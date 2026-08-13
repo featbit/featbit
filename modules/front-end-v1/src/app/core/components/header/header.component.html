@@ -1,0 +1,151 @@
+<section class="header-body">
+  <nz-breadcrumb class="breadcrumb-nav" nzSeparator=">">
+    @for (breadcrumb of (breadcrumbs$ | async); track breadcrumb.url || breadcrumb.label) {
+      <nz-breadcrumb-item>
+        <a [routerLink]="breadcrumb.url">{{ breadcrumb.label }}</a>
+      </nz-breadcrumb-item>
+    }
+  </nz-breadcrumb>
+
+  <div class="header-btns">
+    <div
+      (click)="onClickLicenseBadge()"
+      class="license-badge"
+      [nz-tooltip]="isSmallScreen ? licenseBadgeTooltip : null"
+      nzTooltipPlacement="bottomRight"
+      [ngClass]="{
+        'license-saas-free': isSaasFreePlan,
+        'license-expiring': isLicenseExpiring,
+        'license-expired': isLicenseExpired,
+        'license-active': license.data && !isLicenseExpired && !isLicenseExpiring && !isSaasFreePlan
+      }"
+    >
+      <div class="badge-icon">
+        <i nz-icon nzType="icons:icon-medal"></i>
+      </div>
+      <div class="badge-content">
+        @if (isSaasFreePlan) {
+          <span class="badge-label" i18n="@@common.free-plan">Free Plan</span>
+          <span class="badge-plan" i18n="@@common.upgrade-now">Upgrade Now</span>
+        } @else if (license.data) {
+          @if (isLicenseExpired) {
+            <span class="badge-label badge-warning" i18n="@@common.license-expired">License Expired</span>
+            <span class="badge-plan">{{ license.data?.plan }}</span>
+          } @else if (isLicenseExpiring) {
+            <span class="badge-label badge-warning" i18n="@@common.license-expiring-soon">Expiring in {{ daysUntilExpiration }} days</span>
+            <span class="badge-plan">{{ license.data?.plan }}</span>
+          } @else {
+            <span class="badge-label" i18n="@@common.current-plan">Current Plan</span>
+            <span class="badge-plan">{{ license.data?.plan }}</span>
+          }
+        } @else {
+          <span class="badge-label" i18n="@@common.upgrade-now">Upgrade Now</span>
+          <span class="badge-plan" i18n="@@common.get-enterprise">Get Enterprise</span>
+        }
+      </div>
+      <div class="badge-arrow">
+        <i nz-icon nzType="right" nzTheme="outline"></i>
+      </div>
+    </div>
+
+    <div class="org-btns">
+      <div class="workspace-selector">
+        <div class="selector-items">
+          <div class="selector-item" [routerLink]="['/organization']"
+               [nz-tooltip]="isSmallScreen ? orgTooltip : null"
+               nzTooltipPlacement="bottom">
+            <div class="item-icon org-icon">
+              <i nz-icon nzType="icons:icon-org"></i>
+            </div>
+            <div class="item-content">
+              <span class="item-label" i18n="@@common.organization">Organization</span>
+              <span class="item-value">{{currentOrganization?.name}}</span>
+            </div>
+          </div>
+          <div class="selector-divider"></div>
+          <div class="selector-item" (click)="envModalVisible=true"
+               [nz-tooltip]="isSmallScreen ? projectTooltip : null"
+               nzTooltipPlacement="bottom">
+            <div class="item-icon proj-icon">
+              <i nz-icon nzType="icons:icon-proj"></i>
+            </div>
+            <div class="item-content">
+              <span class="item-label" i18n="@@common.project">Project</span>
+              <span class="item-value">{{currentProjectEnv?.projectName}}</span>
+            </div>
+          </div>
+          <div class="selector-divider"></div>
+          <div class="selector-item" (click)="envModalVisible=true"
+               nz-popover
+               i18n-nz-popover="@@common.env-secret"
+               nzPopoverTitle="Environment Secrets"
+               nzPopoverPlacement="bottomLeft"
+               [nzPopoverContent]="environmentSecretContent"
+               nzPopoverOverlayClassName="env-secret-popover">
+            <div class="item-icon env-icon">
+              <i nz-icon nzType="icons:icon-env"></i>
+            </div>
+            <div class="item-content">
+              <span class="item-label" i18n="@@common.environment">Environment</span>
+              <span class="item-value">{{currentProjectEnv?.envName}}</span>
+            </div>
+          </div>
+          <ng-template #environmentSecretContent>
+            @for (secret of env?.secrets; track secret.value || secret.name) {
+              <div class="env-secret-popover-content" (click)="copyText(secret.value)">
+                <i class="copy-icon" nz-icon nzType="icons:icon-copy"></i>
+                <span>{{secret.name}}</span>
+                @if (secret.type == SecretTypeEnum.Server) {
+                  <nz-tag nzColor="geekblue" i18n="@@common.server">server</nz-tag>
+                }
+                @if (secret.type == SecretTypeEnum.Client) {
+                  <nz-tag nzColor="cyan" i18n="@@common.client">client</nz-tag>
+                }
+                <span>{{secret.value}}</span>
+              </div>
+            }
+          </ng-template>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<nz-modal nzCentered nzWidth="792" [nzVisible]="envModalVisible" [nzFooter]="modalFooter"
+  (nzOnCancel)="envModelCancel()" i18n-nzTitle="@@common.change-environment" nzTitle="Change environment">
+  <ng-container *nzModalContent>
+    <div class="project-envs">
+      <nz-list class="overflow-y-list" style="--list-height: 320px" [nzHeader]="projectHeader">
+        @for (project of availableProjects; track project.id) {
+          <nz-list-item [ngClass]="{'item-selected': selectedProject?.id === project.id}"
+            (click)="onSelectProject(project)">
+            {{ project.name }}
+            @if (isCurrentProject(project)) {
+              <nz-tag nzColor="green" i18n="@@common.current">Current</nz-tag>
+            }
+          </nz-list-item>
+        }
+        <ng-template #projectHeader>
+          <span class="header" i18n="@@common.projects">Projects</span>
+        </ng-template>
+      </nz-list>
+      <nz-list class="overflow-y-list" style="--list-height: 320px" [nzHeader]="envHeader">
+        @for (env of availableEnvs; track env.id) {
+          <nz-list-item [ngClass]="{'item-selected': selectedEnv?.id === env.id}"
+            (click)="onSelectEnv(env)">
+            {{ env.name }} @if (isCurrentEnv(env)) {
+            <nz-tag nzColor="green" i18n="@@common.current">Current</nz-tag>
+          }
+        </nz-list-item>
+      }
+      <ng-template #envHeader>
+        <span class="header" i18n="@@common.environments">Environments</span>
+      </ng-template>
+    </nz-list>
+  </div>
+</ng-container>
+<ng-template #modalFooter>
+  <button nz-button nzType="default" (click)="envModelCancel()" i18n="@@common.cancel">Cancel</button>
+  <button nz-button nzType="primary" (click)="envModalConfirm()" i18n="@@common.save">Save</button>
+</ng-template>
+</nz-modal>

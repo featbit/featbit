@@ -35,9 +35,10 @@ jobs:
           - app: featbit-api-server
             build-dir: modules/back-end
             file: ./deploy/Dockerfile
-          - app: featbit-data-analytics-server
-            build-dir: modules/data-analytics
-            file: ./Dockerfile
+          - app: featbit-control-plane
+            # Because the control-plane has dependencies on the back-end module, the build-dir will need to be modules.
+            build-dir: modules/
+            file: ./control-plane/deploy/Dockerfile
           - app: featbit-evaluation-server
             build-dir: modules/evaluation-server
             file: ./deploy/Dockerfile
@@ -74,6 +75,8 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.app }}:${{ env.VERSION_TAG }}
+          build-args: |
+            VERSION=${{ env.VERSION_TAG }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -86,5 +89,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.app }}:${{ env.LATEST_TAG }}
+          build-args: |
+            VERSION=${{ env.VERSION_TAG }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

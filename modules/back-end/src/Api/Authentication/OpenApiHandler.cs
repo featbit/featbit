@@ -17,6 +17,8 @@ public class OpenApiHandler(
     IAccessTokenService accessTokenService)
     : AuthenticationHandler<OpenApiOptions>(options, logger, encoder)
 {
+    private static readonly TimeSpan LastUsedAtRefreshInterval = TimeSpan.FromMinutes(1);
+
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
         try
@@ -43,6 +45,21 @@ public class OpenApiHandler(
 
             // store access token in context for later use
             Context.Items[ApplicationConsts.AccessTokenItem] = accessToken;
+
+            // refresh LastUsedAt at most once per minute to avoid write amplification on chatty callers
+            if (accessToken.LastUsedAt is null ||
+                DateTime.UtcNow - accessToken.LastUsedAt.Value >= LastUsedAtRefreshInterval)
+            {
+                try
+                {
+                    await accessTokenService.RefreshLastUsedAtAsync(accessToken.Id);
+                }
+                catch (Exception ex)
+                {
+                    // a transient DB error here shouldn't reject valid access token
+                    Logger.LogWarning(ex, "Failed to refresh LastUsedAt for access token {AccessTokenId}", accessToken.Id);
+                }
+            }
 
             // construct ticket
             var identity = new ClaimsIdentity(Schemes.OpenApi);

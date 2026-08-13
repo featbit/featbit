@@ -1,0 +1,186 @@
+name: featbit-dev
+services:
+  ui:
+    image: featbit/ui:dev
+    container_name: ui
+    build:
+      context: ./modules/front-end
+      dockerfile: ./Dockerfile
+    environment:
+      - API_URL=http://localhost:5000
+      - DEMO_URL=http://localhost:5173
+      - EVALUATION_URL=http://localhost:5100
+      - BASE_HREF=/
+    depends_on:
+      - api-server
+      - demo-dino-game-vue
+    ports:
+      - "8081:80"
+    networks:
+      - featbit-network
+
+  api-server:
+    image: featbit/api:dev
+    container_name: api
+    build:
+      context: ./modules/back-end
+      dockerfile: ./deploy/Dockerfile
+    environment:
+      - SSOEnabled=true
+      - DbProvider=Postgres
+      - MqProvider=Kafka
+      - CacheProvider=Redis
+      - Postgres__ConnectionString=Host=postgresql;Port=5432;Username=postgres;Password=please_change_me;Database=featbit
+      - Redis__ConnectionString=redis:6379
+      - UseControlPlane=true
+      - Jwt__Algorithm=HS256
+      - Jwt__Key=please_change_me_to_a_secure_secret_key
+    depends_on:
+      - postgresql
+      - redis
+      - kafka
+    ports:
+      - "5000:5000"
+    networks:
+      - featbit-network
+
+  control-plane:
+    image: featbit/control-plane:dev
+    container_name: control-plane
+    build:
+      context: ./modules
+      dockerfile: ./control-plane/deploy/Dockerfile
+    environment:
+      - DbProvider=Postgres
+      - MqProvider=Kafka
+      - CacheProvider=Redis
+      - Postgres__ConnectionString=Host=postgresql;Port=5432;Username=postgres;Password=please_change_me;Database=featbit
+      - Redis__Instances__0=redis:6379
+    depends_on:
+      - postgresql
+      - redis
+      - kafka
+    ports:
+      - "5200:5200"
+    networks:
+      - featbit-network
+
+  evaluation-server:
+    image: featbit/evaluation-server:dev
+    container_name: evaluation-server
+    build:
+      context: ./modules/evaluation-server
+      dockerfile: ./deploy/Dockerfile
+    environment:
+      - DbProvider=Postgres
+      - MqProvider=Kafka
+      - CacheProvider=Redis
+      - Postgres__ConnectionString=Host=postgresql;Port=5432;Username=postgres;Password=please_change_me;Database=featbit
+      - Redis__ConnectionString=redis:6379
+    depends_on:
+      - postgresql
+      - redis
+      - kafka
+    ports:
+      - "5100:5100"
+    networks:
+      - featbit-network
+
+  postgresql:
+    image: ${POSTGRES_COMPOSE_IMAGE:-postgres:15.10}
+    container_name: postgresql
+    restart: on-failure
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: please_change_me
+    volumes:
+      - ./infra/postgresql/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/
+      - postgres:/var/lib/postgresql/data
+    networks:
+      - featbit-network
+
+  redis:
+    image: ${REDIS_IMAGE:-bitnamilegacy/redis:6.2.10}
+    container_name: redis
+    restart: on-failure
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    networks:
+      - featbit-network
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis:/bitnami/redis/data
+
+  demo-dino-game-vue:
+    image: featbit/demo-dino-game-vue:latest
+    container_name: demo-dino-game-vue
+    networks:
+      - featbit-network
+    ports:
+      - "5173:80"
+
+  kafka:
+    image: ${KAFKA_IMAGE:-bitnamilegacy/kafka:3.5}
+    restart: on-failure
+    ports:
+      - '9092:9092'
+      - '29092:29092'
+    environment:
+      KAFKA_CFG_NODE_ID: 0
+      KAFKA_CFG_PROCESS_ROLES: controller,broker
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 0@kafka:9093
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,PLAINTEXT_HOST://:29092,CONTROLLER://:9093
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      ALLOW_PLAINTEXT_LISTENER: 'true'
+    networks:
+      - featbit-network
+    volumes:
+      - kafka:/bitnami/kafka
+
+  init-kafka-topics:
+    image: ${KAFKA_IMAGE:-bitnamilegacy/kafka:3.5}
+    depends_on:
+      kafka:
+        condition: service_started
+    entrypoint:
+      - bash
+      - -c
+      - |
+        echo "Waiting for Kafka to be ready..."
+        until /opt/bitnami/kafka/bin/kafka-topics.sh --list --bootstrap-server kafka:9092; do sleep 5; done;
+        echo "Kafka is ready now, start creating topics."
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-feature-flag-change;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-segment-change;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-endusers;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-insights;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-control-plane-feature-flag-change;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-control-plane-segment-change;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-control-plane-secret-change;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-control-plane-license-change;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-control-plane-web-hooks;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-control-plane-command;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-connection-made;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-connection-closed;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-pod-heartbeat;
+        echo "Seed kafka topic finished."
+    networks:
+      - featbit-network
+
+networks:
+  featbit-network:
+    name: featbit-network
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.1.0.0/16
+
+volumes:
+  postgres:
+  redis:
+  kafka:

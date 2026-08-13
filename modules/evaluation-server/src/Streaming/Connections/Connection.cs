@@ -1,4 +1,5 @@
 ﻿using System.Net.WebSockets;
+using Domain.ControlPlane;
 using Domain.EndUsers;
 using Domain.Shared;
 using Streaming.Protocol;
@@ -40,6 +41,8 @@ public class Connection
     {
         User = user;
     }
+
+    public ConnectionMessage AsMessage(ConnectionMessageType type) => new(Id, EnvId, ProjectKey, type);
 
     public override string ToString()
     {

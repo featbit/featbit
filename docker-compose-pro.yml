@@ -56,6 +56,7 @@ services:
     networks:
       - featbit-network
 
+  # Deprecated: da-server remains for backward compatibility and will be removed in the official v6.0 release.
   da-server:
     image: featbit/featbit-data-analytics-server:latest
     depends_on:

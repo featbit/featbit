@@ -6,21 +6,21 @@ namespace Domain.Insights;
 
 public class InsightMessage
 {
-    [JsonPropertyName("uuid")] 
+    [JsonPropertyName("uuid")]
     public string Uuid { get; set; }
 
-    [JsonPropertyName("distinct_id")] 
+    [JsonPropertyName("distinct_id")]
     public string DistinctId { get; set; }
 
-    [JsonPropertyName("env_id")] 
+    [JsonPropertyName("env_id")]
     public string EnvId { get; set; }
 
-    [JsonPropertyName("event")] 
+    [JsonPropertyName("event")]
     public string Event { get; set; }
 
-    [JsonPropertyName("properties")] 
+    [JsonPropertyName("properties")]
     public string Properties { get; set; }
 
-    [JsonPropertyName("timestamp")] 
+    [JsonPropertyName("timestamp")]
     public long Timestamp { get; set; }
 }

@@ -17,8 +17,18 @@ public static class EmailExtractor
 
         string ExtractGoogle() => jsonRoot.GetProperty("email").GetString() ?? string.Empty;
 
-        string ExtractGitHub() => jsonRoot.EnumerateArray()
-            .FirstOrDefault(x => x.GetProperty("primary").GetBoolean())
-            .GetProperty("email").GetString() ?? string.Empty;
+        string ExtractGitHub()
+        {
+            foreach (var entry in jsonRoot.EnumerateArray())
+            {
+                var isPrimary = entry.GetProperty("primary").GetBoolean();
+                if (isPrimary)
+                {
+                    return entry.GetProperty("email").GetString() ?? string.Empty;
+                }
+            }
+
+            return string.Empty;
+        }
     }
 }

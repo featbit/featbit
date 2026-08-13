@@ -1,0 +1,26 @@
+@import "./scrollbar.css";
+
+/* Base UI exposes disabled state through data attributes rather than the
+   native :disabled pseudo-class. Keep every disabled checkbox visibly muted,
+   including when it is not hovered. */
+[data-slot="checkbox"][data-disabled] {
+  cursor: not-allowed;
+  border-color: color-mix(
+    in oklab,
+    var(--muted-foreground) 50%,
+    transparent
+  ) !important;
+  background-color: var(--muted) !important;
+  color: var(--muted-foreground) !important;
+  opacity: 1 !important;
+}
+
+[data-slot="checkbox"][data-disabled][data-unchecked]::before {
+  position: absolute;
+  width: 0.5rem;
+  height: 1.5px;
+  border-radius: var(--radius-sm);
+  background-color: var(--muted-foreground);
+  content: "";
+  pointer-events: none;
+}

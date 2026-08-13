@@ -18,6 +18,12 @@ public class Evaluator : IEvaluator
 
     public async Task<UserVariation> EvaluateAsync(FeatureFlag flag, EndUser user)
     {
+        // if flag is archived
+        if (flag.IsArchived)
+        {
+            return new UserVariation(null, "flag archived");
+        }
+
         // if flag is disabled
         if (!flag.IsEnabled)
         {

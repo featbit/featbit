@@ -6,6 +6,7 @@ using Infrastructure.MQ;
 using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Security.AntiSSRF;
 using Services = Infrastructure.Services;
 using AppServices = Infrastructure.AppService;
 
@@ -25,6 +26,13 @@ public static class ConfigureServices
         // flag schedule worker
         services.AddHostedService<AppServices.FlagScheduleWorker>();
 
+        if (configuration.UseControlPlane())
+        {
+            // staged flag version GC worker (B5): reclaims superseded versioned flag value keys.
+            // The worker itself no-ops unless ControlPlane:ConsistencyMode is GatedCommit.
+            services.AddHostedService<AppServices.StagedFlagGcWorker>();
+        }
+
         // track usage
         services.AddOptions<UsageTrackingOptions>()
             .Bind(configuration.GetSection(UsageTrackingOptions.UsageTracking))
@@ -42,7 +50,22 @@ public static class ConfigureServices
 
         // http clients
         services.AddHttpClient<IAgentService, Services.AgentService>();
-        services.AddHttpClient<IWebhookSender, Services.WebhookSender>();
+        services.AddHttpClient<IWebhookSender, Services.WebhookSender>()
+            .ConfigurePrimaryHttpMessageHandler(() =>
+            {
+                var policy = new AntiSSRFPolicy(PolicyConfigOptions.ExternalOnlyLatest)
+                {
+                    AllowPlainTextHttp = true,
+
+                    // ExternalOnlyLatest adds X-Forwarded-For: true by default as a
+                    // defense-in-depth against IMDS. For an outgoing webhook sender the
+                    // dummy value can cause third-party receivers to reject the request,
+                    // and IMDS is already blocked by the IP-range enforcement, so disable it.
+                    AddXFFHeader = false
+                };
+
+                return policy.GetHandler();
+            });
 
         // custom services
         services.AddDbSpecificServices(configuration);

@@ -1,0 +1,152 @@
+<section class="menu-body" [class]="{'menu-extended': menuExtended}">
+  <div class="brand">
+    <div class="brand-content">
+      <a class="brand-logo" [routerLink]="['/']">
+        <img alt="logo" class="logo" src="assets/logo/logo.svg">
+        <img alt="brand" class="brand" src="assets/logo/featbit-logo-text.svg" >
+      </a>
+      <a class="icon-fold" (click)="toggleMenuMode()">
+        <i nz-icon nzType="icons:icon-fold"></i>
+      </a>
+    </div>
+  </div>
+  <div class="menu-list">
+    <ul nz-menu [nzMode]="menuExtended ? 'inline' : 'vertical'">
+      <ng-container *ngTemplateOutlet="menuTpl; context: { $implicit: menus }"></ng-container>
+      <ng-template #menuTpl let-menus>
+        @for (menu of menus; track menu) {
+          @if (menu.line) {
+            <div class="menu-item-line">
+              <div class="line"></div>
+            </div>
+          } @else {
+            @if (!menu.children && !menu.hide) {
+              <li
+                nz-menu-item
+                nzMatchRouter
+                [nzPaddingLeft]="32"
+                [nzDisabled]="menu.disabled"
+                [nzSelected]="menu.selected"
+                (click)="onLeafItemClick()">
+                @if (menuExtended) {
+                  @if (menu.path) {
+                    <a class="menu-item" [routerLink]="menu.path">
+                      <i nz-icon [nzType]="menu.icon"></i>
+                      <span class="menu-item-title">{{ menu.title }}</span>
+                    </a>
+                  } @else {
+                    @if (menuExtended) {
+                      <a target="_blank" [href]="menu.target">
+                        <i nz-icon [nzType]="menu.icon"></i>
+                        <span class="menu-item-title">{{ menu.title }}</span>
+                      </a>
+                    } @else {
+                      <ng-container>
+                        <a target="_blank" [href]="menu.target" [nz-tooltip]="menu.title" nzTooltipPlacement="right">
+                          <i nz-icon [nzType]="menu.icon"></i>
+                          <span class="menu-item-title">{{ menu.title }}</span>
+                        </a>
+                      </ng-container>
+                    }
+                  }
+                } @else {
+                  @if (menu.path) {
+                    <a [routerLink]="menu.path" [nz-tooltip]="menu.title" nzTooltipPlacement="right">
+                      <i nz-icon [nzType]="menu.icon"></i>
+                      <span class="menu-item-title">{{ menu.title }}</span>
+                    </a>
+                  } @else {
+                    @if (menuExtended) {
+                      <a target="_blank" [href]="menu.target">
+                        <i nz-icon [nzType]="menu.icon"></i>
+                        <span class="menu-item-title">{{ menu.title }}</span>
+                      </a>
+                    } @else {
+                      <ng-container>
+                        <a target="_blank" [href]="menu.target" [nz-tooltip]="menu.title" nzTooltipPlacement="right">
+                          <i nz-icon [nzType]="menu.icon"></i>
+                          <span class="menu-item-title">{{ menu.title }}</span>
+                        </a>
+                      </ng-container>
+                    }
+                  }
+                }
+              </li>
+            }
+            @if (menu.children && !menu.hide) {
+              <li
+                nz-submenu
+                [nzPaddingLeft]="32"
+                [nzOpen]="menu.open"
+                (nzOpenChange)="onSubmenuOpenChange(menu, $event)"
+                [nzTitle]="menu.title"
+                [nzIcon]="menu.icon"
+                [nzDisabled]="menu.disabled">
+                <ul>
+                  <ng-container
+                  *ngTemplateOutlet="menuTpl;
+                  context: { $implicit: menu.children }">
+                  </ng-container>
+                </ul>
+              </li>
+            }
+          }
+        }
+      </ng-template>
+    </ul>
+  </div>
+  <div class="menu-item-line">
+    <div class="line"></div>
+  </div>
+  <div class="organization-management">
+    <button nzType="text" nz-button nz-dropdown [nzDropdownMenu]="menu" nzPlacement="topCenter">
+      <div class="account-header">
+          <div class="account-avatar">{{ userInitial }}</div>
+          <div class="account-info">
+            <p class="account-name">{{ profile?.name }}</p>
+            <p class="account-email">{{ profile?.email }}</p>
+          </div>
+        </div>
+    </button>
+    <nz-dropdown-menu #menu="nzDropdownMenu">
+      <div class="account-dropdown">
+        <div class="dropdown-nav">
+          @if (isInitialized) {
+            <span class="nav-item" routerLink="/organization/profile">
+              <i nz-icon nzType="icons:icon-user"></i>
+              <ng-container i18n="@@common.profile">Profile</ng-container>
+            </span>
+          }
+          <span class="nav-item" (click)="openSupport()">
+            <i nz-icon nzType="question-circle" nzTheme="outline"></i>
+            <ng-container i18n="@@common.support">Support</ng-container>
+          </span>
+          <span class="nav-item" (click)="openDoc()">
+            <i nz-icon nzType="file-text" nzTheme="outline"></i>
+            <ng-container i18n="@@common.documentation">Documentation</ng-container>
+          </span>
+          <span class="nav-item nav-item-danger" (click)="logout.emit()">
+            <i nz-icon nzType="icons:icon-logout"></i>
+            <ng-container i18n="@@common.sign-out">Sign out</ng-container>
+          </span>
+        </div>
+
+        <div class="dropdown-divider"></div>
+
+        <div class="dropdown-info">
+          <a href="https://github.com/featbit/featbit" target="_blank" rel="noopener" class="dropdown-version">
+            <i nz-icon nzType="github" nzTheme="outline"></i>
+            <ng-container i18n="@@common.version">Version</ng-container>: {{ appVersion }}
+          </a>
+        </div>
+
+        <div class="dropdown-footer">
+          <app-locale-switcher></app-locale-switcher>
+          <app-theme-switcher></app-theme-switcher>
+        </div>
+      </div>
+    </nz-dropdown-menu>
+  </div>
+</section>
+
+

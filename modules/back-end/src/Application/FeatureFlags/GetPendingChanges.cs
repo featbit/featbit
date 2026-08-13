@@ -6,56 +6,54 @@ namespace Application.FeatureFlags;
 
 public class GetPendingChanges : IRequest<IEnumerable<PendingChangesVm>>
 {
+    public Guid OrgId { get; set; }
+
     public Guid EnvId { get; set; }
 
     public string Key { get; set; }
 }
 
-public class GetPendingChangesHandler : IRequestHandler<GetPendingChanges, IEnumerable<PendingChangesVm>>
+public class GetPendingChangesHandler(
+    IFlagScheduleService flagScheduleService,
+    IFlagChangeRequestService flagChangeRequestService,
+    IFlagDraftService flagDraftService,
+    IUserService userService,
+    IMemberService memberService,
+    IFeatureFlagService flagService)
+    : IRequestHandler<GetPendingChanges, IEnumerable<PendingChangesVm>>
 {
-    private readonly IFlagScheduleService _flagScheduleService;
-    private readonly IFlagChangeRequestService _flagChangeRequestService;
-    private readonly IFlagDraftService _flagDraftService;
-    private readonly IUserService _userService;
-    private readonly IFeatureFlagService _flagService;
-
-    public GetPendingChangesHandler(
-        IFlagScheduleService flagScheduleService,
-        IFlagChangeRequestService flagChangeRequestService,
-        IFlagDraftService flagDraftService,
-        IUserService userService,
-        IFeatureFlagService flagService)
-    {
-        _flagScheduleService = flagScheduleService;
-        _flagChangeRequestService = flagChangeRequestService;
-        _flagDraftService = flagDraftService;
-        _userService = userService;
-        _flagService = flagService;
-    }
-
     public async Task<IEnumerable<PendingChangesVm>> Handle(GetPendingChanges request, CancellationToken cancellationToken)
     {
-        var flag = await _flagService.GetAsync(request.EnvId, request.Key);
+        var flag = await flagService.GetAsync(request.EnvId, request.Key);
 
         // get schedules
-        var pendingSchedules = await _flagScheduleService.FindManyAsync(
+        var pendingSchedules = await flagScheduleService.FindManyAsync(
             x => x.FlagId == flag.Id && x.Status != FlagScheduleStatus.Applied
         );
 
         // get change requests
-        var pendingChangeRequests = await _flagChangeRequestService.FindManyAsync(
+        var pendingChangeRequests = await flagChangeRequestService.FindManyAsync(
             x => x.FlagId == flag.Id && x.Status != FlagChangeRequestStatus.Applied
         );
 
         // get drafts
         var draftIds =
             pendingSchedules.Select(s => s.FlagDraftId).Union(pendingChangeRequests.Select(cr => cr.FlagDraftId));
-        var drafts = await _flagDraftService.FindManyAsync(x => draftIds.Contains(x.Id));
+        var drafts = await flagDraftService.FindManyAsync(x => draftIds.Contains(x.Id));
 
         // get users
         var userIds =
             pendingSchedules.Select(x => x.CreatorId).Union(pendingChangeRequests.Select(cr => cr.CreatorId));
-        var users = await _userService.GetListAsync(userIds);
+        var users = await userService.GetListAsync(userIds);
+
+        // get reviewers
+        var reviewerIds = pendingChangeRequests
+            .SelectMany(changeRequest => changeRequest.Reviewers)
+            .Select(reviewer => reviewer.MemberId)
+            .Distinct()
+            .ToArray();
+        var reviewerMembers = (await memberService.GetListAsync(request.OrgId, reviewerIds))
+            .ToDictionary(member => member.Id, member => (member.Name, member.Email));
 
         var result = new List<PendingChangesVm>();
 
@@ -91,6 +89,17 @@ public class GetPendingChangesHandler : IRequestHandler<GetPendingChanges, IEnum
             {
                 vm.CreatorId = user.Id;
                 vm.CreatorName = user.Name;
+            }
+
+            foreach (var reviewer in vm.Reviewers ?? [])
+            {
+                if (!reviewerMembers.TryGetValue(reviewer.MemberId, out var member))
+                {
+                    continue;
+                }
+
+                reviewer.Name = member.Name;
+                reviewer.Email = member.Email;
             }
 
             return vm;

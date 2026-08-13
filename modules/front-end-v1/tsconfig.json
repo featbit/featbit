@@ -1,0 +1,36 @@
+/* To learn more about this file see: https://angular.io/config/tsconfig. */
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "@core/*": ["./src/app/core/*"],
+      "@features/*": ["./src/app/features/*"],
+      "@services/*": ["./src/app/core/services/*"],
+      "@interceptors/*": ["./src/app/core/interceptors/*"],
+      "@utils/*": ["./src/app/shared/utils/*"],
+      "@shared/*": ["./src/app/shared/*"]
+    },
+    "outDir": "./dist/out-tsc",
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "declaration": false,
+    "experimentalDecorators": true,
+    "moduleResolution": "node",
+    "importHelpers": true,
+    "resolveJsonModule": true,
+    "useDefineForClassFields": false,
+    "target": "ES2022",
+    "module": "ES2022",
+    "lib": [
+      "es2022",
+      "dom"
+    ],
+    "skipLibCheck": true
+  },
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true
+  }
+}

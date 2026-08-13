@@ -1,10 +1,8 @@
 using Application.AuditLogs;
 using Application.Bases;
-using Application.Bases.Exceptions;
 using Application.Users;
 using Domain.AuditLogs;
 using Domain.Policies;
-using Domain.SemanticPatch;
 using Domain.Targeting;
 
 namespace Application.Segments;
@@ -59,7 +57,7 @@ public class UpdateTargetingValidator : AbstractValidator<UpdateTargeting>
 
 public class UpdateTargetingHandler(
     ISegmentService service,
-    IResourceService resourceService,
+    IPermissionGuard permissionGuard,
     ICurrentUser currentUser,
     IPublisher publisher
 ) : IRequestHandler<UpdateTargeting, bool>
@@ -69,7 +67,7 @@ public class UpdateTargetingHandler(
         var segment = await service.GetAsync(request.Id);
         var dataChange = segment.UpdateTargeting(request.Included, request.Excluded, request.Rules);
 
-        await CheckPermissionsAsync();
+        await permissionGuard.EnsureSegmentChangeAllowedAsync(segment, dataChange, request.Permissions);
 
         await service.UpdateAsync(segment);
 
@@ -85,32 +83,5 @@ public class UpdateTargetingHandler(
         await publisher.Publish(notification, cancellationToken);
 
         return true;
-
-        async Task CheckPermissionsAsync()
-        {
-            var instructions = SegmentComparer.Compare(dataChange).ToArray();
-            List<string> requiredPermissions = [];
-
-            if (instructions.Any(x => SegmentInstructionKind.UpdateRuleKinds.Contains(x.Kind)))
-            {
-                requiredPermissions.Add(Permissions.UpdateSegmentRules);
-            }
-
-            if (instructions.Any(x => SegmentInstructionKind.UpdateTargetUsersKinds.Contains(x.Kind)))
-            {
-                requiredPermissions.Add(Permissions.UpdateSegmentTargetingUsers);
-            }
-
-            if (requiredPermissions.Count == 0)
-            {
-                return;
-            }
-
-            var segmentRN = await resourceService.GetSegmentRnAsync(segment.EnvId, segment.Id);
-            if (requiredPermissions.Any(permission => !PolicyHelper.IsAllowed(request.Permissions, segmentRN, permission)))
-            {
-                throw new ForbiddenException();
-            }
-        }
     }
 }

@@ -5,8 +5,10 @@ metadata:
     app: clickhouse-server
   name: clickhouse-server
 spec:
+  imagePullSecrets:
+    - name: registry-credentials
   containers:
-    - image: clickhouse/clickhouse-server:23.7
+    - image: clickhouse/clickhouse-server:24.8
       name: clickhouse-server
       ports:
         - containerPort: 8123
@@ -15,7 +17,13 @@ spec:
         - containerPort: 9009
         - containerPort: 9440
         - containerPort: 9181
-      resources: {}
+      resources:
+        requests:
+          memory: 768Mi
+          cpu: 150m
+        limits:
+          memory: 1536Mi
+          cpu: 1500m
       volumeMounts:
         - mountPath: /etc/clickhouse-server/config.xml
           name: clickhouse-etc
@@ -29,10 +37,16 @@ spec:
           name: clickhouse-server
         - mountPath: /var/log
           name: varlog
-    - image: busybox:1.28
+    - image: busybox:1.36
       name: clickhouse-server-err-log
       args: [/bin/sh, -c, 'tail -n+1 -F /var/log/clickhouse-server/clickhouse-server.err.log']
-      resources: {}
+      resources:
+        requests:
+          memory: 16Mi
+          cpu: 10m
+        limits:
+          memory: 64Mi
+          cpu: 100m
       volumeMounts:
         - name: varlog
           mountPath: /var/log

@@ -38,11 +38,6 @@ public class AccessToken : AuditedEntity
         Token = $"api-{TokenHelper.New(Guid.NewGuid())}";
     }
 
-    public void RefreshLastUsedAt()
-    {
-        LastUsedAt = DateTime.UtcNow;
-    }
-
     public void ToggleStatus()
     {
         Status = Status == AccessTokenStatus.Active ? AccessTokenStatus.Inactive : AccessTokenStatus.Active;

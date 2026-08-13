@@ -42,7 +42,6 @@ services:
     depends_on:
       - mongodb
       - redis
-      - da-server
     ports:
       - "5000:5000"
     networks:
@@ -68,27 +67,6 @@ services:
       - "5100:5100"
     networks:
       - featbit-network
-
-  da-server:
-    image: featbit/data-analytics-server:dev
-    container_name: data-analytics-server
-    build:
-      context: ./modules/data-analytics
-      dockerfile: ./Dockerfile
-    depends_on:
-      - mongodb
-    ports:
-      - "8200:80"
-    networks:
-      - featbit-network
-    environment:
-      DB_PROVIDER: MongoDb
-      MONGO_URI: mongodb://admin:password@mongodb:27017
-      MONGO_INITDB_DATABASE: featbit
-      MONGO_HOST: mongodb
-      ENABLE_OPENTELEMETRY: true
-      OTEL_SERVICE_NAME: featbit-das
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
 
   mongodb:
     image: mongo:5.0.32

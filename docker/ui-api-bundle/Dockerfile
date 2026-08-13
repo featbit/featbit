@@ -31,7 +31,10 @@ FROM node:16.17 as frontendBuilder
 
 WORKDIR /frontend
 COPY modules/front-end/package*.json .
-RUN npm install
+# Skip postinstall: scripts/ isn't copied yet, and the dark-CSS generation
+# step is run deterministically by `npm run build:prod` (which chains
+# `npm run build:dark-css`). Mirrors modules/front-end/Dockerfile.
+RUN npm install --ignore-scripts
 COPY modules/front-end/ .
 
 RUN npm run build:prod

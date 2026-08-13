@@ -130,6 +130,26 @@ public class SegmentController : ApiControllerBase
     }
 
     /// <summary>
+    /// Update the general information of a segment
+    /// </summary>
+    /// <remarks>
+    /// Update the name, description, and tags of a segment in a single operation.
+    /// Permissions are checked for each field that is changed.
+    /// </remarks>
+    [OpenApi]
+    [HttpPut("{segmentId:guid}/general")]
+    public async Task<ApiResponse<bool>> UpdateGeneralAsync(
+        Guid segmentId,
+        UpdateGeneralPayload payload)
+    {
+        var permissions = await GetRequestPermissionsAsync();
+        var request = new UpdateGeneral(segmentId, payload, permissions);
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
+
+    /// <summary>
     /// Update the targeting of a segment
     /// </summary>
     /// <remarks>
@@ -166,7 +186,8 @@ public class SegmentController : ApiControllerBase
         var request = new PatchSegment
         {
             Id = segmentId,
-            Patch = patch
+            Patch = patch,
+            Permissions = await GetRequestPermissionsAsync()
         };
 
         var result = await Mediator.Send(request);

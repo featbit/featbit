@@ -40,7 +40,6 @@ services:
     depends_on:
       - postgresql
       - redis
-      - da-server
     ports:
       - "5000:5000"
     networks:
@@ -64,27 +63,6 @@ services:
       - "5100:5100"
     networks:
       - featbit-network
-
-  da-server:
-    image: featbit/data-analytics-server:dev
-    container_name: data-analytics-server
-    build:
-      context: ./modules/data-analytics
-      dockerfile: ./Dockerfile
-    depends_on:
-      - postgresql
-    ports:
-      - "8200:80"
-    networks:
-      - featbit-network
-    environment:
-      CHECK_DB_LIVNESS: false
-      DB_PROVIDER: Postgres
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: please_change_me
-      POSTGRES_HOST: postgresql
-      POSTGRES_PORT: 5432
-      POSTGRES_DATABASE: featbit
 
   postgresql:
     image: postgres:15.10

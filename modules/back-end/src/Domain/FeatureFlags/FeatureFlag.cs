@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Domain.AuditLogs;
 using Domain.FlagDrafts;
 using Domain.Targeting;
@@ -37,6 +39,28 @@ public class FeatureFlag : FullAuditedEntity
     public string[] Tags { get; set; }
 
     public bool IsArchived { get; set; }
+
+    /// <summary>
+    /// Monotonic version of the last COMMITTED change to this flag. The committed
+    /// value is the authoritative value that may be safely served to evaluators.
+    /// </summary>
+    public long CommittedVersion { get; set; }
+
+    /// <summary>
+    /// A staged-but-not-committed change. Null when there is no pending change
+    /// (the default). When set, the committed read must continue to return the
+    /// committed value and ignore this pending change until it is promoted.
+    /// </summary>
+    public PendingFlagChange Pending { get; set; }
+
+    /// <summary>
+    /// Postgres <c>xmin</c> system column, used as the optimistic concurrency token. It is a real
+    /// property rather than an EF shadow property because the DbContext queries with no tracking,
+    /// and shadow values only live on a tracking entry - they would be lost before the update.
+    /// Unused by the Mongo provider.
+    /// </summary>
+    [JsonIgnore]
+    public uint Xmin { get; private set; }
 
     public FeatureFlag()
     {
@@ -162,6 +186,18 @@ public class FeatureFlag : FullAuditedEntity
         return dataChange.To(this);
     }
 
+    public DataChange UpdateGeneral(string name, string description, string[] tags, Guid currentUserId)
+    {
+        var dataChange = new DataChange(this);
+
+        Name = name;
+        Description = description;
+        Tags = tags ?? [];
+        MarkAsUpdated(currentUserId);
+
+        return dataChange.To(this);
+    }
+
     public DataChange UpdateOffVariation(string offVariationId, Guid currentUserId)
     {
         var dataChange = new DataChange(this);
@@ -199,6 +235,7 @@ public class FeatureFlag : FullAuditedEntity
     {
         var dataChange = new DataChange(this);
 
+        DisabledVariationId = targeting.DisabledVariationId;
         TargetUsers = targeting.TargetUsers;
         Rules = targeting.Rules;
         Fallthrough = targeting.Fallthrough;
@@ -300,6 +337,15 @@ public class FeatureFlag : FullAuditedEntity
     }
 
     /// <summary>
+    /// Creates a deep copy of this feature flag.
+    /// </summary>
+    public FeatureFlag Clone()
+    {
+        var json = JsonSerializer.Serialize(this, ReusableJsonSerializerOptions.Web);
+        return JsonSerializer.Deserialize<FeatureFlag>(json, ReusableJsonSerializerOptions.Web)!;
+    }
+
+    /// <summary>
     /// Mark the feature flag as updated when a referenced segment's targeting is updated.
     /// </summary>
     /// <param name="operatorId">The ID of the operator making the change to the segment.</param>
@@ -310,5 +356,70 @@ public class FeatureFlag : FullAuditedEntity
         Revision = Guid.NewGuid();
 
         base.MarkAsUpdated(updatorId);
+    }
+
+    /// <summary>
+    /// Stage <paramref name="pendingValue"/> as a pending (not-yet-committed) change.
+    /// The committed value is left untouched, so a committed read still returns the
+    /// old value until <see cref="PromotePending"/> is called.
+    /// </summary>
+    public void SetPending(FeatureFlag pendingValue, long version)
+    {
+        // A pending value must never itself carry a pending change (no pending-within-pending):
+        // the staged payload describes a single committed-to-be state, so null out any nested
+        // pending before storing it. This keeps the staged document flat and avoids recursive bloat.
+        if (pendingValue != null)
+        {
+            pendingValue.Pending = null;
+        }
+
+        Pending = new PendingFlagChange
+        {
+            Version = version,
+            Value = pendingValue
+        };
+    }
+
+    /// <summary>
+    /// Promote the staged pending change to committed: the pending value becomes the
+    /// committed value, <see cref="CommittedVersion"/> advances to the pending version,
+    /// and the pending slot is cleared. No-op when there is no pending change.
+    /// </summary>
+    public void PromotePending()
+    {
+        if (Pending == null)
+        {
+            return;
+        }
+
+        var promoted = Pending.Value;
+        var version = Pending.Version;
+
+        // adopt the committed-relevant fields from the pending value
+        Name = promoted.Name;
+        Description = promoted.Description;
+        Key = promoted.Key;
+        VariationType = promoted.VariationType;
+        Variations = promoted.Variations;
+        TargetUsers = promoted.TargetUsers;
+        Rules = promoted.Rules;
+        IsEnabled = promoted.IsEnabled;
+        DisabledVariationId = promoted.DisabledVariationId;
+        Fallthrough = promoted.Fallthrough;
+        ExptIncludeAllTargets = promoted.ExptIncludeAllTargets;
+        Tags = promoted.Tags;
+        IsArchived = promoted.IsArchived;
+        // Revision is part of the committed-relevant state (it changes on every mutation and is
+        // observed by evaluators); adopt the pending value's revision on promotion.
+        Revision = promoted.Revision;
+
+        // Refresh audit fields so the committed value reflects WHEN it was promoted and WHO authored
+        // the change. The promotion is the moment this value becomes authoritative, so UpdatedAt must
+        // advance to now; carry the pending author's UpdatorId.
+        UpdatorId = promoted.UpdatorId;
+        UpdatedAt = DateTime.UtcNow;
+
+        CommittedVersion = version;
+        Pending = null;
     }
 }

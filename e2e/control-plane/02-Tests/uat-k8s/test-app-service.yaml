@@ -1,0 +1,23 @@
+# UAT Test App Service Template
+#
+# Exposes a UAT test app instance within the cluster.
+# Placeholder __INSTANCE_ID__ is replaced at deploy time by deploy-test-apps.ps1.
+#
+# Do not apply this file directly — use deploy-test-apps.ps1 instead.
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: uat-test-app-__INSTANCE_ID__
+  labels:
+    app: uat-test-app
+    instance: __INSTANCE_ID__
+spec:
+  selector:
+    app: uat-test-app
+    instance: __INSTANCE_ID__
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+  type: ClusterIP

@@ -5,6 +5,11 @@ namespace Domain.FeatureFlags;
 public class FlagTargeting
 {
     /// <summary>
+    /// The variation served when the feature flag is disabled.
+    /// </summary>
+    public string DisabledVariationId { get; set; }
+
+    /// <summary>
     /// The list of user keys explicitly targeted by the feature flag
     /// </summary>
     public ICollection<TargetUser> TargetUsers { get; set; }

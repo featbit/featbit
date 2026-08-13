@@ -12,6 +12,21 @@ public static class Permissions
     // IAM
     public const string CanManageIAM = nameof(CanManageIAM);
 
+    // Access tokens
+    public const string ListAccessTokens = nameof(ListAccessTokens);
+    public const string ManagePersonalAccessTokens = nameof(ManagePersonalAccessTokens);
+    public const string ManageServiceAccessTokens = nameof(ManageServiceAccessTokens);
+
+    // Relay proxies
+    public const string ListRelayProxies = nameof(ListRelayProxies);
+    public const string ManageRelayProxies = nameof(ManageRelayProxies);
+
+    // Organizations
+    public const string UpdateOrgName = nameof(UpdateOrgName);
+    public const string UpdateOrgSortFlagsBy = nameof(UpdateOrgSortFlagsBy);
+    public const string UpdateOrgDefaultUserPermissions = nameof(UpdateOrgDefaultUserPermissions);
+    public const string CreateOrg = nameof(CreateOrg);
+
     // Projects
     public const string CanAccessProject = nameof(CanAccessProject);
     public const string CreateProject = nameof(CreateProject);
@@ -64,6 +79,21 @@ public static class Permissions
 
         // IAM
         { CanManageIAM, ResourceTypes.Iam },
+
+        // Access tokens
+        { ListAccessTokens, ResourceTypes.AccessToken },
+        { ManagePersonalAccessTokens, ResourceTypes.AccessToken },
+        { ManageServiceAccessTokens, ResourceTypes.AccessToken },
+
+        // Relay proxies
+        { ListRelayProxies, ResourceTypes.RelayProxy },
+        { ManageRelayProxies, ResourceTypes.RelayProxy },
+
+        // Organizations
+        { UpdateOrgName, ResourceTypes.Organization },
+        { UpdateOrgSortFlagsBy, ResourceTypes.Organization },
+        { UpdateOrgDefaultUserPermissions, ResourceTypes.Organization },
+        { CreateOrg, ResourceTypes.Organization },
 
         // Projects
         { CanAccessProject, ResourceTypes.Project },

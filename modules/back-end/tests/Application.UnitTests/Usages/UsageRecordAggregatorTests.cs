@@ -10,7 +10,7 @@ public class UsageRecordAggregatorTests
     private static readonly DateOnly Yesterday = new DateOnly(2026, 4, 13);
 
     [Fact]
-    public void EmptyList()
+    public void Aggregate_EmptyInput_ReturnsEmptyResult()
     {
         var result = UsageRecordsAggregator.Aggregate([]);
 
@@ -18,7 +18,7 @@ public class UsageRecordAggregatorTests
     }
 
     [Fact]
-    public void SingleRecord()
+    public void Aggregate_SingleRecord_ProducesOneAggregateWithRecordData()
     {
         var record = new InsightsUsageRecord(EnvId1, Today, ["user1", "user2"], 10, 5);
 
@@ -32,7 +32,7 @@ public class UsageRecordAggregatorTests
     }
 
     [Fact]
-    public void MultipleRecordsSameDate()
+    public void Aggregate_MultipleRecordsForSameEnvAndDate_MergesEndUsersAndSumsEvents()
     {
         var records = new List<UsageRecord>
         {
@@ -50,7 +50,7 @@ public class UsageRecordAggregatorTests
     }
 
     [Fact]
-    public void MultipleRecordsDifferentDates()
+    public void Aggregate_RecordsAcrossDates_ProducesOneAggregatePerDate()
     {
         var records = new List<UsageRecord>
         {
@@ -72,7 +72,7 @@ public class UsageRecordAggregatorTests
     }
 
     [Fact]
-    public void MultipleEnvsSameDate()
+    public void Aggregate_DifferentEnvsSameDate_ProducesSingleAggregateWithBothEnvs()
     {
         var records = new List<UsageRecord>
         {
@@ -93,7 +93,7 @@ public class UsageRecordAggregatorTests
     }
 
     [Fact]
-    public void DuplicateEndUsers()
+    public void Aggregate_DuplicateEndUserIds_DeduplicatesIntoSingleEntries()
     {
         var records = new List<UsageRecord>
         {
@@ -108,7 +108,7 @@ public class UsageRecordAggregatorTests
     }
 
     [Fact]
-    public void EnvWithNoEndUsers()
+    public void Aggregate_RecordWithoutEndUsers_ProducesEmptyEndUserSetWithEventCounts()
     {
         var record = new InsightsUsageRecord(EnvId1, Today, [], 7, 3);
 

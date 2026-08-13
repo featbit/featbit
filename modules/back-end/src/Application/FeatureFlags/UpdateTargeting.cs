@@ -1,10 +1,10 @@
 using Application.AuditLogs;
+using Application.Bases;
 using Application.Bases.Exceptions;
 using Application.Users;
 using Domain.AuditLogs;
 using Domain.FeatureFlags;
 using Domain.Policies;
-using Domain.SemanticPatch;
 
 namespace Application.FeatureFlags;
 
@@ -49,9 +49,24 @@ public class UpdateTargeting : UpdateTargetingPayload, IRequest<Guid>
     }
 }
 
+public class UpdateTargetingValidator : AbstractValidator<UpdateTargeting>
+{
+    public UpdateTargetingValidator()
+    {
+        RuleFor(x => x.Targeting)
+            .NotNull().WithErrorCode(ErrorCodes.Required("targeting"));
+
+        When(x => x.Targeting is not null, () =>
+        {
+            RuleFor(x => x.Targeting.DisabledVariationId)
+                .NotEmpty().WithErrorCode(ErrorCodes.Required("disabledVariationId"));
+        });
+    }
+}
+
 public class UpdateTargetingHandler(
     IFeatureFlagService flagService,
-    IResourceService resourceService,
+    IPermissionGuard permissionGuard,
     ICurrentUser currentUser,
     IPublisher publisher)
     : IRequestHandler<UpdateTargeting, Guid>
@@ -66,7 +81,7 @@ public class UpdateTargetingHandler(
 
         var dataChange = flag.UpdateTargeting(request.Targeting, currentUser.Id);
 
-        await CheckPermissionsAsync();
+        await permissionGuard.EnsureFlagChangeAllowedAsync(flag, dataChange, request.Permissions);
 
         await flagService.UpdateAsync(flag);
 
@@ -81,37 +96,5 @@ public class UpdateTargetingHandler(
         await publisher.Publish(notification, cancellationToken);
 
         return flag.Revision;
-
-        async Task CheckPermissionsAsync()
-        {
-            var instructions = FlagComparer.Compare(dataChange).ToArray();
-            List<string> requiredPermissions = [];
-
-            if (instructions.Any(x => FlagInstructionKind.UpdateDefaultRuleKinds.Contains(x.Kind)))
-            {
-                requiredPermissions.Add(Permissions.UpdateFlagDefaultRule);
-            }
-
-            if (instructions.Any(x => FlagInstructionKind.UpdateTargetUsersKinds.Contains(x.Kind)))
-            {
-                requiredPermissions.Add(Permissions.UpdateFlagIndividualTargeting);
-            }
-
-            if (instructions.Any(x => FlagInstructionKind.UpdateRuleKinds.Contains(x.Kind)))
-            {
-                requiredPermissions.Add(Permissions.UpdateFlagTargetingRules);
-            }
-
-            if (requiredPermissions.Count == 0)
-            {
-                return;
-            }
-
-            var flagRn = await resourceService.GetFlagRnAsync(flag.EnvId, flag.Key);
-            if (requiredPermissions.Any(permission => !PolicyHelper.IsAllowed(request.Permissions, flagRn, permission)))
-            {
-                throw new ForbiddenException();
-            }
-        }
     }
 }

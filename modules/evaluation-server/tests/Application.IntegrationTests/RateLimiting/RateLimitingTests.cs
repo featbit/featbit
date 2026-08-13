@@ -3,10 +3,16 @@ using System.Net.Http.Json;
 using System.Net.WebSockets;
 using Domain.Shared;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Internal;
 
 namespace Application.IntegrationTests.RateLimiting;
 
+[Trait("Category", "Host")]
 [Collection(nameof(TestApp))]
+[Trait("Category", "Integration")]
 public class RateLimitingTests
 {
     private readonly TestApp _app;
@@ -17,7 +23,7 @@ public class RateLimitingTests
     }
 
     [Fact]
-    public async Task DisabledRateLimiting_DoesNotReturn429()
+    public async Task SdkEndpoint_RateLimitingDisabled_DoesNotReturn429()
     {
         var client = CreateClientWithRateLimitingSettings(
             ("RateLimiting:Enabled", "false"),
@@ -41,7 +47,7 @@ public class RateLimitingTests
     }
 
     [Fact]
-    public async Task ControllerPolicies_AreAppliedPerEndpoint()
+    public async Task PublicEndpoints_PerControllerPolicies_ApplyIndependentLimits()
     {
         var client = CreateClientWithRateLimitingSettings(
             ("RateLimiting:Enabled", "true"),
@@ -98,7 +104,7 @@ public class RateLimitingTests
     }
 
     [Fact]
-    public async Task PartitionedByEnvId_OneEnvDoesNotThrottleAnother()
+    public async Task SdkEndpoint_RequestsFromDifferentEnvironments_PartitionedIndependently()
     {
         var client = CreateClientWithRateLimitingSettings(
             ("RateLimiting:Enabled", "true"),
@@ -124,7 +130,7 @@ public class RateLimitingTests
     }
 
     [Fact]
-    public async Task RejectedRequest_ReturnsRetryAfterAndErrorBody()
+    public async Task RejectedSdkRequest_ReturnsRetryAfterHeaderAndErrorBody()
     {
         var client = CreateClientWithRateLimitingSettings(
             ("RateLimiting:Enabled", "true"),
@@ -152,7 +158,7 @@ public class RateLimitingTests
     }
 
     [Fact]
-    public async Task StreamingHandshake_IsRateLimited()
+    public async Task StreamingHandshake_BeyondPermitLimit_Returns429()
     {
         var app = _app.WithSettings(
             ("RateLimiting:Enabled", "true"),
@@ -163,19 +169,27 @@ public class RateLimitingTests
             ("RateLimiting:Endpoints:Streaming:PermitLimit", "1")
         );
 
+        var appWithClock = app.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureTestServices(collection =>
+            {
+                collection.Replace(ServiceDescriptor.Singleton<ISystemClock>(new TestClock(TestData.ClientToken.Timestamp)));
+            });
+        });
+
         // Consume the single permit for the Streaming endpoint.
         // FixedWindowRateLimiter does not restore permits on lease disposal — they reset
         // only at the end of the window — so no need to close the first socket first.
-        var (firstConnected, _, _) = await TryConnectStreamingAsync(app, TestData.ClientTokenString);
+        var (firstConnected, _, _) = await TryConnectStreamingAsync(appWithClock, TestData.ClientTokenString);
         Assert.True(firstConnected);
 
-        var (_, _, secondError) = await TryConnectStreamingAsync(app, TestData.ClientTokenString);
+        var (_, _, secondError) = await TryConnectStreamingAsync(appWithClock, TestData.ClientTokenString);
         Assert.NotNull(secondError);
         Assert.Contains("429", secondError);
     }
 
     [Fact]
-    public async Task DistributedEnabledButNoRedis_FallsBackToInMemoryLimiter()
+    public async Task DistributedEnabled_WithoutRedis_FallsBackToInMemoryLimiter()
     {
         // TestApp defaults to CacheProvider.None; this validates fallback behavior
         // when Distributed=true but Redis is not enabled.
@@ -198,7 +212,7 @@ public class RateLimitingTests
     }
 
     [Fact]
-    public async Task EndpointOverrides_ApplyOverGlobalDefaults()
+    public async Task EndpointSpecificLimit_AppliedInsteadOfGlobalLimit()
     {
         var client = CreateClientWithRateLimitingSettings(
             ("RateLimiting:Enabled", "true"),
@@ -239,7 +253,7 @@ public class RateLimitingTests
     }
 
     [Fact]
-    public async Task InvalidWindowSeconds_FailsAtStartup()
+    public async Task Startup_WindowSecondsZero_ThrowsValidationException()
     {
         // WindowSeconds=0 should be rejected by data annotation validation on startup
         Assert.ThrowsAny<Exception>(() =>

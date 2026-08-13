@@ -2,7 +2,9 @@ using System.Net;
 
 namespace Application.IntegrationTests;
 
+[Trait("Category", "Host")]
 [Collection(nameof(TestApp))]
+[Trait("Category", "Integration")]
 public class SmokeTests
 {
     private readonly TestApp _app;
@@ -13,7 +15,7 @@ public class SmokeTests
     }
 
     [Fact]
-    public async Task Start()
+    public async Task LivenessEndpoint_ServerStarted_Returns200Ok()
     {
         var client = _app.CreateClient();
         var response = await client.GetAsync("/health/liveness");

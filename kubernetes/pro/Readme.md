@@ -53,6 +53,7 @@ With kubectl you can forward to a pod, deployment, replicaset, or service. These
 
 ```
 kubectl port-forward services/api-server 5000:5000 -n featbit
+kubectl port-forward services/control-plane 5200:5200 -n featbit
 kubectl port-forward services/evaluation-server 5100:5100 -n featbit
 kubectl port-forward services/ui 8081:8081 -n featbit
 ```

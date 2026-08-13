@@ -7,9 +7,6 @@ namespace Infrastructure.Store;
 
 public class MongoDbStore : IDbStore
 {
-    private const string EnvironmentSpecificSegmentType = "environment-specific";
-    private const string SharedSegmentType = "shared";
-
     public string Name => Stores.MongoDb;
 
     private readonly IMongoDbClient _mongoDbClient;
@@ -32,7 +29,7 @@ public class MongoDbStore : IDbStore
         return flags.Select(x => x.ToJsonBytes());
     }
 
-    public async Task<IEnumerable<byte[]>> GetFlagsAsync(IEnumerable<string> ids)
+    public async Task<IEnumerable<byte[]>> GetFlagsAsync(string[] ids)
     {
         var query = _mongodb.GetCollection<BsonDocument>("FeatureFlags")
             .Find(x => ids.Select(Guid.Parse).Contains(x["_id"].AsGuid));
@@ -58,17 +55,26 @@ public class MongoDbStore : IDbStore
             return [];
         }
 
-        var query = _mongodb.GetCollection<BsonDocument>("Segments")
-            .Find(x => x["updatedAt"] > DateTime.UnixEpoch.AddMilliseconds(timestamp) &&
-                       x["workspaceId"].AsGuid == wsId &&
-                       (
-                           (x["type"].AsString == EnvironmentSpecificSegmentType && x["envId"].AsGuid == envId) ||
-                           (x["type"].AsString == SharedSegmentType &&
-                            ((BsonArray)x["scopes"]).Any(y => $"{envRN}:".StartsWith(string.Concat(y, ":"))))
-                       ));
+        // Build the list of candidate scope strings that should match this environment.
+        // A segment is in scope when one of its `scopes` entries is a prefix (split by ':')
+        // of the environment's RN. Pre-computing the candidates lets us use a simple `$in`
+        // filter, which avoids LINQ3 translation issues with `(BsonArray)x["scopes"].Any(...)`.
+        var parts = envRN.Split(':');
+        var candidateScopes = new string[parts.Length];
+        for (var i = 0; i < parts.Length; i++)
+        {
+            candidateScopes[i] = string.Join(':', parts.Take(i + 1));
+        }
+
+        var filterBuilder = Builders<BsonDocument>.Filter;
+        var filter = filterBuilder.And(
+            filterBuilder.Gt("updatedAt", DateTime.UnixEpoch.AddMilliseconds(timestamp)),
+            filterBuilder.Eq("workspaceId", new BsonBinaryData(wsId, GuidRepresentation.Standard)),
+            filterBuilder.AnyIn("scopes", candidateScopes)
+        );
 
         // replace envId for shared segments
-        var segments = await query.ToListAsync();
+        var segments = await _mongodb.GetCollection<BsonDocument>("Segments").Find(filter).ToListAsync();
         foreach (var segment in segments)
         {
             segment["envId"] = new BsonBinaryData(envId, GuidRepresentation.Standard);

@@ -141,3 +141,21 @@ The environment variable pattern is `RateLimiting__Endpoints__<Key>__<Property>`
 Notes:
 - Any property not specified for an endpoint key inherits from the global defaults above. 
 - All per-endpoint properties are optional and omit any property to fall back to the global value.
+
+## Control-Plane Integration (Cross-DC Consistency)
+
+When a control plane is deployed, the evaluation server participates in the cross-DC consistency
+machinery (see [`modules/control-plane/README.md`](../control-plane/README.md) and the
+[operator guide](../../e2e/control-plane/00-Docs/GATED-COMMIT-CONSISTENCY.md)):
+
+| Key | Default | Purpose |
+|---|---|---|
+| `ControlPlane__Enabled` | `false` | Enables heartbeat publishing to the control plane |
+| `ControlPlane__DcId` | *(unset)* | This DC's identity — **must equal** the control plane's `Redis:Instances[].DcId` for this DC; the join key for commit gating, eviction, and recovery |
+| `ControlPlane__ConsistencyMode` | `BestEffort` | Under `GatedCommit`, flag/segment reads are pointer-gated: only versions the control plane has committed for this DC are served |
+| `ControlPlane__HeartbeatIntervalSeconds` | `5` | Heartbeat cadence; keep ≤ the control plane's `LeaseTtlSeconds`/3 (15s default) or this DC's lease flaps |
+| `ControlPlane__HeartbeatStalenessThresholdSeconds` | `15` | Under `GatedCommit`, `/health/readiness` returns 503 once heartbeats have not been published for this long (the pod leaves rotation rather than serving stale-but-consistent values); liveness is unaffected |
+
+Heartbeats also carry a per-environment **applied watermark** (the newest committed flag/segment
+this DC serves, read from the local Redis indexes), which the control plane exposes as a per-DC
+lag metric.

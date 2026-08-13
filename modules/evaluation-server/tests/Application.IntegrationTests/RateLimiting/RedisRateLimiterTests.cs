@@ -7,6 +7,7 @@ using StackExchange.Redis;
 
 namespace Application.IntegrationTests.RateLimiting;
 
+[Trait("Category", "Host")]
 public class RedisRateLimiterTests
 {
     private static readonly ILogger<RedisRateLimiter> NullLogger =
@@ -16,7 +17,7 @@ public class RedisRateLimiterTests
     [InlineData(RateLimiterType.FixedWindow)]
     [InlineData(RateLimiterType.SlidingWindow)]
     [InlineData(RateLimiterType.TokenBucket)]
-    public async Task AcquireAsync_FailsOpen_WhenRedisThrowsRedisException(RateLimiterType limiterType)
+    public async Task AcquireAsync_RedisThrowsRedisException_FailsOpenAndReturnsAcquiredLease(RateLimiterType limiterType)
     {
         var redisClient = new Mock<IRedisClient>();
         redisClient
@@ -43,7 +44,7 @@ public class RedisRateLimiterTests
     [InlineData(RateLimiterType.FixedWindow)]
     [InlineData(RateLimiterType.SlidingWindow)]
     [InlineData(RateLimiterType.TokenBucket)]
-    public async Task AcquireAsync_FailsOpen_WhenRedisThrowsRedisTimeoutException(RateLimiterType limiterType)
+    public async Task AcquireAsync_RedisThrowsTimeoutException_FailsOpenAndReturnsAcquiredLease(RateLimiterType limiterType)
     {
         var redisClient = new Mock<IRedisClient>();
         redisClient
@@ -70,7 +71,7 @@ public class RedisRateLimiterTests
     [InlineData(RateLimiterType.FixedWindow)]
     [InlineData(RateLimiterType.SlidingWindow)]
     [InlineData(RateLimiterType.TokenBucket)]
-    public async Task AcquireAsync_Propagates_NonRedisExceptions(RateLimiterType limiterType)
+    public async Task AcquireAsync_NonRedisException_PropagatesToCaller(RateLimiterType limiterType)
     {
         var redisClient = new Mock<IRedisClient>();
         redisClient
@@ -95,7 +96,7 @@ public class RedisRateLimiterTests
     }
 
     [Fact]
-    public void IdleDuration_IsExposed()
+    public void IdleDuration_NewlyCreatedLimiter_ReturnsNonNegativeTimeSpan()
     {
         var redisClient = new Mock<IRedisClient>();
 

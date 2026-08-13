@@ -7,11 +7,11 @@ namespace Api.Contracts;
 
 public class EvalResultVariation
 {
-    public string Id { get; set; }
+    public string? Id { get; set; }
 
     public string Type { get; set; }
 
-    public string Value { get; set; }
+    public string? Value { get; set; }
 
     public string MatchReason { get; set; }
 
@@ -19,9 +19,9 @@ public class EvalResultVariation
 
     public EvalResultVariation(string type, UserVariation uv)
     {
-        Id = uv.Variation.Id;
+        Id = uv.Variation?.Id;
         Type = type;
-        Value = uv.Variation.Value;
+        Value = uv.Variation?.Value;
         MatchReason = uv.MatchReason;
         SendToExperiment = uv.SendToExperiment;
     }

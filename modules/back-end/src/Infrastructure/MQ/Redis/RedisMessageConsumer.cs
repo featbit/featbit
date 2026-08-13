@@ -10,7 +10,8 @@ namespace Infrastructure.MQ.Redis;
 public partial class RedisMessageConsumer(
     IRedisClient redisClient,
     IServiceProvider serviceProvider,
-    ILogger<RedisMessageConsumer> logger)
+    ILogger<RedisMessageConsumer> logger,
+    string[] topics)
     : BackgroundService
 {
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -18,12 +19,7 @@ public partial class RedisMessageConsumer(
         // eager resolve InsightsWriter to start flushing insights loop
         _ = serviceProvider.GetRequiredService<InsightsWriter>();
 
-        var tasks = new[]
-        {
-            ConsumeAsync(Topics.EndUser, stoppingToken),
-            ConsumeAsync(Topics.Insights, stoppingToken),
-            ConsumeAsync(Topics.Usage, stoppingToken)
-        };
+        var tasks = topics.Select(topic => ConsumeAsync(topic, stoppingToken));
 
         return Task.WhenAll(tasks);
     }

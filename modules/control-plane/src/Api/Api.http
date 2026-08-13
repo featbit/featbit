@@ -1,0 +1,6 @@
+@Api_HostAddress = http://localhost:5200
+
+POST {{Api_HostAddress}}/api/admin/push-eval-full-sync/
+Accept: application/json
+
+###

@@ -5,7 +5,9 @@ using Streaming.Connections;
 
 namespace Application.IntegrationTests.Configuration;
 
+[Trait("Category", "Host")]
 [Collection(nameof(TestApp))]
+[Trait("Category", "Integration")]
 public class DefaultTests
 {
     private readonly TestApp _app;
@@ -16,7 +18,7 @@ public class DefaultTests
     }
 
     [Fact]
-    public void DefaultToDevelopmentEnvironment()
+    public void EnvironmentName_NotConfigured_DefaultsToDevelopment()
     {
         var environment = _app.Services.GetRequiredService<IWebHostEnvironment>();
 
@@ -26,7 +28,7 @@ public class DefaultTests
     }
 
     [Fact]
-    public void DefaultStreamingOptions()
+    public void StreamingOptions_NotConfigured_HasExpectedDefaults()
     {
         var options = _app.Services.GetRequiredService<StreamingOptions>();
 

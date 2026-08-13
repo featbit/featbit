@@ -65,6 +65,7 @@ public static class DbServiceCollectionExtensions
             services.AddTransient<IFlagChangeRequestService, MongoServices.FlagChangeRequestService>();
             services.AddTransient<IWebhookService, MongoServices.WebhookService>();
             services.AddTransient<IRefreshTokenService, MongoServices.RefreshTokenService>();
+            services.AddTransient<Application.ControlPlane.ILeaseStore, MongoServices.MongoLeaseStore>();
             services.AddTransient<IMcpAuthorizationStore, MongoServices.McpAuthorizationStore>();
         }
 
@@ -109,6 +110,7 @@ public static class DbServiceCollectionExtensions
             services.AddTransient<IFlagChangeRequestService, EntityFrameworkCoreServices.FlagChangeRequestService>();
             services.AddTransient<IWebhookService, EntityFrameworkCoreServices.WebhookService>();
             services.AddTransient<IRefreshTokenService, EntityFrameworkCoreServices.RefreshTokenService>();
+            services.AddTransient<Application.ControlPlane.ILeaseStore, EntityFrameworkCoreServices.PostgresLeaseStore>();
             services.AddTransient<IMcpAuthorizationStore, EntityFrameworkCoreServices.McpAuthorizationStore>();
         }
     }

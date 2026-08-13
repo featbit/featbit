@@ -34,7 +34,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0
 RUN apt-get update && apt-get install -y curl unzip && rm -rf /var/lib/apt/lists/*
 
 ARG INSTALL_DIR
-ARG OTEL_VERSION=1.7.0
+ARG OTEL_VERSION=1.16.0
 
 # ensure we listen on any IP Address
 ENV ASPNETCORE_URLS=http://*:5100 \
@@ -47,13 +47,16 @@ ENV ASPNETCORE_URLS=http://*:5100 \
     OTEL_TRACES_EXPORTER=otlp \
     OTEL_METRICS_EXPORTER=otlp \
     OTEL_LOGS_EXPORTER=otlp \
-    OTEL_EXPORTER_OTLP_ENDPOINT=http://locahost:4317 \
+    OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317 \
     OTEL_EXPORTER_OTLP_PROTOCOL=grpc \
     OTEL_EXPORTER_OTLP_INSECURE=true
 
 ADD https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v${OTEL_VERSION}/otel-dotnet-auto-install.sh otel-dotnet-auto-install.sh
 RUN chmod +x otel-dotnet-auto-install.sh
 RUN ./otel-dotnet-auto-install.sh
+
+ARG VERSION=dev
+ENV VERSION=$VERSION
 
 WORKDIR $INSTALL_DIR
 COPY --from=publish $INSTALL_DIR ./
