@@ -37,9 +37,6 @@ function runtimeEnvPlugin() {
 }
 
 export default defineConfig({
-  server: {
-    port: 4200,
-  },
   plugins: [runtimeEnvPlugin(), react(), tailwindcss()],
   resolve: {
     alias: {

@@ -303,7 +303,7 @@ Only route registration and IAM translation resources may live outside this feat
 - Remove uses an explicit destructive confirmation and is guarded in both UI and handler logic.
 - Loading, error, empty, and search-empty states provide clear recovery actions.
 - Light and dark themes use semantic tokens, and English/Chinese routes remain translated.
-- The page is verified on the local development route `http://localhost:4200/:lang/iam/policies`.
+- The page is verified on the local development route `http://localhost:5173/:lang/iam/policies`.
 - The details header follows the approved first-version composition and displays Policy Type as a compact shadcn Badge beside the Resource name.
 - System-managed policies hide name/description editing and destructive removal; customer-managed policies expose them.
 - Details tabs are exactly Permissions, Team, and Groups and use the existing React underline treatment.
@@ -312,4 +312,4 @@ Only route registration and IAM translation resources may live outside this feat
 - Team mirrors the Group-details member relationship pattern; Groups mirrors the Team-details group relationship pattern.
 - Relationship searches debounce and reset pagination, and add/remove mutations refresh both the table and counter.
 - Remove-member and remove-group dialogs use the documented Angular-equivalent copy and emphasize the affected member or group name.
-- Details are verified on `http://localhost:4200/:lang/iam/policies/:policyId/permission`, `/team`, and `/groups`.
+- Details are verified on `http://localhost:5173/:lang/iam/policies/:policyId/permission`, `/team`, and `/groups`.

@@ -53,17 +53,20 @@ Then run
 npm run dev
 ```
 
-The UI will be available at http://localhost:4200
+The UI will be available at http://localhost:5173
 
 ## Install with Docker
 
 The following variables could be overridden by environment variables when running the container:
-- **API_URL**: **Mandatory**, the url of the API Server, default value is http://localhost:5000, it overrides **url**
-- **DEMO_URL**: **Optional**, set the value if you deploy the [dino-game demo](https://github.com/featbit/featbit-samples/tree/main/samples/dino-game/interactive-demo-vue) on your own server, otherwise it would use our demo deployed on https://featbit-samples.vercel.app. The link doesn't work if you click directly on it, it needs extra parameters. **demoUrl**
-- **EVALUATION_URL**: **Optional**, the url of the evaluation server, this is used by the demo, ignore it if you don't want to run the demo, the default value is http://localhost:5100. It overrides **evaluationUrl**
-- **DISPLAY_API_URL**: **Optional**, the display url of the API server. This is an optional variable used when you want to override the API URL displayed in the 'Getting Started' UI.
-- **DISPLAY_EVALUATION_URL**: **Optional**, the display url of the Evaluation server. This is an optional variable used when you want to override the Event and Streaming URL displayed in the 'Getting Started' UI.
-- **BASE_HREF**: **Optional**, set the value if you want to deploy FeatBit UI to a path, for example https://www.example.com/abc/def/, in this case, the value should be `/abc/def/`.
+
+| Variable | Requirement | Default value | Description |
+| --- | --- | --- | --- |
+| `API_URL` | Mandatory | `http://localhost:5000` | The URL of the API server. It overrides `url`. |
+| `DEMO_URL` | Optional | `https://featbit-samples.vercel.app` | Set this value if you deploy the [dino-game demo](https://github.com/featbit/featbit-samples/tree/main/samples/dino-game/interactive-demo-vue) on your own server. The link requires extra parameters and does not work when opened directly. It overrides `demoUrl`. |
+| `EVALUATION_URL` | Optional | `http://localhost:5100` | The URL of the evaluation server used by the demo. Ignore it if you do not want to run the demo. It overrides `evaluationUrl`. |
+| `DISPLAY_API_URL` | Optional | — | Overrides the API URL displayed in the 'Getting Started' UI. |
+| `DISPLAY_EVALUATION_URL` | Optional | — | Overrides the Event and Streaming URL displayed in the 'Getting Started' UI. |
+| `BASE_HREF` | Optional | — | Sets the path where the FeatBit UI is deployed. For example, for `https://www.example.com/abc/def/`, use `/abc/def/`. |
 
 Bind the port 8081 or any other available port to 80.
 

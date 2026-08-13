@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
 
 const host = "127.0.0.1";
-const port = 4200;
+const port = 5173;
 const url = `http://${host}:${port}/en/login`;
 const viteBin = "./node_modules/vite/bin/vite.js";
 const playwrightBin = "./node_modules/@playwright/test/cli.js";
