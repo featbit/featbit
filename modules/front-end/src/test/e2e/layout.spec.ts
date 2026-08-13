@@ -173,6 +173,34 @@ test.describe("layout", () => {
     })
   })
 
+  test("keeps navigation made during the environment switch delay", async ({
+    page,
+  }) => {
+    await mockContextEndpoints(page)
+    await setAuthenticatedUser(page)
+    await setCurrentContext(page)
+
+    await page.goto("/en/workspace")
+
+    await page.getByRole("button", { name: /Production CN/ }).click()
+    const environmentSearch = page.getByPlaceholder(
+      "Search projects or environments..."
+    )
+    await environmentSearch.fill("Staging")
+    await environmentSearch.press("Enter")
+
+    const switchingStatus = page.getByRole("status", {
+      name: "Switching to Growth Platform / Staging...",
+    })
+    await expect(switchingStatus).toBeVisible()
+    await page.getByRole("link", { name: "Feature Flags" }).click()
+
+    await expect(page).toHaveURL(/\/en\/feature-flags$/)
+    await expect(switchingStatus).toHaveCount(0)
+    await page.waitForTimeout(600)
+    await expect(page).toHaveURL(/\/en\/feature-flags$/)
+  })
+
   test("keeps explicit environment contexts isolated between tabs", async ({
     context,
     page,

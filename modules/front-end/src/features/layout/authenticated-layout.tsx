@@ -44,6 +44,7 @@ const ENV_CHANGED_MESSAGE = "env-changed"
 const ORG_CHANGED_MESSAGE = "org-changed"
 const HOSTING_MODE_SAAS = "saas"
 const ENVIRONMENT_SWITCH_DELAY_MS = 500
+const BROADCAST_SOURCE_ID = `${Date.now()}-${Math.random().toString(36).slice(2)}`
 
 function getEnvironmentReloadPath(pathname: string) {
   const segments = pathname.split("/").filter(Boolean)
@@ -82,9 +83,8 @@ export function AuthenticatedLayout() {
   const [projects, setProjects] = useState<Project[]>([])
   const [switchingProjectEnv, setSwitchingProjectEnv] =
     useState<ProjectEnv | null>(null)
-  const broadcastSourceId = useRef(
-    `${Date.now()}-${Math.random().toString(36).slice(2)}`
-  ).current
+  const environmentSwitchTimeoutRef = useRef<number | null>(null)
+  const environmentSwitchOriginRef = useRef<string | null>(null)
   const isSaas = getRuntimeEnv().hostingMode === HOSTING_MODE_SAAS
   const subscriptionQuery = useQuery({
     queryKey: ["billing", "subscription"],
@@ -131,14 +131,54 @@ export function AuthenticatedLayout() {
       const channel = new BroadcastChannel(UI_BROADCAST_CHANNEL)
       channel.postMessage({
         type: ENV_CHANGED_MESSAGE,
-        sourceId: broadcastSourceId,
+        sourceId: BROADCAST_SOURCE_ID,
       })
       channel.close()
     }
-    window.setTimeout(() => {
+
+    if (environmentSwitchTimeoutRef.current !== null) {
+      window.clearTimeout(environmentSwitchTimeoutRef.current)
+    }
+
+    const switchOrigin = `${location.pathname}${location.search}${location.hash}`
+    environmentSwitchOriginRef.current = switchOrigin
+    environmentSwitchTimeoutRef.current = window.setTimeout(() => {
+      environmentSwitchTimeoutRef.current = null
+      environmentSwitchOriginRef.current = null
+
+      const currentLocation = `${window.location.pathname}${window.location.search}${window.location.hash}`
+      if (currentLocation !== switchOrigin) {
+        setSwitchingProjectEnv(null)
+        return
+      }
+
       window.location.assign(getEnvironmentReloadPath(location.pathname))
     }, ENVIRONMENT_SWITCH_DELAY_MS)
   }
+
+  useEffect(() => {
+    const switchOrigin = environmentSwitchOriginRef.current
+    const currentLocation = `${location.pathname}${location.search}${location.hash}`
+
+    if (switchOrigin === null || currentLocation === switchOrigin) {
+      return
+    }
+
+    if (environmentSwitchTimeoutRef.current !== null) {
+      window.clearTimeout(environmentSwitchTimeoutRef.current)
+      environmentSwitchTimeoutRef.current = null
+    }
+    environmentSwitchOriginRef.current = null
+    setSwitchingProjectEnv(null)
+  }, [location.hash, location.pathname, location.search])
+
+  useEffect(() => {
+    return () => {
+      if (environmentSwitchTimeoutRef.current !== null) {
+        window.clearTimeout(environmentSwitchTimeoutRef.current)
+      }
+    }
+  }, [])
 
   useEffect(() => {
     if (!("BroadcastChannel" in window)) {
@@ -154,7 +194,7 @@ export function AuthenticatedLayout() {
 
       if (
         messageType === ENV_CHANGED_MESSAGE &&
-        sourceId !== broadcastSourceId &&
+        sourceId !== BROADCAST_SOURCE_ID &&
         !hasTabProjectEnvOverride()
       ) {
         window.location.assign(getEnvironmentReloadPath(location.pathname))
@@ -169,7 +209,7 @@ export function AuthenticatedLayout() {
     return () => {
       channel.close()
     }
-  }, [broadcastSourceId, lang, location.pathname])
+  }, [lang, location.pathname])
 
   useEffect(() => {
     return onCurrentOrganizationChanged(() => {
