@@ -1,5 +1,7 @@
-import { Suspense, useCallback, useEffect, useState } from "react"
+import { Suspense, useCallback, useEffect, useRef, useState } from "react"
+import { flushSync } from "react-dom"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { Loader2 } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom"
 import { getStoredUserProfile, signOut } from "@/features/auth/auth-api"
@@ -41,6 +43,7 @@ const UI_BROADCAST_CHANNEL = "featbit-ui-broadcast-channel"
 const ENV_CHANGED_MESSAGE = "env-changed"
 const ORG_CHANGED_MESSAGE = "org-changed"
 const HOSTING_MODE_SAAS = "saas"
+const ENVIRONMENT_SWITCH_DELAY_MS = 500
 
 function getEnvironmentReloadPath(pathname: string) {
   const segments = pathname.split("/").filter(Boolean)
@@ -63,7 +66,7 @@ export function AuthenticatedLayout() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const lang = resolveLang(langParam)
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
   const [collapsed, setCollapsedState] = useState(
     () => localStorage.getItem(SIDEBAR_STORAGE_KEY) === "true"
   )
@@ -77,6 +80,11 @@ export function AuthenticatedLayout() {
     () => getCurrentProjectEnv()
   )
   const [projects, setProjects] = useState<Project[]>([])
+  const [switchingProjectEnv, setSwitchingProjectEnv] =
+    useState<ProjectEnv | null>(null)
+  const broadcastSourceId = useRef(
+    `${Date.now()}-${Math.random().toString(36).slice(2)}`
+  ).current
   const isSaas = getRuntimeEnv().hostingMode === HOSTING_MODE_SAAS
   const subscriptionQuery = useQuery({
     queryKey: ["billing", "subscription"],
@@ -114,14 +122,22 @@ export function AuthenticatedLayout() {
     }
 
     const isTabScoped = hasTabProjectEnvOverride()
+    flushSync(() => {
+      setSwitchingProjectEnv(nextProjectEnv)
+    })
     saveCurrentProjectEnv(nextProjectEnv)
     setCurrentProjectEnv(nextProjectEnv)
     if (!isTabScoped && "BroadcastChannel" in window) {
       const channel = new BroadcastChannel(UI_BROADCAST_CHANNEL)
-      channel.postMessage(ENV_CHANGED_MESSAGE)
+      channel.postMessage({
+        type: ENV_CHANGED_MESSAGE,
+        sourceId: broadcastSourceId,
+      })
       channel.close()
     }
-    window.location.assign(getEnvironmentReloadPath(location.pathname))
+    window.setTimeout(() => {
+      window.location.assign(getEnvironmentReloadPath(location.pathname))
+    }, ENVIRONMENT_SWITCH_DELAY_MS)
   }
 
   useEffect(() => {
@@ -131,11 +147,20 @@ export function AuthenticatedLayout() {
 
     const channel = new BroadcastChannel(UI_BROADCAST_CHANNEL)
     channel.onmessage = (event) => {
-      if (event.data === ENV_CHANGED_MESSAGE && !hasTabProjectEnvOverride()) {
+      const messageType =
+        typeof event.data === "string" ? event.data : event.data?.type
+      const sourceId =
+        typeof event.data === "string" ? undefined : event.data?.sourceId
+
+      if (
+        messageType === ENV_CHANGED_MESSAGE &&
+        sourceId !== broadcastSourceId &&
+        !hasTabProjectEnvOverride()
+      ) {
         window.location.assign(getEnvironmentReloadPath(location.pathname))
       }
 
-      if (event.data === ORG_CHANGED_MESSAGE) {
+      if (messageType === ORG_CHANGED_MESSAGE) {
         clearTabProjectEnv()
         window.location.assign(`/${lang}`)
       }
@@ -144,7 +169,7 @@ export function AuthenticatedLayout() {
     return () => {
       channel.close()
     }
-  }, [lang, location.pathname])
+  }, [broadcastSourceId, lang, location.pathname])
 
   useEffect(() => {
     return onCurrentOrganizationChanged(() => {
@@ -257,9 +282,32 @@ export function AuthenticatedLayout() {
             <SubscriptionLicenseBadge lang={lang} workspace={workspace} />
           </header>
           <main className="min-h-0 flex-1 overflow-y-auto bg-muted/30 p-5">
-            <Suspense fallback={<div className="min-h-32" />}>
-              <Outlet />
-            </Suspense>
+            {switchingProjectEnv ? (
+              <div
+                role="status"
+                aria-live="polite"
+                aria-label={t("layout.context.switchingEnvironment", {
+                  project: switchingProjectEnv.projectName,
+                  environment: switchingProjectEnv.envName,
+                })}
+                className="flex h-full min-h-32 flex-col items-center justify-center gap-3"
+              >
+                <Loader2
+                  aria-hidden
+                  className="size-7 animate-spin text-primary motion-reduce:animate-none"
+                />
+                <p className="text-sm font-medium text-foreground">
+                  {t("layout.context.switchingEnvironment", {
+                    project: switchingProjectEnv.projectName,
+                    environment: switchingProjectEnv.envName,
+                  })}
+                </p>
+              </div>
+            ) : (
+              <Suspense fallback={<div className="min-h-32" />}>
+                <Outlet />
+              </Suspense>
+            )}
           </main>
         </div>
       </div>

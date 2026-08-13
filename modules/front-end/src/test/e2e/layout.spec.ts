@@ -150,9 +150,16 @@ test.describe("layout", () => {
       "Search projects or environments..."
     )
     await environmentSearch.fill("Staging")
+    const switchStartedAt = Date.now()
     await environmentSearch.press("Enter")
 
+    await expect(
+      page.getByRole("status", {
+        name: "Switching to Growth Platform / Staging...",
+      })
+    ).toBeVisible()
     await expect(page).toHaveURL(/\/en\/workspace$/)
+    expect(Date.now() - switchStartedAt).toBeGreaterThanOrEqual(450)
     await expect(page.getByRole("button", { name: /Staging/ })).toBeVisible()
     await expect(
       page.evaluate(() =>
