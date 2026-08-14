@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { MessageQueueService } from '@services/message-queue.service';
-import { copyToClipboard, getPathPrefix, uuidv4 } from "@utils/index";
+import { copyToClipboard, uuidv4 } from "@utils/index";
 import { editor } from "monaco-editor";
 import { FeatureFlagService } from "@services/feature-flag.service";
 import {
@@ -13,8 +13,6 @@ import {
   VariationTypeEnum
 } from "@features/safe/feature-flags/types/details";
 import { IVariation } from "@shared/rules";
-import { ExperimentService } from "@services/experiment.service";
-import { ExperimentStatus, IExpt } from "@features/safe/experiments/types";
 import { NzSelectComponent } from "ng-zorro-antd/select";
 import { FormArray, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators } from "@angular/forms";
 import { PermissionsService } from "@services/permissions.service";
@@ -133,7 +131,6 @@ export class SettingComponent {
   constructor(
     private route: ActivatedRoute,
     private featureFlagService: FeatureFlagService,
-    private experimentService: ExperimentService,
     private message: NzMessageService,
     private messageQueueService: MessageQueueService,
     private formBuilder: FormBuilder,
@@ -321,17 +318,7 @@ export class SettingComponent {
       return;
     }
 
-    this.experimentService.getVariationReferences(this.featureFlag.id, id).subscribe({
-      next: (references) => {
-        if (references.length === 0) {
-          this.variations.removeAt(index);
-        } else {
-          this.variationExptReferences = [...references];
-          this.exptReferenceModalVisible = true;
-        }
-      },
-      error: () => this.message.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`)
-    });
+    this.variations.removeAt(index);
   }
 
   saveVariations() {
@@ -406,25 +393,6 @@ export class SettingComponent {
   };
 
   //#endregion
-
-  exptStatusNotStarted: ExperimentStatus = ExperimentStatus.NotStarted;
-  exptStatusPaused: ExperimentStatus = ExperimentStatus.Paused;
-  exptStatusRecording: ExperimentStatus = ExperimentStatus.Recording;
-
-  goToExperimentPage(featureFlagKey: string, exptId: string) {
-    const url = this.router.serializeUrl(
-      this.router.createUrlTree([`${getPathPrefix()}feature-flags/${featureFlagKey}/experimentations`], { fragment: exptId })
-    );
-
-    window.open(url, '_blank');
-  }
-
-  exptReferenceModalVisible = false;
-
-  variationExptReferences: IExpt[] = [];
-  closeExptReferenceModal() {
-    this.exptReferenceModalVisible = false;
-  }
 
   onSaveName() {
     const { name } = this.featureFlag;

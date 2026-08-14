@@ -5,8 +5,12 @@ services:
     image: featbit/ui:dev
     container_name: ui
     build:
-      context: ./modules/front-end
-      dockerfile: ./Dockerfile
+      context: .
+      dockerfile: ./docker/ui-combined/Dockerfile
+      args:
+        VITE_FEATBIT_APP_URL: https://featbit.example
+        VITE_FEATBIT_API_URL: https://api.featbit.example
+        VITE_BASE_PATH: /release-decision/
     environment:
       - API_URL=https://api.featbit.example
       - DEMO_URL=https://demo.featbit.example

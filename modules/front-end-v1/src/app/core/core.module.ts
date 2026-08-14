@@ -51,8 +51,6 @@ import { MenuComponent } from "@core/components/menu/menu.component";
 import { HeaderComponent } from "@core/components/header/header.component";
 import { PropsDrawerComponent } from "@core/components/props-drawer/props-drawer.component";
 import { ImportEndUserComponent } from './components/import-end-user/import-end-user.component';
-import { MetricDrawerComponent } from "@core/components/metric-drawer/metric-drawer.component";
-import { ExperimentDrawerComponent } from "@core/components/experiment-drawer/experiment-drawer.component";
 import { G2LineChartComponent } from "@core/components/g2-chart/g2-line-chart/g2-line-chart.component";
 import { ExptRulesDrawerComponent } from "@core/components/expt-rules-drawer/expt-rules-drawer.component";
 import {
@@ -133,8 +131,6 @@ import { ThemeSwitcherComponent } from '@core/components/theme-switcher/theme-sw
     HeaderComponent,
     PropsDrawerComponent,
     ImportEndUserComponent,
-    MetricDrawerComponent,
-    ExperimentDrawerComponent,
     FeatureFlagDrawerComponent,
     G2LineChartComponent,
     ExptRulesDrawerComponent,
@@ -250,8 +246,6 @@ import { ThemeSwitcherComponent } from '@core/components/theme-switcher/theme-sw
     HeaderComponent,
     PropsDrawerComponent,
     ImportEndUserComponent,
-    MetricDrawerComponent,
-    ExperimentDrawerComponent,
     G2LineChartComponent,
     ExptRulesDrawerComponent,
     UserSegmentsFlagsDrawerComponent,

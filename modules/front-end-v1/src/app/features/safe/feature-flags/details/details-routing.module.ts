@@ -5,6 +5,9 @@ import { TargetingComponent } from './targeting/targeting.component';
 import { SettingComponent } from './setting/setting.component';
 import {InsightsComponent} from "@features/safe/feature-flags/details/insights/insights.component";
 import {AuditLogComponent} from "@core/components/audit-log/audit-log.component";
+import {
+  ReleaseDecisionRedirectComponent
+} from "@features/safe/release-decision-redirect.component";
 
 
 const routes: Routes = [
@@ -32,7 +35,7 @@ const routes: Routes = [
         }
       }, {
         path: 'experimentations',
-        component: SettingComponent,
+        component: ReleaseDecisionRedirectComponent,
         data: {
           breadcrumb: $localize `:@@ff.routing.details.experimentation:Experimentation`
         }

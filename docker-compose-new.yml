@@ -1,0 +1,125 @@
+name: featbit-new
+
+x-api-build: &api-build
+  context: ./modules/back-end
+  dockerfile: deploy/Dockerfile
+
+x-evaluation-build: &evaluation-build
+  context: ./modules/evaluation-server
+  dockerfile: deploy/Dockerfile
+
+x-ui-build: &ui-build
+  context: .
+  dockerfile: docker/ui-combined/Dockerfile
+  args:
+    VITE_FEATBIT_APP_URL: http://localhost:8081
+    VITE_FEATBIT_API_URL: http://localhost:5000
+    VITE_BASE_PATH: /release-decision/
+
+x-api-environment: &api-environment
+  ASPNETCORE_ENVIRONMENT: Production
+  ASPNETCORE_URLS: http://*:5000
+  DbProvider: Postgres
+  MqProvider: Postgres
+  CacheProvider: None
+  Postgres__ConnectionString: Host=postgresql;Port=5432;Username=postgres;Password=please_change_me;Database=featbit
+  Jwt__Algorithm: HS256
+  Jwt__Key: please_change_me_to_a_secure_secret_key
+  ENABLE_OPENTELEMETRY: "${ENABLE_OPENTELEMETRY:-false}"
+  OTEL_SERVICE_NAME: featbit-api
+  OTEL_TRACES_EXPORTER: otlp
+  OTEL_METRICS_EXPORTER: otlp
+  OTEL_LOGS_EXPORTER: otlp
+  OTEL_EXPORTER_OTLP_ENDPOINT: "${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector:4317}"
+  OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+  OTEL_EXPORTER_OTLP_INSECURE: "true"
+
+x-evaluation-environment: &evaluation-environment
+  ASPNETCORE_ENVIRONMENT: Production
+  ASPNETCORE_URLS: http://*:5100
+  DbProvider: Postgres
+  MqProvider: Postgres
+  CacheProvider: None
+  Postgres__ConnectionString: Host=postgresql;Port=5432;Username=postgres;Password=please_change_me;Database=featbit
+  ENABLE_OPENTELEMETRY: "${ENABLE_OPENTELEMETRY:-false}"
+  OTEL_SERVICE_NAME: featbit-els
+  OTEL_TRACES_EXPORTER: otlp
+  OTEL_METRICS_EXPORTER: otlp
+  OTEL_LOGS_EXPORTER: otlp
+  OTEL_EXPORTER_OTLP_ENDPOINT: "${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector:4317}"
+  OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+  OTEL_EXPORTER_OTLP_INSECURE: "true"
+
+x-ui-environment: &ui-environment
+  API_URL: http://localhost:5000
+  DEMO_URL: https://featbit-samples.vercel.app
+  EVALUATION_URL: http://localhost:5100
+  DISPLAY_API_URL: http://localhost:5000
+  DISPLAY_EVALUATION_URL: http://localhost:5100
+  BASE_HREF: /
+  HOSTING_MODE: self-hosted
+  EXPERIMENT_PAGE_MODE: integrated
+
+services:
+  ui:
+    image: featbit/featbit-ui:local
+    build: *ui-build
+    restart: on-failure
+    environment: *ui-environment
+    depends_on:
+      api-server:
+        condition: service_started
+      evaluation-server:
+        condition: service_started
+    ports:
+      - "8081:80"
+    networks:
+      - featbit-network
+
+  api-server:
+    image: featbit/featbit-api-server:local
+    build: *api-build
+    restart: on-failure
+    environment: *api-environment
+    depends_on:
+      postgresql:
+        condition: service_started
+    ports:
+      - "5000:5000"
+    networks:
+      - featbit-network
+
+  evaluation-server:
+    image: featbit/featbit-evaluation-server:local
+    build: *evaluation-build
+    restart: on-failure
+    environment: *evaluation-environment
+    depends_on:
+      postgresql:
+        condition: service_started
+    ports:
+      - "5100:5100"
+    networks:
+      - featbit-network
+
+  postgresql:
+    image: postgres:15.10
+    restart: on-failure
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: please_change_me
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./infra/postgresql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
+      - postgres:/var/lib/postgresql/data
+    networks:
+      - featbit-network
+
+networks:
+  featbit-network:
+    driver: bridge
+
+volumes:
+  postgres:

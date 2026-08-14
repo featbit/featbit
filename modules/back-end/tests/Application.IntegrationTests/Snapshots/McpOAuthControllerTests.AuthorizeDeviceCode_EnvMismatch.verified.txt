@@ -1,0 +1,24 @@
+﻿{
+  Request: {
+    Method: POST,
+    Uri: http://localhost/api/v1/envs/99000000-0000-0000-0000-000000000001/release-decision/mcp/oauth/device/authorize,
+    Headers: {
+      Authorization: {Scrubbed},
+      Organization: Guid_1,
+      Workspace: Guid_2
+    },
+    Content: {
+      Headers: {
+        Content-Length: 25,
+        Content-Type: application/json; charset=utf-8
+      },
+      Value: 
+    }
+  },
+  Response: {
+    Status: 403 Forbidden,
+    Headers: {
+      api-supported-versions: 1.0
+    }
+  }
+}
