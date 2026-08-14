@@ -5,7 +5,6 @@ using Api.Authorization;
 using Application.Bases;
 using Application.Bases.Exceptions;
 using Application.FeatureFlags;
-using Application.Experiments;
 using Application.Services;
 using Domain.FeatureFlags;
 using Domain.Policies;

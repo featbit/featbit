@@ -27,7 +27,8 @@ public static class ServicesRegister
 
         // add services for controllers
         builder.Services.AddControllers();
-        builder.Services.AddHttpContextAccessor();
+
+        // add mcp server & tools
         builder.Services.AddScoped<McpJwtBearerEvents>();
         builder.Services
             .AddMcpServer()
