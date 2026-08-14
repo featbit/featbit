@@ -10,19 +10,19 @@ namespace Application.IntegrationTests.Stubs;
 
 public class TestAccessTokenService : NullServiceBase<AccessToken>, IAccessTokenService
 {
-    public const string PersonalToken = "api-release-decision-test";
+    public const string PersonalToken = "api-experiment-test";
 
     public override Task<AccessToken?> FindOneAsync(Expression<Func<AccessToken, bool>> predicate)
     {
         var accessToken = new AccessToken(
             TestWorkspace.OrganizationId,
             TestUser.Id,
-            "Release decision test token",
+            "Experiment test token",
             AccessTokenTypes.Personal,
             [
                 new PolicyStatement
                 {
-                    Id = "release-decision-test",
+                    Id = "experiment-test",
                     ResourceType = ResourceTypes.Env,
                     Effect = "allow",
                     Actions = [Permissions.CanAccessEnv],

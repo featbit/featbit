@@ -4,7 +4,7 @@ using Api.Mcp;
 using Application.Bases;
 using Application.Bases.Exceptions;
 using Application.FeatureFlags;
-using Application.ReleaseDecisions;
+using Application.Experiments;
 using Application.Services;
 using Domain.FeatureFlags;
 using Domain.Policies;
@@ -24,7 +24,7 @@ public class FeatureFlagMcpToolsTests
         var envId = Guid.NewGuid();
         var httpContext = new DefaultHttpContext();
         var sender = new Mock<ISender>();
-        var experimentService = new Mock<IReleaseDecisionExperimentService>();
+        var experimentService = new Mock<IExperimentService>();
         var permissionChecker = new Mock<IPermissionChecker>();
         var licenseService = new Mock<ILicenseService>();
         var requestPermissions = new Mock<IRequestPermissions>();
@@ -77,7 +77,7 @@ public class FeatureFlagMcpToolsTests
         var envId = Guid.NewGuid();
         var httpContext = new DefaultHttpContext();
         var sender = new Mock<ISender>();
-        var experimentService = new Mock<IReleaseDecisionExperimentService>();
+        var experimentService = new Mock<IExperimentService>();
         var permissionChecker = new Mock<IPermissionChecker>();
         var tools = new FeatureFlagMcpTools(
             sender.Object,
@@ -122,7 +122,7 @@ public class FeatureFlagMcpToolsTests
         httpContext.Request.Headers[ApiConstants.OrgIdHeaderKey] = orgId.ToString();
 
         var sender = new Mock<ISender>();
-        var experimentService = new Mock<IReleaseDecisionExperimentService>();
+        var experimentService = new Mock<IExperimentService>();
         var permissionChecker = new Mock<IPermissionChecker>();
         var licenseService = new Mock<ILicenseService>();
         var requestPermissions = new Mock<IRequestPermissions>();
@@ -186,7 +186,7 @@ public class FeatureFlagMcpToolsTests
     {
         var tools = new FeatureFlagMcpTools(
             Mock.Of<ISender>(),
-            Mock.Of<IReleaseDecisionExperimentService>(),
+            Mock.Of<IExperimentService>(),
             new HttpContextAccessor { HttpContext = new DefaultHttpContext() },
             Mock.Of<IPermissionChecker>(),
             Mock.Of<ILicenseService>(),
@@ -214,7 +214,7 @@ public class FeatureFlagMcpToolsTests
 
         var httpContext = new DefaultHttpContext();
         var sender = new Mock<ISender>();
-        var experimentService = new Mock<IReleaseDecisionExperimentService>();
+        var experimentService = new Mock<IExperimentService>();
         var permissionChecker = new Mock<IPermissionChecker>();
         var licenseService = new Mock<ILicenseService>();
         var requestPermissions = new Mock<IRequestPermissions>();
@@ -269,7 +269,7 @@ public class FeatureFlagMcpToolsTests
     {
         var tools = new FeatureFlagMcpTools(
             Mock.Of<ISender>(),
-            Mock.Of<IReleaseDecisionExperimentService>(),
+            Mock.Of<IExperimentService>(),
             new HttpContextAccessor { HttpContext = new DefaultHttpContext() },
             Mock.Of<IPermissionChecker>(),
             Mock.Of<ILicenseService>(),
@@ -288,7 +288,7 @@ public class FeatureFlagMcpToolsTests
     {
         var tools = new FeatureFlagMcpTools(
             Mock.Of<ISender>(),
-            Mock.Of<IReleaseDecisionExperimentService>(),
+            Mock.Of<IExperimentService>(),
             new HttpContextAccessor { HttpContext = new DefaultHttpContext() },
             Mock.Of<IPermissionChecker>(),
             Mock.Of<ILicenseService>(),
@@ -320,7 +320,7 @@ public class FeatureFlagMcpToolsTests
         httpContext.Request.Headers[ApiConstants.WorkspaceHeaderKey] = workspaceId.ToString();
 
         var sender = new Mock<ISender>();
-        var experimentService = new Mock<IReleaseDecisionExperimentService>();
+        var experimentService = new Mock<IExperimentService>();
         var permissionChecker = new Mock<IPermissionChecker>();
         var licenseService = new Mock<ILicenseService>();
         var requestPermissions = new Mock<IRequestPermissions>();
@@ -399,7 +399,7 @@ public class FeatureFlagMcpToolsTests
 
         var httpContext = new DefaultHttpContext();
         var sender = new Mock<ISender>();
-        var experimentService = new Mock<IReleaseDecisionExperimentService>();
+        var experimentService = new Mock<IExperimentService>();
         var permissionChecker = new Mock<IPermissionChecker>();
         var licenseService = new Mock<ILicenseService>();
         var requestPermissions = new Mock<IRequestPermissions>();

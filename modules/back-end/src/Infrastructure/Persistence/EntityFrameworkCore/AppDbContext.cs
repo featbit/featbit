@@ -34,14 +34,14 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.ApplyConfiguration(new GroupPolicyConfiguration());
         modelBuilder.ApplyConfiguration(new MemberPolicyConfiguration());
 
-        modelBuilder.ApplyConfiguration(new ReleaseDecisionExperimentConfiguration());
-        modelBuilder.ApplyConfiguration(new ReleaseDecisionExperimentRunConfiguration());
-        modelBuilder.ApplyConfiguration(new ReleaseDecisionLayerConfiguration());
-        modelBuilder.ApplyConfiguration(new ReleaseDecisionMetricConfiguration());
-        modelBuilder.ApplyConfiguration(new ReleaseDecisionActivityConfiguration());
-        modelBuilder.ApplyConfiguration(new ReleaseDecisionExposureEventConfiguration());
-        modelBuilder.ApplyConfiguration(new ReleaseDecisionMetricEventConfiguration());
-        modelBuilder.ApplyConfiguration(new ReleaseDecisionRunAssignmentConfiguration());
+        modelBuilder.ApplyConfiguration(new ExperimentConfiguration());
+        modelBuilder.ApplyConfiguration(new ExperimentRunConfiguration());
+        modelBuilder.ApplyConfiguration(new ExperimentLayerConfiguration());
+        modelBuilder.ApplyConfiguration(new ExperimentMetricConfiguration());
+        modelBuilder.ApplyConfiguration(new ExperimentActivityConfiguration());
+        modelBuilder.ApplyConfiguration(new ExperimentExposureEventConfiguration());
+        modelBuilder.ApplyConfiguration(new ExperimentMetricEventConfiguration());
+        modelBuilder.ApplyConfiguration(new ExperimentRunAssignmentConfiguration());
         modelBuilder.ApplyConfiguration(new AccessTokenConfiguration());
         modelBuilder.ApplyConfiguration(new McpDeviceAuthorizationConfiguration());
         modelBuilder.ApplyConfiguration(new McpRefreshAuthorizationConfiguration());

@@ -27,7 +27,7 @@ public class McpOAuthControllerTests
         {
             client_id = "codex",
             env_id = TestWorkspace.Id,
-            experiment_id = TestReleaseDecisionExperimentService.ExperimentId
+            experiment_id = TestExperimentService.ExperimentId
         }, false);
         var deviceCode = await ReadStringAsync(createResponse, "device_code");
         var userCode = await ReadStringAsync(createResponse, "user_code");
@@ -40,7 +40,7 @@ public class McpOAuthControllerTests
         }, false);
 
         var authorizeResponse = await _app.PostAsync(
-            $"/api/v1/envs/{TestWorkspace.Id}/release-decision/mcp/oauth/device/authorize",
+            $"/api/v1/envs/{TestWorkspace.Id}/mcp/oauth/device/authorize",
             new { user_code = userCode },
             includeWorkspaceContext: true);
 
@@ -88,11 +88,11 @@ public class McpOAuthControllerTests
     public async Task CreateScopedToken_UsesEnvironmentScopeWhenWorkspaceHeadersAreMissing()
     {
         var response = await _app.PostAsync(
-            $"/api/v1/envs/{TestWorkspace.Id}/release-decision/mcp/oauth/token",
+            $"/api/v1/envs/{TestWorkspace.Id}/mcp/oauth/token",
             new
             {
                 client_id = "featbit-coding-agent",
-                experiment_id = TestReleaseDecisionExperimentService.ExperimentId
+                experiment_id = TestExperimentService.ExperimentId
             });
 
         await Verify(await NormalizeTokenResponseAsync(response));
@@ -109,7 +109,7 @@ public class McpOAuthControllerTests
         var userCode = await ReadStringAsync(createResponse, "user_code");
 
         var response = await _app.PostAsync(
-            $"/api/v1/envs/99000000-0000-0000-0000-000000000001/release-decision/mcp/oauth/device/authorize",
+            $"/api/v1/envs/99000000-0000-0000-0000-000000000001/mcp/oauth/device/authorize",
             new { user_code = userCode },
             includeWorkspaceContext: true);
 

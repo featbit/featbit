@@ -102,7 +102,7 @@ public class McpOAuthController(
     }
 
     [Authorize(Permissions.CanAccessEnv)]
-    [HttpPost("~/api/v{version:apiVersion}/envs/{envId:guid}/release-decision/mcp/oauth/token")]
+    [HttpPost("~/api/v{version:apiVersion}/envs/{envId:guid}/mcp/oauth/token")]
     public async Task<ActionResult<McpTokenResponse>> CreateScopedToken(
         Guid envId,
         McpScopedTokenRequest request)
@@ -139,7 +139,7 @@ public class McpOAuthController(
     }
 
     [Authorize(Permissions.CanAccessEnv)]
-    [HttpPost("~/api/v{version:apiVersion}/envs/{envId:guid}/release-decision/mcp/oauth/device/authorize")]
+    [HttpPost("~/api/v{version:apiVersion}/envs/{envId:guid}/mcp/oauth/device/authorize")]
     public async Task<ActionResult<ApiResponse<McpDeviceAuthorizeResponse>>> AuthorizeDeviceCode(
         Guid envId,
         McpDeviceAuthorizeRequest request)

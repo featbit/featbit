@@ -49,7 +49,7 @@ public class TestApp : WebApplicationFactory<Program>
             collection.Replace(ServiceDescriptor.Transient<IPermissionChecker, TestPermissionChecker>());
             collection.Replace(ServiceDescriptor.Transient<IAccessTokenService, TestAccessTokenService>());
             collection.Replace(ServiceDescriptor.Singleton<IMcpAuthorizationStore, TestMcpAuthorizationStore>());
-            collection.Replace(ServiceDescriptor.Transient<IReleaseDecisionExperimentService, TestReleaseDecisionExperimentService>());
+            collection.Replace(ServiceDescriptor.Transient<IExperimentService, TestExperimentService>());
             collection.Replace(ServiceDescriptor.Transient<IExperimentStatsService, TestExperimentStatsService>());
 
             // Replace IPermissionChecker so [Authorize(Permissions.X)] routes don't

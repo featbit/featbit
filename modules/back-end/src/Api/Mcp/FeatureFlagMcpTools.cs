@@ -5,7 +5,7 @@ using Api.Authorization;
 using Application.Bases;
 using Application.Bases.Exceptions;
 using Application.FeatureFlags;
-using Application.ReleaseDecisions;
+using Application.Experiments;
 using Application.Services;
 using Domain.FeatureFlags;
 using Domain.Policies;
@@ -19,16 +19,16 @@ namespace Api.Mcp;
 [McpServerToolType]
 public class FeatureFlagMcpTools(
     ISender mediator,
-    IReleaseDecisionExperimentService experimentService,
+    IExperimentService experimentService,
     IHttpContextAccessor httpContextAccessor,
     IPermissionChecker permissionChecker,
     ILicenseService licenseService,
     IRequestPermissions requestPermissions)
 {
-    [McpServerTool(Name = "featbit_release_decision_get_feature_flag")]
-    [Description("Read a FeatBit feature flag by key from the environment attached to a release-decision experiment.")]
+    [McpServerTool(Name = "featbit_experiment_get_feature_flag")]
+    [Description("Read a FeatBit feature flag by key from the environment attached to a experiment experiment.")]
     public async Task<FeatureFlag> GetFeatureFlag(
-        [Description("Release-decision experiment id used to resolve the FeatBit environment.")]
+        [Description("Experiment experiment id used to resolve the FeatBit environment.")]
         Guid experimentId,
         [Description("Feature flag key.")]
         string key)
@@ -42,10 +42,10 @@ public class FeatureFlagMcpTools(
         });
     }
 
-    [McpServerTool(Name = "featbit_release_decision_create_feature_flag")]
-    [Description("Create a FeatBit feature flag in the environment attached to a release-decision experiment. Requires request.confirmedByUser=true after explicit user approval. If variations are omitted for a boolean flag, standard false/true variations are generated.")]
+    [McpServerTool(Name = "featbit_experiment_create_feature_flag")]
+    [Description("Create a FeatBit feature flag in the environment attached to a experiment experiment. Requires request.confirmedByUser=true after explicit user approval. If variations are omitted for a boolean flag, standard false/true variations are generated.")]
     public async Task<FeatureFlag> CreateFeatureFlag(
-        [Description("Release-decision experiment id used to resolve the FeatBit environment.")]
+        [Description("Experiment experiment id used to resolve the FeatBit environment.")]
         Guid experimentId,
         [Description("Feature flag creation payload.")]
         FeatureFlagMcpCreateRequest request)
@@ -56,10 +56,10 @@ public class FeatureFlagMcpTools(
         return await mediator.Send(request.ToCreateFeatureFlag(envId));
     }
 
-    [McpServerTool(Name = "featbit_release_decision_toggle_feature_flag")]
-    [Description("Enable or disable a FeatBit feature flag in the environment attached to a release-decision experiment. Requires request.confirmedByUser=true after explicit user approval.")]
+    [McpServerTool(Name = "featbit_experiment_toggle_feature_flag")]
+    [Description("Enable or disable a FeatBit feature flag in the environment attached to a experiment experiment. Requires request.confirmedByUser=true after explicit user approval.")]
     public async Task<FeatureFlagToggleResult> ToggleFeatureFlag(
-        [Description("Release-decision experiment id used to resolve the FeatBit environment.")]
+        [Description("Experiment experiment id used to resolve the FeatBit environment.")]
         Guid experimentId,
         [Description("Feature flag key.")]
         string key,
@@ -86,10 +86,10 @@ public class FeatureFlagMcpTools(
         };
     }
 
-    [McpServerTool(Name = "featbit_release_decision_update_feature_flag_targeting")]
+    [McpServerTool(Name = "featbit_experiment_update_feature_flag_targeting")]
     [Description("Update feature flag targeting in the experiment environment. Requires request.confirmedByUser=true after explicit user approval. By default this applies directly; set useChangeRequest or provide reviewers to create a change request instead.")]
     public async Task<FeatureFlagTargetingUpdateResult> UpdateFeatureFlagTargeting(
-        [Description("Release-decision experiment id used to resolve the FeatBit environment.")]
+        [Description("Experiment experiment id used to resolve the FeatBit environment.")]
         Guid experimentId,
         [Description("Feature flag key.")]
         string key,

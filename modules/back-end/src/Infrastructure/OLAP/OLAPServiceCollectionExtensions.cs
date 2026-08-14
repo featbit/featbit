@@ -24,8 +24,8 @@ public static class OLAPServiceCollectionExtensions
 
         services.AddHttpClient<ClickHouseClient>();
 
-        services.AddTransient<IFeatureFlagInsightsService, ClickHouseServices.ReleaseDecisionFeatureFlagInsightsService>();
-        services.AddTransient<IFeatureFlagEndUserStatsService, ClickHouseServices.ReleaseDecisionFeatureFlagEndUserStatsService>();
-        services.AddTransient<IExperimentStatsService, ClickHouseServices.ReleaseDecisionExperimentStatsService>();
+        services.AddTransient<IFeatureFlagInsightsService, ClickHouseServices.ExperimentFeatureFlagInsightsService>();
+        services.AddTransient<IFeatureFlagEndUserStatsService, ClickHouseServices.ExperimentFeatureFlagEndUserStatsService>();
+        services.AddTransient<IExperimentStatsService, ClickHouseServices.ExperimentStatsService>();
     }
 }
