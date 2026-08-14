@@ -1,23 +1,23 @@
-# Migration 1：MongoDB Events 数据迁移计划（5.4.6 → 6.0.0）
+# Migration 1: MongoDB Events Migration Plan (5.4.6 → 6.0.0)
 
-## 目标与边界
+## Goal and Scope
 
-把 MongoDB 5.4.6 `Events` 中的历史事件迁入 v6.0.0 的 release-decision event collections，使 Feature Flag Insights 和新的实验统计能够读取历史数据。
+Migrate historical events from the MongoDB 5.4.6 `Events` collection into the v6.0.0 release-decision event collections so Feature Flag Insights and the new experimentation statistics can read historical data.
 
-- 源数据库在迁移期间没有新增事件，不需要双写、watermark 或 change stream。
-- 本计划只处理 MongoDB。
-- 本计划只迁移 event evidence，不处理 metric 定义、experiment 或 iteration。
+- No new events are added to the source database during migration, so dual writes, watermarks, and change streams are unnecessary.
+- This plan applies only to MongoDB.
+- This plan migrates event evidence only. It does not migrate metric definitions, experiments, or iterations.
 
-## 涉及的 collections
+## Collections Involved
 
-| 角色 | Collection | 用途 |
+| Role | Collection | Purpose |
 |---|---|---|
-| 源 | `Events` | 5.4.6 的 `FlagValue` 与 metric events |
-| 目标 | `ReleaseDecisionExposureEvents` | Feature Flag evaluation/exposure events |
-| 目标 | `ReleaseDecisionMetricEvents` | `CustomEvent`、`PageView`、`Click` 等 metric events |
-| 只读 lookup | `FeatureFlags`、`Environments` | 校验环境、flag key 和 variation；不修改 |
+| Source | `Events` | 5.4.6 `FlagValue` and metric events |
+| Target | `ReleaseDecisionExposureEvents` | Feature flag evaluation/exposure events |
+| Target | `ReleaseDecisionMetricEvents` | Metric events such as `CustomEvent`, `PageView`, and `Click` |
+| Read-only lookup | `FeatureFlags`, `Environments` | Validate environments, flag keys, and variations; never modified |
 
-正常的 5.4.6 Evaluation Server 写入如下 BSON document：
+A normal 5.4.6 Evaluation Server write has the following BSON document shape:
 
 ```text
 {
@@ -30,127 +30,127 @@
 }
 ```
 
-旧 DAS 的内部 `/events` 路径还可能留下 `_id: ObjectId` 和 `id: <UUID string>`。迁移预检查必须识别实际 BSON 类型，不能假设所有 `_id` 都是 MongoDB UUID binary。
+The legacy DAS internal `/events` path may also have left documents with `_id: ObjectId` and `id: <UUID string>`. Preflight checks must inspect actual BSON types and must not assume that every `_id` is MongoDB UUID binary.
 
-v6 目标 collection 使用 camelCase 字段和 Standard UUID binary（subtype 4）。其中 `properties` 不是 BSON 子文档，而是保存完整 JSON 的 string；迁移应使用与当前 `ReleaseDecisionInsightWriter` 相同的 BSON-to-JSON 序列化行为。源 event 必须按原始 `BsonDocument` 读取，避免反序列化时丢掉未知字段或 BSON 类型。
+The v6 target collections use camelCase fields and Standard UUID binary (subtype 4). The target `properties` field is not a BSON subdocument; it is a string containing the complete JSON value. The migration must use the same BSON-to-JSON serialization behavior as the current `ReleaseDecisionInsightWriter`. Read each source event as its original `BsonDocument` so deserialization cannot discard unknown fields or BSON types.
 
-## 旧字段与 property 使用清单
+## Legacy Field and Property Inventory
 
-### 顶层字段
+### Top-level Fields
 
-| 5.4.6 字段 | 旧逻辑中的用途 | 迁移处理 |
+| 5.4.6 field | Legacy use | Migration handling |
 |---|---|---|
-| `_id` | 正常 ingestion 的事件唯一 ID | 优先作为目标 `_id` 来源 |
-| `id` | 旧 DAS 内部写入路径的 UUID | `_id` 不是 UUID 时作为 fallback |
-| `distinct_id` | metric event name；也包含 `env_id-featureFlagKey` | 用于 event name，或缺少 flag key 时精确推导 |
-| `env_id` | 旧查询的环境过滤条件 | 转为目标 `envId` UUID binary |
-| `event` | 区分 `FlagValue`、`CustomEvent`、`PageView`、`Click` | 决定目标 collection，并写入 metric `eventType` |
-| `properties` | 用户、variation、metric 数值及上下文 | 完整保存，不能只挑选已知字段 |
-| `timestamp` | 旧统计的事件时间 | 写入 `exposedAt` 或 `occurredAt` |
+| `_id` | Unique event ID for normal ingestion | Preferred source for the target `_id` |
+| `id` | UUID written by the legacy DAS internal path | Fallback when `_id` is not a UUID |
+| `distinct_id` | Metric event name; also contains `env_id-featureFlagKey` | Used as the event name, or for exact flag-key derivation when the flag key is missing |
+| `env_id` | Environment filter in legacy queries | Convert to target `envId` UUID binary |
+| `event` | Distinguishes `FlagValue`, `CustomEvent`, `PageView`, and `Click` | Selects the target collection and becomes metric `eventType` |
+| `properties` | User, variation, metric value, and context | Preserve completely; never select only known fields |
+| `timestamp` | Event time used by legacy statistics | Write to `exposedAt` or `occurredAt` |
 
 ### `FlagValue.properties`
 
-| Property | 5.4.6 中的意义/使用 | 目标处理 |
+| Property | Meaning/use in 5.4.6 | Target handling |
 |---|---|---|
-| `route` | ingestion route | 保留在完整 `properties` |
-| `flagId` | flag UUID 上下文 | 保留；目标 event 没有同名列 |
-| `envId` | properties 内的冗余环境 ID | 保留；与顶层 `env_id` 不一致时报告 |
-| `accountId` | workspace/account 上下文 | 保留 |
-| `projectId` | project 上下文 | 保留 |
-| `featureFlagKey` | flag insights 的 flag key | 写入 `flagKey` |
-| `sendToExperiment` | 旧实验 exposure 查询的过滤条件 | 完整保留；不用于排除 Insights 事件 |
-| `userKeyId` | flag/end-user/experiment 统计的 user key | 写入 `userKey` |
-| `userName` | 旧 end-user insight 显示 | 保留；目标没有 user-name 列 |
-| `variationId` | exposure 和 variation 统计 | 写入 `variationId` |
-| `tag_0` | user key 的兼容副本 | 具名字段缺失时 fallback |
-| `tag_1` | variation ID 的兼容副本 | 具名字段缺失时 fallback |
-| `tag_2` | `sendToExperiment` 的字符串副本 | 保留并用于一致性检查 |
-| `tag_3` | user name 的兼容副本 | 保留 |
+| `route` | Ingestion route | Preserve in the complete `properties` value |
+| `flagId` | Flag UUID context | Preserve; the target event has no equivalent column |
+| `envId` | Redundant environment ID inside properties | Preserve; report when it differs from top-level `env_id` |
+| `accountId` | Workspace/account context | Preserve |
+| `projectId` | Project context | Preserve |
+| `featureFlagKey` | Flag key used by flag insights | Write to `flagKey` |
+| `sendToExperiment` | Filter used by legacy experiment exposure queries | Preserve completely; do not use it to exclude Insights events |
+| `userKeyId` | User key used by flag/end-user/experiment statistics | Write to `userKey` |
+| `userName` | Display value in legacy end-user insights | Preserve; the target has no user-name column |
+| `variationId` | Exposure and variation statistics | Write to `variationId` |
+| `tag_0` | Compatibility copy of the user key | Fallback when the named field is missing |
+| `tag_1` | Compatibility copy of the variation ID | Fallback when the named field is missing |
+| `tag_2` | String copy of `sendToExperiment` | Preserve and use for consistency checks |
+| `tag_3` | Compatibility copy of the user name | Preserve |
 
-### Metric event `properties`
+### Metric Event `properties`
 
-| Property | 5.4.6 中的意义/使用 | 目标处理 |
+| Property | Meaning/use in 5.4.6 | Target handling |
 |---|---|---|
-| `route` | ingestion route | 保留 |
-| `type` | metric event type 的副本 | 保留；与顶层 `event` 不一致时报告 |
-| `eventName` | metric event name | 与 `distinct_id` 交叉检查并作为 fallback |
-| `numericValue` | 旧 numeric experiment 的数值 | 写入 `numericValue` |
-| `user.keyId` | 旧 MongoDB experiment 查询实际读取的 user key | 写入 `userKey` |
-| `user.name` | user name | 保留 |
-| `applicationType` | SDK/application 上下文 | 保留 |
-| `projectId`、`envId`、`accountId` | 事件上下文 | 保留；`envId` 与顶层值交叉检查 |
-| `tag_0` | user key 的兼容副本 | 具名 user 字段缺失时 fallback |
-| `tag_1` | numeric value 的字符串副本 | `numericValue` 缺失时 fallback |
-| `tag_2` | user name 的兼容副本 | 保留 |
+| `route` | Ingestion route | Preserve |
+| `type` | Copy of the metric event type | Preserve; report when it differs from top-level `event` |
+| `eventName` | Metric event name | Cross-check with `distinct_id` and use as fallback |
+| `numericValue` | Value used by legacy numeric experiments | Write to `numericValue` |
+| `user.keyId` | User key actually read by legacy MongoDB experiment queries | Write to `userKey` |
+| `user.name` | User name | Preserve |
+| `applicationType` | SDK/application context | Preserve |
+| `projectId`, `envId`, `accountId` | Event context | Preserve; cross-check `envId` against the top-level value |
+| `tag_0` | Compatibility copy of the user key | Fallback when the named user field is missing |
+| `tag_1` | String copy of the numeric value | Fallback when `numericValue` is missing |
+| `tag_2` | Compatibility copy of the user name | Preserve |
 
-迁移前还要用 `$objectToArray` 对真实 `properties` key 做一次 profile。上表之外的客户自定义或历史字段也必须完整进入目标 `properties` JSON string，并在测试中验证；迁移实现不能使用 property whitelist。
+Before migration, use `$objectToArray` to profile the actual keys in `properties`. Customer-specific and historical fields not listed above must also be preserved in the target `properties` JSON string and verified by tests. The migration implementation must not use a property whitelist.
 
-与 PostgreSQL 不同，5.4.6 MongoDB DAS 查询实际读取具名 property，而不是 `tag_*`。因此具名字段与 tag 冲突时记录 mismatch，并以具名字段为准；tag 只作为缺失字段的兼容 fallback。
+Unlike PostgreSQL, the 5.4.6 MongoDB DAS actually queried named properties instead of `tag_*`. Therefore, report a mismatch when named fields and tags conflict and prefer the named value; use tags only as compatibility fallbacks for missing fields.
 
-## 数据映射
+## Data Mapping
 
 ### 1. `FlagValue` → `ReleaseDecisionExposureEvents`
 
-所有字段完整且可识别的 `FlagValue` 都迁移，包括 `sendToExperiment=false`，因为它们仍属于 Feature Flag Insights。
+Migrate every complete and recognizable `FlagValue`, including records where `sendToExperiment=false`, because they still belong to Feature Flag Insights.
 
-| 源数据 | 目标字段 | 规则 |
+| Source | Target field | Rule |
 |---|---|---|
-| `_id` / `id` | `_id` | UUID string 或 UUID binary 转为 Standard UUID binary；否则用源 collection + 原 `_id` 生成稳定 UUID，并报告 |
-| `env_id` | `envId` | 校验 UUID 后转为 Standard UUID binary |
-| `properties.featureFlagKey` | `flagKey` | 缺失时仅可从 `distinct_id` 移除精确前缀 `env_id + '-'`；冲突时报告 |
-| `properties.userKeyId` / `tag_0` | `userKey` | 具名字段优先 |
-| `properties.variationId` / `tag_1` | `variationId` | 具名字段优先 |
-| 无可靠历史字段 | `variationValue` | 写 `null`；5.4.6 未记录该值，不从当前 flag 配置反推历史值 |
-| `timestamp` | `exposedAt` | 保持同一个 UTC instant |
-| 完整 `properties` BSON document | `properties` | 使用当前 writer 相同方式序列化为完整 JSON string，包括所有 tag 和未知字段 |
-| 迁移执行时间 | `createdAt` | UTC |
+| `_id` / `id` | `_id` | Convert a UUID string or UUID binary to Standard UUID binary; otherwise generate a stable UUID from the source collection and original `_id`, and report it |
+| `env_id` | `envId` | Validate the UUID and convert to Standard UUID binary |
+| `properties.featureFlagKey` | `flagKey` | If absent, derive only by removing the exact `env_id + '-'` prefix from `distinct_id`; report conflicts |
+| `properties.userKeyId` / `tag_0` | `userKey` | Prefer the named field |
+| `properties.variationId` / `tag_1` | `variationId` | Prefer the named field |
+| No reliable historical source | `variationValue` | Write `null`; 5.4.6 did not record this value, so do not infer it from the current flag configuration |
+| `timestamp` | `exposedAt` | Preserve the same UTC instant |
+| Complete `properties` BSON document | `properties` | Serialize to a complete JSON string using the current writer behavior, including every tag and unknown field |
+| Migration execution time | `createdAt` | UTC |
 
-### 2. 其他事件 → `ReleaseDecisionMetricEvents`
+### 2. Other Events → `ReleaseDecisionMetricEvents`
 
-| 源数据 | 目标字段 | 规则 |
+| Source | Target field | Rule |
 |---|---|---|
-| `_id` / `id` | `_id` | 与 exposure event 相同的确定性 UUID 规则 |
-| `env_id` | `envId` | 校验 UUID 后转为 Standard UUID binary |
-| `properties.user.keyId` / `properties.userKeyId` / `tag_0` | `userKey` | 旧 MongoDB 查询使用 nested user；其余依次 fallback |
-| `distinct_id` / `properties.eventName` | `eventName` | `distinct_id` 优先，因为旧 MongoDB DAS 以它查询；冲突时报告 |
-| `event` | `eventType` | 原值，例如 `CustomEvent`、`PageView`、`Click` |
-| `properties.numericValue` / `tag_1` | `numericValue` | 具名 BSON number 优先；tag 字符串 fallback；缺失时按当前 ingestion 写 `0` 并报告非法 numeric case |
-| `timestamp` | `occurredAt` | 保持同一个 UTC instant |
-| 完整 `properties` BSON document | `properties` | 序列化为完整 JSON string，不丢失 nested user、tag 或客户字段 |
-| 迁移执行时间 | `createdAt` | UTC |
+| `_id` / `id` | `_id` | Use the same deterministic UUID rules as exposure events |
+| `env_id` | `envId` | Validate the UUID and convert to Standard UUID binary |
+| `properties.user.keyId` / `properties.userKeyId` / `tag_0` | `userKey` | Prefer the nested user read by legacy MongoDB queries; use the other fields as fallbacks in order |
+| `distinct_id` / `properties.eventName` | `eventName` | Prefer `distinct_id` because the legacy MongoDB DAS queried it; report conflicts |
+| `event` | `eventType` | Preserve the original value, such as `CustomEvent`, `PageView`, or `Click` |
+| `properties.numericValue` / `tag_1` | `numericValue` | Prefer a named BSON number; use the tag string as fallback; when absent, write `0` to match current ingestion and report invalid numeric cases |
+| `timestamp` | `occurredAt` | Preserve the same UTC instant |
+| Complete `properties` BSON document | `properties` | Serialize to a complete JSON string without losing nested users, tags, or customer fields |
+| Migration execution time | `createdAt` | UTC |
 
-## 执行步骤
+## Execution Steps
 
-1. 对 MongoDB 做可恢复快照，确认 v6 应用使用的数据库名和目标 collections。
-2. 只读预检查：按 `event` 统计数量，profile 顶层字段和全部 property key/BSON type，统计非法 UUID、时间、必要字段、named-only、tag-only、named/tag mismatch，以及目标 `_id` 冲突。
-3. 按批迁移：先写 `ReleaseDecisionExposureEvents`，再写 `ReleaseDecisionMetricEvents`。使用确定性 `_id` 和 insert-if-absent；相同 ID 内容一致视为已迁移，内容冲突则停止并报告，不覆盖已有 v6 数据。
-4. 核对并补齐目标查询索引：exposure 至少覆盖 `envId + flagKey + exposedAt`、`envId + userKey + exposedAt`；metric event 至少覆盖 `envId + eventName + occurredAt`、`envId + eventName + userKey + occurredAt`。
-5. 输出 migration report：源数量、新增、已存在、rejected、mismatch、非标准 BSON shape，以及对应源 `_id`。
+1. Create a recoverable MongoDB snapshot and confirm the database name and target collections used by the v6 application.
+2. Run read-only preflight checks: count by `event`; profile top-level fields and every property key/BSON type; count invalid UUIDs, timestamps, required fields, named-only, tag-only, named/tag mismatch, and target `_id` conflicts.
+3. Migrate in batches, writing `ReleaseDecisionExposureEvents` first and `ReleaseDecisionMetricEvents` second. Use deterministic `_id` values and insert-if-absent semantics. Treat identical content under the same ID as already migrated; stop and report content conflicts without overwriting existing v6 data.
+4. Verify and add target query indexes: exposure must cover at least `envId + flagKey + exposedAt` and `envId + userKey + exposedAt`; metric events must cover at least `envId + eventName + occurredAt` and `envId + eventName + userKey + occurredAt`.
+5. Produce a migration report containing source, inserted, already-present, rejected, mismatch, and nonstandard BSON-shape counts, together with the corresponding source `_id` values.
 
-迁移必须可重复执行：第二次执行新增数为 0，且源 `Events` 不发生变化。
+The migration must be repeatable: a second run inserts zero rows, and the source `Events` collection remains unchanged.
 
-## 测试计划
+## Test Plan
 
-使用临时 MongoDB，写入真实 BSON 类型的 5.4.6 documents 和当前目标 collections。至少覆盖：
+Use a temporary MongoDB instance containing 5.4.6 documents with real BSON types and the current target collections. Cover at least:
 
-- `FlagValue`、`CustomEvent`、`PageView`、`Click`；
-- named-only、tag-only、两者一致和两者冲突，并断言 MongoDB 采用 named-first；
-- `sendToExperiment=true` 与 `false`；
-- `_id` 为 UUID string、UUID binary、ObjectId + `id`，以及需要稳定 fallback ID 的记录；
-- nested user、top-level user、tag user；BSON int/long/double、numeric tag、缺失或非法 numeric value；
-- 所有上表中的 properties，再加入 nested object、array 和额外客户 property；
-- 非法 env UUID、缺少必要字段、空 properties、时间异常；
-- 目标已有一致记录、已有冲突记录，以及连续运行两次。
+- `FlagValue`, `CustomEvent`, `PageView`, and `Click`.
+- Named-only, tag-only, matching named/tag values, and conflicting named/tag values, asserting MongoDB's named-first behavior.
+- `sendToExperiment=true` and `sendToExperiment=false`.
+- `_id` as a UUID string, UUID binary, ObjectId with `id`, and a record requiring a stable fallback ID.
+- Nested, top-level, and tag users; BSON int/long/double values; numeric tags; and missing or invalid numeric values.
+- Every property listed above, plus nested objects, arrays, and extra customer properties.
+- Invalid environment UUIDs, missing required fields, empty properties, and invalid timestamps.
+- Identical and conflicting documents already in the target, plus two consecutive migration runs.
 
-核心断言：
+Core assertions:
 
-1. 每个源 event 恰好进入 exposure、metric、already-present 或 rejected 一类，且数量完全对账。
-2. 目标 UUID、UTC 时间、flag/user/variation/event/numeric 映射正确。
-3. 解析目标 `properties` string 后，与源 BSON document 的字段和值语义等价；所有已知、tag、nested 和额外 property 均存在。
-4. `sendToExperiment=false` 的有效 `FlagValue` 也进入 exposure collection。
-5. 用目标 collections 计算的典型 flag count、end-user projection、binary once 和 numeric sum 与 5.4.6 MongoDB DAS 在同一数据集上的结果一致。
-6. 第二次运行新增数为 0，源 `Events` 的数量、BSON 类型和内容不变。
+1. Every source event belongs to exactly one category: exposure, metric, already present, or rejected, and the counts reconcile completely.
+2. Target UUIDs, UTC times, and flag/user/variation/event/numeric mappings are correct.
+3. After parsing the target `properties` string, its fields and values are semantically equivalent to the source BSON document; every known, tag, nested, and extra property is present.
+4. Valid `FlagValue` records with `sendToExperiment=false` are also written to the exposure collection.
+5. Typical flag counts, end-user projections, binary-once results, and numeric sums calculated from the target collections match the 5.4.6 MongoDB DAS results for the same dataset.
+6. A second run inserts zero documents, and the source `Events` count, BSON types, and content remain unchanged.
 
-## 回滚与完成标准
+## Rollback and Completion Criteria
 
-写入前记录目标 collections 已有 ID。若需回滚，只按 migration report 删除本次新增的目标 ID，不触碰迁移前已有记录和源 `Events`。所有字段 profile、映射、数量、查询结果、完整 properties 和幂等断言通过后，Migration 1 才算完成。
+Record the IDs already present in the target collections before writing. To roll back, delete only target IDs inserted by this migration according to the migration report; do not touch pre-existing target records or source `Events`. Migration 1 is complete only after the field profiles, mappings, counts, query results, complete properties, and idempotency assertions all pass.

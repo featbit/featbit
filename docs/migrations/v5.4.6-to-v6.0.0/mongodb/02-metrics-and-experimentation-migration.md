@@ -1,197 +1,197 @@
-# Migration 2：MongoDB Metrics 与 Experimentation 数据迁移计划（5.4.6 → 6.0.0）
+# Migration 2: MongoDB Metrics and Experimentation Migration Plan (5.4.6 → 6.0.0)
 
-## 目标与边界
+## Goal and Scope
 
-把 MongoDB 5.4.6 的 metric 定义、experiment 元数据和 `iterations` 历史结果迁入 v6.0.0 release-decision collections。
+Migrate MongoDB 5.4.6 metric definitions, experiment metadata, and historical `iterations` results into the v6.0.0 release-decision collections.
 
-- 源数据库在迁移期间没有新增数据，不需要双写或增量追赶。
-- 本计划只处理 MongoDB。
-- 不迁移 `Events`，也不写两个 release-decision event collections。
-- 不从 event 重算历史 iteration，不伪造 layer、assignment、hypothesis、decision 或 learning。
-- 旧 collections 和 lookup collections 保留不变。
+- No new data is added to the source database during migration, so dual writes and incremental catch-up are unnecessary.
+- This plan applies only to MongoDB.
+- Do not migrate `Events` or write to either release-decision event collection.
+- Do not recalculate historical iterations from events or invent layers, assignments, hypotheses, decisions, or learnings.
+- Preserve the legacy collections and lookup collections unchanged.
 
-## 涉及的 collections
+## Collections Involved
 
-| 角色 | Collection | 用途 |
+| Role | Collection | Purpose |
 |---|---|---|
-| 源 | `ExperimentMetrics` | 5.4.6 metric 定义 |
-| 源 | `Experiments` | 5.4.6 experiment，内嵌 `iterations[]` 和 `results[]` |
-| 只读 lookup | `FeatureFlags` | flag key、name、variations |
-| 只读 lookup | `Environments` | experiment 到 project 的关联 |
-| 只读 lookup | `Projects` | project key |
-| 只读 lookup | `Users` | 核对旧 `maintainerUserId`；不修改 |
-| 目标 | `ReleaseDecisionMetrics` | v6 metric registry |
-| 目标 | `ReleaseDecisionExperiments` | v6 experiment workspace |
-| 目标 | `ReleaseDecisionExperimentRuns` | 每个旧 iteration 对应一个 run |
-| 目标 | `ReleaseDecisionActivities` | 迁移来源以及完整旧配置快照 |
+| Source | `ExperimentMetrics` | 5.4.6 metric definitions |
+| Source | `Experiments` | 5.4.6 experiments with embedded `iterations[]` and `results[]` |
+| Read-only lookup | `FeatureFlags` | Flag key, name, and variations |
+| Read-only lookup | `Environments` | Experiment-to-project relationship |
+| Read-only lookup | `Projects` | Project key |
+| Read-only lookup | `Users` | Validate the legacy `maintainerUserId`; never modified |
+| Target | `ReleaseDecisionMetrics` | v6 metric registry |
+| Target | `ReleaseDecisionExperiments` | v6 experiment workspace |
+| Target | `ReleaseDecisionExperimentRuns` | One run for each legacy iteration |
+| Target | `ReleaseDecisionActivities` | Migration provenance and complete legacy configuration snapshots |
 
-本迁移不写 `ReleaseDecisionLayers` 和 `ReleaseDecisionRunAssignments`，因为 5.4.6 没有可可靠映射的数据。
+This migration does not write `ReleaseDecisionLayers` or `ReleaseDecisionRunAssignments` because 5.4.6 contains no data that maps to them reliably.
 
-5.4.6 和 v6 的 typed MongoDB entities 都采用 camelCase element name；entity `Id` 存为 `_id`，Guid 使用 Standard UUID binary（subtype 4），时间为 BSON Date。目标中的 `primaryMetric`、`variants`、`analysisResult` 和 activity `detail` 是 JSON string，不是 BSON 子文档。
+The typed MongoDB entities in both 5.4.6 and v6 use camelCase element names. Entity `Id` is stored as `_id`, GUID values use Standard UUID binary (subtype 4), and timestamps use BSON Date. Target fields `primaryMetric`, `variants`, `analysisResult`, and activity `detail` are JSON strings rather than BSON subdocuments.
 
-## 全字段使用与映射
+## Complete Field Usage and Mapping
 
 ### 1. `ExperimentMetrics` → `ReleaseDecisionMetrics`
 
-5.4.6 enum：`eventType` 为 Custom=1、PageView=2、Click=3；`customEventTrackOption` 为 Undefined=0、Conversion=1、Numeric=2；`customEventSuccessCriteria` 为 Undefined=0、Higher=1、Lower=2；`targetUrls[].matchType` 当前只有 Substring=1。
+5.4.6 enums: `eventType` is Custom=1, PageView=2, Click=3; `customEventTrackOption` is Undefined=0, Conversion=1, Numeric=2; `customEventSuccessCriteria` is Undefined=0, Higher=1, Lower=2; and the only current `targetUrls[].matchType` value is Substring=1.
 
-| 5.4.6 字段/property | 旧用途 | v6 处理 |
+| 5.4.6 field/property | Legacy use | v6 handling |
 |---|---|---|
-| `_id` | metric ID、experiment 引用 | 无 key 合并时保持 UUID；合并时建立 old-to-target ID map |
-| `envId` | 环境隔离和查询 | `featBitEnvId` |
-| `name` | catalog/UI 显示 | `name` |
-| `description` | catalog/UI 描述 | `description` |
-| `maintainerUserId` | old UI maintainer lookup | 目标 metric 无对应字段；写入引用它的 migration activity 完整快照，并列入报告 |
-| `eventName` | 从 `Events` 选择 metric event | `key`；保持原 event name |
-| `eventType` | Custom/PageView/Click 行为 | 参与计算 `metricType`、`metricAgg`，并保留在 legacy 快照 |
-| `customEventTrackOption` | Conversion/Numeric 统计方式 | Custom+Numeric → continuous/sum；其他 → binary/once |
-| `customEventUnit` | numeric metric 的单位和旧结果显示 | 保留在 legacy run artifact/activity；目标 metric 和 run 均无对应 unit 字段 |
-| `customEventSuccessCriteria` | Higher/Lower 判断 winner | Lower → `decrease_good`；Higher/Undefined → `increase_good`；Undefined 报告 |
-| `elementTargets` | Click metric 的元素选择配置 | 保留在 activity/报告；v6 metric registry 无对应字段 |
-| `targetUrls` | PageView/Click URL 匹配配置 | 完整保留数组及每项 `id`、`matchType`、`url`；目标 metric 无对应字段 |
-| `isArvhived` | 旧 catalog archive 过滤，字段名含历史拼写错误 | true → `status=archived`；false → `status=active` |
-| `createdAt`、`updatedAt` | 审计时间 | 原 BSON instant 写入同名目标字段 |
+| `_id` | Metric ID and experiment reference | Preserve the UUID when no key-based merge occurs; otherwise create an old-to-target ID map |
+| `envId` | Environment isolation and queries | Map to `featBitEnvId` |
+| `name` | Catalog/UI display | Map to `name` |
+| `description` | Catalog/UI description | Map to `description` |
+| `maintainerUserId` | Legacy UI maintainer lookup | No target metric field; preserve it in the complete migration activity snapshot for referencing experiments and list it in the report |
+| `eventName` | Selects metric events from `Events` | Map to `key`, preserving the original event name |
+| `eventType` | Custom/PageView/Click behavior | Contributes to `metricType` and `metricAgg`, and remains in the legacy snapshot |
+| `customEventTrackOption` | Conversion/Numeric aggregation behavior | Custom+Numeric → continuous/sum; otherwise → binary/once |
+| `customEventUnit` | Numeric metric unit and legacy result display | Preserve in the legacy run artifact/activity; neither the target metric nor run has a unit field |
+| `customEventSuccessCriteria` | Higher/Lower winner direction | Lower → `decrease_good`; Higher/Undefined → `increase_good`; report Undefined |
+| `elementTargets` | Element selector configuration for Click metrics | Preserve in the activity/report; the v6 metric registry has no equivalent field |
+| `targetUrls` | URL matching configuration for PageView/Click | Preserve the complete array, including each item's `id`, `matchType`, and `url`; the target metric has no equivalent field |
+| `isArvhived` | Legacy catalog archive filter; field name contains the historical typo | true → `status=archived`; false → `status=active` |
+| `createdAt`, `updatedAt` | Audit timestamps | Preserve the BSON instants in target fields with the same names |
 
-目标 metric 核心映射：
+Core target metric mapping:
 
-| 源 | 目标 |
+| Source | Target |
 |---|---|
 | `envId` | `featBitEnvId` |
 | `eventName` | `key` |
-| Custom + Numeric | `metricType=continuous`、`metricAgg=sum` |
-| 其他组合 | `metricType=binary`、`metricAgg=once` |
+| Custom + Numeric | `metricType=continuous`, `metricAgg=sum` |
+| Other combinations | `metricType=binary`, `metricAgg=once` |
 | Lower | `expectedDirection=decrease_good` |
 | Higher / Undefined | `expectedDirection=increase_good` |
 
-旧数据可能有相同 `(envId, eventName)`。配置兼容时合并到一个目标 metric，并保存每个 old metric ID 的映射；type、aggregation 或 direction 冲突时停止该组并报告，不能改 `key` 绕开，因为它必须继续匹配历史 event name。
+Legacy data may contain duplicate `(envId, eventName)` values. Merge compatible configurations into one target metric and retain a mapping for every old metric ID. Stop and report a group when type, aggregation, or direction conflicts. Do not avoid the conflict by changing `key`, because it must continue to match the historical event name.
 
 ### 2. `Experiments` → `ReleaseDecisionExperiments`
 
-| 5.4.6 字段/property | 旧用途 | v6 处理 |
+| 5.4.6 field/property | Legacy use | v6 handling |
 |---|---|---|
-| `_id` | experiment ID | 保持 UUID |
-| `envId` | 环境和 project lookup | `featBitEnvId`；再由 `Environments.projectId → Projects.key` 得到 `featBitProjectKey` |
-| `metricId` | primary metric 引用 | 使用 old-to-target metric map 构造 `primaryMetric` JSON string |
-| `featureFlagId` | flag 和 variations 引用 | lookup `FeatureFlags`，写 `flagKey` 和 `variants` |
-| `isArchived` | 旧 experiment archive 状态 | activity 完整记录；不虚构 v6 workspace 状态 |
-| `status` | `NotStarted`、`Paused`、`Recording` 生命周期 | activity 完整记录；不把它当成 v6 decision |
-| `baselineVariationId` | iteration baseline | 写入每个目标 run 的 `controlVariant` |
-| `iterations` | 每轮配置和历史结果 | 每项生成一个 `ReleaseDecisionExperimentRuns` document |
-| `alpha` | 旧 frequentist 显著性阈值 | 完整写入 legacy analysis artifact/activity；不映射为 Bayesian prior |
-| `createdAt`、`updatedAt` | 审计时间 | 原 BSON instant |
+| `_id` | Experiment ID | Preserve the UUID |
+| `envId` | Environment and project lookup | Map to `featBitEnvId`; resolve `featBitProjectKey` through `Environments.projectId → Projects.key` |
+| `metricId` | Primary metric reference | Use the old-to-target metric map to construct the `primaryMetric` JSON string |
+| `featureFlagId` | Flag and variations reference | Look up `FeatureFlags`, then write `flagKey` and `variants` |
+| `isArchived` | Legacy experiment archive state | Preserve completely in the activity; do not invent a v6 workspace state |
+| `status` | `NotStarted`, `Paused`, or `Recording` lifecycle | Preserve completely in the activity; do not treat it as a v6 decision |
+| `baselineVariationId` | Iteration baseline | Write to each target run's `controlVariant` |
+| `iterations` | Configuration and historical results for each round | Generate one `ReleaseDecisionExperimentRuns` document per item |
+| `alpha` | Legacy frequentist significance threshold | Preserve completely in the legacy analysis artifact/activity; do not map it to a Bayesian prior |
+| `createdAt`, `updatedAt` | Audit timestamps | Preserve the BSON instants |
 
-`ReleaseDecisionExperiments` 的字段映射：
+`ReleaseDecisionExperiments` field mapping:
 
-| 目标字段 | 来源/规则 |
+| Target field | Source/rule |
 |---|---|
-| `_id` | 旧 experiment `_id` |
-| `name` | flag name + metric name，稳定生成且不超过 256 字符 |
-| `description` | `null`；不把 flag description 冒充 experiment description |
-| `stage` | 无 iteration → `implementing`；有 iteration → `measuring` |
+| `_id` | Legacy experiment `_id` |
+| `name` | Stable flag name + metric name, no longer than 256 characters |
+| `description` | `null`; do not misrepresent the flag description as an experiment description |
+| `stage` | No iterations → `implementing`; one or more iterations → `measuring` |
 | `flagKey` | `FeatureFlags.key` |
 | `featBitProjectKey` | `Environments.projectId → Projects.key` |
 | `featBitEnvId` | `Experiments.envId` |
-| `primaryMetric` | 完整 JSON string：`name`、`event`、`metricType`、`metricAgg`、`expectedDirection`、可选 `description` |
-| `variants` | 完整 JSON string 数组：每个 `FeatureFlags.variations[]` 映射为 `key=id`、`name`、`value`；`description` 按当前 builder 规则由 name/value 生成 |
+| `primaryMetric` | Complete JSON string containing `name`, `event`, `metricType`, `metricAgg`, `expectedDirection`, and optional `description` |
+| `variants` | Complete JSON string array; map each `FeatureFlags.variations[]` item to `key=id`, `name`, and `value`; generate `description` from name/value using the current builder rules |
 | `sandboxStatus` | `idle` |
-| `createdAt`、`updatedAt` | 旧审计时间 |
+| `createdAt`, `updatedAt` | Legacy audit timestamps |
 
-每个迁移后的 experiment 生成一条 `ReleaseDecisionActivities` migration activity。`detail` 使用版本化 Extended JSON string，保存完整源 `Experiments` document、引用的完整 `ExperimentMetrics` document、lookup ID、迁移映射和来源版本。这样 `maintainerUserId`、URL/element tracking 配置、旧状态、alpha 以及未来发现的额外 BSON property 都不会被静默忽略。未被任何 experiment 引用的 metric 的无对应字段仍保留在源 collection，并在 migration report 中完整列出。
+Generate one `ReleaseDecisionActivities` migration activity for every migrated experiment. Its `detail` is a versioned Extended JSON string containing the complete source `Experiments` document, the complete referenced `ExperimentMetrics` document, lookup IDs, migration mappings, and source version. This prevents `maintainerUserId`, URL/element tracking configuration, legacy state, alpha, and any additional BSON properties discovered later from being silently ignored. Fields without a target on metrics that no experiment references remain in the source collection and must be listed completely in the migration report.
 
-| Activity 字段 | 规则 |
+| Activity field | Rule |
 |---|---|
-| `_id` | 由 migration version + experiment ID 确定性生成 |
-| `experimentId` | 目标 experiment `_id` |
-| `type`、`title` | `migration` 和明确的 5.4.6 MongoDB 导入标题 |
-| `detail` | 上述完整、版本化 Extended JSON snapshot |
-| `actorType`、`actorName` | `system` 和 migration 标识；不冒充旧 maintainer |
-| `createdAt` | 迁移执行 UTC 时间 |
+| `_id` | Generate deterministically from migration version + experiment ID |
+| `experimentId` | Target experiment `_id` |
+| `type`, `title` | `migration` and an explicit 5.4.6 MongoDB import title |
+| `detail` | The complete, versioned Extended JSON snapshot described above |
+| `actorType`, `actorName` | `system` and the migration identifier; never impersonate the legacy maintainer |
+| `createdAt` | Migration execution time in UTC |
 
 ### 3. `iterations[]` → `ReleaseDecisionExperimentRuns`
 
-旧 iteration 的每个字段都要处理：
+Handle every field on each legacy iteration:
 
-| `iterations[]` property | 旧用途 | v6 处理 |
+| `iterations[]` property | Legacy use | v6 handling |
 |---|---|---|
-| `id` | iteration UUID string | 解析为目标 `_id` UUID binary；原字符串写 `runId` |
-| `startTime`、`endTime` | observation window | `observationStart`、`observationEnd` |
-| `updatedAt` | iteration 更新时间 | 目标 `updatedAt` fallback 来源 |
-| `isArchived` | 旧 iteration archive/lock 语义 | legacy artifact 完整保留 |
-| `eventType`、`eventName` | 当次运行的 metric snapshot | 写 `primaryMetricType`、`primaryMetricEvent`；优先使用 snapshot 而不是当前 metric |
-| `customEventTrackOption` | 当次 Conversion/Numeric 方式 | 写 `primaryMetricType`、`primaryMetricAgg`，并保留原 enum |
-| `customEventUnit` | 当次 numeric unit | legacy artifact 完整保留；目标 run 没有 unit 字段 |
-| `customEventSuccessCriteria` | 当次 Higher/Lower 方向 | legacy artifact 保留 |
-| `results` | 旧统计结果 | 完整写入 versioned legacy `analysisResult` JSON string |
-| `isFinish` | 旧运行完成状态 | 状态映射和 legacy artifact |
+| `id` | Iteration UUID string | Parse into target `_id` UUID binary; write the original string to `runId` |
+| `startTime`, `endTime` | Observation window | Map to `observationStart`, `observationEnd` |
+| `updatedAt` | Iteration update time | Fallback source for target `updatedAt` |
+| `isArchived` | Legacy iteration archive/lock semantics | Preserve completely in the legacy artifact |
+| `eventType`, `eventName` | Metric snapshot for that run | Write `primaryMetricType`, `primaryMetricEvent`; prefer the snapshot over the current metric |
+| `customEventTrackOption` | Conversion/Numeric behavior for that run | Write `primaryMetricType`, `primaryMetricAgg`, and preserve the original enum |
+| `customEventUnit` | Numeric unit for that run | Preserve completely in the legacy artifact; the target run has no unit field |
+| `customEventSuccessCriteria` | Higher/Lower direction for that run | Preserve in the legacy artifact |
+| `results` | Legacy statistical results | Preserve completely in the versioned legacy `analysisResult` JSON string |
+| `isFinish` | Legacy run completion state | Use for status mapping and preserve in the legacy artifact |
 
-`results[]` 中以下 property 必须逐项原值保留，不能只保存 winner：
+Preserve the original value of every following `results[]` property; do not retain only the winner:
 
-`changeToBaseline`、`confidenceInterval`、`conversion`、`conversionRate`、`totalEvents`、`average`、`isBaseline`、`isInvalid`、`isWinner`、`pValue`、`uniqueUsers`、`variationId`、`effectSize`、`reason`。
+`changeToBaseline`, `confidenceInterval`, `conversion`, `conversionRate`, `totalEvents`, `average`, `isBaseline`, `isInvalid`, `isWinner`, `pValue`, `uniqueUsers`, `variationId`, `effectSize`, `reason`.
 
-目标 run 映射：
+Target run mapping:
 
-| 目标字段 | 来源/规则 |
+| Target field | Source/rule |
 |---|---|
-| `_id`、`runId` | 旧 iteration `id` |
-| `experimentId` | 父 experiment `_id` |
-| `slug` | 按源数组顺序稳定生成 `legacy-1`、`legacy-2`…… |
-| `status` | 未完成且无结果 → `collecting`；已完成或已有结果 → `analyzing`；不伪造 `decided` |
-| `method` | `legacy_frequentist`，明确区别于 v6 `bayesian_ab` / `bandit` |
-| `methodReason` | 说明数据从 5.4.6 iteration 导入 |
-| `primaryMetricEvent/type/agg` | iteration 自身的 event snapshot |
-| `metricDescription` | 原 metric description；旧 unit 仅保留在 legacy artifact，避免改变描述语义 |
-| `controlVariant` | experiment `baselineVariationId` |
-| `treatmentVariant` | result 中非 baseline variation ID，以 `|` 连接；无结果时 fallback 到 flag variations |
-| `observationStart`、`observationEnd` | iteration 时间 |
-| `analysisResult` | versioned legacy artifact：完整 iteration、全部 results、experiment alpha、来源 ID 和迁移版本 |
-| `inputData` | `null`；不能用聚合结果伪造原始 observation |
-| decision/learning 相关字段 | `null`；旧 winner 不是 v6 release decision |
-| `createdAt`、`updatedAt` | `startTime`；更新时间依次 fallback `updatedAt`、`endTime`、`startTime` |
+| `_id`, `runId` | Legacy iteration `id` |
+| `experimentId` | Parent experiment `_id` |
+| `slug` | Generate stable `legacy-1`, `legacy-2`, and so on from source array order |
+| `status` | Not finished with no results → `collecting`; finished or results present → `analyzing`; never invent `decided` |
+| `method` | `legacy_frequentist`, explicitly distinct from v6 `bayesian_ab` / `bandit` |
+| `methodReason` | Explain that the data was imported from a 5.4.6 iteration |
+| `primaryMetricEvent/type/agg` | The iteration's event snapshot |
+| `metricDescription` | Original metric description; preserve the legacy unit only in the legacy artifact to avoid changing description semantics |
+| `controlVariant` | Experiment `baselineVariationId` |
+| `treatmentVariant` | Join non-baseline variation IDs from results with `\|`; when results are absent, fall back to flag variations |
+| `observationStart`, `observationEnd` | Iteration timestamps |
+| `analysisResult` | Versioned legacy artifact containing the complete iteration, every result, experiment alpha, source IDs, and migration version |
+| `inputData` | `null`; do not fabricate raw observations from aggregate results |
+| Decision/learning fields | `null`; a legacy winner is not a v6 release decision |
+| `createdAt`, `updatedAt` | `startTime`; update time falls back in order through `updatedAt`, `endTime`, and `startTime` |
 
-legacy run 必须作为“5.4.6 导入、未重新计算”的只读历史结果展示。首次读取不能触发 v6 Bayesian/Bandit 分析并覆盖 `analysisResult`；UI/API 需要能识别 `legacy_frequentist`，而不是把未知 method 显示为 Bayesian。
+Display a legacy run as a read-only result “imported from 5.4.6 and not recalculated.” The first read must not trigger v6 Bayesian/Bandit analysis and overwrite `analysisResult`. The UI/API must recognize `legacy_frequentist` instead of displaying an unknown method as Bayesian.
 
-## 额外 property 检查
+## Additional Property Checks
 
-执行迁移前，用 `$objectToArray` 和数组展开对以下层级做字段 profile：
+Before migration, use `$objectToArray` and array unwinding to profile fields at these levels:
 
-- `ExperimentMetrics` 顶层与 `targetUrls[]`；
-- `Experiments` 顶层；
-- `iterations[]`；
-- `iterations[].results[]`；
-- `FeatureFlags.variations[]`。
+- Top-level `ExperimentMetrics` and `targetUrls[]`.
+- Top-level `Experiments`.
+- `iterations[]`.
+- `iterations[].results[]`.
+- `FeatureFlags.variations[]`.
 
-profile 结果必须与上面的字段清单对账。源 collections 必须以原始 `BsonDocument` 读取，不能只反序列化为旧 typed entity；项目的 `IgnoreExtraElements` convention 会令未知字段静默消失。发现未知 property 时，先确认 5.4.6 代码或客户数据是否使用；有业务意义的字段必须增加明确映射或写入 versioned legacy artifact/activity 后才能执行，不能静默 drop。
+Reconcile the profile with the field inventory above. Read source collections as original `BsonDocument` values rather than deserializing only to legacy typed entities; the project's `IgnoreExtraElements` convention would silently discard unknown fields. When an unknown property is found, first confirm whether 5.4.6 code or customer data uses it. Any field with business meaning must receive an explicit mapping or be written to the versioned legacy artifact/activity before migration; never drop it silently.
 
-## 执行步骤
+## Execution Steps
 
-1. 对 MongoDB 做可恢复快照，确认源和目标使用同一个预期 database，并部署可读取 legacy run 的 v6 代码。
-2. 只读预检查：完整字段/BSON type profile；metric key 重复；experiment 对 environment/project/flag/metric 的缺失引用；iteration ID、时间、results 和 variation 引用；目标 `_id` 与唯一 key 冲突。
-3. 按依赖顺序迁移：`ReleaseDecisionMetrics` → `ReleaseDecisionExperiments` → `ReleaseDecisionExperimentRuns` → `ReleaseDecisionActivities`。所有 `_id` 和 activity ID 都确定性生成。
-4. 相同 ID/key 且内容一致视为已迁移；内容不同则停止并报告，不使用 `ReplaceOne` 覆盖已有 v6 document。迁移不依赖跨 collection transaction，也应能安全重跑。
-5. 核对目标索引，至少保证 metric `(featBitEnvId, key)` 唯一、run `(experimentId, slug)` 唯一，并覆盖 experiment 的 env/project/flag 查询。
-6. 输出 migration report：migrated、merged、already-present、rejected 数量，old-to-target ID map，缺失引用、冲突、未知 property 和无直接目标字段的完整值。
+1. Create a recoverable MongoDB snapshot, confirm that source and target use the same expected database, and deploy v6 code capable of reading legacy runs.
+2. Run read-only preflight checks: complete field/BSON type profiles; duplicate metric keys; missing experiment references to environment/project/flag/metric; iteration IDs, times, results, and variation references; target `_id` and unique-key conflicts.
+3. Migrate in dependency order: `ReleaseDecisionMetrics` → `ReleaseDecisionExperiments` → `ReleaseDecisionExperimentRuns` → `ReleaseDecisionActivities`. Generate every `_id` and activity ID deterministically.
+4. Treat identical content with the same ID/key as already migrated. Stop and report when content differs; never use `ReplaceOne` to overwrite an existing v6 document. The migration must not depend on a cross-collection transaction and must be safe to rerun.
+5. Verify target indexes, ensuring at least uniqueness of metric `(featBitEnvId, key)` and run `(experimentId, slug)`, plus coverage for experiment environment/project/flag queries.
+6. Produce a migration report containing migrated, merged, already-present, and rejected counts; the old-to-target ID map; and complete missing references, conflicts, unknown properties, and values without direct target fields.
 
-## 测试计划
+## Test Plan
 
-使用临时 MongoDB，并按真实 BSON 类型加载 5.4.6 documents。至少覆盖：
+Use a temporary MongoDB instance and load 5.4.6 documents with their real BSON types. Cover at least:
 
-- Custom Conversion、Custom Numeric、PageView、Click；Higher、Lower、Undefined；active/archived；
-- `maintainerUserId`、`customEventUnit`、`elementTargets`、完整 `targetUrls[]`，以及额外未知 property；
-- 相同 `(envId,eventName)` 的兼容重复和冲突重复；
-- experiment 的 `NotStarted`、`Paused`、`Recording`、archived，零个/一个/多个 iterations；
-- iteration 所有字段，binary/numeric results、baseline 加多个 treatment，以及全部 14 个 result property；
-- 缺失 flag/metric/project、非法 UUID、BSON type 异常、未知 variation；
-- 目标已有一致 document、已有冲突 document，以及连续运行两次。
+- Custom Conversion, Custom Numeric, PageView, and Click; Higher, Lower, and Undefined; active and archived metrics.
+- `maintainerUserId`, `customEventUnit`, `elementTargets`, complete `targetUrls[]`, and additional unknown properties.
+- Compatible and conflicting duplicates with the same `(envId,eventName)`.
+- Experiment states `NotStarted`, `Paused`, `Recording`, and archived; zero, one, and multiple iterations.
+- Every iteration field; binary/numeric results; one baseline plus multiple treatments; and all 14 result properties.
+- Missing flags, metrics, or projects; invalid UUIDs; unexpected BSON types; and unknown variations.
+- Identical and conflicting documents already in the target, plus two consecutive migration runs.
 
-核心断言：
+Core assertions:
 
-1. 每个源 metric 和 experiment 都进入 migrated、merged/already-present 或 rejected，并能从 old ID 追踪到目标 ID。
-2. 每个合法 iteration 恰好生成一个 run；metric type/agg/direction、flag/project、variants、baseline/treatments 和时间窗口映射正确。
-3. activity 的 source snapshot 和 legacy `analysisResult` 包含所有源字段；逐项比较全部 iteration/result/property 名称、值和数组顺序。
-4. API 能列出迁移后的 metrics/experiments；UI 能打开 legacy run，并明确显示为 imported frequentist result。
-5. 迁移和首次读取不会重新分析或改变旧结果，也不会生成 layer、assignment、decision 或 learning。
-6. 第二次运行新增数为 0；源 `ExperimentMetrics`、`Experiments` 和所有 lookup collections 内容不变；event collections 完全未修改。
+1. Every source metric and experiment is migrated, merged/already present, or rejected, and every old ID can be traced to a target ID.
+2. Every valid iteration generates exactly one run; metric type/aggregation/direction, flag/project, variants, baseline/treatments, and observation window are mapped correctly.
+3. The activity source snapshot and legacy `analysisResult` contain every source field; compare every iteration/result/property name, value, and array order.
+4. The API lists migrated metrics and experiments; the UI opens legacy runs and labels them explicitly as imported frequentist results.
+5. Migration and the first read neither reanalyze nor alter legacy results, and do not create layers, assignments, decisions, or learnings.
+6. A second run inserts zero documents; source `ExperimentMetrics`, `Experiments`, and every lookup collection remain unchanged; event collections are never modified.
 
-## 回滚与完成标准
+## Rollback and Completion Criteria
 
-迁移前记录目标 collections 的已有 ID。若需回滚，按 `ReleaseDecisionActivities` → `ReleaseDecisionExperimentRuns` → `ReleaseDecisionExperiments` → `ReleaseDecisionMetrics` 的逆序，只删除本次新增 document；合并到迁移前已有 metric 的记录不能删除。全字段对账、API/UI smoke test、legacy 只读行为和幂等测试全部通过后，Migration 2 才算完成。
+Record IDs already present in the target collections before migration. To roll back, delete only documents inserted by this migration, in reverse dependency order: `ReleaseDecisionActivities` → `ReleaseDecisionExperimentRuns` → `ReleaseDecisionExperiments` → `ReleaseDecisionMetrics`. Never delete a legacy metric mapping merged into a metric that existed before migration. Migration 2 is complete only after full-field reconciliation, API/UI smoke tests, read-only legacy behavior, and idempotency tests all pass.

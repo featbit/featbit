@@ -1,132 +1,132 @@
-# Migration 2：PostgreSQL Metrics 与 Experimentation 数据迁移计划（5.4.6 → 6.0.0）
+# Migration 2: PostgreSQL Metrics and Experimentation Migration Plan (5.4.6 → 6.0.0)
 
-## 目标与边界
+## Goal and Scope
 
-把 5.4.6 的 metric 定义、experiment 元数据及 `iterations` 历史结果迁入 v6.0.0 release-decision 数据模型。
+Migrate 5.4.6 metric definitions, experiment metadata, and historical `iterations` results into the v6.0.0 release-decision data model.
 
-- 源数据库在迁移期间没有新增数据，不需要双写或增量追赶。
-- 本计划只处理 PostgreSQL。
-- 不迁移 `events`，也不写 `release_decision_exposure_events` 或 `release_decision_metric_events`。
-- 不从事件重新计算历史 iteration 结果。
-- 不为旧实验虚构 layer 或 assignment，因此不写 `release_decision_layers` 和 `release_decision_run_assignments`。
-- 原 `experiment_metrics`、`experiments` 及 lookup 表保留不变。
+- No new data is added to the source database during migration, so dual writes and incremental catch-up are unnecessary.
+- This plan applies only to PostgreSQL.
+- Do not migrate `events` or write to `release_decision_exposure_events` or `release_decision_metric_events`.
+- Do not recalculate historical iteration results from events.
+- Do not invent layers or assignments for legacy experiments; do not write `release_decision_layers` or `release_decision_run_assignments`.
+- Preserve the original `experiment_metrics`, `experiments`, and lookup tables unchanged.
 
-## 涉及的表
+## Tables Involved
 
-| 角色 | 表 | 用途 |
+| Role | Table | Purpose |
 |---|---|---|
-| 源表 | `experiment_metrics` | 5.4.6 metric 定义 |
-| 源表 | `experiments` | 5.4.6 experiment 与 `iterations` JSONB |
-| Lookup | `feature_flags` | flag key、name、variations |
-| Lookup | `environments` | experiment 到 project 的关联 |
-| Lookup | `projects` | project key |
-| 目标表 | `release_decision_metrics` | v6 metric registry |
-| 目标表 | `release_decision_experiments` | v6 experiment workspace |
-| 目标表 | `release_decision_experiment_runs` | 每个旧 iteration 对应一个 run |
-| 目标表 | `release_decision_activities` | 记录迁移来源及无法直接映射的旧状态 |
+| Source | `experiment_metrics` | 5.4.6 metric definitions |
+| Source | `experiments` | 5.4.6 experiments and `iterations` JSONB |
+| Lookup | `feature_flags` | Flag key, name, and variations |
+| Lookup | `environments` | Experiment-to-project relationship |
+| Lookup | `projects` | Project key |
+| Target | `release_decision_metrics` | v6 metric registry |
+| Target | `release_decision_experiments` | v6 experiment workspace |
+| Target | `release_decision_experiment_runs` | One run for each legacy iteration |
+| Target | `release_decision_activities` | Records migration provenance and legacy state that cannot be mapped directly |
 
-## 数据映射
+## Data Mapping
 
 ### 1. `experiment_metrics` → `release_decision_metrics`
 
-5.4.6 enum：`event_type` 为 Custom=1、PageView=2、Click=3；`custom_event_track_option` 为 Undefined=0、Conversion=1、Numeric=2；`custom_event_success_criteria` 为 Undefined=0、Higher=1、Lower=2。
+5.4.6 enums: `event_type` is Custom=1, PageView=2, Click=3; `custom_event_track_option` is Undefined=0, Conversion=1, Numeric=2; and `custom_event_success_criteria` is Undefined=0, Higher=1, Lower=2.
 
-| 源字段 | 目标字段 | 规则 |
+| Source field | Target field | Rule |
 |---|---|---|
-| `id` | `id` | 无 key 合并时保持 UUID 不变 |
-| `env_id` | `featbit_env_id` | 保持 UUID 不变 |
-| `name` | `name` | 原值 |
-| `event_name` | `key` | 原值；目标唯一键为 `(featbit_env_id, key)` |
-| `description` | `description` | 原值 |
-| `event_type` + `custom_event_track_option` | `metric_type` | Custom + Numeric → `continuous`；其他 → `binary` |
-| 同上 | `metric_agg` | Custom + Numeric → `sum`；其他 → `once` |
-| `custom_event_success_criteria` | `expected_direction` | Lower → `decrease_good`；Higher/Undefined → `increase_good`，Undefined 同时进入报告 |
-| `is_arvhived` | `status` | true → `archived`；false → `active` |
-| `created_at`、`updated_at` | 同名字段 | 原时间点 |
+| `id` | `id` | Preserve the UUID when no key-based merge occurs |
+| `env_id` | `featbit_env_id` | Preserve the UUID |
+| `name` | `name` | Preserve the value |
+| `event_name` | `key` | Preserve the value; the target unique key is `(featbit_env_id, key)` |
+| `description` | `description` | Preserve the value |
+| `event_type` + `custom_event_track_option` | `metric_type` | Custom + Numeric → `continuous`; otherwise → `binary` |
+| Same fields | `metric_agg` | Custom + Numeric → `sum`; otherwise → `once` |
+| `custom_event_success_criteria` | `expected_direction` | Lower → `decrease_good`; Higher/Undefined → `increase_good`, while also reporting Undefined |
+| `is_arvhived` | `status` | true → `archived`; false → `active` |
+| `created_at`, `updated_at` | Fields with the same names | Preserve the original instants |
 
-`maintainer_user_id`、`custom_event_unit`、`element_targets`、`target_urls` 在目标 metric 表没有等价字段：不把它们拼进 description；数据继续保留在旧表，并在 migration report 中列出。
+`maintainer_user_id`, `custom_event_unit`, `element_targets`, and `target_urls` have no equivalent fields in the target metric table. Do not append them to the description. Retain them in the legacy table and list them in the migration report.
 
-旧表可能存在相同 `(env_id, event_name)`：
+The legacy table may contain duplicate `(env_id, event_name)` values:
 
-- 配置完全兼容的重复项合并为一个目标 metric，并建立 `old_metric_id → target_metric_id` 映射供 experiment 使用；
-- metric type、aggregation 或 direction 冲突时先报告并人工确认，不能通过改 key 静默绕开，因为 key 必须继续匹配历史事件名。
+- Merge duplicates with fully compatible configurations into one target metric, and create an `old_metric_id → target_metric_id` mapping for experiments.
+- Report and require manual resolution when metric type, aggregation, or direction conflicts. Do not silently avoid a conflict by changing the key, because the key must continue to match the historical event name.
 
 ### 2. `experiments` → `release_decision_experiments`
 
-| 源数据 | 目标字段 | 规则 |
+| Source | Target field | Rule |
 |---|---|---|
-| `experiments.id` | `id` | 保持 UUID 不变 |
-| `experiments.env_id` | `featbit_env_id` | 原值 |
-| `feature_flags.key` | `flag_key` | 通过 `feature_flag_id` lookup |
-| `environments.project_id → projects.key` | `featbit_project_key` | lookup |
-| flag name + metric name | `name` | 生成可识别且不超过 256 字符的名称 |
-| 无直接来源 | `description` | `NULL`，不把 flag description 冒充 experiment description |
-| iteration 数量 | `stage` | 无 iteration → `implementing`；有 iteration → `measuring` |
-| 已迁移 metric | `primary_metric` | 使用 v6 JSON 结构：name、event、metricType、metricAgg、expectedDirection、description |
-| `feature_flags.variations` | `variants` | 转为 v6 数组：`key`、`name`、`value`、`description` |
-| `created_at`、`updated_at` | 同名字段 | 原时间点 |
+| `experiments.id` | `id` | Preserve the UUID |
+| `experiments.env_id` | `featbit_env_id` | Preserve the value |
+| `feature_flags.key` | `flag_key` | Resolve through the `feature_flag_id` lookup |
+| `environments.project_id → projects.key` | `featbit_project_key` | Resolve through lookups |
+| Flag name + metric name | `name` | Generate a recognizable name no longer than 256 characters |
+| No direct source | `description` | Write `NULL`; do not misrepresent the flag description as an experiment description |
+| Iteration count | `stage` | No iterations → `implementing`; one or more iterations → `measuring` |
+| Migrated metric | `primary_metric` | Use the v6 JSON shape: name, event, metricType, metricAgg, expectedDirection, and description |
+| `feature_flags.variations` | `variants` | Convert to a v6 array containing `key`, `name`, `value`, and `description` |
+| `created_at`, `updated_at` | Fields with the same names | Preserve the original instants |
 
-旧 `status`、`is_archived` 没有等价的 v6 workspace 字段。每个 experiment 在 `release_decision_activities` 写一条 migration activity，记录源 experiment ID、旧 status、archive 状态、metric ID、feature flag ID、alpha 和 iteration 数量。不要因为旧实验结束就伪造 hypothesis、decision 或 learning。
+The legacy `status` and `is_archived` fields have no equivalent v6 workspace fields. Write one migration activity to `release_decision_activities` for each experiment, recording the source experiment ID, legacy status, archive state, metric ID, feature flag ID, alpha, and iteration count. Do not invent a hypothesis, decision, or learning merely because a legacy experiment ended.
 
 ### 3. `experiments.iterations[]` → `release_decision_experiment_runs`
 
-5.4.6 的 `iterations` 是 JSONB 数组，正常字段使用 camelCase，例如 `id`、`startTime`、`endTime`、`eventType`、`eventName`、`customEventTrackOption`、`customEventSuccessCriteria`、`results`、`isFinish`。
+The 5.4.6 `iterations` value is a JSONB array whose normal fields use camelCase, including `id`, `startTime`, `endTime`, `eventType`, `eventName`, `customEventTrackOption`, `customEventSuccessCriteria`, `results`, and `isFinish`.
 
-| 源 iteration | 目标字段 | 规则 |
+| Source iteration | Target field | Rule |
 |---|---|---|
-| `id` | `id`、`run_id` | 正常值为 UUID 字符串；目标 UUID 保持一致，原字符串同时写入 `run_id` |
-| JSON 数组顺序 | `slug` | 生成稳定的 `legacy-1`、`legacy-2`…… |
-| `isFinish`、`results` | `status` | 未结束且无结果 → `collecting`；已有结果或已结束 → `analyzing`；不伪造 `decided` |
-| 固定迁移标识 | `method` | `legacy_frequentist`，不能标成 `bayesian_ab` 或 `bandit` |
-| iteration event snapshot | `primary_metric_event/type/agg` | 优先使用 iteration 自身字段，而不是可能已被修改的 metric 当前值 |
-| `baseline_variation_id` | `control_variant` | 原 variation ID |
-| iteration result variation IDs | `treatment_variant` | 除 baseline 外用 `|` 连接；无结果时 fallback 到 flag variations |
-| `startTime`、`endTime` | `observation_start`、`observation_end` | 原时间点 |
-| `results` + experiment `alpha` | `analysis_result` | 保存为带版本和来源标识的 legacy artifact，完整保留旧结果，不转换成 v6 Bayesian/Bandit 输出 |
-| 无可靠来源 | `input_data` | `NULL`；不能从汇总结果伪造原始观测数据 |
-| `startTime` | `created_at` | 原时间点 |
-| `updatedAt` / `endTime` / `startTime` | `updated_at` | 按顺序 fallback |
+| `id` | `id`, `run_id` | A normal value is a UUID string; preserve it as the target UUID and also write the original string to `run_id` |
+| JSON array order | `slug` | Generate stable values `legacy-1`, `legacy-2`, and so on |
+| `isFinish`, `results` | `status` | Not finished with no results → `collecting`; results present or finished → `analyzing`; never invent `decided` |
+| Fixed migration marker | `method` | `legacy_frequentist`; never label it `bayesian_ab` or `bandit` |
+| Iteration event snapshot | `primary_metric_event/type/agg` | Prefer the iteration's own fields over current metric values that may have changed |
+| `baseline_variation_id` | `control_variant` | Preserve the variation ID |
+| Variation IDs in iteration results | `treatment_variant` | Join non-baseline IDs with `\|`; when results are absent, fall back to flag variations |
+| `startTime`, `endTime` | `observation_start`, `observation_end` | Preserve the original instants |
+| `results` + experiment `alpha` | `analysis_result` | Store a versioned legacy artifact with provenance, preserving the complete legacy result without converting it to v6 Bayesian/Bandit output |
+| No reliable source | `input_data` | Write `NULL`; do not fabricate raw observations from aggregate results |
+| `startTime` | `created_at` | Preserve the original instant |
+| `updatedAt` / `endTime` / `startTime` | `updated_at` | Apply fallbacks in that order |
 
-legacy `analysis_result` 必须在当前读取路径中明确显示为“从 5.4.6 导入、未重新计算”的只读历史结果，并保留原始 `IterationResult` 字段，例如 variationId、conversion、conversionRate、average、uniqueUsers、totalEvents、confidenceInterval、pValue、effectSize、isWinner 和 reason。不得把旧 `alpha` 映射成 Bayesian prior。
+The current read path must clearly present a legacy `analysis_result` as a read-only result “imported from 5.4.6 and not recalculated.” Preserve original `IterationResult` fields such as variationId, conversion, conversionRate, average, uniqueUsers, totalEvents, confidenceInterval, pValue, effectSize, isWinner, and reason. Never map the legacy `alpha` to a Bayesian prior.
 
-## 执行步骤
+## Execution Steps
 
-1. 对数据库做可恢复快照，并先部署 v6.0.0 schema。
-2. 执行只读预检查：
-   - metric enum 值及 `(env_id, event_name)` 重复/冲突；
-   - experiment 对 environment、project、flag、metric 的缺失引用；
-   - `iterations` 是否为合法数组，iteration ID 是否为 UUID，时间和 results 是否可解析；
-   - baseline/result variation 是否存在于相应 flag；
-   - 目标表中相同 ID 或唯一 key 的已有记录及内容冲突。
-3. 按依赖顺序迁移：metrics → experiments → runs → migration activities。迁移期间保存 old metric ID 到 target metric ID 的映射。
-4. 相同 ID/key 且内容一致视为已迁移；内容不同则停止并报告，不覆盖用户已有的 v6 数据。
-5. 输出 migration report：每类源记录的 migrated、merged、already-present、rejected 数量，以及所有缺失引用、冲突和无法直接映射的字段。
-6. 完成 API/UI smoke test 和总量对账后结束迁移窗口。
+1. Create a recoverable database snapshot and deploy the v6.0.0 schema.
+2. Run read-only preflight checks:
+   - Metric enum values and duplicate/conflicting `(env_id, event_name)` groups.
+   - Missing experiment references to environment, project, flag, or metric.
+   - Whether `iterations` is a valid array, iteration IDs are UUIDs, and times and results are parseable.
+   - Whether baseline/result variations exist on the corresponding flag.
+   - Existing target records with the same ID or unique key, including content conflicts.
+3. Migrate in dependency order: metrics → experiments → runs → migration activities. Preserve the old metric ID to target metric ID mapping throughout migration.
+4. Treat identical records with the same ID/key as already migrated. Stop and report when content differs; never overwrite existing user-owned v6 data.
+5. Produce a migration report with migrated, merged, already-present, and rejected counts for each source type, plus every missing reference, conflict, and field without a direct mapping.
+6. End the migration window after API/UI smoke tests and count reconciliation succeed.
 
-迁移必须可重复执行；第二次运行不得产生重复 metric、experiment、run 或 activity。
+The migration must be repeatable. A second run must not create duplicate metrics, experiments, runs, or activities.
 
-## 测试计划
+## Test Plan
 
-使用临时 PostgreSQL，加载真实的 5.4.6 schema 和当前 v6.0.0 schema。至少覆盖：
+Use a temporary PostgreSQL instance loaded with the real 5.4.6 schema and the current v6.0.0 schema. Cover at least:
 
-- Custom Conversion、Custom Numeric、PageView、Click，以及 Higher、Lower、Undefined；
-- active/archived metric；
-- 相同 event name 的兼容重复与冲突重复；
-- 零个、一个、多个 iterations；
-- 正在运行、已结束、已归档、缺少 results 的 iteration；
-- binary 与 numeric 历史结果、baseline 加多个 treatment；
-- 缺失 flag/metric/project、非法 iteration JSON 和非法 iteration ID；
-- 目标表已有一致记录、已有冲突记录，以及连续执行两次迁移。
+- Custom Conversion, Custom Numeric, PageView, and Click metrics, plus Higher, Lower, and Undefined criteria.
+- Active and archived metrics.
+- Compatible and conflicting duplicates with the same event name.
+- Zero, one, and multiple iterations.
+- Running, finished, archived, and result-less iterations.
+- Binary and numeric historical results, with one baseline and multiple treatments.
+- Missing flags, metrics, or projects; invalid iteration JSON; and invalid iteration IDs.
+- Identical and conflicting records already in the target, plus two consecutive migration runs.
 
-核心断言：
+Core assertions:
 
-1. 每个源 metric 都被 migrated、merged、already-present 或 rejected，并有 old-to-target ID 映射。
-2. 每个源 experiment 都被 migrated、already-present 或 rejected；每个合法 iteration 恰好对应一个 run。
-3. metric type/agg/direction、flag/project、primary metric、variants、control/treatments 和 observation window 映射正确。
-4. legacy result 和 alpha 完整保留，并被标记为 5.4.6 历史结果；迁移及首次读取不会触发重新分析。
-5. API 能列出迁移后的 metrics/experiments，UI 能打开 experiment 和 legacy run，不把旧结果显示为新的 Bayesian/Bandit 结论。
-6. 第二次运行新增数为 0；源表内容不变；事件相关三张表完全未被本迁移修改。
+1. Every source metric is migrated, merged, already present, or rejected, with an old-to-target ID mapping.
+2. Every source experiment is migrated, already present, or rejected; every valid iteration maps to exactly one run.
+3. Metric type/aggregation/direction, flag/project, primary metric, variants, control/treatments, and observation window are mapped correctly.
+4. The legacy result and alpha are preserved completely and marked as 5.4.6 historical results; migration and the first read do not trigger reanalysis.
+5. The API lists migrated metrics and experiments, and the UI opens experiments and legacy runs without presenting old results as new Bayesian/Bandit conclusions.
+6. A second run inserts zero rows, source table content remains unchanged, and this migration does not modify any of the three event-related tables.
 
-## 回滚与完成标准
+## Rollback and Completion Criteria
 
-写入前记录目标表已有记录。若需回滚，按 activities → runs → experiments → metrics 的逆序，仅删除本次新增记录；被合并到迁移前已有 metric 的记录不能删除。全部映射、数量、API/UI smoke test、历史结果标识和幂等测试通过后，Migration 2 才算完成。
+Record the target rows that existed before writing. To roll back, delete only rows inserted by this migration, in reverse dependency order: activities → runs → experiments → metrics. Never delete a legacy metric mapping that was merged into a metric that existed before migration. Migration 2 is complete only when every mapping and count, the API/UI smoke tests, historical-result labeling, and idempotency tests pass.
