@@ -176,9 +176,23 @@ test.describe("layout", () => {
   test("keeps navigation made during the environment switch delay", async ({
     page,
   }) => {
+    await page.clock.install()
     await mockContextEndpoints(page)
     await setAuthenticatedUser(page)
     await setCurrentContext(page)
+    await page.route("**/api/v1/workspaces", async (route) => {
+      await route.fulfill({
+        json: {
+          success: true,
+          data: {
+            id: "ws-1",
+            key: "acme-workspace",
+            name: "Acme Workspace",
+            license: createLicense("Growth"),
+          },
+        },
+      })
+    })
 
     await page.goto("/en/workspace")
 
@@ -187,6 +201,8 @@ test.describe("layout", () => {
       "Search projects or environments..."
     )
     await environmentSearch.fill("Staging")
+    const pauseTime = await page.evaluate(() => Date.now() + 1_000)
+    await page.clock.pauseAt(pauseTime)
     await environmentSearch.press("Enter")
 
     const switchingStatus = page.getByRole("status", {
@@ -197,7 +213,7 @@ test.describe("layout", () => {
 
     await expect(page).toHaveURL(/\/en\/feature-flags$/)
     await expect(switchingStatus).toHaveCount(0)
-    await page.waitForTimeout(600)
+    await page.clock.fastForward(600)
     await expect(page).toHaveURL(/\/en\/feature-flags$/)
   })
 
