@@ -8,9 +8,6 @@ namespace Infrastructure.Store;
 
 public class PostgresStore(NpgsqlDataSource dataSource) : IDbStore
 {
-    private const string EnvironmentSpecificSegmentType = "environment-specific";
-    private const string SharedSegmentType = "shared";
-
     public string Name => Stores.Postgres;
 
     public async Task<bool> IsAvailableAsync()
@@ -87,26 +84,17 @@ public class PostgresStore(NpgsqlDataSource dataSource) : IDbStore
             select * from segments
             where date_trunc('milliseconds', updated_at) > @time
               and workspace_id = @workspaceId
-              and (
-                  (type = @environmentSpecific and env_id = @envId)
-                  or (
-                      type = @shared
-                      and exists (
-                          select 1
-                          from unnest(scopes) as scope
-                          where @envRN ^@ (scope || ':')
-                      )
-                  )
+              and exists (
+                  select 1
+                  from unnest(scopes) as scope
+                  where @envRN ^@ (scope || ':')
               )
             """,
             new
             {
                 time = DateTimeOffset.FromUnixTimeMilliseconds(timestamp),
                 workspaceId = (Guid)rnRow["workspace_id"],
-                envId,
-                envRN = $"{rnRow["rn"] as string}:",
-                environmentSpecific = EnvironmentSpecificSegmentType,
-                shared = SharedSegmentType
+                envRN = $"{rnRow["rn"] as string}:"
             }
         );
 
