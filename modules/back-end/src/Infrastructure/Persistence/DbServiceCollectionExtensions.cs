@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Infrastructure.OLAP;
 using MongoServices = Infrastructure.Services.MongoDb;
 using EntityFrameworkCoreServices = Infrastructure.Services.EntityFrameworkCore;
 
@@ -21,6 +22,8 @@ public static class DbServiceCollectionExtensions
                 AddEntityFrameworkCoreServices();
                 break;
         }
+
+        services.AddOLAPSpecificServices(configuration, dbProvider.Name);
 
         return;
 
@@ -45,7 +48,14 @@ public static class DbServiceCollectionExtensions
             services.AddTransient<IGlobalUserService, MongoServices.GlobalUserService>();
             services.AddTransient<ISegmentService, MongoServices.SegmentService>();
             services.AddTransient<IFeatureFlagService, MongoServices.FeatureFlagService>();
+            services.AddTransient<IFeatureFlagInsightsService, MongoServices.ReleaseDecisionFeatureFlagInsightsService>();
+            services.AddTransient<IFeatureFlagEndUserStatsService, MongoServices.ReleaseDecisionFeatureFlagEndUserStatsService>();
+            services.AddTransient<IExperimentStatsService, MongoServices.ReleaseDecisionExperimentStatsService>();
+            services.AddTransient<IInsightService, MongoServices.ReleaseDecisionInsightService>();
             services.AddTransient<ITriggerService, MongoServices.TriggerService>();
+            services.AddTransient<IReleaseDecisionExperimentService, MongoServices.ReleaseDecisionExperimentService>();
+            services.AddTransient<IReleaseDecisionLayerService, MongoServices.ReleaseDecisionLayerService>();
+            services.AddTransient<IReleaseDecisionMetricService, MongoServices.ReleaseDecisionMetricService>();
             services.AddTransient<IAuditLogService, MongoServices.AuditLogService>();
             services.AddTransient<IAccessTokenService, MongoServices.AccessTokenService>();
             services.AddTransient<IRelayProxyService, MongoServices.RelayProxyService>();
@@ -54,9 +64,9 @@ public static class DbServiceCollectionExtensions
             services.AddTransient<IFlagRevisionService, MongoServices.FlagRevisionService>();
             services.AddTransient<IFlagChangeRequestService, MongoServices.FlagChangeRequestService>();
             services.AddTransient<IWebhookService, MongoServices.WebhookService>();
-            services.AddTransient<IInsightService, MongoServices.InsightService>();
             services.AddTransient<IRefreshTokenService, MongoServices.RefreshTokenService>();
             services.AddTransient<Application.ControlPlane.ILeaseStore, MongoServices.MongoLeaseStore>();
+            services.AddTransient<IMcpAuthorizationStore, MongoServices.McpAuthorizationStore>();
         }
 
         void AddEntityFrameworkCoreServices()
@@ -83,7 +93,14 @@ public static class DbServiceCollectionExtensions
             services.AddTransient<IGlobalUserService, EntityFrameworkCoreServices.GlobalUserService>();
             services.AddTransient<ISegmentService, EntityFrameworkCoreServices.SegmentService>();
             services.AddTransient<IFeatureFlagService, EntityFrameworkCoreServices.FeatureFlagService>();
+            services.AddTransient<IFeatureFlagInsightsService, EntityFrameworkCoreServices.ReleaseDecisionFeatureFlagInsightsService>();
+            services.AddTransient<IFeatureFlagEndUserStatsService, EntityFrameworkCoreServices.ReleaseDecisionFeatureFlagEndUserStatsService>();
+            services.AddTransient<IExperimentStatsService, EntityFrameworkCoreServices.ReleaseDecisionExperimentStatsService>();
+            services.AddTransient<IInsightService, EntityFrameworkCoreServices.ReleaseDecisionInsightService>();
             services.AddTransient<ITriggerService, EntityFrameworkCoreServices.TriggerService>();
+            services.AddTransient<IReleaseDecisionExperimentService, EntityFrameworkCoreServices.ReleaseDecisionExperimentService>();
+            services.AddTransient<IReleaseDecisionLayerService, EntityFrameworkCoreServices.ReleaseDecisionLayerService>();
+            services.AddTransient<IReleaseDecisionMetricService, EntityFrameworkCoreServices.ReleaseDecisionMetricService>();
             services.AddTransient<IAuditLogService, EntityFrameworkCoreServices.AuditLogService>();
             services.AddTransient<IAccessTokenService, EntityFrameworkCoreServices.AccessTokenService>();
             services.AddTransient<IRelayProxyService, EntityFrameworkCoreServices.RelayProxyService>();
@@ -92,9 +109,9 @@ public static class DbServiceCollectionExtensions
             services.AddTransient<IFlagRevisionService, EntityFrameworkCoreServices.FlagRevisionService>();
             services.AddTransient<IFlagChangeRequestService, EntityFrameworkCoreServices.FlagChangeRequestService>();
             services.AddTransient<IWebhookService, EntityFrameworkCoreServices.WebhookService>();
-            services.AddTransient<IInsightService, EntityFrameworkCoreServices.InsightService>();
             services.AddTransient<IRefreshTokenService, EntityFrameworkCoreServices.RefreshTokenService>();
             services.AddTransient<Application.ControlPlane.ILeaseStore, EntityFrameworkCoreServices.PostgresLeaseStore>();
+            services.AddTransient<IMcpAuthorizationStore, EntityFrameworkCoreServices.McpAuthorizationStore>();
         }
     }
 }

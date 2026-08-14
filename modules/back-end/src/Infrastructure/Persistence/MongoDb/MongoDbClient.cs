@@ -9,11 +9,13 @@ using Domain.FlagRevisions;
 using Domain.FlagSchedules;
 using Domain.Groups;
 using Domain.Members;
+using Domain.Mcp;
 using Domain.Organizations;
 using Domain.Policies;
 using Domain.Projects;
 using Domain.RefreshTokens;
 using Domain.RelayProxies;
+using Domain.ReleaseDecisions;
 using Domain.Segments;
 using Domain.Triggers;
 using Domain.Users;
@@ -70,7 +72,19 @@ public class MongoDbClient
         { typeof(GroupPolicy), "GroupPolicies" },
         { typeof(MemberPolicy), "MemberPolicies" },
 
+        { typeof(ReleaseDecisionExperiment), "ReleaseDecisionExperiments" },
+        { typeof(ReleaseDecisionExperimentRun), "ReleaseDecisionExperimentRuns" },
+        { typeof(ReleaseDecisionLayer), "ReleaseDecisionLayers" },
+        { typeof(ReleaseDecisionMetric), "ReleaseDecisionMetrics" },
+        { typeof(ReleaseDecisionActivity), "ReleaseDecisionActivities" },
+        { typeof(ReleaseDecisionExposureEvent), "ReleaseDecisionExposureEvents" },
+        { typeof(ReleaseDecisionMetricEvent), "ReleaseDecisionMetricEvents" },
+        { typeof(ReleaseDecisionRunAssignment), "ReleaseDecisionRunAssignments" },
+
         { typeof(AccessToken), "AccessTokens" },
+        { typeof(McpDeviceAuthorization), "McpDeviceAuthorizations" },
+        { typeof(McpRefreshAuthorization), "McpRefreshAuthorizations" },
+        { typeof(McpAccessTokenSession), "McpAccessTokenSessions" },
         { typeof(RelayProxy), "RelayProxies" },
         { typeof(Webhook), "Webhooks" },
         { typeof(WebhookDelivery), "WebhookDeliveries" }

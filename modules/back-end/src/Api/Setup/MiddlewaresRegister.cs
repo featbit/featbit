@@ -86,6 +86,7 @@ public static class MiddlewaresRegister
         app.UseAuthentication();
         app.UseAuthorization();
 
+        app.MapMcp("/mcp").RequireAuthorization();
         app.MapControllers();
 
         return app;

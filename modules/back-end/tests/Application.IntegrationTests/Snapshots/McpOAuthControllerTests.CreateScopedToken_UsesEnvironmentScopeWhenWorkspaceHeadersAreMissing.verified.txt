@@ -1,0 +1,8 @@
+{
+  ExpiresIn: 2592000,
+  HasAccessToken: true,
+  HasRefreshToken: true,
+  Scope: experiment:read experiment:write experiment:analyze,
+  Status: 200,
+  TokenType: Bearer
+}
