@@ -149,16 +149,16 @@ public class ExperimentMcpTools(
                 TreatmentVariant = request.TreatmentVariant,
                 TrafficPercent = request.TrafficPercent,
                 TrafficOffset = request.TrafficOffset,
-                LayerId = request.LayerId ?? request.LayerKey,
-                LayerKey = request.LayerKey ?? request.LayerId,
-                AllocationKeySelector = request.AllocationKeySelector,
+                LayerId = Normalize(request.LayerId) ?? Normalize(request.LayerKey),
+                LayerKey = Normalize(request.LayerKey) ?? Normalize(request.LayerId),
+                AllocationKeySelector = Normalize(request.AllocationKeySelector),
                 SliceStart = request.SliceStart,
                 SliceEnd = request.SliceEnd,
                 AssignmentUnitSelector = request.AssignmentUnitSelector,
                 LayerTrafficPercent = request.LayerTrafficPercent,
-                AllocationPlan = request.AllocationPlan,
+                AllocationPlan = Normalize(request.AllocationPlan),
                 AnalysisSamplingPlan = request.AnalysisSamplingPlan,
-                AudienceFilters = request.AudienceFilters,
+                AudienceFilters = Normalize(request.AudienceFilters),
             }
         });
     }

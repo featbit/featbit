@@ -8,7 +8,7 @@ namespace Application.UnitTests.EndUsers;
 public class GetFeatureFlagEndUserListHandlerTests
 {
     [Fact]
-    public async Task MapsVariationIdsAndPassesFilterToStatsService()
+    public async Task Handle_ValidRequest_MapsVariationsAndPassesFilter()
     {
         var envId = Guid.NewGuid();
         FeatureFlagEndUserParam? capturedParam = null;

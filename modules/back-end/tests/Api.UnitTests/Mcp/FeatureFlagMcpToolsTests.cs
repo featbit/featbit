@@ -13,12 +13,12 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Moq;
 
-namespace Application.IntegrationTests.Mcp;
+namespace Api.UnitTests.Mcp;
 
 public class FeatureFlagMcpToolsTests
 {
     [Fact]
-    public async Task CreateFeatureFlagResolvesEnvAndChecksCreateFlagPermission()
+    public async Task CreateFeatureFlag_ValidContext_ResolvesEnvironmentAndChecksPermission()
     {
         var experimentId = Guid.NewGuid();
         var envId = Guid.NewGuid();
@@ -71,7 +71,7 @@ public class FeatureFlagMcpToolsTests
     }
 
     [Fact]
-    public async Task CreateFeatureFlagRequiresUserConfirmation()
+    public async Task CreateFeatureFlag_ValidRequest_RequiresConfirmation()
     {
         var experimentId = Guid.NewGuid();
         var envId = Guid.NewGuid();
@@ -107,7 +107,7 @@ public class FeatureFlagMcpToolsTests
     }
 
     [Fact]
-    public async Task UpdateFeatureFlagTargetingAppliesDirectlyWhenReviewersAreNotProvided()
+    public async Task UpdateFeatureFlagTargeting_NoReviewers_AppliesDirectly()
     {
         var experimentId = Guid.NewGuid();
         var envId = Guid.NewGuid();
@@ -182,7 +182,7 @@ public class FeatureFlagMcpToolsTests
     }
 
     [Fact]
-    public async Task UpdateFeatureFlagTargetingRequiresUserConfirmation()
+    public async Task UpdateFeatureFlagTargeting_ValidRequest_RequiresConfirmation()
     {
         var tools = new FeatureFlagMcpTools(
             Mock.Of<ISender>(),
@@ -205,7 +205,7 @@ public class FeatureFlagMcpToolsTests
     }
 
     [Fact]
-    public async Task ToggleFeatureFlagChecksPermissionAndUsesExistingCommand()
+    public async Task ToggleFeatureFlag_ValidRequest_ChecksPermissionAndDispatchesCommand()
     {
         var experimentId = Guid.NewGuid();
         var envId = Guid.NewGuid();
@@ -265,7 +265,7 @@ public class FeatureFlagMcpToolsTests
     }
 
     [Fact]
-    public async Task ToggleFeatureFlagRequiresUserConfirmation()
+    public async Task ToggleFeatureFlag_ValidRequest_RequiresConfirmation()
     {
         var tools = new FeatureFlagMcpTools(
             Mock.Of<ISender>(),
@@ -284,7 +284,7 @@ public class FeatureFlagMcpToolsTests
     }
 
     [Fact]
-    public async Task ToggleFeatureFlagRequiresEnabledStatus()
+    public async Task ToggleFeatureFlag_MissingEnabledStatus_Throws()
     {
         var tools = new FeatureFlagMcpTools(
             Mock.Of<ISender>(),
@@ -303,7 +303,7 @@ public class FeatureFlagMcpToolsTests
     }
 
     [Fact]
-    public async Task UpdateFeatureFlagTargetingCreatesChangeRequestWhenReviewersAreProvided()
+    public async Task UpdateFeatureFlagTargeting_WithReviewers_CreatesChangeRequest()
     {
         var experimentId = Guid.NewGuid();
         var envId = Guid.NewGuid();
@@ -388,7 +388,7 @@ public class FeatureFlagMcpToolsTests
     }
 
     [Fact]
-    public async Task UpdateFeatureFlagTargetingRejectsInvalidRollout()
+    public async Task UpdateFeatureFlagTargeting_InvalidRollout_Throws()
     {
         var experimentId = Guid.NewGuid();
         var envId = Guid.NewGuid();

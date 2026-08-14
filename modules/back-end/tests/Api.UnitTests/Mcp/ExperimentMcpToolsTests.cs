@@ -6,7 +6,7 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Moq;
 
-namespace Application.IntegrationTests.Mcp;
+namespace Api.UnitTests.Mcp;
 
 public class ExperimentMcpToolsTests
 {
@@ -14,7 +14,7 @@ public class ExperimentMcpToolsTests
         """[{"variation":"control","role":"control","includeRate":11.111111},{"variation":"treatment","role":"treatment","includeRate":100}]""";
 
     [Fact]
-    public async Task GetExperimentResolvesEnvAndChecksPermissionBeforeDispatch()
+    public async Task GetExperiment_ValidContext_ResolvesEnvironmentAndChecksPermission()
     {
         var experimentId = Guid.NewGuid();
         var envId = Guid.NewGuid();
@@ -51,7 +51,7 @@ public class ExperimentMcpToolsTests
     }
 
     [Fact]
-    public async Task GetExperimentThrowsWhenPermissionIsDenied()
+    public async Task GetExperiment_PermissionDenied_Throws()
     {
         var experimentId = Guid.NewGuid();
         var envId = Guid.NewGuid();
@@ -78,7 +78,7 @@ public class ExperimentMcpToolsTests
     }
 
     [Fact]
-    public async Task UpdateRunTrafficDispatchesAudienceUpdateWithSamplingFields()
+    public async Task UpdateRunTraffic_ValidRequest_DispatchesSamplingFields()
     {
         var experimentId = Guid.NewGuid();
         var runId = Guid.NewGuid();
@@ -93,20 +93,11 @@ public class ExperimentMcpToolsTests
         experimentService.Setup(x => x.GetEnvIdAsync(experimentId)).ReturnsAsync(envId);
         experimentService.Setup(x => x.GetAsync(envId, experimentId)).ReturnsAsync(detail);
         permissionChecker.Setup(x => x.IsGrantedAsync(httpContext, It.IsAny<PermissionRequirement>())).ReturnsAsync(true);
+        UpdateExperimentRunAudience? dispatched = null;
         sender
-            .Setup(x => x.Send(It.Is<UpdateExperimentRunAudience>(request =>
-                request.EnvId == envId &&
-                request.Id == experimentId &&
-                request.RunId == runId &&
-                request.Update.Method == "bayesian_ab" &&
-                request.Update.ControlVariant == "control" &&
-                request.Update.TreatmentVariant == "treatment" &&
-                request.Update.LayerKey == "checkout" &&
-                request.Update.LayerId == "checkout" &&
-                request.Update.AssignmentUnitSelector == "user.keyId" &&
-                request.Update.LayerTrafficPercent == 30 &&
-                request.Update.AnalysisSamplingPlan == ValidSamplingPlan &&
-                request.Update.AllocationPlan == null), It.IsAny<CancellationToken>()))
+            .Setup(x => x.Send(It.IsAny<UpdateExperimentRunAudience>(), It.IsAny<CancellationToken>()))
+            .Callback<IRequest<ExperimentDetailVm>, CancellationToken>(
+                (request, _) => dispatched = Assert.IsType<UpdateExperimentRunAudience>(request))
             .ReturnsAsync(detail);
 
         var tools = new ExperimentMcpTools(
@@ -127,11 +118,23 @@ public class ExperimentMcpToolsTests
         });
 
         Assert.Equal(experimentId, result.Id);
-        sender.VerifyAll();
+        Assert.NotNull(dispatched);
+        Assert.Equal(envId, dispatched.EnvId);
+        Assert.Equal(experimentId, dispatched.Id);
+        Assert.Equal(runId, dispatched.RunId);
+        Assert.Equal("bayesian_ab", dispatched.Update.Method);
+        Assert.Equal("control", dispatched.Update.ControlVariant);
+        Assert.Equal("treatment", dispatched.Update.TreatmentVariant);
+        Assert.Equal("checkout", dispatched.Update.LayerKey);
+        Assert.Equal("checkout", dispatched.Update.LayerId);
+        Assert.Equal("user.keyId", dispatched.Update.AssignmentUnitSelector);
+        Assert.Equal(30, dispatched.Update.LayerTrafficPercent);
+        Assert.Equal(ValidSamplingPlan, dispatched.Update.AnalysisSamplingPlan);
+        Assert.Null(dispatched.Update.AllocationPlan);
     }
 
     [Fact]
-    public async Task UpdateRunTrafficRequiresConfirmationWhenRunAlreadyCollecting()
+    public async Task UpdateRunTraffic_CollectingRun_RequiresConfirmation()
     {
         var experimentId = Guid.NewGuid();
         var runId = Guid.NewGuid();
@@ -168,7 +171,7 @@ public class ExperimentMcpToolsTests
     [InlineData("""[{"variation":"control","role":"control","includeRate":101},{"variation":"treatment","role":"treatment","includeRate":100}]""")]
     [InlineData("""[{"variation":"control","role":"control","includeRate":100}]""")]
     [InlineData("not-json")]
-    public async Task UpdateRunTrafficRejectsInvalidSamplingPlan(string samplingPlan)
+    public async Task UpdateRunTraffic_InvalidSamplingPlan_Throws(string samplingPlan)
     {
         var experimentId = Guid.NewGuid();
         var runId = Guid.NewGuid();

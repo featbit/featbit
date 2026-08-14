@@ -3,12 +3,12 @@ using Api;
 using Api.Mcp;
 using Microsoft.AspNetCore.Http;
 
-namespace Application.IntegrationTests.Mcp;
+namespace Api.UnitTests;
 
 public class HttpRequestExtensionsTests
 {
     [Fact]
-    public void OrganizationIdUsesHeaderBeforeClaim()
+    public void OrganizationId_HeaderAndClaim_UsesHeader()
     {
         var headerOrgId = Guid.NewGuid();
         var claimOrgId = Guid.NewGuid();
@@ -23,7 +23,7 @@ public class HttpRequestExtensionsTests
     }
 
     [Fact]
-    public void WorkspaceIdFallsBackToMcpClaim()
+    public void WorkspaceId_MissingHeader_UsesMcpClaim()
     {
         var workspaceId = Guid.NewGuid();
         var context = new DefaultHttpContext();
@@ -36,7 +36,7 @@ public class HttpRequestExtensionsTests
     }
 
     [Fact]
-    public void MissingOrMalformedContextReturnsEmptyGuid()
+    public void OrganizationId_MissingOrMalformedContext_ReturnsEmptyGuid()
     {
         var context = new DefaultHttpContext();
         context.Request.Headers[ApiConstants.OrgIdHeaderKey] = "not-a-guid";

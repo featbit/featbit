@@ -1,11 +1,11 @@
 using Domain.Mcp;
 
-namespace Application.IntegrationTests.Mcp;
+namespace Domain.UnitTests.Mcp;
 
 public class McpAuthorizationModelsTests
 {
     [Fact]
-    public void DeviceAuthorizationStoresOnlyHashedDeviceCode()
+    public void Constructor_RawDeviceCode_StoresOnlyHash()
     {
         var (authorization, deviceCode) = McpDeviceAuthorization.Create(
             "client-1",
@@ -20,7 +20,7 @@ public class McpAuthorizationModelsTests
     }
 
     [Fact]
-    public void RefreshAuthorizationStoresOnlyHashedRefreshToken()
+    public void Constructor_RawRefreshToken_StoresOnlyHash()
     {
         var (authorization, refreshToken) = McpRefreshAuthorization.Create(
             "client-1",
@@ -37,7 +37,7 @@ public class McpAuthorizationModelsTests
     }
 
     [Fact]
-    public void AccessTokenSessionCanBeRevoked()
+    public void Revoke_ActiveSession_SetsRevocationTimestamp()
     {
         var session = McpAccessTokenSession.Create(
             "client-1",

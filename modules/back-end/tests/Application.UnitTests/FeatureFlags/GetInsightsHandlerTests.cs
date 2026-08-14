@@ -7,7 +7,7 @@ namespace Application.UnitTests.FeatureFlags;
 public class GetInsightsHandlerTests
 {
     [Fact]
-    public async Task MapsVariationIdsToVariationNamesAndFillsMissingCounts()
+    public async Task Handle_MissingVariationCounts_MapsNamesAndFillsZeros()
     {
         var envId = Guid.NewGuid();
         var featureFlagService = new Mock<IFeatureFlagService>();

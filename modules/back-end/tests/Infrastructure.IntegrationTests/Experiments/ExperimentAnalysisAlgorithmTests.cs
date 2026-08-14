@@ -1,31 +1,36 @@
 using System.Linq.Expressions;
 using System.Text.Json;
-using Application.Bases.Models;
 using Application.ExperimentStats;
-using Application.FeatureFlags;
 using Application.Experiments;
 using Application.Services;
 using Application.Users;
 using Domain.FeatureFlags;
 using Domain.Experiments;
-using Domain.Segments;
 using Domain.Users;
 using Infrastructure.Persistence.EntityFrameworkCore;
 using Infrastructure.Services.EntityFrameworkCore;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Moq;
 
-namespace Application.UnitTests.Experiments;
+namespace Infrastructure.IntegrationTests.Experiments;
 
-public class ExperimentAnalysisAlgorithmTests
+[Collection(nameof(ExperimentProviderParityCollection))]
+public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
 {
+    private readonly ExperimentProviderParityFixture _fixture;
+
+    public ExperimentAnalysisAlgorithmTests(ExperimentProviderParityFixture fixture)
+    {
+        _fixture = fixture;
+    }
+
     private static readonly Guid EnvId = Guid.Parse("11111111-1111-1111-1111-111111111111");
     private static readonly Guid ExperimentId = Guid.Parse("22222222-2222-2222-2222-222222222222");
     private static readonly Guid RunId = Guid.Parse("33333333-3333-3333-3333-333333333333");
     private static readonly Guid UserId = Guid.Parse("55555555-5555-5555-5555-555555555555");
 
-    [Fact]
-    public async Task Bayesian_binary_analysis_reports_conversion_rate_and_win_probability()
+    [DockerFact]
+    public async Task AnalyzeRun_BayesianBinary_ReportsConversionRateAndWinProbability()
     {
         var stats = new FixedExperimentStatsService(new ExperimentStatsVm
         {
@@ -66,10 +71,10 @@ public class ExperimentAnalysisAlgorithmTests
         Assert.True(root.GetProperty("srm").GetProperty("ok").GetBoolean());
     }
 
-    [Theory]
+    [DockerTheory]
     [InlineData("sum", 12.5, 25.0, 1.0)]
     [InlineData("average", 2.5, 3.0, 0.2)]
-    public async Task Bayesian_continuous_analysis_reports_per_user_mean(string metricAgg, double controlMean, double treatmentMean, double relDelta)
+    public async Task AnalyzeRun_BayesianContinuous_ReportsPerUserMean(string metricAgg, double controlMean, double treatmentMean, double relDelta)
     {
         var stats = new FixedExperimentStatsService(new ExperimentStatsVm
         {
@@ -102,8 +107,8 @@ public class ExperimentAnalysisAlgorithmTests
         Assert.Equal(relDelta, treatment.GetProperty("rel_delta").GetDouble(), 6);
     }
 
-    [Fact]
-    public async Task Bayesian_analysis_keeps_canonical_variant_ids_when_a_configured_arm_has_no_observations()
+    [DockerFact]
+    public async Task AnalyzeRun_UnobservedConfiguredArm_KeepsCanonicalVariantIds()
     {
         var stats = new FixedExperimentStatsService(new ExperimentStatsVm
         {
@@ -146,8 +151,8 @@ public class ExperimentAnalysisAlgorithmTests
         Assert.False(root.TryGetProperty("warnings", out _));
     }
 
-    [Fact]
-    public async Task Bandit_analysis_keeps_burn_in_when_an_arm_has_too_few_users()
+    [DockerFact]
+    public async Task AnalyzeRun_BanditArmBelowMinimum_KeepsBurnIn()
     {
         var stats = new FixedExperimentStatsService(new ExperimentStatsVm
         {
@@ -180,8 +185,8 @@ public class ExperimentAnalysisAlgorithmTests
         Assert.False(document.RootElement.GetProperty("stopping").GetProperty("met").GetBoolean());
     }
 
-    [Fact]
-    public async Task Bandit_analysis_returns_normalized_weights_after_burn_in()
+    [DockerFact]
+    public async Task AnalyzeRun_BanditAfterBurnIn_ReturnsNormalizedWeights()
     {
         var stats = new FixedExperimentStatsService(new ExperimentStatsVm
         {
@@ -216,8 +221,8 @@ public class ExperimentAnalysisAlgorithmTests
         Assert.True(treatment.GetProperty("recommended_weight").GetDouble() > 0.49);
     }
 
-    [Fact]
-    public async Task AnalyzeRun_passes_run_sampling_scope_to_stats_query()
+    [DockerFact]
+    public async Task AnalyzeRun_SamplingScope_PassesFieldsToStatsQuery()
     {
         var stats = new FixedExperimentStatsService(new ExperimentStatsVm
         {
@@ -268,23 +273,15 @@ public class ExperimentAnalysisAlgorithmTests
         return new ExperimentService(
             db,
             stats,
-            new TestFeatureFlagService(),
+            CreateFeatureFlagService(),
+            null!,
             new TestCurrentUser(UserId),
-            new TestUserService());
+            CreateUserService());
     }
 
-    private static AppDbContext CreateDbContext()
+    private AppDbContext CreateDbContext()
     {
-        var connection = new SqliteConnection("DataSource=:memory:");
-        connection.Open();
-        var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseSqlite(connection)
-            .Options;
-
-        var db = new TestExperimentDbContext(options);
-        db.Database.EnsureCreated();
-
-        return db;
+        return _fixture.CreateDbContext();
     }
 
     private static async Task SeedExperimentAsync(
@@ -302,6 +299,9 @@ public class ExperimentAnalysisAlgorithmTests
         double? layerTrafficPercent = null,
         string? analysisSamplingPlan = null)
     {
+        await db.Database.ExecuteSqlRawAsync(
+            "TRUNCATE TABLE experiment_activities, experiment_runs, experiments RESTART IDENTITY CASCADE;");
+
         var experiment = new Experiment
         {
             Id = ExperimentId,
@@ -385,40 +385,12 @@ public class ExperimentAnalysisAlgorithmTests
         }
     }
 
-    private sealed class TestExperimentDbContext(DbContextOptions<AppDbContext> options) : AppDbContext(options)
+    private static IFeatureFlagService CreateFeatureFlagService()
     {
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<Experiment>(builder =>
-            {
-                builder.HasKey(x => x.Id);
-                builder.Property(x => x.Name).IsRequired();
-                builder.Property(x => x.Stage).IsRequired();
-                builder.Ignore(x => x.ExperimentRuns);
-                builder.Ignore(x => x.Activities);
-            });
-
-            modelBuilder.Entity<ExperimentRun>(builder =>
-            {
-                builder.HasKey(x => x.Id);
-                builder.Property(x => x.Slug).IsRequired();
-                builder.Property(x => x.Status).IsRequired();
-                builder.Ignore(x => x.Experiment);
-            });
-
-            modelBuilder.Entity<ExperimentActivity>(builder =>
-            {
-                builder.HasKey(x => x.Id);
-                builder.Ignore(x => x.Experiment);
-            });
-        }
-    }
-
-    private sealed class TestFeatureFlagService : IFeatureFlagService
-    {
-        public Task<FeatureFlag> GetAsync(Guid envId, string key)
-        {
-            return Task.FromResult(new FeatureFlag
+        var service = new Mock<IFeatureFlagService>();
+        service
+            .Setup(x => x.GetAsync(It.IsAny<Guid>(), It.IsAny<string>()))
+            .ReturnsAsync((Guid envId, string key) => new FeatureFlag
             {
                 Id = Guid.Parse("44444444-4444-4444-4444-444444444444"),
                 EnvId = envId,
@@ -433,61 +405,32 @@ public class ExperimentAnalysisAlgorithmTests
                 ],
                 Tags = []
             });
-        }
+        return service.Object;
+    }
 
-        public Task<FeatureFlag> GetAsync(Guid id) => throw new NotImplementedException();
-        public Task AddOneAsync(FeatureFlag segment) => throw new NotImplementedException();
-        public Task AddManyAsync(IEnumerable<FeatureFlag> entities) => throw new NotImplementedException();
-        public Task<FeatureFlag?> FindOneAsync(Expression<Func<FeatureFlag, bool>> predicate) => throw new NotImplementedException();
-        public Task<ICollection<FeatureFlag>> FindManyAsync(Expression<Func<FeatureFlag, bool>> predicate) => throw new NotImplementedException();
-        public Task<long> CountAsync(Expression<Func<FeatureFlag, bool>> predicate) => throw new NotImplementedException();
-        public Task<bool> AnyAsync(Expression<Func<FeatureFlag, bool>> predicate) => throw new NotImplementedException();
-        public Task UpdateAsync(FeatureFlag segment) => throw new NotImplementedException();
-        public Task DeleteOneAsync(Guid id) => throw new NotImplementedException();
-        public Task<PagedResult<FeatureFlag>> GetListAsync(Guid envId, FeatureFlagFilter filter) => throw new NotImplementedException();
-        public Task<bool> HasKeyBeenUsedAsync(Guid envId, string key) => throw new NotImplementedException();
-        public Task<ICollection<string>> GetAllTagsAsync(Guid envId) => throw new NotImplementedException();
-        public Task<ICollection<Segment>> GetRelatedSegmentsAsync(ICollection<FeatureFlag> flags) => throw new NotImplementedException();
-        public Task MarkAsUpdatedAsync(ICollection<Guid> flagIds, Guid operatorId) => throw new NotImplementedException();
+    private static IUserService CreateUserService()
+    {
+        var user = new User(UserId, "experiment@example.com", "hashed", "Experiment Tester");
+        var service = new Mock<IUserService>();
+        service
+            .Setup(x => x.GetOperatorAsync(It.IsAny<Guid>()))
+            .ReturnsAsync((Guid id) => id == user.Id ? user.Name : string.Empty);
+        service
+            .Setup(x => x.GetListAsync(It.IsAny<IEnumerable<Guid>>()))
+            .ReturnsAsync((IEnumerable<Guid> ids) =>
+                (ICollection<User>)(ids.Contains(user.Id) ? [user] : Array.Empty<User>()));
+        service
+            .Setup(x => x.GetAsync(user.Id))
+            .ReturnsAsync(user);
+        service
+            .Setup(x => x.FindOneAsync(It.IsAny<Expression<Func<User, bool>>>()))
+            .ReturnsAsync((Expression<Func<User, bool>> predicate) =>
+                predicate.Compile()(user) ? user : null);
+        return service.Object;
     }
 
     private sealed class TestCurrentUser(Guid id) : ICurrentUser
     {
         public Guid Id { get; } = id;
-    }
-
-    private sealed class TestUserService : IUserService
-    {
-        private static readonly User User = new(UserId, "experiment@example.com", "hashed", "Experiment Tester");
-
-        public Task<string> GetOperatorAsync(Guid operatorId) =>
-            Task.FromResult(operatorId == User.Id ? User.Name : string.Empty);
-
-        public Task<ICollection<User>> GetListAsync(IEnumerable<Guid> ids) =>
-            Task.FromResult<ICollection<User>>(ids.Contains(User.Id) ? [User] : []);
-
-        public Task<ICollection<Domain.Workspaces.Workspace>> GetWorkspacesAsync(Guid userId) =>
-            Task.FromResult<ICollection<Domain.Workspaces.Workspace>>([]);
-
-        public Task<User> GetAsync(Guid id) =>
-            id == User.Id ? Task.FromResult(User) : throw new NotImplementedException();
-
-        public Task AddOneAsync(User segment) => throw new NotImplementedException();
-        public Task AddManyAsync(IEnumerable<User> entities) => throw new NotImplementedException();
-
-        public Task<User?> FindOneAsync(Expression<Func<User, bool>> predicate) =>
-            Task.FromResult(predicate.Compile()(User) ? User : null);
-
-        public Task<ICollection<User>> FindManyAsync(Expression<Func<User, bool>> predicate) =>
-            Task.FromResult<ICollection<User>>(predicate.Compile()(User) ? [User] : []);
-
-        public Task<long> CountAsync(Expression<Func<User, bool>> predicate) =>
-            Task.FromResult(predicate.Compile()(User) ? 1L : 0L);
-
-        public Task<bool> AnyAsync(Expression<Func<User, bool>> predicate) =>
-            Task.FromResult(predicate.Compile()(User));
-
-        public Task UpdateAsync(User segment) => throw new NotImplementedException();
-        public Task DeleteOneAsync(Guid id) => throw new NotImplementedException();
     }
 }

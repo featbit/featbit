@@ -1,10 +1,8 @@
-using Application.ExperimentStats;
-using Application.FeatureFlags;
+using System.Collections.Concurrent;
 using Application.Services;
 using Application.Users;
 using Dapper;
 using Domain.EndUsers;
-using Domain.FeatureFlags;
 using Domain.Experiments;
 using Domain.Targeting;
 using Infrastructure.OLAP.ClickHouse;
@@ -12,22 +10,28 @@ using Infrastructure.Persistence.EntityFrameworkCore;
 using Infrastructure.Persistence.MongoDb;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using MongoDB.Driver;
 using Npgsql;
+using NpgsqlTypes;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
+using Infrastructure.Services.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Infrastructure.IntegrationTests.Experiments;
 
 public sealed class ExperimentProviderParityFixture : IAsyncLifetime
 {
-    public static readonly Guid EnvId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+    public static readonly Guid StandardEnvId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+    public static readonly Guid UnbalancedEnvId = Guid.Parse("11111111-1111-1111-1111-111111111112");
+    public static readonly Guid SamplingEnvId = Guid.Parse("11111111-1111-1111-1111-111111111113");
+    public static readonly Guid EnvId = StandardEnvId;
     public const string FlagKey = "checkout-flow";
     public const string MetricEvent = "purchase";
     public const string GuardrailEvent = "checkout_error";
 
-    private readonly IContainer _postgres = new ContainerBuilder()
-        .WithImage("postgres:15.10")
+    private readonly ConcurrentDictionary<string, Lazy<Task>> _seedTasks = new();
+
+    private readonly IContainer _postgres = new ContainerBuilder("postgres:15.10")
         .WithEnvironment("POSTGRES_USER", "postgres")
         .WithEnvironment("POSTGRES_PASSWORD", "please_change_me")
         .WithEnvironment("POSTGRES_DB", "featbit")
@@ -35,16 +39,14 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
         .WithWaitStrategy(Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(5432))
         .Build();
 
-    private readonly IContainer _mongo = new ContainerBuilder()
-        .WithImage("mongo:5.0.32")
+    private readonly IContainer _mongo = new ContainerBuilder("mongo:5.0.32")
         .WithEnvironment("MONGO_INITDB_ROOT_USERNAME", "admin")
         .WithEnvironment("MONGO_INITDB_ROOT_PASSWORD", "password")
         .WithPortBinding(27017, true)
         .WithWaitStrategy(Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(27017))
         .Build();
 
-    private readonly IContainer _clickHouse = new ContainerBuilder()
-        .WithImage("clickhouse/clickhouse-server:23.7")
+    private readonly IContainer _clickHouse = new ContainerBuilder("clickhouse/clickhouse-server:23.7")
         .WithPortBinding(8123, true)
         .WithWaitStrategy(Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(8123))
         .Build();
@@ -72,27 +74,23 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
         );
     }
 
-    public async Task SeedScenarioAsync()
-    {
-        await ClearAsync();
+    public Task SeedScenarioAsync(string provider) =>
+        EnsureSeededAsync(provider, "standard", () => SeedScenarioCoreAsync(provider));
 
+    private async Task SeedScenarioCoreAsync(string provider)
+    {
         var exposures = Scenario.Exposures;
         var metrics = Scenario.Metrics;
         var users = Scenario.Users;
 
-        await SeedPostgresAsync(exposures, metrics, users);
-        await SeedMongoAsync(exposures, metrics, users);
-        await SeedClickHouseAsync(exposures, metrics, users);
-        await ValidateClickHouseSeedAsync(
-            exposures.Length,
-            metrics.Length,
-            exposures.Count(x => x.FlagKey == FlagKey));
+        await SeedProviderAsync(provider, exposures, metrics, users);
     }
 
-    public async Task SeedUnbalancedVariantScenarioAsync()
-    {
-        await ClearAsync();
+    public Task SeedUnbalancedVariantScenarioAsync(string provider) =>
+        EnsureSeededAsync(provider, "unbalanced", () => SeedUnbalancedVariantScenarioCoreAsync(provider));
 
+    private async Task SeedUnbalancedVariantScenarioCoreAsync(string provider)
+    {
         var createdAt = DateTimeOffset.Parse("2026-01-01T00:00:00Z");
         var exposures = new List<ScenarioExposure>();
         var metrics = new List<ScenarioMetric>();
@@ -103,10 +101,7 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
         AddUsers("control", "control", count: 900);
         AddUsers("treatment", "treatment", count: 100);
 
-        await SeedPostgresAsync(exposures, metrics, users);
-        await SeedMongoAsync(exposures, metrics, users);
-        await SeedClickHouseAsync(exposures, metrics, users);
-        await ValidateClickHouseSeedAsync(exposures.Count, metrics.Count, exposures.Count);
+        await SeedProviderAsync(provider, exposures, metrics, users);
         return;
 
         void AddUsers(string prefix, string variationId, int count)
@@ -115,10 +110,10 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
             {
                 var userKey = $"{prefix}-{i:000}";
                 var exposedAt = DateTimeOffset.Parse("2026-01-01T01:00:00Z").AddSeconds(sequence);
-                users.Add(new ScenarioUser(EnvId, userKey, userKey));
+                users.Add(new ScenarioUser(UnbalancedEnvId, userKey, userKey));
                 exposures.Add(new ScenarioExposure(
-                    GuidFromSequence(sequence++),
-                    EnvId,
+                    GuidFromSequence(100_000 + sequence++),
+                    UnbalancedEnvId,
                     FlagKey,
                     userKey,
                     variationId,
@@ -126,8 +121,8 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
                     exposedAt,
                     createdAt));
                 metrics.Add(new ScenarioMetric(
-                    MetricGuidFromSequence(metricSequence++),
-                    EnvId,
+                    MetricGuidFromSequence(100_000 + metricSequence++),
+                    UnbalancedEnvId,
                     userKey,
                     MetricEvent,
                     "CustomEvent",
@@ -138,10 +133,11 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
         }
     }
 
-    public async Task SeedSamplingPlanScenarioAsync(Guid runId)
-    {
-        await ClearAsync();
+    public Task SeedSamplingPlanScenarioAsync(string provider) =>
+        EnsureSeededAsync(provider, "sampling", () => SeedSamplingPlanScenarioCoreAsync(provider));
 
+    private async Task SeedSamplingPlanScenarioCoreAsync(string provider)
+    {
         var createdAt = DateTimeOffset.Parse("2026-01-01T00:00:00Z");
         var exposures = new List<ScenarioExposure>();
         var metrics = new List<ScenarioMetric>();
@@ -176,20 +172,17 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
             }
         }
 
-        await SeedPostgresAsync(exposures, metrics, users);
-        await SeedMongoAsync(exposures, metrics, users);
-        await SeedClickHouseAsync(exposures, metrics, users);
-        await ValidateClickHouseSeedAsync(exposures.Count, metrics.Count, exposures.Count);
+        await SeedProviderAsync(provider, exposures, metrics, users);
         return;
 
         void AddUser(string userKey, string variationId, bool duplicateExposure = false)
         {
             var exposedAt = DateTimeOffset.Parse("2026-01-01T01:00:00Z").AddSeconds(sequence);
-            users.Add(new ScenarioUser(EnvId, userKey, userKey));
+            users.Add(new ScenarioUser(SamplingEnvId, userKey, userKey));
 
             exposures.Add(new ScenarioExposure(
-                GuidFromSequence(sequence++),
-                EnvId,
+                GuidFromSequence(200_000 + sequence++),
+                SamplingEnvId,
                 FlagKey,
                 userKey,
                 variationId,
@@ -199,8 +192,8 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
             if (duplicateExposure)
             {
                 exposures.Add(new ScenarioExposure(
-                    GuidFromSequence(sequence++),
-                    EnvId,
+                    GuidFromSequence(200_000 + sequence++),
+                    SamplingEnvId,
                     FlagKey,
                     userKey,
                     variationId,
@@ -209,8 +202,8 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
                     createdAt));
             }
             metrics.Add(new ScenarioMetric(
-                MetricGuidFromSequence(metricSequence++),
-                EnvId,
+                MetricGuidFromSequence(200_000 + metricSequence++),
+                SamplingEnvId,
                 userKey,
                 MetricEvent,
                 "CustomEvent",
@@ -218,8 +211,8 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
                 exposedAt.AddMinutes(-1),
                 createdAt));
             metrics.Add(new ScenarioMetric(
-                MetricGuidFromSequence(metricSequence++),
-                EnvId,
+                MetricGuidFromSequence(200_000 + metricSequence++),
+                SamplingEnvId,
                 userKey,
                 MetricEvent,
                 "CustomEvent",
@@ -227,8 +220,8 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
                 exposedAt.AddMinutes(1),
                 createdAt));
             metrics.Add(new ScenarioMetric(
-                MetricGuidFromSequence(metricSequence++),
-                EnvId,
+                MetricGuidFromSequence(200_000 + metricSequence++),
+                SamplingEnvId,
                 userKey,
                 MetricEvent,
                 "CustomEvent",
@@ -236,8 +229,8 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
                 exposedAt.AddMinutes(2),
                 createdAt));
             metrics.Add(new ScenarioMetric(
-                MetricGuidFromSequence(metricSequence++),
-                EnvId,
+                MetricGuidFromSequence(200_000 + metricSequence++),
+                SamplingEnvId,
                 userKey,
                 GuardrailEvent,
                 "CustomEvent",
@@ -247,90 +240,80 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
         }
     }
 
-    public (string Name, IExperimentStatsService Service)[] CreateExperimentStatsServices()
+    public IExperimentStatsService CreateExperimentStatsService(string provider) => provider switch
     {
-        return
-        [
-            ("Postgres", new global::Infrastructure.Services.EntityFrameworkCore.ExperimentStatsService(CreateDbContext())),
-            ("MongoDb", new global::Infrastructure.Services.MongoDb.ExperimentStatsService(CreateMongoDbClient())),
-            ("ClickHouse", new global::Infrastructure.Services.ClickHouse.ExperimentStatsService(CreateClickHouseClient()))
-        ];
+        "Postgres" => new global::Infrastructure.Services.EntityFrameworkCore.ExperimentStatsService(CreateDbContext()),
+        "MongoDb" => new global::Infrastructure.Services.MongoDb.ExperimentStatsService(CreateMongoDbClient()),
+        "ClickHouse" => new global::Infrastructure.Services.ClickHouse.ExperimentStatsService(CreateClickHouseClient()),
+        _ => throw new ArgumentOutOfRangeException(nameof(provider), provider, null)
+    };
+
+    public IFeatureFlagInsightsService CreateFeatureFlagInsightsService(string provider) => provider switch
+    {
+        "Postgres" => new global::Infrastructure.Services.EntityFrameworkCore.ExperimentFeatureFlagInsightsService(CreateDbContext()),
+        "MongoDb" => new global::Infrastructure.Services.MongoDb.ExperimentFeatureFlagInsightsService(CreateMongoDbClient()),
+        "ClickHouse" => new global::Infrastructure.Services.ClickHouse.ExperimentFeatureFlagInsightsService(CreateClickHouseClient()),
+        _ => throw new ArgumentOutOfRangeException(nameof(provider), provider, null)
+    };
+
+    public IFeatureFlagEndUserStatsService CreateFeatureFlagEndUserStatsService(string provider) => provider switch
+    {
+        "Postgres" => new global::Infrastructure.Services.EntityFrameworkCore.ExperimentFeatureFlagEndUserStatsService(CreateDbContext()),
+        "MongoDb" => new global::Infrastructure.Services.MongoDb.ExperimentFeatureFlagEndUserStatsService(CreateMongoDbClient()),
+        "ClickHouse" => new global::Infrastructure.Services.ClickHouse.ExperimentFeatureFlagEndUserStatsService(CreateClickHouseClient()),
+        _ => throw new ArgumentOutOfRangeException(nameof(provider), provider, null)
+    };
+
+    public IExperimentMetricService CreateExperimentMetricService(string provider) => provider switch
+    {
+        "Postgres" => new global::Infrastructure.Services.EntityFrameworkCore.ExperimentMetricService(CreateDbContext()),
+        "MongoDb" => new global::Infrastructure.Services.MongoDb.ExperimentMetricService(CreateMongoDbClient()),
+        _ => throw new ArgumentOutOfRangeException(nameof(provider), provider, null)
+    };
+
+    public (IExperimentService ExperimentService, IExperimentMetricService MetricService)
+        CreateExperimentServices(string provider) => provider switch
+    {
+        "Postgres" => CreatePostgresExperimentServices(),
+        "MongoDb" => CreateMongoExperimentServices(),
+        _ => throw new ArgumentOutOfRangeException(nameof(provider), provider, null)
+    };
+
+    private (IExperimentService ExperimentService, IExperimentMetricService MetricService)
+        CreatePostgresExperimentServices()
+    {
+        var dbContext = CreateDbContext();
+        var metricService = new global::Infrastructure.Services.EntityFrameworkCore.ExperimentMetricService(dbContext);
+        return (
+            new global::Infrastructure.Services.EntityFrameworkCore.ExperimentService(
+                dbContext,
+                new global::Infrastructure.Services.EntityFrameworkCore.ExperimentStatsService(dbContext),
+                new global::Infrastructure.Services.EntityFrameworkCore.FeatureFlagService(
+                    dbContext,
+                    NullLogger<FeatureFlagService>.Instance),
+                metricService,
+                new FixtureCurrentUser(),
+                new global::Infrastructure.Services.EntityFrameworkCore.UserService(dbContext)),
+            metricService);
     }
 
-    public (string Name, IFeatureFlagInsightsService Service)[] CreateFeatureFlagInsightsServices()
+    private (IExperimentService ExperimentService, IExperimentMetricService MetricService)
+        CreateMongoExperimentServices()
     {
-        return
-        [
-            ("Postgres", new global::Infrastructure.Services.EntityFrameworkCore.ExperimentFeatureFlagInsightsService(CreateDbContext())),
-            ("MongoDb", new global::Infrastructure.Services.MongoDb.ExperimentFeatureFlagInsightsService(CreateMongoDbClient())),
-            ("ClickHouse", new global::Infrastructure.Services.ClickHouse.ExperimentFeatureFlagInsightsService(CreateClickHouseClient()))
-        ];
+        var client = CreateMongoDbClient();
+        var metricService = new global::Infrastructure.Services.MongoDb.ExperimentMetricService(client);
+        return (
+            new global::Infrastructure.Services.MongoDb.ExperimentService(
+                client,
+                new global::Infrastructure.Services.MongoDb.ExperimentStatsService(client),
+                new global::Infrastructure.Services.MongoDb.FeatureFlagService(client),
+                metricService,
+                new FixtureCurrentUser(),
+                new global::Infrastructure.Services.MongoDb.UserService(client)),
+            metricService);
     }
 
-    public (string Name, IFeatureFlagEndUserStatsService Service)[] CreateFeatureFlagEndUserStatsServices()
-    {
-        return
-        [
-            ("Postgres", new global::Infrastructure.Services.EntityFrameworkCore.ExperimentFeatureFlagEndUserStatsService(CreateDbContext())),
-            ("MongoDb", new global::Infrastructure.Services.MongoDb.ExperimentFeatureFlagEndUserStatsService(CreateMongoDbClient())),
-            ("ClickHouse", new global::Infrastructure.Services.ClickHouse.ExperimentFeatureFlagEndUserStatsService(CreateClickHouseClient()))
-        ];
-    }
-
-    public (string Name, IExperimentMetricService Service)[] CreateExperimentMetricServices()
-    {
-        return
-        [
-            ("Postgres", new global::Infrastructure.Services.EntityFrameworkCore.ExperimentMetricService(CreateDbContext())),
-            ("MongoDb", new global::Infrastructure.Services.MongoDb.ExperimentMetricService(CreateMongoDbClient()))
-        ];
-    }
-
-    public (string Name, IExperimentService ExperimentService, IExperimentMetricService MetricService)[]
-        CreateExperimentServices()
-    {
-        var currentUser = new FixtureCurrentUser();
-
-        var postgresDbContext = CreateDbContext();
-        var postgresMetricService = new global::Infrastructure.Services.EntityFrameworkCore.ExperimentMetricService(postgresDbContext);
-        var postgresStatsService = new global::Infrastructure.Services.EntityFrameworkCore.ExperimentStatsService(postgresDbContext);
-        var postgresFeatureFlagService = new global::Infrastructure.Services.EntityFrameworkCore.FeatureFlagService(postgresDbContext);
-        var postgresUserService = new global::Infrastructure.Services.EntityFrameworkCore.UserService(postgresDbContext);
-
-        var mongoDbClient = CreateMongoDbClient();
-        var mongoMetricService = new global::Infrastructure.Services.MongoDb.ExperimentMetricService(mongoDbClient);
-        var mongoStatsService = new global::Infrastructure.Services.MongoDb.ExperimentStatsService(mongoDbClient);
-        var mongoFeatureFlagService = new global::Infrastructure.Services.MongoDb.FeatureFlagService(mongoDbClient);
-        var mongoUserService = new global::Infrastructure.Services.MongoDb.UserService(mongoDbClient);
-
-        return
-        [
-            (
-                "Postgres",
-                new global::Infrastructure.Services.EntityFrameworkCore.ExperimentService(
-                    postgresDbContext,
-                    postgresStatsService,
-                    postgresFeatureFlagService,
-                    postgresMetricService,
-                    currentUser,
-                    postgresUserService),
-                postgresMetricService
-            ),
-            (
-                "MongoDb",
-                new global::Infrastructure.Services.MongoDb.ExperimentService(
-                    mongoDbClient,
-                    mongoStatsService,
-                    mongoFeatureFlagService,
-                    mongoMetricService,
-                    currentUser,
-                    mongoUserService),
-                mongoMetricService
-            )
-        ];
-    }
-
-    private AppDbContext CreateDbContext()
+    internal AppDbContext CreateDbContext()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseNpgsql(PostgresConnectionString)
@@ -619,26 +602,31 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
             """);
     }
 
-    private async Task ClearAsync()
+    private Task EnsureSeededAsync(string provider, string scenario, Func<Task> seed) =>
+        _seedTasks.GetOrAdd(
+            $"{provider}:{scenario}",
+            _ => new Lazy<Task>(seed, LazyThreadSafetyMode.ExecutionAndPublication)).Value;
+
+    private async Task SeedProviderAsync(
+        string provider,
+        IReadOnlyCollection<ScenarioExposure> exposures,
+        IReadOnlyCollection<ScenarioMetric> metrics,
+        IReadOnlyCollection<ScenarioUser> users)
     {
-        await using (var connection = new NpgsqlConnection(PostgresConnectionString))
+        switch (provider)
         {
-            await connection.ExecuteAsync("""
-                TRUNCATE TABLE experiment_exposure_events;
-                TRUNCATE TABLE experiment_metric_events;
-                TRUNCATE TABLE end_users;
-                TRUNCATE TABLE experiment_run_assignments;
-                """);
+            case "Postgres":
+                await SeedPostgresAsync(exposures, metrics, users);
+                break;
+            case "MongoDb":
+                await SeedMongoAsync(exposures, metrics, users);
+                break;
+            case "ClickHouse":
+                await SeedClickHouseAsync(exposures, metrics, users);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(provider), provider, null);
         }
-
-        var mongo = CreateMongoDbClient();
-        await mongo.CollectionOf<ExperimentExposureEvent>().DeleteManyAsync(_ => true);
-        await mongo.CollectionOf<ExperimentMetricEvent>().DeleteManyAsync(_ => true);
-        await mongo.CollectionOf<EndUser>().DeleteManyAsync(_ => true);
-
-        var clickHouse = CreateClickHouseClient();
-        await clickHouse.ExecuteCommandAsync("TRUNCATE TABLE experiment_exposure_events");
-        await clickHouse.ExecuteCommandAsync("TRUNCATE TABLE experiment_metric_events");
     }
 
     private async Task SeedPostgresAsync(
@@ -647,25 +635,95 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
         IEnumerable<ScenarioUser> users)
     {
         await using var connection = new NpgsqlConnection(PostgresConnectionString);
+        await connection.OpenAsync();
+        await using var transaction = await connection.BeginTransactionAsync();
 
-        await connection.ExecuteAsync("""
-            INSERT INTO experiment_exposure_events
+        await CopyExposuresAsync(connection, exposures);
+        await CopyMetricsAsync(connection, metrics);
+        await CopyUsersAsync(connection, users);
+
+        await transaction.CommitAsync();
+    }
+
+    private static async Task CopyExposuresAsync(
+        NpgsqlConnection connection,
+        IEnumerable<ScenarioExposure> exposures)
+    {
+        await using var writer = await connection.BeginBinaryImportAsync("""
+            COPY experiment_exposure_events
                 (id, env_id, flag_key, user_key, variation_id, variation_value, exposed_at, properties, created_at)
-            VALUES
-                (@Id, @EnvId, @FlagKey, @UserKey, @VariationId, @VariationValue, @ExposedAt, @Properties::jsonb, @CreatedAt)
-            """, exposures);
+            FROM STDIN (FORMAT BINARY)
+            """);
 
-        await connection.ExecuteAsync("""
-            INSERT INTO experiment_metric_events
+        foreach (var exposure in exposures)
+        {
+            await writer.StartRowAsync();
+            await writer.WriteAsync(exposure.Id, NpgsqlDbType.Uuid);
+            await writer.WriteAsync(exposure.EnvId, NpgsqlDbType.Uuid);
+            await writer.WriteAsync(exposure.FlagKey, NpgsqlDbType.Varchar);
+            await writer.WriteAsync(exposure.UserKey, NpgsqlDbType.Varchar);
+            await writer.WriteAsync(exposure.VariationId, NpgsqlDbType.Varchar);
+            if (exposure.VariationValue is null)
+            {
+                await writer.WriteNullAsync();
+            }
+            else
+            {
+                await writer.WriteAsync(exposure.VariationValue, NpgsqlDbType.Varchar);
+            }
+            await writer.WriteAsync(exposure.ExposedAt, NpgsqlDbType.TimestampTz);
+            await writer.WriteAsync(exposure.Properties, NpgsqlDbType.Jsonb);
+            await writer.WriteAsync(exposure.CreatedAt, NpgsqlDbType.TimestampTz);
+        }
+
+        await writer.CompleteAsync();
+    }
+
+    private static async Task CopyMetricsAsync(
+        NpgsqlConnection connection,
+        IEnumerable<ScenarioMetric> metrics)
+    {
+        await using var writer = await connection.BeginBinaryImportAsync("""
+            COPY experiment_metric_events
                 (id, env_id, user_key, event_name, event_type, numeric_value, occurred_at, properties, created_at)
-            VALUES
-                (@Id, @EnvId, @UserKey, @EventName, @EventType, @NumericValue, @OccurredAt, @Properties::jsonb, @CreatedAt)
-            """, metrics);
+            FROM STDIN (FORMAT BINARY)
+            """);
 
-        await connection.ExecuteAsync("""
-            INSERT INTO end_users (env_id, key_id, name)
-            VALUES (@EnvId, @KeyId, @Name)
-            """, users);
+        foreach (var metric in metrics)
+        {
+            await writer.StartRowAsync();
+            await writer.WriteAsync(metric.Id, NpgsqlDbType.Uuid);
+            await writer.WriteAsync(metric.EnvId, NpgsqlDbType.Uuid);
+            await writer.WriteAsync(metric.UserKey, NpgsqlDbType.Varchar);
+            await writer.WriteAsync(metric.EventName, NpgsqlDbType.Varchar);
+            await writer.WriteAsync(metric.EventType, NpgsqlDbType.Varchar);
+            await writer.WriteAsync(metric.NumericValue, NpgsqlDbType.Double);
+            await writer.WriteAsync(metric.OccurredAt, NpgsqlDbType.TimestampTz);
+            await writer.WriteAsync(metric.Properties, NpgsqlDbType.Jsonb);
+            await writer.WriteAsync(metric.CreatedAt, NpgsqlDbType.TimestampTz);
+        }
+
+        await writer.CompleteAsync();
+    }
+
+    private static async Task CopyUsersAsync(
+        NpgsqlConnection connection,
+        IEnumerable<ScenarioUser> users)
+    {
+        await using var writer = await connection.BeginBinaryImportAsync("""
+            COPY end_users (env_id, key_id, name)
+            FROM STDIN (FORMAT BINARY)
+            """);
+
+        foreach (var user in users)
+        {
+            await writer.StartRowAsync();
+            await writer.WriteAsync(user.EnvId, NpgsqlDbType.Uuid);
+            await writer.WriteAsync(user.KeyId, NpgsqlDbType.Varchar);
+            await writer.WriteAsync(user.Name, NpgsqlDbType.Varchar);
+        }
+
+        await writer.CompleteAsync();
     }
 
     private async Task SeedMongoAsync(
@@ -770,58 +828,6 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
                 VALUES
                     {string.Join(",\n", values)}
                 """);
-        }
-    }
-
-    private async Task ValidateClickHouseSeedAsync(
-        int expectedExposures,
-        int expectedMetrics,
-        int expectedFlagExposures)
-    {
-        var clickHouse = CreateClickHouseClient();
-        var exposureCount = await clickHouse.QueryAsync<CountRow>(
-            "SELECT toInt32(count()) AS Count FROM experiment_exposure_events");
-        var metricCount = await clickHouse.QueryAsync<CountRow>(
-            "SELECT toInt32(count()) AS Count FROM experiment_metric_events");
-        var envFlagExposureCount = await clickHouse.QueryAsync<CountRow>($"""
-            SELECT toInt32(count()) AS Count
-            FROM experiment_exposure_events
-            WHERE env_id = {ChUuid(EnvId)}
-              AND flag_key = {ChString(FlagKey)}
-            """);
-        var filteredExposureCount = await clickHouse.QueryAsync<CountRow>($"""
-            SELECT toInt32(count()) AS Count
-            FROM experiment_exposure_events
-            WHERE env_id = {ChUuid(EnvId)}
-              AND flag_key = {ChString(FlagKey)}
-              AND exposed_at >= {ChDateTime64(DateTimeOffset.Parse("2026-01-01T00:00:00Z"))}
-              AND exposed_at < {ChDateTime64(DateTimeOffset.Parse("2026-01-03T00:00:00Z"))}
-            """);
-
-        if (exposureCount.Single().Count != expectedExposures || metricCount.Single().Count != expectedMetrics)
-        {
-            throw new InvalidOperationException(
-                $"ClickHouse seed failed. Expected {expectedExposures} exposures and {expectedMetrics} metrics, " +
-                $"actual {exposureCount.Single().Count} exposures and {metricCount.Single().Count} metrics.");
-        }
-
-        if (filteredExposureCount.Single().Count != expectedFlagExposures)
-        {
-            var sample = await clickHouse.QueryAsync<ExposureSampleRow>("""
-                SELECT
-                    toString(env_id) AS EnvId,
-                    flag_key AS FlagKey,
-                    toString(exposed_at) AS ExposedAt,
-                    toUnixTimestamp64Milli(exposed_at) AS ExposedAtMs
-                FROM experiment_exposure_events
-                LIMIT 1
-                """);
-            throw new InvalidOperationException(
-                $"ClickHouse filtered seed check failed. Expected {expectedFlagExposures} " +
-                $"matching exposures, actual {filteredExposureCount.Single().Count}. " +
-                $"Env/flag count {envFlagExposureCount.Single().Count}. " +
-                $"Sample: {sample.SingleOrDefault()?.EnvId}, {sample.SingleOrDefault()?.FlagKey}, " +
-                $"{sample.SingleOrDefault()?.ExposedAt}, {sample.SingleOrDefault()?.ExposedAtMs}.");
         }
     }
 
@@ -991,23 +997,11 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
             Guid.Parse($"10000000-0000-0000-0000-{sequence:000000000000}");
     }
 
-    private sealed class CountRow
-    {
-        public int Count { get; init; }
-    }
-
     private sealed class FixtureCurrentUser : ICurrentUser
     {
         public Guid Id => Guid.Empty;
     }
 
-    private sealed class ExposureSampleRow
-    {
-        public string EnvId { get; init; } = string.Empty;
-        public string FlagKey { get; init; } = string.Empty;
-        public string ExposedAt { get; init; } = string.Empty;
-        public long ExposedAtMs { get; init; }
-    }
 }
 
 public sealed record ScenarioUser(Guid EnvId, string KeyId, string Name);

@@ -8,12 +8,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 
-namespace Application.IntegrationTests.Mcp;
+namespace Api.UnitTests.Mcp;
 
 public class McpJwtBearerEventsTests
 {
     [Fact]
-    public async Task NonMcpTokenIsAccepted()
+    public async Task ValidateToken_NonMcpToken_AcceptsToken()
     {
         var context = CreateContext("/api/v1/user/profile", []);
         var events = new McpJwtBearerEvents(new TestMcpAuthorizationStore());
@@ -24,7 +24,7 @@ public class McpJwtBearerEventsTests
     }
 
     [Fact]
-    public async Task McpTokenCannotBeUsedOutsideMcpEndpoint()
+    public async Task ValidateToken_McpTokenOutsideMcpEndpoint_RejectsToken()
     {
         var context = CreateContext("/api/v1/user/profile",
         [
@@ -39,7 +39,7 @@ public class McpJwtBearerEventsTests
     }
 
     [Fact]
-    public async Task McpTokenRequiresTokenId()
+    public async Task ValidateToken_MissingTokenId_RejectsToken()
     {
         var context = CreateContext("/mcp",
         [
@@ -53,7 +53,7 @@ public class McpJwtBearerEventsTests
     }
 
     [Fact]
-    public async Task RevokedMcpTokenIsRejected()
+    public async Task ValidateToken_RevokedMcpToken_RejectsToken()
     {
         const string tokenId = "token-1";
         var store = new TestMcpAuthorizationStore(revokedTokenIds: [tokenId]);
@@ -70,7 +70,7 @@ public class McpJwtBearerEventsTests
     }
 
     [Fact]
-    public async Task UnknownMcpTokenIsRejected()
+    public async Task ValidateToken_UnknownMcpToken_RejectsToken()
     {
         var context = CreateContext("/mcp",
         [
