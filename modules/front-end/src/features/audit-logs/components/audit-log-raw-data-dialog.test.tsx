@@ -10,8 +10,22 @@ const mergeViewMock = vi.hoisted(() => vi.fn())
 
 vi.mock("@codemirror/merge", () => ({
   MergeView: class {
-    a = { requestMeasure: vi.fn() }
-    b = { requestMeasure: vi.fn() }
+    a = {
+      requestMeasure: vi.fn(
+        (request?: { read: () => unknown; write?: () => void }) => {
+          request?.read()
+          request?.write?.()
+        }
+      ),
+    }
+    b = {
+      requestMeasure: vi.fn(
+        (request?: { read: () => unknown; write?: () => void }) => {
+          request?.read()
+          request?.write?.()
+        }
+      ),
+    }
 
     constructor(config: unknown) {
       mergeViewMock(config)
@@ -60,6 +74,14 @@ describe("AuditLogRawDataDialog", () => {
     expect(screen.getByRole("dialog")).toHaveClass(
       "max-h-[78vh]",
       "grid-rows-[auto_auto_auto]"
+    )
+    expect(document.querySelector('[data-slot="raw-data-diff"]')).toHaveClass(
+      "[&_.cm-editor]:max-h-[calc(78vh-11rem)]",
+      "[&_.cm-mergeView]:max-h-[calc(78vh-11rem)]",
+      "[&_.cm-scroller]:max-h-[calc(78vh-11rem)]"
+    )
+    await waitFor(() =>
+      expect(screen.getByRole("dialog")).not.toHaveClass("invisible")
     )
     expect(screen.getByText(/Segment · After/)).toBeInTheDocument()
     expect(
