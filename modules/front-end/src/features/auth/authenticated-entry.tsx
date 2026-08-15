@@ -42,6 +42,7 @@ type EntryStatus =
   | "ready"
   | "login"
   | "permission-denied"
+  | "create-project"
   | "create-example-project"
   | "select-workspace"
   | "onboarding"
@@ -259,7 +260,11 @@ export function AuthenticatedEntry({ children }: { children: ReactNode }) {
           }
 
           if (canUseAction(policies, "project/*", "CreateProject")) {
-            setStatus("create-example-project")
+            setStatus(
+              canUseAction(policies, "project/*", "CanAccessProject")
+                ? "create-example-project"
+                : "create-project"
+            )
             return
           }
         }
@@ -330,6 +335,10 @@ export function AuthenticatedEntry({ children }: { children: ReactNode }) {
         replace
       />
     )
+  }
+
+  if (status === "create-project") {
+    return <Navigate to={`/${lang}/onboarding?mode=create-project`} replace />
   }
 
   if (status === "select-workspace") {

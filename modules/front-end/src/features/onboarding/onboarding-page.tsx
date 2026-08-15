@@ -22,6 +22,7 @@ import {
 import { CreationPreview } from "@/features/onboarding/components/creation-preview"
 import { OnboardingForm } from "@/features/onboarding/components/onboarding-form"
 import { slugify } from "@/features/onboarding/onboarding-utils"
+import { ApiRequestError } from "@/lib/api/authenticated-api"
 
 const defaultEnvironments = ["Dev", "Prod"]
 
@@ -32,8 +33,13 @@ export function OnboardingPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [searchParams] = useSearchParams()
-  const isExampleProjectRecovery =
+  const projectRecoveryMode =
     searchParams.get("mode") === "create-example-project"
+      ? "example"
+      : searchParams.get("mode") === "create-project"
+        ? "no-access"
+        : undefined
+  const isProjectRecovery = Boolean(projectRecoveryMode)
   const currentOrganization = getCurrentOrganization()
   const currentOrganizationId = currentOrganization?.id ?? ""
   const completedHereRef = useRef(false)
@@ -47,7 +53,7 @@ export function OnboardingPage() {
 
   useEffect(() => {
     if (
-      !isExampleProjectRecovery &&
+      !isProjectRecovery &&
       !completedHereRef.current &&
       currentOrganization?.initialized !== false
     ) {
@@ -55,15 +61,10 @@ export function OnboardingPage() {
         replace: true,
       })
     }
-  }, [
-    currentOrganization?.initialized,
-    isExampleProjectRecovery,
-    lang,
-    navigate,
-  ])
+  }, [currentOrganization?.initialized, isProjectRecovery, lang, navigate])
 
   useEffect(() => {
-    if (!isExampleProjectRecovery || !currentOrganizationId) {
+    if (!isProjectRecovery || !currentOrganizationId) {
       return
     }
 
@@ -94,21 +95,14 @@ export function OnboardingPage() {
     return () => {
       cancelled = true
     }
-  }, [
-    currentOrganizationId,
-    isExampleProjectRecovery,
-    lang,
-    navigate,
-    queryClient,
-  ])
+  }, [currentOrganizationId, isProjectRecovery, lang, navigate, queryClient])
 
   const organizationKey = useMemo(
     () => slugify(organizationName),
     [organizationName]
   )
   const canSubmit = Boolean(
-    (isExampleProjectRecovery ||
-      (organizationName.trim() && organizationKey)) &&
+    (isProjectRecovery || (organizationName.trim() && organizationKey)) &&
     projectName.trim() &&
     projectKey.trim()
   )
@@ -131,7 +125,7 @@ export function OnboardingPage() {
     setIsSubmitting(true)
 
     try {
-      if (isExampleProjectRecovery) {
+      if (isProjectRecovery) {
         const project = await createExampleProject({
           name: projectName.trim(),
           key: projectKey.trim(),
@@ -142,7 +136,7 @@ export function OnboardingPage() {
           ) ?? project.environments[0]
 
         if (!environment) {
-          throw new Error("Example project did not include an environment")
+          throw new Error("Created project did not include an environment")
         }
 
         saveCurrentProjectEnv({
@@ -191,8 +185,17 @@ export function OnboardingPage() {
       navigate(`${localizedPath(lang, landingPath)}?status=init`, {
         replace: true,
       })
-    } catch {
-      setError(t("onboarding.errors.submit"))
+    } catch (submitError) {
+      const errorKey =
+        isProjectRecovery &&
+        submitError instanceof ApiRequestError &&
+        submitError.status === 403
+          ? "onboarding.errors.projectPermissionDenied"
+          : isProjectRecovery
+            ? "onboarding.errors.projectSubmit"
+            : "onboarding.errors.submit"
+
+      setError(t(errorKey))
     } finally {
       setIsSubmitting(false)
     }
@@ -210,7 +213,7 @@ export function OnboardingPage() {
         <div className="w-full max-w-[90rem] rounded-lg border bg-card px-9 py-6 shadow-sm">
           <div className="grid items-stretch gap-16 xl:grid-cols-[minmax(38rem,45rem)_minmax(30rem,36rem)]">
             <OnboardingForm
-              isExampleProjectRecovery={isExampleProjectRecovery}
+              projectRecoveryMode={projectRecoveryMode}
               organizationName={organizationName}
               projectName={projectName}
               projectKey={projectKey}

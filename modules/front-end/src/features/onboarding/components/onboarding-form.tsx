@@ -24,7 +24,7 @@ type TextFieldProps = {
 }
 
 type OnboardingFormProps = {
-  isExampleProjectRecovery?: boolean
+  projectRecoveryMode?: "example" | "no-access"
   organizationName: string
   projectName: string
   projectKey: string
@@ -39,7 +39,7 @@ type OnboardingFormProps = {
 }
 
 export function OnboardingForm({
-  isExampleProjectRecovery = false,
+  projectRecoveryMode,
   organizationName,
   projectName,
   projectKey,
@@ -53,28 +53,31 @@ export function OnboardingForm({
   onSignOut,
 }: OnboardingFormProps) {
   const { t } = useTranslation()
+  const isProjectRecovery = Boolean(projectRecoveryMode)
+  const recoveryCopyKey =
+    projectRecoveryMode === "no-access"
+      ? "onboarding.noAccessibleProjects"
+      : "onboarding.recovery"
 
   return (
     <main className="min-w-0">
       <header>
         <h1 className="text-3xl font-semibold tracking-normal">
           {t(
-            isExampleProjectRecovery
-              ? "onboarding.recovery.title"
-              : "onboarding.title"
+            isProjectRecovery ? `${recoveryCopyKey}.title` : "onboarding.title"
           )}
         </h1>
         <p className="mt-3 text-base text-muted-foreground">
           {t(
-            isExampleProjectRecovery
-              ? "onboarding.recovery.subtitle"
+            isProjectRecovery
+              ? `${recoveryCopyKey}.subtitle`
               : "onboarding.subtitle"
           )}
         </p>
       </header>
 
       <div className="mt-8 space-y-6">
-        {!isExampleProjectRecovery ? (
+        {!isProjectRecovery ? (
           <>
             <SetupSection
               icon={<Building2 className="size-6" />}
@@ -131,7 +134,11 @@ export function OnboardingForm({
             <EnvironmentPill name="Prod" tone="blue" />
           </div>
           <p className="text-sm text-muted-foreground">
-            {t("onboarding.environments.helper")}
+            {t(
+              projectRecoveryMode === "no-access"
+                ? "onboarding.noAccessibleProjects.environmentsHelper"
+                : "onboarding.environments.helper"
+            )}
           </p>
         </SetupSection>
 
@@ -154,8 +161,8 @@ export function OnboardingForm({
               <Check className="size-4" />
             )}
             {t(
-              isExampleProjectRecovery
-                ? "onboarding.recovery.complete"
+              isProjectRecovery
+                ? `${recoveryCopyKey}.complete`
                 : "onboarding.complete"
             )}
           </Button>

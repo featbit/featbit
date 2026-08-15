@@ -9,6 +9,14 @@ export const enOnboarding = {
       "This organization has no projects yet. Create an example project with Dev and Prod environments to continue.",
     complete: "Create project",
   },
+  noAccessibleProjects: {
+    title: "Create a project",
+    subtitle:
+      "You don't currently have access to any projects. Create a new project to continue.",
+    complete: "Create project",
+    environmentsHelper:
+      "FeatBit will create Dev and Prod environments with SDK secrets for this project.",
+  },
   organization: {
     section: "Organization",
     name: "Organization name",
@@ -28,7 +36,7 @@ export const enOnboarding = {
   environments: {
     section: "Environments",
     helper:
-      "FeatBit will create Dev and Prod environments with SDK secrets for your first project.",
+      "FeatBit will create Dev and Prod environments with SDK secrets for this project.",
   },
   preview: {
     title: "Setup preview",
@@ -37,11 +45,21 @@ export const enOnboarding = {
     sdkSecret: "SDK secret",
   },
   errors: {
-    submit: "Unable to complete onboarding. Please try again.",
+    submit: "Unable to complete setup. Please try again.",
+    projectSubmit: "Unable to create the project. Please try again.",
+    projectPermissionDenied:
+      "A permission rule prevents you from accessing this new project or its environments. Ask a workspace administrator to update your permissions, then try again.",
   },
 } as const
 
 export const zhOnboarding = {
+  noAccessibleProjects: {
+    title: "创建项目",
+    subtitle: "你目前没有可访问的项目。请创建一个新项目以继续。",
+    complete: "创建项目",
+    environmentsHelper:
+      "FeatBit 将为该项目创建 Dev 和 Prod 环境以及 SDK 密钥。",
+  },
   recovery: {
     title: "创建示例项目",
     subtitle:
@@ -67,7 +85,7 @@ export const zhOnboarding = {
   },
   environments: {
     section: "环境",
-    helper: "FeatBit 会为你的第一个项目创建 Dev 和 Prod 环境及 SDK 密钥。",
+    helper: "FeatBit 会为此项目创建 Dev 和 Prod 环境及 SDK 密钥。",
   },
   preview: {
     title: "设置预览",
@@ -76,6 +94,9 @@ export const zhOnboarding = {
     sdkSecret: "SDK 密钥",
   },
   errors: {
-    submit: "无法完成初始化，请重试。",
+    submit: "无法完成设置，请重试。",
+    projectSubmit: "无法创建项目，请重试。",
+    projectPermissionDenied:
+      "权限规则阻止你访问这个新项目或其环境。请联系工作区管理员更新你的权限，然后重试。",
   },
 } as const

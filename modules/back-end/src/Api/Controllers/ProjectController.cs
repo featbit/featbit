@@ -65,6 +65,8 @@ public class ProjectController : ApiControllerBase
     public async Task<ApiResponse<ProjectWithEnvs>> CreateAsync(CreateProject request)
     {
         request.OrganizationId = OrgId;
+        request.CreatorId = ProjectCreatorResolver.Resolve(HttpContext, CurrentUser);
+        request.CurrentUserPermissions = await GetRequestPermissionsAsync();
 
         var projectWithEnvs = await Mediator.Send(request);
         return Ok(projectWithEnvs);

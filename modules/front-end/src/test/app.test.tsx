@@ -437,7 +437,9 @@ describe("App shell", () => {
   function mockEmptyOrganizationApi(
     canCreateProject: boolean,
     hasExistingProject = false,
-    hasAccessibleOtherWorkspace = false
+    hasAccessibleOtherWorkspace = false,
+    canAccessProjects = canCreateProject,
+    projectCreateStatus = 200
   ) {
     let projectCreated = hasExistingProject
 
@@ -490,10 +492,12 @@ describe("App shell", () => {
                       type: "SysManaged",
                       statements: [
                         {
-                          resourceType: "*",
+                          resourceType: canAccessProjects ? "*" : "project",
                           effect: "allow",
-                          actions: ["*"],
-                          resources: ["*"],
+                          actions: canAccessProjects
+                            ? ["*"]
+                            : ["CreateProject"],
+                          resources: canAccessProjects ? ["*"] : ["project/*"],
                         },
                       ],
                     },
@@ -505,6 +509,16 @@ describe("App shell", () => {
         }
 
         if (url.endsWith("/api/v1/projects") && init?.method === "POST") {
+          if (projectCreateStatus !== 200) {
+            return new Response(
+              JSON.stringify({ success: false, errors: ["forbidden"] }),
+              {
+                status: projectCreateStatus,
+                headers: { "Content-Type": "application/json" },
+              }
+            )
+          }
+
           projectCreated = true
           return new Response(
             JSON.stringify({
@@ -719,6 +733,84 @@ describe("App shell", () => {
         { name: "Get started" },
         { timeout: 3_000 }
       )
+    ).toBeInTheDocument()
+  })
+
+  it("uses no-access copy when a project creator cannot access any projects", async () => {
+    mockEmptyOrganizationApi(true, false, false, false)
+    window.history.pushState({}, "", "/en/feature-flags")
+    signIn()
+    localStorage.setItem(
+      "current-workspace_user-1",
+      JSON.stringify({
+        id: "ws-empty",
+        key: "empty",
+        name: "Empty Workspace",
+      })
+    )
+
+    render(<App />)
+
+    expect(
+      await screen.findByRole("heading", { name: "Create a project" })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        "You don't currently have access to any projects. Create a new project to continue."
+      )
+    ).toBeInTheDocument()
+    expect(window.location.pathname).toBe("/en/onboarding")
+    expect(window.location.search).toBe("?mode=create-project")
+    expect(
+      screen.queryByText(/This organization has no projects yet/)
+    ).not.toBeInTheDocument()
+  })
+
+  it("explains when a permission rule prevents access to the new project", async () => {
+    mockEmptyOrganizationApi(true, false, false, false, 403)
+    window.history.pushState({}, "", "/en/feature-flags")
+    signIn()
+    localStorage.setItem(
+      "current-workspace_user-1",
+      JSON.stringify({
+        id: "ws-empty",
+        key: "empty",
+        name: "Empty Workspace",
+      })
+    )
+
+    render(<App />)
+
+    fireEvent.click(await screen.findByText("Create project"))
+
+    expect(
+      await screen.findByText(
+        "A permission rule prevents you from accessing this new project or its environments. Ask a workspace administrator to update your permissions, then try again."
+      )
+    ).toBeInTheDocument()
+    expect(window.location.pathname).toBe("/en/onboarding")
+    expect(localStorage.getItem("token")).toBe("test-token")
+  })
+
+  it("uses project-specific copy for other project creation failures", async () => {
+    mockEmptyOrganizationApi(true, false, false, false, 500)
+    window.history.pushState({}, "", "/en/feature-flags")
+    signIn()
+    localStorage.setItem(
+      "current-workspace_user-1",
+      JSON.stringify({
+        id: "ws-empty",
+        key: "empty",
+        name: "Empty Workspace",
+      })
+    )
+
+    render(<App />)
+
+    fireEvent.click(await screen.findByText("Create project"))
+
+    expect(
+      await screen.findByText("Unable to create the project. Please try again.")
     ).toBeInTheDocument()
   })
 
