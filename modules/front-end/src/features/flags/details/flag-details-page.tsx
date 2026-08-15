@@ -14,7 +14,6 @@ import {
   fetchChangeRequestPreview,
   performChangeRequestAction,
 } from "@/features/change-requests/change-requests-api"
-import { changeRequestsCopy } from "@/features/change-requests/change-requests-copy"
 import { ChangeRequestDecisionDialog } from "@/features/change-requests/components/change-request-decision-dialog"
 import { ChangeRequestPreviewAlert } from "@/features/change-requests/components/change-request-preview-alert"
 import {
@@ -97,7 +96,6 @@ export function FlagDetailsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const queryClient = useQueryClient()
   const lang = resolveLang(params.lang)
-  const changeRequestCopy = changeRequestsCopy(lang)
   const flagKey = decodeURIComponent(params.flagKey ?? "")
   const activeTab =
     params.tab === "history" ||
@@ -736,10 +734,9 @@ export function FlagDetailsPage() {
             requestTitle={
               pendingDecision.item.changeRequestReason?.trim() ||
               pendingDecision.item.scheduleTitle?.trim() ||
-              changeRequestCopy.fallbackRequest
+              t("changeRequests.fallbackRequest")
             }
             saving={pendingActionMutation.isPending}
-            copy={changeRequestCopy}
             onOpenChange={(open) => {
               if (!open) setPendingDecision(null)
             }}

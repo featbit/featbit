@@ -3,7 +3,6 @@ import { MemoryRouter } from "react-router-dom"
 import { describe, expect, it, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import "@/lib/i18n/i18n"
-import { changeRequestsCopy } from "../change-requests-copy"
 import type { ChangeRequestItem } from "../change-requests-types"
 import { ChangeRequestTable } from "./change-request-table"
 
@@ -68,7 +67,6 @@ describe("ChangeRequestTable", () => {
             loading={false}
             filtered={false}
             acting={null}
-            copy={changeRequestsCopy("en")}
             onAction={onAction}
             onCopyKey={onCopyKey}
             onClearFilters={vi.fn()}
@@ -192,7 +190,6 @@ describe("ChangeRequestTable", () => {
             loading={false}
             filtered={false}
             acting={null}
-            copy={changeRequestsCopy("en")}
             onAction={vi.fn()}
             onCopyKey={vi.fn()}
             onClearFilters={vi.fn()}
@@ -263,7 +260,6 @@ describe("ChangeRequestTable", () => {
             loading={false}
             filtered={false}
             acting={null}
-            copy={changeRequestsCopy("en")}
             onAction={vi.fn()}
             onCopyKey={vi.fn()}
             onClearFilters={vi.fn()}
@@ -294,7 +290,6 @@ describe("ChangeRequestTable", () => {
             loading={false}
             filtered
             acting={null}
-            copy={changeRequestsCopy("en")}
             onAction={vi.fn()}
             onCopyKey={vi.fn()}
             onClearFilters={vi.fn()}
@@ -331,7 +326,6 @@ describe("ChangeRequestTable", () => {
             loading={false}
             filtered
             acting={null}
-            copy={changeRequestsCopy("en")}
             onAction={vi.fn()}
             onCopyKey={vi.fn()}
             onClearFilters={onClearFilters}
