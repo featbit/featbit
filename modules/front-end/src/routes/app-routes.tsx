@@ -234,8 +234,11 @@ function LocalizedAuthRedirect({ mode }: { mode: "login" | "sso" }) {
 
 function AuthRoute({ mode }: { mode: "login" | "sso" }) {
   const { lang = getPreferredLanguage() } = useParams()
+  const location = useLocation()
+  const isPermissionDenied =
+    new URLSearchParams(location.search).get("reason") === "permission-denied"
 
-  if (getIdentityToken()) {
+  if (getIdentityToken() && !isPermissionDenied) {
     return <Navigate to={`/${lang}`} replace />
   }
 

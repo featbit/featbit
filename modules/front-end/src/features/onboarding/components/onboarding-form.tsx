@@ -24,6 +24,7 @@ type TextFieldProps = {
 }
 
 type OnboardingFormProps = {
+  isExampleProjectRecovery?: boolean
   organizationName: string
   projectName: string
   projectKey: string
@@ -38,6 +39,7 @@ type OnboardingFormProps = {
 }
 
 export function OnboardingForm({
+  isExampleProjectRecovery = false,
   organizationName,
   projectName,
   projectKey,
@@ -56,31 +58,43 @@ export function OnboardingForm({
     <main className="min-w-0">
       <header>
         <h1 className="text-3xl font-semibold tracking-normal">
-          {t("onboarding.title")}
+          {t(
+            isExampleProjectRecovery
+              ? "onboarding.recovery.title"
+              : "onboarding.title"
+          )}
         </h1>
         <p className="mt-3 text-base text-muted-foreground">
-          {t("onboarding.subtitle")}
+          {t(
+            isExampleProjectRecovery
+              ? "onboarding.recovery.subtitle"
+              : "onboarding.subtitle"
+          )}
         </p>
       </header>
 
       <div className="mt-8 space-y-6">
-        <SetupSection
-          icon={<Building2 className="size-6" />}
-          title={t("onboarding.organization.section")}
-        >
-          <TextField
-            id="onboardingOrganizationName"
-            label={t("onboarding.organization.name")}
-            value={organizationName}
-            placeholder={t("onboarding.organization.placeholder")}
-            onChange={setOrganizationName}
-          />
-          <p className="text-sm text-muted-foreground">
-            {t("onboarding.organization.helper")}
-          </p>
-        </SetupSection>
+        {!isExampleProjectRecovery ? (
+          <>
+            <SetupSection
+              icon={<Building2 className="size-6" />}
+              title={t("onboarding.organization.section")}
+            >
+              <TextField
+                id="onboardingOrganizationName"
+                label={t("onboarding.organization.name")}
+                value={organizationName}
+                placeholder={t("onboarding.organization.placeholder")}
+                onChange={setOrganizationName}
+              />
+              <p className="text-sm text-muted-foreground">
+                {t("onboarding.organization.helper")}
+              </p>
+            </SetupSection>
 
-        <SectionDivider />
+            <SectionDivider />
+          </>
+        ) : null}
 
         <SetupSection
           icon={<Folder className="size-6" />}
@@ -139,7 +153,11 @@ export function OnboardingForm({
             ) : (
               <Check className="size-4" />
             )}
-            {t("onboarding.complete")}
+            {t(
+              isExampleProjectRecovery
+                ? "onboarding.recovery.complete"
+                : "onboarding.complete"
+            )}
           </Button>
           <Button type="button" variant="ghost" onClick={onSignOut}>
             <LogOut className="size-4" />
