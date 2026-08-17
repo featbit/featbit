@@ -145,7 +145,7 @@ export function AccessTokenCreatedDialog({
           <p className="text-sm font-medium text-foreground">{result?.name}</p>
         </div>
 
-        <div className="flex items-start gap-2 rounded-md border bg-muted/30 p-3">
+        <div className="flex items-center gap-2 rounded-md border bg-muted/30 p-3">
           <code className="min-w-0 flex-1 font-mono text-xs break-all text-foreground">
             {result?.token}
           </code>

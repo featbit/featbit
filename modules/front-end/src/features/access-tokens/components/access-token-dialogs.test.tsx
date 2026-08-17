@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest"
 import "@/lib/i18n/i18n"
 import {
   AccessTokenConfirmDialog,
+  AccessTokenCreatedDialog,
   type AccessTokenConfirmTarget,
 } from "./access-token-dialogs"
 
@@ -36,4 +37,18 @@ describe("AccessTokenConfirmDialog", () => {
       expect(tokenName).toHaveClass("font-semibold", "text-foreground")
     }
   )
+})
+
+describe("AccessTokenCreatedDialog", () => {
+  it("vertically centers the token and copy button", () => {
+    render(
+      <AccessTokenCreatedDialog
+        result={{ name: token.name, token: "secret-token" }}
+        onClose={vi.fn()}
+      />
+    )
+
+    const tokenValue = screen.getByText("secret-token")
+    expect(tokenValue.parentElement).toHaveClass("items-center")
+  })
 })
