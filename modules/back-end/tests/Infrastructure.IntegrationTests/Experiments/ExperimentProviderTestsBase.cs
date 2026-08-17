@@ -2,10 +2,10 @@ using Application.ExperimentStats;
 using Application.FeatureFlags;
 using Application.Experiments;
 using Application.Services;
-using Domain.FeatureFlags;
 using Domain.Experiments;
 using System.Text.Json;
 using Application.EndUsers;
+using Application.Insights;
 
 namespace Infrastructure.IntegrationTests.Experiments;
 
@@ -478,7 +478,7 @@ public abstract class ExperimentProviderTestsBase(ExperimentProviderParityFixtur
         );
     }
 
-    private static IReadOnlyList<NormalizedInsight> Normalize(ICollection<Insights> insights)
+    private static IReadOnlyList<NormalizedInsight> Normalize(ICollection<Insight> insights)
     {
         return insights
             .OrderBy(x => DateTimeOffset.Parse(x.Time).UtcDateTime)

@@ -1,6 +1,6 @@
-namespace Domain.FeatureFlags;
+namespace Application.Insights;
 
-public class Insights
+public class Insight
 {
     public string Time { get; set; }
     public ICollection<VariationInsights> Variations { get; set; }

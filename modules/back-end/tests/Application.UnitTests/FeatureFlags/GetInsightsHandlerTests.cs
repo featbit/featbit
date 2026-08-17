@@ -1,4 +1,5 @@
 using Application.FeatureFlags;
+using Application.Insights;
 using Application.Services;
 using Domain.FeatureFlags;
 
@@ -26,7 +27,7 @@ public class GetInsightsHandlerTests
             .Setup(x => x.GetInsightsAsync(envId, It.IsAny<InsightFilter>()))
             .ReturnsAsync(
             [
-                new Domain.FeatureFlags.Insights
+                new Insight
                 {
                     Time = "2026-06-01T00:00:00.0000000Z",
                     Variations =

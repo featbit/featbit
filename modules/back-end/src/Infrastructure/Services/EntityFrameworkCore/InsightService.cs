@@ -1,8 +1,8 @@
 using System.Text.Json;
 using Application.FeatureFlags;
+using Application.Insights;
 using Dapper;
 using Domain.Experiments;
-using Domain.FeatureFlags;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services.EntityFrameworkCore;
@@ -40,7 +40,7 @@ public class InsightService(AppDbContext dbContext) : IInsightService
         await dbContext.SaveChangesAsync();
     }
 
-    public async Task<ICollection<Insights>> GetInsightsAsync(Guid envId, InsightFilter filter)
+    public async Task<ICollection<Insight>> GetInsightsAsync(Guid envId, InsightFilter filter)
     {
         var bucket = GetBucketExpression(filter.IntervalType);
         var from = DateTimeOffset.FromUnixTimeMilliseconds(filter.From);
@@ -74,7 +74,7 @@ public class InsightService(AppDbContext dbContext) : IInsightService
 
         return rows
             .GroupBy(x => x.Bucket)
-            .Select(group => new Insights
+            .Select(group => new Insight
             {
                 Time = DateTime.SpecifyKind(group.Key, DateTimeKind.Utc).ToString("O"),
                 Variations = group

@@ -1,7 +1,7 @@
 using System.Text.Json.Nodes;
 using Application.FeatureFlags;
+using Application.Insights;
 using Domain.Experiments;
-using Domain.FeatureFlags;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
@@ -75,7 +75,7 @@ public class InsightService(MongoDbClient mongoDb) : IInsightService
         }
     }
 
-    public async Task<ICollection<Insights>> GetInsightsAsync(Guid envId, InsightFilter filter)
+    public async Task<ICollection<Insight>> GetInsightsAsync(Guid envId, InsightFilter filter)
     {
         var start = DateTimeOffset.FromUnixTimeMilliseconds(filter.From).UtcDateTime;
         var end = DateTimeOffset.FromUnixTimeMilliseconds(filter.To).UtcDateTime;
@@ -98,7 +98,7 @@ public class InsightService(MongoDbClient mongoDb) : IInsightService
             .Where(x => !string.IsNullOrWhiteSpace(x.VariationId))
             .GroupBy(x => x.Bucket)
             .OrderBy(x => x.Key)
-            .Select(group => new Insights
+            .Select(group => new Insight
             {
                 Time = group.Key.ToString("O"),
                 Variations = group

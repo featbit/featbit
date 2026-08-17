@@ -1,5 +1,5 @@
 using Application.FeatureFlags;
-using Domain.FeatureFlags;
+using Application.Insights;
 using Infrastructure.OLAP.ClickHouse;
 
 namespace Infrastructure.Services.ClickHouse;
@@ -20,7 +20,7 @@ public class InsightService(ClickHouseClient clickHouse) : IInsightService
         throw new NotImplementedException();
     }
 
-    public async Task<ICollection<Insights>> GetInsightsAsync(Guid envId, InsightFilter filter)
+    public async Task<ICollection<Insight>> GetInsightsAsync(Guid envId, InsightFilter filter)
     {
         var bucket = GetBucketExpression(filter.IntervalType);
         var from = DateTimeOffset.FromUnixTimeMilliseconds(filter.From);
@@ -45,7 +45,7 @@ public class InsightService(ClickHouseClient clickHouse) : IInsightService
 
         return rows
             .GroupBy(x => x.BucketMs)
-            .Select(group => new Insights
+            .Select(group => new Insight
             {
                 Time = DateTimeOffset.FromUnixTimeMilliseconds(group.Key).UtcDateTime.ToString("O"),
                 Variations = group

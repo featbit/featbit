@@ -1,8 +1,5 @@
 using System.Net.Http.Headers;
 using Api.Authorization;
-using Application.Bases.Models;
-using Application.FeatureFlags;
-using Application.Identity;
 using Application.Services;
 using Application.Users;
 using Domain.Users;
@@ -59,8 +56,8 @@ public class PermissionCheckTestApp : WebApplicationFactory<Program>
             }
         });
 
-        builder.ConfigureLogging(
-            logging => logging.AddFilter("Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware", LogLevel.None)
+        builder.ConfigureLogging(logging =>
+            logging.AddFilter("Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware", LogLevel.None)
         );
     }
 
@@ -72,7 +69,8 @@ public class PermissionCheckTestApp : WebApplicationFactory<Program>
         var identityService = scope.ServiceProvider.GetRequiredService<IIdentityService>();
         var tokens = await identityService.IssueTokensAsync(TestUser.Instance(), "::1");
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
-            JwtBearerDefaults.AuthenticationScheme, tokens.AccessToken);
+            JwtBearerDefaults.AuthenticationScheme, tokens.AccessToken
+        );
         return client;
     }
 }
