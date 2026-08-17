@@ -1,19 +1,19 @@
+using Application.EndUsers;
 using Dapper;
-using Domain.FeatureFlags;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services.EntityFrameworkCore;
 
-public class ExperimentFeatureFlagEndUserStatsService(AppDbContext dbContext) : IFeatureFlagEndUserStatsService
+public class EndUserStatsService(AppDbContext dbContext) : IEndUserStatsService
 {
-    public async Task<FeatureFlagEndUserStats> GetFeatureFlagEndUserStatsAsync(FeatureFlagEndUserParam param)
+    public async Task<EndUserStats> GetEndUserStatsAsync(Guid envId, EndUserStatsFilter filter)
     {
-        var from = DateTimeOffset.FromUnixTimeMilliseconds(param.StartTime);
-        var to = DateTimeOffset.FromUnixTimeMilliseconds(param.EndTime);
-        var query = string.IsNullOrWhiteSpace(param.Query) ? null : $"%{param.Query.Trim()}%";
-        var variationId = string.IsNullOrWhiteSpace(param.VariationId) ? null : param.VariationId.Trim();
-        var pageSize = Math.Max(param.PageSize, 1);
-        var offset = Math.Max(param.PageIndex, 0) * pageSize;
+        var from = DateTimeOffset.FromUnixTimeMilliseconds(filter.From);
+        var to = DateTimeOffset.FromUnixTimeMilliseconds(filter.To);
+        var query = string.IsNullOrWhiteSpace(filter.Query) ? null : $"%{filter.Query.Trim()}%";
+        var variationId = string.IsNullOrWhiteSpace(filter.VariationId) ? null : filter.VariationId.Trim();
+        var pageSize = Math.Max(filter.PageSize, 1);
+        var offset = Math.Max(filter.PageIndex, 0) * pageSize;
 
         var sql = """
             WITH evaluations AS
@@ -40,7 +40,7 @@ public class ExperimentFeatureFlagEndUserStatsService(AppDbContext dbContext) : 
                     coalesce(u.name, e.KeyId) AS Name,
                     e.LastEvaluatedAt
                 FROM evaluations e
-                LEFT JOIN end_users u ON u.env_id = @EnvGuid AND u.key_id = e.KeyId
+                LEFT JOIN end_users u ON u.env_id = @EnvId AND u.key_id = e.KeyId
                 WHERE @Query IS NULL OR e.KeyId ILIKE @Query OR u.name ILIKE @Query
             )
             SELECT
@@ -55,25 +55,25 @@ public class ExperimentFeatureFlagEndUserStatsService(AppDbContext dbContext) : 
             LIMIT @PageSize
             """;
 
-        var rows = (await dbContext.Database.GetDbConnection().QueryAsync<FeatureFlagEndUserRow>(
+        var connection = dbContext.Database.GetDbConnection();
+        var rows = (await connection.QueryAsync<FeatureFlagEndUserRow>(
             sql,
             new
             {
-                EnvId = param.EnvId,
-                EnvGuid = param.EnvId,
-                param.FeatureFlagKey,
+                EnvId = envId,
+                filter.FeatureFlagKey,
                 VariationId = variationId,
                 Query = query,
                 From = from,
                 To = to,
                 Offset = offset,
                 PageSize = pageSize
-            })).ToArray();
+            })).AsList();
 
-        return new FeatureFlagEndUserStats
+        return new EndUserStats
         {
             TotalCount = rows.FirstOrDefault()?.TotalCount ?? 0,
-            Items = rows.Select(x => new FeatureFlagEndUser
+            Items = rows.Select(x => new EndUserStatsItem
             {
                 VariationId = x.VariationId,
                 KeyId = x.KeyId,

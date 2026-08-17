@@ -1,22 +1,22 @@
+using Application.EndUsers;
 using Domain.EndUsers;
-using Domain.FeatureFlags;
 using Domain.Experiments;
 using MongoDB.Driver;
 
 namespace Infrastructure.Services.MongoDb;
 
-public class ExperimentFeatureFlagEndUserStatsService(MongoDbClient mongoDb) : IFeatureFlagEndUserStatsService
+public class EndUserStatsService(MongoDbClient mongoDb) : IEndUserStatsService
 {
-    public async Task<FeatureFlagEndUserStats> GetFeatureFlagEndUserStatsAsync(FeatureFlagEndUserParam param)
+    public async Task<EndUserStats> GetEndUserStatsAsync(Guid envId, EndUserStatsFilter filter)
     {
-        var start = DateTimeOffset.FromUnixTimeMilliseconds(param.StartTime).UtcDateTime;
-        var end = DateTimeOffset.FromUnixTimeMilliseconds(param.EndTime).UtcDateTime;
-        var variationId = string.IsNullOrWhiteSpace(param.VariationId) ? null : param.VariationId.Trim();
-        var query = param.Query?.Trim();
+        var start = DateTimeOffset.FromUnixTimeMilliseconds(filter.From).UtcDateTime;
+        var end = DateTimeOffset.FromUnixTimeMilliseconds(filter.To).UtcDateTime;
+        var variationId = string.IsNullOrWhiteSpace(filter.VariationId) ? null : filter.VariationId.Trim();
+        var query = filter.Query?.Trim();
 
         var exposureFilter = Builders<ExperimentExposureEvent>.Filter.And(
-            Builders<ExperimentExposureEvent>.Filter.Eq(x => x.EnvId, param.EnvId),
-            Builders<ExperimentExposureEvent>.Filter.Eq(x => x.FlagKey, param.FeatureFlagKey),
+            Builders<ExperimentExposureEvent>.Filter.Eq(x => x.EnvId, envId),
+            Builders<ExperimentExposureEvent>.Filter.Eq(x => x.FlagKey, filter.FeatureFlagKey),
             Builders<ExperimentExposureEvent>.Filter.Gte(x => x.ExposedAt, start),
             Builders<ExperimentExposureEvent>.Filter.Lte(x => x.ExposedAt, end),
             Builders<ExperimentExposureEvent>.Filter.Ne(x => x.UserKey, null),
@@ -43,7 +43,7 @@ public class ExperimentFeatureFlagEndUserStatsService(MongoDbClient mongoDb) : I
             ? new Dictionary<string, EndUser>()
             : (await mongoDb.CollectionOf<EndUser>()
                 .Find(Builders<EndUser>.Filter.And(
-                    Builders<EndUser>.Filter.Eq(x => x.EnvId, param.EnvId),
+                    Builders<EndUser>.Filter.Eq(x => x.EnvId, envId),
                     Builders<EndUser>.Filter.In(x => x.KeyId, keyIds)
                 ))
                 .ToListAsync())
@@ -55,7 +55,7 @@ public class ExperimentFeatureFlagEndUserStatsService(MongoDbClient mongoDb) : I
             {
                 endUsers.TryGetValue(x.UserKey, out var endUser);
 
-                return new FeatureFlagEndUser
+                return new EndUserStatsItem
                 {
                     VariationId = x.VariationId,
                     KeyId = x.UserKey,
@@ -68,17 +68,17 @@ public class ExperimentFeatureFlagEndUserStatsService(MongoDbClient mongoDb) : I
             .ThenBy(x => x.KeyId)
             .ToArray();
 
-        var pageSize = Math.Max(param.PageSize, 1);
-        var offset = Math.Max(param.PageIndex, 0) * pageSize;
+        var pageSize = Math.Max(filter.PageSize, 1);
+        var offset = Math.Max(filter.PageIndex, 0) * pageSize;
 
-        return new FeatureFlagEndUserStats
+        return new EndUserStats
         {
             TotalCount = items.Length,
             Items = items.Skip(offset).Take(pageSize).ToArray()
         };
     }
 
-    private static bool MatchesQuery(FeatureFlagEndUser item, string? query)
+    private static bool MatchesQuery(EndUserStatsItem item, string? query)
     {
         return string.IsNullOrWhiteSpace(query) ||
                item.KeyId.Contains(query, StringComparison.OrdinalIgnoreCase) ||

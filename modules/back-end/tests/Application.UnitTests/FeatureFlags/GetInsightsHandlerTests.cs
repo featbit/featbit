@@ -11,7 +11,7 @@ public class GetInsightsHandlerTests
     {
         var envId = Guid.NewGuid();
         var featureFlagService = new Mock<IFeatureFlagService>();
-        var insightsService = new Mock<IFeatureFlagInsightsService>();
+        var insightsService = new Mock<IInsightService>();
         featureFlagService
             .Setup(x => x.GetAsync(envId, "checkout-onboarding"))
             .ReturnsAsync(new FeatureFlag
@@ -23,7 +23,7 @@ public class GetInsightsHandlerTests
                 ]
             });
         insightsService
-            .Setup(x => x.GetFeatureFlagInsightsAsync(envId, It.IsAny<StatsByVariationFilter>()))
+            .Setup(x => x.GetInsightsAsync(envId, It.IsAny<InsightFilter>()))
             .ReturnsAsync(
             [
                 new Domain.FeatureFlags.Insights
@@ -40,7 +40,7 @@ public class GetInsightsHandlerTests
         var result = (await handler.Handle(new GetInsights
         {
             EnvId = envId,
-            Filter = new StatsByVariationFilter
+            Filter = new InsightFilter
             {
                 FeatureFlagKey = "checkout-onboarding",
                 IntervalType = IntervalType.Day,

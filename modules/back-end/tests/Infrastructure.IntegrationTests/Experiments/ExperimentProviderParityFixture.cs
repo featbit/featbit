@@ -248,19 +248,19 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
         _ => throw new ArgumentOutOfRangeException(nameof(provider), provider, null)
     };
 
-    public IFeatureFlagInsightsService CreateFeatureFlagInsightsService(string provider) => provider switch
+    public IInsightService CreateInsightsService(string provider) => provider switch
     {
-        "Postgres" => new global::Infrastructure.Services.EntityFrameworkCore.ExperimentFeatureFlagInsightsService(CreateDbContext()),
-        "MongoDb" => new global::Infrastructure.Services.MongoDb.ExperimentFeatureFlagInsightsService(CreateMongoDbClient()),
-        "ClickHouse" => new global::Infrastructure.Services.ClickHouse.ExperimentFeatureFlagInsightsService(CreateClickHouseClient()),
+        "Postgres" => new global::Infrastructure.Services.EntityFrameworkCore.InsightService(CreateDbContext()),
+        "MongoDb" => new global::Infrastructure.Services.MongoDb.InsightService(CreateMongoDbClient()),
+        "ClickHouse" => new global::Infrastructure.Services.ClickHouse.InsightService(CreateClickHouseClient()),
         _ => throw new ArgumentOutOfRangeException(nameof(provider), provider, null)
     };
 
-    public IFeatureFlagEndUserStatsService CreateFeatureFlagEndUserStatsService(string provider) => provider switch
+    public IEndUserStatsService CreateEndUserStatsService(string provider) => provider switch
     {
-        "Postgres" => new global::Infrastructure.Services.EntityFrameworkCore.ExperimentFeatureFlagEndUserStatsService(CreateDbContext()),
-        "MongoDb" => new global::Infrastructure.Services.MongoDb.ExperimentFeatureFlagEndUserStatsService(CreateMongoDbClient()),
-        "ClickHouse" => new global::Infrastructure.Services.ClickHouse.ExperimentFeatureFlagEndUserStatsService(CreateClickHouseClient()),
+        "Postgres" => new global::Infrastructure.Services.EntityFrameworkCore.EndUserStatsService(CreateDbContext()),
+        "MongoDb" => new global::Infrastructure.Services.MongoDb.EndUserStatsService(CreateMongoDbClient()),
+        "ClickHouse" => new global::Infrastructure.Services.ClickHouse.EndUserStatsService(CreateClickHouseClient()),
         _ => throw new ArgumentOutOfRangeException(nameof(provider), provider, null)
     };
 

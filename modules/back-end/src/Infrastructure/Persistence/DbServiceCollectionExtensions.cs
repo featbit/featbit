@@ -29,8 +29,8 @@ public static class DbServiceCollectionExtensions
         {
             services.TryAddClickHouse(configuration);
 
-            services.Replace(ServiceDescriptor.Transient<IFeatureFlagInsightsService, ClickHouseServices.ExperimentFeatureFlagInsightsService>());
-            services.Replace(ServiceDescriptor.Transient<IFeatureFlagEndUserStatsService, ClickHouseServices.ExperimentFeatureFlagEndUserStatsService>());
+            services.Replace(ServiceDescriptor.Transient<IInsightService, ClickHouseServices.InsightService>());
+            services.Replace(ServiceDescriptor.Transient<IEndUserStatsService, ClickHouseServices.EndUserStatsService>());
             services.Replace(ServiceDescriptor.Transient<IExperimentStatsService, ClickHouseServices.ExperimentStatsService>());
         }
 
@@ -57,10 +57,9 @@ public static class DbServiceCollectionExtensions
             services.AddTransient<IGlobalUserService, MongoServices.GlobalUserService>();
             services.AddTransient<ISegmentService, MongoServices.SegmentService>();
             services.AddTransient<IFeatureFlagService, MongoServices.FeatureFlagService>();
-            services.AddTransient<IFeatureFlagInsightsService, MongoServices.ExperimentFeatureFlagInsightsService>();
-            services.AddTransient<IFeatureFlagEndUserStatsService, MongoServices.ExperimentFeatureFlagEndUserStatsService>();
+            services.AddTransient<IEndUserStatsService, MongoServices.EndUserStatsService>();
             services.AddTransient<IExperimentStatsService, MongoServices.ExperimentStatsService>();
-            services.AddTransient<IInsightService, MongoServices.ExperimentInsightService>();
+            services.AddTransient<IInsightService, MongoServices.InsightService>();
             services.AddTransient<ITriggerService, MongoServices.TriggerService>();
             services.AddTransient<IExperimentService, MongoServices.ExperimentService>();
             services.AddTransient<IExperimentLayerService, MongoServices.ExperimentLayerService>();
@@ -102,10 +101,9 @@ public static class DbServiceCollectionExtensions
             services.AddTransient<IGlobalUserService, EntityFrameworkCoreServices.GlobalUserService>();
             services.AddTransient<ISegmentService, EntityFrameworkCoreServices.SegmentService>();
             services.AddTransient<IFeatureFlagService, EntityFrameworkCoreServices.FeatureFlagService>();
-            services.AddTransient<IFeatureFlagInsightsService, EntityFrameworkCoreServices.ExperimentFeatureFlagInsightsService>();
-            services.AddTransient<IFeatureFlagEndUserStatsService, EntityFrameworkCoreServices.ExperimentFeatureFlagEndUserStatsService>();
+            services.AddTransient<IEndUserStatsService, EntityFrameworkCoreServices.EndUserStatsService>();
             services.AddTransient<IExperimentStatsService, EntityFrameworkCoreServices.ExperimentStatsService>();
-            services.AddTransient<IInsightService, EntityFrameworkCoreServices.ExperimentInsightService>();
+            services.AddTransient<IInsightService, EntityFrameworkCoreServices.InsightService>();
             services.AddTransient<ITriggerService, EntityFrameworkCoreServices.TriggerService>();
             services.AddTransient<IExperimentService, EntityFrameworkCoreServices.ExperimentService>();
             services.AddTransient<IExperimentLayerService, EntityFrameworkCoreServices.ExperimentLayerService>();

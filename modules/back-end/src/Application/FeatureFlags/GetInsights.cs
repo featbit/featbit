@@ -6,7 +6,7 @@ namespace Application.FeatureFlags;
 public class GetInsights : IRequest<IEnumerable<InsightsVm>>
 {
     public Guid EnvId { get; set; }
-    public StatsByVariationFilter Filter { get; set; }
+    public InsightFilter Filter { get; set; }
 }
 
 public class GetInsightsValidator : AbstractValidator<GetInsights>
@@ -27,24 +27,14 @@ public class GetInsightsValidator : AbstractValidator<GetInsights>
     }
 }
 
-public class GetInsightsHandler : IRequestHandler<GetInsights, IEnumerable<InsightsVm>>
+public class GetInsightsHandler(IFeatureFlagService flagService, IInsightService insightService)
+    : IRequestHandler<GetInsights, IEnumerable<InsightsVm>>
 {
-    private readonly IFeatureFlagService _service;
-    private readonly IFeatureFlagInsightsService _insightsService;
-
-    public GetInsightsHandler(
-        IFeatureFlagService service,
-        IFeatureFlagInsightsService insightsService)
-    {
-        _service = service;
-        _insightsService = insightsService;
-    }
-
     public async Task<IEnumerable<InsightsVm>> Handle(GetInsights request, CancellationToken cancellationToken)
     {
-        var featureFlag = await _service.GetAsync(request.EnvId, request.Filter.FeatureFlagKey);
+        var featureFlag = await flagService.GetAsync(request.EnvId, request.Filter.FeatureFlagKey);
 
-        var stats = await _insightsService.GetFeatureFlagInsightsAsync(request.EnvId, request.Filter);
+        var stats = await insightService.GetInsightsAsync(request.EnvId, request.Filter);
 
         return stats.Select(s => new InsightsVm
         {

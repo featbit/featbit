@@ -1,18 +1,18 @@
-using Domain.FeatureFlags;
+using Application.EndUsers;
 using Infrastructure.OLAP.ClickHouse;
 
 namespace Infrastructure.Services.ClickHouse;
 
-public class ExperimentFeatureFlagEndUserStatsService(ClickHouseClient clickHouse) : IFeatureFlagEndUserStatsService
+public class EndUserStatsService(ClickHouseClient clickHouse) : IEndUserStatsService
 {
-    public async Task<FeatureFlagEndUserStats> GetFeatureFlagEndUserStatsAsync(FeatureFlagEndUserParam param)
+    public async Task<EndUserStats> GetEndUserStatsAsync(Guid envId, EndUserStatsFilter filter)
     {
-        var from = DateTimeOffset.FromUnixTimeMilliseconds(param.StartTime);
-        var to = DateTimeOffset.FromUnixTimeMilliseconds(param.EndTime);
-        var variationId = string.IsNullOrWhiteSpace(param.VariationId) ? null : param.VariationId.Trim();
-        var query = string.IsNullOrWhiteSpace(param.Query) ? null : param.Query.Trim();
-        var pageSize = Math.Max(param.PageSize, 1);
-        var offset = Math.Max(param.PageIndex, 0) * pageSize;
+        var from = DateTimeOffset.FromUnixTimeMilliseconds(filter.From);
+        var to = DateTimeOffset.FromUnixTimeMilliseconds(filter.To);
+        var variationId = string.IsNullOrWhiteSpace(filter.VariationId) ? null : filter.VariationId.Trim();
+        var query = string.IsNullOrWhiteSpace(filter.Query) ? null : filter.Query.Trim();
+        var pageSize = Math.Max(filter.PageSize, 1);
+        var offset = Math.Max(filter.PageIndex, 0) * pageSize;
 
         var variationClause = variationId == null
             ? string.Empty
@@ -35,8 +35,8 @@ public class ExperimentFeatureFlagEndUserStatsService(ClickHouseClient clickHous
                     argMax(if(empty(user_name), user_key, user_name), exposed_at) AS Name,
                     max(exposed_at) AS LastEvaluatedAt
                 FROM experiment_exposure_events
-                WHERE env_id = {ClickHouseSql.Uuid(param.EnvId)}
-                  AND flag_key = {ClickHouseSql.String(param.FeatureFlagKey)}
+                WHERE env_id = {ClickHouseSql.Uuid(envId)}
+                  AND flag_key = {ClickHouseSql.String(filter.FeatureFlagKey)}
                   AND exposed_at >= {ClickHouseSql.DateTime64(from)}
                   AND exposed_at <= {ClickHouseSql.DateTime64(to)}
                   AND notEmpty(user_key)
@@ -65,10 +65,10 @@ public class ExperimentFeatureFlagEndUserStatsService(ClickHouseClient clickHous
 
         var rows = await clickHouse.QueryAsync<FeatureFlagEndUserRow>(sql);
 
-        return new FeatureFlagEndUserStats
+        return new EndUserStats
         {
             TotalCount = rows.FirstOrDefault()?.TotalCount ?? 0,
-            Items = rows.Select(x => new FeatureFlagEndUser
+            Items = rows.Select(x => new EndUserStatsItem
             {
                 VariationId = x.VariationId,
                 KeyId = x.KeyId,

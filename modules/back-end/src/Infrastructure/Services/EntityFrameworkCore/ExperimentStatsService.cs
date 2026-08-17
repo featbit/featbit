@@ -167,7 +167,8 @@ public class ExperimentStatsService(AppDbContext dbContext) : IExperimentStatsSe
             ORDER BY fe.variant
             """;
 
-        var rows = (await dbContext.Database.GetDbConnection().QueryAsync<ExperimentVariantStatsVm>(
+        var connection = dbContext.Database.GetDbConnection();
+        var rows = (await connection.QueryAsync<ExperimentVariantStatsVm>(
             sql,
             new
             {
@@ -185,7 +186,7 @@ public class ExperimentStatsService(AppDbContext dbContext) : IExperimentStatsSe
                 trafficScope.TrafficScopeKey,
                 trafficScope.TrafficBucketStart,
                 trafficScope.TrafficBucketEnd
-            })).ToArray();
+            })).AsList();
 
         foreach (var row in rows)
         {
@@ -419,7 +420,8 @@ public class ExperimentStatsService(AppDbContext dbContext) : IExperimentStatsSe
             ORDER BY fe.variant
             """;
 
-        var rows = (await dbContext.Database.GetDbConnection().QueryAsync<ExperimentVariantStatsVm>(
+        var connection = dbContext.Database.GetDbConnection();
+        var rows = (await connection.QueryAsync<ExperimentVariantStatsVm>(
             sql,
             new
             {
@@ -437,7 +439,7 @@ public class ExperimentStatsService(AppDbContext dbContext) : IExperimentStatsSe
                 SamplingScopeKey = samplingScopeKey,
                 request.AnalysisSamplingPlan,
                 Now = DateTime.UtcNow
-            })).ToArray();
+            })).AsList();
 
         foreach (var row in rows)
         {
@@ -661,7 +663,8 @@ public class ExperimentStatsService(AppDbContext dbContext) : IExperimentStatsSe
             ORDER BY fe.variant
             """;
 
-        var rows = (await dbContext.Database.GetDbConnection().QueryAsync<ExperimentVariantStatsVm>(
+        var connection = dbContext.Database.GetDbConnection();
+        var rows = (await connection.QueryAsync<ExperimentVariantStatsVm>(
             sql,
             new
             {
@@ -677,7 +680,7 @@ public class ExperimentStatsService(AppDbContext dbContext) : IExperimentStatsSe
                 SliceEnd = Math.Clamp(request.SliceEnd ?? 100, 0, 100),
                 request.AllocationPlan,
                 Now = DateTime.UtcNow
-            })).ToArray();
+            })).AsList();
 
         foreach (var row in rows)
         {

@@ -1,6 +1,6 @@
 namespace Application.FeatureFlags;
 
-public class StatsByVariationFilter
+public class InsightFilter
 {
     public string FeatureFlagKey { get; set; }
     public string IntervalType { get; set; }

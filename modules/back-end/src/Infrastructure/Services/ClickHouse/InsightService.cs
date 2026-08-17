@@ -4,9 +4,23 @@ using Infrastructure.OLAP.ClickHouse;
 
 namespace Infrastructure.Services.ClickHouse;
 
-public class ExperimentFeatureFlagInsightsService(ClickHouseClient clickHouse) : IFeatureFlagInsightsService
+public class InsightService(ClickHouseClient clickHouse) : IInsightService
 {
-    public async Task<ICollection<Insights>> GetFeatureFlagInsightsAsync(Guid envId, StatsByVariationFilter filter)
+    public bool TryParse(string json, out object insight)
+    {
+        // In Kafka deployments, ClickHouse consumes `featbit-insights` through its Kafka-engine table and materialized view
+        // So this method should never be called
+        throw new NotImplementedException();
+    }
+
+    public Task AddManyAsync(object[] insights)
+    {
+        // In Kafka deployments, ClickHouse consumes `featbit-insights` through its Kafka-engine table and materialized view
+        // So this method should never be called
+        throw new NotImplementedException();
+    }
+
+    public async Task<ICollection<Insights>> GetInsightsAsync(Guid envId, InsightFilter filter)
     {
         var bucket = GetBucketExpression(filter.IntervalType);
         var from = DateTimeOffset.FromUnixTimeMilliseconds(filter.From);

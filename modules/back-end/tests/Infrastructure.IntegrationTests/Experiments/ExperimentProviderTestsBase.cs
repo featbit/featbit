@@ -5,22 +5,22 @@ using Application.Services;
 using Domain.FeatureFlags;
 using Domain.Experiments;
 using System.Text.Json;
+using Application.EndUsers;
 
 namespace Infrastructure.IntegrationTests.Experiments;
 
-public abstract class ExperimentProviderTestsBase(
-    ExperimentProviderParityFixture fixture) : IntegrationTestBase
+public abstract class ExperimentProviderTestsBase(ExperimentProviderParityFixture fixture) : IntegrationTestBase
 {
     protected abstract string ProviderName { get; }
 
     private IExperimentStatsService CreateExperimentStatsService() =>
         fixture.CreateExperimentStatsService(ProviderName);
 
-    private IFeatureFlagInsightsService CreateFeatureFlagInsightsService() =>
-        fixture.CreateFeatureFlagInsightsService(ProviderName);
+    private IInsightService CreateInsightsService() =>
+        fixture.CreateInsightsService(ProviderName);
 
-    private IFeatureFlagEndUserStatsService CreateFeatureFlagEndUserStatsService() =>
-        fixture.CreateFeatureFlagEndUserStatsService(ProviderName);
+    private IEndUserStatsService CreateEndUserStatsService() =>
+        fixture.CreateEndUserStatsService(ProviderName);
 
     private IExperimentMetricService CreateExperimentMetricService() =>
         fixture.CreateExperimentMetricService(ProviderName);
@@ -228,7 +228,7 @@ public abstract class ExperimentProviderTestsBase(
     {
         await fixture.SeedScenarioAsync(ProviderName);
 
-        var filter = new StatsByVariationFilter
+        var filter = new InsightFilter
         {
             FeatureFlagKey = ExperimentProviderParityFixture.FlagKey,
             IntervalType = IntervalType.Day,
@@ -236,8 +236,8 @@ public abstract class ExperimentProviderTestsBase(
             To = DateTimeOffset.Parse("2026-01-02T23:59:59Z").ToUnixTimeMilliseconds()
         };
 
-        var actual = Normalize(await CreateFeatureFlagInsightsService()
-            .GetFeatureFlagInsightsAsync(ExperimentProviderParityFixture.EnvId, filter));
+        var actual = Normalize(await CreateInsightsService()
+            .GetInsightsAsync(ExperimentProviderParityFixture.EnvId, filter));
 
         AssertInsightsEqual("expected fixture", ExpectedInsights(), ProviderName, actual);
     }
@@ -247,18 +247,17 @@ public abstract class ExperimentProviderTestsBase(
     {
         await fixture.SeedScenarioAsync(ProviderName);
 
-        var param = new FeatureFlagEndUserParam
+        var param = new EndUserStatsFilter
         {
-            EnvId = ExperimentProviderParityFixture.StandardEnvId,
             FeatureFlagKey = ExperimentProviderParityFixture.FlagKey,
-            StartTime = DateTimeOffset.Parse("2026-01-01T00:00:00Z").ToUnixTimeMilliseconds(),
-            EndTime = DateTimeOffset.Parse("2026-01-02T23:59:59Z").ToUnixTimeMilliseconds(),
+            From = DateTimeOffset.Parse("2026-01-01T00:00:00Z").ToUnixTimeMilliseconds(),
+            To = DateTimeOffset.Parse("2026-01-02T23:59:59Z").ToUnixTimeMilliseconds(),
             PageIndex = 0,
             PageSize = 20
         };
 
-        var actual = Normalize(await CreateFeatureFlagEndUserStatsService()
-            .GetFeatureFlagEndUserStatsAsync(param));
+        var actual = Normalize(await CreateEndUserStatsService()
+            .GetEndUserStatsAsync(ExperimentProviderParityFixture.StandardEnvId, param));
 
         Assert.Equal(1_500, actual.TotalCount);
         Assert.Equal(20, actual.Items.Count);
@@ -493,7 +492,7 @@ public abstract class ExperimentProviderTestsBase(
             .ToArray();
     }
 
-    private static NormalizedEndUserStats Normalize(FeatureFlagEndUserStats stats)
+    private static NormalizedEndUserStats Normalize(EndUserStats stats)
     {
         return new NormalizedEndUserStats(
             stats.TotalCount,
