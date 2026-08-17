@@ -12,6 +12,7 @@ import {
 import { useId, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
+import { LicenseGateContent } from "@/components/license-gate-card"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
@@ -36,8 +37,10 @@ import { Skeleton } from "@/components/ui/skeleton"
 import {
   fetchProjects,
   getCurrentProjectEnv,
+  localizedPath,
 } from "@/features/layout/layout-context"
 import type { Lang } from "@/features/layout/layout-types"
+import { getRuntimeEnv } from "@/lib/env/runtime-env"
 import { cn } from "@/lib/utils"
 import { compareFeatureFlag, copyFeatureFlagSettings } from "../flags-api"
 import type {
@@ -147,11 +150,17 @@ export function FlagDifferencesSheet({
   >({ individualTargeting: "overwrite", targetingRule: "overwrite" })
   const modeOptionIdPrefix = useId()
   const targetId = lockedTarget?.id ?? selectedTargetId
+  const manageLicenseHref = localizedPath(
+    lang,
+    getRuntimeEnv().hostingMode === "saas"
+      ? "/workspace/billing"
+      : "/workspace/license"
+  )
 
   const projectsQuery = useQuery({
     queryKey: ["projects", "flag-differences"],
     queryFn: fetchProjects,
-    enabled: open && !lockedTarget,
+    enabled: open && comparisonGranted && !lockedTarget,
     staleTime: 5 * 60_000,
   })
   const targetProjects = useMemo(
@@ -293,88 +302,98 @@ export function FlagDifferencesSheet({
           </SheetDescription>
         </SheetHeader>
 
-        <div className="min-h-0 flex-1 overflow-auto">
-          <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-end gap-4 px-5 py-4 sm:px-8">
-            <div className="min-w-0">
-              <p className="mb-1.5 text-xs text-muted-foreground">
-                {t("featureFlags.differencesSheet.source")}
-              </p>
-              <div
-                data-testid="flag-difference-source"
-                className="flex h-8 min-w-0 items-center gap-2 rounded-md border bg-muted/40 px-3"
-              >
-                <Box className="size-4 shrink-0 text-muted-foreground" />
-                <span className="truncate text-sm">
-                  {source ? `${source.projectName} / ${source.envName}` : "-"}
-                </span>
-                <Lock className="ml-auto size-3.5 shrink-0 text-muted-foreground" />
-              </div>
-            </div>
-            <ArrowRight className="mb-2.5 size-4 text-muted-foreground" />
-            <div className="min-w-0">
-              <p className="mb-1.5 text-xs text-muted-foreground">
-                {t("featureFlags.differencesSheet.target")}
-              </p>
-              {lockedTarget ? (
-                <div className="flex h-8 min-w-0 items-center gap-2 rounded-md border bg-muted/40 px-3">
+        <div
+          className={cn(
+            "min-h-0 flex-1 overflow-auto",
+            !comparisonGranted &&
+              "flex items-center justify-center px-6 py-10 sm:px-10"
+          )}
+        >
+          {comparisonGranted ? (
+            <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-end gap-4 px-5 py-4 sm:px-8">
+              <div className="min-w-0">
+                <p className="mb-1.5 text-xs text-muted-foreground">
+                  {t("featureFlags.differencesSheet.source")}
+                </p>
+                <div
+                  data-testid="flag-difference-source"
+                  className="flex h-8 min-w-0 items-center gap-2 rounded-md border bg-muted/40 px-3"
+                >
                   <Box className="size-4 shrink-0 text-muted-foreground" />
-                  <span className="truncate text-sm">{lockedTarget.name}</span>
+                  <span className="truncate text-sm">
+                    {source ? `${source.projectName} / ${source.envName}` : "-"}
+                  </span>
                   <Lock className="ml-auto size-3.5 shrink-0 text-muted-foreground" />
                 </div>
-              ) : (
-                <Select
-                  value={selectedTargetId}
-                  disabled={copyMutation.isPending}
-                  onValueChange={(value) => {
-                    resetComparisonState()
-                    setSelectedTargetId(value ?? "")
-                  }}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue>
-                      {selectedTarget ? (
-                        <span className="flex min-w-0 items-center gap-2">
-                          <Box className="size-4 shrink-0 text-muted-foreground" />
-                          <span className="truncate">
-                            {selectedTarget.name}
-                          </span>
-                        </span>
-                      ) : (
-                        t("featureFlags.differencesSheet.selectTarget")
-                      )}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {targetProjects.map((project) => (
-                      <SelectGroup key={project.id}>
-                        <SelectLabel>{project.name}</SelectLabel>
-                        {project.environments.map((environment) => (
-                          <SelectItem
-                            key={environment.id}
-                            value={environment.id}
-                          >
+              </div>
+              <ArrowRight className="mb-2.5 size-4 text-muted-foreground" />
+              <div className="min-w-0">
+                <p className="mb-1.5 text-xs text-muted-foreground">
+                  {t("featureFlags.differencesSheet.target")}
+                </p>
+                {lockedTarget ? (
+                  <div className="flex h-8 min-w-0 items-center gap-2 rounded-md border bg-muted/40 px-3">
+                    <Box className="size-4 shrink-0 text-muted-foreground" />
+                    <span className="truncate text-sm">
+                      {lockedTarget.name}
+                    </span>
+                    <Lock className="ml-auto size-3.5 shrink-0 text-muted-foreground" />
+                  </div>
+                ) : (
+                  <Select
+                    value={selectedTargetId}
+                    disabled={copyMutation.isPending}
+                    onValueChange={(value) => {
+                      resetComparisonState()
+                      setSelectedTargetId(value ?? "")
+                    }}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue>
+                        {selectedTarget ? (
+                          <span className="flex min-w-0 items-center gap-2">
                             <Box className="size-4 shrink-0 text-muted-foreground" />
                             <span className="truncate">
-                              {project.name} / {environment.name}
+                              {selectedTarget.name}
                             </span>
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
+                          </span>
+                        ) : (
+                          t("featureFlags.differencesSheet.selectTarget")
+                        )}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {targetProjects.map((project) => (
+                        <SelectGroup key={project.id}>
+                          <SelectLabel>{project.name}</SelectLabel>
+                          {project.environments.map((environment) => (
+                            <SelectItem
+                              key={environment.id}
+                              value={environment.id}
+                            >
+                              <Box className="size-4 shrink-0 text-muted-foreground" />
+                              <span className="truncate">
+                                {project.name} / {environment.name}
+                              </span>
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              </div>
             </div>
-          </div>
+          ) : null}
           {!comparisonGranted ? (
-            <div className="m-8 rounded-md bg-muted/50 p-5">
-              <p className="font-medium">
-                {t("featureFlags.differencesSheet.unavailable")}
-              </p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {t("featureFlags.differencesSheet.unavailableHelp")}
-              </p>
-            </div>
+            <LicenseGateContent
+              title={t("featureFlags.comparePage.unavailableTitle")}
+              description={t("featureFlags.comparePage.unavailableDescription")}
+              actionLabel={t("featureFlags.comparePage.manageLicense")}
+              actionHref={manageLicenseHref}
+              note={t("featureFlags.comparePage.licenseGateNote")}
+              className="-translate-y-6"
+            />
           ) : !selectedTarget ? (
             <div className="flex min-h-64 items-center justify-center p-8 text-center text-sm text-muted-foreground">
               {t("featureFlags.differencesSheet.selectTargetHelp")}
@@ -600,14 +619,21 @@ export function FlagDifferencesSheet({
           )}
         </div>
 
-        <SheetFooter className="shrink-0 flex-row items-center justify-between bg-transparent px-5 py-4 sm:px-8">
-          <p className="text-sm text-muted-foreground">
-            {selected.size
-              ? t("featureFlags.differencesSheet.selected", {
-                  count: selected.size,
-                })
-              : t("featureFlags.differencesSheet.noneSelected")}
-          </p>
+        <SheetFooter
+          className={cn(
+            "shrink-0 flex-row items-center justify-between bg-transparent px-5 py-4 sm:px-8",
+            !comparisonGranted && "justify-end"
+          )}
+        >
+          {comparisonGranted ? (
+            <p className="text-sm text-muted-foreground">
+              {selected.size
+                ? t("featureFlags.differencesSheet.selected", {
+                    count: selected.size,
+                  })
+                : t("featureFlags.differencesSheet.noneSelected")}
+            </p>
+          ) : null}
           <div className="flex gap-2">
             <Button
               type="button"
@@ -617,22 +643,27 @@ export function FlagDifferencesSheet({
             >
               {t("featureFlags.differencesSheet.cancel")}
             </Button>
-            <Button
-              type="button"
-              disabled={
-                !canCopy || !detail || !selected.size || copyMutation.isPending
-              }
-              onClick={() => copyMutation.mutate()}
-            >
-              {copyMutation.isPending ? (
-                <Loader2 className="animate-spin" />
-              ) : (
-                <Check />
-              )}
-              {copyMutation.isPending
-                ? t("featureFlags.differencesSheet.copying")
-                : t("featureFlags.differencesSheet.copySettings")}
-            </Button>
+            {comparisonGranted ? (
+              <Button
+                type="button"
+                disabled={
+                  !canCopy ||
+                  !detail ||
+                  !selected.size ||
+                  copyMutation.isPending
+                }
+                onClick={() => copyMutation.mutate()}
+              >
+                {copyMutation.isPending ? (
+                  <Loader2 className="animate-spin" />
+                ) : (
+                  <Check />
+                )}
+                {copyMutation.isPending
+                  ? t("featureFlags.differencesSheet.copying")
+                  : t("featureFlags.differencesSheet.copySettings")}
+              </Button>
+            ) : null}
           </div>
         </SheetFooter>
       </SheetContent>

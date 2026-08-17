@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
+import { MemoryRouter } from "react-router-dom"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import type { FeatureFlag, FlagComparisonDetail } from "../flags-types"
 import { FlagDifferencesSheet } from "./flag-differences-sheet"
@@ -20,6 +21,7 @@ vi.mock("@/features/layout/layout-context", () => ({
     envKey: "production",
   }),
   fetchProjects: mocks.fetchProjects,
+  localizedPath: (lang: string, path: string) => `/${lang}${path}`,
 }))
 
 vi.mock("../flags-api", () => ({
@@ -116,16 +118,18 @@ describe("FlagDifferencesSheet", () => {
       },
     })
     return render(
-      <QueryClientProvider client={queryClient}>
-        <FlagDifferencesSheet
-          lang="en"
-          envId="source-env"
-          flag={flag}
-          open
-          onOpenChange={vi.fn()}
-          {...props}
-        />
-      </QueryClientProvider>
+      <MemoryRouter>
+        <QueryClientProvider client={queryClient}>
+          <FlagDifferencesSheet
+            lang="en"
+            envId="source-env"
+            flag={flag}
+            open
+            onOpenChange={vi.fn()}
+            {...props}
+          />
+        </QueryClientProvider>
+      </MemoryRouter>
     )
   }
 
@@ -205,6 +209,30 @@ describe("FlagDifferencesSheet", () => {
     expect(unchangedDefault).toHaveAttribute("aria-disabled", "true")
     expect(unchangedDefault).toHaveAttribute("data-disabled", "")
     expect(unchangedDefault).toHaveAttribute("data-unchecked", "")
+  })
+
+  it("shows a focused license gate without loading comparison controls", () => {
+    renderSheet({ comparisonGranted: false })
+
+    expect(
+      screen.getByRole("heading", {
+        name: "Your license doesn't include Feature Flag Comparison",
+      })
+    ).toBeVisible()
+    expect(
+      screen.getByRole("button", { name: "Manage license" })
+    ).toHaveAttribute("href", "/en/workspace/license")
+    expect(
+      screen.queryByTestId("flag-difference-source")
+    ).not.toBeInTheDocument()
+    expect(screen.queryByRole("combobox")).not.toBeInTheDocument()
+    expect(screen.queryByText("No settings selected")).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", { name: "Copy settings" })
+    ).not.toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Cancel" })).toBeVisible()
+    expect(mocks.fetchProjects).not.toHaveBeenCalled()
+    expect(mocks.compare).not.toHaveBeenCalled()
   })
 
   it("reuses the same sheet with a locked target and copies selected settings", async () => {
