@@ -27,6 +27,7 @@ import {
   isFeatureGranted,
   parseLicense,
 } from "@/features/workspace/license/license-utils"
+import { getRuntimeEnv } from "@/lib/env/runtime-env"
 import {
   archiveSegment,
   createSegment,
@@ -159,6 +160,12 @@ export function SegmentsPage() {
     },
     license,
     getLicenseStatus(license)
+  )
+  const manageLicenseHref = localizedPath(
+    lang,
+    getRuntimeEnv().hostingMode === "saas"
+      ? "/workspace/billing"
+      : "/workspace/license"
   )
   const fineGrainedGranted = useMemo(
     () => isFineGrainedAccessControlGranted(workspace?.license),
@@ -419,6 +426,7 @@ export function SegmentsPage() {
             resourcesLoading={scopesQuery.isLoading}
             resourcesError={scopesQuery.isError}
             shareableGranted={shareableGranted}
+            manageLicenseHref={manageLicenseHref}
             saving={createMutation.isPending}
             onOpenChange={setSheetOpen}
             onRetryResources={() => void scopesQuery.refetch()}
