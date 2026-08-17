@@ -79,7 +79,6 @@ public class Insight
         }
 
         // metric messages
-        // metric messages
         if (Metrics != null)
         {
             foreach (var metric in Metrics)

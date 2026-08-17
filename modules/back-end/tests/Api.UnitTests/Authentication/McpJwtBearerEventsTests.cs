@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Api.Authentication;
 using Api.Mcp;
 using Application.Services;
 using Domain.Mcp;
@@ -8,7 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 
-namespace Api.UnitTests.Mcp;
+namespace Api.UnitTests.Authentication;
 
 public class McpJwtBearerEventsTests
 {
@@ -16,7 +17,7 @@ public class McpJwtBearerEventsTests
     public async Task ValidateToken_NonMcpToken_AcceptsToken()
     {
         var context = CreateContext("/api/v1/user/profile", []);
-        var events = new McpJwtBearerEvents(new TestMcpAuthorizationStore());
+        var events = new DefaultJwtBearerEvents(new TestMcpAuthorizationStore());
 
         await events.TokenValidated(context);
 
@@ -31,7 +32,7 @@ public class McpJwtBearerEventsTests
             new Claim(McpClaimTypes.TokenType, McpClaimTypes.McpTokenType),
             new Claim(JwtRegisteredClaimNames.Jti, "token-1")
         ]);
-        var events = new McpJwtBearerEvents(new TestMcpAuthorizationStore(activeTokenIds: ["token-1"]));
+        var events = new DefaultJwtBearerEvents(new TestMcpAuthorizationStore(activeTokenIds: ["token-1"]));
 
         await events.TokenValidated(context);
 
@@ -45,7 +46,7 @@ public class McpJwtBearerEventsTests
         [
             new Claim(McpClaimTypes.TokenType, McpClaimTypes.McpTokenType)
         ]);
-        var events = new McpJwtBearerEvents(new TestMcpAuthorizationStore());
+        var events = new DefaultJwtBearerEvents(new TestMcpAuthorizationStore());
 
         await events.TokenValidated(context);
 
@@ -62,7 +63,7 @@ public class McpJwtBearerEventsTests
             new Claim(McpClaimTypes.TokenType, McpClaimTypes.McpTokenType),
             new Claim(JwtRegisteredClaimNames.Jti, tokenId)
         ]);
-        var events = new McpJwtBearerEvents(store);
+        var events = new DefaultJwtBearerEvents(store);
 
         await events.TokenValidated(context);
 
@@ -77,7 +78,7 @@ public class McpJwtBearerEventsTests
             new Claim(McpClaimTypes.TokenType, McpClaimTypes.McpTokenType),
             new Claim(JwtRegisteredClaimNames.Jti, "token-1")
         ]);
-        var events = new McpJwtBearerEvents(new TestMcpAuthorizationStore());
+        var events = new DefaultJwtBearerEvents(new TestMcpAuthorizationStore());
 
         await events.TokenValidated(context);
 

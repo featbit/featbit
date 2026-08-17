@@ -29,7 +29,6 @@ public static class ServicesRegister
         builder.Services.AddControllers();
 
         // add mcp server & tools
-        builder.Services.AddScoped<McpJwtBearerEvents>();
         builder.Services
             .AddMcpServer()
             .WithHttpTransport(options => options.Stateless = true)
@@ -78,7 +77,7 @@ public static class ServicesRegister
         // authentication
         var jwtOptions = JwtOptionsBuilder.Build(builder.Configuration);
         builder.Services.AddSingleton(jwtOptions);
-
+        builder.Services.AddScoped<DefaultJwtBearerEvents>();
         builder.Services
             .AddAuthentication(options =>
             {
@@ -118,7 +117,7 @@ public static class ServicesRegister
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero
                 };
-                options.EventsType = typeof(McpJwtBearerEvents);
+                options.EventsType = typeof(DefaultJwtBearerEvents);
             })
             .AddOpenApi(Schemes.OpenApi);
 
