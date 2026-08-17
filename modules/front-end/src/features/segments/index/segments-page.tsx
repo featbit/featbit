@@ -44,6 +44,7 @@ import {
   segmentRn,
   type SegmentAction,
 } from "../segments-permissions"
+import { environmentScopeRn } from "../segment-scopes"
 import type {
   ScopeResource,
   Segment,
@@ -72,6 +73,11 @@ export function SegmentsPage() {
   const projectEnv = getCurrentProjectEnv()
   const envId = projectEnv?.envId ?? ""
   const envRn = environmentRn({
+    projectKey: projectEnv?.projectKey ?? "",
+    environmentKey: projectEnv?.envKey ?? "",
+  })
+  const fallbackCurrentScopeRn = environmentScopeRn({
+    organizationKey: organization?.key ?? "",
     projectKey: projectEnv?.projectKey ?? "",
     environmentKey: projectEnv?.envKey ?? "",
   })
@@ -257,11 +263,13 @@ export function SegmentsPage() {
     setConfirmation({ kind, segment })
   }
 
-  const currentScope: ScopeResource = {
+  const currentScope: ScopeResource = scopesQuery.data?.find(
+    (resource) => resource.type === "env" && resource.id === envId
+  ) ?? {
     id: envId,
     name: projectEnv?.envName ?? "",
     pathName: `${organization?.name ?? ""} / ${projectEnv?.projectName ?? ""} / ${projectEnv?.envName ?? ""}`,
-    rn: envRn,
+    rn: fallbackCurrentScopeRn,
     type: "env",
   }
   const data = listQuery.data ?? { items: [], totalCount: 0 }
