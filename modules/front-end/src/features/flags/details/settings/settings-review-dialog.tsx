@@ -28,6 +28,7 @@ export function SettingsReviewDialog({
       changes={changes}
       requireComment={requireComment}
       saving={saving}
+      saveDisabled={!changes.length}
       copy={{
         title: t("featureFlags.detailsPage.settings.reviewTitle"),
         description: (

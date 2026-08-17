@@ -2,6 +2,13 @@ import { Info, LockKeyhole, Shield } from "lucide-react"
 import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
 
 type LicenseGateContentProps = {
@@ -11,6 +18,7 @@ type LicenseGateContentProps = {
   actionHref: string
   note: string
   className?: string
+  dialogSemantics?: boolean
 }
 
 export function LicenseGateContent({
@@ -20,6 +28,7 @@ export function LicenseGateContent({
   actionHref,
   note,
   className,
+  dialogSemantics = false,
 }: LicenseGateContentProps) {
   return (
     <div
@@ -36,10 +45,22 @@ export function LicenseGateContent({
         />
       </div>
 
-      <h2 className="mt-8 text-xl font-semibold tracking-normal">{title}</h2>
-      <p className="mt-3 max-w-[65ch] text-sm leading-6 text-muted-foreground">
-        {description}
-      </p>
+      {dialogSemantics ? (
+        <DialogTitle className="mt-8 text-xl leading-normal font-semibold tracking-normal">
+          {title}
+        </DialogTitle>
+      ) : (
+        <h2 className="mt-8 text-xl font-semibold tracking-normal">{title}</h2>
+      )}
+      {dialogSemantics ? (
+        <DialogDescription className="mt-3 max-w-[65ch] text-sm leading-6">
+          {description}
+        </DialogDescription>
+      ) : (
+        <p className="mt-3 max-w-[65ch] text-sm leading-6 text-muted-foreground">
+          {description}
+        </p>
+      )}
 
       <Button
         nativeButton={false}
@@ -54,6 +75,48 @@ export function LicenseGateContent({
         <span>{note}</span>
       </p>
     </div>
+  )
+}
+
+export function LicenseGateDialog({
+  open,
+  title,
+  description,
+  actionLabel,
+  actionHref,
+  note,
+  closeLabel,
+  onOpenChange,
+}: LicenseGateContentProps & {
+  open: boolean
+  closeLabel: string
+  onOpenChange: (open: boolean) => void
+}) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="gap-0 overflow-hidden p-0 sm:max-w-xl">
+        <div className="flex min-h-96 items-center justify-center px-8 py-12">
+          <LicenseGateContent
+            title={title}
+            description={description}
+            actionLabel={actionLabel}
+            actionHref={actionHref}
+            note={note}
+            className="-translate-y-3"
+            dialogSemantics
+          />
+        </div>
+        <DialogFooter className="mx-0 mb-0 rounded-none border-t-0 bg-transparent px-5 py-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+          >
+            {closeLabel}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }
 

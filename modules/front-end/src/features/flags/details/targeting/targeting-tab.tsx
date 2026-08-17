@@ -202,8 +202,7 @@ export function TargetingTab({
   onDiscard,
   onReview,
   onOpenPending,
-  scheduleGranted,
-  changeRequestGranted,
+  onPermissionDenied,
   onSchedule,
   onChangeRequest,
   onToggle,
@@ -227,8 +226,7 @@ export function TargetingTab({
   onDiscard: () => void
   onReview: () => void
   onOpenPending: () => void
-  scheduleGranted: boolean
-  changeRequestGranted: boolean
+  onPermissionDenied: () => void
   onSchedule: () => void
   onChangeRequest: () => void
   onToggle: (nextEnabled: boolean) => void
@@ -275,6 +273,10 @@ export function TargetingTab({
   }
 
   function review() {
+    if (!canManageWorkflow) {
+      onPermissionDenied()
+      return
+    }
     const next = validateTargeting(flag, {
       allocation: t("featureFlags.detailsPage.validation.allocation"),
       conditionRequired: t(
@@ -297,6 +299,11 @@ export function TargetingTab({
   const canEditDefault = canUpdateDefault && !archived && !readOnly
   const canEditUsers = canUpdateUsers && !archived && !readOnly
   const canEditRules = canUpdateRules && !archived && !readOnly
+  const canManageWorkflow =
+    canUpdateOffVariation ||
+    canUpdateDefault ||
+    canUpdateUsers ||
+    canUpdateRules
   return (
     <div className="space-y-6 pt-3 pb-6">
       <section className="pt-1 pb-2">
@@ -360,13 +367,7 @@ export function TargetingTab({
                 primaryLabel={t("featureFlags.detailsPage.reviewAndSave")}
                 savingLabel={t("featureFlags.detailsPage.review.saving")}
                 saving={saving}
-                primaryDisabled={
-                  !dirty ||
-                  (!canEditOffVariation &&
-                    !canEditDefault &&
-                    !canEditUsers &&
-                    !canEditRules)
-                }
+                primaryDisabled={false}
                 menuLabel={t("featureFlags.detailsPage.moreActions")}
                 menuSide="bottom"
                 separateAfterFirst={false}
@@ -374,13 +375,11 @@ export function TargetingTab({
                   {
                     label: t("featureFlags.detailsPage.scheduleChanges"),
                     icon: <Clock3 />,
-                    disabled: !dirty || !scheduleGranted,
                     onSelect: onSchedule,
                   },
                   {
                     label: t("featureFlags.detailsPage.changeRequest"),
                     icon: <UserRoundCheck />,
-                    disabled: !dirty || !changeRequestGranted,
                     onSelect: onChangeRequest,
                   },
                 ]}

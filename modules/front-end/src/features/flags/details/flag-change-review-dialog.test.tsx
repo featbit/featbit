@@ -11,11 +11,11 @@ describe("FlagChangeReviewDialog save options", () => {
       <FlagChangeReviewDialog
         open
         flagName="Checkout redesign"
-        changes={[]}
+        changes={[
+          { kind: "default", label: "Default rule", action: "updated" },
+        ]}
         requireComment={false}
         saving={false}
-        scheduleGranted
-        changeRequestGranted
         onOpenChange={vi.fn()}
         onSave={onSave}
         onSchedule={onSchedule}
@@ -58,7 +58,7 @@ describe("FlagChangeReviewDialog save options", () => {
     expect(onChangeRequest).toHaveBeenCalledWith("Coordinate with support")
   })
 
-  it("keeps the primary segment as the immediate save action", () => {
+  it("keeps all save paths disabled when there are no changes", async () => {
     const onSave = vi.fn()
     render(
       <FlagChangeReviewDialog
@@ -67,8 +67,6 @@ describe("FlagChangeReviewDialog save options", () => {
         changes={[]}
         requireComment={false}
         saving={false}
-        scheduleGranted
-        changeRequestGranted
         onOpenChange={vi.fn()}
         onSave={onSave}
         onSchedule={vi.fn()}
@@ -79,9 +77,21 @@ describe("FlagChangeReviewDialog save options", () => {
     const save = screen.getByRole("button", { name: "Save changes" })
     expect(save).toHaveClass("rounded-r-none", "border-r-0")
     expect(save.parentElement).toHaveAttribute("data-slot", "review-save-split")
+    expect(save).toBeDisabled()
 
     fireEvent.click(save)
-    expect(onSave).toHaveBeenCalledWith("")
+    expect(onSave).not.toHaveBeenCalled()
+
+    fireEvent.click(screen.getByRole("button", { name: "More save options" }))
+    for (const label of [
+      "Apply immediately",
+      "Schedule changes",
+      "Request approval",
+    ]) {
+      expect(
+        (await screen.findByText(label)).closest('[role="menuitem"]')
+      ).toHaveAttribute("aria-disabled", "true")
+    }
   })
 
   it("restores the submission reason when returning to review", () => {
@@ -93,8 +103,6 @@ describe("FlagChangeReviewDialog save options", () => {
         requireComment={false}
         saving={false}
         initialComment="Coordinate with support"
-        scheduleGranted
-        changeRequestGranted
         onOpenChange={vi.fn()}
         onSave={vi.fn()}
         onSchedule={vi.fn()}

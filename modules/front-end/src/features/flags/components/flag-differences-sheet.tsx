@@ -641,7 +641,11 @@ export function FlagDifferencesSheet({
               disabled={copyMutation.isPending}
               onClick={() => changeOpen(false)}
             >
-              {t("featureFlags.differencesSheet.cancel")}
+              {t(
+                comparisonGranted
+                  ? "featureFlags.differencesSheet.cancel"
+                  : "featureFlags.differencesSheet.close"
+              )}
             </Button>
             {comparisonGranted ? (
               <Button

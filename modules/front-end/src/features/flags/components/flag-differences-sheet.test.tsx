@@ -1,5 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { fireEvent, render, screen, waitFor } from "@testing-library/react"
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import type { FeatureFlag, FlagComparisonDetail } from "../flags-types"
@@ -230,7 +236,10 @@ describe("FlagDifferencesSheet", () => {
     expect(
       screen.queryByRole("button", { name: "Copy settings" })
     ).not.toBeInTheDocument()
-    expect(screen.getByRole("button", { name: "Cancel" })).toBeVisible()
+    const footer = document.querySelector('[data-slot="sheet-footer"]')
+    expect(
+      within(footer as HTMLElement).getByRole("button", { name: "Close" })
+    ).toBeVisible()
     expect(mocks.fetchProjects).not.toHaveBeenCalled()
     expect(mocks.compare).not.toHaveBeenCalled()
   })

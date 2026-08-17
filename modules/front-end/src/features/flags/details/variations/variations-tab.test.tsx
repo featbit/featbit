@@ -25,6 +25,28 @@ const flag: FeatureFlag = {
 }
 
 describe("VariationsTab", () => {
+  it("allows a clean draft to enter review", () => {
+    const onReview = vi.fn()
+    render(
+      <TooltipProvider>
+        <VariationsTab
+          flag={flag}
+          dirty={false}
+          saving={false}
+          canUpdate
+          onChange={vi.fn()}
+          onDiscard={vi.fn()}
+          onReview={onReview}
+        />
+      </TooltipProvider>
+    )
+
+    const review = screen.getByRole("button", { name: "Review & save" })
+    expect(review).toBeEnabled()
+    fireEvent.click(review)
+    expect(onReview).toHaveBeenCalledOnce()
+  })
+
   it("aligns the data type label and badge by their text baselines", () => {
     const { container } = render(
       <TooltipProvider>

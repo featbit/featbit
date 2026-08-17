@@ -3,6 +3,7 @@ import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { toast } from "sonner"
+import { LicenseGateDialog } from "@/components/license-gate-card"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { TooltipProvider } from "@/components/ui/tooltip"
@@ -35,6 +36,7 @@ import {
   isFeatureGranted,
   parseLicense,
 } from "@/features/workspace/license/license-utils"
+import { getRuntimeEnv } from "@/lib/env/runtime-env"
 import {
   createFlagSchedule,
   fetchFeatureFlag,
@@ -118,6 +120,12 @@ export function FlagDetailsPage() {
   )
   const envId = projectEnv?.envId ?? ""
   const basePath = localizedPath(lang, "/feature-flags")
+  const manageLicenseHref = localizedPath(
+    lang,
+    getRuntimeEnv().hostingMode === "saas"
+      ? "/workspace/billing"
+      : "/workspace/license"
+  )
   const [targetingDraft, setTargetingDraft] = useState<{
     key: string
     value: FlagTargeting
@@ -142,6 +150,9 @@ export function FlagDetailsPage() {
     mode: "schedule" | "change-request"
     initialReason: string
   } | null>(null)
+  const [workflowLicenseGate, setWorkflowLicenseGate] = useState<
+    "schedule" | "change-request" | null
+  >(null)
 
   const flagQuery = useQuery({
     queryKey: ["feature-flag-details", envId, flagKey],
@@ -247,6 +258,15 @@ export function FlagDetailsPage() {
       )
     )
   }
+  const canManageTargetingWorkflow =
+    can("UpdateFlagOffVariation") ||
+    can("UpdateFlagDefaultRule") ||
+    can("UpdateFlagIndividualTargeting") ||
+    can("UpdateFlagTargetingRules")
+
+  function showPermissionDenied() {
+    toast.error(t("featureFlags.permissionDenied"))
+  }
   const dirty =
     !previewing &&
     Boolean(
@@ -317,6 +337,24 @@ export function FlagDetailsPage() {
     decodedLicense,
     licenseStatus
   )
+
+  function openSubmission(
+    mode: "schedule" | "change-request",
+    initialReason: string
+  ) {
+    const granted = mode === "schedule" ? scheduleGranted : changeRequestGranted
+    if (!granted) {
+      setReviewOpen(false)
+      setWorkflowLicenseGate(mode)
+      return
+    }
+    if (!canManageTargetingWorkflow) {
+      showPermissionDenied()
+      return
+    }
+    setReviewOpen(false)
+    setSubmission({ mode, initialReason })
+  }
 
   const saveMutation = useMutation({
     mutationFn: (comment: string) =>
@@ -635,23 +673,23 @@ export function FlagDetailsPage() {
               onDiscard={() => setTargetingDraft(null)}
               onReview={() => {
                 if (previewing) return
+                if (!canManageTargetingWorkflow) {
+                  showPermissionDenied()
+                  return
+                }
                 setReviewInitialComment("")
                 setReviewOpen(true)
               }}
               onOpenPending={() => !previewing && setPendingOpen(true)}
-              scheduleGranted={scheduleGranted}
-              changeRequestGranted={changeRequestGranted}
+              onPermissionDenied={showPermissionDenied}
               onSchedule={() => {
                 if (!previewing) {
-                  setSubmission({ mode: "schedule", initialReason: "" })
+                  openSubmission("schedule", "")
                 }
               }}
               onChangeRequest={() => {
                 if (!previewing) {
-                  setSubmission({
-                    mode: "change-request",
-                    initialReason: "",
-                  })
+                  openSubmission("change-request", "")
                 }
               }}
               onToggle={(nextEnabled) => {
@@ -675,17 +713,13 @@ export function FlagDetailsPage() {
           requireComment={settingsQuery.data?.requireChangeComment ?? false}
           saving={saveMutation.isPending}
           initialComment={reviewInitialComment}
-          scheduleGranted={scheduleGranted}
-          changeRequestGranted={changeRequestGranted}
           onOpenChange={setReviewOpen}
           onSave={(comment) => saveMutation.mutate(comment)}
           onSchedule={(comment) => {
-            setReviewOpen(false)
-            setSubmission({ mode: "schedule", initialReason: comment })
+            openSubmission("schedule", comment)
           }}
           onChangeRequest={(comment) => {
-            setReviewOpen(false)
-            setSubmission({ mode: "change-request", initialReason: comment })
+            openSubmission("change-request", comment)
           }}
         />
         <VariationsReviewDialog
@@ -768,6 +802,28 @@ export function FlagDetailsPage() {
             )
           }}
           onSubmit={(value) => submissionMutation.mutate(value)}
+        />
+        <LicenseGateDialog
+          open={workflowLicenseGate !== null}
+          title={t(
+            workflowLicenseGate === "schedule"
+              ? "featureFlags.detailsPage.licenseGate.scheduleTitle"
+              : "featureFlags.detailsPage.licenseGate.changeRequestTitle"
+          )}
+          description={t(
+            workflowLicenseGate === "schedule"
+              ? "featureFlags.detailsPage.licenseGate.scheduleDescription"
+              : "featureFlags.detailsPage.licenseGate.changeRequestDescription"
+          )}
+          actionLabel={t("featureFlags.detailsPage.licenseGate.manageLicense")}
+          actionHref={manageLicenseHref}
+          note={t(
+            workflowLicenseGate === "schedule"
+              ? "featureFlags.detailsPage.licenseGate.scheduleNote"
+              : "featureFlags.detailsPage.licenseGate.changeRequestNote"
+          )}
+          closeLabel={t("featureFlags.detailsPage.licenseGate.close")}
+          onOpenChange={(open) => !open && setWorkflowLicenseGate(null)}
         />
         <FlagConfirmDialog
           key={

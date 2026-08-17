@@ -28,6 +28,7 @@ export function VariationsReviewDialog({
       changes={changes}
       requireComment={requireComment}
       saving={saving}
+      saveDisabled={!changes.length}
       copy={{
         title: t("featureFlags.detailsPage.variations.reviewTitle"),
         description: (

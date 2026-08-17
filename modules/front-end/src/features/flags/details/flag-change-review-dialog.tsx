@@ -12,8 +12,6 @@ export function FlagChangeReviewDialog({
   requireComment,
   saving,
   initialComment,
-  scheduleGranted,
-  changeRequestGranted,
   onOpenChange,
   onSave,
   onSchedule,
@@ -26,8 +24,6 @@ export function FlagChangeReviewDialog({
   requireComment: boolean
   saving: boolean
   initialComment?: string
-  scheduleGranted: boolean
-  changeRequestGranted: boolean
   onOpenChange: (open: boolean) => void
   onSave: (comment: string) => void
   onSchedule: (comment: string) => void
@@ -43,6 +39,7 @@ export function FlagChangeReviewDialog({
       changes={changes}
       requireComment={requireComment}
       saving={saving}
+      saveDisabled={!changes.length}
       initialComment={initialComment}
       copy={{
         title: t("featureFlags.detailsPage.review.title"),
@@ -70,24 +67,16 @@ export function FlagChangeReviewDialog({
       }}
       ledger={ledger}
       saveOptions={[
-        ...(scheduleGranted
-          ? [
-              {
-                label: t("featureFlags.detailsPage.review.schedule"),
-                icon: <Clock3 />,
-                onSelect: onSchedule,
-              },
-            ]
-          : []),
-        ...(changeRequestGranted
-          ? [
-              {
-                label: t("featureFlags.detailsPage.review.requestApproval"),
-                icon: <UserRoundCheck />,
-                onSelect: onChangeRequest,
-              },
-            ]
-          : []),
+        {
+          label: t("featureFlags.detailsPage.review.schedule"),
+          icon: <Clock3 />,
+          onSelect: onSchedule,
+        },
+        {
+          label: t("featureFlags.detailsPage.review.requestApproval"),
+          icon: <UserRoundCheck />,
+          onSelect: onChangeRequest,
+        },
       ]}
       saveOptionsLabel={t("featureFlags.detailsPage.review.moreSaveOptions")}
       saveImmediatelyDescription={t(
