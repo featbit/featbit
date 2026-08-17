@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
+  CircleAlert,
   ChevronLeft,
   ChevronRight,
   Plus,
@@ -10,6 +11,7 @@ import { useCallback, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
+import { UnavailablePage } from "@/components/unavailable-page"
 import { Input } from "@/components/ui/input"
 import {
   Select,
@@ -162,27 +164,42 @@ export function RelayProxiesPage() {
 
   if (permissionsQuery.isLoading) {
     return (
-      <div className="-m-5 min-h-[calc(100vh-3.5rem)] bg-background px-8 py-6">
+      <div className="-m-5 min-h-[calc(100vh-3.5rem)] bg-background px-6 py-6 lg:px-8">
         <Skeleton className="h-8 w-52" />
         <Skeleton className="mt-3 h-4 w-96" />
-        <Skeleton className="mt-10 h-96 w-full" />
+        <Skeleton className="mt-10 min-h-[clamp(30rem,66vh,39rem)] w-full rounded-xl" />
       </div>
     )
   }
 
-  if (permissionsQuery.isError || !canList) {
+  if (permissionsQuery.isError) {
     return (
-      <div className="-m-5 flex min-h-[calc(100vh-3.5rem)] items-center justify-center bg-background p-8">
-        <div className="max-w-md text-center">
-          <Waypoints className="mx-auto mb-4 size-8 text-muted-foreground" />
-          <h1 className="text-xl font-semibold">
-            {t("relayProxies.unavailableTitle")}
-          </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {t("relayProxies.unavailableDescription")}
-          </p>
-        </div>
-      </div>
+      <UnavailablePage
+        pageTitle={t("relayProxies.title")}
+        pageSubtitle={t("relayProxies.subtitle")}
+        icon={CircleAlert}
+        title={t("relayProxies.permissionLoadFailedTitle")}
+        description={t("relayProxies.permissionLoadFailedDescription")}
+        retry={{
+          label: t("relayProxies.retry"),
+          pendingLabel: t("relayProxies.retrying"),
+          pending: permissionsQuery.isFetching,
+          onRetry: () => void permissionsQuery.refetch(),
+        }}
+      />
+    )
+  }
+
+  if (!canList) {
+    return (
+      <UnavailablePage
+        pageTitle={t("relayProxies.title")}
+        pageSubtitle={t("relayProxies.subtitle")}
+        icon={Waypoints}
+        title={t("relayProxies.unavailableTitle")}
+        description={t("relayProxies.unavailableDescription")}
+        note={t("relayProxies.unavailableNote")}
+      />
     )
   }
 
