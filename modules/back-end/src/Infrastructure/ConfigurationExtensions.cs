@@ -1,5 +1,6 @@
 ﻿using Infrastructure.Caches;
 using Infrastructure.MQ;
+using Infrastructure.OLAP;
 using Infrastructure.Persistence;
 using Microsoft.Extensions.Configuration;
 using Npgsql;
@@ -11,14 +12,14 @@ public static class ConfigurationExtensions
 {
     public static string GetMqProvider(this IConfiguration configuration)
     {
-        var provider = configuration.GetValue(MqProvider.SectionName, MqProvider.Redis)!;
+        var provider = configuration.GetValue(MqProvider.SectionName, MqProvider.Redis);
         return provider;
     }
 
     public static DbProvider GetDbProvider(this IConfiguration configuration)
     {
-        var name = configuration.GetValue(DbProvider.SectionName, DbProvider.MongoDb)!;
-        var connectionString = configuration.GetSection(name).GetValue("ConnectionString", string.Empty)!;
+        var name = configuration.GetValue(DbProvider.SectionName, DbProvider.MongoDb);
+        var connectionString = configuration.GetSection(name).GetValue("ConnectionString", string.Empty);
 
         return new DbProvider
         {
@@ -29,8 +30,16 @@ public static class ConfigurationExtensions
 
     public static string GetCacheProvider(this IConfiguration configuration)
     {
-        var provider = configuration.GetValue(CacheProvider.SectionName, CacheProvider.Redis)!;
+        var provider = configuration.GetValue(CacheProvider.SectionName, CacheProvider.Redis);
         return provider;
+    }
+
+    public static string GetOLAPProvider(this IConfiguration configuration)
+    {
+        var dbProvider = configuration.GetValue(DbProvider.SectionName, DbProvider.MongoDb);
+
+        var olapProvider = configuration.GetValue(OLAPProvider.SectionName, dbProvider);
+        return olapProvider;
     }
 
     public static string GetRedisConnectionString(this IConfiguration configuration)

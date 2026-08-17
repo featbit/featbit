@@ -2,6 +2,7 @@ using Dapper;
 using Domain.EndUsers;
 using Domain.Utils;
 using Infrastructure.Caches.Redis;
+using Infrastructure.OLAP.ClickHouse;
 using Infrastructure.Persistence.Dapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -77,5 +78,19 @@ public static class ServiceCollectionExtensions
                 .UseSnakeCaseNamingConvention()
                 .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
         });
+    }
+
+    public static void TryAddClickHouse(this IServiceCollection services, IConfiguration configuration)
+    {
+        if (services.Any(service => service.ServiceType == typeof(ClickHouseClient)))
+        {
+            return;
+        }
+
+        services.AddOptionsWithValidateOnStart<ClickHouseOptions>()
+            .Bind(configuration.GetSection(ClickHouseOptions.ClickHouse))
+            .ValidateDataAnnotations();
+
+        services.AddHttpClient<ClickHouseClient>();
     }
 }

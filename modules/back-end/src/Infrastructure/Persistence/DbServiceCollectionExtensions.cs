@@ -1,8 +1,10 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Infrastructure.OLAP;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using MongoServices = Infrastructure.Services.MongoDb;
 using EntityFrameworkCoreServices = Infrastructure.Services.EntityFrameworkCore;
+using ClickHouseServices = Infrastructure.Services.ClickHouse;
 
 namespace Infrastructure.Persistence;
 
@@ -11,7 +13,6 @@ public static class DbServiceCollectionExtensions
     public static void AddDbSpecificServices(this IServiceCollection services, IConfiguration configuration)
     {
         var dbProvider = configuration.GetDbProvider();
-
         switch (dbProvider.Name)
         {
             case DbProvider.MongoDb:
@@ -23,7 +24,15 @@ public static class DbServiceCollectionExtensions
                 break;
         }
 
-        services.AddOLAPSpecificServices(configuration, dbProvider.Name);
+        var olapProvider = configuration.GetOLAPProvider();
+        if (olapProvider == OLAPProvider.ClickHouse)
+        {
+            services.TryAddClickHouse(configuration);
+
+            services.Replace(ServiceDescriptor.Transient<IFeatureFlagInsightsService, ClickHouseServices.ExperimentFeatureFlagInsightsService>());
+            services.Replace(ServiceDescriptor.Transient<IFeatureFlagEndUserStatsService, ClickHouseServices.ExperimentFeatureFlagEndUserStatsService>());
+            services.Replace(ServiceDescriptor.Transient<IExperimentStatsService, ClickHouseServices.ExperimentStatsService>());
+        }
 
         return;
 
