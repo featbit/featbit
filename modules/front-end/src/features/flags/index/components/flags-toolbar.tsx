@@ -46,7 +46,6 @@ type Props = {
   status: "all" | "on" | "off"
   archived: boolean
   selectedCount: number
-  canCreate: boolean
   canCopySelected: boolean
   onSearchChange: (value: string) => void
   onTagsChange: (value: string[]) => void
@@ -231,30 +230,10 @@ export function FlagsToolbar(props: Props) {
             <GitCompareArrows />
             {t("featureFlags.compare")}
           </Button>
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <span
-                  className="inline-flex"
-                  tabIndex={props.canCreate ? -1 : 0}
-                />
-              }
-            >
-              <Button
-                type="button"
-                disabled={!props.canCreate}
-                onClick={props.onCreate}
-              >
-                <Plus />
-                {t("featureFlags.newFlag")}
-              </Button>
-            </TooltipTrigger>
-            {!props.canCreate ? (
-              <TooltipContent>
-                {t("featureFlags.permissionDenied")}
-              </TooltipContent>
-            ) : null}
-          </Tooltip>
+          <Button type="button" onClick={props.onCreate}>
+            <Plus />
+            {t("featureFlags.newFlag")}
+          </Button>
         </div>
       </div>
     </div>

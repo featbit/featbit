@@ -56,7 +56,6 @@ type Props = {
   onRemove: (flag: FeatureFlag) => void
   onClearFilters: () => void
   onCreate: () => void
-  canCreate: boolean
 }
 
 function personName(person?: { name?: string; email?: string }) {
@@ -339,7 +338,7 @@ export function FlagsTable(props: Props) {
                   >
                     {t("featureFlags.clearFilters")}
                   </Button>
-                ) : props.canCreate && !props.archived ? (
+                ) : !props.archived ? (
                   <Button
                     type="button"
                     variant="outline"

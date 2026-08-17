@@ -7,12 +7,7 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+import { TooltipProvider } from "@/components/ui/tooltip"
 import { currentUserPoliciesQueryOptions } from "@/features/iam/current-user-policy-query"
 import {
   getCurrentOrganization,
@@ -270,6 +265,14 @@ export function SegmentsPage() {
     setConfirmation({ kind, segment })
   }
 
+  function startCreate() {
+    if (!canCreate) {
+      toast.error(t("segments.permissionDenied"))
+      return
+    }
+    setSheetOpen(true)
+  }
+
   const currentScope: ScopeResource = scopesQuery.data?.find(
     (resource) => resource.type === "env" && resource.id === envId
   ) ?? {
@@ -334,25 +337,10 @@ export function SegmentsPage() {
             </Button>
           </div>
 
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <span className="inline-flex" tabIndex={canCreate ? -1 : 0} />
-              }
-            >
-              <Button
-                type="button"
-                disabled={!canCreate}
-                onClick={() => setSheetOpen(true)}
-              >
-                <Plus />
-                {t("segments.new")}
-              </Button>
-            </TooltipTrigger>
-            {!canCreate ? (
-              <TooltipContent>{t("segments.permissionDenied")}</TooltipContent>
-            ) : null}
-          </Tooltip>
+          <Button type="button" onClick={startCreate}>
+            <Plus />
+            {t("segments.new")}
+          </Button>
         </div>
 
         <div className="overflow-hidden rounded-md border bg-background">
@@ -400,8 +388,7 @@ export function SegmentsPage() {
                 startAction("remove", segment, "DeleteSegment")
               }
               onClearSearch={() => setSearch("")}
-              onCreate={() => setSheetOpen(true)}
-              canCreate={canCreate}
+              onCreate={startCreate}
             />
           )}
         </div>
