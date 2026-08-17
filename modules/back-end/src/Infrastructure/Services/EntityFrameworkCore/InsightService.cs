@@ -3,6 +3,8 @@ using Application.Insights;
 using Dapper;
 using Domain.Experiments;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
+using NpgsqlTypes;
 
 namespace Infrastructure.Services.EntityFrameworkCore;
 
@@ -10,24 +12,48 @@ public class InsightService(AppDbContext dbContext) : IInsightService
 {
     public async Task AddManyAsync(object[] insights)
     {
-        var exposures = insights.OfType<ExperimentExposureEvent>().ToArray();
-        if (exposures.Length > 0)
+        if (insights.Length == 0)
         {
-            await dbContext.Set<ExperimentExposureEvent>().AddRangeAsync(exposures);
+            return;
         }
 
-        var metrics = insights.OfType<ExperimentMetricEvent>().ToArray();
-        if (metrics.Length > 0)
-        {
-            await dbContext.Set<ExperimentMetricEvent>().AddRangeAsync(metrics);
-        }
+        await dbContext.Database.OpenConnectionAsync();
 
-        await dbContext.SaveChangesAsync();
+        try
+        {
+            await using var transaction = await dbContext.Database.BeginTransactionAsync();
+            var connection = (NpgsqlConnection)dbContext.Database.GetDbConnection();
+
+            if (insights.Any(x => x is ExperimentExposureEvent))
+            {
+                await CopyExposuresAsync(connection, insights);
+            }
+
+            if (insights.Any(x => x is ExperimentMetricEvent))
+            {
+                await CopyMetricsAsync(connection, insights);
+            }
+
+            await transaction.CommitAsync();
+        }
+        finally
+        {
+            await dbContext.Database.CloseConnectionAsync();
+        }
     }
 
     public async Task<ICollection<Insight>> GetInsightsAsync(Guid envId, InsightFilter filter)
     {
-        var bucket = GetBucketExpression(filter.IntervalType);
+        var bucket = filter.IntervalType switch
+        {
+            IntervalType.Month => "date_trunc('month', exposed_at)",
+            IntervalType.Week => "date_trunc('week', exposed_at)",
+            IntervalType.Day => "date_trunc('day', exposed_at)",
+            IntervalType.Hour => "date_trunc('hour', exposed_at)",
+            IntervalType.Minute => "date_trunc('minute', exposed_at)",
+            _ => throw new ArgumentException($"Unsupported interval type: {filter.IntervalType}", nameof(filter.IntervalType))
+        };
+
         var from = DateTimeOffset.FromUnixTimeMilliseconds(filter.From);
         var to = DateTimeOffset.FromUnixTimeMilliseconds(filter.To);
 
@@ -69,17 +95,72 @@ public class InsightService(AppDbContext dbContext) : IInsightService
             .ToArray();
     }
 
-    private static string GetBucketExpression(string intervalType)
+    private static async Task CopyExposuresAsync(NpgsqlConnection connection, object[] insights)
     {
-        return intervalType switch
+        await using var writer = await connection.BeginBinaryImportAsync("""
+            COPY experiment_exposure_events
+                (id, env_id, flag_key, user_key, variation_id, variation_value, exposed_at, properties, created_at)
+            FROM STDIN (FORMAT BINARY)
+            """);
+
+        foreach (var insight in insights)
         {
-            IntervalType.Month => "date_trunc('month', exposed_at)",
-            IntervalType.Week => "date_trunc('week', exposed_at)",
-            IntervalType.Day => "date_trunc('day', exposed_at)",
-            IntervalType.Hour => "date_trunc('hour', exposed_at)",
-            IntervalType.Minute => "date_trunc('minute', exposed_at)",
-            _ => throw new ArgumentException($"Unsupported interval type: {intervalType}", nameof(intervalType))
-        };
+            if (insight is not ExperimentExposureEvent exposure)
+            {
+                continue;
+            }
+
+            await writer.StartRowAsync();
+            await writer.WriteAsync(exposure.Id, NpgsqlDbType.Uuid);
+            await writer.WriteAsync(exposure.EnvId, NpgsqlDbType.Uuid);
+            await writer.WriteAsync(exposure.FlagKey, NpgsqlDbType.Varchar);
+            await writer.WriteAsync(exposure.UserKey, NpgsqlDbType.Varchar);
+            await writer.WriteAsync(exposure.VariationId, NpgsqlDbType.Varchar);
+            if (exposure.VariationValue is null)
+            {
+                await writer.WriteNullAsync();
+            }
+            else
+            {
+                await writer.WriteAsync(exposure.VariationValue, NpgsqlDbType.Varchar);
+            }
+
+            await writer.WriteAsync(exposure.ExposedAt, NpgsqlDbType.TimestampTz);
+            await writer.WriteAsync(exposure.Properties, NpgsqlDbType.Jsonb);
+            await writer.WriteAsync(exposure.CreatedAt, NpgsqlDbType.TimestampTz);
+        }
+
+        await writer.CompleteAsync();
+    }
+
+    private static async Task CopyMetricsAsync(NpgsqlConnection connection, object[] insights)
+    {
+        await using var writer = await connection.BeginBinaryImportAsync("""
+            COPY experiment_metric_events
+                (id, env_id, user_key, event_name, event_type, numeric_value, occurred_at, properties, created_at)
+            FROM STDIN (FORMAT BINARY)
+            """);
+
+        foreach (var insight in insights)
+        {
+            if (insight is not ExperimentMetricEvent metric)
+            {
+                continue;
+            }
+
+            await writer.StartRowAsync();
+            await writer.WriteAsync(metric.Id, NpgsqlDbType.Uuid);
+            await writer.WriteAsync(metric.EnvId, NpgsqlDbType.Uuid);
+            await writer.WriteAsync(metric.UserKey, NpgsqlDbType.Varchar);
+            await writer.WriteAsync(metric.EventName, NpgsqlDbType.Varchar);
+            await writer.WriteAsync(metric.EventType, NpgsqlDbType.Varchar);
+            await writer.WriteAsync(metric.NumericValue, NpgsqlDbType.Double);
+            await writer.WriteAsync(metric.OccurredAt, NpgsqlDbType.TimestampTz);
+            await writer.WriteAsync(metric.Properties, NpgsqlDbType.Jsonb);
+            await writer.WriteAsync(metric.CreatedAt, NpgsqlDbType.TimestampTz);
+        }
+
+        await writer.CompleteAsync();
     }
 
     private sealed class InsightRow

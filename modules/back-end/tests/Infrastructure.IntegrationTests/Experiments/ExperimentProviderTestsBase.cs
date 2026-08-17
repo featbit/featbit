@@ -16,16 +16,16 @@ public abstract class ExperimentProviderTestsBase(ExperimentProviderParityFixtur
     private IExperimentStatsService CreateExperimentStatsService() =>
         fixture.CreateExperimentStatsService(ProviderName);
 
-    private IInsightService CreateInsightsService() =>
+    protected IInsightService CreateInsightsService() =>
         fixture.CreateInsightsService(ProviderName);
 
     private IEndUserStatsService CreateEndUserStatsService() =>
         fixture.CreateEndUserStatsService(ProviderName);
 
-    private IExperimentMetricService CreateExperimentMetricService() =>
+    protected IExperimentMetricService CreateExperimentMetricService() =>
         fixture.CreateExperimentMetricService(ProviderName);
 
-    private (IExperimentService ExperimentService, IExperimentMetricService MetricService)
+    protected (IExperimentService ExperimentService, IExperimentMetricService MetricService)
         CreateExperimentServices() => fixture.CreateExperimentServices(ProviderName);
 
     private const string TenTenSamplingPlan = """
@@ -263,119 +263,6 @@ public abstract class ExperimentProviderTestsBase(ExperimentProviderParityFixtur
         Assert.Equal(20, actual.Items.Count);
     }
 
-    protected async Task UpdateExperimentMetric_PersistsChanges()
-    {
-        var service = CreateExperimentMetricService();
-        var key = $"metric-update-{Guid.NewGuid():N}";
-        var created = await service.CreateAsync(ExperimentProviderParityFixture.EnvId, new ExperimentMetricUpdate
-        {
-            Name = "Metric update parity",
-            Key = key,
-            MetricType = "binary",
-            MetricAgg = "once",
-            Status = "active"
-        });
-
-        await service.UpdateAsync(ExperimentProviderParityFixture.EnvId, created.Id, new ExperimentMetricUpdate
-        {
-            Name = "Metric update parity",
-            Key = key,
-            MetricType = "continuous",
-            MetricAgg = "sum",
-            Status = "active"
-        });
-
-        var listed = await service.GetListAsync(ExperimentProviderParityFixture.EnvId, new ExperimentMetricFilter
-        {
-            Key = key,
-            PageIndex = 0,
-            PageSize = 10
-        });
-        var metric = Assert.Single(listed.Items);
-        Assert.Equal("continuous", metric.MetricType);
-        Assert.Equal("sum", metric.MetricAgg);
-        Assert.Equal("active", metric.Status);
-    }
-
-    protected async Task VerifySharedMetricPersistsForMultipleExperiments()
-    {
-        var (experimentService, metricService) = CreateExperimentServices();
-        var key = $"metric-reuse-{Guid.NewGuid():N}";
-        var metric = await metricService.CreateAsync(ExperimentProviderParityFixture.EnvId, new ExperimentMetricUpdate
-        {
-            Name = "Metric reuse parity",
-            Key = key,
-            Description = "One registered metric can be selected by multiple experiments.",
-            MetricType = "binary",
-            MetricAgg = "once",
-            Status = "active"
-        });
-
-        var firstExperiment = NewExperiment("Metric reuse first");
-        var secondExperiment = NewExperiment("Metric reuse second");
-        await experimentService.CreateAsync(firstExperiment);
-        await experimentService.CreateAsync(secondExperiment);
-
-        var first = await experimentService.UpdateMetricsAsync(
-            ExperimentProviderParityFixture.EnvId,
-            firstExperiment.Id,
-            new ExperimentMetricsUpdate
-            {
-                MetricId = metric.Id,
-                ExpectedDirection = "increase_good",
-                Guardrails = "[]"
-            });
-        var second = await experimentService.UpdateMetricsAsync(
-            ExperimentProviderParityFixture.EnvId,
-            secondExperiment.Id,
-            new ExperimentMetricsUpdate
-            {
-                MetricId = metric.Id,
-                ExpectedDirection = "decrease_good",
-                Guardrails = "[]"
-            });
-
-        AssertPrimaryMetric(ProviderName, first, metric.Id, key, "increase_good");
-        AssertPrimaryMetric(ProviderName, second, metric.Id, key, "decrease_good");
-    }
-
-    private static Experiment NewExperiment(string name)
-    {
-        var now = DateTime.UtcNow;
-        return new Experiment
-        {
-            Id = Guid.NewGuid(),
-            Name = name,
-            Description = "Provider parity experiment",
-            Stage = "hypothesis",
-            FeatBitProjectKey = "provider-parity",
-            FeatBitEnvId = ExperimentProviderParityFixture.EnvId,
-            SandboxStatus = "idle",
-            CreatedAt = now,
-            UpdatedAt = now
-        };
-    }
-
-    private static void AssertPrimaryMetric(
-        string provider,
-        ExperimentDetailVm experiment,
-        Guid metricId,
-        string metricKey,
-        string expectedDirection)
-    {
-        using var doc = JsonDocument.Parse(experiment.PrimaryMetric);
-        var root = doc.RootElement;
-
-        Assert.NotEqual(Guid.Empty, metricId);
-        Assert.Equal(metricKey, root.GetProperty("event").GetString());
-        Assert.Equal(expectedDirection, root.GetProperty("expectedDirection").GetString());
-        Assert.Equal("binary", root.GetProperty("metricType").GetString());
-        Assert.Equal("once", root.GetProperty("metricAgg").GetString());
-        Assert.True(
-            root.GetProperty("description").GetString()?.Contains("multiple experiments") == true,
-            $"{provider} should preserve the selected catalog metric description.");
-    }
-
     private static NormalizedStats ExpectedStats(string metricType, string metricAgg)
     {
         IReadOnlyList<NormalizedVariantStats> variants = (metricType, metricAgg) switch
@@ -589,10 +476,141 @@ public abstract class WritableExperimentProviderTestsBase(
     ExperimentProviderParityFixture fixture) : ExperimentProviderTestsBase(fixture)
 {
     [DockerFact]
-    public Task UpdateExperimentMetric_ValidUpdate_PersistsChanges() =>
-        UpdateExperimentMetric_PersistsChanges();
+    public async Task AddInsights_MixedBatch_PersistsEvents()
+    {
+        var envId = Guid.NewGuid();
+        var timestamp = new DateTime(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc);
+        var service = CreateInsightsService();
+
+        await service.AddManyAsync(
+        [
+            new ExperimentExposureEvent
+            {
+                Id = Guid.NewGuid(), EnvId = envId, FlagKey = "copy-test-flag", UserKey = "copy-test-user",
+                VariationId = "copy-test-variation", VariationValue = null, ExposedAt = timestamp,
+                Properties = "{}", CreatedAt = timestamp
+            },
+            new ExperimentMetricEvent
+            {
+                Id = Guid.NewGuid(), EnvId = envId, UserKey = "copy-test-user", EventName = "copy-test-metric",
+                EventType = "Custom", NumericValue = 1, OccurredAt = timestamp, Properties = "{}", CreatedAt = timestamp
+            }
+        ]);
+
+        var insights = await service.GetInsightsAsync(envId, new InsightFilter
+        {
+            FeatureFlagKey = "copy-test-flag",
+            IntervalType = IntervalType.Day,
+            From = new DateTimeOffset(timestamp.Date).ToUnixTimeMilliseconds(),
+            To = new DateTimeOffset(timestamp.Date.AddDays(1).AddTicks(-1)).ToUnixTimeMilliseconds()
+        });
+
+        var insight = Assert.Single(insights);
+        var variation = Assert.Single(insight.Variations);
+        Assert.Equal("copy-test-variation", variation.Id);
+        Assert.Equal(1, variation.Val);
+    }
 
     [DockerFact]
-    public Task UpdateExperimentMetric_SharedMetric_PersistsForMultipleExperiments() =>
-        VerifySharedMetricPersistsForMultipleExperiments();
+    public async Task UpdateExperimentMetric_ValidUpdate_PersistsChanges()
+    {
+        var service = CreateExperimentMetricService();
+        var key = $"metric-update-{Guid.NewGuid():N}";
+        var created = await service.CreateAsync(ExperimentProviderParityFixture.EnvId, new ExperimentMetricUpdate
+        {
+            Name = "Metric update parity",
+            Key = key,
+            MetricType = "binary",
+            MetricAgg = "once",
+            Status = "active"
+        });
+
+        await service.UpdateAsync(ExperimentProviderParityFixture.EnvId, created.Id, new ExperimentMetricUpdate
+        {
+            Name = "Metric update parity",
+            Key = key,
+            MetricType = "continuous",
+            MetricAgg = "sum",
+            Status = "active"
+        });
+
+        var listed = await service.GetListAsync(ExperimentProviderParityFixture.EnvId, new ExperimentMetricFilter
+        {
+            Key = key,
+            PageIndex = 0,
+            PageSize = 10
+        });
+        var metric = Assert.Single(listed.Items);
+        Assert.Equal("continuous", metric.MetricType);
+        Assert.Equal("sum", metric.MetricAgg);
+        Assert.Equal("active", metric.Status);
+    }
+
+    [DockerFact]
+    public async Task UpdateExperimentMetric_SharedMetric_PersistsForMultipleExperiments()
+    {
+        var (experimentService, metricService) = CreateExperimentServices();
+        var key = $"metric-reuse-{Guid.NewGuid():N}";
+        var metric = await metricService.CreateAsync(ExperimentProviderParityFixture.EnvId, new ExperimentMetricUpdate
+        {
+            Name = "Metric reuse parity",
+            Key = key,
+            Description = "One registered metric can be selected by multiple experiments.",
+            MetricType = "binary",
+            MetricAgg = "once",
+            Status = "active"
+        });
+
+        var firstExperiment = NewExperiment("Metric reuse first");
+        var secondExperiment = NewExperiment("Metric reuse second");
+        await experimentService.CreateAsync(firstExperiment);
+        await experimentService.CreateAsync(secondExperiment);
+
+        var first = await experimentService.UpdateMetricsAsync(
+            ExperimentProviderParityFixture.EnvId, firstExperiment.Id,
+            new ExperimentMetricsUpdate { MetricId = metric.Id, ExpectedDirection = "increase_good", Guardrails = "[]" });
+        var second = await experimentService.UpdateMetricsAsync(
+            ExperimentProviderParityFixture.EnvId, secondExperiment.Id,
+            new ExperimentMetricsUpdate { MetricId = metric.Id, ExpectedDirection = "decrease_good", Guardrails = "[]" });
+
+        AssertPrimaryMetric(ProviderName, first, metric.Id, key, "increase_good");
+        AssertPrimaryMetric(ProviderName, second, metric.Id, key, "decrease_good");
+    }
+
+    private static Experiment NewExperiment(string name)
+    {
+        var now = DateTime.UtcNow;
+        return new Experiment
+        {
+            Id = Guid.NewGuid(),
+            Name = name,
+            Description = "Provider parity experiment",
+            Stage = "hypothesis",
+            FeatBitProjectKey = "provider-parity",
+            FeatBitEnvId = ExperimentProviderParityFixture.EnvId,
+            SandboxStatus = "idle",
+            CreatedAt = now,
+            UpdatedAt = now
+        };
+    }
+
+    private static void AssertPrimaryMetric(
+        string provider,
+        ExperimentDetailVm experiment,
+        Guid metricId,
+        string metricKey,
+        string expectedDirection)
+    {
+        using var doc = JsonDocument.Parse(experiment.PrimaryMetric);
+        var root = doc.RootElement;
+
+        Assert.NotEqual(Guid.Empty, metricId);
+        Assert.Equal(metricKey, root.GetProperty("event").GetString());
+        Assert.Equal(expectedDirection, root.GetProperty("expectedDirection").GetString());
+        Assert.Equal("binary", root.GetProperty("metricType").GetString());
+        Assert.Equal("once", root.GetProperty("metricAgg").GetString());
+        Assert.True(
+            root.GetProperty("description").GetString()?.Contains("multiple experiments") == true,
+            $"{provider} should preserve the selected catalog metric description.");
+    }
 }
