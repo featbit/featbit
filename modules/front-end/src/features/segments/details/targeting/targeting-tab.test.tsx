@@ -10,6 +10,7 @@ import {
 import { useState } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n/i18n"
+import { toast } from "sonner"
 import { createSegmentEndUser, searchSegmentUsers } from "../../segments-api"
 import type { Segment, SegmentEndUser, SegmentRule } from "../../segments-types"
 import { UserPicker } from "@/features/targeting/user-panel"
@@ -19,6 +20,13 @@ vi.mock("../../segments-api", () => ({
   createSegmentEndUser: vi.fn(),
   searchSegmentUsers: vi.fn(),
   updateSegmentTargeting: vi.fn(),
+}))
+
+vi.mock("sonner", () => ({
+  toast: {
+    error: vi.fn(),
+    success: vi.fn(),
+  },
 }))
 
 function renderPicker(
@@ -62,7 +70,10 @@ function renderPicker(
   )
 }
 
-function renderTargeting(rules: SegmentRule[] = []) {
+function renderTargeting(
+  rules: SegmentRule[] = [],
+  permissions: { canUpdateUsers?: boolean; canUpdateRules?: boolean } = {}
+) {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { retry: false },
@@ -104,8 +115,8 @@ function renderTargeting(rules: SegmentRule[] = []) {
         }
         properties={[]}
         requireComment={false}
-        canUpdateUsers
-        canUpdateRules
+        canUpdateUsers={permissions.canUpdateUsers ?? true}
+        canUpdateRules={permissions.canUpdateRules ?? true}
         onSaved={vi.fn()}
       />
     </QueryClientProvider>
@@ -244,6 +255,38 @@ describe("targeting UserPicker", () => {
 })
 
 describe("TargetingTab actions", () => {
+  beforeEach(() => {
+    vi.mocked(toast.error).mockReset()
+  })
+
+  it("opens review for a clean draft and keeps save disabled", async () => {
+    renderTargeting()
+
+    const review = screen.getByRole("button", { name: "Review & save" })
+    expect(review).toBeEnabled()
+    fireEvent.click(review)
+
+    expect(
+      await screen.findByRole("button", { name: "Save changes" })
+    ).toBeDisabled()
+  })
+
+  it("reports missing IAM permission without disabling review", () => {
+    renderTargeting([], {
+      canUpdateUsers: false,
+      canUpdateRules: false,
+    })
+
+    const review = screen.getByRole("button", { name: "Review & save" })
+    expect(review).toBeEnabled()
+    fireEvent.click(review)
+
+    expect(toast.error).toHaveBeenCalledWith(
+      "You do not have permission to perform this action."
+    )
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+  })
+
   it("adds a rule with one default condition", () => {
     renderTargeting()
 

@@ -121,12 +121,14 @@ export function TargetingTab({
             ) : null}
             <Button
               type="button"
-              disabled={
-                !dirty ||
-                saveMutation.isPending ||
-                (!canUpdateRules && !canUpdateUsers)
-              }
-              onClick={() => setReviewOpen(true)}
+              disabled={saveMutation.isPending}
+              onClick={() => {
+                if (!canUpdateRules && !canUpdateUsers) {
+                  toast.error(t("segments.permissionDenied"))
+                  return
+                }
+                setReviewOpen(true)
+              }}
             >
               {t("segments.detailsPage.reviewAndSave")}
             </Button>
