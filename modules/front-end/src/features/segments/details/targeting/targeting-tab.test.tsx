@@ -290,10 +290,25 @@ describe("TargetingTab actions", () => {
   it("adds a rule with one default condition", () => {
     renderTargeting()
 
-    fireEvent.click(screen.getByRole("button", { name: "Add rule" }))
+    const emptyRules = screen
+      .getByText("No rules yet. Add a rule to match users by their properties.")
+      .closest<HTMLElement>('[data-slot="targeting-rules-empty"]')
+
+    expect(emptyRules).toBeVisible()
+    fireEvent.click(
+      within(emptyRules!).getByRole("button", { name: "Add rule" })
+    )
 
     expect(screen.getByDisplayValue("Rule 1")).toBeVisible()
     expect(screen.getByText("IF")).toBeVisible()
+  })
+
+  it("disables both add rule actions without rule update permission", () => {
+    renderTargeting([], { canUpdateRules: false })
+
+    const addRuleActions = screen.getAllByRole("button", { name: "Add rule" })
+    expect(addRuleActions).toHaveLength(2)
+    for (const action of addRuleActions) expect(action).toBeDisabled()
   })
 
   it("labels the first and following rule conditions with IF and AND", () => {
