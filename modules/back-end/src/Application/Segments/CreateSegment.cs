@@ -2,7 +2,6 @@ using Application.Bases;
 using Application.Bases.Exceptions;
 using Application.Users;
 using Domain.AuditLogs;
-using Domain.Resources;
 using Domain.Segments;
 using Domain.Workspaces;
 
@@ -79,20 +78,17 @@ public class CreateSegmentHandler : IRequestHandler<CreateSegment, Segment>
     private readonly ILicenseService _licenseService;
     private readonly IPublisher _publisher;
     private readonly ICurrentUser _currentUser;
-    private readonly IResourceServiceV2 _resourceService;
 
     public CreateSegmentHandler(
         ISegmentService segmentService,
         ILicenseService licenseService,
         IPublisher publisher,
-        ICurrentUser currentUser,
-        IResourceServiceV2 resourceService)
+        ICurrentUser currentUser)
     {
         _segmentService = segmentService;
         _licenseService = licenseService;
         _publisher = publisher;
         _currentUser = currentUser;
-        _resourceService = resourceService;
     }
 
     public async Task<Segment> Handle(CreateSegment request, CancellationToken cancellationToken)
@@ -106,12 +102,6 @@ public class CreateSegmentHandler : IRequestHandler<CreateSegment, Segment>
                 throw new BusinessException(ErrorCodes.Unauthorized);
             }
         }
-        else if (request.Type == SegmentType.EnvironmentSpecific)
-        {
-            var environmentRn = await _resourceService.GetRNAsync(request.EnvId, ResourceTypes.Env);
-            request.Scopes = [environmentRn];
-        }
-
         var segment = request.AsSegment();
         await _segmentService.AddOneAsync(segment);
 
