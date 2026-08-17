@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { render, screen } from "@testing-library/react"
+import { fireEvent, render, screen } from "@testing-library/react"
 import {
   MemoryRouter,
   Outlet,
@@ -86,8 +86,14 @@ describe("IamRouteGuard", () => {
     renderGuard()
 
     expect(
-      await screen.findByRole("heading", { name: "IAM unavailable" })
+      await screen.findByRole("heading", {
+        name: "You don't have access to IAM",
+      })
     ).toBeInTheDocument()
+    expect(
+      screen.getByText("Ask a workspace administrator to update your access.")
+    ).toBeInTheDocument()
+    expect(screen.queryByRole("button")).not.toBeInTheDocument()
     expect(screen.getByTestId("location")).toHaveTextContent("/en/iam/team")
     expect(screen.queryByText("Feature flags")).not.toBeInTheDocument()
   })
@@ -101,21 +107,43 @@ describe("IamRouteGuard", () => {
     renderGuard()
 
     expect(
-      await screen.findByRole("heading", { name: "IAM unavailable" })
+      await screen.findByRole("heading", {
+        name: "You don't have access to IAM",
+      })
     ).toBeInTheDocument()
     expect(screen.queryByText("IAM team")).not.toBeInTheDocument()
   })
 
-  it("fails closed when policies cannot be loaded", async () => {
-    vi.mocked(fetchCurrentUserPolicies).mockRejectedValue(
-      new Error("Policy request failed")
-    )
+  it("localizes the unavailable state through global i18n", async () => {
+    await i18n.changeLanguage("zh")
+    vi.mocked(fetchCurrentUserPolicies).mockResolvedValue([])
 
     renderGuard()
 
     expect(
-      await screen.findByRole("heading", { name: "IAM unavailable" })
+      await screen.findByRole("heading", { name: "你没有 IAM 访问权限" })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText("请联系工作区管理员更新你的访问权限。")
+    ).toBeInTheDocument()
+  })
+
+  it("fails closed and allows retry when policies cannot be loaded", async () => {
+    vi.mocked(fetchCurrentUserPolicies)
+      .mockRejectedValueOnce(new Error("Policy request failed"))
+      .mockResolvedValueOnce([policy("allow", ["CanManageIAM"], ["iam/*"])])
+
+    renderGuard()
+
+    expect(
+      await screen.findByRole("heading", {
+        name: "We couldn't verify your IAM access",
+      })
     ).toBeInTheDocument()
     expect(screen.getByTestId("location")).toHaveTextContent("/en/iam/team")
+
+    fireEvent.click(screen.getByRole("button", { name: "Retry" }))
+
+    expect(await screen.findByText("IAM team")).toBeInTheDocument()
   })
 })
