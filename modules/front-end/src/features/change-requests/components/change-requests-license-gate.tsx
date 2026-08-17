@@ -1,8 +1,5 @@
-import { Info, LockKeyhole, Shield } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { Link } from "react-router-dom"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import { LicenseGateCard } from "@/components/license-gate-card"
 
 export function ChangeRequestsLicenseGate({
   manageLicenseHref,
@@ -12,38 +9,12 @@ export function ChangeRequestsLicenseGate({
   const { t } = useTranslation()
 
   return (
-    <Card className="min-h-[clamp(30rem,66vh,39rem)] gap-0 bg-background py-0 shadow-none">
-      <CardContent className="flex flex-1 items-center justify-center px-6 py-12 sm:px-10">
-        <div className="flex max-w-xl -translate-y-8 flex-col items-center text-center">
-          <div className="relative flex size-16 items-center justify-center rounded-xl border bg-muted/40 text-foreground">
-            <Shield aria-hidden className="size-9 stroke-[1.5]" />
-            <LockKeyhole
-              aria-hidden
-              className="absolute size-3.5 translate-y-0.5 stroke-[2.25]"
-            />
-          </div>
-
-          <h2 className="mt-8 text-xl font-semibold tracking-normal">
-            {t("changeRequests.licenseGateTitle")}
-          </h2>
-          <p className="mt-3 max-w-[65ch] text-sm leading-6 text-muted-foreground">
-            {t("changeRequests.licenseGateDescription")}
-          </p>
-
-          <Button
-            nativeButton={false}
-            className="mt-7 min-w-36"
-            render={<Link to={manageLicenseHref} />}
-          >
-            {t("changeRequests.manageLicense")}
-          </Button>
-
-          <p className="mt-6 flex items-center gap-2 text-xs text-muted-foreground">
-            <Info aria-hidden className="size-4 shrink-0" />
-            <span>{t("changeRequests.licenseGateNote")}</span>
-          </p>
-        </div>
-      </CardContent>
-    </Card>
+    <LicenseGateCard
+      title={t("changeRequests.licenseGateTitle")}
+      description={t("changeRequests.licenseGateDescription")}
+      actionLabel={t("changeRequests.manageLicense")}
+      actionHref={manageLicenseHref}
+      note={t("changeRequests.licenseGateNote")}
+    />
   )
 }

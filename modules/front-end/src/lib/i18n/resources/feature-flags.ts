@@ -529,9 +529,12 @@ export const enFeatureFlags = {
     title: "Compare feature flags",
     subtitle:
       "Compare flag settings across environments and copy only what you need.",
-    unavailableTitle: "Feature flag comparison is unavailable",
+    unavailableTitle: "Your license doesn't include Feature Flag Comparison",
     unavailableDescription:
-      "Your current license does not include cross-environment comparison and settings copy.",
+      "Feature Flag Comparison lets you compare settings across environments and copy only the changes you need. Upgrade your license to enable this feature.",
+    manageLicense: "Manage license",
+    licenseGateNote:
+      "After upgrading, you can compare feature flags across environments here.",
     resultsFailed: "Comparison results could not be loaded.",
     resultsFailedHelp:
       "Your current comparison scope and filters have been preserved.",
@@ -1178,8 +1181,11 @@ export const zhFeatureFlags: typeof enFeatureFlags = {
     back: "功能开关",
     title: "比较功能开关",
     subtitle: "比较不同环境中的功能开关设置，并只复制你需要的内容。",
-    unavailableTitle: "功能开关比较不可用",
-    unavailableDescription: "当前许可证不包含跨环境比较和设置复制功能。",
+    unavailableTitle: "当前许可证不包含功能开关比较",
+    unavailableDescription:
+      "功能开关比较可让你比较不同环境中的设置，并只复制需要的变更。请升级许可证以启用此功能。",
+    manageLicense: "管理许可证",
+    licenseGateNote: "升级后，你可以在这里跨环境比较功能开关。",
     resultsFailed: "无法加载比较结果",
     resultsFailedHelp: "已保留当前比较范围和筛选条件，请重试。",
     retry: "重试",

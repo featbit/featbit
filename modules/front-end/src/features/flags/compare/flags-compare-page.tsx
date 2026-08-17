@@ -1,6 +1,6 @@
 import { Popover as PopoverPrimitive } from "@base-ui/react/popover"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { AlertTriangle, ChevronsUpDown, Lock, Search } from "lucide-react"
+import { AlertTriangle, ChevronsUpDown, Search } from "lucide-react"
 import {
   type ReactNode,
   useCallback,
@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { DetailBackLink } from "@/components/detail-back-link"
+import { LicenseGateCard } from "@/components/license-gate-card"
 import {
   Command,
   CommandEmpty,
@@ -51,6 +52,7 @@ import {
   parseLicense,
 } from "@/features/workspace/license/license-utils"
 import { fetchApi } from "@/lib/api/authenticated-api"
+import { getRuntimeEnv } from "@/lib/env/runtime-env"
 import {
   canUseFlagAction,
   environmentRn,
@@ -274,6 +276,25 @@ export function FlagsComparePage() {
   const projectEnv = getCurrentProjectEnv()
   const envId = projectEnv?.envId ?? ""
   const sortBy = organization?.settings?.flagSortedBy ?? "created_at"
+  const decodedLicense = parseLicense(workspace?.license)
+  const fineGrainedGranted = isFineGrainedAccessControlGranted(
+    workspace?.license
+  )
+  const comparisonGranted = isFeatureGranted(
+    {
+      id: "flag-comparison",
+      labelKey: "workspace.license.features.flagComparison.title",
+      descriptionKey: "workspace.license.features.flagComparison.description",
+    },
+    decodedLicense,
+    getLicenseStatus(decodedLicense)
+  )
+  const manageLicenseHref = localizedPath(
+    lang,
+    getRuntimeEnv().hostingMode === "saas"
+      ? "/workspace/billing"
+      : "/workspace/license"
+  )
 
   const [search, setSearch] = useState(() => searchParams.get("name") ?? "")
   const [debouncedSearch, setDebouncedSearch] = useState(search.trim())
@@ -326,16 +347,18 @@ export function FlagsComparePage() {
   const projectsQuery = useQuery({
     queryKey: ["projects", "flag-compare"],
     queryFn: fetchProjects,
+    enabled: comparisonGranted,
     staleTime: 60_000,
   })
   const tagsQuery = useQuery({
     queryKey: ["feature-flag-tags", envId],
     queryFn: () => fetchFeatureFlagTags(envId),
-    enabled: Boolean(envId),
+    enabled: Boolean(envId && comparisonGranted),
     staleTime: 5 * 60_000,
   })
   const permissionsQuery = useQuery({
     ...currentUserPoliciesQueryOptions<UserPolicy>(organization?.id ?? ""),
+    enabled: Boolean(organization?.id && comparisonGranted),
     staleTime: 5 * 60_000,
   })
 
@@ -350,20 +373,6 @@ export function FlagsComparePage() {
           environmentName: environment.name,
           label: `${project.name} / ${environment.name}`,
         }))
-  )
-
-  const decodedLicense = parseLicense(workspace?.license)
-  const fineGrainedGranted = isFineGrainedAccessControlGranted(
-    workspace?.license
-  )
-  const comparisonGranted = isFeatureGranted(
-    {
-      id: "flag-comparison",
-      labelKey: "workspace.license.features.flagComparison.title",
-      descriptionKey: "workspace.license.features.flagComparison.description",
-    },
-    decodedLicense,
-    getLicenseStatus(decodedLicense)
   )
 
   const envRn = environmentRn({
@@ -466,6 +475,30 @@ export function FlagsComparePage() {
     })
   }
 
+  function renderHeader(className = "mb-6") {
+    return (
+      <header className={className}>
+        <DetailBackLink
+          to={localizedPath(lang, "/feature-flags")}
+          onClick={(event) => {
+            if (location.key !== "default") {
+              event.preventDefault()
+              navigate(-1)
+            }
+          }}
+        >
+          {t("featureFlags.comparePage.back")}
+        </DetailBackLink>
+        <h1 className="text-2xl font-semibold tracking-normal">
+          {t("featureFlags.comparePage.title")}
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {t("featureFlags.comparePage.subtitle")}
+        </p>
+      </header>
+    )
+  }
+
   if (!projectEnv || !envId) {
     return (
       <div className="-m-5 flex min-h-[calc(100vh-3.5rem)] items-center justify-center bg-background p-8">
@@ -476,28 +509,25 @@ export function FlagsComparePage() {
     )
   }
 
+  if (!comparisonGranted) {
+    return (
+      <div className="-m-5 min-h-[calc(100vh-3.5rem)] bg-background px-6 py-6 lg:px-8">
+        {renderHeader("mb-10")}
+        <LicenseGateCard
+          title={t("featureFlags.comparePage.unavailableTitle")}
+          description={t("featureFlags.comparePage.unavailableDescription")}
+          actionLabel={t("featureFlags.comparePage.manageLicense")}
+          actionHref={manageLicenseHref}
+          note={t("featureFlags.comparePage.licenseGateNote")}
+        />
+      </div>
+    )
+  }
+
   return (
     <TooltipProvider>
       <div className="-m-5 min-h-[calc(100vh-3.5rem)] bg-background px-6 py-6 lg:px-8">
-        <header className="mb-6">
-          <DetailBackLink
-            to={localizedPath(lang, "/feature-flags")}
-            onClick={(event) => {
-              if (location.key !== "default") {
-                event.preventDefault()
-                navigate(-1)
-              }
-            }}
-          >
-            {t("featureFlags.comparePage.back")}
-          </DetailBackLink>
-          <h1 className="text-2xl font-semibold tracking-normal">
-            {t("featureFlags.comparePage.title")}
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {t("featureFlags.comparePage.subtitle")}
-          </p>
-        </header>
+        {renderHeader()}
 
         <FlagsCompareScope
           source={projectEnv}
@@ -512,18 +542,6 @@ export function FlagsComparePage() {
           onApply={applyTargets}
           onRetry={() => void projectsQuery.refetch()}
         />
-
-        {!comparisonGranted ? (
-          <Alert className="mt-4 bg-muted/30">
-            <Lock />
-            <AlertTitle>
-              {t("featureFlags.comparePage.unavailableTitle")}
-            </AlertTitle>
-            <AlertDescription>
-              {t("featureFlags.comparePage.unavailableDescription")}
-            </AlertDescription>
-          </Alert>
-        ) : null}
 
         {resultsError ? (
           <Alert variant="destructive" className="mt-4 bg-destructive/5">
