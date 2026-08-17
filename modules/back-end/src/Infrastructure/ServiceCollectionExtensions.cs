@@ -2,11 +2,13 @@ using Dapper;
 using Domain.EndUsers;
 using Domain.Utils;
 using Infrastructure.Caches.Redis;
+using Infrastructure.MQ;
 using Infrastructure.OLAP.ClickHouse;
 using Infrastructure.Persistence.Dapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Npgsql;
 
 namespace Infrastructure;
@@ -85,6 +87,17 @@ public static class ServiceCollectionExtensions
         if (services.Any(service => service.ServiceType == typeof(ClickHouseClient)))
         {
             return;
+        }
+
+        if (configuration.GetMqProvider() != MqProvider.Kafka)
+        {
+            throw new OptionsValidationException(
+                nameof(ClickHouseOptions),
+                typeof(ClickHouseOptions),
+                [
+                    "ClickHouse is only used for Kafka OLAP, please recheck your configuration."
+                ]
+            );
         }
 
         services.AddOptionsWithValidateOnStart<ClickHouseOptions>()

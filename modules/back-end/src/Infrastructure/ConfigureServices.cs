@@ -1,8 +1,10 @@
 using Application;
 using Application.Usages;
 using Domain.Users;
+using Infrastructure;
 using Infrastructure.Caches;
 using Infrastructure.MQ;
+using Infrastructure.OLAP;
 using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -40,6 +42,14 @@ public static class ConfigureServices
             .ValidateOnStart();
         services.AddSingleton<UsageTracker>();
         services.AddHostedService<AppServices.UsageFlushWorker>();
+
+        // ClickHouse consumes insights directly from Kafka, so no application writer is needed.
+        if (configuration.GetOLAPProvider() != OLAPProvider.ClickHouse)
+        {
+            // Insights writer starts before and stops after the message consumers.
+            services.AddSingleton<AppServices.InsightsWriter>();
+            services.AddHostedService(sp => sp.GetRequiredService<AppServices.InsightsWriter>());
+        }
 
         // messaging services
         services.AddMq(configuration);
@@ -79,9 +89,6 @@ public static class ConfigureServices
         {
             services.AddTransient<IBillingService, Services.NoopBillingService>();
         }
-
-        // InsightsWriter must be a singleton service
-        services.AddSingleton(typeof(AppServices.InsightsWriter));
 
         return services;
     }

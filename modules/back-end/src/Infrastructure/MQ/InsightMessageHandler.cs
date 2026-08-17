@@ -7,13 +7,11 @@ public class InsightMessageHandler(IInsightService insightService, InsightsWrite
 {
     public string Topic => Topics.Insights;
 
-    public Task HandleAsync(string message)
+    public async Task HandleAsync(string message)
     {
         if (insightService.TryParse(message, out var insight))
         {
-            insightsWriter.Record(insight);
+            await insightsWriter.RecordAsync(insight);
         }
-
-        return Task.CompletedTask;
     }
 }
