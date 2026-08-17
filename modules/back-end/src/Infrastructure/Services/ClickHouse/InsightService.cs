@@ -6,13 +6,6 @@ namespace Infrastructure.Services.ClickHouse;
 
 public class InsightService(ClickHouseClient clickHouse) : IInsightService
 {
-    public bool TryParse(string json, out object insight)
-    {
-        // In Kafka deployments, ClickHouse consumes `featbit-insights` through its Kafka-engine table and materialized view
-        // So this method should never be called
-        throw new NotImplementedException();
-    }
-
     public Task AddManyAsync(object[] insights)
     {
         // In Kafka deployments, ClickHouse consumes `featbit-insights` through its Kafka-engine table and materialized view
