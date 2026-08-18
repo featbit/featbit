@@ -1,12 +1,17 @@
 using System.Collections.Concurrent;
+using System.Net;
+using System.Security.Claims;
 using System.Text.Json;
 using System.Net.Http.Json;
 using Application.Services;
+using Api.Controllers;
 using Domain.Environments;
 using Domain.Mcp;
 using Domain.Organizations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Tokens;
 using Moq;
 
 namespace Application.IntegrationTests.Controllers;
@@ -154,6 +159,26 @@ public class McpOAuthControllerTests
             new { access_token = "not-a-jwt" });
 
         await Verify(response);
+    }
+
+    [Fact]
+    public async Task RevokeToken_UnsignedToken_ReturnsInvalidToken()
+    {
+        using var factory = CreateFactory(new InMemoryMcpAuthorizationStore());
+        using var client = factory.CreateClient();
+        var accessToken = new JsonWebTokenHandler().CreateToken(new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity([new Claim(JwtRegisteredClaimNames.Jti, "forged-token-id")])
+        });
+
+        var response = await client.PostAsJsonAsync(
+            "/api/v1/mcp/oauth/revoke",
+            new { access_token = accessToken });
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal(
+            new McpOAuthError("invalid_token", "The access token is malformed."),
+            await response.Content.ReadFromJsonAsync<McpOAuthError>());
     }
 
     private static async Task<object> NormalizeDeviceCodeResponseAsync(HttpResponseMessage response)

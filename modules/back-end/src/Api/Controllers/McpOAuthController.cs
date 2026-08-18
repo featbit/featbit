@@ -179,7 +179,7 @@ public class McpOAuthController(
             return BadRequest(new McpOAuthError("invalid_request", "access_token is required."));
         }
 
-        var tokenId = ReadTokenId(request.AccessToken);
+        var tokenId = await ValidateAndReadTokenIdAsync(request.AccessToken);
         if (string.IsNullOrWhiteSpace(tokenId))
         {
             return BadRequest(new McpOAuthError("invalid_token", "The access token is malformed."));
@@ -284,17 +284,30 @@ public class McpOAuthController(
         return handler.CreateToken(descriptor);
     }
 
-    private static string? ReadTokenId(string accessToken)
+    private async Task<string?> ValidateAndReadTokenIdAsync(string accessToken)
     {
-        try
-        {
-            var token = new JsonWebTokenHandler().ReadJsonWebToken(accessToken);
-            return token.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Jti)?.Value;
-        }
-        catch
+        var validationResult = await new JsonWebTokenHandler().ValidateTokenAsync(
+            accessToken,
+            new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidIssuer = jwtOptions.Issuer,
+                ValidateAudience = true,
+                ValidAudience = jwtOptions.Audience,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = jwtOptions.VerificationSecurityKey,
+                ValidAlgorithms = [jwtOptions.Algorithm],
+                RequireSignedTokens = true,
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero
+            });
+
+        if (!validationResult.IsValid)
         {
             return null;
         }
+
+        return validationResult.ClaimsIdentity.FindFirst(JwtRegisteredClaimNames.Jti)?.Value;
     }
 }
 
