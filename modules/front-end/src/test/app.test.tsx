@@ -599,13 +599,20 @@ describe("App shell", () => {
     ).toBeInTheDocument()
   })
 
-  it("renders the localized SSO route", async () => {
-    window.history.pushState({}, "", "/en/login/sso")
+  it("shows SSO on the localized login route without changing the URL", async () => {
+    window.history.pushState({}, "", "/en/login")
     mockAuthOptionsApi()
 
     render(<App />)
 
-    expect(await screen.findByText("Sign in with SSO")).toBeInTheDocument()
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Sign in with SSO" })
+    )
+
+    expect(
+      await screen.findByRole("heading", { name: "Sign in with SSO" })
+    ).toBeInTheDocument()
+    expect(window.location.pathname).toBe("/en/login")
   })
 
   it("routes first-time authenticated users to get started", async () => {

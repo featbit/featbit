@@ -202,7 +202,7 @@ function getExternalLoginRedirect(search: string) {
   }
 
   if (params.has("sso-logged-in")) {
-    return `/login/sso${search}`
+    return `/login${search}`
   }
 
   if (params.has("social-logged-in")) {
@@ -224,15 +224,16 @@ function LanguageRedirect() {
   return <Navigate to={`/${lang}/login`} replace />
 }
 
-function LocalizedAuthRedirect({ mode }: { mode: "login" | "sso" }) {
+function LocalizedAuthRedirect() {
   const lang = getPreferredLanguage()
   const location = useLocation()
-  const path = mode === "sso" ? "login/sso" : "login"
 
-  return <Navigate to={`/${lang}/${path}${location.search}`} replace />
+  return (
+    <Navigate to={`/${lang}/login${location.search}${location.hash}`} replace />
+  )
 }
 
-function AuthRoute({ mode }: { mode: "login" | "sso" }) {
+function AuthRoute() {
   const { lang = getPreferredLanguage() } = useParams()
   const location = useLocation()
   const isPermissionDenied =
@@ -242,7 +243,7 @@ function AuthRoute({ mode }: { mode: "login" | "sso" }) {
     return <Navigate to={`/${lang}`} replace />
   }
 
-  return <AuthPage mode={mode} />
+  return <AuthPage />
 }
 
 function AuthenticatedLandingRedirect() {
@@ -341,13 +342,8 @@ export function AppRoutes() {
     <Suspense fallback={<RouteFallback />}>
       <Routes>
         <Route path="/" element={<LanguageRedirect />} />
-        <Route path="/login" element={<LocalizedAuthRedirect mode="login" />} />
-        <Route
-          path="/login/sso"
-          element={<LocalizedAuthRedirect mode="sso" />}
-        />
-        <Route path="/:lang/login" element={<AuthRoute mode="login" />} />
-        <Route path="/:lang/login/sso" element={<AuthRoute mode="sso" />} />
+        <Route path="/login" element={<LocalizedAuthRedirect />} />
+        <Route path="/:lang/login" element={<AuthRoute />} />
         <Route
           path="/:lang/select-workspace"
           element={<SelectWorkspaceRoute />}
