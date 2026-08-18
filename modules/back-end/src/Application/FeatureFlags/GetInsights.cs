@@ -20,7 +20,7 @@ public class GetInsightsValidator : AbstractValidator<GetInsights>
             .Must(IntervalType.IsDefined).WithErrorCode(ErrorCodes.Invalid("intervalType"));
 
         RuleFor(x => x.Filter.From)
-            .GreaterThan(0).WithErrorCode(ErrorCodes.Invalid("from"));
+            .LessThanOrEqualTo(x => x.Filter.To).WithErrorCode(ErrorCodes.Invalid("from"));
 
         RuleFor(x => x.Filter.To)
             .GreaterThan(0).WithErrorCode(ErrorCodes.Invalid("to"));

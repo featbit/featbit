@@ -499,6 +499,7 @@ public class FeatureFlagController : ApiControllerBase
 
     [HttpGet]
     [Route("insights")]
+    [Authorize(Permissions.CanAccessEnv)]
     public async Task<ApiResponse<IEnumerable<InsightsVm>>> GetInsightsAsync(Guid envId, [FromQuery] InsightFilter filter)
     {
         var request = new GetInsights

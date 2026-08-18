@@ -88,6 +88,21 @@ public class FeatureFlagControllerTests : IClassFixture<PermissionCheckTestApp>
     }
 
     [Fact]
+    public async Task GetInsightsAsync_PermissionDenied_Returns403()
+    {
+        _app.PermissionChecker.Grant = false;
+
+        var client = await _app.CreateAuthenticatedClientAsync();
+        var response = await client.GetAsync(
+            $"/api/v1/envs/{EnvId}/feature-flags/insights?featureFlagKey=checkout&intervalType=DAY&from=1&to=2");
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        _app.Sender.Verify(
+            s => s.Send(It.IsAny<GetInsights>(), It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    [Fact]
     public async Task UpdateGeneralAsync_Authenticated_SendsCombinedRequest()
     {
         var expectedRevision = Guid.NewGuid();

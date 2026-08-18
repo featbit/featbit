@@ -18,7 +18,7 @@ public class GetEndUserStatsValidator : AbstractValidator<GetEndUserStats>
             .NotEmpty().WithErrorCode(ErrorCodes.Required("featureFlagKey"));
 
         RuleFor(x => x.Filter.From)
-            .GreaterThan(0).WithErrorCode(ErrorCodes.Invalid("from"));
+            .LessThanOrEqualTo(x => x.Filter.To).WithErrorCode(ErrorCodes.Invalid("from"));
 
         RuleFor(x => x.Filter.To)
             .GreaterThan(0).WithErrorCode(ErrorCodes.Invalid("to"));

@@ -34,7 +34,7 @@ public class InsightsFlushWorkerTests
 
         await using var provider = CreateServiceProvider(service.Object);
         var tracker = new InsightsTracker(options);
-        var worker = CreateWorker(tracker, provider, options);
+        var worker = CreateSut(tracker, provider, options);
 
         await tracker.RecordAsync(first);
         await tracker.RecordAsync(second);
@@ -57,7 +57,7 @@ public class InsightsFlushWorkerTests
 
         await using var provider = CreateServiceProvider(service.Object);
         var tracker = new InsightsTracker(options);
-        var worker = CreateWorker(tracker, provider, options);
+        var worker = CreateSut(tracker, provider, options);
 
         await worker.StartAsync(CancellationToken.None);
         await tracker.RecordAsync(insight);
@@ -78,7 +78,7 @@ public class InsightsFlushWorkerTests
 
         await using var provider = CreateServiceProvider(service.Object);
         var tracker = new InsightsTracker(options);
-        var worker = CreateWorker(tracker, provider, options);
+        var worker = CreateSut(tracker, provider, options);
 
         foreach (var insight in insights)
         {
@@ -103,7 +103,7 @@ public class InsightsFlushWorkerTests
 
         await using var provider = CreateServiceProvider(service.Object);
         var tracker = new InsightsTracker(options);
-        var worker = CreateWorker(tracker, provider, options);
+        var worker = CreateSut(tracker, provider, options);
 
         await worker.StartAsync(CancellationToken.None);
         await tracker.RecordAsync(insight);
@@ -145,7 +145,7 @@ public class InsightsFlushWorkerTests
             .BuildServiceProvider();
     }
 
-    private static InsightsFlushWorker CreateWorker(
+    private static InsightsFlushWorker CreateSut(
         InsightsTracker tracker,
         IServiceProvider serviceProvider,
         IOptions<InsightsTrackingOptions> options)
