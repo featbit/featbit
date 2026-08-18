@@ -266,7 +266,7 @@ public class ExperimentStatsService(MongoDbClient mongoDb) : IExperimentStatsSer
                         x.Metric.OccurredAt >= fe.FirstExposedAt)
             .GroupBy(x => x.AssignmentUnit)
             .ToDictionary(
-                x => x.Key,
+                x => x.Key!,
                 x => new UserTotal
                 {
                     Count = x.LongCount(),
@@ -641,7 +641,7 @@ public class ExperimentStatsService(MongoDbClient mongoDb) : IExperimentStatsSer
         }
     }
 
-    private static string GetAssignmentUnit(string userKey, string properties, string selector)
+    private static string? GetAssignmentUnit(string userKey, string properties, string selector)
     {
         if (string.IsNullOrWhiteSpace(selector) ||
             selector is "user.keyId" or "user.key" or "keyId")
@@ -676,7 +676,7 @@ public class ExperimentStatsService(MongoDbClient mongoDb) : IExperimentStatsSer
             : request.AssignmentUnitSelector.Trim();
     }
 
-    private static string NormalizeLayerKey(QueryExperimentStats request)
+    private static string? NormalizeLayerKey(QueryExperimentStats request)
     {
         return string.IsNullOrWhiteSpace(request.LayerKey)
             ? string.IsNullOrWhiteSpace(request.LayerId)

@@ -589,7 +589,7 @@ public class ExperimentStatsService(ClickHouseClient clickHouse) : IExperimentSt
             : request.AssignmentUnitSelector.Trim();
     }
 
-    private static string NormalizeLayerKey(QueryExperimentStats request)
+    private static string? NormalizeLayerKey(QueryExperimentStats request)
     {
         return string.IsNullOrWhiteSpace(request.LayerKey)
             ? string.IsNullOrWhiteSpace(request.LayerId)
