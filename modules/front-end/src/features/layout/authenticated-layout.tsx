@@ -46,19 +46,24 @@ const HOSTING_MODE_SAAS = "saas"
 const ENVIRONMENT_SWITCH_DELAY_MS = 500
 const BROADCAST_SOURCE_ID = `${Date.now()}-${Math.random().toString(36).slice(2)}`
 
-function getEnvironmentReloadPath(pathname: string) {
+function getBrowserPath(pathname: string, baseHref: string) {
+  const absolutePathname = pathname.startsWith("/") ? pathname : `/${pathname}`
+  return `${baseHref}${absolutePathname}` || "/"
+}
+
+function getEnvironmentReloadPath(pathname: string, baseHref: string) {
   const segments = pathname.split("/").filter(Boolean)
   const [lang, featureSegment] = segments
 
   if (lang && featureSegment) {
-    return `/${lang}/${featureSegment}`
+    return getBrowserPath(`/${lang}/${featureSegment}`, baseHref)
   }
 
   if (lang) {
-    return `/${lang}`
+    return getBrowserPath(`/${lang}`, baseHref)
   }
 
-  return pathname || "/"
+  return getBrowserPath(pathname || "/", baseHref)
 }
 
 export function AuthenticatedLayout() {
@@ -85,7 +90,8 @@ export function AuthenticatedLayout() {
     useState<ProjectEnv | null>(null)
   const environmentSwitchTimeoutRef = useRef<number | null>(null)
   const environmentSwitchOriginRef = useRef<string | null>(null)
-  const isSaas = getRuntimeEnv().hostingMode === HOSTING_MODE_SAAS
+  const { baseHref, hostingMode } = getRuntimeEnv()
+  const isSaas = hostingMode === HOSTING_MODE_SAAS
   const subscriptionQuery = useQuery({
     queryKey: ["billing", "subscription"],
     queryFn: fetchSubscription,
@@ -140,7 +146,7 @@ export function AuthenticatedLayout() {
       window.clearTimeout(environmentSwitchTimeoutRef.current)
     }
 
-    const switchOrigin = `${location.pathname}${location.search}${location.hash}`
+    const switchOrigin = `${getBrowserPath(location.pathname, baseHref)}${location.search}${location.hash}`
     environmentSwitchOriginRef.current = switchOrigin
     environmentSwitchTimeoutRef.current = window.setTimeout(() => {
       environmentSwitchTimeoutRef.current = null
@@ -152,13 +158,15 @@ export function AuthenticatedLayout() {
         return
       }
 
-      window.location.assign(getEnvironmentReloadPath(location.pathname))
+      window.location.assign(
+        getEnvironmentReloadPath(location.pathname, baseHref)
+      )
     }, ENVIRONMENT_SWITCH_DELAY_MS)
   }
 
   useEffect(() => {
     const switchOrigin = environmentSwitchOriginRef.current
-    const currentLocation = `${location.pathname}${location.search}${location.hash}`
+    const currentLocation = `${getBrowserPath(location.pathname, baseHref)}${location.search}${location.hash}`
 
     if (switchOrigin === null || currentLocation === switchOrigin) {
       return
@@ -170,7 +178,7 @@ export function AuthenticatedLayout() {
     }
     environmentSwitchOriginRef.current = null
     setSwitchingProjectEnv(null)
-  }, [location.hash, location.pathname, location.search])
+  }, [baseHref, location.hash, location.pathname, location.search])
 
   useEffect(() => {
     return () => {
@@ -197,19 +205,21 @@ export function AuthenticatedLayout() {
         sourceId !== BROADCAST_SOURCE_ID &&
         !hasTabProjectEnvOverride()
       ) {
-        window.location.assign(getEnvironmentReloadPath(location.pathname))
+        window.location.assign(
+          getEnvironmentReloadPath(location.pathname, baseHref)
+        )
       }
 
       if (messageType === ORG_CHANGED_MESSAGE) {
         clearTabProjectEnv()
-        window.location.assign(`/${lang}`)
+        window.location.assign(getBrowserPath(`/${lang}`, baseHref))
       }
     }
 
     return () => {
       channel.close()
     }
-  }, [lang, location.pathname])
+  }, [baseHref, lang, location.pathname])
 
   useEffect(() => {
     return onCurrentOrganizationChanged(() => {
