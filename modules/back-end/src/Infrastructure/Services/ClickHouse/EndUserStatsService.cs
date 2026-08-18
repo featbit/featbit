@@ -21,8 +21,8 @@ public class EndUserStatsService(ClickHouseClient clickHouse) : IEndUserStatsSer
             ? string.Empty
             : $"""
                AND (
-                   positionCaseInsensitive(user_key, {ClickHouseSql.String(query)}) > 0
-                   OR positionCaseInsensitive(user_name, {ClickHouseSql.String(query)}) > 0
+                   positionCaseInsensitive(KeyId, {ClickHouseSql.String(query)}) > 0
+                   OR positionCaseInsensitive(Name, {ClickHouseSql.String(query)}) > 0
                )
                """;
 

@@ -1,6 +1,7 @@
 using Application.ExperimentStats;
 using Dapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using System.Text.Json;
 
 namespace Infrastructure.Services.EntityFrameworkCore;
@@ -316,13 +317,6 @@ public class ExperimentStatsService(AppDbContext dbContext) : IExperimentStatsSe
                 FROM included_exposure
                 ORDER BY assignment_unit, exposed_at
             ),
-            delete_existing_assignments AS
-            (
-                DELETE FROM experiment_run_assignments
-                WHERE @RunId IS NOT NULL
-                  AND run_id = @RunId
-                RETURNING 1
-            ),
             upsert_assignments AS
             (
                 INSERT INTO experiment_run_assignments
@@ -351,7 +345,6 @@ public class ExperimentStatsService(AppDbContext dbContext) : IExperimentStatsSe
                     @Now,
                     @Now
                 FROM first_eval
-                CROSS JOIN (SELECT count(*) FROM delete_existing_assignments) deleted
                 WHERE @RunId IS NOT NULL
                 ON CONFLICT (run_id, assignment_unit)
                 DO UPDATE SET
@@ -420,8 +413,7 @@ public class ExperimentStatsService(AppDbContext dbContext) : IExperimentStatsSe
             ORDER BY fe.variant
             """;
 
-        var connection = dbContext.Database.GetDbConnection();
-        var rows = (await connection.QueryAsync<ExperimentVariantStatsVm>(
+        var rows = await QueryWithAssignmentRefreshAsync(
             sql,
             new
             {
@@ -439,7 +431,8 @@ public class ExperimentStatsService(AppDbContext dbContext) : IExperimentStatsSe
                 SamplingScopeKey = samplingScopeKey,
                 request.AnalysisSamplingPlan,
                 Now = DateTime.UtcNow
-            })).AsList();
+            },
+            request.RunId);
 
         foreach (var row in rows)
         {
@@ -559,13 +552,6 @@ public class ExperimentStatsService(AppDbContext dbContext) : IExperimentStatsSe
                 WHERE role <> 'mismatch'
                 ORDER BY allocation_key, exposed_at
             ),
-            delete_existing_assignments AS
-            (
-                DELETE FROM experiment_run_assignments
-                WHERE @RunId IS NOT NULL
-                  AND run_id = @RunId
-                RETURNING 1
-            ),
             upsert_assignments AS
             (
                 INSERT INTO experiment_run_assignments
@@ -592,7 +578,6 @@ public class ExperimentStatsService(AppDbContext dbContext) : IExperimentStatsSe
                     @Now,
                     @Now
                 FROM computed_assignments
-                CROSS JOIN (SELECT count(*) FROM delete_existing_assignments) deleted
                 WHERE @RunId IS NOT NULL
                 ON CONFLICT (run_id, allocation_key)
                 DO UPDATE SET
@@ -663,8 +648,7 @@ public class ExperimentStatsService(AppDbContext dbContext) : IExperimentStatsSe
             ORDER BY fe.variant
             """;
 
-        var connection = dbContext.Database.GetDbConnection();
-        var rows = (await connection.QueryAsync<ExperimentVariantStatsVm>(
+        var rows = await QueryWithAssignmentRefreshAsync(
             sql,
             new
             {
@@ -680,7 +664,8 @@ public class ExperimentStatsService(AppDbContext dbContext) : IExperimentStatsSe
                 SliceEnd = Math.Clamp(request.SliceEnd ?? 100, 0, 100),
                 request.AllocationPlan,
                 Now = DateTime.UtcNow
-            })).AsList();
+            },
+            request.RunId);
 
         foreach (var row in rows)
         {
@@ -700,6 +685,32 @@ public class ExperimentStatsService(AppDbContext dbContext) : IExperimentStatsSe
             },
             Variants = rows
         };
+    }
+
+    private async Task<List<ExperimentVariantStatsVm>> QueryWithAssignmentRefreshAsync(
+        string sql,
+        object parameters,
+        Guid? runId)
+    {
+        var connection = dbContext.Database.GetDbConnection();
+        if (runId == null)
+        {
+            return (await connection.QueryAsync<ExperimentVariantStatsVm>(sql, parameters)).AsList();
+        }
+
+        await using var transaction = await dbContext.Database.BeginTransactionAsync();
+        var dbTransaction = transaction.GetDbTransaction();
+        await connection.ExecuteAsync(
+            "DELETE FROM experiment_run_assignments WHERE run_id = @RunId",
+            new { RunId = runId.Value },
+            dbTransaction);
+        var rows = (await connection.QueryAsync<ExperimentVariantStatsVm>(
+            sql,
+            parameters,
+            dbTransaction)).AsList();
+        await transaction.CommitAsync();
+
+        return rows;
     }
 
     private static string GetUserContributionExpression(string metricType, string metricAgg)

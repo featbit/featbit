@@ -138,6 +138,11 @@ public abstract class ExperimentProviderTestsBase(ExperimentProviderParityFixtur
         Assert.Equal(
             [("control", 80L), ("treatment", 80L)],
             actual.Variants.Select(x => (x.Variant, x.Conversions)).ToArray());
+
+        var refreshed = Normalize(await CreateExperimentStatsService().QueryAsync(request));
+        Assert.Equal(
+            actual.Variants.Select(x => (x.Variant, x.Users, x.Conversions)),
+            refreshed.Variants.Select(x => (x.Variant, x.Users, x.Conversions)));
     }
 
     [DockerFact]
@@ -261,6 +266,28 @@ public abstract class ExperimentProviderTestsBase(ExperimentProviderParityFixtur
 
         Assert.Equal(1_500, actual.TotalCount);
         Assert.Equal(20, actual.Items.Count);
+    }
+
+    [DockerFact]
+    public async Task GetFeatureFlagEndUserStats_NameQuery_ReturnsMatchingUser()
+    {
+        await fixture.SeedScenarioAsync(ProviderName);
+
+        var param = new EndUserStatsFilter
+        {
+            FeatureFlagKey = ExperimentProviderParityFixture.FlagKey,
+            From = DateTimeOffset.Parse("2026-01-01T00:00:00Z").ToUnixTimeMilliseconds(),
+            To = DateTimeOffset.Parse("2026-01-02T23:59:59Z").ToUnixTimeMilliseconds(),
+            Query = "A User 001",
+            PageIndex = 0,
+            PageSize = 20
+        };
+
+        var actual = Normalize(await CreateEndUserStatsService()
+            .GetEndUserStatsAsync(ExperimentProviderParityFixture.StandardEnvId, param));
+
+        Assert.Equal(1, actual.TotalCount);
+        Assert.Equal("a-001", Assert.Single(actual.Items).KeyId);
     }
 
     private static NormalizedStats ExpectedStats(string metricType, string metricAgg)
