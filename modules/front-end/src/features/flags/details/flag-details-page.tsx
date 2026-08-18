@@ -348,10 +348,6 @@ export function FlagDetailsPage() {
       setWorkflowLicenseGate(mode)
       return
     }
-    if (!canManageTargetingWorkflow) {
-      showPermissionDenied()
-      return
-    }
     setReviewOpen(false)
     setSubmission({ mode, initialReason })
   }

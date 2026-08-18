@@ -317,7 +317,7 @@ describe("feature flag targeting tab", () => {
     expect(props.onChangeRequest).toHaveBeenCalledOnce()
   })
 
-  it("keeps workflow actions clickable while review reports missing IAM permission", async () => {
+  it("lets workflow actions bypass IAM while review still requires it", async () => {
     const props = renderTargeting(exampleFlag(), true, false, false, false)
 
     const review = screen.getByRole("button", { name: "Review & save" })
