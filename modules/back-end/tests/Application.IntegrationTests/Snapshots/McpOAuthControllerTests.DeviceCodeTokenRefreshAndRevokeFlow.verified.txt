@@ -1,0 +1,44 @@
+﻿{
+  Authorize: {
+    ClientId: codex,
+    EnvId: Guid_1,
+    ExperimentId: Guid_2,
+    Status: 200,
+    Success: true
+  },
+  Create: {
+    ExpiresInIsPositive: true,
+    HasDeviceCode: true,
+    Interval: 5,
+    Status: 200,
+    UserCodeLength: 9,
+    VerificationUri: http://localhost/mcp/oauth/device
+  },
+  OldRefresh: {
+    Error: invalid_grant,
+    ErrorDescription: The refresh token is expired or invalid.,
+    Status: 400
+  },
+  Pending: {
+    Error: authorization_pending,
+    ErrorDescription: The user has not approved the device code yet.,
+    Status: 400
+  },
+  Refresh: {
+    ExpiresIn: 2592000,
+    HasAccessToken: true,
+    HasRefreshToken: true,
+    Scope: experiment:read experiment:write experiment:analyze,
+    Status: 200,
+    TokenType: Bearer
+  },
+  RevokeStatus: 200,
+  Token: {
+    ExpiresIn: 2592000,
+    HasAccessToken: true,
+    HasRefreshToken: true,
+    Scope: experiment:read experiment:write experiment:analyze,
+    Status: 200,
+    TokenType: Bearer
+  }
+}

@@ -21,10 +21,11 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
 
-        <PackageReference Include="Testcontainers.MongoDb" Version="4.6.0" />
-        <PackageReference Include="Testcontainers.PostgreSql" Version="4.6.0" />
-        <PackageReference Include="Testcontainers.Redis" Version="4.6.0" />
-        <PackageReference Include="Testcontainers.Kafka" Version="4.6.0" />
+        <PackageReference Include="Testcontainers.MongoDb" Version="4.13.0" />
+        <PackageReference Include="Testcontainers.PostgreSql" Version="4.13.0" />
+        <PackageReference Include="Testcontainers.Redis" Version="4.13.0" />
+        <PackageReference Include="Testcontainers.Kafka" Version="4.13.0" />
+        <PackageReference Include="Testcontainers.ClickHouse" Version="4.13.0" />
 
         <PackageReference Include="MongoDB.Driver" Version="3.8.1" />
         <PackageReference Include="Npgsql" Version="10.0.2" />

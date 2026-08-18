@@ -1,4 +1,5 @@
 using Application;
+using Application.Insights;
 using Application.Usages;
 using Domain.Users;
 using Infrastructure.Caches;
@@ -41,6 +42,18 @@ public static class ConfigureServices
         services.AddSingleton<UsageTracker>();
         services.AddHostedService<AppServices.UsageFlushWorker>();
 
+        // track insights
+        services.AddOptions<InsightsTrackingOptions>()
+            .Bind(configuration.GetSection(InsightsTrackingOptions.InsightsTracking))
+            .ValidateDataAnnotations()
+            .Validate(
+                options => options.MaxBatchSize <= options.ChannelCapacity,
+                "Max batch size must not exceed channel capacity."
+            )
+            .ValidateOnStart();
+        services.AddSingleton<InsightsTracker>();
+        services.AddHostedService<AppServices.InsightsFlushWorker>();
+
         // messaging services
         services.AddMq(configuration);
 
@@ -79,9 +92,6 @@ public static class ConfigureServices
         {
             services.AddTransient<IBillingService, Services.NoopBillingService>();
         }
-
-        // InsightsWriter must be a singleton service
-        services.AddSingleton(typeof(AppServices.InsightsWriter));
 
         return services;
     }

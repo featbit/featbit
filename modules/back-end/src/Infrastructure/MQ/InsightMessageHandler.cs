@@ -1,19 +1,17 @@
+using Application.Insights;
 using Domain.Messages;
-using Infrastructure.AppService;
 
 namespace Infrastructure.MQ;
 
-public class InsightMessageHandler(IInsightService insightService, InsightsWriter insightsWriter) : IMessageHandler
+public class InsightMessageHandler(InsightsTracker insightsTracker) : IMessageHandler
 {
     public string Topic => Topics.Insights;
 
-    public Task HandleAsync(string message)
+    public async Task HandleAsync(string message)
     {
-        if (insightService.TryParse(message, out var insight))
+        if (InsightParser.TryParse(message, out var insight))
         {
-            insightsWriter.Record(insight);
+            await insightsTracker.RecordAsync(insight!);
         }
-
-        return Task.CompletedTask;
     }
 }

@@ -1,0 +1,45 @@
+﻿{
+  Status: 200 OK,
+  Headers: {
+    api-supported-versions: 1.0
+  },
+  Content: {
+    Headers: {
+      Content-Length: 453,
+      Content-Type: application/json; charset=utf-8
+    },
+    Value: {
+      data: {
+        envId: Guid_1,
+        flagKey: checkout-onboarding,
+        metricEvent: checkout_activated,
+        variants: [
+          {
+            avgValue: 0.1,
+            conversionRate: 0.1,
+            conversions: 10,
+            sumSquares: 10,
+            sumValue: 10,
+            users: 100,
+            variant: control
+          },
+          {
+            avgValue: 0.15,
+            conversionRate: 0.15,
+            conversions: 15,
+            sumSquares: 15,
+            sumValue: 15,
+            users: 100,
+            variant: treatment
+          }
+        ],
+        window: {
+          end: 2026-06-10,
+          start: 2026-06-01
+        }
+      },
+      errors: [],
+      success: true
+    }
+  }
+}

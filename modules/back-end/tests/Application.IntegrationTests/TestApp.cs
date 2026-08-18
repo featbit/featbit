@@ -2,10 +2,10 @@ using System.Net.Http.Headers;
 using System.Net.Mime;
 using System.Text;
 using System.Text.Json;
+using Api.Authorization;
 using Application.Identity;
 using Application.Services;
 using Application.Users;
-using Api.Authorization;
 using Domain.Users;
 using Infrastructure.Caches;
 using Infrastructure.MQ;
@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
@@ -22,6 +23,16 @@ namespace Application.IntegrationTests;
 
 public class TestApp : WebApplicationFactory<Program>
 {
+    public WebApplicationFactory<Program> WithServices(Action<IServiceCollection> configure) =>
+        WithWebHostBuilder(builder => builder.ConfigureTestServices(configure));
+
+    public async Task<HttpClient> CreateAuthenticatedClientAsync(WebApplicationFactory<Program> factory)
+    {
+        var client = factory.CreateClient();
+        await AddAuthorizationHeader(client);
+        return client;
+    }
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseSetting(MqProvider.SectionName, MqProvider.None);

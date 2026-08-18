@@ -9,11 +9,13 @@ using Domain.FlagRevisions;
 using Domain.FlagSchedules;
 using Domain.Groups;
 using Domain.Members;
+using Domain.Mcp;
 using Domain.Organizations;
 using Domain.Policies;
 using Domain.Projects;
 using Domain.RefreshTokens;
 using Domain.RelayProxies;
+using Domain.Experiments;
 using Domain.Segments;
 using Domain.Triggers;
 using Domain.Users;
@@ -70,7 +72,19 @@ public class MongoDbClient
         { typeof(GroupPolicy), "GroupPolicies" },
         { typeof(MemberPolicy), "MemberPolicies" },
 
+        { typeof(Experiment), "Experiments" },
+        { typeof(ExperimentRun), "ExperimentRuns" },
+        { typeof(ExperimentLayer), "ExperimentLayers" },
+        { typeof(ExperimentMetric), "ExperimentMetrics" },
+        { typeof(ExperimentActivity), "ExperimentActivities" },
+        { typeof(ExperimentExposureEvent), "ExperimentExposureEvents" },
+        { typeof(ExperimentMetricEvent), "ExperimentMetricEvents" },
+        { typeof(ExperimentRunAssignment), "ExperimentRunAssignments" },
+
         { typeof(AccessToken), "AccessTokens" },
+        { typeof(McpDeviceAuthorization), "McpDeviceAuthorizations" },
+        { typeof(McpRefreshAuthorization), "McpRefreshAuthorizations" },
+        { typeof(McpAccessTokenSession), "McpAccessTokenSessions" },
         { typeof(RelayProxy), "RelayProxies" },
         { typeof(Webhook), "Webhooks" },
         { typeof(WebhookDelivery), "WebhookDeliveries" }

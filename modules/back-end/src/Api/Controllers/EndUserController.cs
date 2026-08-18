@@ -103,6 +103,19 @@ public class EndUserController : ApiControllerBase
         var segments = await Mediator.Send(request);
         return Ok(segments);
     }
+    
+    [HttpGet("stats")]
+    public async Task<ApiResponse<PagedResult<EndUserStatsVm>>> GetStatsAsync(Guid envId, [FromQuery] EndUserStatsFilter filter)
+    {
+        var request = new GetEndUserStats
+        {
+            EnvId = envId,
+            Filter = filter
+        };
+
+        var users = await Mediator.Send(request);
+        return Ok(users);
+    }
 
     [HttpPost("upload")]
     // request size limit: 510MB
