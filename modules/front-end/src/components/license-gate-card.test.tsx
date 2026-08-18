@@ -34,7 +34,7 @@ describe("LicenseGateDialog", () => {
       "After upgrading, scheduling is available here."
     ).parentElement
     expect(note).toHaveClass("items-start", "text-left")
-    expect(note?.querySelector("svg")).toHaveClass("mt-0.5")
+    expect(note?.querySelector("svg")).not.toHaveClass("mt-0.5")
     expect(document.querySelector('[data-slot="dialog-content"]')).toHaveClass(
       "sm:max-w-xl",
       "overflow-hidden"

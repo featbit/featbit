@@ -71,7 +71,7 @@ export function LicenseGateContent({
       </Button>
 
       <p className="mt-6 flex items-start gap-2 text-left text-xs text-muted-foreground">
-        <Info aria-hidden className="mt-0.5 size-4 shrink-0" />
+        <Info aria-hidden className="size-4 shrink-0" />
         <span>{note}</span>
       </p>
     </div>
