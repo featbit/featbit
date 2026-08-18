@@ -30,9 +30,7 @@ public sealed class FeatBitPostgresFixture : IAsyncLifetime
     private static readonly Regex VersionInName =
         new(@"v(\d+)\.(\d+)\.(\d+)", RegexOptions.IgnoreCase);
 
-    private readonly PostgreSqlContainer _container = new PostgreSqlBuilder()
-        .WithImage("postgres:16-alpine")
-        .Build();
+    private readonly PostgreSqlContainer _container = new PostgreSqlBuilder("postgres:16-alpine").Build();
 
     public string ConnectionString { get; private set; } = string.Empty;
 

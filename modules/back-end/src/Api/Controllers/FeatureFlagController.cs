@@ -497,4 +497,18 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(success);
     }
 
+    [HttpGet]
+    [Route("insights")]
+    [Authorize(Permissions.CanAccessEnv)]
+    public async Task<ApiResponse<IEnumerable<InsightsVm>>> GetInsightsAsync(Guid envId, [FromQuery] InsightFilter filter)
+    {
+        var request = new GetInsights
+        {
+            EnvId = envId,
+            Filter = filter
+        };
+
+        var stats = await Mediator.Send(request);
+        return Ok(stats);
+    }
 }

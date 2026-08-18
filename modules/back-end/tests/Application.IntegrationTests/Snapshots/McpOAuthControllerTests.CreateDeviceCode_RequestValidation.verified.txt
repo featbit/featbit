@@ -1,0 +1,16 @@
+﻿{
+  Status: 400 Bad Request,
+  Headers: {
+    api-supported-versions: 1.0
+  },
+  Content: {
+    Headers: {
+      Content-Length: 71,
+      Content-Type: application/json; charset=utf-8
+    },
+    Value: {
+      error: invalid_request,
+      error_description: clientId is required.
+    }
+  }
+}
