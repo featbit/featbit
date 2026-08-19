@@ -13,18 +13,17 @@ public sealed class CosmosMongoDbFixture : IAsyncLifetime
     private const string EmulatorKey =
         "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==";
 
-    private readonly IContainer _container = new ContainerBuilder(
-            "mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:latest")
+    // private readonly IContainer _container = new ContainerBuilder("mcr.azure.cn/cosmosdb/linux/azure-cosmos-emulator:latest")
+    private readonly IContainer _container = new ContainerBuilder("mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:latest")
         .WithEnvironment("AZURE_COSMOS_EMULATOR_ENABLE_MONGODB_ENDPOINT", "4.2")
         .WithEnvironment("AZURE_COSMOS_EMULATOR_PARTITION_COUNT", "1")
-        .WithPortBinding(8081, 8081)
-        .WithPortBinding(10255, 10255)
+        .WithPortBinding(10255, true)
         .WithWaitStrategy(Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(10255))
         .Build();
 
     public string ConnectionString =>
-        $"mongodb://localhost:{Uri.EscapeDataString(EmulatorKey)}@localhost:10255/admin" +
-        "?tls=true&tlsInsecure=true&retrywrites=false";
+        $"mongodb://localhost:{Uri.EscapeDataString(EmulatorKey)}@localhost:{_container.GetMappedPublicPort(10255)}/admin" +
+        "?tls=true&tlsInsecure=true&retrywrites=false&directConnection=true";
 
     public async Task InitializeAsync()
     {
