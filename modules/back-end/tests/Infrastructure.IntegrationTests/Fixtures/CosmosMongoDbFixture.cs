@@ -22,7 +22,7 @@ public sealed class CosmosMongoDbFixture : IAsyncLifetime
         .Build();
 
     public string ConnectionString =>
-        $"mongodb://localhost:{Uri.EscapeDataString(EmulatorKey)}@localhost:{_container.GetMappedPublicPort(10255)}/admin" +
+        $"mongodb://localhost:{Uri.EscapeDataString(EmulatorKey)}@{_container.Hostname}:{_container.GetMappedPublicPort(10255)}/admin" +
         "?tls=true&tlsInsecure=true&retrywrites=false&directConnection=true";
 
     public async Task InitializeAsync()
