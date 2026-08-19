@@ -106,20 +106,21 @@ public class EndUserService(MongoDbClient mongoDb) : MongoDbService<EndUser>(mon
             return globalUsers;
         }
 
-        // Use $unionWith so each branch hits its own index (workspaceId or envId),
-        // then sort + limit the merged result set — mirrors the PostgreSQL UNION ALL approach.
         var envFilter = builder.And(builder.Eq(x => x.EnvId, envId), extraFilters);
-        var envPipeline = new EmptyPipelineDefinition<EndUser>().Match(envFilter);
 
-        var users = await Collection.Aggregate()
-            .Match(globalFilter)
-            .UnionWith(Collection, envPipeline)
+        var results = await Task.WhenAll(FindAsync(globalFilter), FindAsync(envFilter));
+        return results
+            .SelectMany(x => x)
+            .OrderByDescending(x => x.UpdatedAt)
+            .ThenByDescending(x => x.Id)
+            .Take(limit)
+            .ToArray();
+
+        Task<List<EndUser>> FindAsync(FilterDefinition<EndUser> userFilter) => Collection.Find(userFilter)
             .SortByDescending(x => x.UpdatedAt)
             .ThenByDescending(x => x.Id)
             .Limit(limit)
             .ToListAsync();
-
-        return users;
 
         FilterDefinition<EndUser> BuildExtraFilters()
         {
