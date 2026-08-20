@@ -102,6 +102,7 @@ public class CreateSegmentHandler : IRequestHandler<CreateSegment, Segment>
                 throw new BusinessException(ErrorCodes.Unauthorized);
             }
         }
+
         var segment = request.AsSegment();
         await _segmentService.AddOneAsync(segment);
 

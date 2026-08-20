@@ -16,12 +16,10 @@ public class OnProjectDeleted : INotification
 public class OnProjectDeletedHandler : INotificationHandler<OnProjectDeleted>
 {
     private readonly IPublisher _publisher;
-    private readonly IPolicyService _policyService;
 
-    public OnProjectDeletedHandler(IPublisher publisher, IPolicyService policyService)
+    public OnProjectDeletedHandler(IPublisher publisher)
     {
         _publisher = publisher;
-        _policyService = policyService;
     }
 
     public async Task Handle(OnProjectDeleted notification, CancellationToken cancellationToken)
@@ -32,13 +30,6 @@ public class OnProjectDeletedHandler : INotificationHandler<OnProjectDeleted>
         foreach (var env in envs)
         {
             await _publisher.Publish(new OnEnvironmentDeleted(env), cancellationToken);
-        }
-
-        var creatorAccessPolicyKey = ProjectCreatorAccess.PolicyKey(notification.ProjectWithEnvs.Id);
-        var creatorAccessPolicy = await _policyService.FindOneAsync(x => x.Key == creatorAccessPolicyKey);
-        if (creatorAccessPolicy != null)
-        {
-            await _policyService.DeleteAsync(creatorAccessPolicy.Id);
         }
     }
 }
