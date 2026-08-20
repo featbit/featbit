@@ -1,0 +1,5 @@
+node_modules
+.env
+.env.local
+*.log
+prisma/migrate-sqlite-to-pg.ts
