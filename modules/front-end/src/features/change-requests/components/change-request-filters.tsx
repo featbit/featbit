@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { Check, ChevronDown, Loader2, Search } from "lucide-react"
 import { useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import {
   Command,
@@ -28,7 +29,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import type { ChangeRequestsCopy } from "../change-requests-copy"
 import type { ChangeRequestStatus } from "../change-requests-types"
 
 function memberLabel(member: OrganizationMember) {
@@ -40,16 +40,15 @@ function MemberFilter({
   label,
   allLabel,
   searchPlaceholder,
-  copy,
   onChange,
 }: {
   value: OrganizationMember | null
   label: string
   allLabel: string
   searchPlaceholder: string
-  copy: ChangeRequestsCopy
   onChange: (member: OrganizationMember | null) => void
 }) {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
@@ -97,23 +96,23 @@ function MemberFilter({
             {membersQuery.isLoading ? (
               <div className="flex items-center justify-center gap-2 py-6 text-sm text-muted-foreground">
                 <Loader2 className="size-4 animate-spin" />
-                {copy.loadingMore}
+                {t("changeRequests.loadingMore")}
               </div>
             ) : membersQuery.isError ? (
               <div className="flex items-center justify-between gap-3 px-3 py-4 text-sm text-destructive">
-                {copy.membersLoadFailed}
+                {t("changeRequests.membersLoadFailed")}
                 <Button
                   type="button"
                   size="sm"
                   variant="outline"
                   onClick={() => void membersQuery.refetch()}
                 >
-                  {copy.retry}
+                  {t("changeRequests.retry")}
                 </Button>
               </div>
             ) : (
               <>
-                <CommandEmpty>{copy.noMembers}</CommandEmpty>
+                <CommandEmpty>{t("changeRequests.noMembers")}</CommandEmpty>
                 <CommandGroup>
                   <CommandItem
                     value="all"
@@ -169,7 +168,6 @@ export function ChangeRequestFilters({
   reviewer,
   status,
   filtersApplied,
-  copy,
   onQueryChange,
   onAuthorChange,
   onReviewerChange,
@@ -181,13 +179,14 @@ export function ChangeRequestFilters({
   reviewer: OrganizationMember | null
   status?: ChangeRequestStatus
   filtersApplied: boolean
-  copy: ChangeRequestsCopy
   onQueryChange: (value: string) => void
   onAuthorChange: (member: OrganizationMember | null) => void
   onReviewerChange: (member: OrganizationMember | null) => void
   onStatusChange: (status: ChangeRequestStatus | undefined) => void
   onClear: () => void
 }) {
+  const { t } = useTranslation()
+
   return (
     <div className="flex flex-wrap items-center gap-3">
       <div className="relative w-80 min-w-64">
@@ -195,26 +194,24 @@ export function ChangeRequestFilters({
         <Input
           value={query}
           className="pl-9"
-          aria-label={copy.filterByComment}
-          placeholder={copy.filterByComment}
+          aria-label={t("changeRequests.filterByComment")}
+          placeholder={t("changeRequests.filterByComment")}
           onChange={(event) => onQueryChange(event.target.value)}
         />
       </div>
 
       <MemberFilter
         value={author}
-        label={copy.author}
-        allLabel={copy.allAuthors}
-        searchPlaceholder={copy.searchAuthors}
-        copy={copy}
+        label={t("changeRequests.author")}
+        allLabel={t("changeRequests.allAuthors")}
+        searchPlaceholder={t("changeRequests.searchAuthors")}
         onChange={onAuthorChange}
       />
       <MemberFilter
         value={reviewer}
-        label={copy.reviewer}
-        allLabel={copy.allReviewers}
-        searchPlaceholder={copy.searchReviewers}
-        copy={copy}
+        label={t("changeRequests.reviewer")}
+        allLabel={t("changeRequests.allReviewers")}
+        searchPlaceholder={t("changeRequests.searchReviewers")}
         onChange={onReviewerChange}
       />
 
@@ -228,14 +225,18 @@ export function ChangeRequestFilters({
           )
         }
       >
-        <SelectTrigger className="w-52" aria-label={copy.status}>
+        <SelectTrigger className="w-52" aria-label={t("changeRequests.status")}>
           <SelectValue>
-            {status ? copy.statuses[status] : copy.allStatuses}
+            {status
+              ? t(`changeRequests.statuses.${status}`)
+              : t("changeRequests.allStatuses")}
           </SelectValue>
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            <SelectItem value="all">{copy.allStatuses}</SelectItem>
+            <SelectItem value="all">
+              {t("changeRequests.allStatuses")}
+            </SelectItem>
             {(
               [
                 "PendingReview",
@@ -245,7 +246,7 @@ export function ChangeRequestFilters({
               ] as ChangeRequestStatus[]
             ).map((option) => (
               <SelectItem key={option} value={option}>
-                {copy.statuses[option]}
+                {t(`changeRequests.statuses.${option}`)}
               </SelectItem>
             ))}
           </SelectGroup>
@@ -254,7 +255,7 @@ export function ChangeRequestFilters({
 
       {filtersApplied ? (
         <Button type="button" variant="ghost" onClick={onClear}>
-          {copy.clearFilters}
+          {t("changeRequests.clearFilters")}
         </Button>
       ) : null}
     </div>

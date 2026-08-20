@@ -1,7 +1,14 @@
 export const enIam = {
-  unavailableTitle: "IAM unavailable",
+  pageTitle: "Identity and access management",
+  pageSubtitle: "Manage team members, groups, and policies in this workspace.",
+  unavailableTitle: "You don't have access to IAM",
   unavailableDescription:
-    "You don't have permission to access identity and access management in this workspace.",
+    "Your role doesn't include permission to manage team members, groups, or policies in this workspace.",
+  unavailableNote: "Ask a workspace administrator to update your access.",
+  loadFailedTitle: "We couldn't verify your IAM access",
+  loadFailedDescription: "Try again to reload your workspace permissions.",
+  retry: "Retry",
+  retrying: "Retrying...",
   team: {
     title: "Team",
     subtitle: "Manage organization members and their effective access.",
@@ -509,8 +516,16 @@ export const enIam = {
 } as const
 
 export const zhIam = {
-  unavailableTitle: "无法访问 IAM",
-  unavailableDescription: "你没有在此工作区访问身份与权限管理的权限。",
+  pageTitle: "身份与权限管理",
+  pageSubtitle: "管理此工作区中的团队成员、组和策略。",
+  unavailableTitle: "你没有 IAM 访问权限",
+  unavailableDescription:
+    "你的角色没有管理此工作区中的团队成员、组或策略的权限。",
+  unavailableNote: "请联系工作区管理员更新你的访问权限。",
+  loadFailedTitle: "无法验证你的 IAM 访问权限",
+  loadFailedDescription: "请重试以重新加载工作区权限。",
+  retry: "重试",
+  retrying: "正在重试...",
   team: {
     title: "团队",
     subtitle: "管理机构成员及其有效访问权限。",

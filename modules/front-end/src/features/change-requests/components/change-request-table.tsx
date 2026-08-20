@@ -28,7 +28,6 @@ import { useFlagChangeLedgerAdapter } from "@/features/flags/details/targeting/u
 import { localizedPath } from "@/features/layout/layout-context"
 import type { Lang } from "@/features/layout/layout-types"
 import { cn } from "@/lib/utils"
-import type { ChangeRequestsCopy } from "../change-requests-copy"
 import type {
   ChangeRequestAction,
   ChangeRequestItem,
@@ -116,13 +115,12 @@ function ReviewerList({
   reviewers,
   currentUserId,
   lang,
-  copy,
 }: {
   reviewers: ChangeRequestReviewer[]
   currentUserId?: string
   lang: Lang
-  copy: ChangeRequestsCopy
 }) {
+  const { t } = useTranslation()
   const visible = reviewers.slice(0, 2)
 
   return (
@@ -130,10 +128,10 @@ function ReviewerList({
       {visible.map((reviewer) => {
         const name =
           reviewer.memberId === currentUserId
-            ? copy.you
+            ? t("changeRequests.you")
             : reviewer.name ||
               reviewer.email ||
-              copy.reviewerFallback(reviewer.memberId)
+              t("changeRequests.reviewerFallback", { id: reviewer.memberId })
         const decision = reviewerDecision(reviewer)
         return (
           <div
@@ -149,7 +147,7 @@ function ReviewerList({
             />
             <span
               className={`size-1.5 shrink-0 rounded-full ${reviewerDot(decision)}`}
-              title={copy.reviewerStatuses[decision]}
+              title={t(`changeRequests.reviewerStatuses.${decision}`)}
             />
           </div>
         )
@@ -172,7 +170,6 @@ export function ChangeRequestTable({
   loading,
   filtered,
   acting,
-  copy,
   onAction,
   onCopyKey,
   onClearFilters,
@@ -185,7 +182,6 @@ export function ChangeRequestTable({
   loading: boolean
   filtered: boolean
   acting: { id: string; action: ChangeRequestAction } | null
-  copy: ChangeRequestsCopy
   onAction: (item: ChangeRequestItem, action: ChangeRequestAction) => void
   onCopyKey: (key: string) => void
   onClearFilters: () => void
@@ -215,13 +211,19 @@ export function ChangeRequestTable({
         <TableRow className="hover:bg-transparent">
           <TableHead className="w-12" />
           <TableHead className="w-[19rem] max-w-[19rem]">
-            {copy.request}
+            {t("changeRequests.request")}
           </TableHead>
-          <TableHead className="w-72">{copy.scope}</TableHead>
-          <TableHead className="w-56">{copy.reviewers}</TableHead>
-          <TableHead className="w-36">{copy.status}</TableHead>
-          <TableHead className="w-48">{copy.lastChange}</TableHead>
-          <TableHead className="w-52 text-center">{copy.actions}</TableHead>
+          <TableHead className="w-72">{t("changeRequests.scope")}</TableHead>
+          <TableHead className="w-56">
+            {t("changeRequests.reviewers")}
+          </TableHead>
+          <TableHead className="w-36">{t("changeRequests.status")}</TableHead>
+          <TableHead className="w-48">
+            {t("changeRequests.lastChange")}
+          </TableHead>
+          <TableHead className="w-52 text-center">
+            {t("changeRequests.actions")}
+          </TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -237,10 +239,15 @@ export function ChangeRequestTable({
           items.map((item) => {
             const expanded = visibleExpandedId === item.id
             const creator =
-              item.creatorName || item.creatorEmail || copy.unknownUser
+              item.creatorName ||
+              item.creatorEmail ||
+              t("changeRequests.unknownUser")
             const updator =
-              item.updatorName || item.updatorEmail || copy.unknownUser
-            const requestTitle = item.reason?.trim() || copy.fallbackRequest
+              item.updatorName ||
+              item.updatorEmail ||
+              t("changeRequests.unknownUser")
+            const requestTitle =
+              item.reason?.trim() || t("changeRequests.fallbackRequest")
             const targetingHref = item.flagKey
               ? `${localizedPath(
                   lang,
@@ -265,7 +272,11 @@ export function ChangeRequestTable({
                       size="icon-sm"
                       variant="ghost"
                       aria-expanded={expanded}
-                      aria-label={expanded ? copy.collapse : copy.expand}
+                      aria-label={t(
+                        expanded
+                          ? "changeRequests.collapse"
+                          : "changeRequests.expand"
+                      )}
                       onClick={(event) => {
                         event.stopPropagation()
                         toggleExpanded(item.id)
@@ -285,7 +296,9 @@ export function ChangeRequestTable({
                             render={
                               <button
                                 type="button"
-                                aria-label={copy.copyKey(item.flagKey)}
+                                aria-label={t("changeRequests.copyKey", {
+                                  key: item.flagKey,
+                                })}
                                 className="inline-flex max-w-full items-center gap-1.5 rounded bg-muted px-2 py-0.5 font-mono text-xs text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                                 onClick={(event) => {
                                   event.stopPropagation()
@@ -302,7 +315,7 @@ export function ChangeRequestTable({
                       ) : null}
                       <p className="flex min-w-0 items-center gap-1.5 text-xs">
                         <span className="shrink-0 text-muted-foreground">
-                          {copy.createdBy}
+                          {t("changeRequests.createdBy")}
                         </span>
                         <TeamMemberLink
                           id={item.creatorId}
@@ -335,7 +348,6 @@ export function ChangeRequestTable({
                       reviewers={item.reviewers}
                       currentUserId={currentUserId}
                       lang={lang}
-                      copy={copy}
                     />
                   </TableCell>
                   <TableCell className="py-3">
@@ -343,7 +355,7 @@ export function ChangeRequestTable({
                       variant="outline"
                       className={statusClassName(item.status)}
                     >
-                      {copy.statuses[item.status]}
+                      {t(`changeRequests.statuses.${item.status}`)}
                     </Badge>
                   </TableCell>
                   <TableCell className="w-48 max-w-48 py-3">
@@ -357,7 +369,7 @@ export function ChangeRequestTable({
                       </p>
                       <p className="flex min-w-0 items-center gap-1.5 text-xs">
                         <span className="shrink-0 text-muted-foreground">
-                          {copy.updatedBy}
+                          {t("changeRequests.updatedBy")}
                         </span>
                         <TeamMemberLink
                           id={item.updatorId}
@@ -382,8 +394,8 @@ export function ChangeRequestTable({
                           }}
                         >
                           {isActing && acting?.action === "decline"
-                            ? copy.declining
-                            : copy.decline}
+                            ? t("changeRequests.declining")
+                            : t("changeRequests.decline")}
                         </Button>
                         <Button
                           type="button"
@@ -395,8 +407,8 @@ export function ChangeRequestTable({
                           }}
                         >
                           {isActing && acting?.action === "approve"
-                            ? copy.approving
-                            : copy.approve}
+                            ? t("changeRequests.approving")
+                            : t("changeRequests.approve")}
                         </Button>
                       </div>
                     ) : item.canApply ? (
@@ -410,8 +422,8 @@ export function ChangeRequestTable({
                         }}
                       >
                         {isActing && acting?.action === "apply"
-                          ? copy.applying
-                          : copy.apply}
+                          ? t("changeRequests.applying")
+                          : t("changeRequests.apply")}
                       </Button>
                     ) : null}
                   </TableCell>
@@ -427,10 +439,12 @@ export function ChangeRequestTable({
                         <div className="mb-3 flex items-center justify-between gap-4">
                           <div className="flex items-baseline gap-2">
                             <h3 className="text-sm font-medium">
-                              {copy.targetingChanges}
+                              {t("changeRequests.targetingChanges")}
                             </h3>
                             <span className="text-xs text-muted-foreground">
-                              {copy.changeCount(changes.length)}
+                              {t("changeRequests.changeCount", {
+                                count: changes.length,
+                              })}
                             </span>
                           </div>
                           {targetingHref ? (
@@ -446,7 +460,7 @@ export function ChangeRequestTable({
                               )}
                             >
                               <span className="translate-y-px">
-                                {copy.viewInTargeting}
+                                {t("changeRequests.viewInTargeting")}
                               </span>
                             </Link>
                           ) : null}
@@ -461,7 +475,7 @@ export function ChangeRequestTable({
                             />
                           ) : (
                             <p className="py-3 text-sm text-muted-foreground">
-                              {copy.noChanges}
+                              {t("changeRequests.noChanges")}
                             </p>
                           )}
                         </div>
@@ -478,17 +492,17 @@ export function ChangeRequestTable({
               <div className="mx-auto max-w-md space-y-2">
                 <p className="font-medium">
                   {focused
-                    ? copy.unavailableTitle
+                    ? t("changeRequests.unavailableTitle")
                     : filtered
-                      ? copy.filteredEmptyTitle
-                      : copy.emptyTitle}
+                      ? t("changeRequests.filteredEmptyTitle")
+                      : t("changeRequests.emptyTitle")}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   {focused
-                    ? copy.unavailableDescription
+                    ? t("changeRequests.unavailableDescription")
                     : filtered
-                      ? copy.filteredEmptyDescription
-                      : copy.emptyDescription}
+                      ? t("changeRequests.filteredEmptyDescription")
+                      : t("changeRequests.emptyDescription")}
                 </p>
                 {filtered ? (
                   <Button
@@ -497,7 +511,11 @@ export function ChangeRequestTable({
                     size="sm"
                     onClick={onClearFilters}
                   >
-                    {focused ? copy.viewAll : copy.clearFilters}
+                    {t(
+                      focused
+                        ? "changeRequests.viewAll"
+                        : "changeRequests.clearFilters"
+                    )}
                   </Button>
                 ) : null}
               </div>

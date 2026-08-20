@@ -1,12 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { useEffect, useRef, useState, type ReactNode } from "react"
 import { useTranslation } from "react-i18next"
-import {
-  Navigate,
-  useNavigate,
-  useParams,
-  useSearchParams,
-} from "react-router-dom"
+import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
   completeLogin,
@@ -25,8 +20,9 @@ import {
 import { LoginForm } from "@/features/auth/components/login-form"
 import { LeftPanel } from "@/features/auth/components/rollout-visual"
 import { SsoForm } from "@/features/auth/components/sso-form"
+import { getRuntimeEnv } from "@/lib/env/runtime-env"
 
-export function AuthPage({ mode }: { mode: AuthMode }) {
+export function AuthPage() {
   const params = useParams()
   const lang = resolveLang(params.lang)
   const { i18n, t } = useTranslation()
@@ -34,6 +30,7 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
   const [searchParams] = useSearchParams()
   const handledExternalLoginKey = useRef("")
   const [externalLoginFailed, setExternalLoginFailed] = useState(false)
+  const [selectedMode, setSelectedMode] = useState<AuthMode | null>(null)
   const socialProvidersQuery = useQuery({
     queryKey: ["auth", "social-providers"],
     queryFn: getSocialProviders,
@@ -108,25 +105,15 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
 
   const socialProviders = socialProvidersQuery.data ?? []
   const ssoPreCheck = ssoPreCheckQuery.data ?? null
+  const hostingMode = getRuntimeEnv().hostingMode
+  const isSelfHosted = !hostingMode || hostingMode === "self-hosted"
+  const mode =
+    selectedMode ??
+    (isSelfHosted && ssoPreCheck?.isEnabled === true ? "sso" : "login")
   const permissionDenied = searchParams.get("reason") === "permission-denied"
   const ssoUnavailable = searchParams.get("reason") === "sso-unavailable"
   const isCompletingExternalLogin =
     hasExternalLoginCallback && !externalLoginFailed
-  const isSsoDisabled =
-    ssoPreCheckQuery.isSuccess && ssoPreCheck?.isEnabled !== true
-
-  if (mode === "sso" && isSsoDisabled && !isCompletingExternalLogin) {
-    return (
-      <Navigate
-        replace
-        to={{
-          pathname: `/${lang}/login`,
-          search: "?reason=sso-unavailable",
-        }}
-      />
-    )
-  }
-
   let authContent: ReactNode
 
   if (isCompletingExternalLogin) {
@@ -161,6 +148,7 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
         onSocialLogin={(provider) => {
           window.location.assign(provider.authorizeUrl)
         }}
+        onSsoLogin={() => setSelectedMode("sso")}
       />
     )
   } else if (ssoPreCheckQuery.isPending) {
@@ -181,7 +169,9 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
       />
     )
   } else {
-    authContent = <SsoForm lang={lang} preCheck={ssoPreCheck} />
+    authContent = (
+      <SsoForm preCheck={ssoPreCheck} onBack={() => setSelectedMode("login")} />
+    )
   }
 
   return (

@@ -10,6 +10,7 @@ import {
 } from "@/features/auth/auth-api"
 import {
   chooseProjectEnv,
+  clearCurrentContext,
   clearTabProjectEnv,
   getIsSsoFirstLogin,
   getStoredOrganization,
@@ -27,13 +28,22 @@ import {
   projectsQueryOptions,
   workspacesQueryOptions,
 } from "@/features/layout/auth-context-query"
+import {
+  canUseAction,
+  type CurrentUserPolicy,
+} from "@/features/iam/current-user-permissions"
+import { currentUserPoliciesQueryOptions } from "@/features/iam/current-user-policy-query"
 import type { Project } from "@/features/layout/layout-types"
+import type { Organization, Workspace } from "@/features/layout/layout-types"
+import { fetchApi } from "@/lib/api/authenticated-api"
 
 type EntryStatus =
   | "loading"
   | "ready"
   | "login"
   | "permission-denied"
+  | "create-project"
+  | "create-example-project"
   | "select-workspace"
   | "onboarding"
 
@@ -45,6 +55,51 @@ function EntryLoading() {
   )
 }
 
+async function hasAccessibleContextOutsideSelectedOrganization(
+  workspaces: Workspace[],
+  selectedOrganizationId: string
+) {
+  try {
+    for (const workspace of workspaces) {
+      const organizations = await fetchApi<Organization[]>(
+        `/api/v1/organizations?isSsoFirstLogin=false`,
+        {
+          headers: {
+            Organization: "",
+            Workspace: workspace.id,
+          },
+        }
+      )
+
+      for (const organization of organizations) {
+        if (organization.id === selectedOrganizationId) {
+          continue
+        }
+
+        const headers = {
+          Organization: organization.id,
+          Workspace: workspace.id,
+        }
+        const [projects, policies] = await Promise.all([
+          fetchApi<Project[]>("/api/v1/projects", { headers }),
+          fetchApi<CurrentUserPolicy[]>("/api/v1/user/policies", { headers }),
+        ])
+
+        if (
+          projects.some((project) => project.environments.length > 0) ||
+          canUseAction(policies, "project/*", "CreateProject")
+        ) {
+          return true
+        }
+      }
+    }
+
+    return false
+  } catch {
+    return null
+  }
+}
+
 export function AuthenticatedEntry({ children }: { children: ReactNode }) {
   const params = useParams()
   const location = useLocation()
@@ -53,6 +108,9 @@ export function AuthenticatedEntry({ children }: { children: ReactNode }) {
   const [entryUrl] = useState(() => `${location.pathname}${location.search}`)
   const [status, setStatus] = useState<EntryStatus>("loading")
   const [projects, setProjects] = useState<Project[] | null>(null)
+  const [workspaceCount, setWorkspaceCount] = useState(0)
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([])
+  const [organizationId, setOrganizationId] = useState("")
   const [selectStep, setSelectStep] = useState<"workspace" | "organization">(
     "workspace"
   )
@@ -75,6 +133,9 @@ export function AuthenticatedEntry({ children }: { children: ReactNode }) {
           setStatus("login")
           return
         }
+
+        setWorkspaceCount(workspaces.length)
+        setWorkspaces(workspaces)
 
         const storedWorkspace = getStoredWorkspace()
         const selectedWorkspace =
@@ -128,6 +189,7 @@ export function AuthenticatedEntry({ children }: { children: ReactNode }) {
         }
 
         persistCurrentOrganization(selectedOrganization)
+        setOrganizationId(selectedOrganization.id)
         await joinCurrentOrganizationIfSsoFirstLogin()
 
         if (selectedOrganization.initialized === false) {
@@ -189,7 +251,48 @@ export function AuthenticatedEntry({ children }: { children: ReactNode }) {
 
       const selectedProjectEnv = chooseProjectEnv(projects)
       if (!selectedProjectEnv) {
-        signOut()
+        if (organizationId) {
+          const policies = await queryClient
+            .fetchQuery(currentUserPoliciesQueryOptions(organizationId))
+            .catch(() => [])
+          if (cancelled) {
+            return
+          }
+
+          if (canUseAction(policies, "project/*", "CreateProject")) {
+            setStatus(
+              canUseAction(policies, "project/*", "CanAccessProject")
+                ? "create-example-project"
+                : "create-project"
+            )
+            return
+          }
+        }
+
+        if (workspaceCount > 1) {
+          const hasOtherAccessibleContext =
+            await hasAccessibleContextOutsideSelectedOrganization(
+              workspaces,
+              organizationId
+            )
+          if (cancelled) {
+            return
+          }
+
+          clearCurrentContext()
+          if (hasOtherAccessibleContext === false) {
+            localStorage.removeItem("login-redirect-url")
+            setStatus("permission-denied")
+          } else {
+            localStorage.setItem("login-redirect-url", entryUrl)
+            setSelectStep("workspace")
+            setStatus("select-workspace")
+          }
+          return
+        }
+
+        clearCurrentContext()
+        localStorage.removeItem("login-redirect-url")
         setStatus("permission-denied")
         return
       }
@@ -203,7 +306,15 @@ export function AuthenticatedEntry({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true
     }
-  }, [location.search, projects])
+  }, [
+    entryUrl,
+    location.search,
+    organizationId,
+    projects,
+    queryClient,
+    workspaceCount,
+    workspaces,
+  ])
 
   if (status === "loading") {
     return <EntryLoading />
@@ -215,6 +326,19 @@ export function AuthenticatedEntry({ children }: { children: ReactNode }) {
 
   if (status === "permission-denied") {
     return <Navigate to={`/${lang}/login?reason=permission-denied`} replace />
+  }
+
+  if (status === "create-example-project") {
+    return (
+      <Navigate
+        to={`/${lang}/onboarding?mode=create-example-project`}
+        replace
+      />
+    )
+  }
+
+  if (status === "create-project") {
+    return <Navigate to={`/${lang}/onboarding?mode=create-project`} replace />
   }
 
   if (status === "select-workspace") {

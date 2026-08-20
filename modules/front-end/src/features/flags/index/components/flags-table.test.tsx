@@ -69,7 +69,6 @@ describe("FlagsTable serving markers", () => {
             onRemove={noop}
             onClearFilters={noop}
             onCreate={noop}
-            canCreate
           />
         </TooltipProvider>
       </MemoryRouter>

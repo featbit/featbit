@@ -434,6 +434,163 @@ describe("App shell", () => {
     })
   }
 
+  function mockEmptyOrganizationApi(
+    canCreateProject: boolean,
+    hasExistingProject = false,
+    hasAccessibleOtherWorkspace = false,
+    canAccessProjects = canCreateProject,
+    projectCreateStatus = 200
+  ) {
+    let projectCreated = hasExistingProject
+
+    return vi
+      .spyOn(globalThis, "fetch")
+      .mockImplementation(async (input, init) => {
+        const url = String(input)
+        const headers = init?.headers as Record<string, string> | undefined
+        const workspaceId = headers?.Workspace ?? ""
+        const organizationId = headers?.Organization ?? ""
+
+        if (url.endsWith("/api/v1/user/workspaces")) {
+          return new Response(
+            JSON.stringify({
+              success: true,
+              data: [
+                { id: "ws-empty", key: "empty", name: "Empty Workspace" },
+                { id: "ws-other", key: "other", name: "Other Workspace" },
+              ],
+            }),
+            { status: 200, headers: { "Content-Type": "application/json" } }
+          )
+        }
+
+        if (url.includes("/api/v1/organizations")) {
+          return new Response(
+            JSON.stringify({
+              success: true,
+              data: [
+                {
+                  id: workspaceId === "ws-other" ? "org-other" : "org-empty",
+                  key: workspaceId === "ws-other" ? "other-org" : "empty-org",
+                  name: workspaceId === "ws-other" ? "Other Org" : "Empty Org",
+                  initialized: true,
+                },
+              ],
+            }),
+            { status: 200, headers: { "Content-Type": "application/json" } }
+          )
+        }
+
+        if (url.endsWith("/api/v1/user/policies")) {
+          return new Response(
+            JSON.stringify({
+              success: true,
+              data: canCreateProject
+                ? [
+                    {
+                      name: "Owner",
+                      type: "SysManaged",
+                      statements: [
+                        {
+                          resourceType: canAccessProjects ? "*" : "project",
+                          effect: "allow",
+                          actions: canAccessProjects
+                            ? ["*"]
+                            : ["CreateProject"],
+                          resources: canAccessProjects ? ["*"] : ["project/*"],
+                        },
+                      ],
+                    },
+                  ]
+                : [],
+            }),
+            { status: 200, headers: { "Content-Type": "application/json" } }
+          )
+        }
+
+        if (url.endsWith("/api/v1/projects") && init?.method === "POST") {
+          if (projectCreateStatus !== 200) {
+            return new Response(
+              JSON.stringify({ success: false, errors: ["forbidden"] }),
+              {
+                status: projectCreateStatus,
+                headers: { "Content-Type": "application/json" },
+              }
+            )
+          }
+
+          projectCreated = true
+          return new Response(
+            JSON.stringify({
+              success: true,
+              data: {
+                id: "project-example",
+                key: "example-project",
+                name: "Example project",
+                environments: [
+                  {
+                    id: "env-prod",
+                    projectId: "project-example",
+                    key: "prod",
+                    name: "Prod",
+                  },
+                  {
+                    id: "env-dev",
+                    projectId: "project-example",
+                    key: "dev",
+                    name: "Dev",
+                  },
+                ],
+              },
+            }),
+            { status: 200, headers: { "Content-Type": "application/json" } }
+          )
+        }
+
+        if (url.endsWith("/api/v1/projects")) {
+          const hasAccessibleProject =
+            hasAccessibleOtherWorkspace && organizationId === "org-other"
+          return new Response(
+            JSON.stringify({
+              success: true,
+              data:
+                projectCreated || hasAccessibleProject
+                  ? [
+                      {
+                        id: hasAccessibleProject
+                          ? "project-other"
+                          : "project-example",
+                        key: hasAccessibleProject
+                          ? "other-project"
+                          : "example-project",
+                        name: hasAccessibleProject
+                          ? "Other project"
+                          : "Example project",
+                        environments: [
+                          {
+                            id: hasAccessibleProject ? "env-other" : "env-dev",
+                            projectId: hasAccessibleProject
+                              ? "project-other"
+                              : "project-example",
+                            key: "dev",
+                            name: "Dev",
+                          },
+                        ],
+                      },
+                    ]
+                  : [],
+            }),
+            { status: 200, headers: { "Content-Type": "application/json" } }
+          )
+        }
+
+        return new Response(JSON.stringify({ success: true, data: [] }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        })
+      })
+  }
+
   it("redirects to the localized login route", async () => {
     render(<App />)
 
@@ -442,13 +599,20 @@ describe("App shell", () => {
     ).toBeInTheDocument()
   })
 
-  it("renders the localized SSO route", async () => {
-    window.history.pushState({}, "", "/en/login/sso")
+  it("shows SSO on the localized login route without changing the URL", async () => {
+    window.history.pushState({}, "", "/en/login")
     mockAuthOptionsApi()
 
     render(<App />)
 
-    expect(await screen.findByText("Sign in with SSO")).toBeInTheDocument()
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Sign in with SSO" })
+    )
+
+    expect(
+      await screen.findByRole("heading", { name: "Sign in with SSO" })
+    ).toBeInTheDocument()
+    expect(window.location.pathname).toBe("/en/login")
   })
 
   it("routes first-time authenticated users to get started", async () => {
@@ -491,7 +655,7 @@ describe("App shell", () => {
     ).toBeInTheDocument()
   })
 
-  it("signs out and explains when no environment is accessible", async () => {
+  it("keeps the session and explains when no environment is accessible", async () => {
     mockNoAccessibleEnvironmentsApi()
     window.history.pushState({}, "", "/en/feature-flags")
     signIn()
@@ -517,8 +681,240 @@ describe("App shell", () => {
     ).toBeInTheDocument()
     expect(window.location.pathname).toBe("/en/login")
     expect(window.location.search).toBe("?reason=permission-denied")
-    expect(localStorage.getItem("token")).toBeNull()
-    expect(localStorage.getItem("auth")).toBeNull()
+    expect(localStorage.getItem("token")).toBe("test-token")
+    expect(localStorage.getItem("auth")).toContain("user-1")
+  })
+
+  it("routes an owner with an empty organization to example project creation", async () => {
+    const fetchMock = mockEmptyOrganizationApi(true)
+    window.history.pushState({}, "", "/en/feature-flags")
+    signIn()
+    localStorage.setItem(
+      "current-workspace_user-1",
+      JSON.stringify({
+        id: "ws-empty",
+        key: "empty",
+        name: "Empty Workspace",
+      })
+    )
+
+    render(<App />)
+
+    expect(
+      await screen.findByRole("heading", {
+        name: "Create your example project",
+      })
+    ).toBeInTheDocument()
+    expect(window.location.pathname).toBe("/en/onboarding")
+    expect(window.location.search).toBe("?mode=create-example-project")
+    expect(localStorage.getItem("token")).toBe("test-token")
+
+    fireEvent.click(screen.getByText("Create project"))
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.stringContaining("/api/v1/projects"),
+        expect.objectContaining({
+          method: "POST",
+          body: JSON.stringify({
+            name: "Example project",
+            key: "example-project",
+          }),
+        })
+      )
+    })
+    await waitFor(() => {
+      expect(localStorage.getItem("current-project_user-1")).toContain(
+        '"projectId":"project-example"'
+      )
+      expect(localStorage.getItem("current-project_user-1")).toContain(
+        '"envId":"env-dev"'
+      )
+    })
+    await waitFor(() => {
+      expect(window.location.pathname).toBe("/en/get-started")
+    })
+    expect(
+      await screen.findByRole(
+        "heading",
+        { name: "Get started" },
+        { timeout: 3_000 }
+      )
+    ).toBeInTheDocument()
+  })
+
+  it("uses no-access copy when a project creator cannot access any projects", async () => {
+    mockEmptyOrganizationApi(true, false, false, false)
+    window.history.pushState({}, "", "/en/feature-flags")
+    signIn()
+    localStorage.setItem(
+      "current-workspace_user-1",
+      JSON.stringify({
+        id: "ws-empty",
+        key: "empty",
+        name: "Empty Workspace",
+      })
+    )
+
+    render(<App />)
+
+    expect(
+      await screen.findByRole("heading", { name: "Create a project" })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        "You don't currently have access to any projects. Create a new project to continue."
+      )
+    ).toBeInTheDocument()
+    expect(window.location.pathname).toBe("/en/onboarding")
+    expect(window.location.search).toBe("?mode=create-project")
+    expect(
+      screen.queryByText(/This organization has no projects yet/)
+    ).not.toBeInTheDocument()
+  })
+
+  it("explains when a permission rule prevents access to the new project", async () => {
+    mockEmptyOrganizationApi(true, false, false, false, 403)
+    window.history.pushState({}, "", "/en/feature-flags")
+    signIn()
+    localStorage.setItem(
+      "current-workspace_user-1",
+      JSON.stringify({
+        id: "ws-empty",
+        key: "empty",
+        name: "Empty Workspace",
+      })
+    )
+
+    render(<App />)
+
+    fireEvent.click(await screen.findByText("Create project"))
+
+    expect(
+      await screen.findByText(
+        "A permission rule prevents you from accessing this new project or its environments. Ask a workspace administrator to update your permissions, then try again."
+      )
+    ).toBeInTheDocument()
+    expect(window.location.pathname).toBe("/en/onboarding")
+    expect(localStorage.getItem("token")).toBe("test-token")
+  })
+
+  it("uses project-specific copy for other project creation failures", async () => {
+    mockEmptyOrganizationApi(true, false, false, false, 500)
+    window.history.pushState({}, "", "/en/feature-flags")
+    signIn()
+    localStorage.setItem(
+      "current-workspace_user-1",
+      JSON.stringify({
+        id: "ws-empty",
+        key: "empty",
+        name: "Empty Workspace",
+      })
+    )
+
+    render(<App />)
+
+    fireEvent.click(await screen.findByText("Create project"))
+
+    expect(
+      await screen.findByText("Unable to create the project. Please try again.")
+    ).toBeInTheDocument()
+  })
+
+  it("shows permission denied when every workspace is inaccessible", async () => {
+    mockEmptyOrganizationApi(false)
+    window.history.pushState({}, "", "/en/feature-flags")
+    signIn()
+    localStorage.setItem(
+      "current-workspace_user-1",
+      JSON.stringify({
+        id: "ws-empty",
+        key: "empty",
+        name: "Empty Workspace",
+      })
+    )
+    localStorage.setItem(
+      "current-organization_user-1",
+      JSON.stringify({
+        id: "org-empty",
+        key: "empty-org",
+        name: "Empty Org",
+      })
+    )
+
+    render(<App />)
+
+    expect(await screen.findByText("Permission Denied")).toBeInTheDocument()
+    expect(window.location.pathname).toBe("/en/login")
+    expect(window.location.search).toBe("?reason=permission-denied")
+    expect(localStorage.getItem("token")).toBe("test-token")
+    expect(localStorage.getItem("current-workspace_user-1")).toBeNull()
+    expect(localStorage.getItem("current-organization_user-1")).toBeNull()
+  })
+
+  it("returns to workspace selection when another workspace is accessible", async () => {
+    mockEmptyOrganizationApi(false, false, true)
+    window.history.pushState({}, "", "/en/feature-flags")
+    signIn()
+    localStorage.setItem(
+      "current-workspace_user-1",
+      JSON.stringify({
+        id: "ws-empty",
+        key: "empty",
+        name: "Empty Workspace",
+      })
+    )
+    localStorage.setItem(
+      "current-organization_user-1",
+      JSON.stringify({
+        id: "org-empty",
+        key: "empty-org",
+        name: "Empty Org",
+      })
+    )
+
+    render(<App />)
+
+    expect(await screen.findByText("Select a workspace")).toBeInTheDocument()
+    expect(localStorage.getItem("token")).toBe("test-token")
+    expect(localStorage.getItem("current-workspace_user-1")).toBeNull()
+    expect(localStorage.getItem("current-organization_user-1")).toBeNull()
+  })
+
+  it("enters FeatBit when the recovery page finds an existing project", async () => {
+    mockEmptyOrganizationApi(true, true)
+    window.history.pushState(
+      {},
+      "",
+      "/en/onboarding?mode=create-example-project"
+    )
+    signIn()
+    localStorage.setItem(
+      "current-workspace_user-1",
+      JSON.stringify({
+        id: "ws-empty",
+        key: "empty",
+        name: "Empty Workspace",
+      })
+    )
+    localStorage.setItem(
+      "current-organization_user-1",
+      JSON.stringify({
+        id: "org-empty",
+        key: "empty-org",
+        name: "Empty Org",
+        initialized: true,
+      })
+    )
+
+    render(<App />)
+
+    await waitFor(() => {
+      expect(window.location.pathname).toBe("/en/get-started")
+    })
+    expect(localStorage.getItem("current-project_user-1")).toContain(
+      '"projectId":"project-example"'
+    )
   })
 
   it("signs out only the current tab for an inaccessible URL environment", async () => {

@@ -24,6 +24,7 @@ type TextFieldProps = {
 }
 
 type OnboardingFormProps = {
+  projectRecoveryMode?: "example" | "no-access"
   organizationName: string
   projectName: string
   projectKey: string
@@ -38,6 +39,7 @@ type OnboardingFormProps = {
 }
 
 export function OnboardingForm({
+  projectRecoveryMode,
   organizationName,
   projectName,
   projectKey,
@@ -51,36 +53,51 @@ export function OnboardingForm({
   onSignOut,
 }: OnboardingFormProps) {
   const { t } = useTranslation()
+  const isProjectRecovery = Boolean(projectRecoveryMode)
+  const recoveryCopyKey =
+    projectRecoveryMode === "no-access"
+      ? "onboarding.noAccessibleProjects"
+      : "onboarding.recovery"
 
   return (
     <main className="min-w-0">
       <header>
         <h1 className="text-3xl font-semibold tracking-normal">
-          {t("onboarding.title")}
+          {t(
+            isProjectRecovery ? `${recoveryCopyKey}.title` : "onboarding.title"
+          )}
         </h1>
         <p className="mt-3 text-base text-muted-foreground">
-          {t("onboarding.subtitle")}
+          {t(
+            isProjectRecovery
+              ? `${recoveryCopyKey}.subtitle`
+              : "onboarding.subtitle"
+          )}
         </p>
       </header>
 
       <div className="mt-8 space-y-6">
-        <SetupSection
-          icon={<Building2 className="size-6" />}
-          title={t("onboarding.organization.section")}
-        >
-          <TextField
-            id="onboardingOrganizationName"
-            label={t("onboarding.organization.name")}
-            value={organizationName}
-            placeholder={t("onboarding.organization.placeholder")}
-            onChange={setOrganizationName}
-          />
-          <p className="text-sm text-muted-foreground">
-            {t("onboarding.organization.helper")}
-          </p>
-        </SetupSection>
+        {!isProjectRecovery ? (
+          <>
+            <SetupSection
+              icon={<Building2 className="size-6" />}
+              title={t("onboarding.organization.section")}
+            >
+              <TextField
+                id="onboardingOrganizationName"
+                label={t("onboarding.organization.name")}
+                value={organizationName}
+                placeholder={t("onboarding.organization.placeholder")}
+                onChange={setOrganizationName}
+              />
+              <p className="text-sm text-muted-foreground">
+                {t("onboarding.organization.helper")}
+              </p>
+            </SetupSection>
 
-        <SectionDivider />
+            <SectionDivider />
+          </>
+        ) : null}
 
         <SetupSection
           icon={<Folder className="size-6" />}
@@ -117,7 +134,11 @@ export function OnboardingForm({
             <EnvironmentPill name="Prod" tone="blue" />
           </div>
           <p className="text-sm text-muted-foreground">
-            {t("onboarding.environments.helper")}
+            {t(
+              projectRecoveryMode === "no-access"
+                ? "onboarding.noAccessibleProjects.environmentsHelper"
+                : "onboarding.environments.helper"
+            )}
           </p>
         </SetupSection>
 
@@ -139,7 +160,11 @@ export function OnboardingForm({
             ) : (
               <Check className="size-4" />
             )}
-            {t("onboarding.complete")}
+            {t(
+              isProjectRecovery
+                ? `${recoveryCopyKey}.complete`
+                : "onboarding.complete"
+            )}
           </Button>
           <Button type="button" variant="ghost" onClick={onSignOut}>
             <LogOut className="size-4" />

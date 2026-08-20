@@ -1,4 +1,5 @@
 import { Copy, TriangleAlert } from "lucide-react"
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -104,12 +105,22 @@ export function AccessTokenCreatedDialog({
   onClose: () => void
 }) {
   const { t } = useTranslation()
+  const [copiedResult, setCopiedResult] = useState<typeof result>(null)
+  const copied = Boolean(result && copiedResult === result)
+
+  function closeAfterCopy() {
+    if (!copied) return
+
+    setCopiedResult(null)
+    onClose()
+  }
 
   async function copyToken() {
     if (!result) return
 
     try {
       await navigator.clipboard.writeText(result.token)
+      setCopiedResult(result)
       toast.success(t("accessTokens.created.copied"))
     } catch {
       toast.error(t("accessTokens.created.copyFailed"))
@@ -120,7 +131,7 @@ export function AccessTokenCreatedDialog({
     <Dialog
       open={Boolean(result)}
       onOpenChange={(open) => {
-        if (!open) onClose()
+        if (!open) closeAfterCopy()
       }}
     >
       <DialogContent showCloseButton={false} className="sm:max-w-lg">
@@ -145,7 +156,7 @@ export function AccessTokenCreatedDialog({
           <p className="text-sm font-medium text-foreground">{result?.name}</p>
         </div>
 
-        <div className="flex items-start gap-2 rounded-md border bg-muted/30 p-3">
+        <div className="flex items-center gap-2 rounded-md border bg-muted/30 p-3">
           <code className="min-w-0 flex-1 font-mono text-xs break-all text-foreground">
             {result?.token}
           </code>
@@ -161,7 +172,7 @@ export function AccessTokenCreatedDialog({
         </div>
 
         <div className="flex justify-end pt-1">
-          <Button type="button" onClick={onClose}>
+          <Button type="button" disabled={!copied} onClick={closeAfterCopy}>
             {t("accessTokens.created.done")}
           </Button>
         </div>

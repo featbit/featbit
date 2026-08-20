@@ -3,6 +3,7 @@ import { initReactI18next } from "react-i18next"
 import { enAccessTokens, zhAccessTokens } from "./resources/access-tokens"
 import { enAuditLogs, zhAuditLogs } from "./resources/audit-logs"
 import { enAuth, zhAuth } from "./resources/auth"
+import { enChangeRequests, zhChangeRequests } from "./resources/change-requests"
 import { enEndUsers, zhEndUsers } from "./resources/end-users"
 import {
   enExperimentation,
@@ -41,6 +42,7 @@ i18n.use(initReactI18next).init({
         relayProxies: enRelayProxies,
         accessTokens: enAccessTokens,
         auditLogs: enAuditLogs,
+        changeRequests: enChangeRequests,
         endUsers: enEndUsers,
         experimentation: enExperimentation,
         featureFlags: enFeatureFlags,
@@ -63,6 +65,7 @@ i18n.use(initReactI18next).init({
         relayProxies: zhRelayProxies,
         accessTokens: zhAccessTokens,
         auditLogs: zhAuditLogs,
+        changeRequests: zhChangeRequests,
         endUsers: zhEndUsers,
         experimentation: zhExperimentation,
         featureFlags: zhFeatureFlags,

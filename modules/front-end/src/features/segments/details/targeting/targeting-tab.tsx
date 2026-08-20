@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { Plus } from "lucide-react"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
@@ -98,6 +99,29 @@ export function TargetingTab({
     })
   }
 
+  function addRule() {
+    setDraft((current) => ({
+      ...current,
+      rules: [
+        ...current.rules,
+        {
+          id: newId(),
+          name: t("segments.detailsPage.rules.defaultName", {
+            count: current.rules.length + 1,
+          }),
+          conditions: [
+            {
+              id: newId(),
+              property: "keyId",
+              op: "Equal",
+              value: "",
+            },
+          ],
+        },
+      ],
+    }))
+  }
+
   return (
     <div className="space-y-7 pt-4 pb-5">
       <section>
@@ -121,12 +145,14 @@ export function TargetingTab({
             ) : null}
             <Button
               type="button"
-              disabled={
-                !dirty ||
-                saveMutation.isPending ||
-                (!canUpdateRules && !canUpdateUsers)
-              }
-              onClick={() => setReviewOpen(true)}
+              disabled={saveMutation.isPending}
+              onClick={() => {
+                if (!canUpdateRules && !canUpdateUsers) {
+                  toast.error(t("segments.permissionDenied"))
+                  return
+                }
+                setReviewOpen(true)
+              }}
             >
               {t("segments.detailsPage.reviewAndSave")}
             </Button>
@@ -174,29 +200,9 @@ export function TargetingTab({
             variant="outline"
             size="sm"
             disabled={!canUpdateRules}
-            onClick={() =>
-              setDraft((current) => ({
-                ...current,
-                rules: [
-                  ...current.rules,
-                  {
-                    id: newId(),
-                    name: t("segments.detailsPage.rules.defaultName", {
-                      count: current.rules.length + 1,
-                    }),
-                    conditions: [
-                      {
-                        id: newId(),
-                        property: "keyId",
-                        op: "Equal",
-                        value: "",
-                      },
-                    ],
-                  },
-                ],
-              }))
-            }
+            onClick={addRule}
           >
+            <Plus />
             {t("segments.detailsPage.rules.addRule")}
           </Button>
         </div>
@@ -263,8 +269,23 @@ export function TargetingTab({
             </div>
           ))}
           {!draft.rules.length ? (
-            <div className="rounded-md border border-dashed px-5 py-10 text-center text-sm text-muted-foreground">
-              {t("segments.detailsPage.rules.empty")}
+            <div
+              data-slot="targeting-rules-empty"
+              className="flex flex-col items-center rounded-md border border-dashed px-5 py-10 text-center"
+            >
+              <p className="text-sm text-muted-foreground">
+                {t("segments.detailsPage.rules.empty")}
+              </p>
+              <Button
+                type="button"
+                size="sm"
+                className="mt-4"
+                disabled={!canUpdateRules}
+                onClick={addRule}
+              >
+                <Plus />
+                {t("segments.detailsPage.rules.addRule")}
+              </Button>
             </div>
           ) : null}
         </div>

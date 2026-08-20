@@ -152,6 +152,7 @@ type Props<TChange extends ChangeReviewItem> = {
   changes: TChange[]
   requireComment: boolean
   saving: boolean
+  saveDisabled?: boolean
   initialComment?: string
   copy: ChangeReviewDialogCopy
   ledger: Omit<ChangeLedgerProps<TChange>, "changes" | "layout">
@@ -173,6 +174,7 @@ export function ChangeReviewDialog<TChange extends ChangeReviewItem>({
   changes,
   requireComment,
   saving,
+  saveDisabled = false,
   initialComment,
   copy,
   ledger,
@@ -191,6 +193,7 @@ export function ChangeReviewDialog<TChange extends ChangeReviewItem>({
           changes={changes}
           requireComment={requireComment}
           saving={saving}
+          saveDisabled={saveDisabled}
           initialComment={initialComment}
           copy={copy}
           ledger={ledger}
@@ -211,6 +214,7 @@ function ReviewDialogContent<TChange extends ChangeReviewItem>({
   changes,
   requireComment,
   saving,
+  saveDisabled,
   initialComment,
   copy,
   ledger,
@@ -272,18 +276,22 @@ function ReviewDialogContent<TChange extends ChangeReviewItem>({
               primaryLabel={copy.save}
               savingLabel={copy.saving}
               saving={saving}
-              primaryDisabled={Boolean(requireComment && !comment.trim())}
+              primaryDisabled={
+                saveDisabled || Boolean(requireComment && !comment.trim())
+              }
               menuLabel={saveOptionsLabel ?? copy.save}
               options={[
                 {
                   label: copy.save,
                   description: saveImmediatelyDescription,
                   current: true,
-                  disabled: Boolean(requireComment && !comment.trim()),
+                  disabled:
+                    saveDisabled || Boolean(requireComment && !comment.trim()),
                   onSelect: () => onSave(comment.trim()),
                 },
                 ...saveOptions.map((option) => ({
                   ...option,
+                  disabled: saveDisabled || undefined,
                   onSelect: () => option.onSelect(comment.trim()),
                 })),
               ]}
@@ -292,7 +300,9 @@ function ReviewDialogContent<TChange extends ChangeReviewItem>({
           ) : (
             <Button
               type="button"
-              disabled={saving || (requireComment && !comment.trim())}
+              disabled={
+                saving || saveDisabled || (requireComment && !comment.trim())
+              }
               onClick={() => onSave(comment.trim())}
             >
               {saving ? copy.saving : copy.save}

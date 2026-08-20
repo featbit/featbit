@@ -46,11 +46,14 @@ export const enAccessTokens = {
   loading: "Loading...",
   operationSucceeded: "Operation succeeded",
   operationFailed: "Operation failed. Please try again.",
-  unavailableTitle: "Access tokens unavailable",
+  unavailableTitle: "You don't have access to Access Tokens",
   unavailableDescription:
-    "You do not have permission to list access tokens in this workspace.",
-  permissionLoadFailed:
-    "Your token permissions could not be loaded. Access remains read-only.",
+    "Your role doesn't include permission to view access tokens in this workspace.",
+  unavailableNote: "Ask a workspace administrator to update your access.",
+  permissionLoadFailedTitle: "We couldn't verify your Access Tokens access",
+  permissionLoadFailedDescription:
+    "Try again to reload your workspace permissions.",
+  retrying: "Retrying...",
   confirm: {
     deactivateTitle: "Deactivate access token?",
     deactivateDescriptionBefore: "API calls using ",
@@ -238,9 +241,12 @@ export const zhAccessTokens = {
   loading: "加载中...",
   operationSucceeded: "操作成功",
   operationFailed: "操作失败，请重试。",
-  unavailableTitle: "无法访问访问令牌",
-  unavailableDescription: "你没有在此工作区查看访问令牌列表的权限。",
-  permissionLoadFailed: "无法加载你的令牌权限，当前仅可查看。",
+  unavailableTitle: "你没有访问令牌权限",
+  unavailableDescription: "你的角色没有查看此工作区访问令牌的权限。",
+  unavailableNote: "请联系工作区管理员更新你的访问权限。",
+  permissionLoadFailedTitle: "无法验证你的访问令牌权限",
+  permissionLoadFailedDescription: "请重试以重新加载工作区权限。",
+  retrying: "正在重试...",
   confirm: {
     deactivateTitle: "停用访问令牌？",
     deactivateDescriptionBefore: "使用",

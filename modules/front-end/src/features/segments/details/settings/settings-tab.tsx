@@ -125,6 +125,8 @@ export function SettingsTab({
     ]
   )
   const dirty = stableSettings(submittedDraft) !== stableSettings(segment)
+  const canUpdateGeneral =
+    canUpdateName || canUpdateDescription || canUpdateTags
   const changes = useMemo<ReviewChange[]>(
     () => settingsReviewChanges(segment, submittedDraft),
     [segment, submittedDraft]
@@ -202,7 +204,13 @@ export function SettingsTab({
   return (
     <form
       className="space-y-8 pt-4 pb-8"
-      onSubmit={form.handleSubmit(() => setReviewOpen(true))}
+      onSubmit={form.handleSubmit(() => {
+        if (!canUpdateGeneral) {
+          toast.error(t("segments.permissionDenied"))
+          return
+        }
+        setReviewOpen(true)
+      })}
     >
       <section className="max-w-3xl space-y-5">
         <h2 className="text-base font-medium">
@@ -279,7 +287,7 @@ export function SettingsTab({
                 {t("segments.detailsPage.discard")}
               </Button>
             ) : null}
-            <Button type="submit" disabled={!dirty || saveMutation.isPending}>
+            <Button type="submit" disabled={saveMutation.isPending}>
               {t("segments.detailsPage.reviewAndSave")}
             </Button>
           </div>

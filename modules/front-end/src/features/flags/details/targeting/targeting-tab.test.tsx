@@ -53,7 +53,8 @@ function renderTargeting(
   flag = exampleFlag(),
   dirty = true,
   canUpdateOffVariation = true,
-  readOnly = false
+  readOnly = false,
+  canUpdateOtherTargeting = true
 ) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -76,16 +77,15 @@ function renderTargeting(
     readOnly,
     canToggle: true,
     canUpdateOffVariation,
-    canUpdateDefault: true,
-    canUpdateUsers: true,
-    canUpdateRules: true,
+    canUpdateDefault: canUpdateOtherTargeting,
+    canUpdateUsers: canUpdateOtherTargeting,
+    canUpdateRules: canUpdateOtherTargeting,
     onDraftChange: vi.fn(),
     onResolveUser: vi.fn(),
     onDiscard: vi.fn(),
     onReview: vi.fn(),
     onOpenPending: vi.fn(),
-    scheduleGranted: true,
-    changeRequestGranted: true,
+    onPermissionDenied: vi.fn(),
     onSchedule: vi.fn(),
     onChangeRequest: vi.fn(),
     onToggle: vi.fn(),
@@ -286,10 +286,69 @@ describe("feature flag targeting tab", () => {
     ).toBeDisabled()
   })
 
-  it("keeps review disabled and omits discard when the draft is clean", () => {
-    renderTargeting(exampleFlag(), false)
+  it("keeps review and workflow entries available for a clean draft", async () => {
+    const props = renderTargeting(exampleFlag(), false)
     expect(screen.queryByRole("button", { name: "Discard changes" })).toBeNull()
-    expect(screen.getByRole("button", { name: "Review & save" })).toBeDisabled()
+    const review = screen.getByRole("button", { name: "Review & save" })
+    expect(review).toBeEnabled()
+    fireEvent.click(review)
+    expect(props.onReview).toHaveBeenCalledOnce()
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "More targeting actions" })
+    )
+    const schedule = await screen.findByText("Schedule changes")
+    expect(schedule.closest('[role="menuitem"]')).not.toHaveAttribute(
+      "aria-disabled",
+      "true"
+    )
+    fireEvent.click(schedule)
+    expect(props.onSchedule).toHaveBeenCalledOnce()
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "More targeting actions" })
+    )
+    const changeRequest = await screen.findByText("Change request")
+    expect(changeRequest.closest('[role="menuitem"]')).not.toHaveAttribute(
+      "aria-disabled",
+      "true"
+    )
+    fireEvent.click(changeRequest)
+    expect(props.onChangeRequest).toHaveBeenCalledOnce()
+  })
+
+  it("lets workflow actions bypass IAM while review still requires it", async () => {
+    const props = renderTargeting(exampleFlag(), true, false, false, false)
+
+    const review = screen.getByRole("button", { name: "Review & save" })
+    expect(review).toBeEnabled()
+    fireEvent.click(review)
+    expect(props.onPermissionDenied).toHaveBeenCalledTimes(1)
+    expect(props.onReview).not.toHaveBeenCalled()
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "More targeting actions" })
+    )
+    const schedule = await screen.findByText("Schedule changes")
+    expect(schedule.closest('[role="menuitem"]')).not.toHaveAttribute(
+      "aria-disabled",
+      "true"
+    )
+    fireEvent.click(schedule)
+    expect(props.onPermissionDenied).toHaveBeenCalledTimes(1)
+    expect(props.onSchedule).toHaveBeenCalledOnce()
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "More targeting actions" })
+    )
+    const changeRequest = await screen.findByText("Change request")
+    expect(changeRequest.closest('[role="menuitem"]')).not.toHaveAttribute(
+      "aria-disabled",
+      "true"
+    )
+    fireEvent.click(changeRequest)
+    expect(props.onPermissionDenied).toHaveBeenCalledTimes(1)
+    expect(props.onChangeRequest).toHaveBeenCalledOnce()
   })
 
   it("makes archived targeting read-only and hides mutation commands", () => {

@@ -1,10 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { KeyRound, Plus, Search, X } from "lucide-react"
+import { CircleAlert, KeyRound, Plus, Search, X } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useParams } from "react-router-dom"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
+import { UnavailablePage } from "@/components/unavailable-page"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
@@ -200,27 +201,42 @@ export function AccessTokensPage() {
 
   if (permissionsQuery.isLoading) {
     return (
-      <div className="-m-5 min-h-[calc(100vh-3.5rem)] bg-background px-8 py-6">
+      <div className="-m-5 min-h-[calc(100vh-3.5rem)] bg-background px-6 py-6 lg:px-8">
         <Skeleton className="h-8 w-52" />
         <Skeleton className="mt-3 h-4 w-96" />
-        <Skeleton className="mt-10 h-96 w-full" />
+        <Skeleton className="mt-10 min-h-[clamp(30rem,66vh,39rem)] w-full rounded-xl" />
       </div>
     )
   }
 
-  if (permissionsQuery.isError || !canList) {
+  if (permissionsQuery.isError) {
     return (
-      <div className="-m-5 flex min-h-[calc(100vh-3.5rem)] items-center justify-center bg-background p-8">
-        <div className="max-w-md text-center">
-          <KeyRound className="mx-auto mb-4 size-8 text-muted-foreground" />
-          <h1 className="text-xl font-semibold">
-            {t("accessTokens.unavailableTitle")}
-          </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {t("accessTokens.unavailableDescription")}
-          </p>
-        </div>
-      </div>
+      <UnavailablePage
+        pageTitle={t("accessTokens.title")}
+        pageSubtitle={t("accessTokens.subtitle")}
+        icon={CircleAlert}
+        title={t("accessTokens.permissionLoadFailedTitle")}
+        description={t("accessTokens.permissionLoadFailedDescription")}
+        retry={{
+          label: t("accessTokens.retry"),
+          pendingLabel: t("accessTokens.retrying"),
+          pending: permissionsQuery.isFetching,
+          onRetry: () => void permissionsQuery.refetch(),
+        }}
+      />
+    )
+  }
+
+  if (!canList) {
+    return (
+      <UnavailablePage
+        pageTitle={t("accessTokens.title")}
+        pageSubtitle={t("accessTokens.subtitle")}
+        icon={KeyRound}
+        title={t("accessTokens.unavailableTitle")}
+        description={t("accessTokens.unavailableDescription")}
+        note={t("accessTokens.unavailableNote")}
+      />
     )
   }
 

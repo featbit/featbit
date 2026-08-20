@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test"
+import { expect, test, type Page } from "@playwright/test"
 import {
   createLicense,
   mockContextEndpoints,
@@ -7,6 +7,45 @@ import {
   setAuthenticatedUser,
   setCurrentContext,
 } from "./helpers"
+
+async function setReloadableCurrentContext(page: Page) {
+  await page.addInitScript((license) => {
+    const userId = "test-user-id"
+    localStorage.setItem(
+      `current-workspace_${userId}`,
+      JSON.stringify({
+        id: "ws-1",
+        key: "acme-workspace",
+        name: "Acme Workspace",
+        license,
+      })
+    )
+    localStorage.setItem(
+      `current-organization_${userId}`,
+      JSON.stringify({
+        id: "org-1",
+        key: "acme-org",
+        name: "Acme Corp",
+        initialized: true,
+      })
+    )
+
+    const projectKey = `current-project_${userId}`
+    if (!localStorage.getItem(projectKey)) {
+      localStorage.setItem(
+        projectKey,
+        JSON.stringify({
+          projectId: "project-commerce",
+          projectName: "Commerce Apps",
+          projectKey: "commerce",
+          envId: "env-prod-cn",
+          envKey: "prod-cn",
+          envName: "Production CN",
+        })
+      )
+    }
+  }, createLicense("Growth"))
+}
 
 test.describe("layout", () => {
   test("persists sidebar collapse and exposes account preferences", async ({
@@ -86,42 +125,7 @@ test.describe("layout", () => {
   }) => {
     await mockContextEndpoints(page)
     await setAuthenticatedUser(page)
-    await page.addInitScript((license) => {
-      const userId = "test-user-id"
-      localStorage.setItem(
-        `current-workspace_${userId}`,
-        JSON.stringify({
-          id: "ws-1",
-          key: "acme-workspace",
-          name: "Acme Workspace",
-          license,
-        })
-      )
-      localStorage.setItem(
-        `current-organization_${userId}`,
-        JSON.stringify({
-          id: "org-1",
-          key: "acme-org",
-          name: "Acme Corp",
-          initialized: true,
-        })
-      )
-
-      const projectKey = `current-project_${userId}`
-      if (!localStorage.getItem(projectKey)) {
-        localStorage.setItem(
-          projectKey,
-          JSON.stringify({
-            projectId: "project-commerce",
-            projectName: "Commerce Apps",
-            projectKey: "commerce",
-            envId: "env-prod-cn",
-            envKey: "prod-cn",
-            envName: "Production CN",
-          })
-        )
-      }
-    }, createLicense("Growth"))
+    await setReloadableCurrentContext(page)
 
     await page.route("**/api/v1/global-users**", async (route) => {
       await route.fulfill({
@@ -150,9 +154,16 @@ test.describe("layout", () => {
       "Search projects or environments..."
     )
     await environmentSearch.fill("Staging")
+    const switchStartedAt = Date.now()
     await environmentSearch.press("Enter")
 
+    await expect(
+      page.getByRole("status", {
+        name: "Switching to Growth Platform / Staging...",
+      })
+    ).toBeVisible()
     await expect(page).toHaveURL(/\/en\/workspace$/)
+    expect(Date.now() - switchStartedAt).toBeGreaterThanOrEqual(450)
     await expect(page.getByRole("button", { name: /Staging/ })).toBeVisible()
     await expect(
       page.evaluate(() =>
@@ -164,6 +175,120 @@ test.describe("layout", () => {
       envId: "env-staging-growth",
       envName: "Staging",
     })
+  })
+
+  test("reloads the switched environment within the configured base href", async ({
+    page,
+  }) => {
+    await mockRuntimeEnv(page, { BASE_HREF: "abc" })
+    await mockContextEndpoints(page)
+    await setAuthenticatedUser(page)
+    await setReloadableCurrentContext(page)
+    await page.route("**/api/v1/global-users**", async (route) => {
+      await route.fulfill({
+        json: { success: true, data: { totalCount: 0, items: [] } },
+      })
+    })
+    await page.route("**/api/v1/workspaces", async (route) => {
+      await route.fulfill({
+        json: {
+          success: true,
+          data: {
+            id: "ws-1",
+            key: "acme-workspace",
+            name: "Acme Workspace",
+            license: createLicense("Growth"),
+          },
+        },
+      })
+    })
+
+    await page.goto("/abc/en/workspace/global-users")
+    await page.getByRole("button", { name: /Production CN/ }).click()
+    const environmentSearch = page.getByPlaceholder(
+      "Search projects or environments..."
+    )
+    await environmentSearch.fill("Staging")
+    await environmentSearch.press("Enter")
+
+    await expect(page).toHaveURL(/\/abc\/en\/workspace$/)
+    await expect(page.getByRole("button", { name: /Staging/ })).toBeVisible()
+  })
+
+  test("applies the configured base href to broadcast environment reloads", async ({
+    context,
+    page,
+  }) => {
+    await mockRuntimeEnv(page, { BASE_HREF: "abc" })
+    await mockContextEndpoints(page)
+    await setAuthenticatedUser(page)
+    await setCurrentContext(page)
+    await page.route("**/api/v1/global-users**", async (route) => {
+      await route.fulfill({
+        json: { success: true, data: { totalCount: 0, items: [] } },
+      })
+    })
+
+    await page.goto("/abc/en/workspace/global-users")
+    const otherPage = await context.newPage()
+
+    try {
+      await mockRuntimeEnv(otherPage, { BASE_HREF: "abc" })
+      await otherPage.goto("/abc/en/login")
+      await otherPage.evaluate(() => {
+        const channel = new BroadcastChannel("featbit-ui-broadcast-channel")
+        channel.postMessage("env-changed")
+        channel.close()
+      })
+
+      await expect(page).toHaveURL(/\/abc\/en\/workspace$/)
+    } finally {
+      await otherPage.close()
+    }
+  })
+
+  test("keeps navigation made during the environment switch delay", async ({
+    page,
+  }) => {
+    await page.clock.install()
+    await mockContextEndpoints(page)
+    await setAuthenticatedUser(page)
+    await setCurrentContext(page)
+    await page.route("**/api/v1/workspaces", async (route) => {
+      await route.fulfill({
+        json: {
+          success: true,
+          data: {
+            id: "ws-1",
+            key: "acme-workspace",
+            name: "Acme Workspace",
+            license: createLicense("Growth"),
+          },
+        },
+      })
+    })
+
+    await page.goto("/en/workspace")
+
+    await page.getByRole("button", { name: /Production CN/ }).click()
+    const environmentSearch = page.getByPlaceholder(
+      "Search projects or environments..."
+    )
+    await environmentSearch.fill("Staging")
+    const pauseTime = await page.evaluate(() => Date.now() + 1_000)
+    await page.clock.pauseAt(pauseTime)
+    await environmentSearch.press("Enter")
+
+    const switchingStatus = page.getByRole("status", {
+      name: "Switching to Growth Platform / Staging...",
+    })
+    await expect(switchingStatus).toBeVisible()
+    await page.getByRole("link", { name: "Feature Flags" }).click()
+
+    await expect(page).toHaveURL(/\/en\/feature-flags$/)
+    await expect(switchingStatus).toHaveCount(0)
+    await page.clock.fastForward(600)
+    await expect(page).toHaveURL(/\/en\/feature-flags$/)
   })
 
   test("keeps explicit environment contexts isolated between tabs", async ({

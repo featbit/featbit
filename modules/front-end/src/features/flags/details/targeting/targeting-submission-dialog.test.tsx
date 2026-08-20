@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 import { getStoredUserProfile } from "@/features/auth/auth-api"
 import { fetchOrganizationMembers } from "@/features/organization/organization-members-api"
 import { TargetingSubmissionDialog } from "./targeting-submission-dialog"
+import type { FlagTargetingReviewChange } from "./targeting-utils"
 
 vi.mock("@/features/auth/auth-api", () => ({
   getStoredUserProfile: vi.fn(),
@@ -18,7 +19,8 @@ window.HTMLElement.prototype.scrollIntoView = vi.fn()
 function renderDialog(
   mode: "schedule" | "change-request",
   initialReason?: string,
-  onModeChange = vi.fn()
+  onModeChange = vi.fn(),
+  changes: FlagTargetingReviewChange[] = []
 ) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
@@ -29,7 +31,7 @@ function renderDialog(
         <TargetingSubmissionDialog
           mode={mode}
           flagName="Checkout redesign"
-          changes={[]}
+          changes={changes}
           initialReason={initialReason}
           scheduleGranted
           changeRequestGranted
@@ -148,7 +150,9 @@ describe("targeting submission dialog", () => {
 
   it("keeps save options available from a submission flow", async () => {
     const onModeChange = vi.fn()
-    renderDialog("schedule", "Coordinate with support", onModeChange)
+    renderDialog("schedule", "Coordinate with support", onModeChange, [
+      { kind: "default", label: "Default rule", action: "updated" },
+    ])
 
     fireEvent.click(screen.getByRole("button", { name: "More save options" }))
     expect(await screen.findByText("Request approval")).toBeVisible()
@@ -163,6 +167,27 @@ describe("targeting submission dialog", () => {
     fireEvent.click(screen.getByRole("button", { name: "More save options" }))
     fireEvent.click(await screen.findByText("Save changes"))
     expect(onModeChange).toHaveBeenCalledWith("save", "Coordinate with support")
+  })
+
+  it("keeps final save actions disabled when there are no changes", async () => {
+    const onModeChange = vi.fn()
+    renderDialog("schedule", "Coordinate with support", onModeChange)
+
+    expect(
+      screen.getByRole("button", { name: "Schedule changes" })
+    ).toBeDisabled()
+
+    fireEvent.click(screen.getByRole("button", { name: "More save options" }))
+    const save = await screen.findByText("Save changes")
+    expect(save.closest('[role="menuitem"]')).toHaveAttribute(
+      "aria-disabled",
+      "true"
+    )
+    fireEvent.click(save)
+    expect(onModeChange).not.toHaveBeenCalledWith(
+      "save",
+      "Coordinate with support"
+    )
   })
 })
 import "@/lib/i18n/i18n"

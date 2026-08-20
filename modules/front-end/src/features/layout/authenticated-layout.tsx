@@ -1,5 +1,7 @@
-import { Suspense, useCallback, useEffect, useState } from "react"
+import { Suspense, useCallback, useEffect, useRef, useState } from "react"
+import { flushSync } from "react-dom"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { Loader2 } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom"
 import { getStoredUserProfile, signOut } from "@/features/auth/auth-api"
@@ -41,20 +43,27 @@ const UI_BROADCAST_CHANNEL = "featbit-ui-broadcast-channel"
 const ENV_CHANGED_MESSAGE = "env-changed"
 const ORG_CHANGED_MESSAGE = "org-changed"
 const HOSTING_MODE_SAAS = "saas"
+const ENVIRONMENT_SWITCH_DELAY_MS = 500
+const BROADCAST_SOURCE_ID = `${Date.now()}-${Math.random().toString(36).slice(2)}`
 
-function getEnvironmentReloadPath(pathname: string) {
+function getBrowserPath(pathname: string, baseHref: string) {
+  const absolutePathname = pathname.startsWith("/") ? pathname : `/${pathname}`
+  return `${baseHref}${absolutePathname}` || "/"
+}
+
+function getEnvironmentReloadPath(pathname: string, baseHref: string) {
   const segments = pathname.split("/").filter(Boolean)
   const [lang, featureSegment] = segments
 
   if (lang && featureSegment) {
-    return `/${lang}/${featureSegment}`
+    return getBrowserPath(`/${lang}/${featureSegment}`, baseHref)
   }
 
   if (lang) {
-    return `/${lang}`
+    return getBrowserPath(`/${lang}`, baseHref)
   }
 
-  return pathname || "/"
+  return getBrowserPath(pathname || "/", baseHref)
 }
 
 export function AuthenticatedLayout() {
@@ -63,7 +72,7 @@ export function AuthenticatedLayout() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const lang = resolveLang(langParam)
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
   const [collapsed, setCollapsedState] = useState(
     () => localStorage.getItem(SIDEBAR_STORAGE_KEY) === "true"
   )
@@ -77,7 +86,12 @@ export function AuthenticatedLayout() {
     () => getCurrentProjectEnv()
   )
   const [projects, setProjects] = useState<Project[]>([])
-  const isSaas = getRuntimeEnv().hostingMode === HOSTING_MODE_SAAS
+  const [switchingProjectEnv, setSwitchingProjectEnv] =
+    useState<ProjectEnv | null>(null)
+  const environmentSwitchTimeoutRef = useRef<number | null>(null)
+  const environmentSwitchOriginRef = useRef<string | null>(null)
+  const { baseHref, hostingMode } = getRuntimeEnv()
+  const isSaas = hostingMode === HOSTING_MODE_SAAS
   const subscriptionQuery = useQuery({
     queryKey: ["billing", "subscription"],
     queryFn: fetchSubscription,
@@ -114,15 +128,65 @@ export function AuthenticatedLayout() {
     }
 
     const isTabScoped = hasTabProjectEnvOverride()
+    flushSync(() => {
+      setSwitchingProjectEnv(nextProjectEnv)
+    })
     saveCurrentProjectEnv(nextProjectEnv)
     setCurrentProjectEnv(nextProjectEnv)
     if (!isTabScoped && "BroadcastChannel" in window) {
       const channel = new BroadcastChannel(UI_BROADCAST_CHANNEL)
-      channel.postMessage(ENV_CHANGED_MESSAGE)
+      channel.postMessage({
+        type: ENV_CHANGED_MESSAGE,
+        sourceId: BROADCAST_SOURCE_ID,
+      })
       channel.close()
     }
-    window.location.assign(getEnvironmentReloadPath(location.pathname))
+
+    if (environmentSwitchTimeoutRef.current !== null) {
+      window.clearTimeout(environmentSwitchTimeoutRef.current)
+    }
+
+    const switchOrigin = `${getBrowserPath(location.pathname, baseHref)}${location.search}${location.hash}`
+    environmentSwitchOriginRef.current = switchOrigin
+    environmentSwitchTimeoutRef.current = window.setTimeout(() => {
+      environmentSwitchTimeoutRef.current = null
+      environmentSwitchOriginRef.current = null
+
+      const currentLocation = `${window.location.pathname}${window.location.search}${window.location.hash}`
+      if (currentLocation !== switchOrigin) {
+        setSwitchingProjectEnv(null)
+        return
+      }
+
+      window.location.assign(
+        getEnvironmentReloadPath(location.pathname, baseHref)
+      )
+    }, ENVIRONMENT_SWITCH_DELAY_MS)
   }
+
+  useEffect(() => {
+    const switchOrigin = environmentSwitchOriginRef.current
+    const currentLocation = `${getBrowserPath(location.pathname, baseHref)}${location.search}${location.hash}`
+
+    if (switchOrigin === null || currentLocation === switchOrigin) {
+      return
+    }
+
+    if (environmentSwitchTimeoutRef.current !== null) {
+      window.clearTimeout(environmentSwitchTimeoutRef.current)
+      environmentSwitchTimeoutRef.current = null
+    }
+    environmentSwitchOriginRef.current = null
+    setSwitchingProjectEnv(null)
+  }, [baseHref, location.hash, location.pathname, location.search])
+
+  useEffect(() => {
+    return () => {
+      if (environmentSwitchTimeoutRef.current !== null) {
+        window.clearTimeout(environmentSwitchTimeoutRef.current)
+      }
+    }
+  }, [])
 
   useEffect(() => {
     if (!("BroadcastChannel" in window)) {
@@ -131,20 +195,31 @@ export function AuthenticatedLayout() {
 
     const channel = new BroadcastChannel(UI_BROADCAST_CHANNEL)
     channel.onmessage = (event) => {
-      if (event.data === ENV_CHANGED_MESSAGE && !hasTabProjectEnvOverride()) {
-        window.location.assign(getEnvironmentReloadPath(location.pathname))
+      const messageType =
+        typeof event.data === "string" ? event.data : event.data?.type
+      const sourceId =
+        typeof event.data === "string" ? undefined : event.data?.sourceId
+
+      if (
+        messageType === ENV_CHANGED_MESSAGE &&
+        sourceId !== BROADCAST_SOURCE_ID &&
+        !hasTabProjectEnvOverride()
+      ) {
+        window.location.assign(
+          getEnvironmentReloadPath(location.pathname, baseHref)
+        )
       }
 
-      if (event.data === ORG_CHANGED_MESSAGE) {
+      if (messageType === ORG_CHANGED_MESSAGE) {
         clearTabProjectEnv()
-        window.location.assign(`/${lang}`)
+        window.location.assign(getBrowserPath(`/${lang}`, baseHref))
       }
     }
 
     return () => {
       channel.close()
     }
-  }, [lang, location.pathname])
+  }, [baseHref, lang, location.pathname])
 
   useEffect(() => {
     return onCurrentOrganizationChanged(() => {
@@ -257,9 +332,32 @@ export function AuthenticatedLayout() {
             <SubscriptionLicenseBadge lang={lang} workspace={workspace} />
           </header>
           <main className="min-h-0 flex-1 overflow-y-auto bg-muted/30 p-5">
-            <Suspense fallback={<div className="min-h-32" />}>
-              <Outlet />
-            </Suspense>
+            {switchingProjectEnv ? (
+              <div
+                role="status"
+                aria-live="polite"
+                aria-label={t("layout.context.switchingEnvironment", {
+                  project: switchingProjectEnv.projectName,
+                  environment: switchingProjectEnv.envName,
+                })}
+                className="flex h-full min-h-32 flex-col items-center justify-center gap-3"
+              >
+                <Loader2
+                  aria-hidden
+                  className="size-7 animate-spin text-primary motion-reduce:animate-none"
+                />
+                <p className="text-sm font-medium text-foreground">
+                  {t("layout.context.switchingEnvironment", {
+                    project: switchingProjectEnv.projectName,
+                    environment: switchingProjectEnv.envName,
+                  })}
+                </p>
+              </div>
+            ) : (
+              <Suspense fallback={<div className="min-h-32" />}>
+                <Outlet />
+              </Suspense>
+            )}
           </main>
         </div>
       </div>

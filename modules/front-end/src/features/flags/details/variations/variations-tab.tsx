@@ -99,7 +99,7 @@ export function VariationsTab({
                 {t("featureFlags.detailsPage.discard")}
               </Button>
             ) : null}
-            <Button disabled={!dirty || saving} onClick={review}>
+            <Button disabled={saving} onClick={review}>
               {t("featureFlags.detailsPage.reviewAndSave")}
             </Button>
           </div>

@@ -27,6 +27,7 @@ export function LoginForm({
   isRetryingExternalOptions,
   onRetryExternalOptions,
   onSocialLogin,
+  onSsoLogin,
 }: {
   lang: Lang
   socialProviders: OAuthProvider[]
@@ -36,6 +37,7 @@ export function LoginForm({
   isRetryingExternalOptions: boolean
   onRetryExternalOptions: () => void
   onSocialLogin: (provider: OAuthProvider) => void
+  onSsoLogin: () => void
 }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -208,7 +210,7 @@ export function LoginForm({
                 type="button"
                 variant="outline"
                 className="h-12 w-full gap-3 text-base"
-                onClick={() => navigate(`/${lang}/login/sso`)}
+                onClick={onSsoLogin}
               >
                 <Building2 className="size-5" />
                 {t("auth.ssoButton")}

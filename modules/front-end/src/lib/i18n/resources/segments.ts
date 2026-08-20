@@ -444,9 +444,12 @@ export const enSegments = {
       "Choose the organizations, projects, or environments where this segment can be used.",
     current: "Current",
     chooseScopes: "Choose scopes",
-    gatedTitle: "Shareable segments require a license",
+    gatedTitle: "Your license doesn't include Shareable Segments",
     gatedDescription:
-      "Shareable segments can be used across environments, projects, and organizations. Contact the FeatBit team to enable this feature.",
+      "Shareable segments can be used across environments, projects, and organizations. Manage your workspace license to enable this feature.",
+    manageLicense: "Manage license",
+    licenseGateNote:
+      "After upgrading, you can choose the scopes where this segment will be available.",
     cancel: "Cancel",
     submit: "Create segment",
     submitting: "Creating...",
@@ -578,9 +581,11 @@ export const zhSegments = {
     scopesHelp: "选择可使用此用户组的组织、项目或环境。",
     current: "当前",
     chooseScopes: "选择范围",
-    gatedTitle: "可共享用户组需要许可证",
+    gatedTitle: "当前许可证不包含可共享用户组",
     gatedDescription:
-      "可共享用户组可以跨环境、项目和组织使用。请联系 FeatBit 团队启用此功能。",
+      "可共享用户组可以跨环境、项目和组织使用。请管理工作区许可证以启用此功能。",
+    manageLicense: "管理许可证",
+    licenseGateNote: "升级后，你可以选择此用户组可用的范围。",
     cancel: "取消",
     submit: "创建用户组",
     submitting: "创建中...",

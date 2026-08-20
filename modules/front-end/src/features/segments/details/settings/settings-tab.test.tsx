@@ -138,6 +138,37 @@ describe("SettingsTab actions", () => {
     expect(generalSection).not.toContainElement(lifecycle)
   })
 
+  it("opens review for a clean draft and keeps save disabled", async () => {
+    renderSettings()
+
+    const review = screen.getByRole("button", { name: "Review & save" })
+    expect(review).toBeEnabled()
+    fireEvent.click(review)
+
+    expect(
+      await screen.findByRole("button", { name: "Save changes" })
+    ).toBeDisabled()
+  })
+
+  it("reports missing IAM permission without disabling review", async () => {
+    renderSettings(segment, {
+      canUpdateName: false,
+      canUpdateDescription: false,
+      canUpdateTags: false,
+    })
+
+    const review = screen.getByRole("button", { name: "Review & save" })
+    expect(review).toBeEnabled()
+    fireEvent.click(review)
+
+    await waitFor(() =>
+      expect(toast.error).toHaveBeenCalledWith(
+        "You do not have permission to perform this action."
+      )
+    )
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+  })
+
   it("shows only the archive action for an active segment", () => {
     renderSettings()
 
