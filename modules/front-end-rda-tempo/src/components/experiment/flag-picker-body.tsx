@@ -12,7 +12,8 @@ import {
   type Project,
 } from "@/lib/featbit-auth";
 import { bindFeatbitFlagAction } from "@/lib/actions";
-import { Search, Loader2, AlertCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Search, Loader2, AlertCircle, Check } from "lucide-react";
 
 function variationsToVariantsJson(variations: IVariation[]) {
   return JSON.stringify(
@@ -28,17 +29,19 @@ function variationsToVariantsJson(variations: IVariation[]) {
 export function FlagPickerBody({
   active,
   experimentId,
+  experimentFlagKey,
   experimentProjectKey,
   experimentEnvId,
-  onPicked,
+  onConfirmed,
   onCancel,
 }: {
-  /** Pause data loading when body is mounted but hidden (e.g., inactive drawer tab). */
+  /** Pause data loading while the sheet is closed. */
   active: boolean;
   experimentId: string;
+  experimentFlagKey: string | null;
   experimentProjectKey: string | null;
   experimentEnvId: string | null;
-  onPicked: () => void;
+  onConfirmed: (flagKey: string) => void;
   onCancel?: () => void;
 }) {
   const [projects, setProjects] = useState<Project[] | null>(null);
@@ -55,7 +58,16 @@ export function FlagPickerBody({
   const [pageIndex, setPageIndex] = useState(1);
   const pageSize = 20;
 
-  const [submitting, setSubmitting] = useState<string | null>(null);
+  const [selectedFlag, setSelectedFlag] =
+    useState<IFeatureFlagListItem | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (active) return;
+    setSelectedFlag(null);
+    setSubmitError(null);
+  }, [active]);
 
   // ─── Load projects once when body becomes active ────────────────────
   useEffect(() => {
@@ -141,30 +153,36 @@ export function FlagPickerBody({
     setPageIndex(1);
   }, [envId, search]);
 
-  async function handlePick(flag: IFeatureFlagListItem) {
-    if (!envId || !projectKey) return;
-    setSubmitting(flag.key);
+  async function handleConfirm() {
+    if (!selectedFlag || !envId || !projectKey) return;
+    setSubmitting(true);
+    setSubmitError(null);
     try {
-      const detail = await featureFlagService.getByKey(envId, flag.key);
+      const detail = await featureFlagService.getByKey(envId, selectedFlag.key);
       const variants = variationsToVariantsJson(detail.variations);
 
       const fd = new FormData();
       fd.append("experimentId", experimentId);
-      fd.append("flagKey", flag.key);
+      fd.append("flagKey", selectedFlag.key);
       fd.append("featbitEnvId", envId);
       fd.append("featbitProjectKey", projectKey);
       fd.append("variants", variants);
       await bindFeatbitFlagAction(fd);
-      onPicked();
+      onConfirmed(selectedFlag.key);
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
-      setFlagsError(`Couldn't bind flag: ${msg}`);
+      setSubmitError(`Couldn't change feature flag: ${msg}`);
     } finally {
-      setSubmitting(null);
+      setSubmitting(false);
     }
   }
 
   const totalPages = Math.max(1, Math.ceil(totalFlags / pageSize));
+  const isCurrentSelection = Boolean(
+    selectedFlag &&
+      selectedFlag.key === experimentFlagKey &&
+      envId === experimentEnvId,
+  );
 
   return (
     <div className="flex flex-col gap-3 h-full">
@@ -177,7 +195,12 @@ export function FlagPickerBody({
           <select
             className="w-full h-9 rounded-md border bg-background px-2 text-sm font-mono"
             value={projectKey ?? ""}
-            onChange={(e) => setProjectKey(e.target.value || null)}
+            onChange={(e) => {
+              setProjectKey(e.target.value || null);
+              setEnvId(null);
+              setSelectedFlag(null);
+              setSubmitError(null);
+            }}
             disabled={!projects}
           >
             {!projects && <option>Loading…</option>}
@@ -195,7 +218,11 @@ export function FlagPickerBody({
           <select
             className="w-full h-9 rounded-md border bg-background px-2 text-sm font-mono"
             value={envId ?? ""}
-            onChange={(e) => setEnvId(e.target.value || null)}
+            onChange={(e) => {
+              setEnvId(e.target.value || null);
+              setSelectedFlag(null);
+              setSubmitError(null);
+            }}
             disabled={!currentProject}
           >
             {!currentProject && <option>—</option>}
@@ -248,14 +275,23 @@ export function FlagPickerBody({
         {!flagsLoading && !flagsError && flags.length > 0 && (
           <ul className="divide-y">
             {flags.map((f) => {
-              const isSubmitting = submitting === f.key;
+              const isSelected = selectedFlag?.id === f.id;
+              const isCurrent =
+                f.key === experimentFlagKey && envId === experimentEnvId;
               return (
                 <li key={f.id}>
                   <button
                     type="button"
-                    onClick={() => handlePick(f)}
-                    disabled={Boolean(submitting)}
-                    className="w-full text-left px-4 py-3 hover:bg-muted/40 focus:bg-muted/40 focus:outline-none disabled:opacity-50 transition-colors"
+                    aria-pressed={isSelected}
+                    onClick={() => {
+                      setSelectedFlag(f);
+                      setSubmitError(null);
+                    }}
+                    disabled={submitting}
+                    className={cn(
+                      "w-full px-4 py-3 text-left transition-colors hover:bg-muted/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring disabled:opacity-50",
+                      isSelected && "bg-primary/8 hover:bg-primary/10",
+                    )}
                   >
                     <div className="flex items-center gap-2 mb-0.5">
                       <span className="font-mono text-sm font-medium">{f.key}</span>
@@ -272,8 +308,13 @@ export function FlagPickerBody({
                       <Badge variant="outline" className="text-[10px] px-1.5 py-0">
                         {f.variationType}
                       </Badge>
-                      {isSubmitting && (
-                        <Loader2 className="size-3 animate-spin ml-auto text-muted-foreground" />
+                      {isCurrent && (
+                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                          Current
+                        </Badge>
+                      )}
+                      {isSelected && (
+                        <Check className="ml-auto size-4 text-primary" />
                       )}
                     </div>
                     {f.name !== f.key && (
@@ -295,40 +336,80 @@ export function FlagPickerBody({
       </div>
 
       {/* ── Pagination + actions footer ── */}
-      <div className="flex items-center justify-between text-xs text-muted-foreground">
-        <span>
-          {totalFlags > 0 && (
-            <>
-              Page {pageIndex} of {totalPages} · {totalFlags} flags
-            </>
+      <div className="space-y-3 border-t pt-3">
+        {submitError && (
+          <p className="flex items-start gap-1.5 text-xs text-destructive">
+            <AlertCircle className="mt-0.5 size-3.5 shrink-0" />
+            {submitError}
+          </p>
+        )}
+
+        <div className="text-xs text-muted-foreground">
+          {selectedFlag ? (
+            <span>
+              Selected <code className="font-mono text-foreground">{selectedFlag.key}</code>
+              {isCurrentSelection && " · already bound to this experiment"}
+            </span>
+          ) : (
+            <span>Select a flag, then confirm the change.</span>
           )}
-        </span>
-        <div className="flex gap-1.5 items-center">
-          {totalFlags > pageSize && (
-            <>
+        </div>
+
+        <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
+          <div className="flex items-center gap-1.5">
+            <span>
+              {totalFlags > 0 && (
+                <>
+                  Page {pageIndex} of {totalPages} · {totalFlags} flags
+                </>
+              )}
+            </span>
+            {totalFlags > pageSize && (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={pageIndex <= 1 || submitting}
+                  onClick={() => setPageIndex((p) => Math.max(1, p - 1))}
+                >
+                  Prev
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={pageIndex >= totalPages || submitting}
+                  onClick={() => setPageIndex((p) => Math.min(totalPages, p + 1))}
+                >
+                  Next
+                </Button>
+              </>
+            )}
+          </div>
+
+          <div className="flex shrink-0 items-center gap-1.5">
+            {onCancel && (
               <Button
-                variant="outline"
+                variant="ghost"
                 size="sm"
-                disabled={pageIndex <= 1}
-                onClick={() => setPageIndex((p) => Math.max(1, p - 1))}
+                onClick={onCancel}
+                disabled={submitting}
               >
-                Prev
+                Cancel
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={pageIndex >= totalPages}
-                onClick={() => setPageIndex((p) => Math.min(totalPages, p + 1))}
-              >
-                Next
-              </Button>
-            </>
-          )}
-          {onCancel && (
-            <Button variant="ghost" size="sm" onClick={onCancel}>
-              Cancel
+            )}
+            <Button
+              size="sm"
+              onClick={handleConfirm}
+              disabled={!selectedFlag || isCurrentSelection || submitting}
+            >
+              {submitting ? (
+                <Loader2 className="animate-spin" />
+              ) : (
+                <Check />
+              )}
+              {experimentFlagKey ? "Confirm change" : "Confirm selection"}
             </Button>
-          )}
+          </div>
         </div>
       </div>
     </div>

@@ -87,19 +87,6 @@ export interface IFeatureFlag {
   description: string;
 }
 
-export interface FlagTargeting {
-  targetUsers: IVariationUser[];
-  rules: IRule[];
-  fallthrough: IFallthrough;
-  exptIncludeAllTargets: boolean;
-}
-
-export interface UpdateFlagTargetingPayload {
-  targeting: FlagTargeting;
-  revision: string;
-  comment: string;
-}
-
 export interface IVariationOverview {
   disabledVariation: string;
   enabledVariations: string[];

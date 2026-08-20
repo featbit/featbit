@@ -3,7 +3,6 @@ import type {
   FeatureFlagListFilter,
   IFeatureFlag,
   IFeatureFlagListModel,
-  UpdateFlagTargetingPayload,
 } from "./feature-flag-types";
 
 function buildListQuery(filter: FeatureFlagListFilter) {
@@ -42,18 +41,6 @@ export const featureFlagService = {
     return apiRequest<IFeatureFlag>(
       `/envs/${envId}/feature-flags/${encodeURIComponent(key)}`,
       { method: "GET" },
-    );
-  },
-
-  updateTargeting(
-    envId: string,
-    key: string,
-    payload: UpdateFlagTargetingPayload,
-  ) {
-    // Response: server returns new revision string.
-    return apiRequest<string>(
-      `/envs/${envId}/feature-flags/${encodeURIComponent(key)}/targeting`,
-      { method: "PUT", body: payload },
     );
   },
 };

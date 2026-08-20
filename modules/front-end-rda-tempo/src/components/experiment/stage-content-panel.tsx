@@ -23,11 +23,8 @@ import {
   Settings as SettingsIcon,
 } from "lucide-react";
 import type { Experiment, ExperimentRun } from "@/lib/release-decision-types";
-import {
-  FlagIntegrationHeader,
-  FlagIntegrationPanel,
-  SdkCredentialsPopup,
-} from "./flag-config";
+import { FlagIntegrationHeader } from "./flag-config";
+import { FlagPickerSheet } from "./flag-picker-sheet";
 import { Button } from "@/components/ui/button";
 import { MetricEditPanel } from "./metric-edit";
 import { ExperimentRunTrafficConfig } from "./experiment-run-traffic-config";
@@ -335,29 +332,8 @@ function FlagAndExperimentSection({
   const experimentRuns = experiment.experimentRuns;
   const { sorted } = sortAndDetectSequential(experimentRuns);
 
-  // Full-screen edit panels replace stage content instead of using a Sheet
-  // overlay, keeping the stage workflow in one stable workspace.
-  const [flagPanelOpen, setFlagPanelOpen] = useState(false);
+  const [flagPickerOpen, setFlagPickerOpen] = useState(false);
   const [metricsPanelOpen, setMetricsPanelOpen] = useState(false);
-  const [sdkCredsOpen, setSdkCredsOpen] = useState(false);
-
-  if (flagPanelOpen) {
-    return (
-      <div className="min-h-[70vh]">
-        <FlagIntegrationPanel
-          experiment={experiment}
-          experimentRuns={sorted}
-          onClose={() => setFlagPanelOpen(false)}
-          onEditAdvanced={() => setSdkCredsOpen(true)}
-        />
-        <SdkCredentialsPopup
-          experiment={experiment}
-          open={sdkCredsOpen}
-          onOpenChange={setSdkCredsOpen}
-        />
-      </div>
-    );
-  }
 
   if (metricsPanelOpen) {
     return (
@@ -376,7 +352,12 @@ function FlagAndExperimentSection({
       <FlagIntegrationHeader
         experiment={experiment}
         experimentRuns={sorted}
-        onEdit={() => setFlagPanelOpen(true)}
+        onChangeFlag={() => setFlagPickerOpen(true)}
+      />
+      <FlagPickerSheet
+        experiment={experiment}
+        open={flagPickerOpen}
+        onOpenChange={setFlagPickerOpen}
       />
 
       {/* ─── Section 2: Metrics Integration ─── */}

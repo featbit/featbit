@@ -47,35 +47,6 @@ export async function deleteExperimentAction(id: string) {
   return;
 }
 
-export async function updateFlagConfigAction(formData: FormData) {
-  const experimentId = formData.get("experimentId") as string;
-  const flagKey = formData.get("flagKey") as string | null;
-  const envSecret = formData.get("envSecret") as string | null;
-  const accessToken = formData.get("accessToken") as string | null;
-  const flagServerUrl = formData.get("flagServerUrl") as string | null;
-  const featbitProjectKey = formData.get("featbitProjectKey") as string | null;
-  const featbitEnvId = formData.get("featbitEnvId") as string | null;
-  // variants arrives as a JSON string serialised by the client
-  const variants = formData.get("variants") as string | null;
-
-  await updateExperiment(experimentId, {
-    flagKey: flagKey?.trim() || null,
-    envSecret: envSecret?.trim() || null,
-    accessToken: accessToken?.trim() || null,
-    flagServerUrl: flagServerUrl?.trim() || null,
-    featbitProjectKey: featbitProjectKey?.trim() || null,
-    featbitEnvId: featbitEnvId?.trim() || null,
-    variants: variants?.trim() || null,
-  });
-
-  await addActivity(experimentId, {
-    type: "note",
-    title: "Feature flag configuration updated",
-  });
-
-  return;
-}
-
 export async function bindFeatbitFlagAction(formData: FormData) {
   const experimentId = formData.get("experimentId") as string;
   const flagKey = formData.get("flagKey") as string;
