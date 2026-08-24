@@ -65,6 +65,7 @@ public class EndUserController : ApiControllerBase
     {
         var request = new GetEndUserByKeyIds
         {
+            WorkspaceId = WorkspaceId,
             EnvId = envId,
             KeyIds = keyIds
         };
