@@ -58,20 +58,18 @@ export const enFeatureFlags = {
   toggleSavedOffVariationNotice:
     "The currently saved OFF variation is {{variation}}.",
   archiveTitle: "Archive feature flag?",
-  archiveBodyBefore:
-    "The fallback value in your code will be returned for all users. Remove references to",
-  archiveBodyAfter: "before archiving.",
+  archiveBody:
+    "The fallback value in your code will be returned for all users. Remove references to <flagKey>{{key}}</flagKey> before archiving.",
   archiveKeyPromptBefore: "Enter",
   archiveKeyPromptAfter: "to confirm",
   useArchiveKey: "Use feature flag key {{key}}",
   archiveKeyPlaceholder: "Feature flag key",
   restoreTitle: "Restore feature flag?",
-  restoreBodyBefore: "Flag",
-  restoreBodyAfter: "will return to the active list.",
+  restoreBody:
+    "Flag <flagKey>{{key}}</flagKey> will return to the active list.",
   removeTitle: "Remove feature flag permanently?",
-  removeBodyBefore: "Flag",
-  removeBodyAfter:
-    "will be permanently removed. This operation cannot be undone.",
+  removeBody:
+    "Flag <flagKey>{{key}}</flagKey> will be permanently removed. This operation cannot be undone.",
   cancel: "Cancel",
   confirm: "Confirm",
   changeComment: "Change comment",
@@ -749,18 +747,17 @@ export const zhFeatureFlags: typeof enFeatureFlags = {
   toggleUnsavedTargetingNotice: "此状态变更不会应用尚未保存的定向编辑。",
   toggleSavedOffVariationNotice: "当前已保存的关闭变体是 {{variation}}。",
   archiveTitle: "归档功能开关？",
-  archiveBodyBefore: "所有用户将收到代码中的回退值。归档前请移除对",
-  archiveBodyAfter: "的引用。",
+  archiveBody:
+    "所有用户将收到代码中的回退值。归档前请移除对<flagKey>{{key}}</flagKey>的引用。",
   archiveKeyPromptBefore: "请输入",
   archiveKeyPromptAfter: "以确认",
   useArchiveKey: "使用功能开关键 {{key}}",
   archiveKeyPlaceholder: "功能开关键",
   restoreTitle: "恢复功能开关？",
-  restoreBodyBefore: "功能开关",
-  restoreBodyAfter: "将返回活动列表。",
+  restoreBody: "功能开关<flagKey>{{key}}</flagKey>将返回活动列表。",
   removeTitle: "永久删除功能开关？",
-  removeBodyBefore: "功能开关",
-  removeBodyAfter: "将被永久移除。此操作无法撤销。",
+  removeBody:
+    "功能开关<flagKey>{{key}}</flagKey>将被永久移除。此操作无法撤销。",
   cancel: "取消",
   confirm: "确认",
   changeComment: "变更说明",
