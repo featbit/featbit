@@ -303,6 +303,38 @@ describe("FlagDifferencesSheet", () => {
     expect(onOpenChange).not.toHaveBeenCalled()
   })
 
+  it("uses related segment names in targeting rules", async () => {
+    mocks.compare.mockResolvedValueOnce({
+      ...detail,
+      source: {
+        ...detail.source,
+        rules: [
+          {
+            id: "source-rule",
+            name: "Segment rule",
+            conditions: [
+              {
+                property: "User is in segment",
+                op: "",
+                value: '["segment-1"]',
+              },
+            ],
+            variations: [{ id: "true", rollout: [0, 1] }],
+          },
+        ],
+      },
+      relatedSegments: [{ key: "segment-1", value: "Beta customers" }],
+      isRulesCopyable: true,
+    })
+
+    renderSheet({
+      lockedTarget: { id: "target-env", name: "Growth Platform / Staging" },
+    })
+
+    expect(await screen.findByText("Beta customers")).toBeVisible()
+    expect(screen.queryByText('["segment-1"]')).not.toBeInTheDocument()
+  })
+
   it("shows an environment icon when the flag is missing in the target", async () => {
     mocks.compare.mockResolvedValueOnce(null)
     renderSheet()

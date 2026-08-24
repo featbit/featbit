@@ -7,6 +7,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import type { Lang } from "@/features/layout/layout-types"
+import { isSegmentConditionProperty } from "@/features/targeting/segment-conditions"
 import { ChevronRight } from "lucide-react"
 import type {
   FlagComparisonRule,
@@ -36,6 +37,30 @@ function scalar(value: unknown): string {
   if (typeof value === "boolean") return value ? "true" : "false"
   if (Array.isArray(value)) return value.map(scalar).join(", ")
   return JSON.stringify(value)
+}
+
+function conditionValue(
+  property: string,
+  value: unknown,
+  segmentNames?: ReadonlyMap<string, string>
+) {
+  if (!isSegmentConditionProperty(property)) return scalar(value)
+
+  let segmentIds: string[]
+  if (Array.isArray(value)) {
+    segmentIds = value.map(String)
+  } else if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value)
+      segmentIds = Array.isArray(parsed) ? parsed.map(String) : [value]
+    } catch {
+      segmentIds = value ? [value] : []
+    }
+  } else {
+    segmentIds = value === null || value === undefined ? [] : [String(value)]
+  }
+
+  return segmentIds.map((id) => segmentNames?.get(id) ?? id).join(", ")
 }
 
 function SyntaxKeyword({ children }: { children: string }) {
@@ -133,10 +158,12 @@ function RulesValue({
   flag,
   startAt = 0,
   lang,
+  segmentNames,
 }: {
   flag: FlagComparisonValue
   startAt?: number
   lang: Lang
+  segmentNames?: ReadonlyMap<string, string>
 }) {
   const { t } = useTranslation()
   if (!flag.rules.length)
@@ -163,6 +190,11 @@ function RulesValue({
           <div className="border-t">
             {(rule.conditions ?? []).length ? (
               (rule.conditions ?? []).map((condition, conditionIndex) => {
+                const property = scalar(
+                  condition.property ??
+                    condition.key ??
+                    t("featureFlags.differenceValue.condition")
+                )
                 const operator = scalar(
                   condition.op ?? condition.operator ?? ""
                 )
@@ -179,18 +211,18 @@ function RulesValue({
                     </SyntaxKeyword>
                     <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
                       <span className="break-words text-foreground">
-                        {scalar(
-                          condition.property ??
-                            condition.key ??
-                            t("featureFlags.differenceValue.condition")
-                        )}
+                        {property}
                       </span>
                       <span className="font-mono font-medium text-muted-foreground">
                         {operator}
                       </span>
                       {UNARY_RULE_OPERATORS.has(operator) ? null : (
                         <span className="break-words text-foreground">
-                          {scalar(condition.value ?? condition.values ?? "")}
+                          {conditionValue(
+                            property,
+                            condition.value ?? condition.values ?? "",
+                            segmentNames
+                          )}
                         </span>
                       )}
                     </div>
@@ -459,11 +491,13 @@ function BaseValue({
   setting,
   lang,
   tooltipUserStyle,
+  segmentNames,
 }: {
   flag: FlagComparisonValue
   setting: FlagDifferenceKey
   lang: Lang
   tooltipUserStyle?: "added" | "existing"
+  segmentNames?: ReadonlyMap<string, string>
 }) {
   if (setting === "onOffState")
     return <Badge variant="outline">{flag.isEnabled ? "ON" : "OFF"}</Badge>
@@ -475,7 +509,8 @@ function BaseValue({
         tooltipUserStyle={tooltipUserStyle}
       />
     )
-  if (setting === "targetingRule") return <RulesValue flag={flag} lang={lang} />
+  if (setting === "targetingRule")
+    return <RulesValue flag={flag} lang={lang} segmentNames={segmentNames} />
   if (setting === "defaultRule")
     return <DefaultRuleValue flag={flag} lang={lang} />
   return (
@@ -490,6 +525,7 @@ export function FlagDifferenceValue({
   previewMode,
   lang = "en",
   tooltipUserStyle,
+  segmentNames,
 }: {
   flag: FlagComparisonValue
   source?: FlagComparisonValue
@@ -497,6 +533,7 @@ export function FlagDifferenceValue({
   previewMode?: FlagSettingCopyMode
   lang?: Lang
   tooltipUserStyle?: "added" | "existing"
+  segmentNames?: ReadonlyMap<string, string>
 }) {
   const { t } = useTranslation()
 
@@ -507,18 +544,24 @@ export function FlagDifferenceValue({
         setting={setting}
         lang={lang}
         tooltipUserStyle={tooltipUserStyle}
+        segmentNames={segmentNames}
       />
     )
 
   if (setting === "targetingRule")
     return (
       <div className="space-y-3">
-        <RulesValue flag={flag} lang={lang} />
+        <RulesValue flag={flag} lang={lang} segmentNames={segmentNames} />
         <div className="border-t pt-2">
           <p className="mb-2 text-xs font-medium">
             {t("featureFlags.differenceValue.sourceRulesAppended")}
           </p>
-          <RulesValue flag={source} startAt={flag.rules.length} lang={lang} />
+          <RulesValue
+            flag={source}
+            startAt={flag.rules.length}
+            lang={lang}
+            segmentNames={segmentNames}
+          />
         </div>
       </div>
     )
@@ -541,6 +584,7 @@ export function FlagDifferenceValue({
       setting={setting}
       lang={lang}
       tooltipUserStyle={tooltipUserStyle}
+      segmentNames={segmentNames}
     />
   )
 }
