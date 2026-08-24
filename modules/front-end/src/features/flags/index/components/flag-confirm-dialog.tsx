@@ -77,7 +77,15 @@ export function FlagConfirmDialog({
       : target.kind === "archive"
         ? {
             title: t("featureFlags.archiveTitle"),
-            body: t("featureFlags.archiveBody", { key: target.flag.key }),
+            body: (
+              <>
+                {t("featureFlags.archiveBodyBefore")}{" "}
+                <span className="rounded bg-muted px-1 py-0.5 font-mono font-medium text-foreground">
+                  {target.flag.key}
+                </span>{" "}
+                {t("featureFlags.archiveBodyAfter")}
+              </>
+            ),
             action: t("featureFlags.archive"),
           }
         : target.kind === "restore"

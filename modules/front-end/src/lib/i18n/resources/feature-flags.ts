@@ -58,8 +58,9 @@ export const enFeatureFlags = {
   toggleSavedOffVariationNotice:
     "The currently saved OFF variation is {{variation}}.",
   archiveTitle: "Archive feature flag?",
-  archiveBody:
-    "The fallback value in your code will be returned for all users. Remove references to {{key}} before archiving.",
+  archiveBodyBefore:
+    "The fallback value in your code will be returned for all users. Remove references to",
+  archiveBodyAfter: "before archiving.",
   archiveKeyPromptBefore: "Enter",
   archiveKeyPromptAfter: "to confirm",
   useArchiveKey: "Use feature flag key {{key}}",
@@ -748,7 +749,8 @@ export const zhFeatureFlags: typeof enFeatureFlags = {
   toggleUnsavedTargetingNotice: "此状态变更不会应用尚未保存的定向编辑。",
   toggleSavedOffVariationNotice: "当前已保存的关闭变体是 {{variation}}。",
   archiveTitle: "归档功能开关？",
-  archiveBody: "所有用户将收到代码中的回退值。归档前请移除对 {{key}} 的引用。",
+  archiveBodyBefore: "所有用户将收到代码中的回退值。归档前请移除对",
+  archiveBodyAfter: "的引用。",
   archiveKeyPromptBefore: "请输入",
   archiveKeyPromptAfter: "以确认",
   useArchiveKey: "使用功能开关键 {{key}}",
