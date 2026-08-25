@@ -52,7 +52,7 @@ jobs:
           script: |
             function parseVersion(tag) {
               const match = tag.trim().match(
-                /^v?(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/,
+                /^v?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*))*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/,
               );
 
               if (!match) {
@@ -144,8 +144,8 @@ jobs:
               );
             }
 
-  update:
-    name: Build backend and update docs
+  build-openapi:
+    name: Build backend and export OpenAPI
     needs: check-version
     if: needs.check-version.outputs.should_run == 'true'
     runs-on: ubuntu-latest
@@ -157,14 +157,7 @@ jobs:
         with:
           ref: ${{ env.SOURCE_REF }}
           path: featbit
-
-      - name: Check out documentation
-        uses: actions/checkout@v6
-        with:
-          repository: ${{ env.DOCS_REPOSITORY }}
-          ref: main
-          path: docs
-          token: ${{ secrets.DOCS_REPO_TOKEN }}
+          persist-credentials: false
 
       - name: Set up .NET
         uses: actions/setup-dotnet@v5
@@ -192,10 +185,44 @@ jobs:
           ASPNETCORE_ENVIRONMENT: Production
           Jwt__Key: swagger-generation-only-key-at-least-32-characters
         run: |
+          mkdir -p "$RUNNER_TEMP/openapi"
           "$RUNNER_TEMP/dotnet-tools/swagger" tofile \
-            --output "$GITHUB_WORKSPACE/docs/openapi/featbit.json" \
+            --output "$RUNNER_TEMP/openapi/featbit.json" \
             Api.dll \
             OpenApi
+
+      - name: Upload OpenAPI document
+        uses: actions/upload-artifact@v4
+        with:
+          name: featbit-openapi
+          path: ${{ runner.temp }}/openapi/featbit.json
+          if-no-files-found: error
+          retention-days: 1
+
+  generate-docs:
+    name: Generate and validate documentation
+    needs:
+      - check-version
+      - build-openapi
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      has_changes: ${{ steps.changes.outputs.has_changes }}
+
+    steps:
+      - name: Check out documentation without credentials
+        run: >-
+          git clone
+          --branch main
+          --depth 1
+          "https://github.com/${DOCS_REPOSITORY}.git"
+          docs
+
+      - name: Download OpenAPI document
+        uses: actions/download-artifact@v5
+        with:
+          name: featbit-openapi
+          path: docs/openapi
 
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
@@ -232,7 +259,17 @@ jobs:
             echo "API Reference is already up to date for ${CANDIDATE_VERSION}."
           else
             echo "has_changes=true" >> "$GITHUB_OUTPUT"
+            git diff --cached --binary > "$RUNNER_TEMP/api-reference.patch"
           fi
+
+      - name: Upload generated documentation patch
+        if: steps.changes.outputs.has_changes == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-reference-patch
+          path: ${{ runner.temp }}/api-reference.patch
+          if-no-files-found: error
+          retention-days: 1
 
       - name: Report dry-run changes
         if: steps.changes.outputs.has_changes == 'true' && github.event_name == 'workflow_dispatch' && inputs.dry_run
@@ -251,12 +288,55 @@ jobs:
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Commit and push documentation changes
-        if: steps.changes.outputs.has_changes == 'true' && (github.event_name == 'release' || inputs.dry_run == false)
+  publish-docs:
+    name: Publish documentation
+    needs:
+      - check-version
+      - generate-docs
+    if: needs.generate-docs.outputs.has_changes == 'true' && (github.event_name == 'release' || inputs.dry_run == false)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out documentation without credentials
+        run: >-
+          git clone
+          --branch main
+          --depth 1
+          "https://github.com/${DOCS_REPOSITORY}.git"
+          docs
+
+      - name: Download generated documentation patch
+        uses: actions/download-artifact@v5
+        with:
+          name: api-reference-patch
+          path: ${{ runner.temp }}/generated-docs
+
+      - name: Apply and commit documentation changes
         working-directory: docs
         run: |
+          git apply --index "$RUNNER_TEMP/generated-docs/api-reference.patch"
+
+          unexpected_paths="$(
+            git diff --cached --name-only --diff-filter=ACDMRTUXB | \
+              grep -Ev '^(openapi/featbit\.json|openapi/api-reference-generated-files\.json|content/api-reference/)' || true
+          )"
+
+          if [ -n "$unexpected_paths" ]; then
+            echo "Generated patch contains unexpected paths:" >&2
+            echo "$unexpected_paths" >&2
+            exit 1
+          fi
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "docs(api): update reference for FeatBit ${CANDIDATE_VERSION}"
-          git pull --rebase origin main
-          git push origin HEAD:main
+
+      - name: Push documentation changes
+        working-directory: docs
+        env:
+          DOCS_REPO_TOKEN: ${{ secrets.DOCS_REPO_TOKEN }}
+        run: |
+          authorization="$(printf 'x-access-token:%s' "$DOCS_REPO_TOKEN" | base64 | tr -d '\n')"
+          git -c http.https://github.com/.extraheader="AUTHORIZATION: basic ${authorization}" \
+            push origin HEAD:main
