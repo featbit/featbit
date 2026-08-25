@@ -1,0 +1,262 @@
+name: Update API Reference
+
+on:
+  release:
+    types:
+      - published
+  workflow_dispatch:
+    inputs:
+      source_ref:
+        description: Branch or tag to build
+        required: true
+        default: main
+      candidate_version:
+        description: Semantic version to compare with existing releases
+        required: true
+      dry_run:
+        description: Run validation without committing or pushing documentation changes
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: update-api-reference
+  cancel-in-progress: false
+
+env:
+  DOCS_REPOSITORY: featbit/featbit-docs
+  DOTNET_VERSION: 10.0.x
+  NODE_VERSION: 24
+  PNPM_VERSION: 9.6.0
+  SWASHBUCKLE_CLI_VERSION: 10.1.7
+  CANDIDATE_VERSION: ${{ github.event_name == 'release' && github.event.release.tag_name || inputs.candidate_version }}
+  SOURCE_REF: ${{ github.event_name == 'release' && github.event.release.tag_name || inputs.source_ref }}
+
+jobs:
+  check-version:
+    name: Check release version
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.compare.outputs.should_run }}
+
+    steps:
+      - name: Compare with existing releases
+        id: compare
+        uses: actions/github-script@v8
+        env:
+          CURRENT_RELEASE_ID: ${{ github.event.release.id }}
+        with:
+          script: |
+            function parseVersion(tag) {
+              const match = tag.trim().match(
+                /^v?(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/,
+              );
+
+              if (!match) {
+                throw new Error(
+                  `Release tag "${tag}" is not a valid semantic version. ` +
+                    'Expected a tag such as 5.4.7 or 5.5.0-preview1.',
+                );
+              }
+
+              return {
+                tag,
+                major: Number(match[1]),
+                minor: Number(match[2]),
+                patch: Number(match[3]),
+                prerelease: match[4]?.split('.') ?? [],
+              };
+            }
+
+            function compareIdentifiers(left, right) {
+              const leftIsNumber = /^\d+$/.test(left);
+              const rightIsNumber = /^\d+$/.test(right);
+
+              if (leftIsNumber && rightIsNumber) return Number(left) - Number(right);
+              if (leftIsNumber) return -1;
+              if (rightIsNumber) return 1;
+              return left.localeCompare(right, 'en', { sensitivity: 'case' });
+            }
+
+            function compareVersions(left, right) {
+              for (const field of ['major', 'minor', 'patch']) {
+                if (left[field] !== right[field]) return left[field] - right[field];
+              }
+
+              if (left.prerelease.length === 0 && right.prerelease.length > 0) return 1;
+              if (left.prerelease.length > 0 && right.prerelease.length === 0) return -1;
+
+              const identifierCount = Math.max(
+                left.prerelease.length,
+                right.prerelease.length,
+              );
+
+              for (let index = 0; index < identifierCount; index += 1) {
+                const leftIdentifier = left.prerelease[index];
+                const rightIdentifier = right.prerelease[index];
+
+                if (leftIdentifier === undefined) return -1;
+                if (rightIdentifier === undefined) return 1;
+
+                const comparison = compareIdentifiers(leftIdentifier, rightIdentifier);
+                if (comparison !== 0) return comparison;
+              }
+
+              return 0;
+            }
+
+            const releases = await github.paginate(github.rest.repos.listReleases, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100,
+            });
+
+            const previousVersions = releases
+              .filter(
+                (release) =>
+                  !release.draft && String(release.id) !== process.env.CURRENT_RELEASE_ID,
+              )
+              .map((release) => parseVersion(release.tag_name));
+            const currentVersion = parseVersion(process.env.CANDIDATE_VERSION);
+            const highestPreviousVersion = previousVersions.reduce(
+              (highest, version) =>
+                highest === null || compareVersions(version, highest) > 0 ? version : highest,
+              null,
+            );
+            const shouldRun =
+              highestPreviousVersion === null ||
+              compareVersions(currentVersion, highestPreviousVersion) > 0;
+
+            core.setOutput('should_run', shouldRun ? 'true' : 'false');
+
+            if (shouldRun) {
+              core.notice(
+                highestPreviousVersion === null
+                  ? `Running for ${currentVersion.tag}; no previous releases exist.`
+                  : `Running for ${currentVersion.tag}; previous maximum is ${highestPreviousVersion.tag}.`,
+              );
+            } else {
+              core.notice(
+                `Skipping ${currentVersion.tag}; it is not greater than existing release ${highestPreviousVersion.tag}.`,
+              );
+            }
+
+  update:
+    name: Build backend and update docs
+    needs: check-version
+    if: needs.check-version.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out FeatBit source
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ env.SOURCE_REF }}
+          path: featbit
+
+      - name: Check out documentation
+        uses: actions/checkout@v6
+        with:
+          repository: ${{ env.DOCS_REPOSITORY }}
+          ref: main
+          path: docs
+          token: ${{ secrets.DOCS_REPO_TOKEN }}
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore backend dependencies
+        working-directory: featbit/modules/back-end
+        run: dotnet restore Backend.slnx
+
+      - name: Build backend
+        working-directory: featbit/modules/back-end
+        run: dotnet build Backend.slnx --configuration Release --no-restore
+
+      - name: Install Swagger CLI
+        run: >-
+          dotnet tool install
+          --tool-path "$RUNNER_TEMP/dotnet-tools"
+          Swashbuckle.AspNetCore.Cli
+          --version "${SWASHBUCKLE_CLI_VERSION}"
+
+      - name: Export OpenAPI document
+        working-directory: featbit/modules/back-end/src/Api/bin/Release/net10.0
+        env:
+          ASPNETCORE_ENVIRONMENT: Production
+          Jwt__Key: swagger-generation-only-key-at-least-32-characters
+        run: |
+          "$RUNNER_TEMP/dotnet-tools/swagger" tofile \
+            --output "$GITHUB_WORKSPACE/docs/openapi/featbit.json" \
+            Api.dll \
+            OpenApi
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: docs/pnpm-lock.yaml
+
+      - name: Install documentation dependencies
+        working-directory: docs
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate and validate API Reference
+        working-directory: docs
+        run: pnpm api-reference:update
+
+      - name: Stage documentation changes
+        id: changes
+        working-directory: docs
+        run: |
+          git add \
+            openapi/featbit.json \
+            openapi/api-reference-generated-files.json \
+            content/api-reference
+
+          if git diff --cached --quiet; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            echo "API Reference is already up to date for ${CANDIDATE_VERSION}."
+          else
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Report dry-run changes
+        if: steps.changes.outputs.has_changes == 'true' && github.event_name == 'workflow_dispatch' && inputs.dry_run
+        working-directory: docs
+        run: |
+          echo "Dry run completed. The following files would be committed:"
+          git diff --cached --stat
+          {
+            echo "### API Reference dry run"
+            echo
+            echo "Candidate version: \`${CANDIDATE_VERSION}\`"
+            echo "Source ref: \`${SOURCE_REF}\`"
+            echo
+            echo '```text'
+            git diff --cached --stat
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Commit and push documentation changes
+        if: steps.changes.outputs.has_changes == 'true' && (github.event_name == 'release' || inputs.dry_run == false)
+        working-directory: docs
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "docs(api): update reference for FeatBit ${CANDIDATE_VERSION}"
+          git pull --rebase origin main
+          git push origin HEAD:main
