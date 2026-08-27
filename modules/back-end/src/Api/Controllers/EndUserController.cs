@@ -77,7 +77,7 @@ public class EndUserController : ApiControllerBase
     [HttpGet("{id:guid}/flags")]
     public async Task<ApiResponse<PagedResult<EndUserFlagVm>>> GetFlagsAsync(
         Guid envId,
-        Guid id, 
+        Guid id,
         [FromQuery] FeatureFlagFilter filter)
     {
         var request = new GetEndUserFlags
@@ -104,7 +104,7 @@ public class EndUserController : ApiControllerBase
         var segments = await Mediator.Send(request);
         return Ok(segments);
     }
-    
+
     [HttpGet("stats")]
     public async Task<ApiResponse<PagedResult<EndUserStatsVm>>> GetStatsAsync(Guid envId, [FromQuery] EndUserStatsFilter filter)
     {

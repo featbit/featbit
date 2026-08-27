@@ -11,18 +11,12 @@ public class GetEndUserByKeyIds : IRequest<IEnumerable<EndUser>>
     public string[] KeyIds { get; set; }
 }
 
-public class GetEndUserByKeyIdsHandler : IRequestHandler<GetEndUserByKeyIds, IEnumerable<EndUser>>
+public class GetEndUserByKeyIdsHandler(IEndUserService service)
+    : IRequestHandler<GetEndUserByKeyIds, IEnumerable<EndUser>>
 {
-    private readonly IEndUserService _service;
-
-    public GetEndUserByKeyIdsHandler(IEndUserService service)
-    {
-        _service = service;
-    }
-    
     public async Task<IEnumerable<EndUser>> Handle(GetEndUserByKeyIds request, CancellationToken cancellationToken)
     {
-        var users = await _service.FindManyAsync(x =>
+        var users = await service.FindManyAsync(x =>
             (x.EnvId == request.EnvId || (x.EnvId == null && x.WorkspaceId == request.WorkspaceId)) &&
             request.KeyIds.Contains(x.KeyId)
         );
