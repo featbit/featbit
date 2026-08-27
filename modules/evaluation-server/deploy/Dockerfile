@@ -7,7 +7,7 @@ ARG TARGETARCH
 WORKDIR /source
 
 # copy sln
-COPY *.sln .
+COPY *.slnx .
 
 # copy src project files
 COPY src/*/*.csproj ./
