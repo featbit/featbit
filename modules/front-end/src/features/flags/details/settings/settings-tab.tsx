@@ -258,7 +258,7 @@ export function SettingsTab({
                 {t("featureFlags.detailsPage.discard")}
               </Button>
             ) : null}
-            <Button type="submit" disabled={!dirty || saveMutation.isPending}>
+            <Button type="submit" disabled={saveMutation.isPending}>
               {t("featureFlags.detailsPage.reviewAndSave")}
             </Button>
           </div>

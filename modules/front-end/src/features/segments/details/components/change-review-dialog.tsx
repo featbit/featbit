@@ -35,6 +35,7 @@ export function ChangeReviewDialog({
       changes={changes}
       requireComment={requireComment}
       saving={saving}
+      saveDisabled={!changes.length}
       copy={{
         title: t(`segments.detailsPage.review.${kind}.title`),
         description: (

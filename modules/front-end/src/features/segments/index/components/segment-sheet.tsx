@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { z } from "zod"
+import { LicenseGateContent } from "@/components/license-gate-card"
 import {
   AlertDialog,
   AlertDialogContent,
@@ -81,6 +82,7 @@ export function SegmentSheet({
   resourcesLoading,
   resourcesError,
   shareableGranted,
+  manageLicenseHref,
   saving,
   onOpenChange,
   onRetryResources,
@@ -93,6 +95,7 @@ export function SegmentSheet({
   resourcesLoading: boolean
   resourcesError: boolean
   shareableGranted: boolean
+  manageLicenseHref: string
   saving: boolean
   onOpenChange: (open: boolean) => void
   onRetryResources: () => void
@@ -118,6 +121,7 @@ export function SegmentSheet({
   })
   const name = useWatch({ control: form.control, name: "name" })
   const key = useWatch({ control: form.control, name: "key" })
+  const gated = type === "shared" && !shareableGranted
 
   useEffect(() => {
     if (!keyManuallyEdited) {
@@ -128,7 +132,7 @@ export function SegmentSheet({
   }, [form, keyManuallyEdited, name, nameInteracted])
 
   useEffect(() => {
-    if (!key || form.formState.errors.key) return
+    if (gated || !key || form.formState.errors.key) return
     const signature = `${type}:${key}`
     const sequence = ++validationSequence.current
     const timeout = window.setTimeout(() => {
@@ -148,7 +152,7 @@ export function SegmentSheet({
         })
     }, 300)
     return () => window.clearTimeout(timeout)
-  }, [form.formState.errors.key, key, onValidateKey, type])
+  }, [form.formState.errors.key, gated, key, onValidateKey, type])
 
   const currentScopeAvailable = useMemo(
     () =>
@@ -182,7 +186,6 @@ export function SegmentSheet({
           ? "segments.create.keyValidationFailed"
           : null
   const validKey = keyState === "valid"
-  const gated = type === "shared" && !shareableGranted
   const canSubmit = form.formState.isValid && validKey && !gated && !saving
 
   return (
@@ -204,6 +207,7 @@ export function SegmentSheet({
           <form
             className="flex min-h-0 flex-1 flex-col"
             onSubmit={form.handleSubmit(async (values) => {
+              if (gated) return
               const scopes =
                 type === "shared"
                   ? normalizeScopes(selectedScopes, currentScope.rn)
@@ -217,7 +221,7 @@ export function SegmentSheet({
               })
             })}
           >
-            <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-6 py-5">
+            <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
               <section className="space-y-2">
                 <div className="flex items-center gap-1.5">
                   <Label id="segment-type-label">
@@ -280,140 +284,145 @@ export function SegmentSheet({
                 </RadioGroup>
               </section>
 
-              <section className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="segment-name">
-                    {t("segments.create.name")}
-                  </Label>
-                  <Input
-                    id="segment-name"
-                    placeholder={t("segments.create.namePlaceholder")}
-                    aria-invalid={Boolean(form.formState.errors.name)}
-                    {...form.register("name", {
-                      onChange: () => {
-                        setNameInteracted(true)
-                      },
-                    })}
-                  />
-                  {form.formState.errors.name ? (
-                    <p className="text-xs text-destructive">
-                      {t(form.formState.errors.name.message!)}
-                    </p>
-                  ) : null}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="segment-key">
-                    {t("segments.create.key")}
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      id="segment-key"
-                      className="pr-9 font-mono"
-                      placeholder={t("segments.create.keyPlaceholder")}
-                      aria-invalid={
-                        Boolean(form.formState.errors.key) ||
-                        keyState === "duplicate" ||
-                        keyState === "error"
-                      }
-                      {...form.register("key", {
-                        onChange: () => setKeyManuallyEdited(true),
-                      })}
-                    />
-                    {keyState === "validating" ? (
-                      <Loader2 className="absolute top-1/2 right-3 size-4 -translate-y-1/2 animate-spin text-muted-foreground" />
-                    ) : validKey ? (
-                      <Check className="absolute top-1/2 right-3 size-4 -translate-y-1/2 text-teal-600" />
-                    ) : null}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    {t("segments.create.keyHelp")}
-                  </p>
-                  {form.formState.errors.key || keyMessage ? (
-                    <p className="text-xs text-destructive">
-                      {t(form.formState.errors.key?.message ?? keyMessage!)}
-                    </p>
-                  ) : null}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="segment-description">
-                    {t("segments.create.descriptionLabel")}
-                  </Label>
-                  <Textarea
-                    id="segment-description"
-                    className="min-h-24 resize-none"
-                    placeholder={t("segments.create.descriptionPlaceholder")}
-                    {...form.register("description")}
-                  />
-                </div>
-              </section>
-
               {gated ? (
-                <section className="rounded-lg border bg-muted/40 p-4">
-                  <h3 className="font-medium">
-                    {t("segments.create.gatedTitle")}
-                  </h3>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {t("segments.create.gatedDescription")}
-                  </p>
-                </section>
+                <div className="flex min-h-[26rem] items-center justify-center py-8">
+                  <LicenseGateContent
+                    title={t("segments.create.gatedTitle")}
+                    description={t("segments.create.gatedDescription")}
+                    actionLabel={t("segments.create.manageLicense")}
+                    actionHref={manageLicenseHref}
+                    note={t("segments.create.licenseGateNote")}
+                  />
+                </div>
               ) : (
-                <section className="space-y-2">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <Label>
-                        {t(
-                          type === "shared"
-                            ? "segments.create.scopes"
-                            : "segments.create.scope"
-                        )}
+                <div className="mt-6 space-y-6">
+                  <section className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="segment-name">
+                        {t("segments.create.name")}
                       </Label>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        {t(
-                          type === "shared"
-                            ? "segments.create.scopesHelp"
-                            : "segments.create.currentScopeHelp"
-                        )}
-                      </p>
+                      <Input
+                        id="segment-name"
+                        placeholder={t("segments.create.namePlaceholder")}
+                        aria-invalid={Boolean(form.formState.errors.name)}
+                        {...form.register("name", {
+                          onChange: () => {
+                            setNameInteracted(true)
+                          },
+                        })}
+                      />
+                      {form.formState.errors.name ? (
+                        <p className="text-xs text-destructive">
+                          {t(form.formState.errors.name.message!)}
+                        </p>
+                      ) : null}
                     </div>
-                    {type === "shared" ? (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setScopePickerOpen(true)}
-                      >
-                        <Plus />
-                        {t("segments.create.chooseScopes")}
-                      </Button>
-                    ) : null}
-                  </div>
-                  <div className="flex flex-wrap gap-1.5 rounded-lg border bg-muted/20 p-3">
-                    {(type === "shared"
-                      ? selectedScopes
-                      : [currentScopeAvailable]
-                    ).map((resource) => (
-                      <Badge
-                        key={resource.rn}
-                        variant="secondary"
-                        className="max-w-full gap-1.5 font-normal"
-                        title={resource.rn}
-                      >
-                        <ScopeResourceIcon
-                          type={resource.type}
-                          className="size-3.5"
+
+                    <div className="space-y-2">
+                      <Label htmlFor="segment-key">
+                        {t("segments.create.key")}
+                      </Label>
+                      <div className="relative">
+                        <Input
+                          id="segment-key"
+                          className="pr-9 font-mono"
+                          placeholder={t("segments.create.keyPlaceholder")}
+                          aria-invalid={
+                            Boolean(form.formState.errors.key) ||
+                            keyState === "duplicate" ||
+                            keyState === "error"
+                          }
+                          {...form.register("key", {
+                            onChange: () => setKeyManuallyEdited(true),
+                          })}
                         />
-                        <span className="truncate">{resource.pathName}</span>
-                        {resource.rn === currentScope.rn ? (
-                          <span className="text-[0.65rem] text-muted-foreground">
-                            {t("segments.create.current")}
-                          </span>
+                        {keyState === "validating" ? (
+                          <Loader2 className="absolute top-1/2 right-3 size-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+                        ) : validKey ? (
+                          <Check className="absolute top-1/2 right-3 size-4 -translate-y-1/2 text-teal-600" />
                         ) : null}
-                      </Badge>
-                    ))}
-                  </div>
-                </section>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {t("segments.create.keyHelp")}
+                      </p>
+                      {form.formState.errors.key || keyMessage ? (
+                        <p className="text-xs text-destructive">
+                          {t(form.formState.errors.key?.message ?? keyMessage!)}
+                        </p>
+                      ) : null}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="segment-description">
+                        {t("segments.create.descriptionLabel")}
+                      </Label>
+                      <Textarea
+                        id="segment-description"
+                        className="min-h-24 resize-none"
+                        placeholder={t(
+                          "segments.create.descriptionPlaceholder"
+                        )}
+                        {...form.register("description")}
+                      />
+                    </div>
+                  </section>
+
+                  <section className="space-y-2">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <Label>
+                          {t(
+                            type === "shared"
+                              ? "segments.create.scopes"
+                              : "segments.create.scope"
+                          )}
+                        </Label>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {t(
+                            type === "shared"
+                              ? "segments.create.scopesHelp"
+                              : "segments.create.currentScopeHelp"
+                          )}
+                        </p>
+                      </div>
+                      {type === "shared" ? (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setScopePickerOpen(true)}
+                        >
+                          <Plus />
+                          {t("segments.create.chooseScopes")}
+                        </Button>
+                      ) : null}
+                    </div>
+                    <div className="flex flex-wrap gap-1.5 rounded-lg border bg-muted/20 p-3">
+                      {(type === "shared"
+                        ? selectedScopes
+                        : [currentScopeAvailable]
+                      ).map((resource) => (
+                        <Badge
+                          key={resource.rn}
+                          variant="secondary"
+                          className="max-w-full gap-1.5 font-normal"
+                          title={resource.rn}
+                        >
+                          <ScopeResourceIcon
+                            type={resource.type}
+                            className="size-3.5"
+                          />
+                          <span className="truncate">{resource.pathName}</span>
+                          {resource.rn === currentScope.rn ? (
+                            <span className="text-[0.65rem] text-muted-foreground">
+                              {t("segments.create.current")}
+                            </span>
+                          ) : null}
+                        </Badge>
+                      ))}
+                    </div>
+                  </section>
+                </div>
               )}
             </div>
 
@@ -426,16 +435,18 @@ export function SegmentSheet({
               >
                 {t("segments.create.cancel")}
               </Button>
-              <Button type="submit" disabled={!canSubmit}>
-                {saving ? (
-                  <>
-                    <Loader2 className="animate-spin" />
-                    {t("segments.create.submitting")}
-                  </>
-                ) : (
-                  t("segments.create.submit")
-                )}
-              </Button>
+              {!gated ? (
+                <Button type="submit" disabled={!canSubmit}>
+                  {saving ? (
+                    <>
+                      <Loader2 className="animate-spin" />
+                      {t("segments.create.submitting")}
+                    </>
+                  ) : (
+                    t("segments.create.submit")
+                  )}
+                </Button>
+              ) : null}
             </SheetFooter>
           </form>
         </SheetContent>

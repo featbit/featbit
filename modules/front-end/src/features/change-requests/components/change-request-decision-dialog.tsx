@@ -1,5 +1,6 @@
 import { Loader2 } from "lucide-react"
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -12,23 +13,21 @@ import {
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import type { ChangeRequestsCopy } from "../change-requests-copy"
 
 export function ChangeRequestDecisionDialog({
   action,
   requestTitle,
   saving,
-  copy,
   onOpenChange,
   onConfirm,
 }: {
   action: "approve" | "decline"
   requestTitle: string
   saving: boolean
-  copy: ChangeRequestsCopy
   onOpenChange: (open: boolean) => void
   onConfirm: (comment: string) => void
 }) {
+  const { t } = useTranslation()
   const [comment, setComment] = useState("")
   const declining = action === "decline"
 
@@ -37,25 +36,29 @@ export function ChangeRequestDecisionDialog({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            {declining ? copy.declineDialogTitle : copy.approveDialogTitle}
+            {t(
+              declining
+                ? "changeRequests.declineDialogTitle"
+                : "changeRequests.approveDialogTitle"
+            )}
           </AlertDialogTitle>
           <AlertDialogDescription>
-            {copy.decisionDialogDescriptionBefore}
+            {t("changeRequests.decisionDialogDescriptionBefore")}
             <strong className="font-semibold text-foreground">
               {requestTitle}
             </strong>
-            {copy.decisionDialogDescriptionAfter}
+            {t("changeRequests.decisionDialogDescriptionAfter")}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <div className="space-y-2">
           <Label htmlFor="change-request-decision-comment">
-            {copy.decisionComment}
+            {t("changeRequests.decisionComment")}
             {declining ? (
               <span className="text-destructive"> *</span>
             ) : (
               <span className="font-normal text-muted-foreground">
                 {" "}
-                ({copy.optional})
+                ({t("changeRequests.optional")})
               </span>
             )}
           </Label>
@@ -64,8 +67,8 @@ export function ChangeRequestDecisionDialog({
             value={comment}
             placeholder={
               declining
-                ? copy.declineCommentPlaceholder
-                : copy.approveCommentPlaceholder
+                ? t("changeRequests.declineCommentPlaceholder")
+                : t("changeRequests.approveCommentPlaceholder")
             }
             disabled={saving}
             autoFocus
@@ -73,12 +76,14 @@ export function ChangeRequestDecisionDialog({
           />
           {declining ? (
             <p className="text-xs text-muted-foreground">
-              {copy.declineCommentRequired}
+              {t("changeRequests.declineCommentRequired")}
             </p>
           ) : null}
         </div>
         <AlertDialogFooter className="border-t-0 bg-transparent">
-          <AlertDialogCancel disabled={saving}>{copy.cancel}</AlertDialogCancel>
+          <AlertDialogCancel disabled={saving}>
+            {t("changeRequests.cancel")}
+          </AlertDialogCancel>
           <Button
             type="button"
             variant={declining ? "destructive" : "default"}
@@ -86,7 +91,7 @@ export function ChangeRequestDecisionDialog({
             onClick={() => onConfirm(comment.trim())}
           >
             {saving ? <Loader2 className="animate-spin" /> : null}
-            {declining ? copy.decline : copy.approve}
+            {t(declining ? "changeRequests.decline" : "changeRequests.approve")}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

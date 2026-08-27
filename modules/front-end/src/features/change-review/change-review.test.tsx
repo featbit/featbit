@@ -93,6 +93,30 @@ describe("shared change review", () => {
     expect(onSave).toHaveBeenCalledWith("Required for release tracking")
   })
 
+  it("keeps save disabled when there are no changes", () => {
+    const onSave = vi.fn()
+    render(
+      <ChangeReviewDialog
+        open
+        idPrefix="feature-flag-settings"
+        layout="settings"
+        changes={[]}
+        requireComment={false}
+        saving={false}
+        saveDisabled
+        copy={dialogCopy}
+        ledger={{ copy: ledgerCopy }}
+        onOpenChange={vi.fn()}
+        onSave={onSave}
+      />
+    )
+
+    const save = screen.getByRole("button", { name: "Save changes" })
+    expect(save).toBeDisabled()
+    fireEvent.click(save)
+    expect(onSave).not.toHaveBeenCalled()
+  })
+
   it("clears the comment after a parent-controlled save closes the dialog", () => {
     function Harness() {
       const [open, setOpen] = useState(true)

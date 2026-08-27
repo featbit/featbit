@@ -1,20 +1,28 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useNavigate, useParams } from "react-router-dom"
-import { signOut } from "@/features/auth/auth-api"
+import { useQueryClient } from "@tanstack/react-query"
+import { useNavigate, useParams, useSearchParams } from "react-router-dom"
+import { getStoredUserProfile, signOut } from "@/features/auth/auth-api"
 import { AuthHeader } from "@/features/auth/components/auth-header"
 import { getAuthenticatedLandingPath } from "@/features/get-started/get-started-state"
+import { authContextQueryKeys } from "@/features/layout/auth-context-query"
 import {
+  chooseProjectEnv,
+  fetchProjects,
   getCurrentOrganization,
   localizedPath,
   persistCurrentOrganization,
   resolveLang,
   saveCurrentProjectEnv,
 } from "@/features/layout/layout-context"
-import { completeOnboarding } from "@/features/onboarding/onboarding-api"
+import {
+  completeOnboarding,
+  createExampleProject,
+} from "@/features/onboarding/onboarding-api"
 import { CreationPreview } from "@/features/onboarding/components/creation-preview"
 import { OnboardingForm } from "@/features/onboarding/components/onboarding-form"
 import { slugify } from "@/features/onboarding/onboarding-utils"
+import { ApiRequestError } from "@/lib/api/authenticated-api"
 
 const defaultEnvironments = ["Dev", "Prod"]
 
@@ -23,7 +31,17 @@ export function OnboardingPage() {
   const params = useParams()
   const lang = resolveLang(params.lang)
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const [searchParams] = useSearchParams()
+  const projectRecoveryMode =
+    searchParams.get("mode") === "create-example-project"
+      ? "example"
+      : searchParams.get("mode") === "create-project"
+        ? "no-access"
+        : undefined
+  const isProjectRecovery = Boolean(projectRecoveryMode)
   const currentOrganization = getCurrentOrganization()
+  const currentOrganizationId = currentOrganization?.id ?? ""
   const completedHereRef = useRef(false)
   const [organizationName, setOrganizationName] = useState(
     currentOrganization?.name ?? ""
@@ -35,6 +53,7 @@ export function OnboardingPage() {
 
   useEffect(() => {
     if (
+      !isProjectRecovery &&
       !completedHereRef.current &&
       currentOrganization?.initialized !== false
     ) {
@@ -42,15 +61,48 @@ export function OnboardingPage() {
         replace: true,
       })
     }
-  }, [currentOrganization?.initialized, lang, navigate])
+  }, [currentOrganization?.initialized, isProjectRecovery, lang, navigate])
+
+  useEffect(() => {
+    if (!isProjectRecovery || !currentOrganizationId) {
+      return
+    }
+
+    let cancelled = false
+
+    async function enterExistingProject() {
+      const projects = await fetchProjects().catch(() => [])
+      const projectEnv = chooseProjectEnv(projects)
+      if (cancelled || !projectEnv) {
+        return
+      }
+
+      saveCurrentProjectEnv(projectEnv)
+      queryClient.removeQueries({
+        queryKey: authContextQueryKeys.projects(
+          getStoredUserProfile().id ?? "",
+          currentOrganizationId
+        ),
+        exact: true,
+      })
+      navigate(localizedPath(lang, getAuthenticatedLandingPath()), {
+        replace: true,
+      })
+    }
+
+    void enterExistingProject()
+
+    return () => {
+      cancelled = true
+    }
+  }, [currentOrganizationId, isProjectRecovery, lang, navigate, queryClient])
 
   const organizationKey = useMemo(
     () => slugify(organizationName),
     [organizationName]
   )
   const canSubmit = Boolean(
-    organizationName.trim() &&
-    organizationKey &&
+    (isProjectRecovery || (organizationName.trim() && organizationKey)) &&
     projectName.trim() &&
     projectKey.trim()
   )
@@ -73,36 +125,77 @@ export function OnboardingPage() {
     setIsSubmitting(true)
 
     try {
-      await completeOnboarding({
-        organizationName: organizationName.trim(),
-        organizationKey,
-        projectName: projectName.trim(),
-        projectKey: projectKey.trim(),
-        environments: defaultEnvironments,
-      })
+      if (isProjectRecovery) {
+        const project = await createExampleProject({
+          name: projectName.trim(),
+          key: projectKey.trim(),
+        })
+        const environment =
+          project.environments.find(
+            (item) => item.key.toLowerCase() === "dev"
+          ) ?? project.environments[0]
+
+        if (!environment) {
+          throw new Error("Created project did not include an environment")
+        }
+
+        saveCurrentProjectEnv({
+          projectId: project.id,
+          projectName: project.name,
+          projectKey: project.key,
+          envId: environment.id,
+          envName: environment.name,
+          envKey: environment.key,
+        })
+        queryClient.removeQueries({
+          queryKey: authContextQueryKeys.projects(
+            getStoredUserProfile().id ?? "",
+            currentOrganization.id
+          ),
+          exact: true,
+        })
+      } else {
+        await completeOnboarding({
+          organizationName: organizationName.trim(),
+          organizationKey,
+          projectName: projectName.trim(),
+          projectKey: projectKey.trim(),
+          environments: defaultEnvironments,
+        })
+
+        persistCurrentOrganization({
+          ...currentOrganization,
+          initialized: true,
+          name: organizationName.trim(),
+          key: organizationKey,
+        })
+        saveCurrentProjectEnv({
+          projectId: projectKey.trim(),
+          projectName: projectName.trim(),
+          projectKey: projectKey.trim(),
+          envId: "dev",
+          envName: "Dev",
+          envKey: "dev",
+        })
+      }
 
       completedHereRef.current = true
-      persistCurrentOrganization({
-        ...currentOrganization,
-        initialized: true,
-        name: organizationName.trim(),
-        key: organizationKey,
-      })
-      saveCurrentProjectEnv({
-        projectId: projectKey.trim(),
-        projectName: projectName.trim(),
-        projectKey: projectKey.trim(),
-        envId: "dev",
-        envName: "Dev",
-        envKey: "dev",
-      })
+      const landingPath = getAuthenticatedLandingPath()
 
-      navigate(
-        `${localizedPath(lang, getAuthenticatedLandingPath())}?status=init`,
-        { replace: true }
-      )
-    } catch {
-      setError(t("onboarding.errors.submit"))
+      navigate(`${localizedPath(lang, landingPath)}?status=init`, {
+        replace: true,
+      })
+    } catch (submitError) {
+      const errorKey =
+        isProjectRecovery &&
+        submitError instanceof ApiRequestError &&
+        submitError.status === 403
+          ? "onboarding.errors.projectPermissionDenied"
+          : isProjectRecovery
+            ? "onboarding.errors.projectSubmit"
+            : "onboarding.errors.submit"
+
+      setError(t(errorKey))
     } finally {
       setIsSubmitting(false)
     }
@@ -120,6 +213,7 @@ export function OnboardingPage() {
         <div className="w-full max-w-[90rem] rounded-lg border bg-card px-9 py-6 shadow-sm">
           <div className="grid items-stretch gap-16 xl:grid-cols-[minmax(38rem,45rem)_minmax(30rem,36rem)]">
             <OnboardingForm
+              projectRecoveryMode={projectRecoveryMode}
               organizationName={organizationName}
               projectName={projectName}
               projectKey={projectKey}

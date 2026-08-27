@@ -42,7 +42,7 @@ export function fetchEvaluatedEndUsers(
 ) {
   const params = queryString({ ...input, pageIndex: input.pageIndex - 1 })
   return fetchApi<EvaluatedEndUsersPage>(
-    `/api/v1/envs/${encodeURIComponent(envId)}/end-users/get-by-featureflag?${params}`
+    `/api/v1/envs/${encodeURIComponent(envId)}/end-users/stats?${params}`
   )
 }
 

@@ -127,6 +127,20 @@ export const enFeatureFlags = {
     moreActions: "More targeting actions",
     scheduleChanges: "Schedule changes",
     changeRequest: "Change request",
+    licenseGate: {
+      scheduleTitle: "Your license doesn't include Schedule Changes",
+      scheduleDescription:
+        "Schedule Changes lets you choose when feature flag Targeting changes are applied. Upgrade your license to enable this feature.",
+      scheduleNote:
+        "After upgrading, you can schedule Targeting changes for this feature flag.",
+      changeRequestTitle: "Your license doesn't include Change Requests",
+      changeRequestDescription:
+        "Change Requests let your team review and approve feature flag Targeting changes before they are applied. Upgrade your license to enable this feature.",
+      changeRequestNote:
+        "After upgrading, you can request approval for this feature flag's Targeting changes.",
+      manageLicense: "Manage license",
+      close: "Close",
+    },
     whenOn: "When flag is ON",
     whenOff: "When flag is OFF",
     offServingLabel: "Flag OFF serving variation",
@@ -529,9 +543,12 @@ export const enFeatureFlags = {
     title: "Compare feature flags",
     subtitle:
       "Compare flag settings across environments and copy only what you need.",
-    unavailableTitle: "Feature flag comparison is unavailable",
+    unavailableTitle: "Your license doesn't include Feature Flag Comparison",
     unavailableDescription:
-      "Your current license does not include cross-environment comparison and settings copy.",
+      "Feature Flag Comparison lets you compare settings across environments and copy only the changes you need. Upgrade your license to enable this feature.",
+    manageLicense: "Manage license",
+    licenseGateNote:
+      "After upgrading, you can compare feature flags across environments here.",
     resultsFailed: "Comparison results could not be loaded.",
     resultsFailedHelp:
       "Your current comparison scope and filters have been preserved.",
@@ -670,6 +687,7 @@ export const enFeatureFlags = {
     selected_other: "{{count}} settings selected",
     noneSelected: "No settings selected",
     cancel: "Cancel",
+    close: "Close",
     copying: "Copying…",
     copySettings: "Copy settings",
   },
@@ -796,6 +814,19 @@ export const zhFeatureFlags: typeof enFeatureFlags = {
     moreActions: "更多定向操作",
     scheduleChanges: "计划变更",
     changeRequest: "变更请求",
+    licenseGate: {
+      scheduleTitle: "当前许可证不包含计划变更",
+      scheduleDescription:
+        "计划变更可让你选择应用功能开关 Targeting 变更的时间。请升级许可证以启用此功能。",
+      scheduleNote: "升级后，你可以为此功能开关安排 Targeting 变更。",
+      changeRequestTitle: "当前许可证不包含变更请求",
+      changeRequestDescription:
+        "变更请求可让团队在应用功能开关 Targeting 变更前完成审核与批准。请升级许可证以启用此功能。",
+      changeRequestNote:
+        "升级后，你可以为此功能开关的 Targeting 变更请求批准。",
+      manageLicense: "管理许可证",
+      close: "关闭",
+    },
     whenOn: "功能开关开启时",
     whenOff: "功能开关关闭时",
     offServingLabel: "功能开关关闭时返回的变体",
@@ -1178,8 +1209,11 @@ export const zhFeatureFlags: typeof enFeatureFlags = {
     back: "功能开关",
     title: "比较功能开关",
     subtitle: "比较不同环境中的功能开关设置，并只复制你需要的内容。",
-    unavailableTitle: "功能开关比较不可用",
-    unavailableDescription: "当前许可证不包含跨环境比较和设置复制功能。",
+    unavailableTitle: "当前许可证不包含功能开关比较",
+    unavailableDescription:
+      "功能开关比较可让你比较不同环境中的设置，并只复制需要的变更。请升级许可证以启用此功能。",
+    manageLicense: "管理许可证",
+    licenseGateNote: "升级后，你可以在这里跨环境比较功能开关。",
     resultsFailed: "无法加载比较结果",
     resultsFailedHelp: "已保留当前比较范围和筛选条件，请重试。",
     retry: "重试",
@@ -1313,6 +1347,7 @@ export const zhFeatureFlags: typeof enFeatureFlags = {
     selected_other: "已选择 {{count}} 项设置",
     noneSelected: "未选择设置",
     cancel: "取消",
+    close: "关闭",
     copying: "复制中...",
     copySettings: "复制设置",
   },

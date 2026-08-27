@@ -176,6 +176,12 @@ export function clearCurrentProjectEnv() {
   clearTabProjectEnv()
 }
 
+export function clearCurrentContext() {
+  localStorage.removeItem(contextKey("current-workspace"))
+  localStorage.removeItem(contextKey("current-organization"))
+  clearCurrentProjectEnv()
+}
+
 function saveCurrentWorkspace(workspace: Workspace) {
   localStorage.setItem(
     contextKey("current-workspace"),

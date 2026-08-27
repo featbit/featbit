@@ -23,8 +23,23 @@ export type RuntimeEnv = {
   version: string
 }
 
+const DEFAULT_RUNTIME_ENV: Record<RuntimeEnvKey, string> = {
+  API_URL: "http://localhost:5000",
+  DEMO_URL: "https://featbit-samples.vercel.app",
+  EVALUATION_URL: "http://localhost:5100",
+  BASE_HREF: "",
+  DISPLAY_API_URL: "",
+  DISPLAY_EVALUATION_URL: "",
+  HOSTING_MODE: "self-hosted",
+  VERSION: "dev",
+}
+
 function readValue(env: RawRuntimeEnv, key: RuntimeEnvKey) {
-  return env[key] ?? env[key.toLowerCase() as Lowercase<RuntimeEnvKey>] ?? ""
+  return (
+    env[key] ??
+    env[key.toLowerCase() as Lowercase<RuntimeEnvKey>] ??
+    DEFAULT_RUNTIME_ENV[key]
+  ) || DEFAULT_RUNTIME_ENV[key]
 }
 
 export function getRuntimeEnv(): RuntimeEnv {

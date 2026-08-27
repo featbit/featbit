@@ -253,6 +253,7 @@ export function TargetingSubmissionDialog({
   const future =
     !schedule || (scheduledTime && new Date(scheduledTime).getTime() > openedAt)
   const valid = Boolean(
+    changes.length &&
     reason.trim() &&
     (!schedule || (title.trim() && future)) &&
     (!reviewerRequired || reviewers.length)
@@ -397,6 +398,7 @@ export function TargetingSubmissionDialog({
                 description: t(
                   "featureFlags.detailsPage.submission.applyImmediately"
                 ),
+                disabled: !changes.length,
                 onSelect: () => onModeChange("save", reason.trim()),
               },
               ...(scheduleGranted

@@ -3,7 +3,7 @@ import { MergeView } from "@codemirror/merge"
 import { EditorState } from "@codemirror/state"
 import { EditorView, lineNumbers } from "@codemirror/view"
 import { CircleMinus, CirclePlus } from "lucide-react"
-import { useLayoutEffect, useRef } from "react"
+import { useCallback, useLayoutEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import {
   Dialog,
@@ -13,6 +13,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { codeMirrorEditorStyle } from "@/lib/code-mirror/editor-style"
+import { cn } from "@/lib/utils"
 import { auditObjectIdentity, auditTypeLabel } from "../audit-log-utils"
 import type { AuditLog } from "../audit-logs-types"
 
@@ -25,7 +26,13 @@ function formattedJson(value?: string) {
   }
 }
 
-function RawDataDiff({ auditLog }: { auditLog: AuditLog }) {
+function RawDataDiff({
+  auditLog,
+  onReady,
+}: {
+  auditLog: AuditLog
+  onReady: () => void
+}) {
   const containerRef = useRef<HTMLDivElement>(null)
 
   useLayoutEffect(() => {
@@ -53,14 +60,61 @@ function RawDataDiff({ auditLog }: { auditLog: AuditLog }) {
       gutter: true,
       highlightChanges: true,
     })
-    merge.a.requestMeasure()
-    merge.b.requestMeasure()
-    return () => merge.destroy()
-  }, [auditLog])
+    let animationFrame = 0
+    let attempts = 0
+    let stableFrames = 0
+    let previousSignature = ""
+    let measurementsRemaining = 2
+
+    const revealWhenStable = () => {
+      const editors = Array.from(
+        containerRef.current?.querySelectorAll<HTMLElement>(".cm-editor") ?? []
+      )
+      const spacers = Array.from(
+        containerRef.current?.querySelectorAll<HTMLElement>(
+          ".cm-mergeSpacer"
+        ) ?? []
+      )
+      const signature = JSON.stringify({
+        editors: editors.map((editor) => editor.offsetHeight),
+        spacers: spacers.map((spacer) => spacer.offsetHeight),
+      })
+
+      attempts += 1
+      stableFrames = signature === previousSignature ? stableFrames + 1 : 0
+      previousSignature = signature
+
+      if ((attempts >= 4 && stableFrames >= 2) || attempts >= 12) {
+        onReady()
+        return
+      }
+      animationFrame = window.requestAnimationFrame(revealWhenStable)
+    }
+
+    const measurementComplete = () => {
+      measurementsRemaining -= 1
+      if (measurementsRemaining === 0) {
+        animationFrame = window.requestAnimationFrame(revealWhenStable)
+      }
+    }
+
+    const measurement = {
+      read: () => undefined,
+      write: measurementComplete,
+    }
+    merge.a.requestMeasure(measurement)
+    merge.b.requestMeasure(measurement)
+
+    return () => {
+      window.cancelAnimationFrame(animationFrame)
+      merge.destroy()
+    }
+  }, [auditLog, onReady])
 
   return (
     <div
       ref={containerRef}
+      data-slot="raw-data-diff"
       className="min-h-0 overflow-hidden rounded-md border [&_.cm-editor]:max-h-[calc(78vh-11rem)] [&_.cm-mergeView]:max-h-[calc(78vh-11rem)] [&_.cm-mergeView]:overflow-auto [&_.cm-scroller]:max-h-[calc(78vh-11rem)]"
     />
   )
@@ -76,6 +130,13 @@ export function AuditLogRawDataDialog({
   onOpenChange: (open: boolean) => void
 }) {
   const { t } = useTranslation()
+  const [readyAuditLogId, setReadyAuditLogId] = useState<string | null>(null)
+  const contentReady = Boolean(auditLog && readyAuditLogId === auditLog.id)
+  const handleDiffReady = useCallback(() => {
+    if (auditLog) {
+      setReadyAuditLogId(auditLog.id)
+    }
+  }, [auditLog])
   const identity = auditLog
     ? auditObjectIdentity(auditLog, t("auditLogs.unavailable"))
     : null
@@ -93,8 +154,19 @@ export function AuditLogRawDataDialog({
     : ""
 
   return (
-    <Dialog open={Boolean(auditLog)} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[78vh] grid-rows-[auto_auto_auto] overflow-hidden sm:max-w-6xl">
+    <Dialog
+      open={Boolean(auditLog)}
+      onOpenChange={(open) => {
+        if (!open) setReadyAuditLogId(null)
+        onOpenChange(open)
+      }}
+    >
+      <DialogContent
+        className={cn(
+          "max-h-[78vh] grid-rows-[auto_auto_auto] overflow-hidden sm:max-w-6xl",
+          !contentReady && "invisible"
+        )}
+      >
         <DialogHeader>
           <DialogTitle>{t("auditLogs.rawData")}</DialogTitle>
           <DialogDescription>
@@ -113,7 +185,9 @@ export function AuditLogRawDataDialog({
             {t("auditLogs.current")}
           </div>
         </div>
-        {auditLog ? <RawDataDiff auditLog={auditLog} /> : null}
+        {auditLog ? (
+          <RawDataDiff auditLog={auditLog} onReady={handleDiffReady} />
+        ) : null}
       </DialogContent>
     </Dialog>
   )

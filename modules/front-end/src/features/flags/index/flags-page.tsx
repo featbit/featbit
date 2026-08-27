@@ -364,6 +364,14 @@ export function FlagsPage() {
     if (canPerform(flag, action)) next()
     else toast.error(t("featureFlags.permissionDenied"))
   }
+  function startCreate() {
+    if (!canCreate) {
+      toast.error(t("featureFlags.permissionDenied"))
+      return
+    }
+    setCloneTarget(null)
+    setEditorOpen(true)
+  }
 
   if (!envId)
     return (
@@ -394,7 +402,6 @@ export function FlagsPage() {
           status={status}
           archived={archived}
           selectedCount={selectedCount}
-          canCreate={canCreate}
           canCopySelected={canCopySelected}
           onSearchChange={setSearch}
           onTagsChange={(tags) =>
@@ -412,10 +419,7 @@ export function FlagsPage() {
           onCompare={() =>
             navigate(localizedPath(lang, "/feature-flags/compare"))
           }
-          onCreate={() => {
-            setCloneTarget(null)
-            setEditorOpen(true)
-          }}
+          onCreate={startCreate}
         />
         <div className="overflow-x-auto rounded-md border bg-background">
           {listQuery.isError ? (
@@ -484,11 +488,7 @@ export function FlagsPage() {
             onRestore={(flag) => setConfirmation({ kind: "restore", flag })}
             onRemove={(flag) => setConfirmation({ kind: "remove", flag })}
             onClearFilters={clearFilters}
-            onCreate={() => {
-              setCloneTarget(null)
-              setEditorOpen(true)
-            }}
-            canCreate={canCreate}
+            onCreate={startCreate}
           />
         </div>
         <FlagsPagination

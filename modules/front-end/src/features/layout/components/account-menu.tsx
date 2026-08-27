@@ -69,6 +69,7 @@ export function AccountMenu({
   const themeLabel = t(`layout.account.theme.${theme}`)
 
   function changeLanguage(nextLang: Lang) {
+    setAccountMenuOpen(false)
     const nextPath = window.location.pathname.replace(
       /^\/(en|zh)/,
       `/${nextLang}`

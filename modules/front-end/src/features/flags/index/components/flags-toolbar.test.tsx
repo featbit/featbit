@@ -22,7 +22,6 @@ function renderToolbar(overrides: Partial<FlagsToolbarProps> = {}) {
         status="all"
         archived={false}
         selectedCount={0}
-        canCreate
         canCopySelected
         onSearchChange={noop}
         onTagsChange={noop}
@@ -42,6 +41,17 @@ function renderToolbar(overrides: Partial<FlagsToolbarProps> = {}) {
 }
 
 describe("FlagsToolbar", () => {
+  it("keeps New flag clickable so the page can check permission", () => {
+    const onCreate = vi.fn()
+    renderToolbar({ onCreate })
+
+    const button = screen.getByRole("button", { name: "New flag" })
+    expect(button).toBeEnabled()
+    fireEvent.click(button)
+
+    expect(onCreate).toHaveBeenCalledOnce()
+  })
+
   it("hides Clear filters when no filter is applied", () => {
     renderToolbar()
 

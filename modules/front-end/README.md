@@ -1,38 +1,56 @@
-<h1 align="center">
-FeatBit UI
-</h1>
+<h1 align="center">FeatBit UI</h1>
 
 <div align="center">
 
-<!--
-Make New Badge Pattern badges inline
-See https://github.com/all-?/all-contributors/issues/361#issuecomment-637166066
--->
-
-[![stars](https://img.shields.io/github/stars/featbit/featbit.svg?style=flat&logo=github&colorB=red&label=stars)](https://github.com/featbit/featbit)
-[![Node](https://img.shields.io/badge/node->=16.0-success?logo=node.js&logoColor=white)](https://www.typescriptlang.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-4.7-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Angular](https://img.shields.io/badge/Angular-14.0-DD0031?logo=angular&logoColor=white)](https://angular.io/)
-[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/featbit/featbit/FeatBit%20UI%20change%20validations)](https://github.com/featbit/featbit/actions/workflows/ui-change-validations.yml?branch=main)
+[![GitHub stars](https://img.shields.io/github/stars/featbit/featbit.svg?style=flat&logo=github&colorB=red&label=stars)](https://github.com/featbit/featbit)
+[![Node.js](https://img.shields.io/badge/Node.js-22.19-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
 </div>
 
-FeatBit includes a customer UI/Portal. You can use it as the management portal.
+FeatBit UI is the management portal for FeatBit. It provides interfaces for managing feature flags, users, segments, change requests, permissions, organizations, audit logs, and other FeatBit resources.
 
-The FeatBit UI provides features for managing and updating feature flags, users, rollback, configuration peer reviews, permission management, organization management, audit logs, and many other features.
+The application is built with React, TypeScript, and Vite.
 
-# Getting Started
+## Quick start with Docker Compose
 
-Usually, you should run UI along with all other services by running in the root of the repository :
+The recommended way to run the UI together with the FeatBit services is from the repository root:
+
+```sh
+docker compose up -d
 ```
-docker compose -f ./docker-compse.yml up -d
+
+Open <http://localhost:8081> after the containers are ready.
+
+## Local development
+
+### Prerequisites
+
+- Node.js 22.19 or a version supported by the current Vite release
+- A running FeatBit API server
+- A running Evaluation server if you want to use evaluation or demo features
+
+### Install and run
+
+From the repository root:
+
+```sh
+cd modules/front-end
+npm ci
+npm run dev
 ```
-The UI will be available at http://localhost:8081
 
-## Run locally with development mode
+The development server is available at <http://localhost:5173>.
 
-If you already have the API server, Evaluation server and Data analytics server running somewhere, and you want to launch UI on a different machine or want to do some development work on UI,
-you can run the UI locally. Open the file [env.js](public/assets/env.js), and fill the variables like this:
+## Environment variables
+
+The UI reads its environment-specific settings from `assets/env.js`. Service URLs must be reachable from the user's browser; they are not container-to-container addresses.
+
+### Application defaults
+
+The application uses the following defaults when a runtime value is missing or empty. For local development, edit [`public/assets/env.js`](public/assets/env.js) to override them:
+
 ```js
 window.env = window.env || {
   API_URL: "http://localhost:5000",
@@ -41,41 +59,77 @@ window.env = window.env || {
   BASE_HREF: "",
   DISPLAY_API_URL: "",
   DISPLAY_EVALUATION_URL: "",
+  HOSTING_MODE: "self-hosted",
+  VERSION: "dev"
 }
 ```
-Assuming you are running other service on the same machine:
-- **API_URL**: the url of the API server
-- **DEMO_URL**: the url of the dino-game demo, it should be running somewhere
-- **EVALUATION_URL**: the url of the evaluation server
 
-Then run
-```
-npm run dev
-```
+### Docker container configuration
 
-The UI will be available at http://localhost:4200
+The Docker image generates `assets/env.js` from container environment variables when it starts. Empty or unset values fall back to the application defaults, while supplied values override them. The `VERSION` build argument is still injected as image metadata and defaults to `dev`.
 
-## Install with Docker
+| Variable | Required | Application default | Description |
+| --- | --- | --- | --- |
+| `API_URL` | Yes | `http://localhost:5000` | URL of the FeatBit API server used by the browser. |
+| `DEMO_URL` | No | `https://featbit-samples.vercel.app` | URL of the interactive demo. The UI adds the parameters needed by the demo. |
+| `EVALUATION_URL` | No | `http://localhost:5100` | URL of the Evaluation server used by evaluation and demo features. |
+| `BASE_HREF` | No | Empty | URL path under which the UI is served. For example, both `featbit` and `/featbit/` are normalized to `/featbit`. |
+| `DISPLAY_API_URL` | No | Empty | API URL shown in the Getting Started page when it differs from `API_URL`. |
+| `DISPLAY_EVALUATION_URL` | No | Empty | Event and streaming URL shown in the Getting Started page when it differs from `EVALUATION_URL`. |
+| `HOSTING_MODE` | No | `self-hosted` | UI hosting mode. Use `saas` for hosted-only behavior. |
+| `VERSION` | No | `dev` | Version displayed by the UI. |
 
-The following variables could be overridden by environment variables when running the container:
-- **API_URL**: **Mandatory**, the url of the API Server, default value is http://localhost:5000, it overrides **url**
-- **DEMO_URL**: **Optional**, set the value if you deploy the [dino-game demo](https://github.com/featbit/featbit-samples/tree/main/samples/dino-game/interactive-demo-vue) on your own server, otherwise it would use our demo deployed on https://featbit-samples.vercel.app. The link doesn't work if you click directly on it, it needs extra parameters. **demoUrl**
-- **EVALUATION_URL**: **Optional**, the url of the evaluation server, this is used by the demo, ignore it if you don't want to run the demo, the default value is http://localhost:5100. It overrides **evaluationUrl**
-- **DISPLAY_API_URL**: **Optional**, the display url of the API server. This is an optional variable used when you want to override the API URL displayed in the 'Getting Started' UI.
-- **DISPLAY_EVALUATION_URL**: **Optional**, the display url of the Evaluation server. This is an optional variable used when you want to override the Event and Streaming URL displayed in the 'Getting Started' UI.
-- **BASE_HREF**: **Optional**, set the value if you want to deploy FeatBit UI to a path, for example https://www.example.com/abc/def/, in this case, the value should be `/abc/def/`.
+These URL defaults are resolved by the user's browser. They work when the API and Evaluation server expose ports `5000` and `5100` on the same host as the UI. Override them when users access FeatBit through another hostname, port, or reverse proxy.
 
-Bind the port 8081 or any other available port to 80.
+## Docker
 
-### Build docker image and run container from the source code
-```
-docker build -t featbit/ui:local .
-docker run -d -p 8081:80 -e API_URL="http://localhost:5000" -e DEMO_URL="https://featbit-samples.vercel.app" -e EVALUATION_URL="http://localhost:5100" --name featbit-ui featbit/ui:local
+### Build from source
+
+Run the build from the repository root so the Docker context points to this module:
+
+```sh
+docker build -t featbit/ui:local ./modules/front-end
 ```
 
-### Run docker container from our prebuilt docker hub image
-```
-docker run -d -p 8081:80 -e API_URL="http://localhost:5000" -e DEMO_URL="https://featbit-samples.vercel.app" -e EVALUATION_URL="http://localhost:5100" --name featbit-ui featbit/featbit-ui:latest
+To include a version label:
+
+```sh
+docker build --build-arg VERSION=dev -t featbit/ui:local ./modules/front-end
 ```
 
-Then go to http://localhost:8081
+Run the image:
+
+```sh
+docker run -d --name featbit-ui -p 8081:80 \
+  -e API_URL="http://localhost:5000" \
+  -e DEMO_URL="https://featbit-samples.vercel.app" \
+  -e EVALUATION_URL="http://localhost:5100" \
+  -e HOSTING_MODE="self-hosted" \
+  featbit/ui:local
+```
+
+### Use the prebuilt image
+
+```sh
+docker run -d --name featbit-ui -p 8081:80 \
+  -e API_URL="http://localhost:5000" \
+  -e DEMO_URL="https://featbit-samples.vercel.app" \
+  -e EVALUATION_URL="http://localhost:5100" \
+  -e HOSTING_MODE="self-hosted" \
+  featbit/featbit-ui:latest
+```
+
+Open <http://localhost:8081> after the container starts.
+
+## Common commands
+
+Run these commands from `modules/front-end`:
+
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Start the Vite development server. |
+| `npm run build` | Type-check and create a production build. |
+| `npm run lint` | Run ESLint. |
+| `npm test` | Run the Vitest test suite. |
+| `npm run test:e2e` | Run end-to-end tests. |
+| `npm run test:nginx` | Test the production Nginx image behavior. |

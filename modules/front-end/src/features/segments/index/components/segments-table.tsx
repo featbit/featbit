@@ -46,7 +46,6 @@ type Props = {
   onRemove: (segment: Segment) => void
   onClearSearch: () => void
   onCreate: () => void
-  canCreate: boolean
 }
 
 function formatDate(value: string, lang: Lang, withTime = false) {
@@ -99,7 +98,6 @@ export function SegmentsTable({
   onRemove,
   onClearSearch,
   onCreate,
-  canCreate,
 }: Props) {
   const { t } = useTranslation()
 
@@ -164,7 +162,7 @@ export function SegmentsTable({
                   >
                     {t("segments.clearSearch")}
                   </Button>
-                ) : canCreate && !archived ? (
+                ) : !archived ? (
                   <Button
                     type="button"
                     variant="outline"

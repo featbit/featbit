@@ -7,12 +7,7 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+import { TooltipProvider } from "@/components/ui/tooltip"
 import { currentUserPoliciesQueryOptions } from "@/features/iam/current-user-policy-query"
 import {
   getCurrentOrganization,
@@ -27,6 +22,7 @@ import {
   isFeatureGranted,
   parseLicense,
 } from "@/features/workspace/license/license-utils"
+import { getRuntimeEnv } from "@/lib/env/runtime-env"
 import {
   archiveSegment,
   createSegment,
@@ -44,6 +40,7 @@ import {
   segmentRn,
   type SegmentAction,
 } from "../segments-permissions"
+import { environmentScopeRn } from "../segment-scopes"
 import type {
   ScopeResource,
   Segment,
@@ -72,6 +69,11 @@ export function SegmentsPage() {
   const projectEnv = getCurrentProjectEnv()
   const envId = projectEnv?.envId ?? ""
   const envRn = environmentRn({
+    projectKey: projectEnv?.projectKey ?? "",
+    environmentKey: projectEnv?.envKey ?? "",
+  })
+  const fallbackCurrentScopeRn = environmentScopeRn({
+    organizationKey: organization?.key ?? "",
     projectKey: projectEnv?.projectKey ?? "",
     environmentKey: projectEnv?.envKey ?? "",
   })
@@ -153,6 +155,12 @@ export function SegmentsPage() {
     },
     license,
     getLicenseStatus(license)
+  )
+  const manageLicenseHref = localizedPath(
+    lang,
+    getRuntimeEnv().hostingMode === "saas"
+      ? "/workspace/billing"
+      : "/workspace/license"
   )
   const fineGrainedGranted = useMemo(
     () => isFineGrainedAccessControlGranted(workspace?.license),
@@ -257,11 +265,21 @@ export function SegmentsPage() {
     setConfirmation({ kind, segment })
   }
 
-  const currentScope: ScopeResource = {
+  function startCreate() {
+    if (!canCreate) {
+      toast.error(t("segments.permissionDenied"))
+      return
+    }
+    setSheetOpen(true)
+  }
+
+  const currentScope: ScopeResource = scopesQuery.data?.find(
+    (resource) => resource.type === "env" && resource.id === envId
+  ) ?? {
     id: envId,
     name: projectEnv?.envName ?? "",
     pathName: `${organization?.name ?? ""} / ${projectEnv?.projectName ?? ""} / ${projectEnv?.envName ?? ""}`,
-    rn: envRn,
+    rn: fallbackCurrentScopeRn,
     type: "env",
   }
   const data = listQuery.data ?? { items: [], totalCount: 0 }
@@ -319,25 +337,10 @@ export function SegmentsPage() {
             </Button>
           </div>
 
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <span className="inline-flex" tabIndex={canCreate ? -1 : 0} />
-              }
-            >
-              <Button
-                type="button"
-                disabled={!canCreate}
-                onClick={() => setSheetOpen(true)}
-              >
-                <Plus />
-                {t("segments.new")}
-              </Button>
-            </TooltipTrigger>
-            {!canCreate ? (
-              <TooltipContent>{t("segments.permissionDenied")}</TooltipContent>
-            ) : null}
-          </Tooltip>
+          <Button type="button" onClick={startCreate}>
+            <Plus />
+            {t("segments.new")}
+          </Button>
         </div>
 
         <div className="overflow-hidden rounded-md border bg-background">
@@ -385,8 +388,7 @@ export function SegmentsPage() {
                 startAction("remove", segment, "DeleteSegment")
               }
               onClearSearch={() => setSearch("")}
-              onCreate={() => setSheetOpen(true)}
-              canCreate={canCreate}
+              onCreate={startCreate}
             />
           )}
         </div>
@@ -411,6 +413,7 @@ export function SegmentsPage() {
             resourcesLoading={scopesQuery.isLoading}
             resourcesError={scopesQuery.isError}
             shareableGranted={shareableGranted}
+            manageLicenseHref={manageLicenseHref}
             saving={createMutation.isPending}
             onOpenChange={setSheetOpen}
             onRetryResources={() => void scopesQuery.refetch()}

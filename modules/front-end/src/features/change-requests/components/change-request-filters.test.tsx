@@ -2,7 +2,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import "@/lib/i18n/i18n"
-import { changeRequestsCopy } from "../change-requests-copy"
 import { ChangeRequestFilters } from "./change-request-filters"
 
 function renderFilters(filtersApplied: boolean) {
@@ -19,7 +18,6 @@ function renderFilters(filtersApplied: boolean) {
         reviewer={null}
         status={undefined}
         filtersApplied={filtersApplied}
-        copy={changeRequestsCopy("en")}
         onQueryChange={vi.fn()}
         onAuthorChange={vi.fn()}
         onReviewerChange={vi.fn()}

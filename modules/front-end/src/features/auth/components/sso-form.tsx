@@ -1,21 +1,18 @@
 import { ArrowLeft, Building2 } from "lucide-react"
 import { useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { getSsoAuthorizeUrl, type SsoPreCheck } from "@/features/auth/auth-api"
-import type { Lang } from "@/features/auth/auth-page-types"
 import { Field } from "@/features/auth/components/form-controls"
 
 export function SsoForm({
-  lang,
   preCheck,
+  onBack,
 }: {
-  lang: Lang
   preCheck: SsoPreCheck | null
+  onBack: () => void
 }) {
   const { t } = useTranslation()
-  const navigate = useNavigate()
   const workspaceKeyRef = useRef<HTMLInputElement>(null)
   const [workspaceKey, setWorkspaceKey] = useState(preCheck?.workspaceKey ?? "")
   const [hasError, setHasError] = useState(false)
@@ -41,7 +38,7 @@ export function SsoForm({
         type="button"
         variant="link"
         className="mb-14 h-auto justify-start gap-3 p-0 text-base"
-        onClick={() => navigate(`/${lang}/login`, { replace: true })}
+        onClick={onBack}
       >
         <ArrowLeft className="size-5" />
         {t("auth.backToSignIn")}

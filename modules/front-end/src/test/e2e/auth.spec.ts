@@ -1,7 +1,15 @@
 import { expect, test } from "@playwright/test"
-import { mockAuthEndpoints, mockContextEndpoints } from "./helpers"
+import {
+  mockAuthEndpoints,
+  mockContextEndpoints,
+  mockRuntimeEnv,
+} from "./helpers"
 
 test.describe("login page", () => {
+  test.beforeEach(async ({ page }) => {
+    await mockRuntimeEnv(page, { HOSTING_MODE: "saas" })
+  })
+
   test("renders the email login form and social sign-in options", async ({
     page,
   }) => {
@@ -227,13 +235,15 @@ test.describe("login page", () => {
     await expect(page.getByLabel("Email", { exact: true })).toBeVisible()
   })
 
-  test("navigates to SSO and back to email login", async ({ page }) => {
+  test("switches between SSO and email login without changing the URL", async ({
+    page,
+  }) => {
     await mockAuthEndpoints(page)
 
     await page.goto("/en/login")
     await page.getByRole("button", { name: "Sign in with SSO" }).click()
 
-    await expect(page).toHaveURL(/\/en\/login\/sso$/)
+    await expect(page).toHaveURL(/\/en\/login$/)
     await expect(
       page.getByRole("heading", { name: "Sign in with SSO" })
     ).toBeVisible()
@@ -246,10 +256,50 @@ test.describe("login page", () => {
     ).toBeVisible()
   })
 
+  test("defaults to SSO when it is enabled in self-hosted mode", async ({
+    page,
+  }) => {
+    await mockRuntimeEnv(page, { HOSTING_MODE: "self-hosted" })
+    await mockAuthEndpoints(page)
+
+    await page.goto("/en/login")
+
+    await expect(page).toHaveURL(/\/en\/login$/)
+    await expect(
+      page.getByRole("heading", { name: "Sign in with SSO" })
+    ).toBeVisible()
+  })
+
+  test("defaults to SSO when hosting mode is empty", async ({ page }) => {
+    await mockRuntimeEnv(page, {})
+    await mockAuthEndpoints(page)
+
+    await page.goto("/en/login")
+
+    await expect(page).toHaveURL(/\/en\/login$/)
+    await expect(
+      page.getByRole("heading", { name: "Sign in with SSO" })
+    ).toBeVisible()
+  })
+
+  test("defaults to email login in SaaS mode when SSO is enabled", async ({
+    page,
+  }) => {
+    await mockRuntimeEnv(page, { HOSTING_MODE: "saas" })
+    await mockAuthEndpoints(page)
+
+    await page.goto("/en/login")
+
+    await expect(
+      page.getByRole("heading", { name: "Sign in to your workspace" })
+    ).toBeVisible()
+  })
+
   test("validates whitespace-only SSO workspace keys", async ({ page }) => {
     await mockAuthEndpoints(page)
 
-    await page.goto("/en/login/sso")
+    await page.goto("/en/login")
+    await page.getByRole("button", { name: "Sign in with SSO" }).click()
     const workspaceKey = page.getByLabel("Workspace key")
     await workspaceKey.fill("   ")
     await page.getByRole("button", { name: "Continue with SSO" }).click()
@@ -257,7 +307,7 @@ test.describe("login page", () => {
     await expect(page.getByText("Workspace key is required")).toBeVisible()
     await expect(workspaceKey).toHaveAttribute("aria-invalid", "true")
     await expect(workspaceKey).toBeFocused()
-    await expect(page).toHaveURL(/\/en\/login\/sso$/)
+    await expect(page).toHaveURL(/\/en\/login$/)
   })
 
   test("uses the SSO pre-check workspace key as a read-only field", async ({
@@ -270,7 +320,8 @@ test.describe("login page", () => {
       },
     })
 
-    await page.goto("/en/login/sso")
+    await page.goto("/en/login")
+    await page.getByRole("button", { name: "Sign in with SSO" }).click()
 
     await expect(page.getByLabel("Workspace key")).toHaveValue("acme-prod")
     await expect(page.getByLabel("Workspace key")).toHaveAttribute("readonly")
@@ -280,9 +331,8 @@ test.describe("login page", () => {
     ).toBeVisible()
   })
 
-  test("hides disabled SSO and protects the dedicated route", async ({
-    page,
-  }) => {
+  test("hides disabled SSO", async ({ page }) => {
+    await mockRuntimeEnv(page, { HOSTING_MODE: "self-hosted" })
     await mockAuthEndpoints(page, {
       ssoPreCheck: {
         success: true,
@@ -296,11 +346,6 @@ test.describe("login page", () => {
       page.getByRole("button", { name: "Sign in with SSO" })
     ).toHaveCount(0)
     await expect(page.getByText("Enterprise sign-in")).toHaveCount(0)
-
-    await page.goto("/en/login/sso")
-
-    await expect(page).toHaveURL(/\/en\/login\?reason=sso-unavailable$/)
-    await expect(page.getByText("SSO isn't available")).toBeVisible()
   })
 
   test("recovers when the SSO availability check fails", async ({ page }) => {
@@ -320,14 +365,14 @@ test.describe("login page", () => {
       })
     })
 
-    await page.goto("/en/login/sso")
+    await page.goto("/en/login")
 
     await expect(
-      page.getByRole("heading", {
-        name: "We couldn't check SSO availability",
-      })
+      page.getByText("Some sign-in options couldn't be loaded.")
     ).toBeVisible()
     await page.getByRole("button", { name: "Retry" }).click()
+    await page.getByRole("button", { name: "Sign in with SSO" }).click()
+    await expect(page).toHaveURL(/\/en\/login$/)
     await expect(
       page.getByRole("heading", { name: "Sign in with SSO" })
     ).toBeVisible()

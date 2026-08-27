@@ -44,6 +44,7 @@ export const enLayout = {
   context: {
     searchEnvironments: "Search projects or environments...",
     noEnvironments: "No environments found.",
+    switchingEnvironment: "Switching to {{project}} / {{environment}}...",
     currentProject: "Current",
     manageEnvironments: "Manage environments",
     sdkConfiguration: "SDK configuration",
@@ -138,6 +139,7 @@ export const zhLayout = {
   context: {
     searchEnvironments: "搜索项目或环境...",
     noEnvironments: "没有找到环境。",
+    switchingEnvironment: "正在切换到 {{project}} / {{environment}}...",
     currentProject: "当前项目",
     manageEnvironments: "管理环境",
     sdkConfiguration: "SDK 配置",

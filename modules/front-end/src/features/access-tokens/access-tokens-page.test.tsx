@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { render, screen, waitFor } from "@testing-library/react"
+import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { i18n } from "@/lib/i18n/i18n"
@@ -68,7 +68,12 @@ describe("AccessTokensPage IAM", () => {
     renderPage()
 
     expect(
-      await screen.findByRole("heading", { name: "Access tokens unavailable" })
+      await screen.findByRole("heading", {
+        name: "You don't have access to Access Tokens",
+      })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText("Ask a workspace administrator to update your access.")
     ).toBeInTheDocument()
     expect(fetchAccessTokens).not.toHaveBeenCalled()
     expect(
@@ -100,6 +105,54 @@ describe("AccessTokensPage IAM", () => {
     renderPage()
 
     await waitFor(() => expect(fetchAccessTokens).toHaveBeenCalledTimes(1))
+    expect(await screen.findByText("No access tokens yet.")).toBeInTheDocument()
+  })
+
+  it("localizes the unavailable state through global i18n", async () => {
+    await i18n.changeLanguage("zh")
+    vi.mocked(fetchCurrentUserPolicies).mockResolvedValue([])
+
+    renderPage()
+
+    expect(
+      await screen.findByRole("heading", { name: "你没有访问令牌权限" })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText("请联系工作区管理员更新你的访问权限。")
+    ).toBeInTheDocument()
+  })
+
+  it("fails closed and allows retry when permissions cannot be loaded", async () => {
+    vi.mocked(fetchCurrentUserPolicies)
+      .mockRejectedValueOnce(new Error("Policy request failed"))
+      .mockResolvedValueOnce([
+        {
+          type: "CustomerManaged",
+          statements: [
+            {
+              resourceType: "access-token",
+              effect: "allow",
+              actions: ["ListAccessTokens"],
+              resources: ["access-token/*"],
+            },
+          ],
+        },
+      ])
+    vi.mocked(fetchAccessTokens).mockResolvedValue({
+      totalCount: 0,
+      items: [],
+    })
+
+    renderPage()
+
+    expect(
+      await screen.findByRole("heading", {
+        name: "We couldn't verify your Access Tokens access",
+      })
+    ).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole("button", { name: "Retry" }))
+
     expect(await screen.findByText("No access tokens yet.")).toBeInTheDocument()
   })
 })

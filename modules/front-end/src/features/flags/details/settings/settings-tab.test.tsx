@@ -99,6 +99,18 @@ describe("SettingsTab", () => {
     expect(generalSection).not.toContainElement(lifecycle)
   })
 
+  it("opens review for a clean draft and keeps save disabled", async () => {
+    renderSettings()
+
+    const review = screen.getByRole("button", { name: "Review & save" })
+    expect(review).toBeEnabled()
+    fireEvent.click(review)
+
+    expect(
+      await screen.findByRole("button", { name: "Save changes" })
+    ).toBeDisabled()
+  })
+
   it("shows the dirty command row and discards the draft", async () => {
     renderSettings()
     expect(

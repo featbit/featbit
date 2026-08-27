@@ -44,7 +44,6 @@ describe("SegmentsTable", () => {
           onRemove={vi.fn()}
           onClearSearch={vi.fn()}
           onCreate={vi.fn()}
-          canCreate
         />
       </MemoryRouter>
     )
@@ -81,7 +80,6 @@ describe("SegmentsTable", () => {
           onRemove={vi.fn()}
           onClearSearch={vi.fn()}
           onCreate={vi.fn()}
-          canCreate
         />
       </MemoryRouter>
     )
@@ -111,7 +109,6 @@ describe("SegmentsTable", () => {
           onRemove={vi.fn()}
           onClearSearch={vi.fn()}
           onCreate={vi.fn()}
-          canCreate
         />
       </MemoryRouter>
     )

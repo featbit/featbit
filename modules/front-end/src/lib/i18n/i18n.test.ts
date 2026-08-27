@@ -103,6 +103,26 @@ describe("global feature translations", () => {
     expect(i18n.t("targeting.rules.noValues")).toBe("未找到预设值")
   })
 
+  it("resolves Change Requests copy from the global bundle", async () => {
+    await i18n.changeLanguage("en")
+    expect(i18n.t("changeRequests.title")).toBe("Change requests")
+    expect(i18n.t("changeRequests.summary", { count: 2 })).toBe(
+      "2 need your review"
+    )
+    expect(i18n.t("changeRequests.licenseGateTitle")).toBe(
+      "Your license doesn't include Change Requests"
+    )
+
+    await i18n.changeLanguage("zh")
+    expect(i18n.t("changeRequests.title")).toBe("变更请求")
+    expect(i18n.t("changeRequests.summary", { count: 2 })).toBe(
+      "2 个需要你审核"
+    )
+    expect(i18n.t("changeRequests.licenseGateTitle")).toBe(
+      "当前许可证不包含变更请求"
+    )
+  })
+
   it("does not expose retired Chinese end-user terminology", async () => {
     await i18n.changeLanguage("zh")
 

@@ -5,6 +5,7 @@ import {
 } from "@tanstack/react-query"
 import { Loader2 } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { useParams, useSearchParams } from "react-router-dom"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -14,30 +15,55 @@ import { getStoredUserProfile } from "@/features/auth/auth-api"
 import type { OrganizationMember } from "@/features/organization/organization-members-api"
 import {
   getCurrentProjectEnv,
+  getCurrentWorkspace,
+  localizedPath,
   resolveLang,
 } from "@/features/layout/layout-context"
+import {
+  getLicenseStatus,
+  isFeatureGranted,
+  parseLicense,
+} from "@/features/workspace/license/license-utils"
+import { getRuntimeEnv } from "@/lib/env/runtime-env"
+import { cn } from "@/lib/utils"
 import {
   fetchChangeRequests,
   performChangeRequestAction,
 } from "./change-requests-api"
-import { changeRequestsCopy } from "./change-requests-copy"
 import type {
   ChangeRequestItem,
   ChangeRequestAction,
   ChangeRequestStatus,
 } from "./change-requests-types"
 import { ChangeRequestFilters } from "./components/change-request-filters"
+import { ChangeRequestsLicenseGate } from "./components/change-requests-license-gate"
 import { ChangeRequestTable } from "./components/change-request-table"
 import { ChangeRequestDecisionDialog } from "./components/change-request-decision-dialog"
 
 const PAGE_SIZE = 20
 
+function ChangeRequestsHeader({ className }: { className?: string }) {
+  const { t } = useTranslation()
+
+  return (
+    <header className={cn("mb-8 space-y-1", className)}>
+      <h1 className="text-2xl font-semibold tracking-normal">
+        {t("changeRequests.title")}
+      </h1>
+      <p className="text-sm text-muted-foreground">
+        {t("changeRequests.subtitle")}
+      </p>
+    </header>
+  )
+}
+
 export function ChangeRequestsPage() {
+  const { t } = useTranslation()
   const { lang: langParam } = useParams()
   const [searchParams, setSearchParams] = useSearchParams()
   const lang = resolveLang(langParam)
-  const copy = changeRequestsCopy(lang)
   const projectEnv = getCurrentProjectEnv()
+  const workspace = getCurrentWorkspace()
   const envId = projectEnv?.envId ?? ""
   const currentUserId = getStoredUserProfile().id
   const focusedChangeRequestId =
@@ -52,6 +78,18 @@ export function ChangeRequestsPage() {
     item: ChangeRequestItem
     action: Extract<ChangeRequestAction, "approve" | "decline">
   } | null>(null)
+  const license = parseLicense(workspace?.license)
+  const changeRequestsGranted = isFeatureGranted(
+    { id: "change-request", labelKey: "", descriptionKey: "" },
+    license,
+    getLicenseStatus(license)
+  )
+  const manageLicenseHref = localizedPath(
+    lang,
+    getRuntimeEnv().hostingMode === "saas"
+      ? "/workspace/billing"
+      : "/workspace/license"
+  )
 
   useEffect(() => {
     const timeout = window.setTimeout(
@@ -92,7 +130,7 @@ export function ChangeRequestsPage() {
       const loaded = pages.reduce((count, page) => count + page.items.length, 0)
       return loaded < lastPage.totalCount ? pages.length : undefined
     },
-    enabled: Boolean(envId),
+    enabled: Boolean(envId && changeRequestsGranted),
   })
 
   const items = useMemo(
@@ -117,12 +155,14 @@ export function ChangeRequestsPage() {
         action,
         comment
       )
-      if (!success) throw new Error(copy.actionUnavailable)
+      if (!success) {
+        throw new Error(t("changeRequests.actionUnavailable"))
+      }
       return { action, item }
     },
     onSuccess: ({ action, item }) => {
       setDecisionTarget(null)
-      toast.success(copy.actionSucceeded(action))
+      toast.success(t(`changeRequests.actionSucceeded.${action}`))
       void queryClient.invalidateQueries({
         queryKey: ["change-requests", envId],
       })
@@ -138,9 +178,10 @@ export function ChangeRequestsPage() {
     },
     onError: (error) => {
       toast.error(
-        error instanceof Error && error.message === copy.actionUnavailable
-          ? copy.actionUnavailable
-          : copy.actionFailed
+        error instanceof Error &&
+          error.message === t("changeRequests.actionUnavailable")
+          ? t("changeRequests.actionUnavailable")
+          : t("changeRequests.actionFailed")
       )
     },
   })
@@ -166,8 +207,17 @@ export function ChangeRequestsPage() {
     return (
       <div className="-m-5 flex min-h-[calc(100vh-3.5rem)] items-center justify-center bg-background p-8">
         <p className="text-sm text-muted-foreground">
-          {copy.selectEnvironment}
+          {t("changeRequests.selectEnvironment")}
         </p>
+      </div>
+    )
+  }
+
+  if (!changeRequestsGranted) {
+    return (
+      <div className="-m-5 min-h-[calc(100vh-3.5rem)] bg-background px-6 py-6 lg:px-8">
+        <ChangeRequestsHeader className="mb-10" />
+        <ChangeRequestsLicenseGate manageLicenseHref={manageLicenseHref} />
       </div>
     )
   }
@@ -177,10 +227,7 @@ export function ChangeRequestsPage() {
 
   return (
     <div className="-m-5 min-h-[calc(100vh-3.5rem)] bg-background px-8 py-6">
-      <header className="mb-8 space-y-1">
-        <h1 className="text-2xl font-semibold tracking-normal">{copy.title}</h1>
-        <p className="text-sm text-muted-foreground">{copy.subtitle}</p>
-      </header>
+      <ChangeRequestsHeader />
 
       <div className="mb-3 flex flex-col gap-2 xl:flex-row xl:items-center">
         <div className="min-w-0 flex-1">
@@ -190,7 +237,6 @@ export function ChangeRequestsPage() {
             reviewer={reviewer}
             status={status}
             filtersApplied={filtersApplied}
-            copy={copy}
             onQueryChange={setQuery}
             onAuthorChange={setAuthor}
             onReviewerChange={setReviewer}
@@ -203,7 +249,7 @@ export function ChangeRequestsPage() {
             <Skeleton className="h-4 w-48" />
           ) : (
             <p className="text-sm text-muted-foreground">
-              {copy.summary(needsReviewCount)}
+              {t("changeRequests.summary", { count: needsReviewCount })}
             </p>
           )}
         </div>
@@ -214,10 +260,10 @@ export function ChangeRequestsPage() {
           <div className="flex min-h-52 flex-col items-center justify-center gap-3 px-5 py-4 text-center">
             <div>
               <p className="text-sm font-medium text-destructive">
-                {copy.loadFailed}
+                {t("changeRequests.loadFailed")}
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
-                {copy.loadFailedHelp}
+                {t("changeRequests.loadFailedHelp")}
               </p>
             </div>
             <Button
@@ -226,7 +272,7 @@ export function ChangeRequestsPage() {
               size="sm"
               onClick={() => void listQuery.refetch()}
             >
-              {copy.retry}
+              {t("changeRequests.retry")}
             </Button>
           </div>
         ) : (
@@ -241,7 +287,6 @@ export function ChangeRequestsPage() {
                 loading={listQuery.isLoading}
                 filtered={filtersApplied}
                 acting={acting}
-                copy={copy}
                 onAction={(item, action) => {
                   if (action === "apply") {
                     reviewMutation.mutate({ item, action })
@@ -252,9 +297,9 @@ export function ChangeRequestsPage() {
                 onCopyKey={async (key) => {
                   try {
                     await navigator.clipboard.writeText(key)
-                    toast.success(copy.keyCopied)
+                    toast.success(t("changeRequests.keyCopied"))
                   } catch {
-                    toast.error(copy.copyFailed)
+                    toast.error(t("changeRequests.copyFailed"))
                   }
                 }}
                 onClearFilters={clearFilters}
@@ -269,10 +314,10 @@ export function ChangeRequestsPage() {
           key={`${decisionTarget.item.id}-${decisionTarget.action}`}
           action={decisionTarget.action}
           requestTitle={
-            decisionTarget.item.reason?.trim() || copy.fallbackRequest
+            decisionTarget.item.reason?.trim() ||
+            t("changeRequests.fallbackRequest")
           }
           saving={reviewMutation.isPending}
-          copy={copy}
           onOpenChange={(open) => {
             if (!open) setDecisionTarget(null)
           }}
@@ -294,10 +339,10 @@ export function ChangeRequestsPage() {
               <Loader2 className="animate-spin" />
             ) : null}
             {listQuery.isFetchingNextPage
-              ? copy.loadingMore
+              ? t("changeRequests.loadingMore")
               : nextPageError
-                ? copy.retry
-                : copy.loadMore}
+                ? t("changeRequests.retry")
+                : t("changeRequests.loadMore")}
           </Button>
         </div>
       ) : null}
