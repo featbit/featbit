@@ -291,6 +291,35 @@ describe("FlagDifferenceValue targeting rules", () => {
     expect(conditions[2]).toHaveTextContent("ANDcountryEqualFR")
   })
 
+  it("renders segment names instead of stored segment ids", () => {
+    render(
+      <FlagDifferenceValue
+        flag={comparisonValue([
+          {
+            id: "rule-1",
+            name: "Segment rule",
+            conditions: [
+              {
+                property: "User is in segment",
+                op: "",
+                value: '["segment-1","missing-segment"]',
+              },
+            ],
+            variations: [{ id: "true", rollout: [0, 1] }],
+          },
+        ])}
+        setting="targetingRule"
+        segmentNames={new Map([["segment-1", "Beta customers"]])}
+      />
+    )
+
+    const condition = screen.getByTestId("rule-condition-row")
+    expect(condition).toHaveTextContent(
+      "IFUser is in segmentBeta customers, missing-segment"
+    )
+    expect(condition).not.toHaveTextContent("segment-1")
+  })
+
   it("uses the same keyword width with Chinese labels", async () => {
     await i18n.changeLanguage("zh")
     render(
