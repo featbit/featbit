@@ -16,6 +16,27 @@ const flag: FeatureFlag = {
 }
 
 describe("FlagConfirmDialog", () => {
+  it("shows the archive flag key with the same code treatment as other lifecycle dialogs", () => {
+    render(
+      <FlagConfirmDialog
+        target={{ kind: "archive", flag }}
+        saving={false}
+        requireComment={false}
+        onOpenChange={vi.fn()}
+        onConfirm={vi.fn()}
+      />
+    )
+
+    const key = screen.getAllByText("checkout-redesign")[0]
+    expect(key).toHaveClass(
+      "rounded",
+      "bg-muted",
+      "font-mono",
+      "text-foreground"
+    )
+    expect(key.closest('[data-slot="alert-dialog-description"]')).not.toBeNull()
+  })
+
   it("keeps dirty targeting separate and names the saved OFF variation", () => {
     render(
       <FlagConfirmDialog

@@ -198,6 +198,16 @@ export function FlagDifferencesSheet({
     retry: false,
   })
   const detail = comparisonQuery.data ?? null
+  const segmentNames = useMemo(
+    () =>
+      new Map(
+        (detail?.relatedSegments ?? []).map((segment) => [
+          segment.key,
+          segment.value,
+        ])
+      ),
+    [detail]
+  )
   const eligibleKeys = useMemo(
     () =>
       new Set(
@@ -572,6 +582,7 @@ export function FlagDifferencesSheet({
                             setting={row.key}
                             lang={lang}
                             tooltipUserStyle="added"
+                            segmentNames={segmentNames}
                           />
                         </div>
                         <div className="px-5 py-5">
@@ -580,6 +591,7 @@ export function FlagDifferencesSheet({
                             setting={row.key}
                             lang={lang}
                             tooltipUserStyle="existing"
+                            segmentNames={segmentNames}
                           />
                           {rowSelected ? (
                             <div className="mt-4">
@@ -605,6 +617,7 @@ export function FlagDifferencesSheet({
                                   setting={row.key}
                                   previewMode={mode}
                                   lang={lang}
+                                  segmentNames={segmentNames}
                                 />
                               </div>
                             </div>

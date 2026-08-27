@@ -1,6 +1,6 @@
 import { Loader2, MousePointerClick } from "lucide-react"
 import { useState } from "react"
-import { useTranslation } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -77,33 +77,47 @@ export function FlagConfirmDialog({
       : target.kind === "archive"
         ? {
             title: t("featureFlags.archiveTitle"),
-            body: t("featureFlags.archiveBody", { key: target.flag.key }),
+            body: (
+              <Trans
+                i18nKey="featureFlags.archiveBody"
+                values={{ key: target.flag.key }}
+                components={{
+                  flagKey: (
+                    <span className="rounded bg-muted px-1 py-0.5 font-mono font-medium text-foreground" />
+                  ),
+                }}
+              />
+            ),
             action: t("featureFlags.archive"),
           }
         : target.kind === "restore"
           ? {
               title: t("featureFlags.restoreTitle"),
               body: (
-                <>
-                  {t("featureFlags.restoreBodyBefore")}{" "}
-                  <span className="rounded bg-muted px-1 py-0.5 font-mono font-medium text-foreground">
-                    {target.flag.key}
-                  </span>{" "}
-                  {t("featureFlags.restoreBodyAfter")}
-                </>
+                <Trans
+                  i18nKey="featureFlags.restoreBody"
+                  values={{ key: target.flag.key }}
+                  components={{
+                    flagKey: (
+                      <span className="rounded bg-muted px-1 py-0.5 font-mono font-medium text-foreground" />
+                    ),
+                  }}
+                />
               ),
               action: t("featureFlags.restore"),
             }
           : {
               title: t("featureFlags.removeTitle"),
               body: (
-                <>
-                  {t("featureFlags.removeBodyBefore")}{" "}
-                  <span className="rounded bg-muted px-1 py-0.5 font-mono font-medium text-foreground">
-                    {target.flag.key}
-                  </span>{" "}
-                  {t("featureFlags.removeBodyAfter")}
-                </>
+                <Trans
+                  i18nKey="featureFlags.removeBody"
+                  values={{ key: target.flag.key }}
+                  components={{
+                    flagKey: (
+                      <span className="rounded bg-muted px-1 py-0.5 font-mono font-medium text-foreground" />
+                    ),
+                  }}
+                />
               ),
               action: t("featureFlags.remove"),
             }
