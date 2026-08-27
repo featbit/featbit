@@ -133,14 +133,25 @@ const EndUsersPage = lazy(() =>
   }))
 )
 const ExperimentsPage = lazy(() =>
-  import("@/features/experimentation/experimentation-pages").then((module) => ({
-    default: module.ExperimentsPage,
-  }))
+  import("@/features/release-decision/release-decision-pages").then(
+    (module) => ({
+      default: module.ExperimentsPage,
+    })
+  )
 )
 const MetricsPage = lazy(() =>
-  import("@/features/experimentation/experimentation-pages").then((module) => ({
-    default: module.MetricsPage,
-  }))
+  import("@/features/release-decision/release-decision-pages").then(
+    (module) => ({
+      default: module.MetricsPage,
+    })
+  )
+)
+const LayersPage = lazy(() =>
+  import("@/features/release-decision/release-decision-pages").then(
+    (module) => ({
+      default: module.LayersPage,
+    })
+  )
 )
 const SegmentsPage = lazy(() =>
   import("@/features/segments/index/segments-page").then((module) => ({
@@ -384,6 +395,7 @@ export function AppRoutes() {
           <Route path="end-users" element={<EndUsersPage />} />
           <Route path="experiments" element={<ExperimentsPage />} />
           <Route path="metrics" element={<MetricsPage />} />
+          <Route path="layers" element={<LayersPage />} />
           <Route path="audit-logs" element={<AuditLogsPage />} />
           <Route path="change-requests" element={<ChangeRequestsPage />} />
           <Route path="feature-flags" element={<FlagsPage />} />

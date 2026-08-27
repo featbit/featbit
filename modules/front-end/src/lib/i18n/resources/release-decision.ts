@@ -1,4 +1,4 @@
-export const enExperimentation = {
+export const enReleaseDecision = {
   status: "In development",
   experiments: {
     title: "Experiments",
@@ -15,9 +15,17 @@ export const enExperimentation = {
     description:
       "We’re building a reusable metrics catalog for measuring experiment outcomes. It’ll be available here soon.",
   },
+  layers: {
+    title: "Layers",
+    subtitle:
+      "Coordinate mutually exclusive experiments across shared traffic.",
+    comingSoon: "Layers are coming soon",
+    description:
+      "We’re building a layer registry for assigning experiments to non-overlapping bucket ranges. It’ll be available here soon.",
+  },
 } as const
 
-export const zhExperimentation = {
+export const zhReleaseDecision = {
   status: "开发中",
   experiments: {
     title: "实验",
@@ -32,5 +40,12 @@ export const zhExperimentation = {
     comingSoon: "指标功能即将上线",
     description:
       "我们正在构建可复用的指标目录，用于衡量实验结果。该功能即将在此提供。",
+  },
+  layers: {
+    title: "互斥层",
+    subtitle: "协调共享流量中的互斥实验。",
+    comingSoon: "互斥层功能即将上线",
+    description:
+      "我们正在构建互斥层注册表，用于将实验分配到互不重叠的流量桶区间。该功能即将在此提供。",
   },
 } as const

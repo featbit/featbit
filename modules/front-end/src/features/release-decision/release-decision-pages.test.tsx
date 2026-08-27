@@ -1,9 +1,13 @@
 import { render, screen } from "@testing-library/react"
 import { afterEach, describe, expect, it } from "vitest"
 import { i18n } from "@/lib/i18n/i18n"
-import { ExperimentsPage, MetricsPage } from "./experimentation-pages"
+import {
+  ExperimentsPage,
+  LayersPage,
+  MetricsPage,
+} from "./release-decision-pages"
 
-describe("experimentation coming-soon pages", () => {
+describe("release decision coming-soon pages", () => {
   afterEach(async () => {
     await i18n.changeLanguage("en")
   })
@@ -45,6 +49,26 @@ describe("experimentation coming-soon pages", () => {
     expect(
       screen.getByText(
         "We’re building a reusable metrics catalog for measuring experiment outcomes. It’ll be available here soon."
+      )
+    ).toBeInTheDocument()
+  })
+
+  it("renders the Layers content", async () => {
+    await i18n.changeLanguage("en")
+    render(<LayersPage />)
+
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Layers" })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole("heading", {
+        level: 2,
+        name: "Layers are coming soon",
+      })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        "We’re building a layer registry for assigning experiments to non-overlapping bucket ranges. It’ll be available here soon."
       )
     ).toBeInTheDocument()
   })

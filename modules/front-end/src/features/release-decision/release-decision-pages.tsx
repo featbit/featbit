@@ -1,19 +1,25 @@
-import { BarChart3, FlaskConical, type LucideIcon } from "lucide-react"
+import {
+  BarChart3,
+  FlaskConical,
+  GalleryVerticalEnd,
+  type LucideIcon,
+} from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 
-type ExperimentationPageKind = "experiments" | "metrics"
+type ReleaseDecisionPageKind = "experiments" | "metrics" | "layers"
 
-const pageIcons: Record<ExperimentationPageKind, LucideIcon> = {
+const pageIcons: Record<ReleaseDecisionPageKind, LucideIcon> = {
   experiments: FlaskConical,
   metrics: BarChart3,
+  layers: GalleryVerticalEnd,
 }
 
-function ExperimentationComingSoonPage({
+function ReleaseDecisionComingSoonPage({
   kind,
 }: {
-  kind: ExperimentationPageKind
+  kind: ReleaseDecisionPageKind
 }) {
   const { t } = useTranslation()
   const Icon = pageIcons[kind]
@@ -23,10 +29,10 @@ function ExperimentationComingSoonPage({
     <div className="-m-5 min-h-[calc(100vh-3.5rem)] bg-background px-6 py-6 lg:px-8">
       <header className="mb-10 space-y-1">
         <h1 className="text-2xl font-semibold tracking-normal">
-          {t(`experimentation.${kind}.title`)}
+          {t(`releaseDecision.${kind}.title`)}
         </h1>
         <p className="text-sm text-muted-foreground">
-          {t(`experimentation.${kind}.subtitle`)}
+          {t(`releaseDecision.${kind}.subtitle`)}
         </p>
       </header>
 
@@ -44,17 +50,17 @@ function ExperimentationComingSoonPage({
               variant="secondary"
               className="mt-8 h-9 rounded-lg px-5 text-base font-normal"
             >
-              {t("experimentation.status")}
+              {t("releaseDecision.status")}
             </Badge>
 
             <h2
               id={headingId}
               className="mt-8 text-2xl font-semibold tracking-normal"
             >
-              {t(`experimentation.${kind}.comingSoon`)}
+              {t(`releaseDecision.${kind}.comingSoon`)}
             </h2>
             <p className="mt-5 max-w-2xl text-lg leading-8 text-muted-foreground">
-              {t(`experimentation.${kind}.description`)}
+              {t(`releaseDecision.${kind}.description`)}
             </p>
           </section>
         </CardContent>
@@ -64,9 +70,13 @@ function ExperimentationComingSoonPage({
 }
 
 export function ExperimentsPage() {
-  return <ExperimentationComingSoonPage kind="experiments" />
+  return <ReleaseDecisionComingSoonPage kind="experiments" />
 }
 
 export function MetricsPage() {
-  return <ExperimentationComingSoonPage kind="metrics" />
+  return <ReleaseDecisionComingSoonPage kind="metrics" />
+}
+
+export function LayersPage() {
+  return <ReleaseDecisionComingSoonPage kind="layers" />
 }
