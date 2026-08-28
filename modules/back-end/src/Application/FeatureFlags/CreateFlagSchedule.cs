@@ -60,10 +60,7 @@ public class CreateFlagScheduleHandler(
             throw new ConflictException(nameof(FeatureFlag), flag.Id);
         }
 
-        if (!request.Targeting.IsValid(flag.Variations))
-        {
-            throw new BusinessException(ErrorCodes.Invalid("targeting"));
-        }
+        FlagTargetingValidator.EnsureValid(request.Targeting, flag.Variations);
 
         var dataChange = flag.UpdateTargeting(request.Targeting, currentUser.Id);
 

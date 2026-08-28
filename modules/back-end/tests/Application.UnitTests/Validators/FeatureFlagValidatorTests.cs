@@ -1,6 +1,7 @@
 using Application.Bases;
 using Application.FeatureFlags;
 using Domain.FeatureFlags;
+using FluentValidation;
 
 namespace Application.UnitTests.Validators;
 
@@ -186,5 +187,41 @@ public class FeatureFlagValidatorTests
 
         Assert.Contains(result.Errors, e => e.ErrorCode == ErrorCodes.Required("featureFlagId"));
         Assert.Contains(result.Errors, e => e.ErrorCode == ErrorCodes.Required("variationId"));
+    }
+
+    [Fact]
+    public void FlagTargeting_AllServedVariationsBelongToFlag_NoErrors()
+    {
+        Variation[] flagVariations = [V("variation-1")];
+        var targeting = new FlagTargeting
+        {
+            Rules = [],
+            Fallthrough = new Fallthrough
+            {
+                Variations = [new RolloutVariation { Id = "variation-1", Rollout = [0, 1] }]
+            }
+        };
+
+        FlagTargetingValidator.EnsureValid(targeting, flagVariations);
+    }
+
+    [Fact]
+    public void FlagTargeting_InvalidServedVariation_TargetingInvalidError()
+    {
+        Variation[] flagVariations = [V("variation-1")];
+        var targeting = new FlagTargeting
+        {
+            Rules = [],
+            Fallthrough = new Fallthrough
+            {
+                Variations = [new RolloutVariation { Id = "unknown", Rollout = [0, 1] }]
+            }
+        };
+
+        var exception = Assert.Throws<ValidationException>(() =>
+            FlagTargetingValidator.EnsureValid(targeting, flagVariations)
+        );
+
+        Assert.Contains(exception.Errors, error => error.ErrorCode == ErrorCodes.Invalid("targeting"));
     }
 }
