@@ -48,7 +48,7 @@ export class TargetingComponent implements OnInit {
 
     const rules = handleRulesBeforeSave(this.segmentDetail.rules);
     if (rules.some(rule => rule.conditions.some(isConditionIncomplete))) {
-      this.msg.warning($localize`:@@common.incomplete-targeting-conditions:Please complete or remove all incomplete targeting conditions.`);
+      this.msg.warning($localize`:@@common.incomplete-targeting-conditions:Please complete or remove all incomplete targeting conditions`);
       return;
     }
 

@@ -410,15 +410,6 @@ export class TargetingComponent implements OnInit {
     }
 
     // rules
-    const rulesWithoutConditions = this.featureFlag.rules.filter(f => f.conditions.length === 0);
-    if (rulesWithoutConditions.length > 0) {
-      validationErrs.push({
-        kind: FlagValidationErrorKindEnum.rules,
-        ids: rulesWithoutConditions.map((rule) => rule.id),
-        message: $localize `:@@ff.components.details.targeting.rule-conditions-must-be-set:The conditions of each rule must be set`
-      });
-    }
-
     this.featureFlag.rules.filter(f => f.conditions.length > 0).forEach((rule: IRule) => {
       const hasIncompleteCondition = rule.conditions.some(isConditionIncomplete);
       if (hasIncompleteCondition) {

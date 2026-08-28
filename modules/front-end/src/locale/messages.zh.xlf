@@ -9026,19 +9026,11 @@
         </context-group>
         <target>请确认默认返回值的总百分比必须为100%</target>
       </trans-unit>
-      <trans-unit id="ff.components.details.targeting.rule-conditions-must-be-set" datatype="html">
-        <source>The conditions of each rule must be set</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">418</context>
-        </context-group>
-        <target>每条规则的所有条件都不能为空</target>
-      </trans-unit>
       <trans-unit id="common.incomplete-targeting-conditions" datatype="html">
         <source>Please complete or remove all incomplete targeting conditions</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">428</context>
+          <context context-type="linenumber">419</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.ts</context>
@@ -9050,7 +9042,7 @@
         <source>The sum of each rule&apos;s rollout must be 100%</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">440</context>
+          <context context-type="linenumber">431</context>
         </context-group>
         <target>每条规则的返回值分配必须有效</target>
       </trans-unit>
