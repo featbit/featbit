@@ -23,4 +23,19 @@ public class FlagTargeting
     /// Whether all targets should be included in experiments related to this feature flag. Defaults to `true`.
     /// </summary>
     public bool ExptIncludeAllTargets { get; set; } = true;
+
+    public bool IsValid(ICollection<Variation> flagVariations)
+    {
+        if (Rules == null || Fallthrough == null)
+        {
+            return false;
+        }
+
+        if (Rules.Any(rule => rule == null || !rule.IsValid(flagVariations)))
+        {
+            return false;
+        }
+
+        return ServedVariationsValidator.IsValid(Fallthrough.Variations, flagVariations);
+    }
 }

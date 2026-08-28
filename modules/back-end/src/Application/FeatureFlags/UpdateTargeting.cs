@@ -1,4 +1,5 @@
 using Application.AuditLogs;
+using Application.Bases;
 using Application.Bases.Exceptions;
 using Application.Users;
 using Domain.AuditLogs;
@@ -49,6 +50,15 @@ public class UpdateTargeting : UpdateTargetingPayload, IRequest<Guid>
     }
 }
 
+public class UpdateTargetingValidator : AbstractValidator<UpdateTargeting>
+{
+    public UpdateTargetingValidator()
+    {
+        RuleFor(x => x.Targeting)
+            .NotNull().WithErrorCode(ErrorCodes.Required("targeting"));
+    }
+}
+
 public class UpdateTargetingHandler(
     IFeatureFlagService flagService,
     IResourceService resourceService,
@@ -62,6 +72,11 @@ public class UpdateTargetingHandler(
         if (!flag.Revision.Equals(request.Revision))
         {
             throw new ConflictException(nameof(FeatureFlag), flag.Id);
+        }
+
+        if (!request.Targeting.IsValid(flag.Variations))
+        {
+            throw new BusinessException(ErrorCodes.Invalid("targeting"));
         }
 
         var dataChange = flag.UpdateTargeting(request.Targeting, currentUser.Id);

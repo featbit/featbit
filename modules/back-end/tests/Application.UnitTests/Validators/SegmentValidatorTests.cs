@@ -100,7 +100,7 @@ public class SegmentValidatorTests
         var rule = new MatchRule
         {
             Id = "r1",
-            Conditions = new[] { new Condition { Id = "c", Property = "email", Op = "is", Value = "x" } }
+            Conditions = new[] { new Condition { Id = "c", Property = "email", Op = OperatorTypes.Equal, Value = "x" } }
         };
         var request = new UpdateTargeting(Guid.NewGuid(), new UpdateTargetingPayload { Rules = new[] { rule } }, Array.Empty<Domain.Policies.PolicyStatement>());
 
@@ -123,4 +123,27 @@ public class SegmentValidatorTests
 
         Assert.Contains(result.Errors, e => e.ErrorCode == ErrorCodes.Invalid("rules"));
     }
+
+    [Theory]
+    [InlineData("", "Equal", "x")]
+    [InlineData("email", "", "x")]
+    [InlineData("email", "Unknown", "x")]
+    public void UpdateTargeting_InvalidCondition_RulesInvalidError(string property, string op, string value)
+    {
+        var rule = new MatchRule
+        {
+            Id = "r1",
+            Conditions = new[] { new Condition { Id = "c", Property = property, Op = op, Value = value } }
+        };
+        var request = new UpdateTargeting(
+            Guid.NewGuid(),
+            new UpdateTargetingPayload { Rules = new[] { rule } },
+            Array.Empty<Domain.Policies.PolicyStatement>()
+        );
+
+        var result = new UpdateTargetingValidator().Validate(request);
+
+        Assert.Contains(result.Errors, e => e.ErrorCode == ErrorCodes.Invalid("rules"));
+    }
+
 }

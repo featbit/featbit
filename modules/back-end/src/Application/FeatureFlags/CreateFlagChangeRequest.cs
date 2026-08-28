@@ -1,4 +1,5 @@
 ﻿using Application.Bases.Exceptions;
+using Application.Bases;
 using Application.Users;
 using Domain.FeatureFlags;
 using Domain.FlagChangeRequests;
@@ -23,37 +24,39 @@ public class CreateFlagChangeRequest : IRequest<bool>
     public ICollection<Guid> Reviewers { get; set; }
 }
 
-public class CreateFlagChangeRequestHandler : IRequestHandler<CreateFlagChangeRequest, bool>
+public class CreateFlagChangeRequestValidator : AbstractValidator<CreateFlagChangeRequest>
 {
-    private readonly IFeatureFlagService _flagService;
-    private readonly IFlagChangeRequestService _flagChangeRequestService;
-    private readonly IFlagDraftService _flagDraftService;
-    private readonly ICurrentUser _currentUser;
-
-    public CreateFlagChangeRequestHandler(
-        IFeatureFlagService flagService,
-        IFlagChangeRequestService flagChangeRequestService,
-        IFlagDraftService flagDraftService,
-        ICurrentUser currentUser)
+    public CreateFlagChangeRequestValidator()
     {
-        _flagService = flagService;
-        _flagChangeRequestService = flagChangeRequestService;
-        _flagDraftService = flagDraftService;
-        _currentUser = currentUser;
+        RuleFor(x => x.Targeting)
+            .NotNull().WithErrorCode(ErrorCodes.Required("targeting"));
     }
+}
 
+public class CreateFlagChangeRequestHandler(
+    IFeatureFlagService flagService,
+    IFlagChangeRequestService flagChangeRequestService,
+    IFlagDraftService flagDraftService,
+    ICurrentUser currentUser)
+    : IRequestHandler<CreateFlagChangeRequest, bool>
+{
     public async Task<bool> Handle(CreateFlagChangeRequest request, CancellationToken cancellationToken)
     {
-        var flag = await _flagService.GetAsync(request.EnvId, request.Key);
+        var flag = await flagService.GetAsync(request.EnvId, request.Key);
         if (!flag.Revision.Equals(request.Revision))
         {
             throw new ConflictException(nameof(FeatureFlag), flag.Id);
         }
 
+        if (!request.Targeting.IsValid(flag.Variations))
+        {
+            throw new BusinessException(ErrorCodes.Invalid("targeting"));
+        }
+
         // create flag draft
-        var dataChange = flag.UpdateTargeting(request.Targeting, _currentUser.Id);
-        var flagDraft = new FlagDraft(request.EnvId, flag.Id, dataChange, _currentUser.Id, comment: request.Reason);
-        await _flagDraftService.AddOneAsync(flagDraft);
+        var dataChange = flag.UpdateTargeting(request.Targeting, currentUser.Id);
+        var flagDraft = new FlagDraft(request.EnvId, flag.Id, dataChange, currentUser.Id, comment: request.Reason);
+        await flagDraftService.AddOneAsync(flagDraft);
 
         // create change request
         var flagChangeRequest = new FlagChangeRequest(
@@ -62,10 +65,10 @@ public class CreateFlagChangeRequestHandler : IRequestHandler<CreateFlagChangeRe
             flagDraft.Id,
             flag.Id,
             request.Reviewers,
-            _currentUser.Id,
+            currentUser.Id,
             reason: request.Reason
         );
-        await _flagChangeRequestService.AddOneAsync(flagChangeRequest);
+        await flagChangeRequestService.AddOneAsync(flagChangeRequest);
 
         return true;
     }
