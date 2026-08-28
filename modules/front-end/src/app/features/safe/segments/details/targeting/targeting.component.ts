@@ -9,7 +9,7 @@ import { ISegment, ISegmentFlagReference, Segment } from '../../types/segments';
 import { CdkDragDrop, moveItemInArray } from "@angular/cdk/drag-drop";
 import { EnvUserPropService } from "@services/env-user-prop.service";
 import { EnvUserSearchFilter } from "@features/safe/end-users/types/featureflag-user";
-import { ICondition, IRule } from "@shared/rules";
+import { handleRulesBeforeSave, ICondition, isConditionIncomplete, IRule } from "@shared/rules";
 import { RefTypeEnum } from "@core/components/audit-log/types";
 import { getCurrentProjectEnv } from "@utils/project-env";
 import { finalize } from 'rxjs';
@@ -45,6 +45,14 @@ export class TargetingComponent implements OnInit {
       this.msg.warning(this.permissionsService.genericDenyMessage);
       return;
     }
+
+    const rules = handleRulesBeforeSave(this.segmentDetail.rules);
+    if (rules.some(rule => rule.conditions.some(isConditionIncomplete))) {
+      this.msg.warning($localize`:@@common.incomplete-targeting-conditions:Please complete or remove all incomplete targeting conditions`);
+      return;
+    }
+
+    this.segmentDetail.rules = rules;
 
     this.reviewModalData = {
       previous: JSON.stringify(this.segmentDetail.originalData),

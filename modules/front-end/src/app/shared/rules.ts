@@ -31,7 +31,8 @@ export const RULE_OPS: IRuleOp[] = [
   },{
     label: $localize `:@@core.rule.operators.equals:equals`,
     value: 'Equal',
-    type: 'string'
+    type: 'string',
+    default: ''
   },{
     label: $localize `:@@core.rule.operators.notequal:not equal`,
     value: 'NotEqual',
@@ -133,11 +134,19 @@ export interface IRuleVariation {
 }
 
 export function handleRulesBeforeSave(rules: IRule[]) {
-  let filteredRules = rules.filter(rule => rule.conditions.length > 0);
+  const filteredRules = rules
+    .map(rule => ({
+      ...rule,
+      conditions: rule.conditions
+        .filter(condition => !isConditionEmpty(condition))
+        .map(condition => ({ ...condition }))
+    }))
+    .filter(rule => rule.conditions.length > 0);
 
   // handle rule value
   filteredRules.forEach((rule: IRule) => {
     rule.conditions.forEach((condition: ICondition) => {
+      condition.value = condition.value ?? '';
       if(condition.type === 'multi') {
         condition.value = JSON.stringify(condition.multipleValue);
       }
@@ -148,6 +157,53 @@ export function handleRulesBeforeSave(rules: IRule[]) {
   });
 
   return filteredRules;
+}
+
+export function isConditionEmpty(condition: ICondition): boolean {
+  return !condition.property?.trim() &&
+    !condition.op?.trim() &&
+    !condition.value?.toString().trim() &&
+    (!condition.multipleValue || condition.multipleValue.length === 0);
+}
+
+export function isConditionIncomplete(condition: ICondition): boolean {
+  if (isConditionEmpty(condition)) {
+    return false;
+  }
+
+  if (!condition.property?.trim()) {
+    return true;
+  }
+
+  if (['User is in segment', 'User is not in segment'].includes(condition.property)) {
+    return (tryParseStringArray(condition.value)?.length ?? 0) === 0;
+  }
+
+  const op = RULE_OPS.find(item => item.value === condition.op);
+  if (!op) {
+    return true;
+  }
+
+  if (op.type === 'boolean' || ['Equal', 'NotEqual'].includes(condition.op)) {
+    return false;
+  }
+
+  if (op.type === 'multi') {
+    return (condition.multipleValue?.length ?? tryParseStringArray(condition.value)?.length ?? 0) === 0;
+  }
+
+  return !condition.value?.toString().trim();
+}
+
+export function tryParseStringArray(value: string): string[] | null {
+  try {
+    const parsed = JSON.parse(value || '[]');
+    return Array.isArray(parsed) && parsed.every(item => typeof item === 'string')
+      ? parsed
+      : null;
+  } catch {
+    return null;
+  }
 }
 
 export function isNotPercentageRollout(variations: IRuleVariation[]) : boolean {
