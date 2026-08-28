@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
@@ -53,7 +54,9 @@ public static class OpValueValidator
         }
     }
 
-    public static bool IsNumber(string value) => double.TryParse(value, out var number) && !double.IsNaN(number);
+    public static bool IsNumber(string value) =>
+        double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var number) &&
+        double.IsFinite(number);
 
     public static bool IsRegex(string value)
     {

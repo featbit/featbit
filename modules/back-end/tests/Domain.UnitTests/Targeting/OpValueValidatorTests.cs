@@ -1,3 +1,4 @@
+using System.Globalization;
 using Domain.Targeting;
 
 namespace Domain.UnitTests.Targeting;
@@ -49,12 +50,32 @@ public class OpValueValidatorTests
     [Theory]
     [InlineData("10", true)]
     [InlineData("-10.5", true)]
+    [InlineData("1e3", true)]
     [InlineData("NaN", false)]
+    [InlineData("Infinity", false)]
+    [InlineData("-Infinity", false)]
+    [InlineData("1e9999", false)]
+    [InlineData("-1e9999", false)]
     [InlineData("not-a-number", false)]
     [InlineData("", false)]
     public void IsNumber_Value_ReturnsExpectedResult(string value, bool expected)
     {
         Assert.Equal(expected, OpValueValidator.IsNumber(value));
+    }
+
+    [Fact]
+    public void IsNumber_DotDecimalUnderNonDotCulture_ReturnsTrue()
+    {
+        var originalCulture = CultureInfo.CurrentCulture;
+        try
+        {
+            CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("fr-FR");
+            Assert.True(OpValueValidator.IsNumber("10.5"));
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = originalCulture;
+        }
     }
 
     [Theory]
