@@ -425,7 +425,7 @@ export class TargetingComponent implements OnInit {
         validationErrs.push({
           kind: FlagValidationErrorKindEnum.rules,
           ids: [rule.id],
-          message: $localize`:@@common.incomplete-targeting-conditions:Please complete or remove all incomplete targeting conditions.`
+          message: $localize`:@@common.incomplete-targeting-conditions:Please complete or remove all incomplete targeting conditions`
         });
       }
 
