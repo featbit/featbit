@@ -437,7 +437,7 @@ export class TargetingComponent implements OnInit {
         validationErrs.push({
           kind: FlagValidationErrorKindEnum.rules,
           ids: [rule.id],
-          message: $localize `:@@ff.components.details.targeting.rule-rollout-invalid:Each rule's rollout must be valid`
+          message: $localize `:@@ff.components.details.targeting.rule-rollout-must-be-100%:The sum of each rule's rollout must be 100%`
         });
       }
     })
