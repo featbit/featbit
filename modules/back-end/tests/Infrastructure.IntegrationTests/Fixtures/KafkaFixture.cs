@@ -7,9 +7,7 @@ namespace Infrastructure.IntegrationTests.Fixtures;
 /// </summary>
 public sealed class KafkaFixture : IAsyncLifetime
 {
-    private readonly KafkaContainer _container = new KafkaBuilder()
-        .WithImage("confluentinc/cp-kafka:7.6.1")
-        .Build();
+    private readonly KafkaContainer _container = new KafkaBuilder("confluentinc/cp-kafka:7.6.1").Build();
 
     public string BootstrapServers => _container.GetBootstrapAddress();
 

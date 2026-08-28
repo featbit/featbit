@@ -1,5 +1,3 @@
-using Infrastructure.IntegrationTests.Fixtures;
-
 namespace Infrastructure.IntegrationTests.Fixtures;
 
 [CollectionDefinition(MongoCollection.Name)]
