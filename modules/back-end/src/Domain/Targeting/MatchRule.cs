@@ -16,4 +16,14 @@ public class MatchRule
     /// The collection of conditions that make up the match rule.
     /// </summary>
     public ICollection<Condition> Conditions { get; set; } = Array.Empty<Condition>();
+
+    public bool IsValid()
+    {
+        if (Conditions == null)
+        {
+            return false;
+        }
+
+        return Conditions.All(condition => condition != null && condition.IsValid(isSegmentConditionAllowed: false));
+    }
 }
