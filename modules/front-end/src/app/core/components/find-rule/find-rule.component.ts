@@ -3,7 +3,7 @@ import { SegmentService } from '@services/segment.service';
 import { isSegmentCondition, trackByFunction, uuidv4 } from '@utils/index';
 import { ISegment } from "@features/safe/segments/types/segments";
 import { IRuleIdDispatchKey, IUserProp } from "@shared/types";
-import { ICondition, IRule, IRuleVariation, IVariation, RULE_OPS } from "@shared/rules";
+import { ICondition, IRule, IRuleVariation, IVariation, RULE_OPS, tryParseStringArray } from "@shared/rules";
 
 @Component({
   selector: 'find-rule',
@@ -52,14 +52,16 @@ export class FindRuleComponent {
     } else {
       const segmentIds = value.conditions.flatMap((item: ICondition) => {
         const isSegment = isSegmentCondition(item.property);
-        let opType: string = isSegment ? 'multi': RULE_OPS.filter(op => op.value === item.op)[0].type;
+        const opType: string = isSegment ? 'multi': RULE_OPS.find(op => op.value === item.op)?.type;
 
         let defaultValue: string;
         let multipleValue: string[];
 
         if(opType === 'multi') {
-          multipleValue = JSON.parse(item.value || '[]');
-          defaultValue = '';
+          const parsedValue = tryParseStringArray(item.value);
+          multipleValue = parsedValue || [];
+          // Keep the original value so malformed historical data is not silently overwritten.
+          defaultValue = parsedValue === null ? item.value : '';
         } else {
           defaultValue = item.value;
           multipleValue = [];

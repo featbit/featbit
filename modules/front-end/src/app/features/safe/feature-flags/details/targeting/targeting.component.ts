@@ -9,9 +9,9 @@ import { EnvUserPropService } from "@services/env-user-prop.service";
 import { USER_IS_IN_SEGMENT_USER_PROP, USER_IS_NOT_IN_SEGMENT_USER_PROP } from "@shared/constants";
 import { EnvUserSearchFilter } from "@features/safe/end-users/types/featureflag-user";
 import { FeatureFlag, IFeatureFlag } from "@features/safe/feature-flags/types/details";
-import { ICondition, IRule, IRuleVariation } from "@shared/rules";
+import { handleRulesBeforeSave, ICondition, isConditionIncomplete, IRule, IRuleVariation } from "@shared/rules";
 import { FeatureFlagService } from "@services/feature-flag.service";
-import { isSegmentCondition, isSingleOperator, uuidv4 } from "@utils/index";
+import { uuidv4 } from "@utils/index";
 import { RefTypeEnum } from "@core/components/audit-log/types";
 import {
   ChangeReviewModalData,
@@ -103,6 +103,8 @@ export class TargetingComponent implements OnInit {
       this.message.warning(this.permissionsService.genericDenyMessage);
       return;
     }
+
+    this.featureFlag.rules = handleRulesBeforeSave(this.featureFlag.rules);
 
     this.validationErrors = this.validateFeatureFlag();
 
@@ -418,18 +420,12 @@ export class TargetingComponent implements OnInit {
     }
 
     this.featureFlag.rules.filter(f => f.conditions.length > 0).forEach((rule: IRule) => {
-      const invalidCondition = rule.conditions.some((condition) =>
-        condition.property?.length === 0 || // property must be set
-        (isSegmentCondition(condition.property) && JSON.parse(condition.value).length === 0) || // segment condition's value must be set
-        (!isSegmentCondition(condition.property) && condition.op?.length === 0) || // non segment condition's operation must be set if not segment
-        (!isSingleOperator(condition.op) && (condition.type === 'multi' ? JSON.parse(condition.value).length === 0 : condition.value?.length === 0)) // value must be set for non-single operator
-      );
-
-      if (invalidCondition) {
+      const hasIncompleteCondition = rule.conditions.some(isConditionIncomplete);
+      if (hasIncompleteCondition) {
         validationErrs.push({
           kind: FlagValidationErrorKindEnum.rules,
           ids: [rule.id],
-          message: $localize `:@@ff.components.details.targeting.rule-conditions-must-be-set:The conditions of each rule must be set`
+          message: $localize`:@@common.incomplete-targeting-conditions:Please complete or remove all incomplete targeting conditions.`
         });
       }
 
@@ -441,7 +437,7 @@ export class TargetingComponent implements OnInit {
         validationErrs.push({
           kind: FlagValidationErrorKindEnum.rules,
           ids: [rule.id],
-          message: $localize `:@@ff.components.details.targeting.rule-rollout-must-be-100%:The sum of each rule's rollout must be 100%`
+          message: $localize `:@@ff.components.details.targeting.rule-rollout-invalid:Each rule's rollout must be valid`
         });
       }
     })
