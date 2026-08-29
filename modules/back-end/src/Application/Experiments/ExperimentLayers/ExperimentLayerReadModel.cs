@@ -53,16 +53,13 @@ public static class ExperimentLayerReadModel
         ExperimentRun run,
         ExperimentLayer layer)
     {
-        if (Guid.TryParse(run.LayerId, out var layerId))
+        if (run.LayerId.HasValue)
         {
-            return layerId == layer.Id;
+            return run.LayerId.Value == layer.Id;
         }
 
-        var legacyLayerKey = string.IsNullOrWhiteSpace(run.LayerKey)
-            ? run.LayerId
-            : run.LayerKey;
         return string.Equals(
-            legacyLayerKey?.Trim(),
+            run.LayerKey?.Trim(),
             layer.Key,
             StringComparison.Ordinal);
     }
@@ -84,7 +81,7 @@ public static class ExperimentLayerReadModel
             ExperimentId = run.ExperimentId,
             ExperimentName = Normalize(source.ExperimentName) ?? "Experiment",
             Key = Normalize(run.Slug) ?? run.Id.ToString("D"),
-            LayerId = Normalize(run.LayerId),
+            LayerId = run.LayerId,
             LayerKey = Normalize(run.LayerKey),
             AssignmentUnitSelector = Normalize(
                 run.AssignmentUnitSelector,

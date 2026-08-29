@@ -6,7 +6,7 @@ public class ExperimentRunAudienceUpdate
 
     public int? TrafficOffset { get; set; }
 
-    public string LayerId { get; set; }
+    public Guid? LayerId { get; set; }
 
     public string AudienceFilters { get; set; }
 
@@ -104,7 +104,7 @@ public class ExperimentRunUpdate
 
     public double? TrafficPercent { get; set; }
 
-    public string LayerId { get; set; }
+    public Guid? LayerId { get; set; }
 
     public string AudienceFilters { get; set; }
 

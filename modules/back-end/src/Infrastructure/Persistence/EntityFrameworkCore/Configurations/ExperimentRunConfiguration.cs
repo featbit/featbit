@@ -42,7 +42,7 @@ public class ExperimentRunConfiguration : IEntityTypeConfiguration<ExperimentRun
         builder.Property(x => x.PrimaryMetricAgg).HasColumnName("primary_metric_agg").HasMaxLength(64);
         builder.Property(x => x.PrimaryMetricType).HasColumnName("primary_metric_type").HasMaxLength(64);
         builder.Property(x => x.TrafficPercent).HasColumnName("traffic_percent");
-        builder.Property(x => x.LayerId).HasColumnName("layer_id").HasMaxLength(128);
+        builder.Property(x => x.LayerId).HasColumnName("layer_id");
         builder.Property(x => x.AudienceFilters).HasColumnName("audience_filters");
         builder.Property(x => x.TrafficOffset).HasColumnName("traffic_offset");
         builder.Property(x => x.LayerKey).HasColumnName("layer_key").HasMaxLength(128);

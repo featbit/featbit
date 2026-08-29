@@ -62,12 +62,12 @@ public class ExperimentLayerReadModelTests
     }
 
     [Fact]
-    public void IsRunForLayer_SupportsLegacyLayerKeyStoredInLayerId()
+    public void IsRunForLayer_SupportsLayerKeyWhenLayerIdIsMissing()
     {
         var layer = NewLayer();
         var run = NewRun("draft", 0, 50);
-        run.Run.LayerKey = null;
-        run.Run.LayerId = layer.Key;
+        run.Run.LayerId = null;
+        run.Run.LayerKey = layer.Key;
 
         Assert.True(ExperimentLayerReadModel.IsRunForLayer(run.Run, layer));
     }
@@ -77,7 +77,7 @@ public class ExperimentLayerReadModelTests
     {
         var layer = NewLayer();
         var run = NewRun("draft", 0, 50);
-        run.Run.LayerId = Guid.NewGuid().ToString("D");
+        run.Run.LayerId = Guid.NewGuid();
         run.Run.LayerKey = layer.Key;
 
         Assert.False(ExperimentLayerReadModel.IsRunForLayer(run.Run, layer));

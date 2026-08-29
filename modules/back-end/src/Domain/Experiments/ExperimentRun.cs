@@ -66,7 +66,7 @@ public class ExperimentRun : AuditedEntity
 
     public double? TrafficPercent { get; set; } = 100;
 
-    public string LayerId { get; set; }
+    public Guid? LayerId { get; set; }
 
     public string AudienceFilters { get; set; }
 

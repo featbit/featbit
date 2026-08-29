@@ -24,7 +24,7 @@ public class GetExperimentLayersHandlerTests
                 Id = Guid.NewGuid(),
                 ExperimentId = Guid.NewGuid(),
                 Slug = "pricing-v2",
-                LayerId = layer.Id.ToString("D"),
+                LayerId = layer.Id,
                 AssignmentUnitSelector = layer.AssignmentUnitSelector,
                 SliceStart = 10,
                 SliceEnd = 40,

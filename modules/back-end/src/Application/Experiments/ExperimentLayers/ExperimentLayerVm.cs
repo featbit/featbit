@@ -35,7 +35,7 @@ public class ExperimentLayerRunVm
 
     public string Key { get; set; }
 
-    public string LayerId { get; set; }
+    public Guid? LayerId { get; set; }
 
     public string LayerKey { get; set; }
 

@@ -151,7 +151,7 @@ public class ExperimentRunVm
 
     public double? TrafficPercent { get; set; }
 
-    public string LayerId { get; set; }
+    public Guid? LayerId { get; set; }
 
     public string AudienceFilters { get; set; }
 

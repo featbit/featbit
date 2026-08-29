@@ -239,7 +239,7 @@ public class ExperimentService(
             TrafficPercent = previous?.TrafficPercent ?? 100,
             TrafficOffset = previous?.TrafficOffset ?? 0,
             LayerId = previous?.LayerId,
-            LayerKey = previous?.LayerKey ?? previous?.LayerId,
+            LayerKey = previous?.LayerKey,
             AllocationKeySelector = previous?.AllocationKeySelector ?? "user.keyId",
             SliceStart = previous?.SliceStart ?? previous?.TrafficOffset ?? 0,
             SliceEnd = previous?.SliceEnd ?? Math.Min(100, (previous?.TrafficOffset ?? 0) + (previous?.TrafficPercent ?? 100)),
@@ -334,8 +334,8 @@ public class ExperimentService(
 
         run.TrafficPercent = Math.Clamp(update.TrafficPercent ?? sliceEnd - sliceStart, 1, 100);
         run.TrafficOffset = (int)Math.Clamp(update.TrafficOffset ?? Math.Floor(sliceStart), 0, 99);
-        run.LayerId = Normalize(update.LayerId);
-        run.LayerKey = Normalize(update.LayerKey, Normalize(update.LayerId, run.LayerKey));
+        run.LayerId = update.LayerId;
+        run.LayerKey = Normalize(update.LayerKey, run.LayerKey);
         run.AllocationKeySelector = Normalize(update.AllocationKeySelector, run.AllocationKeySelector) ?? "user.keyId";
         run.SliceStart = sliceStart;
         run.SliceEnd = sliceEnd;
@@ -430,7 +430,7 @@ public class ExperimentService(
             MetricAgg = metricAgg,
             TrafficPercent = run.TrafficPercent,
             TrafficOffset = run.TrafficOffset,
-            LayerId = run.LayerId,
+            LayerId = run.LayerId?.ToString("D"),
             ControlVariant = run.ControlVariant,
             TreatmentVariants = run.TreatmentVariant,
             LayerKey = run.LayerKey,
@@ -473,7 +473,7 @@ public class ExperimentService(
                 MetricAgg = guardrail.MetricAgg,
                 TrafficPercent = run.TrafficPercent,
                 TrafficOffset = run.TrafficOffset,
-                LayerId = run.LayerId,
+                LayerId = run.LayerId?.ToString("D"),
                 ControlVariant = run.ControlVariant,
                 TreatmentVariants = run.TreatmentVariant,
                 LayerKey = run.LayerKey,
@@ -538,7 +538,7 @@ public class ExperimentService(
             return [];
         }
 
-        var layerIds = layers.Select(x => x.Id.ToString("D")).ToArray();
+        var layerIds = layers.Select(x => x.Id).ToArray();
         var layerKeys = layers.Select(x => x.Key).ToArray();
 
         return await (
@@ -546,9 +546,8 @@ public class ExperimentService(
             join experiment in dbContext.Set<Experiment>().AsNoTracking()
                 on run.ExperimentId equals experiment.Id
             where experiment.FeatBitEnvId == envId &&
-                  (layerIds.Contains(run.LayerId) ||
-                   layerKeys.Contains(run.LayerKey) ||
-                   layerKeys.Contains(run.LayerId))
+                  ((run.LayerId.HasValue && layerIds.Contains(run.LayerId.Value)) ||
+                   layerKeys.Contains(run.LayerKey))
             select new ExperimentRunForLayer
             {
                 Run = run,
@@ -1087,7 +1086,7 @@ public class ExperimentService(
         run.NextHypothesis = Normalize(update.NextHypothesis, run.NextHypothesis);
         run.PrimaryMetricAgg = NormalizeMetricAgg(update.PrimaryMetricAgg ?? run.PrimaryMetricAgg);
         run.PrimaryMetricType = NormalizeMetricType(update.PrimaryMetricType ?? run.PrimaryMetricType);
-        run.LayerId = Normalize(update.LayerId, run.LayerId);
+        run.LayerId = update.LayerId ?? run.LayerId;
         run.LayerKey = Normalize(update.LayerKey, run.LayerKey);
         run.AllocationKeySelector = Normalize(update.AllocationKeySelector, run.AllocationKeySelector);
         run.AllocationPlan = Normalize(update.AllocationPlan, run.AllocationPlan);
@@ -1180,9 +1179,9 @@ public class ExperimentService(
 
     private async Task NormalizeAndValidateLayerAssignmentAsync(Guid envId, ExperimentRun run)
     {
-        var layerToken = Normalize(run.LayerId, run.LayerKey);
-        var layerKey = Normalize(run.LayerKey, run.LayerId);
-        if (string.IsNullOrWhiteSpace(layerToken) && string.IsNullOrWhiteSpace(layerKey))
+        var layerId = run.LayerId;
+        var layerKey = Normalize(run.LayerKey);
+        if (!layerId.HasValue && string.IsNullOrWhiteSpace(layerKey))
         {
             run.AssignmentUnitSelector = Normalize(run.AssignmentUnitSelector, run.AllocationKeySelector) ?? "user.keyId";
             run.AllocationKeySelector = Normalize(run.AllocationKeySelector, run.AssignmentUnitSelector) ?? "user.keyId";
@@ -1190,10 +1189,10 @@ public class ExperimentService(
             return;
         }
 
-        var layer = await FindActiveLayerAsync(envId, layerToken, layerKey);
+        var layer = await FindActiveLayerAsync(envId, layerId, layerKey);
         if (layer != null)
         {
-            run.LayerId = layer.Id.ToString("D");
+            run.LayerId = layer.Id;
             run.LayerKey = layer.Key;
             run.AssignmentUnitSelector = Normalize(layer.AssignmentUnitSelector) ?? "user.keyId";
             run.AllocationKeySelector = run.AssignmentUnitSelector;
@@ -1241,12 +1240,12 @@ public class ExperimentService(
         }
     }
 
-    private async Task<ExperimentLayer?> FindActiveLayerAsync(Guid envId, string? layerToken, string? layerKey)
+    private async Task<ExperimentLayer?> FindActiveLayerAsync(Guid envId, Guid? layerId, string? layerKey)
     {
-        if (Guid.TryParse(layerToken, out var layerId))
+        if (layerId.HasValue)
         {
             var byId = await dbContext.Set<ExperimentLayer>()
-                .FirstOrDefaultAsync(x => x.Id == layerId && x.FeatBitEnvId == envId && x.Status == "active");
+                .FirstOrDefaultAsync(x => x.Id == layerId.Value && x.FeatBitEnvId == envId && x.Status == "active");
             if (byId != null)
             {
                 return byId;

@@ -463,7 +463,7 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
                 primary_metric_agg varchar(64) null,
                 primary_metric_type varchar(64) null,
                 traffic_percent double precision null,
-                layer_id varchar(128) null,
+                layer_id uuid null,
                 audience_filters text null,
                 traffic_offset integer null,
                 layer_key varchar(128) null,
