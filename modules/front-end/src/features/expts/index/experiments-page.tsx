@@ -173,13 +173,10 @@ export function ExperimentsPage() {
               onChange={(event) => setName(event.target.value)}
             />
           </div>
-          <div className="relative w-60">
-            <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm font-medium text-foreground">
-              {t("releaseDecision.experiments.flagPrefix")}
-            </span>
+          <div className="w-60">
             <Input
               value={flagKey}
-              className="pl-12 font-mono"
+              className="font-mono"
               placeholder={t("releaseDecision.experiments.flagFilter")}
               onChange={(event) => setFlagKey(event.target.value)}
             />
