@@ -93,13 +93,20 @@ describe("FlagDetailsHeader", () => {
       "Variations",
       "Settings",
       "Triggers",
+      "Release Health",
       "Insights",
       "History",
     ])
-    expect(within(tabs).getAllByRole("link")).toHaveLength(6)
+    expect(within(tabs).getAllByRole("link")).toHaveLength(7)
     expect(
       within(tabs).getByRole("link", { name: "Triggers" })
     ).toHaveAttribute("href", "/en-US/feature-flags/checkout-redesign/triggers")
+    expect(
+      within(tabs).getByRole("link", { name: "Release Health" })
+    ).toHaveAttribute(
+      "href",
+      "/en-US/feature-flags/checkout-redesign/release-health"
+    )
     expect(
       within(tabs).getByRole("link", { name: "Insights" })
     ).toHaveAttribute("href", "/en-US/feature-flags/checkout-redesign/insights")

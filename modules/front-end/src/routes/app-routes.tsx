@@ -188,6 +188,41 @@ const FlagDetailsPage = lazy(() =>
     default: module.FlagDetailsPage,
   }))
 )
+const ReleaseHealthOverviewPage = lazy(() =>
+  import("@/features/release-health/overview/release-health-overview-page").then(
+    (module) => ({
+      default: module.ReleaseHealthOverviewPage,
+    })
+  )
+)
+const ReleaseMetricsPage = lazy(() =>
+  import("@/features/release-health/metrics/release-metrics-page").then(
+    (module) => ({
+      default: module.ReleaseMetricsPage,
+    })
+  )
+)
+const ReleaseMetricDetailsPage = lazy(() =>
+  import("@/features/release-health/metrics/release-metric-details-page").then(
+    (module) => ({
+      default: module.ReleaseMetricDetailsPage,
+    })
+  )
+)
+const HealthSessionsPage = lazy(() =>
+  import("@/features/release-health/sessions/health-sessions-page").then(
+    (module) => ({
+      default: module.HealthSessionsPage,
+    })
+  )
+)
+const HealthSessionDetailsPage = lazy(() =>
+  import("@/features/release-health/sessions/health-session-details-page").then(
+    (module) => ({
+      default: module.HealthSessionDetailsPage,
+    })
+  )
+)
 const GetStartedPage = lazy(() =>
   import("@/features/get-started/get-started-page").then((module) => ({
     default: module.GetStartedPage,
@@ -403,6 +438,26 @@ export function AppRoutes() {
           <Route
             path="feature-flags/:flagKey/:tab"
             element={<FlagDetailsPage />}
+          />
+          <Route
+            path="release-health"
+            element={<ReleaseHealthOverviewPage />}
+          />
+          <Route
+            path="release-health/metrics"
+            element={<ReleaseMetricsPage />}
+          />
+          <Route
+            path="release-health/metrics/:metricKey"
+            element={<ReleaseMetricDetailsPage />}
+          />
+          <Route
+            path="release-health/sessions"
+            element={<HealthSessionsPage />}
+          />
+          <Route
+            path="release-health/sessions/:sessionId"
+            element={<HealthSessionDetailsPage />}
           />
           <Route path="segments" element={<SegmentsPage />} />
           <Route path="segments/:segmentId" element={<SegmentDetailsPage />} />

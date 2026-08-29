@@ -163,6 +163,7 @@ type Props<TChange extends ChangeReviewItem> = {
   }>
   saveOptionsLabel?: string
   saveImmediatelyDescription?: string
+  supplementalContent?: ReactNode
   onOpenChange: (open: boolean) => void
   onSave: (comment: string) => void
 }
@@ -181,6 +182,7 @@ export function ChangeReviewDialog<TChange extends ChangeReviewItem>({
   saveOptions,
   saveOptionsLabel,
   saveImmediatelyDescription,
+  supplementalContent,
   onOpenChange,
   onSave,
 }: Props<TChange>) {
@@ -200,6 +202,7 @@ export function ChangeReviewDialog<TChange extends ChangeReviewItem>({
           saveOptions={saveOptions}
           saveOptionsLabel={saveOptionsLabel}
           saveImmediatelyDescription={saveImmediatelyDescription}
+          supplementalContent={supplementalContent}
           onClose={() => onOpenChange(false)}
           onSave={onSave}
         />
@@ -221,6 +224,7 @@ function ReviewDialogContent<TChange extends ChangeReviewItem>({
   saveOptions,
   saveOptionsLabel,
   saveImmediatelyDescription,
+  supplementalContent,
   onClose,
   onSave,
 }: Omit<Props<TChange>, "open" | "onOpenChange"> & { onClose: () => void }) {
@@ -241,6 +245,7 @@ function ReviewDialogContent<TChange extends ChangeReviewItem>({
             </span>
           </div>
           <ChangeLedger changes={changes} layout={layout} {...ledger} />
+          {supplementalContent}
           <div className="space-y-2">
             <Label htmlFor={`${idPrefix}-change-comment`}>
               {copy.comment}

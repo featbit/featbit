@@ -23,6 +23,7 @@ export const enLayout = {
     items: {
       getStarted: "Get Started",
       featureFlags: "Feature Flags",
+      releaseHealth: "Release Health",
       segments: "Segments",
       endUsers: "End Users",
       experiments: "Experiments",
@@ -119,6 +120,7 @@ export const zhLayout = {
     items: {
       getStarted: "开始",
       featureFlags: "功能开关",
+      releaseHealth: "发布健康",
       segments: "用户组",
       endUsers: "目标用户",
       experiments: "实验",

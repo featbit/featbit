@@ -1,5 +1,5 @@
 import { Loader2, MousePointerClick } from "lucide-react"
-import { useState } from "react"
+import { useState, type ReactNode } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import {
   AlertDialog,
@@ -28,12 +28,14 @@ export function FlagConfirmDialog({
   target,
   saving,
   requireComment,
+  supplementalContent,
   onOpenChange,
   onConfirm,
 }: {
   target: FlagConfirmation
   saving: boolean
   requireComment: boolean
+  supplementalContent?: ReactNode
   onOpenChange: (open: boolean) => void
   onConfirm: (comment: string) => void
 }) {
@@ -142,6 +144,7 @@ export function FlagConfirmDialog({
             />
           </div>
         ) : null}
+        {target.kind === "toggle" ? supplementalContent : null}
         {target.kind === "archive" ? (
           <div className="space-y-2">
             <p

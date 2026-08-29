@@ -17,6 +17,7 @@ const tabs = [
   "variations",
   "settings",
   "triggers",
+  "release-health",
   "insights",
   "history",
 ] as const

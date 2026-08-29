@@ -9,6 +9,7 @@ import {
   enReleaseDecision,
   zhReleaseDecision,
 } from "./resources/release-decision"
+import { enReleaseHealth, zhReleaseHealth } from "./resources/release-health"
 import { enFeatureFlags, zhFeatureFlags } from "./resources/feature-flags"
 import { enGetStarted, zhGetStarted } from "./resources/get-started"
 import { enLayout, zhLayout } from "./resources/layout"
@@ -45,6 +46,7 @@ i18n.use(initReactI18next).init({
         changeRequests: enChangeRequests,
         endUsers: enEndUsers,
         releaseDecision: enReleaseDecision,
+        releaseHealth: enReleaseHealth,
         featureFlags: enFeatureFlags,
         getStarted: enGetStarted,
         segments: enSegments,
@@ -68,6 +70,7 @@ i18n.use(initReactI18next).init({
         changeRequests: zhChangeRequests,
         endUsers: zhEndUsers,
         releaseDecision: zhReleaseDecision,
+        releaseHealth: zhReleaseHealth,
         featureFlags: zhFeatureFlags,
         getStarted: zhGetStarted,
         segments: zhSegments,

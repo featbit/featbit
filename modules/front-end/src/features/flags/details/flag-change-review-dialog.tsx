@@ -1,12 +1,14 @@
 import { Clock3, UserRoundCheck } from "lucide-react"
 import { Trans, useTranslation } from "react-i18next"
 import { ChangeReviewDialog } from "@/features/change-review/change-review-dialog"
+import { MonitorThisChangeSection } from "@/features/release-health/components/monitor-this-change-section"
 import type { FlagTargetingReviewChange } from "./targeting/targeting-utils"
 import { useFlagChangeLedgerAdapter } from "./targeting/use-flag-change-ledger-adapter"
 
 export function FlagChangeReviewDialog({
   open,
   flagName,
+  flagKey,
   changes,
   segmentNames,
   requireComment,
@@ -19,6 +21,7 @@ export function FlagChangeReviewDialog({
 }: {
   open: boolean
   flagName: string
+  flagKey?: string
   changes: FlagTargetingReviewChange[]
   segmentNames?: ReadonlyMap<string, string>
   requireComment: boolean
@@ -66,6 +69,9 @@ export function FlagChangeReviewDialog({
         saving: t("featureFlags.detailsPage.review.saving"),
       }}
       ledger={ledger}
+      supplementalContent={
+        <MonitorThisChangeSection flagKey={flagKey ?? flagName} />
+      }
       saveOptions={[
         {
           label: t("featureFlags.detailsPage.review.schedule"),

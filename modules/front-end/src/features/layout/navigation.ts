@@ -6,6 +6,7 @@ import {
   FlaskConical,
   GalleryVerticalEnd,
   GitPullRequest,
+  HeartPulse,
   KeyRound,
   Layers3,
   Logs,
@@ -37,6 +38,11 @@ export const navigationGroups: NavGroup[] = [
         labelKey: "layout.nav.items.featureFlags",
         href: "/feature-flags",
         icon: Flag,
+      },
+      {
+        labelKey: "layout.nav.items.releaseHealth",
+        href: "/release-health",
+        icon: HeartPulse,
       },
       {
         labelKey: "layout.nav.items.segments",

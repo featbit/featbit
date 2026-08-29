@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { getStoredUserProfile } from "@/features/auth/auth-api"
+import { MonitorThisChangeSection } from "@/features/release-health/components/monitor-this-change-section"
+import { FlagReleaseHealthTab } from "@/features/release-health/flag/flag-release-health-tab"
 import { currentUserPoliciesQueryOptions } from "@/features/iam/current-user-policy-query"
 import {
   createChangeRequest,
@@ -102,6 +104,7 @@ export function FlagDetailsPage() {
   const activeTab =
     params.tab === "history" ||
     params.tab === "insights" ||
+    params.tab === "release-health" ||
     params.tab === "settings" ||
     params.tab === "variations" ||
     params.tab === "triggers"
@@ -580,6 +583,8 @@ export function FlagDetailsPage() {
         />
         {activeTab === "history" ? (
           <HistoryTab envId={envId} flagId={saved.id} lang={lang} />
+        ) : activeTab === "release-health" ? (
+          <FlagReleaseHealthTab envId={envId} flag={saved} lang={lang} />
         ) : activeTab === "insights" ? (
           <InsightsTab envId={envId} flag={saved} />
         ) : activeTab === "settings" ? (
@@ -704,6 +709,7 @@ export function FlagDetailsPage() {
         <FlagChangeReviewDialog
           open={reviewOpen}
           flagName={saved.name}
+          flagKey={saved.key}
           changes={changes}
           segmentNames={reviewSegmentNames}
           requireComment={settingsQuery.data?.requireChangeComment ?? false}
@@ -721,6 +727,7 @@ export function FlagDetailsPage() {
         <VariationsReviewDialog
           open={variationsReviewOpen}
           flagName={saved.name}
+          flagKey={saved.key}
           changes={variationChanges}
           requireComment={settingsQuery.data?.requireChangeComment ?? false}
           saving={variationsMutation.isPending}
@@ -779,6 +786,7 @@ export function FlagDetailsPage() {
           key={submission ? "submission-open" : "submission-closed"}
           mode={submission?.mode ?? null}
           flagName={saved.name}
+          flagKey={saved.key}
           changes={changes}
           segmentNames={reviewSegmentNames}
           initialReason={submission?.initialReason}
@@ -828,6 +836,7 @@ export function FlagDetailsPage() {
           target={confirmation}
           saving={toggleMutation.isPending}
           requireComment={settingsQuery.data?.requireChangeComment ?? false}
+          supplementalContent={<MonitorThisChangeSection flagKey={saved.key} />}
           onOpenChange={(open) => !open && setConfirmation(null)}
           onConfirm={(comment) =>
             confirmation?.nextEnabled !== undefined &&
