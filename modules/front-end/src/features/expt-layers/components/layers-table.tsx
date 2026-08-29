@@ -60,7 +60,7 @@ function TrafficAllocation({
         <span>50</span>
         <span>100</span>
       </div>
-      <div className="relative flex h-14 overflow-hidden rounded-md border bg-muted/50">
+      <div className="relative flex h-10 overflow-hidden rounded-md border bg-muted/50">
         {!summary ? (
           <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
             {t("releaseDecision.layers.allocationUnavailable")}
@@ -80,7 +80,7 @@ function TrafficAllocation({
                   }
                 >
                   {width >= 18 ? (
-                    <span className="block px-2 py-2 leading-5">
+                    <span className="block px-2 py-1 leading-4">
                       <span className="block truncate font-medium">
                         {run.experimentName}
                       </span>
@@ -315,7 +315,7 @@ export function LayersTable({
           Array.from({ length: 4 }).map((_, rowIndex) => (
             <TableRow key={rowIndex}>
               {Array.from({ length: 6 }).map((__, columnIndex) => (
-                <TableCell key={columnIndex} className="px-5 py-5">
+                <TableCell key={columnIndex} className="px-5 py-3">
                   <Skeleton className="h-12 w-full" />
                 </TableCell>
               ))}
@@ -369,7 +369,7 @@ export function LayersTable({
             const pending = mutatingId === layer.id
             return (
               <TableRow key={layer.id}>
-                <TableCell className="px-5 py-5 align-middle">
+                <TableCell className="px-5 py-3 align-middle">
                   <div className="min-w-0 space-y-2">
                     <p
                       className="truncate font-semibold text-foreground"
@@ -405,24 +405,24 @@ export function LayersTable({
                     ) : null}
                   </div>
                 </TableCell>
-                <TableCell className="px-5 py-5 align-middle">
+                <TableCell className="px-5 py-3 align-middle">
                   <code className="rounded border bg-muted/60 px-2 py-1 text-xs text-muted-foreground">
                     {layer.assignmentUnitSelector || "user.keyId"}
                   </code>
                 </TableCell>
-                <TableCell className="px-5 py-5 align-middle">
+                <TableCell className="px-5 py-3 align-middle">
                   <TrafficAllocation
                     runs={runs}
                     summary={layer.allocationSummary}
                   />
                 </TableCell>
-                <TableCell className="px-5 py-5 align-middle">
+                <TableCell className="px-5 py-3 align-middle">
                   <AllocationStatus summary={layer.allocationSummary} />
                 </TableCell>
-                <TableCell className="px-5 py-5 align-middle">
+                <TableCell className="px-5 py-3 align-middle">
                   <ExperimentRuns runs={runs} lang={lang} />
                 </TableCell>
-                <TableCell className="px-5 py-5 align-middle">
+                <TableCell className="px-5 py-3 align-middle">
                   <div className="flex items-center gap-1 whitespace-nowrap">
                     <Button
                       type="button"
