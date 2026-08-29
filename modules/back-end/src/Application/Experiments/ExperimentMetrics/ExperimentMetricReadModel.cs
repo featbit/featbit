@@ -59,7 +59,7 @@ public static class ExperimentMetricReadModel
         return new ExperimentMetricRunVm
         {
             Id = run.Id,
-            Key = Normalize(run.Slug, run.RunId) ?? run.Id.ToString("D"),
+            Key = Normalize(run.Slug) ?? run.Id.ToString("D"),
             Status = Normalize(run.Status) ?? "draft",
             Role = role
         };

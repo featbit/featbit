@@ -39,7 +39,6 @@ public class ExperimentRunConfiguration : IEntityTypeConfiguration<ExperimentRun
         builder.Property(x => x.ConfirmedOrRefuted).HasColumnName("confirmed_or_refuted");
         builder.Property(x => x.WhyItHappened).HasColumnName("why_it_happened");
         builder.Property(x => x.NextHypothesis).HasColumnName("next_hypothesis");
-        builder.Property(x => x.RunId).HasColumnName("run_id").HasMaxLength(128);
         builder.Property(x => x.PrimaryMetricAgg).HasColumnName("primary_metric_agg").HasMaxLength(64);
         builder.Property(x => x.PrimaryMetricType).HasColumnName("primary_metric_type").HasMaxLength(64);
         builder.Property(x => x.TrafficPercent).HasColumnName("traffic_percent");

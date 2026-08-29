@@ -786,7 +786,6 @@ public class ExperimentService(
             ConfirmedOrRefuted = run.ConfirmedOrRefuted,
             WhyItHappened = run.WhyItHappened,
             NextHypothesis = run.NextHypothesis,
-            RunId = run.RunId,
             PrimaryMetricAgg = run.PrimaryMetricAgg,
             PrimaryMetricType = run.PrimaryMetricType,
             TrafficPercent = run.TrafficPercent,
@@ -1057,7 +1056,6 @@ public class ExperimentService(
         run.ConfirmedOrRefuted = Normalize(update.ConfirmedOrRefuted, run.ConfirmedOrRefuted);
         run.WhyItHappened = Normalize(update.WhyItHappened, run.WhyItHappened);
         run.NextHypothesis = Normalize(update.NextHypothesis, run.NextHypothesis);
-        run.RunId = Normalize(update.RunId, run.RunId);
         run.PrimaryMetricAgg = NormalizeMetricAgg(update.PrimaryMetricAgg ?? run.PrimaryMetricAgg);
         run.PrimaryMetricType = NormalizeMetricType(update.PrimaryMetricType ?? run.PrimaryMetricType);
         run.LayerId = Normalize(update.LayerId, run.LayerId);

@@ -83,7 +83,7 @@ public static class ExperimentLayerReadModel
             Id = run.Id,
             ExperimentId = run.ExperimentId,
             ExperimentName = Normalize(source.ExperimentName) ?? "Experiment",
-            Key = Normalize(run.Slug, run.RunId) ?? run.Id.ToString("D"),
+            Key = Normalize(run.Slug) ?? run.Id.ToString("D"),
             LayerId = Normalize(run.LayerId),
             LayerKey = Normalize(run.LayerKey),
             AssignmentUnitSelector = Normalize(

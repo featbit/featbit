@@ -98,8 +98,6 @@ public class ExperimentRunUpdate
 
     public string NextHypothesis { get; set; }
 
-    public string RunId { get; set; }
-
     public string PrimaryMetricAgg { get; set; }
 
     public string PrimaryMetricType { get; set; }

@@ -460,7 +460,6 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
                 confirmed_or_refuted text null,
                 why_it_happened text null,
                 next_hypothesis text null,
-                run_id varchar(128) null,
                 primary_metric_agg varchar(64) null,
                 primary_metric_type varchar(64) null,
                 traffic_percent double precision null,

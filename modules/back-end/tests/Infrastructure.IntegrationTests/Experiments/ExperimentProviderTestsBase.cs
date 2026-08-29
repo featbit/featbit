@@ -665,6 +665,22 @@ public abstract class WritableExperimentProviderTestsBase(
     }
 
     [DockerFact]
+    public async Task CreateExperimentRun_PersistsCanonicalIdAndSlug()
+    {
+        var (experimentService, _) = CreateExperimentServices();
+        var experiment = NewExperiment("Create run without legacy run id");
+        await experimentService.CreateAsync(experiment);
+
+        var detail = await experimentService.CreateRunAsync(
+            ExperimentProviderParityFixture.EnvId,
+            experiment.Id);
+
+        var run = Assert.Single(detail.ExperimentRuns);
+        Assert.NotEqual(Guid.Empty, run.Id);
+        Assert.Equal("run-1", run.Slug);
+    }
+
+    [DockerFact]
     public async Task CreateExperimentMetric_NumericType_PersistsNumericValue()
     {
         var service = CreateExperimentMetricService();
