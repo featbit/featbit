@@ -20,6 +20,7 @@ import {
   resolveLang,
 } from "@/features/layout/layout-context"
 import { ExperimentSheet } from "./components/experiment-sheet"
+import { FlagKeyFilter } from "./components/flag-key-filter"
 import { ExperimentsPagination } from "./components/experiments-pagination"
 import { ExperimentsTable } from "./components/experiments-table"
 import type { ExperimentStage } from "./experiment-types"
@@ -60,12 +61,9 @@ export function ExperimentsPage() {
   const projectEnv = getCurrentProjectEnv()
   const envId = projectEnv?.envId ?? ""
   const [name, setName] = useState(() => searchParams.get("name") ?? "")
-  const [flagKey, setFlagKey] = useState(
-    () => searchParams.get("flagKey") ?? ""
-  )
   const [debouncedName, setDebouncedName] = useState(name.trim())
-  const [debouncedFlagKey, setDebouncedFlagKey] = useState(flagKey.trim())
   const [sheetOpen, setSheetOpen] = useState(false)
+  const flagKey = searchParams.get("flagKey") ?? ""
   const stage = stageFromParam(searchParams.get("stage"))
   const pageIndex = positiveInt(searchParams.get("page"), 1)
   const pageSize = positiveInt(searchParams.get("pageSize"), 10, [10, 20, 30])
@@ -97,21 +95,12 @@ export function ExperimentsPage() {
     return () => window.clearTimeout(timeout)
   }, [name, updateParams])
 
-  useEffect(() => {
-    const timeout = window.setTimeout(() => {
-      const value = flagKey.trim()
-      setDebouncedFlagKey(value)
-      updateParams({ flagKey: value || null }, true)
-    }, 350)
-    return () => window.clearTimeout(timeout)
-  }, [flagKey, updateParams])
-
   const listQuery = useQuery({
     queryKey: [
       "experiments",
       envId,
       debouncedName,
-      debouncedFlagKey,
+      flagKey,
       stage,
       pageIndex,
       pageSize,
@@ -119,7 +108,7 @@ export function ExperimentsPage() {
     queryFn: () =>
       fetchExperiments(envId, {
         name: debouncedName,
-        flagKey: debouncedFlagKey,
+        flagKey,
         stage,
         pageIndex: pageIndex - 1,
         pageSize,
@@ -140,14 +129,12 @@ export function ExperimentsPage() {
     },
   })
 
-  const filtered = Boolean(debouncedName || debouncedFlagKey || stage !== "all")
+  const filtered = Boolean(debouncedName || flagKey || stage !== "all")
   const data = listQuery.data ?? { items: [], totalCount: 0 }
 
   function clearFilters() {
     setName("")
-    setFlagKey("")
     setDebouncedName("")
-    setDebouncedFlagKey("")
     updateParams({ name: null, flagKey: null, stage: null }, true)
   }
 
@@ -173,14 +160,11 @@ export function ExperimentsPage() {
               onChange={(event) => setName(event.target.value)}
             />
           </div>
-          <div className="w-60">
-            <Input
-              value={flagKey}
-              className="font-mono"
-              placeholder={t("releaseDecision.experiments.flagFilter")}
-              onChange={(event) => setFlagKey(event.target.value)}
-            />
-          </div>
+          <FlagKeyFilter
+            envId={envId}
+            value={flagKey}
+            onChange={(key) => updateParams({ flagKey: key || null }, true)}
+          />
           <Select
             value={stage}
             onValueChange={(value) =>
@@ -248,8 +232,6 @@ export function ExperimentsPage() {
             localizedPath(lang, `/experiments/${encodeURIComponent(id)}`)
           }
           onFlagFilter={(key) => {
-            setFlagKey(key)
-            setDebouncedFlagKey(key)
             updateParams({ flagKey: key }, true)
           }}
           onClearFilters={clearFilters}
