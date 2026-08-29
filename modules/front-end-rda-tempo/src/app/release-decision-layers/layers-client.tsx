@@ -3,8 +3,6 @@ import { Link } from "@/lib/router";
 import {
   archiveLayer,
   createLayer,
-  getExperiment,
-  listExperiments,
   listLayers,
   updateLayer,
 } from "@/lib/release-decision-client-data";
@@ -21,25 +19,21 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Archive, Loader2, Layers3, Pencil, Plus, TriangleAlert } from "lucide-react";
-import type { ExperimentDetail } from "@/lib/release-decision-client-data";
-import type { ExperimentRun, Layer } from "@/lib/release-decision-types";
-
-type LayerRun = {
-  experimentId: string;
-  experimentName: string;
-  flagKey: string | null;
-  run: ExperimentRun;
-  start: number;
-  end: number;
-};
+import {
+  Archive,
+  Loader2,
+  Layers3,
+  Pencil,
+  Plus,
+  TriangleAlert,
+} from "lucide-react";
+import type { Layer, LayerRunSummary } from "@/lib/release-decision-types";
 
 type LayerGroup = {
   key: string;
-  layer: Layer | null;
+  layer: Layer;
   assignmentUnits: string[];
-  runs: LayerRun[];
-  activeRuns: LayerRun[];
+  runs: LayerRunSummary[];
   reservedTraffic: number;
   warnings: string[];
 };
@@ -53,8 +47,6 @@ type LayerFormState = {
   status: string;
 };
 
-const ACTIVE_RUN_STATUSES = new Set(["draft", "collecting", "analyzing"]);
-
 const emptyForm: LayerFormState = {
   name: "",
   key: "",
@@ -62,33 +54,6 @@ const emptyForm: LayerFormState = {
   assignmentUnitSelector: "user.keyId",
   status: "active",
 };
-
-function runLayerKey(run: ExperimentRun) {
-  return run.layerKey?.trim() || run.layerId?.trim() || "";
-}
-
-function assignmentUnit(run: ExperimentRun) {
-  return run.assignmentUnitSelector?.trim() || run.allocationKeySelector?.trim() || "user.keyId";
-}
-
-function sliceStart(run: ExperimentRun) {
-  return clampPercent(run.sliceStart ?? run.trafficOffset ?? 0);
-}
-
-function sliceEnd(run: ExperimentRun) {
-  const start = sliceStart(run);
-  const fallbackEnd = start + clampPercent(run.layerTrafficPercent ?? run.trafficPercent ?? 100);
-  return clampPercent(run.sliceEnd ?? fallbackEnd);
-}
-
-function runTraffic(run: ExperimentRun) {
-  return Math.max(0, sliceEnd(run) - sliceStart(run));
-}
-
-function clampPercent(value: number) {
-  if (!Number.isFinite(value)) return 0;
-  return Math.max(0, Math.min(100, value));
-}
 
 function formatPercent(value: number) {
   return `${Math.round(value * 1000) / 1000}%`;
@@ -102,81 +67,39 @@ function normalizeLayerKey(value: string) {
     .replace(/^-+|-+$/g, "");
 }
 
-function buildLayerGroups(layers: Layer[], experiments: ExperimentDetail[]): LayerGroup[] {
-  const map = new Map<string, { layer: Layer | null; runs: LayerRun[] }>();
-
-  for (const layer of layers) {
-    map.set(layer.key, { layer, runs: [] });
-  }
-
-  for (const experiment of experiments) {
-    for (const run of experiment.experimentRuns ?? []) {
-      const key = runLayerKey(run);
-      if (!key) continue;
-
-      const entry: LayerRun = {
-        experimentId: experiment.id,
-        experimentName: experiment.name,
-        flagKey: experiment.flagKey,
-        run,
-        start: sliceStart(run),
-        end: sliceEnd(run),
-      };
-      const existing = map.get(key) ?? { layer: null, runs: [] };
-      existing.runs.push(entry);
-      map.set(key, existing);
+function buildLayerGroups(layers: Layer[]): LayerGroup[] {
+  return layers.map((layer) => {
+    const warnings: string[] = [];
+    if (layer.allocationSummary.mixedAssignmentUnits) {
+      warnings.push("Mixed assignment units in the same layer.");
     }
-  }
+    if (layer.allocationSummary.overAllocated) {
+      warnings.push("Active runs reserve more than 100% of the layer.");
+    }
+    if (layer.allocationSummary.overlaps.length > 0) {
+      warnings.push("Active run bucket ranges overlap.");
+    }
 
-  return [...map.entries()]
-    .map(([key, entry]) => {
-      const runs = entry.runs;
-      const activeRuns = runs.filter((item) =>
-        ACTIVE_RUN_STATUSES.has(item.run.status),
-      );
-      const assignmentUnits = [
-        ...new Set([
-          entry.layer?.assignmentUnitSelector?.trim() || "",
-          ...runs.map((item) => assignmentUnit(item.run)),
-        ].filter(Boolean)),
-      ].sort();
-      const reservedTraffic = activeRuns.reduce(
-        (sum, item) => sum + runTraffic(item.run),
-        0,
-      );
-      const warnings: string[] = [];
-      const activeByStart = [...activeRuns].sort((a, b) => a.start - b.start);
-
-      if (assignmentUnits.length > 1) {
-        warnings.push("Mixed assignment units in the same layer.");
-      }
-      for (let i = 1; i < activeByStart.length; i++) {
-        if (activeByStart[i].start < activeByStart[i - 1].end) {
-          warnings.push("Active run bucket ranges overlap.");
-          break;
-        }
-      }
-      if (reservedTraffic > 100) {
-        warnings.push("Active runs reserve more than 100% of the layer.");
-      }
-      if (!entry.layer) {
-        warnings.push("Layer key is used by runs but is not in the registry.");
-      }
-
-      return { key, layer: entry.layer, assignmentUnits, runs, activeRuns, reservedTraffic, warnings };
-    })
-    .sort((a, b) => a.key.localeCompare(b.key));
+    return {
+      key: layer.key,
+      layer,
+      assignmentUnits: [layer.assignmentUnitSelector?.trim() || "user.keyId"],
+      runs: layer.experimentRuns,
+      reservedTraffic: layer.allocationSummary.reservedPercent,
+      warnings,
+    };
+  });
 }
 
-function LayerBucketBar({ runs }: { runs: LayerRun[] }) {
-  const activeRuns = runs.filter((item) => ACTIVE_RUN_STATUSES.has(item.run.status));
+function LayerBucketBar({ runs }: { runs: LayerRunSummary[] }) {
+  const activeRuns = runs.filter((item) => item.includedInAllocation);
 
   return (
     <div className="relative h-8 overflow-hidden rounded-md border bg-muted/40">
       <div className="absolute inset-y-0 left-1/2 w-px bg-border" />
       {activeRuns.map((item, index) => (
         <div
-          key={item.run.id}
+          key={item.id}
           className="absolute top-1 bottom-1 rounded-sm border border-primary/40 bg-primary/35"
           style={{
             left: `${item.start}%`,
@@ -208,7 +131,6 @@ function layerToForm(layer: Layer): LayerFormState {
 
 export function LayersClient() {
   const { isAuthenticated, sessionStatus, projectEnv } = useAuth();
-  const [experiments, setExperiments] = useState<ExperimentDetail[]>([]);
   const [layers, setLayers] = useState<Layer[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -225,14 +147,9 @@ export function LayersClient() {
     setLoading(true);
     setError(null);
     try {
-      const [registeredLayers, experimentItems] = await Promise.all([
-        listLayers({ status: "" }),
-        listExperiments(),
-      ]);
-      const details = await Promise.all(experimentItems.map((item) => getExperiment(item.id)));
+      const registeredLayers = await listLayers({ status: "" });
       if (!cancelled?.value) {
         setLayers(registeredLayers);
-        setExperiments(details);
       }
     } catch (err) {
       if (!cancelled?.value) {
@@ -251,8 +168,10 @@ export function LayersClient() {
     };
   }, [isAuthenticated, projectEnv, sessionStatus]);
 
-  const groups = useMemo(() => buildLayerGroups(layers, experiments), [layers, experiments]);
-  const warningCount = groups.filter((layer) => layer.warnings.length > 0).length;
+  const groups = useMemo(() => buildLayerGroups(layers), [layers]);
+  const warningCount = groups.filter(
+    (layer) => layer.warnings.length > 0,
+  ).length;
 
   const openCreate = () => {
     setForm(emptyForm);
@@ -314,7 +233,8 @@ export function LayersClient() {
                 Layers
               </div>
               <p className="mt-1 max-w-3xl text-xs leading-relaxed text-muted-foreground">
-                Registry and bucket allocation view for mutually exclusive experiment layers.
+                Registry and bucket allocation view for mutually exclusive
+                experiment layers.
               </p>
             </div>
             <div className="fb-right-actions">
@@ -342,7 +262,8 @@ export function LayersClient() {
             </div>
           ) : groups.length === 0 ? (
             <div className="fb-table-state">
-              No layers yet. Create a layer before assigning experiment runs to bucket ranges.
+              No layers yet. Create a layer before assigning experiment runs to
+              bucket ranges.
             </div>
           ) : (
             <table className="fb-table">
@@ -361,13 +282,15 @@ export function LayersClient() {
                   <tr key={group.key}>
                     <td className="fb-name-cell">
                       <span className="font-semibold text-foreground">
-                        {group.layer?.name ?? group.key}
+                        {group.layer.name}
                       </span>
                       <div className="mt-1 flex flex-wrap items-center gap-1.5">
                         <span className="fb-code-pill">{group.key}</span>
-                        <span className="fb-item-meta">{group.layer?.status ?? "unregistered"}</span>
+                        <span className="fb-item-meta">
+                          {group.layer.status}
+                        </span>
                       </div>
-                      {group.layer?.description && (
+                      {group.layer.description && (
                         <div className="fb-item-meta mt-1 max-w-sm">
                           {group.layer.description}
                         </div>
@@ -395,7 +318,7 @@ export function LayersClient() {
                         ) : (
                           group.runs.map((item) => (
                             <div
-                              key={item.run.id}
+                              key={item.id}
                               className="flex flex-wrap items-center gap-2 text-xs"
                             >
                               <Link
@@ -404,13 +327,11 @@ export function LayersClient() {
                               >
                                 {item.experimentName}
                               </Link>
-                              <span className="fb-code-pill">{item.run.slug}</span>
+                              <span className="fb-code-pill">{item.key}</span>
                               <span className="text-muted-foreground">
-                                {item.run.status}, {formatPercent(item.start)}-{formatPercent(item.end)}
+                                {item.status}, {formatPercent(item.start)}-
+                                {formatPercent(item.end)}
                               </span>
-                              {item.flagKey && (
-                                <span className="fb-item-meta">{item.flagKey}</span>
-                              )}
                             </div>
                           ))
                         )}
@@ -436,18 +357,26 @@ export function LayersClient() {
                       )}
                     </td>
                     <td>
-                      {group.layer && (
-                        <div className="flex justify-end gap-1">
-                          <Button type="button" variant="ghost" size="icon-sm" onClick={() => openEdit(group.layer!)}>
-                            <Pencil className="size-3.5" />
+                      <div className="flex justify-end gap-1">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-sm"
+                          onClick={() => openEdit(group.layer)}
+                        >
+                          <Pencil className="size-3.5" />
+                        </Button>
+                        {group.layer.status !== "archived" && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => archive(group.layer)}
+                          >
+                            <Archive className="size-3.5" />
                           </Button>
-                          {group.layer.status !== "archived" && (
-                            <Button type="button" variant="ghost" size="icon-sm" onClick={() => archive(group.layer!)}>
-                              <Archive className="size-3.5" />
-                            </Button>
-                          )}
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -478,7 +407,10 @@ export function LayersClient() {
                     setForm((current) => ({
                       ...current,
                       name,
-                      key: current.id || current.key ? current.key : normalizeLayerKey(name),
+                      key:
+                        current.id || current.key
+                          ? current.key
+                          : normalizeLayerKey(name),
                     }));
                   }}
                   required
@@ -489,10 +421,22 @@ export function LayersClient() {
                 <Input
                   id="layer-key"
                   value={form.key}
-                  onChange={(event) => setForm((current) => ({ ...current, key: normalizeLayerKey(event.target.value) }))}
-                  className="font-mono"
+                  readOnly={Boolean(form.id)}
+                  onChange={(event) =>
+                    setForm((current) => ({
+                      ...current,
+                      key: normalizeLayerKey(event.target.value),
+                    }))
+                  }
+                  className={`font-mono ${form.id ? "bg-muted/40 text-muted-foreground" : ""}`}
                   required
                 />
+                {form.id && (
+                  <p className="text-xs text-muted-foreground">
+                    Layer key cannot be changed after creation because
+                    experiment runs may reference it.
+                  </p>
+                )}
               </div>
               <div className="grid gap-1.5">
                 <Label htmlFor="layer-assignment-unit">Assignment unit</Label>
@@ -508,14 +452,23 @@ export function LayersClient() {
                 <Textarea
                   id="layer-description"
                   value={form.description}
-                  onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
+                  onChange={(event) =>
+                    setForm((current) => ({
+                      ...current,
+                      description: event.target.value,
+                    }))
+                  }
                   rows={3}
                 />
               </div>
             </div>
 
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setDialogOpen(false)}
+              >
                 Cancel
               </Button>
               <Button type="submit" disabled={saving}>

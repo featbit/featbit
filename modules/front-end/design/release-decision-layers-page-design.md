@@ -154,7 +154,11 @@ The visualization represents one Layer's shared `0-100` bucket space.
 - Each run occupies its exact start/end range.
 - A run's segment color matches the small square beside that run in Experiment runs.
 - Unallocated traffic uses the neutral background.
-- Text inside a segment shows the Experiment name and range when the segment is wide enough.
+- Segments at least `18%` wide show the Experiment name on the first line and `run key · range` on the second line.
+- Segments from `8%` up to `18%` show only the Experiment name, vertically centered within the segment.
+- Segments narrower than `8%` contain no inline text.
+- Every allocated segment uses the shared interactive Tooltip rather than the native `title` attribute. Hovering or focusing it reveals the complete Experiment name, run key, and allocation range.
+- The current backend provides a run key/slug, not a separate run display name; the key is therefore the stable run identifier shown here.
 - Do not place critical information only inside a narrow segment; the Experiment runs column remains the complete textual source.
 
 Below the bar:
@@ -200,7 +204,7 @@ Second line:
 - left: bucket range, for example `0-25%`;
 - right: colored state dot and run lifecycle, for example `Collecting`.
 
-Separate adjacent runs with a subtle horizontal divider. When there are no active runs, show `No active runs` in muted text.
+Separate adjacent runs with a subtle horizontal divider. Archived and otherwise inactive runs remain visible in this column, but do not occupy the Traffic allocation bar. When the Layer has no runs at all, show `No experiment runs` in muted text.
 
 Do not display a Feature Flag key in this column. Combining an Experiment run key and a Flag key without explicit labels creates unnecessary ambiguity, and the Flag is not required for the Layer-management task.
 
@@ -210,14 +214,15 @@ Show every valid action directly. Do not use a Details button or ellipsis menu.
 
 Active Layer:
 
-- pencil icon plus `Edit`;
-- Archive icon plus `Archive`.
+- text-only `Edit`;
+- text-only `Archive`.
 
 Archived Layer:
 
-- pencil icon plus `Edit`.
+- text-only `Edit`.
+- text-only `Restore`.
 
-Actions use compact shadcn button treatment, remain on one horizontal line, and are vertically centered in the complete row. They must not wrap into separate lines.
+Actions use the same compact text-only ghost-button treatment as other React list pages, remain on one horizontal line, and are vertically centered in the complete row. They must not wrap into separate lines.
 
 The page-level `New layer` action is the only create action. Never show `Create layer` as a row repair action.
 
@@ -309,12 +314,13 @@ Do not add Status, traffic percentage, bucket range, or Experiment selection to 
 Use the same right-side Sheet frame as New layer.
 
 - Title: `Edit layer`.
-- Fields: Name, Key, read-only Assignment unit, and Description.
+- Fields: Name, read-only Key, read-only Assignment unit, and Description.
+- Key keeps the same muted locked-input treatment as other immutable identifiers. Helper: `Layer key cannot be changed after creation because experiment runs may reference it.`
 - Footer: `Cancel` and text-only `Save changes`.
 - No footer divider.
 - Archiving remains a separate row action rather than a status field inside the form.
 
-The current backend permits Key updates. If product behavior later makes Layer keys immutable after runs reference them, the backend contract and Edit design must change together; do not enforce a UI-only immutability rule.
+The backend rejects an update when the submitted Key differs from the stored Layer key. Immutability therefore applies consistently to every client, not only this Sheet.
 
 ### Archive Layer
 
@@ -390,17 +396,108 @@ The current Layers API supports:
 
 The visual table requires richer server data than the current Layer list item provides. With server pagination, the browser must not infer global Layer allocation from a separately capped Experiment list.
 
-Prefer a server-composed Layer list/read model that returns, for every Layer item:
+The approved architecture is a **server-composed paged Layer read model**. This is required, not an optional optimization. The existing paged Layers endpoint must return, for every Layer on the requested page:
 
-- complete assigned run summaries;
-- active run ranges and lifecycle states;
-- reserved percentage;
-- free percentage;
-- overlapping ranges;
-- whole-Layer allocation status;
-- assignment-unit consistency result.
+- the complete set of Experiment runs assigned to that Layer;
+- a server-computed allocation summary derived from the active subset of those runs.
 
-The API may expose this through an enriched list response or a dedicated per-Layer summary endpoint, but the result must remain correct beyond the current page and beyond any arbitrary Experiment fetch cap.
+Both React frontends must consume this response directly. Neither frontend may fetch an independently capped Experiment list, issue one detail request per Experiment, or reconstruct Layer allocation locally.
+
+Layer pagination applies only to the outer Layer collection. `totalCount` is the number of Layers after server filters. Every returned Layer item includes all of its runs; nested runs are not silently truncated by the Layer page size.
+
+### Required response shape
+
+The exact transport naming may follow backend conventions, but the response must be semantically equivalent to:
+
+```ts
+type PagedLayerResult = {
+  totalCount: number
+  items: Array<{
+    id: string
+    featBitEnvId: string
+    name: string
+    key: string
+    description: string | null
+    assignmentUnitSelector: string
+    status: "active" | "archived"
+    createdAt: string
+    updatedAt: string
+    experimentRuns: Array<{
+      id: string
+      experimentId: string
+      experimentName: string
+      key: string
+      layerId: string | null
+      layerKey: string | null
+      assignmentUnitSelector: string
+      start: number
+      end: number
+      status: string
+      includedInAllocation: boolean
+    }>
+    allocationSummary: {
+      activeRunCount: number
+      reservedPercent: number
+      freePercent: number
+      overlaps: Array<{
+        start: number
+        end: number
+        runIds: string[]
+      }>
+      mixedAssignmentUnits: boolean
+      overAllocated: boolean
+      status:
+        | "no-conflicts"
+        | "overlap"
+        | "mixed-assignment-units"
+        | "over-allocated"
+    }
+  }>
+}
+```
+
+This shape is additive to the existing Layer identity fields, so existing consumers can migrate without losing the registry data.
+
+### Run association contract
+
+- A parseable GUID `layerId` is the canonical association for newly written Experiment runs. It must match the Layer ID and must not be overridden by a conflicting key.
+- If `layerId` is absent or is not a GUID, use `layerKey`; for older records where `layerKey` is empty, treat the non-GUID `layerId` as the Layer key.
+- Association is resolved by the backend in the same environment as the Layer query.
+- A run must never be associated only because a similarly named Layer exists in another environment.
+- Missing references are reported through Experiment configuration; they do not create synthetic rows in the paged Layers result.
+
+### Allocation calculation contract
+
+The backend owns the calculation and applies one shared rule for every client:
+
+1. Return **all** associated runs in `experimentRuns`, including archived or otherwise inactive runs.
+2. Only statuses `draft`, `collecting`, and `analyzing`, compared case-insensitively, participate in allocation.
+3. Clamp each participating range to `0-100` and ignore invalid ranges where `end <= start`.
+4. `reservedPercent` is the sum of every participating run's `end - start`. It represents reserved run capacity, so overlapping ranges are counted for each run.
+5. `freePercent` is `max(0, 100 - reservedPercent)`.
+6. `overlaps` contains every exact conflicting interval and the IDs of the involved runs.
+7. `overAllocated` is true when the uncapped reserved sum is above `100`.
+8. `mixedAssignmentUnits` is true when participating runs do not all use the Layer's assignment unit.
+9. `allocationSummary.status` is selected by deterministic severity: mixed assignment units, over-allocated, overlap, then no conflicts.
+
+For the example Layer shown in the comparison screenshots:
+
+- archived run `0-50%`: returned in `experimentRuns`, excluded from allocation;
+- collecting run `0-60%`: contributes `60%`;
+- draft run `80-90%`: contributes `10%`;
+- server result: `70% reserved`, `30% free`, no overlap.
+
+The response must be computed from one consistent backend view of the Layer and its runs. Avoid an N+1 API contract and avoid arbitrary Experiment-list caps such as the reference frontend's first-200 lookup.
+
+### Frontend consumption contract
+
+- Render `experimentRuns` directly; do not re-fetch Experiment details to populate the Layer row.
+- Render the Traffic allocation bar and Allocation status from `allocationSummary`.
+- Frontend code may map values to visual components, but must not independently decide which statuses count, recalculate overlap, or substitute an empty array when the summary is absent.
+- If the backend response does not contain a usable summary, show `Allocation unavailable`; never turn missing data into `No allocation` or `No conflicts`.
+- Loading, unavailable, and genuinely empty allocation are three different states.
+
+This contract makes the same paged backend response the source of truth for `front-end`, `front-end-rda-tempo`, and future clients.
 
 ### Known gaps affecting this design
 
@@ -428,6 +525,8 @@ The API may expose this through an enriched list response or a dedicated per-Lay
 ## Rejected Alternatives
 
 - Generic `Status` filter: ambiguous and duplicates `Show archived`.
+- Frontend aggregation from Layers plus Experiments endpoints: produces inconsistent results, creates N+1 requests, and becomes incomplete when Experiment fetching is capped.
+- Treating a missing `experimentRuns` property as an empty allocation: converts unavailable data into false `No allocation` and `No conflicts` states.
 - Client-only Allocation status filter: incorrect across server pages.
 - Global `x layers need attention`: no reliable current backend source.
 - Synthetic unregistered-Layer rows: data originates from Experiment configuration, not the Layer registry.
@@ -445,15 +544,18 @@ The API may expose this through an enriched list response or a dedicated per-Lay
 - The toolbar contains Search, Show archived, and New layer; no Status filter is present.
 - No Layer total or global attention summary appears above the table.
 - Pagination matches Feature Flags exactly and uses server `totalCount`.
+- Each paged Layer item receives all of its runs and one backend-computed allocation summary.
+- Both frontends consume the same server summary and do not reconstruct allocation independently.
+- Missing summary data renders as unavailable, not as an empty or conflict-free Layer.
 - Every table cell is vertically centered relative to its complete row.
 - Layer and Experiment names use foreground styling rather than default blue links.
-- All runs are visible directly, with Experiment name, run key, range, and run lifecycle.
+- All runs, including inactive runs, are visible directly with Experiment name, run key, range, and run lifecycle; only active statuses occupy allocation.
 - Allocation status describes the complete Layer and is visually separate from run lifecycle.
 - Overlap hatching maps to an exact bucket interval and has explicit text.
 - Actions remain on one horizontal line and use icons plus labels.
 - New layer opens a right Sheet with only Name, Key, Assignment unit, and Description.
 - Assignment unit is visibly read-only and explained.
+- Layer key is editable during creation and immutable in every edit client and backend update path.
 - Create layer is a text-only primary button.
 - The Sheet footer has no divider.
 - Sidebar, context bar, Header, Metrics, and Experiments remain unchanged.
-

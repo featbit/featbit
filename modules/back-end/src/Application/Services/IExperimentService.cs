@@ -57,6 +57,10 @@ public interface IExperimentService
         Guid runId,
         ExperimentRunAnalyzeRequest request);
 
+    Task<IReadOnlyCollection<ExperimentRunForLayer>> GetExperimentRunsByLayersAsync(
+        Guid envId,
+        IReadOnlyCollection<ExperimentLayer> layers);
+
     Task<PagedResult<ExperimentVm>> GetListAsync(
         Guid envId,
         ExperimentFilter filter);

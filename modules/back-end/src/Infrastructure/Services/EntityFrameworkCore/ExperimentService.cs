@@ -527,6 +527,34 @@ public class ExperimentService(
         return await GetAsync(envId, id);
     }
 
+    public async Task<IReadOnlyCollection<ExperimentRunForLayer>> GetExperimentRunsByLayersAsync(
+        Guid envId,
+        IReadOnlyCollection<ExperimentLayer> layers)
+    {
+        ArgumentNullException.ThrowIfNull(layers);
+        if (layers.Count == 0)
+        {
+            return [];
+        }
+
+        var layerIds = layers.Select(x => x.Id.ToString("D")).ToArray();
+        var layerKeys = layers.Select(x => x.Key).ToArray();
+
+        return await (
+            from run in dbContext.Set<ExperimentRun>().AsNoTracking()
+            join experiment in dbContext.Set<Experiment>().AsNoTracking()
+                on run.ExperimentId equals experiment.Id
+            where experiment.FeatBitEnvId == envId &&
+                  (layerIds.Contains(run.LayerId) ||
+                   layerKeys.Contains(run.LayerKey) ||
+                   layerKeys.Contains(run.LayerId))
+            select new ExperimentRunForLayer
+            {
+                Run = run,
+                ExperimentName = experiment.Name
+            }).ToListAsync();
+    }
+
     public async Task<PagedResult<ExperimentVm>> GetListAsync(
         Guid envId,
         ExperimentFilter filter)

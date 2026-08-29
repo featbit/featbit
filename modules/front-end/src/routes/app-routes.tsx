@@ -147,11 +147,9 @@ const MetricsPage = lazy(() =>
   )
 )
 const LayersPage = lazy(() =>
-  import("@/features/release-decision/release-decision-pages").then(
-    (module) => ({
-      default: module.LayersPage,
-    })
-  )
+  import("@/features/expt-layers/layers-page").then((module) => ({
+    default: module.LayersPage,
+  }))
 )
 const SegmentsPage = lazy(() =>
   import("@/features/segments/index/segments-page").then((module) => ({

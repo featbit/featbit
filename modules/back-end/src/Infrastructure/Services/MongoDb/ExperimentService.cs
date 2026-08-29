@@ -519,6 +519,46 @@ public class ExperimentService(
         return await GetAsync(envId, id);
     }
 
+    public async Task<IReadOnlyCollection<ExperimentRunForLayer>> GetExperimentRunsByLayersAsync(
+        Guid envId,
+        IReadOnlyCollection<ExperimentLayer> layers)
+    {
+        ArgumentNullException.ThrowIfNull(layers);
+        if (layers.Count == 0)
+        {
+            return [];
+        }
+
+        var layerIds = layers.Select(x => x.Id.ToString("D")).ToArray();
+        var layerKeys = layers.Select(x => x.Key).ToArray();
+        var runBuilder = Builders<ExperimentRun>.Filter;
+        var runs = await mongoDb.CollectionOf<ExperimentRun>()
+            .Find(runBuilder.Or(
+                runBuilder.In(x => x.LayerId, layerIds),
+                runBuilder.In(x => x.LayerKey, layerKeys),
+                runBuilder.In(x => x.LayerId, layerKeys)))
+            .ToListAsync();
+        if (runs.Count == 0)
+        {
+            return [];
+        }
+
+        var experimentIds = runs.Select(x => x.ExperimentId).Distinct().ToArray();
+        var experiments = await mongoDb.CollectionOf<Experiment>()
+            .Find(x => experimentIds.Contains(x.Id) && x.FeatBitEnvId == envId)
+            .ToListAsync();
+        var experimentNames = experiments.ToDictionary(x => x.Id, x => x.Name);
+
+        return runs
+            .Where(x => experimentNames.ContainsKey(x.ExperimentId))
+            .Select(run => new ExperimentRunForLayer
+            {
+                Run = run,
+                ExperimentName = experimentNames[run.ExperimentId]
+            })
+            .ToArray();
+    }
+
     public async Task<PagedResult<ExperimentVm>> GetListAsync(
         Guid envId,
         ExperimentFilter filter)
