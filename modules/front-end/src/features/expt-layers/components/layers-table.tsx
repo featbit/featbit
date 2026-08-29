@@ -377,24 +377,29 @@ export function LayersTable({
                     >
                       {layer.name}
                     </p>
-                    <button
-                      type="button"
-                      className="flex max-w-full items-center gap-1.5 rounded bg-muted px-2 py-0.5 font-mono text-xs text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-                      aria-label={t("releaseDecision.layers.copyKey", {
-                        key: layer.key,
-                      })}
-                      title={layer.key}
-                      onClick={() => onCopy(layer.key)}
-                    >
-                      <span className="truncate">{layer.key}</span>
-                      <Copy className="size-3 shrink-0" />
-                    </button>
-                    <Badge variant="outline" className="gap-1.5 font-normal">
-                      <span
-                        className={`size-2 rounded-full ${layer.status === "archived" ? "bg-zinc-400" : "bg-emerald-600"}`}
-                      />
-                      {t(`releaseDecision.layers.${layer.status}`)}
-                    </Badge>
+                    <div className="flex min-w-0 items-center gap-2">
+                      <button
+                        type="button"
+                        className="flex max-w-full min-w-0 items-center gap-1.5 rounded bg-muted px-2 py-0.5 font-mono text-xs text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                        aria-label={t("releaseDecision.layers.copyKey", {
+                          key: layer.key,
+                        })}
+                        title={layer.key}
+                        onClick={() => onCopy(layer.key)}
+                      >
+                        <span className="truncate">{layer.key}</span>
+                        <Copy className="size-3 shrink-0" />
+                      </button>
+                      <Badge
+                        variant="outline"
+                        className="shrink-0 gap-1.5 font-normal"
+                      >
+                        <span
+                          className={`size-2 rounded-full ${layer.status === "archived" ? "bg-zinc-400" : "bg-emerald-600"}`}
+                        />
+                        {t(`releaseDecision.layers.${layer.status}`)}
+                      </Badge>
+                    </div>
                     {layer.description ? (
                       <p
                         className="line-clamp-2 text-sm text-muted-foreground"
