@@ -3,6 +3,7 @@ using Application.Bases.Models;
 using Application.Bases.Exceptions;
 using Application.ExperimentStats;
 using Application.Experiments;
+using Application.Experiments.ExperimentMetrics;
 using Application.Services;
 using Application.Users;
 using Domain.FeatureFlags;
@@ -171,7 +172,7 @@ public class ExperimentService(
         var experiment = await GetTrackedExperimentAsync(envId, id);
         var primaryMetric = await ResolveMetricAsync(envId, update.MetricId, Normalize(update.MetricKey, update.MetricEvent));
         var primaryMetricJson = BuildPrimaryMetricJson(primaryMetric, update.ExpectedDirection);
-        var guardrails = await BuildGuardrailsJsonAsync(envId, update.Guardrails);
+        var guardrails = await BuildGuardrailsJsonAsync(envId, update.Guardrails, primaryMetric);
 
         experiment.PrimaryMetric = primaryMetricJson;
         experiment.Guardrails = guardrails;
@@ -553,6 +554,42 @@ public class ExperimentService(
                 Run = run,
                 ExperimentName = experiment.Name
             }).ToListAsync();
+    }
+
+    public async Task<IReadOnlyCollection<ExperimentWithRuns>> GetExperimentsWithRunsAsync(
+        Guid envId,
+        string? nameSearchText = null)
+    {
+        var experimentQuery = dbContext.Set<Experiment>()
+            .AsNoTracking()
+            .Where(x => x.FeatBitEnvId == envId);
+        if (!string.IsNullOrWhiteSpace(nameSearchText))
+        {
+            var normalizedSearchText = nameSearchText.Trim().ToLower();
+            experimentQuery = experimentQuery.Where(
+                x => x.Name != null && x.Name.ToLower().Contains(normalizedSearchText));
+        }
+
+        var experiments = await experimentQuery.ToListAsync();
+        if (experiments.Count == 0)
+        {
+            return [];
+        }
+
+        var experimentIds = experiments.Select(x => x.Id).ToArray();
+        var runs = await dbContext.Set<ExperimentRun>()
+            .AsNoTracking()
+            .Where(x => experimentIds.Contains(x.ExperimentId))
+            .ToListAsync();
+        var runsByExperiment = runs.ToLookup(x => x.ExperimentId);
+
+        return experiments
+            .Select(experiment => new ExperimentWithRuns
+            {
+                Experiment = experiment,
+                Runs = runsByExperiment[experiment.Id].ToArray()
+            })
+            .ToArray();
     }
 
     public async Task<PagedResult<ExperimentVm>> GetListAsync(
@@ -1352,7 +1389,7 @@ public class ExperimentService(
         return (actorId, "Unknown actor", null, "unknown");
     }
 
-    private async Task<ExperimentMetricVm> ResolveMetricAsync(Guid envId, Guid? metricId, string? metricKey)
+    private async Task<ExperimentMetric> ResolveMetricAsync(Guid envId, Guid? metricId, string? metricKey)
     {
         if (!metricId.HasValue && string.IsNullOrWhiteSpace(metricKey))
         {
@@ -1362,7 +1399,10 @@ public class ExperimentService(
         return await metricService.GetBySelectorAsync(envId, metricId, metricKey);
     }
 
-    private async Task<string?> BuildGuardrailsJsonAsync(Guid envId, string? raw)
+    private async Task<string?> BuildGuardrailsJsonAsync(
+        Guid envId,
+        string? raw,
+        ExperimentMetric primaryMetric)
     {
         if (string.IsNullOrWhiteSpace(raw))
         {
@@ -1376,6 +1416,7 @@ public class ExperimentService(
         }
 
         var guardrails = new List<Dictionary<string, object>>();
+        var guardrailMetricIds = new HashSet<Guid>();
         foreach (var item in doc.RootElement.EnumerateArray())
         {
             if (item.ValueKind != JsonValueKind.Object)
@@ -1389,6 +1430,16 @@ public class ExperimentService(
                 GetJsonString(item, "key") ??
                 GetJsonString(item, "event");
             var metric = await ResolveMetricAsync(envId, metricId, metricKey);
+            if (metric.Id == primaryMetric.Id)
+            {
+                throw new ArgumentException("Primary metric cannot also be selected as a guardrail.");
+            }
+
+            if (!guardrailMetricIds.Add(metric.Id))
+            {
+                throw new ArgumentException("A guardrail metric can only be selected once.");
+            }
+
             var direction = GetJsonString(item, "direction");
             if (direction is not ("increase_bad" or "decrease_bad"))
             {
@@ -1416,7 +1467,7 @@ public class ExperimentService(
         return JsonSerializer.Serialize(guardrails);
     }
 
-    private static string BuildPrimaryMetricJson(ExperimentMetricVm metric, string? expectedDirection)
+    private static string BuildPrimaryMetricJson(ExperimentMetric metric, string? expectedDirection)
     {
         var payload = new Dictionary<string, object>
         {
@@ -1877,7 +1928,7 @@ public class ExperimentService(
         var section = new Dictionary<string, object?>
         {
             ["event"] = label,
-            ["metric_type"] = isProp ? "proportion" : "continuous",
+            ["metric_type"] = isProp ? "proportion" : "numeric",
             ["rows"] = rows,
             ["verdict"] = verdicts.Count > 0 ? string.Join("; ", verdicts) : "no data"
         };
@@ -2736,7 +2787,7 @@ public class ExperimentService(
 
     private static string NormalizeMetricType(string? value)
     {
-        return value is "continuous" or "numeric" ? "continuous" : "binary";
+        return value == "numeric" ? "numeric" : "binary";
     }
 
     private static string NormalizeMetricAgg(string? value)

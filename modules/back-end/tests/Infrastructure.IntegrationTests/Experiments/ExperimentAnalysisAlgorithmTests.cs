@@ -89,7 +89,7 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
             ]
         });
         await using var db = CreateDbContext();
-        await SeedExperimentAsync(db, method: "bayesian_ab", metricType: "continuous", metricAgg: metricAgg, metricEvent: "revenue");
+        await SeedExperimentAsync(db, method: "bayesian_ab", metricType: "numeric", metricAgg: metricAgg, metricEvent: "revenue");
 
         var result = await CreateService(db, stats).AnalyzeRunAsync(
             EnvId,

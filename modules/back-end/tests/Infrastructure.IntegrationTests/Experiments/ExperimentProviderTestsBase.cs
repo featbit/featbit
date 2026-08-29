@@ -1,6 +1,7 @@
 using Application.ExperimentStats;
 using Application.FeatureFlags;
 using Application.Experiments;
+using Application.Experiments.ExperimentMetrics;
 using Application.Services;
 using Domain.Experiments;
 using System.Text.Json;
@@ -37,9 +38,9 @@ public abstract class ExperimentProviderTestsBase(ExperimentProviderParityFixtur
 
     [DockerTheory]
     [InlineData("binary", "once")]
-    [InlineData("continuous", "count")]
-    [InlineData("continuous", "sum")]
-    [InlineData("continuous", "average")]
+    [InlineData("numeric", "count")]
+    [InlineData("numeric", "sum")]
+    [InlineData("numeric", "average")]
     public async Task QueryExperimentStats_ValidMetric_ReturnsExpectedResults(string metricType, string metricAgg)
     {
         await fixture.SeedScenarioAsync(ProviderName);
@@ -300,19 +301,19 @@ public abstract class ExperimentProviderTestsBase(ExperimentProviderParityFixtur
                 Variant("B", conversions: 300, sumValue: 300, sumSquares: 300),
                 Variant("C", conversions: 200, sumValue: 200, sumSquares: 200)
             ],
-            ("continuous", "count") =>
+            ("numeric", "count") =>
             [
                 Variant("A", conversions: 250, sumValue: 500, sumSquares: 1_000),
                 Variant("B", conversions: 300, sumValue: 300, sumSquares: 300),
                 Variant("C", conversions: 200, sumValue: 600, sumSquares: 1_800)
             ],
-            ("continuous", "sum") =>
+            ("numeric", "sum") =>
             [
                 Variant("A", conversions: 250, sumValue: 7_500, sumSquares: 225_000),
                 Variant("B", conversions: 300, sumValue: 7_500, sumSquares: 187_500),
                 Variant("C", conversions: 200, sumValue: 1_200, sumSquares: 7_200)
             ],
-            ("continuous", "average") =>
+            ("numeric", "average") =>
             [
                 Variant("A", conversions: 250, sumValue: 3_750, sumSquares: 56_250),
                 Variant("B", conversions: 300, sumValue: 7_500, sumSquares: 187_500),
@@ -539,26 +540,141 @@ public abstract class WritableExperimentProviderTestsBase(
     }
 
     [DockerFact]
-    public async Task UpdateExperimentMetric_ValidUpdate_PersistsChanges()
+    public async Task GetExperimentMetrics_SearchText_MatchesNameAndKeyCaseInsensitively()
     {
         var service = CreateExperimentMetricService();
-        var key = $"metric-update-{Guid.NewGuid():N}";
-        var created = await service.CreateAsync(ExperimentProviderParityFixture.EnvId, new ExperimentMetricUpdate
+        var nameToken = $"name-{Guid.NewGuid():N}";
+        var keyToken = $"key-{Guid.NewGuid():N}";
+        var metricByName = await service.CreateAsync(
+            ExperimentProviderParityFixture.EnvId,
+            new CreateExperimentMetricRequest
+            {
+                Name = $"Metric {nameToken}",
+                Key = $"metric-{Guid.NewGuid():N}",
+                MetricType = "binary",
+                MetricAgg = "once"
+            });
+        var metricByKey = await service.CreateAsync(
+            ExperimentProviderParityFixture.EnvId,
+            new CreateExperimentMetricRequest
+            {
+                Name = $"Metric {Guid.NewGuid():N}",
+                Key = keyToken,
+                MetricType = "binary",
+                MetricAgg = "once"
+            });
+
+        var nameResult = await service.GetListAsync(
+            ExperimentProviderParityFixture.EnvId,
+            new ExperimentMetricFilter { SearchText = nameToken.ToUpperInvariant(), PageSize = 10 },
+            []);
+        var keyResult = await service.GetListAsync(
+            ExperimentProviderParityFixture.EnvId,
+            new ExperimentMetricFilter { SearchText = keyToken.ToUpperInvariant(), PageSize = 10 },
+            []);
+
+        Assert.Equal(metricByName.Id, Assert.Single(nameResult.Items).Id);
+        Assert.Equal(metricByKey.Id, Assert.Single(keyResult.Items).Id);
+    }
+
+    [DockerFact]
+    public async Task UpdateExperimentMetrics_PrimaryMetricCannotAlsoBeGuardrail()
+    {
+        var (experimentService, metricService) = CreateExperimentServices();
+        var metric = await metricService.CreateAsync(
+            ExperimentProviderParityFixture.EnvId,
+            new CreateExperimentMetricRequest
+            {
+                Name = "Primary guardrail invariant",
+                Key = $"metric-role-{Guid.NewGuid():N}",
+                MetricType = "binary",
+                MetricAgg = "once"
+            });
+        var experiment = NewExperiment("Primary guardrail invariant");
+        await experimentService.CreateAsync(experiment);
+        var guardrails = JsonSerializer.Serialize(new[] { new { metricId = metric.Id } });
+
+        await Assert.ThrowsAsync<ArgumentException>(() => experimentService.UpdateMetricsAsync(
+            ExperimentProviderParityFixture.EnvId,
+            experiment.Id,
+            new ExperimentMetricsUpdate
+            {
+                MetricId = metric.Id,
+                ExpectedDirection = "increase_good",
+                Guardrails = guardrails
+            }));
+    }
+
+    [DockerFact]
+    public async Task UpdateExperimentMetrics_GuardrailMetricCannotBeSelectedTwice()
+    {
+        var (experimentService, metricService) = CreateExperimentServices();
+        var primaryMetric = await metricService.CreateAsync(
+            ExperimentProviderParityFixture.EnvId,
+            new CreateExperimentMetricRequest
+            {
+                Name = "Primary metric",
+                Key = $"metric-primary-{Guid.NewGuid():N}",
+                MetricType = "binary",
+                MetricAgg = "once"
+            });
+        var guardrailMetric = await metricService.CreateAsync(
+            ExperimentProviderParityFixture.EnvId,
+            new CreateExperimentMetricRequest
+            {
+                Name = "Guardrail metric",
+                Key = $"metric-guardrail-{Guid.NewGuid():N}",
+                MetricType = "binary",
+                MetricAgg = "once"
+            });
+        var experiment = NewExperiment("Duplicate guardrail invariant");
+        await experimentService.CreateAsync(experiment);
+        var guardrails = JsonSerializer.Serialize(new[]
         {
-            Name = "Metric update parity",
-            Key = key,
-            MetricType = "binary",
-            MetricAgg = "once",
-            Status = "active"
+            new { metricId = guardrailMetric.Id },
+            new { metricId = guardrailMetric.Id }
         });
 
-        await service.UpdateAsync(ExperimentProviderParityFixture.EnvId, created.Id, new ExperimentMetricUpdate
+        await Assert.ThrowsAsync<ArgumentException>(() => experimentService.UpdateMetricsAsync(
+            ExperimentProviderParityFixture.EnvId,
+            experiment.Id,
+            new ExperimentMetricsUpdate
+            {
+                MetricId = primaryMetric.Id,
+                ExpectedDirection = "increase_good",
+                Guardrails = guardrails
+            }));
+    }
+
+    [DockerFact]
+    public async Task GetExperimentsWithRuns_NameSearch_FiltersExperimentsInDatabase()
+    {
+        var (experimentService, _) = CreateExperimentServices();
+        var searchToken = $"pricing-{Guid.NewGuid():N}";
+        var matchingExperiment = NewExperiment($"Experiment {searchToken}");
+        var nonMatchingExperiment = NewExperiment($"Experiment checkout-{Guid.NewGuid():N}");
+        await experimentService.CreateAsync(matchingExperiment);
+        await experimentService.CreateAsync(nonMatchingExperiment);
+
+        var experiments = await experimentService.GetExperimentsWithRunsAsync(
+            ExperimentProviderParityFixture.EnvId,
+            searchToken.ToUpperInvariant());
+
+        var result = Assert.Single(experiments);
+        Assert.Equal(matchingExperiment.Id, result.Experiment.Id);
+    }
+
+    [DockerFact]
+    public async Task CreateExperimentMetric_NumericType_PersistsNumericValue()
+    {
+        var service = CreateExperimentMetricService();
+        var key = $"metric-numeric-{Guid.NewGuid():N}";
+        await service.CreateAsync(ExperimentProviderParityFixture.EnvId, new CreateExperimentMetricRequest
         {
-            Name = "Metric update parity",
+            Name = "Numeric metric parity",
             Key = key,
-            MetricType = "continuous",
-            MetricAgg = "sum",
-            Status = "active"
+            MetricType = "numeric",
+            MetricAgg = "average"
         });
 
         var listed = await service.GetListAsync(ExperimentProviderParityFixture.EnvId, new ExperimentMetricFilter
@@ -566,11 +682,73 @@ public abstract class WritableExperimentProviderTestsBase(
             Key = key,
             PageIndex = 0,
             PageSize = 10
-        });
+        }, []);
         var metric = Assert.Single(listed.Items);
-        Assert.Equal("continuous", metric.MetricType);
+        Assert.Equal("numeric", metric.MetricType);
+        Assert.Equal("average", metric.MetricAgg);
+    }
+
+    [DockerFact]
+    public async Task UpdateExperimentMetric_ValidUpdate_PersistsChanges()
+    {
+        var service = CreateExperimentMetricService();
+        var key = $"metric-update-{Guid.NewGuid():N}";
+        var created = await service.CreateAsync(ExperimentProviderParityFixture.EnvId, new CreateExperimentMetricRequest
+        {
+            Name = "Metric update parity",
+            Key = key,
+            MetricType = "binary",
+            MetricAgg = "once"
+        });
+
+        await service.UpdateAsync(ExperimentProviderParityFixture.EnvId, created.Id, new UpdateExperimentMetricRequest
+        {
+            Name = "Metric update parity",
+            MetricType = "numeric",
+            MetricAgg = "sum"
+        });
+
+        var listed = await service.GetListAsync(ExperimentProviderParityFixture.EnvId, new ExperimentMetricFilter
+        {
+            SearchText = key,
+            PageIndex = 0,
+            PageSize = 10
+        }, []);
+        var metric = Assert.Single(listed.Items);
+        Assert.Equal(key, metric.Key);
+        Assert.Equal("numeric", metric.MetricType);
         Assert.Equal("sum", metric.MetricAgg);
         Assert.Equal("active", metric.Status);
+    }
+
+    [DockerFact]
+    public async Task RestoreExperimentMetric_ArchivedMetric_ReturnsToActiveCatalog()
+    {
+        var service = CreateExperimentMetricService();
+        var key = $"metric-restore-{Guid.NewGuid():N}";
+        var metric = await service.CreateAsync(
+            ExperimentProviderParityFixture.EnvId,
+            new CreateExperimentMetricRequest
+            {
+                Name = "Metric restore parity",
+                Key = key,
+                MetricType = "binary",
+                MetricAgg = "once"
+            });
+
+        await service.ArchiveAsync(ExperimentProviderParityFixture.EnvId, metric.Id);
+        var archived = await service.GetListAsync(
+            ExperimentProviderParityFixture.EnvId,
+            new ExperimentMetricFilter { Key = key, Status = "archived", PageSize = 10 },
+            []);
+        Assert.Equal("archived", Assert.Single(archived.Items).Status);
+
+        await service.RestoreAsync(ExperimentProviderParityFixture.EnvId, metric.Id);
+        var active = await service.GetListAsync(
+            ExperimentProviderParityFixture.EnvId,
+            new ExperimentMetricFilter { Key = key, Status = "active", PageSize = 10 },
+            []);
+        Assert.Equal("active", Assert.Single(active.Items).Status);
     }
 
     [DockerFact]
@@ -578,14 +756,13 @@ public abstract class WritableExperimentProviderTestsBase(
     {
         var (experimentService, metricService) = CreateExperimentServices();
         var key = $"metric-reuse-{Guid.NewGuid():N}";
-        var metric = await metricService.CreateAsync(ExperimentProviderParityFixture.EnvId, new ExperimentMetricUpdate
+        var metric = await metricService.CreateAsync(ExperimentProviderParityFixture.EnvId, new CreateExperimentMetricRequest
         {
             Name = "Metric reuse parity",
             Key = key,
             Description = "One registered metric can be selected by multiple experiments.",
             MetricType = "binary",
-            MetricAgg = "once",
-            Status = "active"
+            MetricAgg = "once"
         });
 
         var firstExperiment = NewExperiment("Metric reuse first");
