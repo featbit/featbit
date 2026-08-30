@@ -137,6 +137,13 @@ const ExperimentsPage = lazy(() =>
     default: module.ExperimentsPage,
   }))
 )
+const ExperimentDetailsPage = lazy(() =>
+  import("@/features/expts/details/hypothesis/experiment-details-page").then(
+    (module) => ({
+      default: module.ExperimentDetailsPage,
+    })
+  )
+)
 const MetricsPage = lazy(() =>
   import("@/features/expt-metrics/metrics-page").then((module) => ({
     default: module.MetricsPage,
@@ -388,6 +395,10 @@ export function AppRoutes() {
           <Route path="webhooks" element={<WebhooksPage />} />
           <Route path="end-users" element={<EndUsersPage />} />
           <Route path="experiments" element={<ExperimentsPage />} />
+          <Route
+            path="experiments/:experimentId"
+            element={<ExperimentDetailsPage />}
+          />
           <Route path="metrics" element={<MetricsPage />} />
           <Route path="layers" element={<LayersPage />} />
           <Route path="audit-logs" element={<AuditLogsPage />} />
