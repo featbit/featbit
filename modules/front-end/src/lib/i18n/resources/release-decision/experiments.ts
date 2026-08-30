@@ -99,7 +99,7 @@ export const enExperiments = {
     settings: {
       title: "Settings",
       subtitle: "Manage administrative information for this experiment.",
-      back: "Back to Intent & Hypothesis",
+      close: "Close settings",
       information: "Experiment information",
       name: "Name",
       description: "Description",
@@ -110,9 +110,9 @@ export const enExperiments = {
       deleteHelp:
         "Permanently removes this experiment, all runs, and activity history. This action cannot be undone.",
       deleteAction: "Delete experiment",
-      deleteConfirmTitle: "Delete {{name}}?",
+      deleteConfirmTitle: "Delete experiment permanently?",
       deleteConfirmDescription:
-        "The experiment {{name}}, all of its runs, and its activity history will be permanently removed. This action cannot be undone.",
+        "Experiment <experimentName>{{name}}</experimentName> will be permanently removed, including all runs and activity history. This operation cannot be undone.",
       deleting: "Deleting…",
       deleted: "Experiment deleted",
       deleteFailed: "The experiment could not be deleted. Try again.",
@@ -278,7 +278,7 @@ export const zhExperiments = {
     settings: {
       title: "设置",
       subtitle: "管理此实验的管理信息。",
-      back: "返回意图与假设",
+      close: "关闭设置",
       information: "实验信息",
       name: "名称",
       description: "描述",
@@ -288,9 +288,9 @@ export const zhExperiments = {
       deleteTitle: "删除实验",
       deleteHelp: "永久删除此实验、所有运行和活动历史。此操作无法撤销。",
       deleteAction: "删除实验",
-      deleteConfirmTitle: "删除 {{name}}？",
+      deleteConfirmTitle: "永久删除实验？",
       deleteConfirmDescription:
-        "实验 {{name}}、其所有运行和活动历史将被永久删除。此操作无法撤销。",
+        "实验 <experimentName>{{name}}</experimentName> 将被永久删除，包括所有运行和活动历史。此操作无法撤销。",
       deleting: "正在删除…",
       deleted: "实验已删除",
       deleteFailed: "无法删除实验，请重试。",

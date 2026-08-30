@@ -186,7 +186,6 @@ export function ExperimentDetailsPage() {
                 experiment={detailQuery.data}
                 deleting={deleteMutation.isPending}
                 deleteError={deleteMutation.isError}
-                onBack={() => setSettingsActive(false)}
                 onDelete={() => deleteMutation.mutate()}
               />
             ) : (

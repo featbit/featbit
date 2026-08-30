@@ -1,4 +1,4 @@
-import { Bot, ChevronLeft, Settings } from "lucide-react"
+import { Bot, ChevronLeft, Settings, X } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
 import { Badge } from "@/components/ui/badge"
@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/tooltip"
 import { localizedPath } from "@/features/layout/layout-context"
 import type { Lang } from "@/features/layout/layout-types"
-import { cn } from "@/lib/utils"
 import type { ExperimentDetail } from "../experiment-details-types"
 
 type Props = {
@@ -92,27 +91,33 @@ export function ExperimentDetailsHeader({
             <Bot />
             {t("releaseDecision.experiments.detailsPage.agentSetup.title")}
           </Button>
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <Button
-                  type="button"
-                  variant={settingsActive ? "secondary" : "outline"}
-                  size="icon"
-                  aria-label={t(
-                    "releaseDecision.experiments.detailsPage.settings.title"
-                  )}
-                  className={cn(settingsActive && "bg-muted")}
-                  onClick={onSettings}
-                />
-              }
-            >
-              <Settings />
-            </TooltipTrigger>
-            <TooltipContent>
-              {t("releaseDecision.experiments.detailsPage.settings.title")}
-            </TooltipContent>
-          </Tooltip>
+          {settingsActive ? (
+            <Button type="button" variant="outline" onClick={onSettings}>
+              <X />
+              {t("releaseDecision.experiments.detailsPage.settings.close")}
+            </Button>
+          ) : (
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    aria-label={t(
+                      "releaseDecision.experiments.detailsPage.settings.title"
+                    )}
+                    onClick={onSettings}
+                  />
+                }
+              >
+                <Settings />
+              </TooltipTrigger>
+              <TooltipContent>
+                {t("releaseDecision.experiments.detailsPage.settings.title")}
+              </TooltipContent>
+            </Tooltip>
+          )}
         </div>
       </div>
     </header>

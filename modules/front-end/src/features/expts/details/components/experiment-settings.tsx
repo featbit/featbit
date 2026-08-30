@@ -1,8 +1,9 @@
-import { ChevronLeft, Loader2 } from "lucide-react"
+import { Loader2 } from "lucide-react"
 import { useState } from "react"
-import { useTranslation } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
 import {
   AlertDialog,
+  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -17,7 +18,6 @@ type Props = {
   experiment: ExperimentDetail
   deleting: boolean
   deleteError: boolean
-  onBack: () => void
   onDelete: () => void
 }
 
@@ -25,7 +25,6 @@ export function ExperimentSettings({
   experiment,
   deleting,
   deleteError,
-  onBack,
   onDelete,
 }: Props) {
   const { t } = useTranslation()
@@ -63,16 +62,6 @@ export function ExperimentSettings({
 
   return (
     <div className="max-w-[1080px] pb-10">
-      <Button
-        type="button"
-        variant="link"
-        className="mb-6 -ml-2 h-auto px-2 text-muted-foreground"
-        onClick={onBack}
-      >
-        <ChevronLeft />
-        {t("releaseDecision.experiments.detailsPage.settings.back")}
-      </Button>
-
       <div className="space-y-1">
         <h2 className="text-xl font-semibold">
           {t("releaseDecision.experiments.detailsPage.settings.title")}
@@ -145,15 +134,19 @@ export function ExperimentSettings({
           <AlertDialogHeader>
             <AlertDialogTitle>
               {t(
-                "releaseDecision.experiments.detailsPage.settings.deleteConfirmTitle",
-                { name: experiment.name }
+                "releaseDecision.experiments.detailsPage.settings.deleteConfirmTitle"
               )}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {t(
-                "releaseDecision.experiments.detailsPage.settings.deleteConfirmDescription",
-                { name: experiment.name }
-              )}
+              <Trans
+                i18nKey="releaseDecision.experiments.detailsPage.settings.deleteConfirmDescription"
+                values={{ name: experiment.name }}
+                components={{
+                  experimentName: (
+                    <span className="rounded bg-muted px-1 py-0.5 font-mono font-medium text-foreground" />
+                  ),
+                }}
+              />
             </AlertDialogDescription>
           </AlertDialogHeader>
           {deleteError ? (
@@ -163,15 +156,10 @@ export function ExperimentSettings({
               )}
             </p>
           ) : null}
-          <AlertDialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              disabled={deleting}
-              onClick={() => setConfirmOpen(false)}
-            >
+          <AlertDialogFooter className="border-t-0 bg-transparent">
+            <AlertDialogCancel disabled={deleting}>
               {t("releaseDecision.experiments.detailsPage.cancel")}
-            </Button>
+            </AlertDialogCancel>
             <Button
               type="button"
               variant="destructive"
