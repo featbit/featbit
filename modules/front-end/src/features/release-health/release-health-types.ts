@@ -1,9 +1,44 @@
 export type ReleaseMetricCategory = "impact" | "quality" | "reliability"
 
-export type ReleaseMetricSignalType =
-  "counter" | "gauge" | "rate" | "distribution"
+export type ReleaseMetricValueType =
+  "count" | "gauge" | "rate" | "ratio" | "distribution"
 
-export type MetricObservationScope = "flag-contextual" | "environment"
+export type ReleaseMetricCalculation =
+  | "sum"
+  | "latest"
+  | "average"
+  | "minimum"
+  | "maximum"
+  | "per-second"
+  | "per-minute"
+  | "per-hour"
+  | "numerator-over-denominator"
+  | "one-minus-ratio"
+  | "p50"
+  | "p90"
+  | "p95"
+  | "p99"
+
+export type ReleaseMetricUnit =
+  | "count"
+  | "percent"
+  | "ratio"
+  | "milliseconds"
+  | "seconds"
+  | "bytes"
+  | "megabytes"
+  | "events-per-second"
+  | "events-per-minute"
+  | "events-per-hour"
+  | "requests-per-second"
+  | "errors-per-minute"
+
+export type MetricObservationMode = "flag-contextual" | "environment"
+
+export type MetricContextCapability =
+  "flag-key" | "flag-revision" | "variation" | "exposure"
+
+export type MetricSourceType = "featbit-events" | "prometheus"
 
 export type DataStatus = "collecting" | "ready" | "no-data" | "stale" | "error"
 
@@ -28,6 +63,14 @@ export type EnvironmentMetricState = {
   updatedAt: string
   coverage: number
   history: MetricPoint[]
+  sourceBinding?: {
+    sourceType: MetricSourceType
+    sourceLabel: string
+    selector: string
+    connectionName?: string
+    bindingRevision: number
+    contextCapabilities: MetricContextCapability[]
+  }
 }
 
 export type ReleaseMetric = {
@@ -36,12 +79,9 @@ export type ReleaseMetric = {
   name: string
   description: string
   category: ReleaseMetricCategory
-  signalType: ReleaseMetricSignalType
-  observationScope: MetricObservationScope
-  source: string
-  sourceEvent: string
-  aggregation: string
-  unit: string
+  valueType: ReleaseMetricValueType
+  calculation: ReleaseMetricCalculation
+  unit: ReleaseMetricUnit
   version: number
   usedByMonitors: number
   usedByFlags: string[]
@@ -50,6 +90,7 @@ export type ReleaseMetric = {
 
 export type MonitorBinding = {
   metricId: string
+  observationMode: MetricObservationMode
   purpose: MonitorPurpose
   rule: string
   noDataPolicy: "wait" | "notify" | "block"
@@ -75,6 +116,7 @@ export type HealthMonitor = {
 
 export type HealthAssessment = {
   metricId: string
+  observationMode: MetricObservationMode
   purpose: MonitorPurpose
   dataStatus: DataStatus
   healthStatus: HealthStatus

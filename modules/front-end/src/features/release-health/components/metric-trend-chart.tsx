@@ -70,7 +70,7 @@ export function MetricTrendChart({
             tick={{ fontSize: 12 }}
             className="text-muted-foreground"
             tickFormatter={(value) =>
-              `${value}${metric.unit === "%" ? "%" : ""}`
+              `${value}${metric.unit === "percent" ? "%" : ""}`
             }
           />
           <ChartTooltip
@@ -81,7 +81,9 @@ export function MetricTrendChart({
               color: "var(--popover-foreground)",
             }}
             formatter={(value) => [
-              `${Number(value).toLocaleString()}${metric.unit ? ` ${metric.unit}` : ""}`,
+              `${Number(value).toLocaleString()} ${t(
+                `releaseHealth.unit.${metric.unit}`
+              )}`,
               metricSampleText(t, metric, "name"),
             ]}
           />

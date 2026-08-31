@@ -42,12 +42,12 @@ import { Switch } from "@/components/ui/switch"
 import { cn } from "@/lib/utils"
 import { metricSampleText, ruleSampleText } from "../release-health-display"
 import { releaseMetrics } from "../release-health-mock-data"
-import type { MonitorPurpose } from "../release-health-types"
-import {
-  DataStatusBadge,
-  ObservationScopeBadge,
-  PurposeBadge,
-} from "./status-badges"
+import { supportsFlagContext } from "../metrics/metric-contract"
+import type {
+  MetricObservationMode,
+  MonitorPurpose,
+} from "../release-health-types"
+import { DataStatusBadge, PurposeBadge } from "./status-badges"
 
 const schema = z.object({
   warmup: z.string(),
@@ -113,6 +113,14 @@ export function MonitorConfigurationSheet({
     "metric-api-latency": "guard",
     "metric-completion": "observe",
     "metric-memory": "guard",
+  })
+  const [observationModes, setObservationModes] = useState<
+    Record<string, MetricObservationMode>
+  >({
+    "metric-error-rate": "flag-contextual",
+    "metric-api-latency": "environment",
+    "metric-completion": "flag-contextual",
+    "metric-memory": "environment",
   })
   const [showAdvanced, setShowAdvanced] = useState(false)
   const { control, reset, handleSubmit } = useForm<ConfigurationValues>({
@@ -279,6 +287,12 @@ export function MonitorConfigurationSheet({
                     {releaseMetrics.slice(0, 4).map((metric) => {
                       const selected = selectedMetricIds.includes(metric.id)
                       const purpose = purposes[metric.id] ?? "observe"
+                      const canUseFlagContext = supportsFlagContext(
+                        metric.environment.sourceBinding?.contextCapabilities ??
+                          []
+                      )
+                      const observationMode =
+                        observationModes[metric.id] ?? "environment"
                       return (
                         <div
                           key={metric.id}
@@ -309,13 +323,70 @@ export function MonitorConfigurationSheet({
                                   <DataStatusBadge
                                     status={metric.environment.dataStatus}
                                   />
-                                  <ObservationScopeBadge
-                                    scope={metric.observationScope}
-                                  />
+                                  <Badge variant="outline">
+                                    {t(
+                                      canUseFlagContext
+                                        ? "releaseHealth.monitor.flagContextAvailable"
+                                        : "releaseHealth.monitor.environmentOnly"
+                                    )}
+                                  </Badge>
                                 </div>
                               </div>
                               {selected ? (
-                                <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t pt-3">
+                                <div className="mt-3 grid gap-3 border-t pt-3 sm:grid-cols-[minmax(12rem,1fr)_auto] sm:items-end">
+                                  <div className="space-y-1.5">
+                                    <Label
+                                      htmlFor={`metric-context-${metric.id}`}
+                                    >
+                                      {t("releaseHealth.monitor.contextMode")}
+                                    </Label>
+                                    <Select
+                                      value={observationMode}
+                                      onValueChange={(value) => {
+                                        if (!value) return
+                                        setObservationModes((current) => ({
+                                          ...current,
+                                          [metric.id]:
+                                            value as MetricObservationMode,
+                                        }))
+                                      }}
+                                    >
+                                      <SelectTrigger
+                                        id={`metric-context-${metric.id}`}
+                                        className="w-full"
+                                      >
+                                        <SelectValue>
+                                          {t(
+                                            `releaseHealth.scope.${observationMode}`
+                                          )}
+                                        </SelectValue>
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectGroup>
+                                          <SelectItem value="environment">
+                                            {t(
+                                              "releaseHealth.scope.environment"
+                                            )}
+                                          </SelectItem>
+                                          <SelectItem
+                                            value="flag-contextual"
+                                            disabled={!canUseFlagContext}
+                                          >
+                                            {t(
+                                              "releaseHealth.scope.flag-contextual"
+                                            )}
+                                          </SelectItem>
+                                        </SelectGroup>
+                                      </SelectContent>
+                                    </Select>
+                                    <p className="text-xs leading-5 text-muted-foreground">
+                                      {t(
+                                        canUseFlagContext
+                                          ? "releaseHealth.monitor.contextModeHelp"
+                                          : "releaseHealth.monitor.contextUnavailableHelp"
+                                      )}
+                                    </p>
+                                  </div>
                                   <div className="inline-flex rounded-md border bg-background p-0.5">
                                     {(["observe", "guard"] as const).map(
                                       (value) => (
@@ -341,7 +412,7 @@ export function MonitorConfigurationSheet({
                                       )
                                     )}
                                   </div>
-                                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                  <div className="flex items-center gap-2 text-xs text-muted-foreground sm:col-span-2">
                                     <PurposeBadge purpose={purpose} />
                                     {purpose === "guard"
                                       ? ruleSampleText(

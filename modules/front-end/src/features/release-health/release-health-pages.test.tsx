@@ -6,6 +6,7 @@ import { i18n } from "@/lib/i18n/i18n"
 import type { FeatureFlag } from "@/features/flags/flags-types"
 import { FlagReleaseHealthTab } from "./flag/flag-release-health-tab"
 import { ReleaseMetricDetailsPage } from "./metrics/release-metric-details-page"
+import { ReleaseMetricSourceBindingPage } from "./metrics/release-metric-source-binding-page"
 import { ReleaseHealthOverviewPage } from "./overview/release-health-overview-page"
 import { HealthSessionDetailsPage } from "./sessions/health-session-details-page"
 
@@ -84,7 +85,36 @@ describe("Release Health design pages", () => {
       )
     ).toBeVisible()
     expect(screen.getByText("Environment trend")).toBeVisible()
+    expect(screen.getByText("Environment streams")).toBeVisible()
+    expect(screen.getByText("Not connected")).toBeVisible()
+    expect(screen.getByText("No data")).toBeVisible()
     expect(screen.getByText("Monitor bindings")).toBeVisible()
+  })
+
+  it("configures an environment source without choosing a feature flag", () => {
+    render(
+      <MemoryRouter
+        initialEntries={[
+          "/en/release-health/metrics/api_p95_latency/source-bindings/production",
+        ]}
+      >
+        <Routes>
+          <Route
+            path="/:lang/release-health/metrics/:metricKey/source-bindings/:environmentKey"
+            element={<ReleaseMetricSourceBindingPage />}
+          />
+        </Routes>
+      </MemoryRouter>
+    )
+
+    expect(
+      screen.getByRole("heading", { name: "Manage data source" })
+    ).toBeVisible()
+    expect(screen.getByText("Detected context capabilities")).toBeVisible()
+    expect(screen.getByText("Feature flag key")).toBeVisible()
+    expect(screen.getAllByText("Not checked")).toHaveLength(5)
+    expect(screen.queryByLabelText("Feature flag")).not.toBeInTheDocument()
+    expect(screen.queryByText("Observation scope")).not.toBeInTheDocument()
   })
 
   it("shows monitor rules in the selected metric unit", () => {

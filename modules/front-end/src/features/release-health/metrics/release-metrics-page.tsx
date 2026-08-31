@@ -25,10 +25,7 @@ import {
 import { localizedPath, resolveLang } from "@/features/layout/layout-context"
 import { MetricDefinitionSheet } from "../components/metric-definition-sheet"
 import { ReleaseHealthShell } from "../components/release-health-shell"
-import {
-  DataStatusBadge,
-  ObservationScopeBadge,
-} from "../components/status-badges"
+import { DataStatusBadge } from "../components/status-badges"
 import { metricSampleText } from "../release-health-display"
 import { releaseMetrics } from "../release-health-mock-data"
 import type { ReleaseMetricCategory } from "../release-health-types"
@@ -46,7 +43,7 @@ export function ReleaseMetricsPage() {
         (metric) =>
           (category === "all" || metric.category === category) &&
           (!search.trim() ||
-            `${metricSampleText(t, metric, "name")} ${metric.name} ${metric.key} ${metric.source}`
+            `${metricSampleText(t, metric, "name")} ${metric.name} ${metric.key} ${metric.environment.sourceBinding?.sourceLabel ?? ""}`
               .toLowerCase()
               .includes(search.trim().toLowerCase()))
       ),
@@ -154,7 +151,9 @@ export function ReleaseMetricsPage() {
                 <Badge variant="secondary" className="font-normal">
                   {t(`releaseHealth.category.${metric.category}`)}
                 </Badge>
-                <ObservationScopeBadge scope={metric.observationScope} />
+                <Badge variant="outline" className="font-normal">
+                  {t(`releaseHealth.valueType.${metric.valueType}`)}
+                </Badge>
                 <span className="text-xs text-muted-foreground">
                   {t("releaseHealth.metrics.monitorCount", {
                     count: metric.usedByMonitors,
@@ -178,7 +177,6 @@ export function ReleaseMetricsPage() {
                   {t("releaseHealth.metrics.metric")}
                 </TableHead>
                 <TableHead>{t("releaseHealth.metrics.category")}</TableHead>
-                <TableHead>{t("releaseHealth.metrics.scopeColumn")}</TableHead>
                 <TableHead>{t("releaseHealth.metrics.signal")}</TableHead>
                 <TableHead>{t("releaseHealth.metrics.dataStatus")}</TableHead>
                 <TableHead>{t("releaseHealth.metrics.latest")}</TableHead>
@@ -211,10 +209,13 @@ export function ReleaseMetricsPage() {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <ObservationScopeBadge scope={metric.observationScope} />
-                  </TableCell>
-                  <TableCell>
-                    {t(`releaseHealth.signal.${metric.signalType}`)}
+                    <div className="text-sm">
+                      {t(`releaseHealth.valueType.${metric.valueType}`)}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {t(`releaseHealth.calculation.${metric.calculation}`)} ·{" "}
+                      {t(`releaseHealth.unit.${metric.unit}`)}
+                    </p>
                   </TableCell>
                   <TableCell>
                     <DataStatusBadge status={metric.environment.dataStatus} />
@@ -235,7 +236,7 @@ export function ReleaseMetricsPage() {
               {!filtered.length ? (
                 <TableRow>
                   <TableCell
-                    colSpan={8}
+                    colSpan={7}
                     className="h-40 text-center text-muted-foreground"
                   >
                     {t("releaseHealth.metrics.empty")}

@@ -27,11 +27,7 @@ import {
 } from "@/components/ui/table"
 import { localizedPath, resolveLang } from "@/features/layout/layout-context"
 import { ReleaseHealthShell } from "../components/release-health-shell"
-import {
-  DataStatusBadge,
-  GateStatusBadge,
-  ObservationScopeBadge,
-} from "../components/status-badges"
+import { DataStatusBadge, GateStatusBadge } from "../components/status-badges"
 import { metricSampleText, sessionSampleText } from "../release-health-display"
 import { healthSessions, releaseMetrics } from "../release-health-mock-data"
 
@@ -323,7 +319,14 @@ export function ReleaseHealthOverviewPage() {
                       {metricSampleText(t, metric, "changeLabel")} ·{" "}
                       {metricSampleText(t, metric, "updatedAt")}
                     </p>
-                    <ObservationScopeBadge scope={metric.observationScope} />
+                    <p className="text-xs text-muted-foreground">
+                      {t(`releaseHealth.valueType.${metric.valueType}`)} ·{" "}
+                      {metric.environment.sourceBinding
+                        ? t(
+                            `releaseHealth.metrics.sources.${metric.environment.sourceBinding.sourceType}`
+                          )
+                        : t("releaseHealth.metrics.detail.notConnected")}
+                    </p>
                   </CardContent>
                 </Card>
               </Link>

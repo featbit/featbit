@@ -30,7 +30,7 @@ import {
   DataStatusBadge,
   GateStatusBadge,
   HealthStatusBadge,
-  ObservationScopeBadge,
+  ObservationModeBadge,
   PurposeBadge,
 } from "../components/status-badges"
 import {
@@ -283,8 +283,8 @@ export function HealthSessionDetailsPage() {
                 <div className="mb-4 flex flex-wrap items-center gap-2">
                   <DataStatusBadge status={selectedAssessment.dataStatus} />
                   <HealthStatusBadge status={selectedAssessment.healthStatus} />
-                  <ObservationScopeBadge
-                    scope={selectedMetric.observationScope}
+                  <ObservationModeBadge
+                    mode={selectedAssessment.observationMode}
                   />
                   <Badge variant="outline" className="font-normal">
                     {assessmentSampleText(
@@ -294,7 +294,7 @@ export function HealthSessionDetailsPage() {
                     )}
                   </Badge>
                 </div>
-                {selectedMetric.observationScope === "environment" ? (
+                {selectedAssessment.observationMode === "environment" ? (
                   <div className="mb-4 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-xs leading-5 text-blue-900 dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-blue-100">
                     {t("releaseHealth.sessions.detail.environmentSignalNotice")}
                   </div>

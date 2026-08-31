@@ -42,7 +42,7 @@ import {
   DataStatusBadge,
   GateStatusBadge,
   HealthStatusBadge,
-  ObservationScopeBadge,
+  ObservationModeBadge,
   PurposeBadge,
 } from "../components/status-badges"
 import {
@@ -245,7 +245,7 @@ export function FlagReleaseHealthTab({
                       <HealthStatusBadge status={binding.healthStatus} />
                     </div>
                     <div className="mt-3 flex flex-wrap items-center gap-2">
-                      <ObservationScopeBadge scope={metric.observationScope} />
+                      <ObservationModeBadge mode={binding.observationMode} />
                       <PurposeBadge purpose={binding.purpose} />
                       <DataStatusBadge status={metric.environment.dataStatus} />
                     </div>
@@ -295,8 +295,8 @@ export function FlagReleaseHealthTab({
                           </p>
                         </TableCell>
                         <TableCell>
-                          <ObservationScopeBadge
-                            scope={metric.observationScope}
+                          <ObservationModeBadge
+                            mode={binding.observationMode}
                           />
                         </TableCell>
                         <TableCell>

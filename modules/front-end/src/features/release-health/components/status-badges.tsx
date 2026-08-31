@@ -5,7 +5,7 @@ import type {
   DataStatus,
   GateStatus,
   HealthStatus,
-  MetricObservationScope,
+  MetricObservationMode,
   MonitorPurpose,
 } from "../release-health-types"
 
@@ -82,15 +82,15 @@ export function PurposeBadge({ purpose }: { purpose: MonitorPurpose }) {
   )
 }
 
-export function ObservationScopeBadge({
-  scope,
+export function ObservationModeBadge({
+  mode,
 }: {
-  scope: MetricObservationScope
+  mode: MetricObservationMode
 }) {
   const { t } = useTranslation()
   return (
     <Badge variant="outline" className="font-normal">
-      {t(`releaseHealth.scope.${scope}`)}
+      {t(`releaseHealth.scope.${mode}`)}
     </Badge>
   )
 }
