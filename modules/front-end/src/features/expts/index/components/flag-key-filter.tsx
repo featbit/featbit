@@ -134,11 +134,9 @@ export function FlagKeyFilter({
                     }}
                   >
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate font-mono">
+                      <span className="block truncate">{flag.name}</span>
+                      <span className="block truncate font-mono text-xs text-muted-foreground">
                         {flag.key}
-                      </span>
-                      <span className="block truncate text-xs text-muted-foreground">
-                        {flag.name}
                       </span>
                     </span>
                     <Check

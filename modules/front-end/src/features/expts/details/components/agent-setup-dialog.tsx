@@ -258,7 +258,7 @@ export function AgentSetupDialog({
                 value={selectedAgent}
                 onValueChange={(value) => setSelectedAgent(value as AgentId)}
               >
-                <TabsList className="h-9 max-w-full overflow-x-auto rounded-lg border bg-background p-0">
+                <TabsList className="h-9 max-w-full overflow-x-auto overflow-y-hidden rounded-lg border bg-background p-0">
                   {AGENTS.map((agent) => (
                     <TabsTrigger
                       key={agent}

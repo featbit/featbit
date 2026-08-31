@@ -26,6 +26,7 @@ import type {
   ExperimentDetail,
   ExperimentDetailsUpdate,
 } from "../experiment-details-types"
+import { ExposureDetails } from "../exposure/exposure-details"
 import { HypothesisDetails } from "./hypothesis-details"
 
 function LoadingPage({ backHref }: { backHref: string }) {
@@ -207,6 +208,16 @@ export function ExperimentDetailsPage() {
                       updateMutation.mutateAsync(update).then(() => undefined)
                     }
                     onAdvance={() => advanceMutation.mutate()}
+                  />
+                ) : null}
+                {activeStage === "implementing" ? (
+                  <ExposureDetails
+                    experiment={detailQuery.data}
+                    envId={envId}
+                    lang={lang}
+                    onAdvanced={() =>
+                      setStageSelection({ experimentId, stage: "measuring" })
+                    }
                   />
                 ) : null}
               </>

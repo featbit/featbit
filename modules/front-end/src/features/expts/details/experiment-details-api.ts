@@ -8,6 +8,7 @@ import { getRuntimeEnv } from "@/lib/env/runtime-env"
 import type {
   ExperimentDetail,
   ExperimentDetailsUpdate,
+  ExperimentMetricsUpdate,
   McpTokenResponse,
 } from "./experiment-details-types"
 
@@ -41,6 +42,47 @@ export function advanceExperimentToExposure(
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ stage: "implementing" }),
+    }
+  )
+}
+
+export function updateExperimentFlag(
+  envId: string,
+  experimentId: string,
+  flagKey: string
+) {
+  return fetchApi<ExperimentDetail>(experimentPath(envId, experimentId), {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ flagKey }),
+  })
+}
+
+export function updateExperimentMetrics(
+  envId: string,
+  experimentId: string,
+  update: ExperimentMetricsUpdate
+) {
+  return fetchApi<ExperimentDetail>(
+    `${experimentPath(envId, experimentId)}/metrics`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(update),
+    }
+  )
+}
+
+export function advanceExperimentToMeasuring(
+  envId: string,
+  experimentId: string
+) {
+  return fetchApi<ExperimentDetail>(
+    `${experimentPath(envId, experimentId)}/stage`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ stage: "measuring" }),
     }
   )
 }

@@ -15,8 +15,17 @@ export type ExperimentDetail = {
   change: string | null
   constraints: string | null
   conflictAnalysis: string | null
+  primaryMetric: string | null
+  guardrails: string | null
   createdAt: string
   updatedAt: string
+}
+
+export type ExperimentMetricsUpdate = {
+  metricId: string
+  metricKey: string
+  expectedDirection: "increase_good" | "decrease_good"
+  guardrails: string
 }
 
 export type ExperimentDetailsUpdate = Pick<
