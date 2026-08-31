@@ -4,21 +4,16 @@ using Domain.Shared;
 
 namespace Domain.Evaluation;
 
-public class RuleMatcher : IRuleMatcher
+public class RuleMatcher(IStore store) : IRuleMatcher
 {
-    private readonly IStore _store;
-
-    public RuleMatcher(IStore store)
-    {
-        _store = store;
-    }
-
     public async ValueTask<bool> IsMatchAsync(JsonElement rule, EndUser user)
     {
-        var conditions = rule.GetProperty("conditions");
+        var reader = EntityJsonReader.FeatureFlag;
+
+        var conditions = reader.GetRequiredArray(rule, "conditions");
         foreach (var condition in conditions.EnumerateArray())
         {
-            var property = condition.GetProperty("property").GetString();
+            var property = reader.GetRequiredString(condition, "property");
 
             // in segment condition
             if (property is "User is in segment")
@@ -37,7 +32,7 @@ public class RuleMatcher : IRuleMatcher
                 }
             }
             // common condition
-            else if (!IsMatchCondition(condition, user))
+            else if (!IsMatchCondition(condition, user, reader))
             {
                 return false;
             }
@@ -48,18 +43,20 @@ public class RuleMatcher : IRuleMatcher
 
     private async Task<bool> IsMatchAnySegmentAsync(JsonElement segmentCondition, EndUser user)
     {
-        var value = segmentCondition.GetProperty("value").GetString()!;
+        var reader = EntityJsonReader.FeatureFlag;
 
-        var segmentIds = JsonSerializer.Deserialize<string[]>(value);
-        if (segmentIds == null || !segmentIds.Any())
+        var value = reader.GetRequiredString(segmentCondition, "value");
+
+        var segmentIds = reader.DeserializeStringArray(value, "value");
+        if (segmentIds.Length == 0)
         {
             return false;
         }
 
         foreach (var segmentId in segmentIds)
         {
-            var segment = await _store.GetSegmentAsync(segmentId);
-            if (IsMatchSegment(segment, user))
+            var segment = await store.GetSegmentAsync(segmentId);
+            if (IsMatchSegment(segmentId, segment, user))
             {
                 return true;
             }
@@ -68,30 +65,36 @@ public class RuleMatcher : IRuleMatcher
         return false;
     }
 
-    private static bool IsMatchSegment(byte[] segment, EndUser user)
+    private static bool IsMatchSegment(string segmentId, byte[] segment, EndUser user)
     {
-        using var document = JsonDocument.Parse(segment);
+        var reader = EntityJsonReader.ForSegment(segmentId);
+
+        using var document = reader.Parse(segment);
         var root = document.RootElement;
 
-        var excludes = root.GetProperty("excluded").EnumerateArray();
-        foreach (var exclude in excludes)
+        var excludes = reader.GetRequiredArray(root, "excluded").EnumerateArray();
+        var excludeIndex = 0;
+        foreach (var excludeElement in excludes)
         {
-            if (exclude.GetString() == user.KeyId)
+            var exclude = reader.GetRequiredStringValue(excludeElement, $"excluded[{excludeIndex++}]");
+            if (exclude == user.KeyId)
             {
                 return false;
             }
         }
 
-        var includes = root.GetProperty("included").EnumerateArray();
-        foreach (var include in includes)
+        var includes = reader.GetRequiredArray(root, "included").EnumerateArray();
+        var includeIndex = 0;
+        foreach (var includeElement in includes)
         {
-            if (include.GetString() == user.KeyId)
+            var include = reader.GetRequiredStringValue(includeElement, $"included[{includeIndex++}]");
+            if (include == user.KeyId)
             {
                 return true;
             }
         }
 
-        var rules = root.GetProperty("rules").EnumerateArray();
+        var rules = reader.GetRequiredArray(root, "rules").EnumerateArray();
         foreach (var rule in rules)
         {
             if (IsMatchRule(rule, user))
@@ -104,10 +107,10 @@ public class RuleMatcher : IRuleMatcher
 
         bool IsMatchRule(JsonElement segmentMatchRule, EndUser endUser)
         {
-            var conditions = segmentMatchRule.GetProperty("conditions").EnumerateArray();
+            var conditions = reader.GetRequiredArray(segmentMatchRule, "conditions").EnumerateArray();
             foreach (var condition in conditions)
             {
-                if (!IsMatchCondition(condition, endUser))
+                if (!IsMatchCondition(condition, endUser, reader))
                 {
                     return false;
                 }
@@ -117,15 +120,25 @@ public class RuleMatcher : IRuleMatcher
         }
     }
 
-    private static bool IsMatchCondition(JsonElement condition, EndUser user)
+    private static bool IsMatchCondition(JsonElement condition, EndUser user, EntityJsonReader reader)
     {
-        var property = condition.GetProperty("property").GetString()!;
-        var op = condition.GetProperty("op").GetString()!;
-        var conditionValue = condition.GetProperty("value").GetString()!;
+        var property = reader.GetRequiredString(condition, "property");
+        var op = reader.GetRequiredString(condition, "op");
+        var conditionValue = reader.GetRequiredString(condition, "value");
 
-        var userValue = user.ValueOf(property);
+        try
+        {
+            var userValue = user.ValueOf(property);
 
-        var theOperator = Operator.Get(op);
-        return theOperator.IsMatch(userValue, conditionValue);
+            var theOperator = Operator.Get(op);
+            return theOperator.IsMatch(userValue, conditionValue);
+        }
+        // Some operators parse the string value again using their own format. IsOneOf/NotOneOf can throw
+        // JsonException for an invalid encoded string array, while regex operators can throw ArgumentException
+        // for an invalid pattern. Treat both as malformed evaluation data for the current flag or segment.
+        catch (Exception ex) when (ex is JsonException or ArgumentException)
+        {
+            throw reader.Malformed("Rule condition contains an invalid value", "conditions", ex);
+        }
     }
 }
