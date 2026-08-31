@@ -10,6 +10,7 @@ The approved visual scope currently includes:
 - the four-stage navigation;
 - the **Intent & Hypothesis** stage;
 - the **Exposure** stage;
+- the **Learning** stage;
 - the read-only Details presentation and its edit entry;
 - Feature Flag and Run summary states;
 - the primary transition to **Exposure**;
@@ -20,7 +21,7 @@ Explicitly excluded:
 
 - sidebar, context bar, Header, environment switcher, and authenticated-shell changes;
 - Experiments, Metrics, and Layers list redesigns, which have already been migrated separately;
-- final visual designs for the Measuring and Learning stage bodies;
+- final visual design for the Measuring stage body;
 - Audit log UI;
 - React, route, API, backend, test, configuration, package, or i18n implementation.
 
@@ -113,6 +114,36 @@ The `Experiment metrics` table must reuse the same metric-role Badge treatment a
 - `Guardrail`: outline Badge with restrained amber border, light amber background, normal-weight amber text;
 - do not render a separate `Role` column; place the Badge immediately after the human-readable metric name in the `Metric` column, while the metric key remains on the second line;
 - keep Badge height, padding, radius, and typography consistent with the shared Metrics-page role Badge in light and dark themes.
+
+### Learning stage
+
+![Release Decision Experiment details — Learning](release-decision-experiment-details-learning-light.png)
+
+The Learning body uses one continuous bordered workspace. It does not repeat the active-stage title from the stage navigation and does not import Measuring charts or analysis controls.
+
+The workspace preserves the existing `front-end-rda-tempo` learning contract while making the result easier to scan:
+
+- the workspace header is `Outcome & learning`, with one outline `Edit learning` action;
+- the experiment-level summary presents `Hypothesis` and `Key learning` side by side, separated by one thin divider;
+- `Edit learning` edits only those experiment-level fields and uses the standard compact Dialog behavior already established for Experiment details;
+- `Experiment run learnings` uses Run tabs when more than one Run exists; label them consistently as `Run 1`, `Run 2`, and so on, regardless of observation-window order, and retain the Run slug as the stable identity;
+- each selected Run shows its immutable slug, method, status, and decision without turning the decision into a large colored banner;
+- the selected Run preserves `What changed`, `What happened`, `Confirmed or refuted`, `Why it happened`, and `Next hypothesis` as structured read-only learning fields;
+- `Decision summary` is shown as a compact row when present, and the complete evidence rationale remains available through the existing collapsed rationale pattern rather than occupying the whole Learning page;
+
+The experiment-level summary responds to the available main-content width rather than the full browser width. At approximately `768px` of available content width and below, stack `Hypothesis` above `Key learning` in one column. Remove the vertical divider in this layout and use normal section spacing or one thin horizontal divider between the two fields. Keep both labels and values left-aligned and allow values to wrap naturally. Wider content areas retain the approved two-column layout.
+
+#### Key learning backend contract
+
+`Key learning` maps to the Experiment-level `lastLearning` field. The current backend already accepts `lastLearning` through the existing partial Experiment update endpoint, persists it in both PostgreSQL and MongoDB implementations, and returns it in the Experiment detail response. `Edit learning` therefore reuses `PUT /api/v1/envs/{envId}/experiments/{experimentId}`; it does not require a Learning-specific endpoint.
+
+The active React detail contract does not yet expose `lastLearning`. A future implementation must add it to the detail response type and to the update payload used by `Edit learning`, then refresh or replace the cached Experiment detail with the returned response.
+
+Do not promise reliable clearing of an existing Key learning until backend semantics are aligned. PostgreSQL currently normalizes a null, empty, or whitespace-only `lastLearning` update back to the stored value, while MongoDB may persist an empty string. Until that inconsistency is resolved, the edit Dialog must not silently treat an empty submission as a successful clear: keep Save disabled or show inline validation when an existing Key learning is reduced to blank.
+
+When a Run has no captured learning, keep its tab available and show a compact dashed empty state: `No learning captured for this run.` with helper text that learning is recorded after evidence is reviewed. Do not hide the Run, fabricate learning, or render empty field labels. When the Experiment has no Runs, show `No experiment runs yet.` and direct the user back to Measuring without designing the Measuring body.
+
+Long learning text wraps inside its value region. Labels stay fixed and scannable, Run slugs use monospace, and semantic color is limited to real Run status and decision Badges. The page remains useful when only some optional learning fields are present: populated fields retain their normal order and absent fields are omitted rather than filled with `Not set` rows.
 
 ### Agent setup Dialog
 
@@ -615,5 +646,11 @@ This document is design guidance only. It does not authorize React, API, backend
 - [ ] Stage readiness is not shown.
 - [ ] `Continue to Exposure` is the only prominent bottom action.
 - [ ] There is no duplicate bottom Agent setup action.
-- [ ] Exposure, Measuring, and Learning body designs are not inferred from this Intent & Hypothesis asset.
+- [ ] Exposure and Learning follow their own approved assets; Measuring is not inferred from any current detail-page asset.
+- [ ] Learning preserves Hypothesis, Key learning, Run identity, decision, and all five structured Run-learning fields.
+- [ ] Hypothesis and Key learning stack into one column when the available main-content width is approximately `768px` or narrower.
+- [ ] Key learning reads and writes the Experiment-level `lastLearning` field through the existing partial Experiment update endpoint.
+- [ ] Clearing an existing Key learning is not presented as successful until PostgreSQL and MongoDB clearing semantics are aligned.
+- [ ] Learning uses Run tabs for multiple Runs and keeps an explicit empty state for Runs without captured learning.
+- [ ] Learning does not duplicate Measuring analysis or the global Agent setup entry.
 - [ ] No implementation work is inferred from this design document.
