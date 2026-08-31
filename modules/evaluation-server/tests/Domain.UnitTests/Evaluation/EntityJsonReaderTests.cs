@@ -113,5 +113,29 @@ public class EntityJsonReaderTests
         Assert.Equal("included[0]", exception.PropertyPath);
     }
 
+    [Fact]
+    public void DeserializeRequiredArray_NullElement_ThrowsWithPropertyPath()
+    {
+        var json = Parse("""{"variations":[null]}""");
+
+        var exception = Assert.Throws<MalformedDataException>(
+            () => EntityJsonReader.FeatureFlag.DeserializeRequiredArray<Variation>(json, "variations")
+        );
+
+        Assert.Equal(EvaluationEntityType.FeatureFlag, exception.EntityType);
+        Assert.Equal("variations", exception.PropertyPath);
+    }
+
+    [Fact]
+    public void DeserializeSegmentIds_InvalidGuid_ThrowsWithPropertyPath()
+    {
+        var exception = Assert.Throws<MalformedDataException>(
+            () => EntityJsonReader.FeatureFlag.DeserializeSegmentIds("[\"not-a-guid\"]", "value")
+        );
+
+        Assert.Equal(EvaluationEntityType.FeatureFlag, exception.EntityType);
+        Assert.Equal("value", exception.PropertyPath);
+    }
+
     private static JsonElement Parse(string json) => JsonDocument.Parse(json).RootElement.Clone();
 }

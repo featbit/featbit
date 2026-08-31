@@ -199,6 +199,52 @@ public class DataSyncServiceTests
     }
 
     [Fact]
+    public async Task GetClientSdkPayloadAsync_InvalidSegmentId_SkipsDependentFlagWithoutCallingStore()
+    {
+        const string invalidSegmentId = "not-a-guid";
+        var store = new Mock<IStore>();
+        store.Setup(s => s.GetFlagsAsync(EnvId, 0L)).ReturnsAsync(
+            new[]
+            {
+                EvaluableFlagBytes("broken-key", invalidSegmentId, isEnabled: true),
+                EvaluableFlagBytes("healthy-key", segmentId: null, isEnabled: false)
+            }
+        );
+        var logger = new FakeLogger<DataSyncService>();
+        var service = new DataSyncService(
+            store.Object,
+            new Evaluator(new RuleMatcher(store.Object)),
+            _rpService.Object,
+            logger
+        );
+
+        var payload = await service.GetClientSdkPayloadAsync(EnvId, NewUser(), timestamp: 0);
+
+        var flag = Assert.Single(payload.FeatureFlags);
+        Assert.Equal("healthy-key", flag.Id);
+        store.Verify(s => s.GetSegmentAsync(It.IsAny<string>()), Times.Never);
+        var record = Assert.Single(logger.Collector.GetSnapshot());
+        var exception = Assert.IsType<MalformedDataException>(record.Exception);
+        Assert.Equal(EvaluationEntityType.FeatureFlag, exception.EntityType);
+        Assert.Equal("value", exception.PropertyPath);
+    }
+
+    [Fact]
+    public async Task GetClientSdkPayloadAsync_NullVariation_SkipsItAndReturnsOtherFlags()
+    {
+        _store.Setup(s => s.GetFlagsAsync(EnvId, 0L)).ReturnsAsync(
+            new[] { FlagWithNullVariationBytes(), FlagBytes("healthy", "healthy-key") }
+        );
+        _evaluator.Setup(x => x.EvaluateAsync(It.IsAny<EvaluationScope>()))
+            .ReturnsAsync(NullUserVariation.Instance);
+
+        var payload = await _service.GetClientSdkPayloadAsync(EnvId, NewUser(), timestamp: 0);
+
+        var flag = Assert.Single(payload.FeatureFlags);
+        Assert.Equal("healthy-key", flag.Id);
+    }
+
+    [Fact]
     public async Task GetClientSegmentChangePayloadAsync_OneFlagCannotBeEvaluated_SkipsItAndReturnsOtherFlags()
     {
         _store.Setup(s => s.GetFlagsAsync(new[] { "broken", "healthy" })).ReturnsAsync(
@@ -292,6 +338,18 @@ public class DataSyncServiceTests
             "envId":"{{EnvId}}",
             "variations":[],
             "variationType":"string",
+            "updatedAt":"2026-08-29T00:00:00Z"
+          }
+          """);
+
+    private static byte[] FlagWithNullVariationBytes() =>
+        Encoding.UTF8.GetBytes($$"""
+          {
+            "id":"4abf8ca8-7dc8-41d9-83ab-73a6d194e926",
+            "key":"broken-key",
+            "envId":"{{EnvId}}",
+            "variations":[null],
+            "variationType":"boolean",
             "updatedAt":"2026-08-29T00:00:00Z"
           }
           """);

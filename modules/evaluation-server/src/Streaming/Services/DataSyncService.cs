@@ -285,7 +285,7 @@ public class DataSyncService(
             flagId,
             envId,
             entityType,
-            exception.EntityId,
+            exception.EntityId ?? flagId,
             exception.PropertyPath
         );
     }

@@ -115,24 +115,13 @@ public sealed class EntityJsonReader(EvaluationEntityType entityType, string? en
         var property = GetRequiredArray(json, propertyName);
         try
         {
-            return property.Deserialize<T[]>(ReusableJsonSerializerOptions.Web) ??
-                   throw Malformed($"Property '{propertyName}' must not be null", propertyName);
-        }
-        catch (JsonException ex)
-        {
-            throw Malformed($"Property '{propertyName}' contains invalid values", propertyName, ex);
-        }
-    }
+            var values = property.Deserialize<T[]>(ReusableJsonSerializerOptions.Web) ??
+                         throw Malformed($"Property '{propertyName}' must not be null", propertyName);
 
-    public string[] DeserializeStringArray(string json, string propertyName)
-    {
-        try
-        {
-            var values = JsonSerializer.Deserialize<string[]>(json);
-            if (values == null || values.Any(string.IsNullOrWhiteSpace))
+            if (values.Any(value => value is null))
             {
                 throw Malformed(
-                    $"Property '{propertyName}' must contain non-empty strings",
+                    $"Property '{propertyName}' must not contain null values",
                     propertyName
                 );
             }
@@ -141,7 +130,32 @@ public sealed class EntityJsonReader(EvaluationEntityType entityType, string? en
         }
         catch (JsonException ex)
         {
-            throw Malformed($"Property '{propertyName}' must be an array of strings", propertyName, ex);
+            throw Malformed($"Property '{propertyName}' contains invalid values", propertyName, ex);
+        }
+    }
+
+    public string[] DeserializeSegmentIds(string json, string propertyName)
+    {
+        try
+        {
+            var values = JsonSerializer.Deserialize<string[]>(json);
+            if (values == null || values.Any(value => !Guid.TryParse(value, out _)))
+            {
+                throw Malformed(
+                    $"Property '{propertyName}' must contain valid segment IDs",
+                    propertyName
+                );
+            }
+
+            return values;
+        }
+        catch (JsonException ex)
+        {
+            throw Malformed(
+                $"Property '{propertyName}' must be an array of segment IDs",
+                propertyName,
+                ex
+            );
         }
     }
 

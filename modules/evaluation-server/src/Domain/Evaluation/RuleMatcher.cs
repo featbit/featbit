@@ -47,7 +47,7 @@ public class RuleMatcher(IStore store) : IRuleMatcher
 
         var value = reader.GetRequiredString(segmentCondition, "value");
 
-        var segmentIds = reader.DeserializeStringArray(value, "value");
+        var segmentIds = reader.DeserializeSegmentIds(value, "value");
         if (segmentIds.Length == 0)
         {
             return false;
