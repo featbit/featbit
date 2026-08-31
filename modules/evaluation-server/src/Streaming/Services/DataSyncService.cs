@@ -246,9 +246,6 @@ public class DataSyncService(
 
     private async Task<ClientSdkFlag?> TryEvaluateFlagAsync(JsonElement flag, EndUser user, Guid envId)
     {
-        var flagId = EntityJsonReader.TryGetString(flag, "id");
-        var flagKey = EntityJsonReader.TryGetString(flag, "key");
-
         try
         {
             var variations =
@@ -261,7 +258,12 @@ public class DataSyncService(
         }
         catch (MalformedDataException ex)
         {
-            LogEvaluationFailure(ex, envId, flagId, flagKey);
+            LogEvaluationFailure(
+                ex,
+                envId,
+                EntityJsonReader.TryGetString(flag, "id"),
+                EntityJsonReader.TryGetString(flag, "key")
+            );
 
             return null;
         }

@@ -30,12 +30,11 @@ public class Evaluator(IRuleMatcher ruleMatcher) : IEvaluator
         foreach (var targetUser in targetUsers)
         {
             var keyIds = reader.GetRequiredArray(targetUser, "keyIds").EnumerateArray();
-            var keyIdIndex = 0;
             foreach (var keyIdElement in keyIds)
             {
                 var keyId = reader.GetRequiredStringValue(
                     keyIdElement,
-                    $"targetUsers.keyIds[{keyIdIndex++}]"
+                    "targetUsers.keyIds"
                 );
 
                 if (user.KeyId == keyId)

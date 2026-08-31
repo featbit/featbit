@@ -73,10 +73,9 @@ public class RuleMatcher(IStore store) : IRuleMatcher
         var root = document.RootElement;
 
         var excludes = reader.GetRequiredArray(root, "excluded").EnumerateArray();
-        var excludeIndex = 0;
         foreach (var excludeElement in excludes)
         {
-            var exclude = reader.GetRequiredStringValue(excludeElement, $"excluded[{excludeIndex++}]");
+            var exclude = reader.GetRequiredStringValue(excludeElement, "excluded");
             if (exclude == user.KeyId)
             {
                 return false;
@@ -84,10 +83,9 @@ public class RuleMatcher(IStore store) : IRuleMatcher
         }
 
         var includes = reader.GetRequiredArray(root, "included").EnumerateArray();
-        var includeIndex = 0;
         foreach (var includeElement in includes)
         {
-            var include = reader.GetRequiredStringValue(includeElement, $"included[{includeIndex++}]");
+            var include = reader.GetRequiredStringValue(includeElement, "included");
             if (include == user.KeyId)
             {
                 return true;
