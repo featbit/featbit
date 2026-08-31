@@ -139,7 +139,7 @@ public sealed class EntityJsonReader(EvaluationEntityType entityType, string? en
         try
         {
             var values = JsonSerializer.Deserialize<string[]>(json);
-            if (values == null || values.Any(value => !Guid.TryParse(value, out _)))
+            if (values == null || values.Any(value => !IsCanonicalGuid(value)))
             {
                 throw Malformed(
                     $"Property '{propertyName}' must contain valid segment IDs",
@@ -158,6 +158,9 @@ public sealed class EntityJsonReader(EvaluationEntityType entityType, string? en
             );
         }
     }
+
+    private static bool IsCanonicalGuid(string? value) =>
+        value is { Length: 36 } && Guid.TryParseExact(value, "D", out _);
 
     public JsonElement GetRequiredObject(JsonElement json, string propertyName)
     {

@@ -198,15 +198,16 @@ public class DataSyncServiceTests
         Assert.Equal(segmentId, exception.EntityId);
     }
 
-    [Fact]
-    public async Task GetClientSdkPayloadAsync_InvalidSegmentId_SkipsDependentFlagWithoutCallingStore()
+    [Theory]
+    [InlineData("(0779d76b-afc6-4886-ab65-af8c004273ad)")]
+    [InlineData("not-a-guid")]
+    public async Task GetClientSdkPayloadAsync_NonCanonicalSegmentId_SkipsDependentFlagWithoutCallingStore(string segmentId)
     {
-        const string invalidSegmentId = "not-a-guid";
         var store = new Mock<IStore>();
         store.Setup(s => s.GetFlagsAsync(EnvId, 0L)).ReturnsAsync(
             new[]
             {
-                EvaluableFlagBytes("broken-key", invalidSegmentId, isEnabled: true),
+                EvaluableFlagBytes("broken-key", segmentId, isEnabled: true),
                 EvaluableFlagBytes("healthy-key", segmentId: null, isEnabled: false)
             }
         );

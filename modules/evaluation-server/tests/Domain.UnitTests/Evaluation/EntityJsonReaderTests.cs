@@ -126,11 +126,14 @@ public class EntityJsonReaderTests
         Assert.Equal("variations", exception.PropertyPath);
     }
 
-    [Fact]
-    public void DeserializeSegmentIds_InvalidGuid_ThrowsWithPropertyPath()
+    [Theory]
+    [InlineData("not-a-guid")]
+    [InlineData("(0779d76b-afc6-4886-ab65-af8c004273ad)")]
+    [InlineData(" 0779d76b-afc6-4886-ab65-af8c004273ad")]
+    public void DeserializeSegmentIds_NonCanonicalGuid_ThrowsWithPropertyPath(string segmentId)
     {
         var exception = Assert.Throws<MalformedDataException>(
-            () => EntityJsonReader.FeatureFlag.DeserializeSegmentIds("[\"not-a-guid\"]", "value")
+            () => EntityJsonReader.FeatureFlag.DeserializeSegmentIds($"[\"{segmentId}\"]", "value")
         );
 
         Assert.Equal(EvaluationEntityType.FeatureFlag, exception.EntityType);
