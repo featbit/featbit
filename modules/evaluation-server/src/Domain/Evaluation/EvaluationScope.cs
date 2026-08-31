@@ -20,6 +20,10 @@ public struct EvaluationScope
 
     public Variation GetVariation(string variationId)
     {
-        return Variations.FirstOrDefault(x => x.Id == variationId)!;
+        return Variations.FirstOrDefault(x => x.Id == variationId) ??
+               throw EntityJsonReader.FeatureFlag.Malformed(
+                   $"Variation '{variationId}' does not exist in the feature flag",
+                   "variations"
+               );
     }
 }
