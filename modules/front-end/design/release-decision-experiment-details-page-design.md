@@ -9,6 +9,7 @@ The approved visual scope currently includes:
 - the Experiment detail header;
 - the four-stage navigation;
 - the **Intent & Hypothesis** stage;
+- the **Exposure** stage;
 - the read-only Details presentation and its edit entry;
 - Feature Flag and Run summary states;
 - the primary transition to **Exposure**;
@@ -19,7 +20,7 @@ Explicitly excluded:
 
 - sidebar, context bar, Header, environment switcher, and authenticated-shell changes;
 - Experiments, Metrics, and Layers list redesigns, which have already been migrated separately;
-- final visual designs for the Exposure, Measuring, and Learning stage bodies;
+- final visual designs for the Measuring and Learning stage bodies;
 - Audit log UI;
 - React, route, API, backend, test, configuration, package, or i18n implementation.
 
@@ -28,6 +29,90 @@ Explicitly excluded:
 ## Approved Design Asset
 
 ![Release Decision Experiment details — Intent & Hypothesis](release-decision-experiment-details-intent-hypothesis-with-stage-subtitles.png)
+
+### Exposure stage
+
+![Release Decision Experiment details — Exposure](release-decision-experiment-details-exposure-light.png)
+
+#### Empty configuration state
+
+![Release Decision Experiment details — Exposure without Feature Flag or metrics](release-decision-experiment-details-exposure-empty-light.png)
+
+##### Select Feature Flag Sheet
+
+![Release Decision Experiment details — Select Feature Flag](release-decision-experiment-details-exposure-select-flag-light.png)
+
+`Select flag` opens a right-side Sheet over the unchanged Exposure page. Use the current React **Attach policies** Sheet and its shared `CommandInput` / `SelectableCommandList` composition as the primary visual and interaction reference, adapted to a single Flag selection:
+
+- use the same full-height Header, scrollable Body, and fixed Footer composition as the existing React Sheets; use the standard compact Header spacing and thin Header bottom border, while keeping the Footer free of a top divider;
+- keep the Sheet scoped to the Experiment's current application environment; do not add Project or Environment selectors or duplicate the context bar;
+- title it `Select feature flag` and explain that the list comes from the current environment;
+- provide one compact `CommandInput` search field for Flag name or Key and an independently scrollable, progressively loaded list of non-archived Feature Flags;
+- each selectable row shows the human-readable name, exact Key, ON/OFF state, and Variation type; do not show the Variation count;
+- keep the list heading as `Available flags` without an inline total; do not show a total, pagination summary, page number, or previous/next controls;
+- render candidates as compact, borderless Command items with small vertical gaps; do not use a rounded table container or full-width row separators;
+- use strict single selection through the shared Command-item treatment rather than Radio or Checkbox controls; the complete row is the selection target, and the footer `Select flag` action remains disabled until one row is selected;
+- when a row is selected, reuse the shared Command item's neutral `bg-accent` treatment and show one neutral near-black Check in a reserved trailing column, then enable `Select flag` with the standard primary button treatment; selecting another row moves the single Check without shifting row content, and the green ON status color is never reused for selection;
+- use the available desktop Sheet height efficiently: at the 1536 × 1024 reference size, show seven compact rows before scrolling; load the next batch as the user approaches the bottom, following the Attach policies Sheet behavior;
+- match the Attach policies Footer: show only one compact, default-size primary `Select flag` button aligned to the bottom-right with standard Sheet Footer padding and whitespace above it; do not add a Footer top border or horizontal divider;
+- keep `Select flag` disabled until one candidate is selected, show a submitting state while binding, and prevent repeated confirmation;
+- do not copy the Attach policies `Selected policies` summary, selected-item Badges, `All / Selected` tabs, `Clear all`, or multi-select behavior; retain the wider Flag metadata layout and trailing-Check single selection while reusing its progressive list loading and single-action Footer;
+- close and Escape dismiss without changing the binding; confirmation binds the selected Flag, loads its real Variations, closes the Sheet, refreshes Exposure, and reports success;
+- loading, no-results, initial load failure, load-more failure, and bind failure remain recoverable inside the Sheet. A load-more failure appears at the bottom of the retained results with `Retry`; a no-results state directs the user to create a Flag in Feature Flags rather than fabricating one here.
+
+##### Add Experiment Metrics Sheet
+
+![Release Decision Experiment details — Add Experiment Metrics](release-decision-experiment-details-exposure-add-metrics-light.png)
+
+`Add metrics` opens a right-side Sheet over the unchanged Exposure page:
+
+- match the existing React Sheet frame, typography, control density, overlay, and full-height behavior;
+- use a fixed Header with the standard compact `px-6 py-5 pr-12` spacing and a thin neutral bottom border; keep the title, explanatory subtitle, and close action inside this Header;
+- use a scrollable Body and fixed Footer so multiple Guardrails can grow without turning the configuration into a tall centered Dialog; the Footer remains free of a top divider;
+- title it `Add experiment metrics` and state that exactly one Primary metric is required while Guardrails are optional;
+- the Primary group contains an active catalog Metric selector and a Direction selector with `Higher is better` and `Lower is better`;
+- the Guardrails group begins with `No guardrails added`; `Add guardrail` creates a compact row containing Metric, `Alert if` direction, and Remove controls;
+- allow multiple Guardrails, but do not allow the same Metric to be selected more than once or to be both Primary and Guardrail;
+- use only active Metrics from the current environment; an empty catalog explains that Metrics must be created from the Metrics page;
+- keep `Save metrics` disabled until a Primary metric is selected; close and Escape discard no persisted changes, while a dirty close uses the shared discard-changes confirmation;
+- match the Attach policies Footer and the Select Feature Flag Sheet: show only one compact, default-size `Save metrics` button aligned to the bottom-right with standard Sheet Footer padding and whitespace above it; do not add a Footer top border or horizontal divider;
+- while saving, show a submitting state and prevent repeated confirmation; keep the Sheet open on recoverable failure and, on success, close it, refresh Exposure, and report success.
+
+When neither dependency has been configured, preserve the same continuous Exposure workspace and replace populated data regions with compact horizontal empty states:
+
+- the identity metadata shows `Feature flag · Not bound` and `No runs`;
+- Feature Flag shows `No feature flag selected`, explains that selecting one reveals its Variations, and provides the outline `Select flag` action;
+- Experiment metrics shows `No metrics selected`, explains the Primary and optional Guardrail requirement, and provides the matching outline `Add metrics` action;
+- `Select flag` and `Add metrics` have equal visual weight because both configure missing dependencies; reserve the primary button treatment for the enabled `Continue to Measuring` action;
+- do not render empty Variation or metric table headers, placeholder rows, large illustrations, or oversized empty cards;
+- do not render a full-width divider between Feature Flag and Experiment metrics; their headings, spacing, and compact bordered regions already provide sufficient separation;
+- keep `Continue to Measuring` visible but disabled until a Feature Flag and Primary metric are configured; place `Select a feature flag and primary metric to continue.` beside it so the blocked requirement is explicit.
+
+The Exposure content uses one continuous bordered workspace containing `Feature flag`, `Experiment metrics`, and the primary progression action. It begins directly with `Feature flag`; do not repeat the active-stage title or its purpose because both already appear in the four-stage navigation. Do not split Feature Flag and Experiment metrics into separate large cards. `Continue to Measuring` remains at the bottom-right inside the shared workspace.
+
+The Feature Flag configuration uses one compact bordered group:
+
+- the first row shows the exact Flag Key, toggle state, `Open targeting`, and `Change flag`;
+- one horizontal divider separates the summary row from the Variation column headers and rows;
+- do not render a `Variations`, `Variations (count)`, or equivalent title because the `Feature flag` section and `Variation` column already provide the context;
+- the Variation table does not receive another rounded outer border; use only the shared configuration-group border and horizontal row separators.
+
+The bound Feature Flag summary uses the real Variations returned by FeatBit. Present them as a compact list with separate `Variation`, `Value`, and `Variation ID` columns:
+
+- `Variation` is the user-readable Variation name;
+- `Value` is the served Variation value;
+- `Variation ID` is the immutable technical identifier used for evaluation and experiment mapping;
+- every Variation row has its own Copy icon action inside the `Variation ID` cell, visually associated with that row, and it copies only the complete Variation ID;
+- a successful copy temporarily reports `Copied`; the default tooltip and accessible label are `Copy variation ID`;
+- keep the complete ID visible on large desktop; when space is constrained, truncate visually and expose the complete value through Tooltip while copying the untruncated ID;
+- do not label Variations as `Control`, `Treatment`, or `Treatment 2` before an Experiment Run assigns those roles. An Experiment with `No runs` has only Flag Variations, not experiment roles.
+
+The `Experiment metrics` table must reuse the same metric-role Badge treatment as the Metrics page `Experiment runs` column. Do not create a details-page-specific role style:
+
+- `Primary`: outline Badge with restrained violet border, light violet background, normal-weight violet text;
+- `Guardrail`: outline Badge with restrained amber border, light amber background, normal-weight amber text;
+- do not render a separate `Role` column; place the Badge immediately after the human-readable metric name in the `Metric` column, while the metric key remains on the second line;
+- keep Badge height, padding, radius, and typography consistent with the shared Metrics-page role Badge in light and dark themes.
 
 ### Agent setup Dialog
 
@@ -258,10 +343,10 @@ The stage names are existing product terminology and must not be renamed:
 
 | Step | Persisted stage | Title | Subtitle |
 | --- | --- | --- | --- |
-| 1 | `hypothesis` | `Intent & Hypothesis` | `Define the goal and hypothesis` |
-| 2 | `implementing` | `Exposure` | `Configure flag and rollout` |
-| 3 | `measuring` | `Measuring` | `Track metrics and evidence` |
-| 4 | `learning` | `Learning` | `Capture outcomes and learnings` |
+| 1 | `hypothesis` | `Intent & Hypothesis` | `Define the goal, form a falsifiable hypothesis` |
+| 2 | `implementing` | `Exposure` | `Feature flag, rollout strategy & traffic exposure` |
+| 3 | `measuring` | `Measuring` | `Run experiments, track metrics & make decisions` |
+| 4 | `learning` | `Learning` | `Capture learnings for next cycle` |
 
 Presentation rules:
 
