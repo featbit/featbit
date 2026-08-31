@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/tooltip"
 import { localizedPath } from "@/features/layout/layout-context"
 import type { Lang } from "@/features/layout/layout-types"
+import { experimentStageDot } from "../../index/experiments-utils"
 import type { ExperimentDetail } from "../experiment-details-types"
 
 type Props = {
@@ -28,6 +29,7 @@ export function ExperimentDetailsHeader({
   onSettings,
 }: Props) {
   const { t } = useTranslation()
+  const runCount = experiment.experimentRuns.length
 
   return (
     <header className="space-y-5">
@@ -49,20 +51,14 @@ export function ExperimentDetailsHeader({
               {experiment.name}
             </h1>
             <Badge variant="outline" className="gap-1.5 font-normal">
-              <span className="size-1.5 rounded-full bg-foreground" />
+              <span
+                className={`size-2 rounded-full ${experimentStageDot(experiment.stage)}`}
+              />
               {t(`releaseDecision.experiments.stages.${experiment.stage}`)}
             </Badge>
           </div>
 
           <div className="flex min-w-0 flex-wrap items-center gap-2 text-sm">
-            {experiment.description ? (
-              <p
-                className="mr-2 max-w-[min(34rem,48vw)] truncate text-muted-foreground"
-                title={experiment.description}
-              >
-                {experiment.description}
-              </p>
-            ) : null}
             <Badge variant="outline" className="max-w-72 gap-1 font-normal">
               <span className="shrink-0">
                 {t("releaseDecision.experiments.detailsPage.featureFlag")}
@@ -77,13 +73,21 @@ export function ExperimentDetailsHeader({
               </span>
             </Badge>
             <Badge variant="outline" className="font-normal">
-              {experiment.runCount
+              {runCount
                 ? t("releaseDecision.experiments.runCount", {
-                    count: experiment.runCount,
+                    count: runCount,
                   })
                 : t("releaseDecision.experiments.noRuns")}
             </Badge>
           </div>
+          {experiment.description ? (
+            <p
+              className="max-w-[min(48rem,60vw)] truncate text-sm text-muted-foreground"
+              title={experiment.description}
+            >
+              {experiment.description}
+            </p>
+          ) : null}
         </div>
 
         <div className="flex shrink-0 items-center gap-2">

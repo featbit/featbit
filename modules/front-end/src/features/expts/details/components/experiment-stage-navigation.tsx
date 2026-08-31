@@ -26,11 +26,11 @@ export function ExperimentStageNavigation({
               <Link
                 to={stageHref(stage)}
                 aria-current={active ? "step" : undefined}
-                className="flex h-full w-full min-w-0 cursor-pointer items-start gap-3 rounded-lg px-4 py-5 text-left transition-colors outline-none hover:bg-muted/50 focus-visible:ring-3 focus-visible:ring-ring/50"
+                className="flex h-full w-full min-w-0 cursor-pointer items-start gap-3 rounded-lg px-4 py-3.5 text-left transition-colors outline-none hover:bg-muted/50 focus-visible:ring-3 focus-visible:ring-ring/50"
               >
                 <span
                   className={cn(
-                    "flex size-8 shrink-0 items-center justify-center rounded-full border text-sm font-medium",
+                    "flex size-7 shrink-0 items-center justify-center rounded-full border text-sm font-medium",
                     active
                       ? "border-primary bg-primary text-primary-foreground"
                       : "border-border bg-background text-foreground"
@@ -38,11 +38,11 @@ export function ExperimentStageNavigation({
                 >
                   {index + 1}
                 </span>
-                <span className="min-w-0 pt-0.5">
+                <span className="min-w-0">
                   <span className="block truncate text-sm font-medium text-foreground">
                     {t(`releaseDecision.experiments.stages.${stage}`)}
                   </span>
-                  <span className="mt-1 line-clamp-2 block text-sm leading-5 text-muted-foreground">
+                  <span className="mt-0.5 line-clamp-2 block text-sm leading-5 text-muted-foreground">
                     {t(
                       `releaseDecision.experiments.detailsPage.stageSubtitles.${stage}`
                     )}
