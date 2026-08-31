@@ -8,6 +8,7 @@ import { getRuntimeEnv } from "@/lib/env/runtime-env"
 import type {
   ExperimentDetail,
   ExperimentDetailsUpdate,
+  ExperimentLearningUpdate,
   ExperimentMetricsUpdate,
   McpTokenResponse,
 } from "./experiment-details-types"
@@ -23,7 +24,7 @@ export function fetchExperimentDetail(envId: string, experimentId: string) {
 export function updateExperimentDetails(
   envId: string,
   experimentId: string,
-  update: ExperimentDetailsUpdate
+  update: ExperimentDetailsUpdate | ExperimentLearningUpdate
 ) {
   return fetchApi<ExperimentDetail>(experimentPath(envId, experimentId), {
     method: "PUT",

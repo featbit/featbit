@@ -15,10 +15,28 @@ export type ExperimentDetail = {
   change: string | null
   constraints: string | null
   conflictAnalysis: string | null
+  lastLearning: string | null
   primaryMetric: string | null
   guardrails: string | null
+  experimentRuns: ExperimentRunDetail[]
   createdAt: string
   updatedAt: string
+}
+
+export type ExperimentRunDetail = {
+  id: string
+  slug: string
+  status: string
+  method: string | null
+  decision: string | null
+  decisionSummary: string | null
+  decisionReason: string | null
+  whatChanged: string | null
+  whatHappened: string | null
+  confirmedOrRefuted: string | null
+  whyItHappened: string | null
+  nextHypothesis: string | null
+  createdAt: string
 }
 
 export type ExperimentMetricsUpdate = {
@@ -31,6 +49,11 @@ export type ExperimentMetricsUpdate = {
 export type ExperimentDetailsUpdate = Pick<
   ExperimentDetail,
   "description" | "goal" | "intent" | "hypothesis" | "change" | "constraints"
+>
+
+export type ExperimentLearningUpdate = Pick<
+  ExperimentDetail,
+  "hypothesis" | "lastLearning"
 >
 
 export type McpTokenResponse = {

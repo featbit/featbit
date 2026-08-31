@@ -25,8 +25,10 @@ import {
 import type {
   ExperimentDetail,
   ExperimentDetailsUpdate,
+  ExperimentLearningUpdate,
 } from "../experiment-details-types"
 import { ExposureDetails } from "../exposure/exposure-details"
+import { LearningDetails } from "../learning/learning-details"
 import { HypothesisDetails } from "./hypothesis-details"
 
 function LoadingPage({ backHref }: { backHref: string }) {
@@ -108,11 +110,17 @@ export function ExperimentDetailsPage() {
   })
 
   const updateMutation = useMutation({
-    mutationFn: (update: ExperimentDetailsUpdate) =>
+    mutationFn: (update: ExperimentDetailsUpdate | ExperimentLearningUpdate) =>
       updateExperimentDetails(envId, experimentId, update),
-    onSuccess: (experiment) => {
+    onSuccess: (experiment, update) => {
       queryClient.setQueryData(queryKey, experiment)
-      toast.success(t("releaseDecision.experiments.detailsPage.edit.saved"))
+      toast.success(
+        t(
+          "lastLearning" in update
+            ? "releaseDecision.experiments.detailsPage.learning.edit.saved"
+            : "releaseDecision.experiments.detailsPage.edit.saved"
+        )
+      )
     },
   })
 
@@ -217,6 +225,16 @@ export function ExperimentDetailsPage() {
                     lang={lang}
                     onAdvanced={() =>
                       setStageSelection({ experimentId, stage: "measuring" })
+                    }
+                  />
+                ) : null}
+                {activeStage === "learning" ? (
+                  <LearningDetails
+                    experiment={detailQuery.data}
+                    saving={updateMutation.isPending}
+                    saveError={updateMutation.isError}
+                    onSave={(update) =>
+                      updateMutation.mutateAsync(update).then(() => undefined)
                     }
                   />
                 ) : null}
