@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { ChevronLeft } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { Link, useNavigate, useParams } from "react-router-dom"
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -17,13 +17,16 @@ import { ExperimentDetailsHeader } from "../components/experiment-details-header
 import { ExperimentSettings } from "../components/experiment-settings"
 import { ExperimentStageNavigation } from "../components/experiment-stage-navigation"
 import {
+  experimentStageFromParam,
+  experimentStageSearchParams,
+} from "../experiment-stage-route"
+import {
   advanceExperimentToExposure,
   deleteExperiment,
   fetchExperimentDetail,
   updateExperimentDetails,
 } from "../experiment-details-api"
 import type {
-  ExperimentDetail,
   ExperimentDetailsUpdate,
   ExperimentLearningUpdate,
 } from "../experiment-details-types"
@@ -91,16 +94,13 @@ export function ExperimentDetailsPage() {
   const { lang: langParam, experimentId = "" } = useParams()
   const lang = resolveLang(langParam)
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const queryClient = useQueryClient()
   const projectEnv = getCurrentProjectEnv()
   const envId = projectEnv?.envId ?? ""
   const backHref = localizedPath(lang, "/experiments")
   const [settingsActive, setSettingsActive] = useState(false)
   const [agentSetupOpen, setAgentSetupOpen] = useState(false)
-  const [stageSelection, setStageSelection] = useState<{
-    experimentId: string
-    stage: ExperimentDetail["stage"]
-  } | null>(null)
   const queryKey = ["experiment-details", envId, experimentId]
 
   const detailQuery = useQuery({
@@ -128,7 +128,9 @@ export function ExperimentDetailsPage() {
     mutationFn: () => advanceExperimentToExposure(envId, experimentId),
     onSuccess: (experiment) => {
       queryClient.setQueryData(queryKey, experiment)
-      setStageSelection({ experimentId, stage: "implementing" })
+      setSearchParams((current) =>
+        experimentStageSearchParams(current, "implementing")
+      )
       toast.success(t("releaseDecision.experiments.detailsPage.advanced"))
     },
   })
@@ -144,10 +146,18 @@ export function ExperimentDetailsPage() {
     },
   })
 
-  const activeStage =
-    stageSelection?.experimentId === experimentId
-      ? stageSelection.stage
-      : (detailQuery.data?.stage ?? "hypothesis")
+  const routeStage = experimentStageFromParam(
+    searchParams.get("stage") ?? undefined
+  )
+  const activeStage = routeStage ?? detailQuery.data?.stage ?? "hypothesis"
+
+  useEffect(() => {
+    if (!detailQuery.data || routeStage) return
+    setSearchParams(
+      (current) => experimentStageSearchParams(current, detailQuery.data.stage),
+      { replace: true }
+    )
+  }, [detailQuery.data, routeStage, setSearchParams])
 
   return (
     <TooltipProvider>
@@ -201,8 +211,8 @@ export function ExperimentDetailsPage() {
               <>
                 <ExperimentStageNavigation
                   activeStage={activeStage}
-                  onStageSelect={(stage) =>
-                    setStageSelection({ experimentId, stage })
+                  stageHref={(stage) =>
+                    `?${experimentStageSearchParams(searchParams, stage).toString()}`
                   }
                 />
                 {activeStage === "hypothesis" ? (
@@ -224,7 +234,9 @@ export function ExperimentDetailsPage() {
                     envId={envId}
                     lang={lang}
                     onAdvanced={() =>
-                      setStageSelection({ experimentId, stage: "measuring" })
+                      setSearchParams((current) =>
+                        experimentStageSearchParams(current, "measuring")
+                      )
                     }
                   />
                 ) : null}
