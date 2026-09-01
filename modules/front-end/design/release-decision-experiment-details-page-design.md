@@ -10,6 +10,7 @@ The approved visual scope currently includes:
 - the four-stage navigation;
 - the **Intent & Hypothesis** stage;
 - the **Exposure** stage;
+- the **Measuring** stage when the selected Run uses **Bayesian A/B/n** or **Bandit**;
 - the **Learning** stage;
 - the read-only Details presentation and its edit entry;
 - Feature Flag and Run summary states;
@@ -21,7 +22,7 @@ Explicitly excluded:
 
 - sidebar, context bar, Header, environment switcher, and authenticated-shell changes;
 - Experiments, Metrics, and Layers list redesigns, which have already been migrated separately;
-- final visual design for the Measuring stage body;
+- Measuring-stage visual behavior for Frequentist or any future analysis method;
 - Audit log UI;
 - React, route, API, backend, test, configuration, package, or i18n implementation.
 
@@ -115,6 +116,167 @@ The `Experiment metrics` table must reuse the same metric-role Badge treatment a
 - do not render a separate `Role` column; place the Badge immediately after the human-readable metric name in the `Metric` column, while the metric key remains on the second line;
 - keep Badge height, padding, radius, and typography consistent with the shared Metrics-page role Badge in light and dark themes.
 
+### Measuring stage — Bandit Run
+
+![Release Decision Experiment details — Bandit Measuring](release-decision-experiment-details-measuring-expt-1-baseline-arms-light.png)
+
+This asset is the approved light-theme, large-desktop design for a selected Run whose persisted method is `bandit`. It must not be reused as the complete specification for Bayesian A/B or Frequentist Runs.
+
+The design preserves the complete RDA Bandit information contract while expressing it through the current React workbench language. It does not introduce phases: Runs remain the only repeated experiment units and retain their persisted slugs such as `run-1` and `run-2`.
+
+#### Run selection and identity
+
+- show `Experiment runs` as a compact horizontal Run selector with the Run slug, status, and decision;
+- keep `New run` in the Run selector row and keep destructive Run removal scoped to the individual Run;
+- the selected Run header shows its slug, the `Bandit` method Badge, algorithm, status, decision, and observation window;
+- showing `Bandit` and `thompson_sampling_top_two` in the selected Run header is intentional because they identify how the visible evidence was produced;
+- do not show an invented Phase, generic traffic percentage, or a method switch in the selected Run header.
+
+#### Decision and evidence
+
+Preserve the full RDA decision presentation. Do not compress it into a single decision Badge or one-line alert:
+
+- `DecisionCallout` shows the decision title, decision Badge, recommended action, and decision guidance;
+- `Evidence Summary` remains fully visible;
+- `Evidence Rationale` remains available as a compact expandable row and exposes the complete rationale on expansion;
+- absent evidence is represented as absent; do not synthesize a winner, failure, or rollout recommendation from zero samples.
+
+#### Full analysis metadata and readiness
+
+The analysis region always retains these RDA fields when supplied by the Run analysis:
+
+- `Window`;
+- `Algorithm`, including the complete value such as `thompson_sampling_top_two`;
+- `Data as of`;
+- the raw SRM result, including the p-value and status such as `p=1.0000 · ok`.
+
+Readiness messaging supplements these fields; it never replaces or rewrites them. A compact `No evaluable data` message may be shown only when the persisted analysis actually has no evaluable observations. Zero-sample SRM `p=1.0000` must not be presented as proof that allocation is healthy: retain the raw SRM value and separately state that there are no samples to evaluate.
+
+#### Bandit metric table
+
+RDA's observed-performance and Bandit-recommendation tables may be presented as one visually continuous table only when the two semantic groups remain explicit through grouped column headings:
+
+- `Observed performance` owns the measured sample and outcome columns;
+- `Bandit recommendation` owns `P(best)` and `Recommended weight`;
+- `Samples (n)` maps directly to RDA's `n` and must not be renamed to exposures, users, or traffic;
+- for a Binary metric, preserve both the event count (`Clicks` or the metric-appropriate event label) and `Rate`; do not combine them into `Mean`;
+- for a Numeric metric, show `Samples (n)` and `Mean`; Numeric is the current product terminology for the persisted continuous metric type;
+- `P(best)` maps to `best_arm_probabilities` and `Recommended weight` maps to `bandit_weights`;
+- keep Baseline and Arm role labels attached to the actual Variation names;
+- show burn-in and stopping information below the table. Dynamic weighting is not ready until every Arm satisfies the backend's minimum-unit requirement, and the stopping threshold remains `P(best) >= 95%` when supplied by the analyzer;
+- guardrails remain a distinct analysis block below the Primary metric and are not folded into the Bandit recommendation columns.
+
+#### Experiment traffic assignment summary
+
+The right-hand summary is titled `Experiment traffic assignment` and has exactly four independent sections in this order:
+
+1. `Baseline & Arms`;
+2. `Layer eligibility`;
+3. `Analysis sampling`;
+4. `Audience filters`.
+
+The summary does not display a `Method` row. Method and algorithm already appear in the selected Run header and analysis metadata; repeating Method here incorrectly implies it belongs to assignment editing.
+
+`Baseline & Arms` shows the analysis role assigned to every included Feature Flag Variation, including its human-readable name and exact served value. These are analysis roles only; Feature Flag targeting decides which Variation is served.
+
+`Layer eligibility` shows only Layer-related data: Layer key, Assignment unit, bucket start, bucket end, active range, and width. Layer eligibility determines whether an exposure can enter the Run; it does not select a Variation.
+
+`Analysis sampling` shows the per-Variation include rate and role. Sampling is applied inside each actual served Variation and must not be represented as the live Feature Flag rollout split.
+
+`Audience filters` is never nested under `Layer eligibility`. When no filter exists, show the independent value `No filters — all users eligible`.
+
+#### Edit assignment Sheet
+
+![Release Decision Experiment details — Edit Bandit assignment](release-decision-experiment-details-measuring-expt-1-edit-assignment-light.png)
+
+`Edit assignment` opens a full-height right-side Sheet over the unchanged Measuring page. The Sheet edits the same four assignment groups shown in the read-only summary and preserves their order.
+
+- do not render or edit `Method`, `Bandit`, or algorithm in this Sheet; changing the analysis method is outside the assignment-editing contract and is not supported by this interaction;
+- `Baseline & Arms` lists all real Feature Flag Variations, uses a single Baseline selection, and allows the remaining included Variations to be selected as Arms;
+- `Layer eligibility` provides the registered Layer selection and supported Layer fields, including Assignment unit and bucket range; derived active range and width remain visible;
+- `Analysis sampling` provides one include-rate control per included Variation and may provide `Set all to 100%` as a compact bulk convenience;
+- `Audience filters` remains its own group, provides the supported filter builder entry, and shows `No filters — all users eligible` when empty;
+- do not add live rollout weights, traffic-split editing, phase configuration, scheduler controls, or other behavior not supported by the current RDA/backend contract;
+- the fixed footer contains `Cancel` and `Save changes`, uses the standard Sheet padding and whitespace, and has no top border or horizontal divider; Cancel and close discard uncommitted edits, Save is disabled for invalid assignment data, repeated submission is prevented, and recoverable errors keep the Sheet open.
+
+#### Bandit design boundary
+
+The Run method is persisted before this view is opened. `Edit assignment` may change analysis roles, Layer eligibility, sampling, and Audience filters, but it must not change the Run's analysis method. A future method-change workflow requires its own product and backend contract and must not be inferred from this design.
+
+### Measuring stage — Bayesian A/B/n Run
+
+![Release Decision Experiment details — Bayesian run-3](release-decision-experiment-details-measuring-expt-1-bayesian-run-3-light.png)
+
+This asset is the approved light-theme, large-desktop design for a selected Run whose persisted method is `bayesian_ab`. It uses the real `run-3` state from Experiment `93feed84-68f5-4536-b192-2e71e6c2f734`: Easy is Control, Normal and Hard are Treatments, the Run is decided as `INCONCLUSIVE`, and every Variation has zero valid samples in the completed observation window.
+
+The Bayesian page reuses the same Measuring workbench, Run selector, decision/evidence hierarchy, two-column layout, and traffic-assignment structure as Bandit. Method-specific evidence changes in place; selecting a Bayesian Run must not open a separate page or introduce another navigation level.
+
+#### Bayesian Run identity
+
+- the Experiment header uses the loaded Run collection count; the approved asset therefore shows `3 runs` rather than an inherited or stale aggregate;
+- keep all Runs available in the compact selector and identify each by its stable slug, status, and decision;
+- the selected Run header shows `run-3`, `Bayesian A/B/n`, status, decision, and observation window;
+- do not show Bandit algorithm, Thompson Sampling, burn-in, stopping, `P(best)`, or recommended weights for a Bayesian Run;
+- Bayesian prior information belongs in Full analysis. Do not invent an algorithm label to parallel Bandit.
+
+#### Bayesian decision and evidence
+
+The Bayesian Run preserves the same complete evidence contract as Bandit:
+
+- retain the complete `DecisionCallout`, including title, decision Badge, recommended action, and guidance;
+- keep `Evidence Summary` fully visible;
+- keep `Evidence Rationale` expandable with a useful preview and the complete rationale available on expansion;
+- an `INCONCLUSIVE` result caused by zero samples describes missing evidence, not a failed Treatment or a confirmed lack of effect.
+
+#### Bayesian Full analysis
+
+The analysis metadata row shows:
+
+- `Window` from the persisted analysis window;
+- `Prior`, including values such as `flat (improper)`;
+- `Data as of` from `computed_at`;
+- the raw SRM p-value, status, and observed count for every Variation.
+
+Do not display `Algorithm` for the current Bayesian schema because the persisted result provides `prior`, not an algorithm field. Readiness messaging may supplement the raw metadata but must not replace it.
+
+The Primary metric and every Guardrail retain their own complete Bayesian result table. Do not collapse Guardrails to a one-line health label when row-level evidence is present.
+
+For a Numeric metric, the table columns are:
+
+- `Variant`;
+- `Samples (n)`;
+- `Mean` or the aggregation-specific per-user value label;
+- `Relative lift`;
+- `95% interval`;
+- `Signal`.
+
+For a Binary metric, preserve both event count and Rate before the effect columns. `Samples (n)` continues to map directly to the analyzer's `n`. A Treatment's Signal uses only the probability field actually returned by the analyzer, such as `P(win)` or `P(harm)`; do not substitute another probability label.
+
+Use `Control`, `Treatment 1`, `Treatment 2`, and so on when a Bayesian Run contains multiple Treatments. The Control row shows `baseline` for relative lift and no interval or Signal. Treatment rows show persisted `rel_delta`, interval, and Signal values when present.
+
+When those values are absent, render `—`; never derive or fabricate lift, interval, probability, risk, or a winner. The posterior-distribution visualization appears only when the analysis provides a Treatment's relative delta and both interval bounds. The approved zero-sample `run-3` asset correctly omits it.
+
+The Run's raw Sample check remains visible with its configured minimum and per-Variation counts. A check configured with a minimum of `0` may report `Passed`, but zero samples are still not evaluable. Show this distinction explicitly rather than presenting the raw pass as evidence sufficiency. Likewise, SRM `p=1.0000 · ok` at zero exposure is not proof of healthy allocation.
+
+#### Bayesian traffic assignment
+
+The right-hand `Experiment traffic assignment` summary uses exactly four independent sections in this order:
+
+1. `Control & Treatments`;
+2. `Layer eligibility`;
+3. `Analysis sampling`;
+4. `Audience filters`.
+
+`Control & Treatments` replaces the Bandit-specific `Baseline & Arms` terminology. Show the actual Feature Flag Variation name and served value for the single Control and every Treatment. These remain analysis roles; Feature Flag targeting determines which Variation is served.
+
+Layer eligibility, per-Variation analysis sampling, and Audience filters follow the same semantics and separation defined for Bandit. Audience filters never appear inside Layer eligibility. The summary does not display Method because Method is already visible in the selected Run header and is not assignment data.
+
+The `Edit assignment` entry remains visible, but this asset approves only the Bayesian read-only Measuring state. A future Bayesian edit-state asset must use `Control & Treatments`, must not expose Method editing, and must be approved separately rather than inferred from the Bandit Sheet image.
+
+#### Bayesian design boundary
+
+This design covers the persisted `bayesian_ab` result schema. It does not authorize a Frequentist UI, a method-change workflow, synthetic posterior values, or a generic analysis table that erases the differences between Bayesian and Bandit evidence.
+
 ### Learning stage
 
 ![Release Decision Experiment details — Learning](release-decision-experiment-details-learning-light.png)
@@ -157,7 +319,7 @@ The asset above supersedes `release-decision-experiment-settings-light.png` and 
 
 This image is the approved large-desktop, light-theme direction.
 
-It supersedes `release-decision-experiment-details-intent-hypothesis-light.png`, which did not include stage subtitles. `release-decision-experiment-details-measure-light.png` is not an approved Measuring-stage specification and must not be treated as implementation guidance.
+It supersedes `release-decision-experiment-details-intent-hypothesis-light.png`, which did not include stage subtitles. The approved Bandit assets in this document supersede all earlier Measuring drafts; earlier drafts must not be treated as implementation guidance.
 
 ## Design Direction
 
@@ -646,7 +808,24 @@ This document is design guidance only. It does not authorize React, API, backend
 - [ ] Stage readiness is not shown.
 - [ ] `Continue to Exposure` is the only prominent bottom action.
 - [ ] There is no duplicate bottom Agent setup action.
-- [ ] Exposure and Learning follow their own approved assets; Measuring is not inferred from any current detail-page asset.
+- [ ] Exposure and Learning follow their own approved assets; Bayesian A/B/n and Bandit Measuring follow their respective approved assets.
+- [ ] A Bandit Run header shows Run slug, `Bandit`, algorithm, status, decision, and observation window without introducing phases.
+- [ ] Bandit Measuring preserves `DecisionCallout`, `Evidence Summary`, and expandable `Evidence Rationale` without information loss.
+- [ ] Full analysis preserves Window, Algorithm, Data as of, and the raw SRM p-value/status.
+- [ ] A combined Bandit table retains distinct `Observed performance` and `Bandit recommendation` column groups.
+- [ ] Binary metrics keep event count and Rate; Numeric metrics use Samples and Mean; Samples maps to `n`.
+- [ ] The traffic-assignment summary contains separate Baseline & Arms, Layer eligibility, Analysis sampling, and Audience filters sections.
+- [ ] Audience filters never appear inside Layer eligibility.
+- [ ] The traffic-assignment summary and Edit assignment Sheet do not display or edit Method.
+- [ ] Edit assignment changes only supported roles, Layer eligibility, sampling, and Audience filters.
+- [ ] A Bayesian Run header shows Run slug, `Bayesian A/B/n`, status, decision, and observation window without Bandit-only fields.
+- [ ] Bayesian Full analysis preserves Window, Prior, Data as of, SRM, Primary metric, every Guardrail, and Sample check.
+- [ ] Bayesian Numeric results use Samples, Mean, Relative lift, 95% interval, and the persisted Signal; Binary results retain event count and Rate.
+- [ ] Missing Bayesian lift, interval, Signal, risk, and posterior values render as absent and are never fabricated.
+- [ ] A posterior-distribution visualization appears only when relative delta and both interval bounds are present.
+- [ ] A zero-minimum Sample check pass and zero-sample SRM pass are not presented as sufficient evidence.
+- [ ] Bayesian traffic assignment uses `Control & Treatments`, not `Baseline & Arms`.
+- [ ] The current Bayesian approval covers the read-only Measuring state; its edit-state visual is not inferred from the Bandit Sheet.
 - [ ] Learning preserves Hypothesis, Key learning, Run identity, decision, and all five structured Run-learning fields.
 - [ ] Hypothesis and Key learning stack into one column when the available main-content width is approximately `768px` or narrower.
 - [ ] Key learning reads and writes the Experiment-level `lastLearning` field through the existing partial Experiment update endpoint.
