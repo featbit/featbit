@@ -102,6 +102,7 @@ export function ExperimentDetailsPage() {
   const backHref = localizedPath(lang, "/experiments")
   const [settingsActive, setSettingsActive] = useState(false)
   const [agentSetupOpen, setAgentSetupOpen] = useState(false)
+  const [selectedRunId, setSelectedRunId] = useState<string>()
   const queryKey = ["experiment-details", envId, experimentId]
 
   const detailQuery = useQuery({
@@ -245,6 +246,8 @@ export function ExperimentDetailsPage() {
                   <MeasuringDetails
                     experiment={detailQuery.data}
                     envId={envId}
+                    selectedRunId={selectedRunId}
+                    onSelectedRunChange={setSelectedRunId}
                   />
                 ) : null}
                 {activeStage === "learning" ? (
@@ -252,6 +255,8 @@ export function ExperimentDetailsPage() {
                     experiment={detailQuery.data}
                     saving={updateMutation.isPending}
                     saveError={updateMutation.isError}
+                    selectedRunId={selectedRunId}
+                    onSelectedRunChange={setSelectedRunId}
                     onSave={(update) =>
                       updateMutation.mutateAsync(update).then(() => undefined)
                     }

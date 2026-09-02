@@ -3,8 +3,8 @@ import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
+import { ExperimentRunTabs } from "../components/experiment-run-tabs"
 import type {
   ExperimentDetail,
   ExperimentLearningUpdate,
@@ -14,72 +14,8 @@ import { EditLearningDialog } from "./edit-learning-dialog"
 import {
   hasCapturedLearning,
   LEARNING_FIELDS,
-  normalizedDecision,
   orderExperimentRuns,
 } from "./learning-utils"
-
-function StatusBadge({ status }: { status: string }) {
-  const { t } = useTranslation()
-  const normalized = status.trim().toLowerCase()
-  const dot =
-    normalized === "decided"
-      ? "bg-emerald-600"
-      : normalized === "collecting"
-        ? "bg-blue-600"
-        : normalized === "analyzing"
-          ? "bg-violet-600"
-          : "bg-muted-foreground"
-  const known = [
-    "draft",
-    "collecting",
-    "analyzing",
-    "decided",
-    "archived",
-  ].includes(normalized)
-
-  return (
-    <Badge variant="outline" className="gap-2 font-normal capitalize">
-      <span className={cn("size-1.5 rounded-full", dot)} />
-      {known
-        ? t(
-            `releaseDecision.experiments.detailsPage.learning.statuses.${normalized}`
-          )
-        : status}
-    </Badge>
-  )
-}
-
-function DecisionBadge({ decision }: { decision: string | null }) {
-  const { t } = useTranslation()
-  const normalized = normalizedDecision(decision)
-  if (!normalized) return null
-
-  const key = normalized.includes("ROLLBACK")
-    ? "rollback"
-    : normalized === "CONTINUE"
-      ? "continue"
-      : normalized === "PAUSE"
-        ? "pause"
-        : normalized === "INCONCLUSIVE"
-          ? "inconclusive"
-          : null
-  const color =
-    key === "continue"
-      ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300"
-      : key === "pause"
-        ? "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-300"
-        : key === "rollback"
-          ? "border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300"
-          : "border-border bg-muted/50 text-muted-foreground"
-
-  return (
-    <Badge variant="outline" className={cn("font-normal", color)}>
-      {key
-        ? t(`releaseDecision.experiments.detailsPage.learning.decisions.${key}`)
-        : decision}
-    </Badge>
-  )
-}
 
 function EvidenceRationale({ value }: { value: string }) {
   const { t } = useTranslation()
@@ -126,7 +62,7 @@ function RunLearning({ run }: { run: ExperimentRunDetail }) {
   const hasLearning = hasCapturedLearning(run)
 
   return (
-    <div className="overflow-hidden rounded-lg border">
+    <div>
       <div className="flex min-h-13 flex-wrap items-center gap-2 px-4 py-3">
         <code className="mr-2 rounded bg-muted px-2 py-1 text-xs">
           {run.slug}
@@ -136,10 +72,6 @@ function RunLearning({ run }: { run: ExperimentRunDetail }) {
             ? t("releaseDecision.experiments.methods.bandit")
             : t("releaseDecision.experiments.methods.bayesian")}
         </Badge>
-        <StatusBadge status={run.status} />
-        <div className="ml-auto">
-          <DecisionBadge decision={run.decision} />
-        </div>
       </div>
 
       {run.decisionSummary?.trim() ? (
@@ -198,21 +130,33 @@ export function LearningDetails({
   saving,
   saveError,
   onSave,
+  selectedRunId,
+  onSelectedRunChange,
 }: {
   experiment: ExperimentDetail
   saving: boolean
   saveError: boolean
   onSave: (values: ExperimentLearningUpdate) => Promise<void>
+  selectedRunId?: string
+  onSelectedRunChange?: (runId: string) => void
 }) {
   const { t } = useTranslation()
   const runs = useMemo(
     () => orderExperimentRuns(experiment.experimentRuns ?? []),
     [experiment.experimentRuns]
   )
-  const [selectedRunId, setSelectedRunId] = useState(runs[0]?.id ?? "")
+  const [localSelectedRunId, setLocalSelectedRunId] = useState(
+    runs.at(-1)?.id ?? ""
+  )
   const [editOpen, setEditOpen] = useState(false)
 
-  const selectedRun = runs.find((run) => run.id === selectedRunId) ?? runs[0]
+  const effectiveSelectedRunId = selectedRunId ?? localSelectedRunId
+  const selectedRun =
+    runs.find((run) => run.id === effectiveSelectedRunId) ?? runs.at(-1)
+  const selectRun = (runId: string) => {
+    setLocalSelectedRunId(runId)
+    onSelectedRunChange?.(runId)
+  }
 
   return (
     <section className="@container/learning rounded-lg border bg-background px-6 py-6">
@@ -282,29 +226,15 @@ export function LearningDetails({
             </p>
           </div>
         ) : (
-          <>
-            {runs.length > 1 ? (
-              <Tabs value={selectedRun?.id} onValueChange={setSelectedRunId}>
-                <TabsList>
-                  {runs.map((run, index) => (
-                    <TabsTrigger
-                      key={run.id}
-                      value={run.id}
-                      className="min-w-20 px-3"
-                    >
-                      {t(
-                        "releaseDecision.experiments.detailsPage.learning.run",
-                        {
-                          number: index + 1,
-                        }
-                      )}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-              </Tabs>
-            ) : null}
+          <div className="overflow-hidden rounded-lg border">
+            <ExperimentRunTabs
+              runs={runs}
+              selectedRunId={selectedRun?.id ?? ""}
+              onSelectedRunChange={selectRun}
+              listClassName="border-t-0 border-b"
+            />
             {selectedRun ? <RunLearning run={selectedRun} /> : null}
-          </>
+          </div>
         )}
       </div>
 

@@ -83,14 +83,13 @@ describe("LearningDetails", () => {
     expect(
       screen.getByText("The shorter flow improved conversion.")
     ).toBeInTheDocument()
-    expect(screen.getByText("checkout-v2-run-1")).toBeInTheDocument()
-    expect(screen.getByText("Changed the checkout layout.")).toBeInTheDocument()
-
-    fireEvent.click(screen.getByRole("tab", { name: "Run 2" }))
-
     expect(screen.getByText("checkout-v2-run-2")).toBeInTheDocument()
     expect(screen.getByText("The sample was too small.")).toBeInTheDocument()
-    expect(screen.getByText("INCONCLUSIVE")).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole("tab", { name: /Run 1/ }))
+
+    expect(screen.getByText("checkout-v2-run-1")).toBeInTheDocument()
+    expect(screen.getByText("Changed the checkout layout.")).toBeInTheDocument()
   })
 
   it("keeps runs visible when their learning has not been captured", async () => {
