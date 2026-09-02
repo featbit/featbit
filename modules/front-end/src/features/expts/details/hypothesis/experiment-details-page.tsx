@@ -32,6 +32,7 @@ import type {
 } from "../experiment-details-types"
 import { ExposureDetails } from "../exposure/exposure-details"
 import { LearningDetails } from "../learning/learning-details"
+import { MeasuringDetails } from "../measuring/measuring-details"
 import { HypothesisDetails } from "./hypothesis-details"
 
 function LoadingPage({ backHref }: { backHref: string }) {
@@ -238,6 +239,12 @@ export function ExperimentDetailsPage() {
                         experimentStageSearchParams(current, "measuring")
                       )
                     }
+                  />
+                ) : null}
+                {activeStage === "measuring" ? (
+                  <MeasuringDetails
+                    experiment={detailQuery.data}
+                    envId={envId}
                   />
                 ) : null}
                 {activeStage === "learning" ? (
