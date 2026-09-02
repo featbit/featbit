@@ -12,7 +12,7 @@ import {
   Plus,
   Trash2,
 } from "lucide-react"
-import { useMemo, useState } from "react"
+import { useLayoutEffect, useMemo, useRef, useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import {
@@ -220,6 +220,8 @@ function formatNumber(value: number | undefined, percent = false) {
 function DecisionPanel({ run }: { run: MeasuringRun }) {
   const { t } = useTranslation()
   const [expanded, setExpanded] = useState(false)
+  const [rationaleOverflows, setRationaleOverflows] = useState(false)
+  const rationaleRef = useRef<HTMLSpanElement>(null)
   const decision = normalizedDecision(run.decision)
   const key = decision.toLowerCase().replaceAll(" ", "_")
   const methodKey = `${normalizedMethod(run.method)}_${key}`
@@ -250,6 +252,49 @@ function DecisionPanel({ run }: { run: MeasuringRun }) {
         }
       ),
     }
+  )
+
+  useLayoutEffect(() => {
+    if (expanded) return
+
+    const rationale = rationaleRef.current
+    if (!rationale) return
+
+    const updateOverflow = () => {
+      setRationaleOverflows(rationale.scrollHeight > rationale.clientHeight + 1)
+    }
+
+    updateOverflow()
+    const resizeObserver =
+      typeof ResizeObserver === "undefined"
+        ? null
+        : new ResizeObserver(updateOverflow)
+    resizeObserver?.observe(rationale)
+    window.addEventListener("resize", updateOverflow)
+
+    return () => {
+      resizeObserver?.disconnect()
+      window.removeEventListener("resize", updateOverflow)
+    }
+  }, [expanded, rationaleOverflows, run.decisionReason])
+
+  const rationaleContent = (
+    <span className="min-w-0 flex-1">
+      <span className="block text-sm font-medium">
+        {t(
+          "releaseDecision.experiments.detailsPage.measuring.evidenceRationale"
+        )}
+      </span>
+      <span
+        ref={rationaleRef}
+        className={cn(
+          "mt-1 block text-xs leading-5 text-muted-foreground",
+          !expanded && "line-clamp-2"
+        )}
+      >
+        {run.decisionReason}
+      </span>
+    </span>
   )
 
   if (!run.decision && !run.decisionSummary && !run.decisionReason) return null
@@ -283,39 +328,30 @@ function DecisionPanel({ run }: { run: MeasuringRun }) {
         </div>
       ) : null}
       {run.decisionReason ? (
-        <button
-          type="button"
-          className="flex w-full items-start gap-2 border-t px-4 py-3 text-left hover:bg-muted/30"
-          onClick={() => setExpanded((current) => !current)}
-        >
-          {expanded ? (
-            <ChevronUp className="mt-0.5 size-4 shrink-0" />
-          ) : (
-            <ChevronDown className="mt-0.5 size-4 shrink-0" />
-          )}
-          <span className="min-w-0 flex-1">
-            <span className="block text-sm font-medium">
-              {t(
-                "releaseDecision.experiments.detailsPage.measuring.evidenceRationale"
-              )}
-            </span>
-            <span
-              className={cn(
-                "mt-1 block text-xs leading-5 text-muted-foreground",
-                !expanded && "line-clamp-2"
-              )}
-            >
-              {run.decisionReason}
-            </span>
-          </span>
-          <span className="mt-0.5 shrink-0 text-xs text-muted-foreground">
-            {t(
-              expanded
-                ? "releaseDecision.experiments.detailsPage.measuring.showLess"
-                : "releaseDecision.experiments.detailsPage.measuring.showFullRationale"
+        rationaleOverflows ? (
+          <button
+            type="button"
+            className="flex w-full items-start gap-2 border-t px-4 py-3 text-left hover:bg-muted/30"
+            aria-expanded={expanded}
+            onClick={() => setExpanded((current) => !current)}
+          >
+            {expanded ? (
+              <ChevronUp className="mt-0.5 size-4 shrink-0" />
+            ) : (
+              <ChevronDown className="mt-0.5 size-4 shrink-0" />
             )}
-          </span>
-        </button>
+            {rationaleContent}
+            <span className="mt-0.5 shrink-0 text-xs text-muted-foreground">
+              {t(
+                expanded
+                  ? "releaseDecision.experiments.detailsPage.measuring.showLess"
+                  : "releaseDecision.experiments.detailsPage.measuring.showFullRationale"
+              )}
+            </span>
+          </button>
+        ) : (
+          <div className="border-t px-4 py-3">{rationaleContent}</div>
+        )
       ) : null}
     </div>
   )
@@ -1202,7 +1238,7 @@ export function MeasuringDetails({
                 </Button>
               </div>
               <div className="space-y-5 p-4">
-                <DecisionPanel run={selected} />
+                <DecisionPanel key={selected.id} run={selected} />
                 <FullAnalysis run={selected} variantNames={variantNames} />
               </div>
             </div>

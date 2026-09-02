@@ -1,5 +1,5 @@
 import { ChevronDown, ChevronUp, Pencil } from "lucide-react"
-import { useMemo, useState } from "react"
+import { useLayoutEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -20,6 +20,32 @@ import {
 function EvidenceRationale({ value }: { value: string }) {
   const { t } = useTranslation()
   const [expanded, setExpanded] = useState(false)
+  const [overflows, setOverflows] = useState(false)
+  const rationaleRef = useRef<HTMLParagraphElement>(null)
+
+  useLayoutEffect(() => {
+    if (expanded) return
+
+    const rationale = rationaleRef.current
+    if (!rationale) return
+
+    const updateOverflow = () => {
+      setOverflows(rationale.scrollHeight > rationale.clientHeight + 1)
+    }
+
+    updateOverflow()
+    const resizeObserver =
+      typeof ResizeObserver === "undefined"
+        ? null
+        : new ResizeObserver(updateOverflow)
+    resizeObserver?.observe(rationale)
+    window.addEventListener("resize", updateOverflow)
+
+    return () => {
+      resizeObserver?.disconnect()
+      window.removeEventListener("resize", updateOverflow)
+    }
+  }, [expanded, value])
 
   return (
     <div className="border-t px-4 py-3">
@@ -31,6 +57,7 @@ function EvidenceRationale({ value }: { value: string }) {
         </span>
         <div className="min-w-0">
           <p
+            ref={rationaleRef}
             className={cn(
               "leading-6 whitespace-pre-wrap text-muted-foreground",
               !expanded && "line-clamp-2"
@@ -38,18 +65,21 @@ function EvidenceRationale({ value }: { value: string }) {
           >
             {value}
           </p>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="mt-1 h-7 px-0 text-xs text-muted-foreground hover:bg-transparent hover:text-foreground"
-            onClick={() => setExpanded((current) => !current)}
-          >
-            {t(
-              `releaseDecision.experiments.detailsPage.learning.${expanded ? "showLess" : "showMore"}`
-            )}
-            {expanded ? <ChevronUp /> : <ChevronDown />}
-          </Button>
+          {overflows ? (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="mt-1 h-7 px-0 text-xs text-muted-foreground hover:bg-transparent hover:text-foreground"
+              aria-expanded={expanded}
+              onClick={() => setExpanded((current) => !current)}
+            >
+              {t(
+                `releaseDecision.experiments.detailsPage.learning.${expanded ? "showLess" : "showMore"}`
+              )}
+              {expanded ? <ChevronUp /> : <ChevronDown />}
+            </Button>
+          ) : null}
         </div>
       </div>
     </div>
@@ -119,7 +149,10 @@ function RunLearning({ run }: { run: ExperimentRunDetail }) {
       )}
 
       {run.decisionReason?.trim() ? (
-        <EvidenceRationale value={run.decisionReason} />
+        <EvidenceRationale
+          key={`${run.id}:${run.decisionReason}`}
+          value={run.decisionReason}
+        />
       ) : null}
     </div>
   )
