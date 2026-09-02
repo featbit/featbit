@@ -5,6 +5,8 @@ import {
   CalendarDays,
   Check,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   ChevronUp,
   Copy,
   Loader2,
@@ -12,7 +14,7 @@ import {
   Plus,
   Trash2,
 } from "lucide-react"
-import { useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import {
@@ -966,11 +968,72 @@ export function MeasuringDetails({
   >([])
   const [deleteRun, setDeleteRun] = useState<MeasuringRun | null>(null)
   const [assignmentOpen, setAssignmentOpen] = useState(false)
+  const runTabsViewportRef = useRef<HTMLDivElement>(null)
+  const runTabRefs = useRef(new Map<string, HTMLButtonElement>())
+  const [runTabOverflow, setRunTabOverflow] = useState({
+    left: false,
+    right: false,
+  })
   const selected =
     runs.find((run) => run.id === selectedId) ?? runs.at(-1) ?? null
   const selectedIndex = selected
     ? runs.findIndex((run) => run.id === selected.id)
     : -1
+
+  const updateRunTabOverflow = useCallback(() => {
+    const viewport = runTabsViewportRef.current
+    if (!viewport) return
+
+    const maxScrollLeft = viewport.scrollWidth - viewport.clientWidth
+    setRunTabOverflow({
+      left: viewport.scrollLeft > 1,
+      right: viewport.scrollLeft < maxScrollLeft - 1,
+    })
+  }, [])
+
+  const scrollRunTabs = (direction: -1 | 1) => {
+    const viewport = runTabsViewportRef.current
+    if (!viewport) return
+
+    viewport.scrollBy({
+      left: direction * Math.max(viewport.clientWidth * 0.75, 320),
+      behavior: "smooth",
+    })
+  }
+
+  useEffect(() => {
+    const viewport = runTabsViewportRef.current
+    if (!viewport) return
+
+    updateRunTabOverflow()
+    viewport.addEventListener("scroll", updateRunTabOverflow, {
+      passive: true,
+    })
+    const resizeObserver =
+      typeof ResizeObserver === "undefined"
+        ? null
+        : new ResizeObserver(updateRunTabOverflow)
+    resizeObserver?.observe(viewport)
+    window.addEventListener("resize", updateRunTabOverflow)
+
+    return () => {
+      viewport.removeEventListener("scroll", updateRunTabOverflow)
+      resizeObserver?.disconnect()
+      window.removeEventListener("resize", updateRunTabOverflow)
+    }
+  }, [runs.length, updateRunTabOverflow])
+
+  useEffect(() => {
+    if (!selected?.id) return
+
+    runTabRefs.current.get(selected.id)?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "nearest",
+    })
+    const frame = requestAnimationFrame(updateRunTabOverflow)
+    return () => cancelAnimationFrame(frame)
+  }, [selected?.id, updateRunTabOverflow])
 
   const flagQuery = useQuery({
     queryKey: ["experiment-feature-flag", envId, experiment.flagKey],
@@ -1080,52 +1143,93 @@ export function MeasuringDetails({
           </Button>
         </div>
         {runs.length ? (
-          <div className="mt-3 overflow-x-auto pb-1">
-            <Tabs value={selected?.id ?? ""} onValueChange={setSelectedId}>
-              <TabsList className="w-max min-w-full justify-start gap-1 bg-transparent p-0 group-data-horizontal/tabs:h-auto">
-                {runs.map((run, index) => (
-                  <TabsTrigger
-                    key={run.id}
-                    value={run.id}
-                    className="h-10 min-w-64 flex-none justify-between gap-4 rounded-lg border border-border px-3 font-normal text-foreground hover:bg-muted/30 data-active:border-blue-500 data-active:bg-blue-50/50 data-active:shadow-none data-active:ring-1 data-active:ring-blue-500/20 dark:data-active:border-blue-500 dark:data-active:bg-blue-950/20"
-                  >
-                    <span className="font-medium">
-                      {t(
-                        "releaseDecision.experiments.detailsPage.measuring.run",
-                        { number: index + 1 }
-                      )}
-                    </span>
-                    <span className="flex items-center gap-3 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-2">
-                        <span
-                          className={cn(
-                            "size-1.5 rounded-full",
-                            run.status === "decided"
-                              ? "bg-emerald-600"
-                              : run.status === "collecting"
-                                ? "bg-blue-600"
-                                : "bg-zinc-400"
-                          )}
-                        />
+          <div className="relative -mx-4 mt-3 -mb-3">
+            {runTabOverflow.left ? (
+              <div className="pointer-events-none absolute inset-y-px left-0 z-10 flex w-16 items-center bg-linear-to-r from-background via-background/95 to-transparent pl-1">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon-sm"
+                  className="pointer-events-auto rounded-full bg-background"
+                  aria-label={t(
+                    "releaseDecision.experiments.detailsPage.measuring.previousRuns"
+                  )}
+                  onClick={() => scrollRunTabs(-1)}
+                >
+                  <ChevronLeft />
+                </Button>
+              </div>
+            ) : null}
+            <div
+              ref={runTabsViewportRef}
+              className="[scrollbar-width:none] overflow-x-auto overflow-y-hidden scroll-smooth [&::-webkit-scrollbar]:hidden"
+            >
+              <Tabs value={selected?.id ?? ""} onValueChange={setSelectedId}>
+                <TabsList className="w-max min-w-full justify-start gap-0 rounded-none border-t bg-transparent p-0 group-data-horizontal/tabs:h-auto">
+                  {runs.map((run, index) => (
+                    <TabsTrigger
+                      key={run.id}
+                      value={run.id}
+                      ref={(node) => {
+                        if (node) runTabRefs.current.set(run.id, node)
+                        else runTabRefs.current.delete(run.id)
+                      }}
+                      className="h-11 min-w-52 flex-none justify-between gap-4 rounded-none border-0 border-r border-border px-4 font-normal text-foreground last:border-r-0 hover:bg-muted/40 focus-visible:z-20 data-active:bg-blue-50/60 data-active:shadow-none data-active:after:bottom-0 data-active:after:bg-blue-600 data-active:after:opacity-100 dark:data-active:bg-blue-950/25"
+                    >
+                      <span className="font-medium">
                         {t(
-                          `releaseDecision.experiments.detailsPage.measuring.statuses.${run.status.trim().toLowerCase()}`,
-                          { defaultValue: run.status }
+                          "releaseDecision.experiments.detailsPage.measuring.run",
+                          { number: index + 1 }
                         )}
                       </span>
-                      {run.decision ? (
+                      <span className="flex items-center gap-3 text-xs text-muted-foreground">
                         <span className="flex items-center gap-2">
-                          <span className="size-1.5 rounded-full bg-amber-500" />
+                          <span
+                            className={cn(
+                              "size-1.5 rounded-full",
+                              run.status === "decided"
+                                ? "bg-emerald-600"
+                                : run.status === "collecting"
+                                  ? "bg-blue-600"
+                                  : "bg-zinc-400"
+                            )}
+                          />
                           {t(
-                            `releaseDecision.experiments.detailsPage.measuring.decisions.${run.decision.trim().toLowerCase()}`,
-                            { defaultValue: normalizedDecision(run.decision) }
+                            `releaseDecision.experiments.detailsPage.measuring.statuses.${run.status.trim().toLowerCase()}`,
+                            { defaultValue: run.status }
                           )}
                         </span>
-                      ) : null}
-                    </span>
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            </Tabs>
+                        {run.decision ? (
+                          <span className="flex items-center gap-2">
+                            <span className="size-1.5 rounded-full bg-amber-500" />
+                            {t(
+                              `releaseDecision.experiments.detailsPage.measuring.decisions.${run.decision.trim().toLowerCase()}`,
+                              { defaultValue: normalizedDecision(run.decision) }
+                            )}
+                          </span>
+                        ) : null}
+                      </span>
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </Tabs>
+            </div>
+            {runTabOverflow.right ? (
+              <div className="pointer-events-none absolute inset-y-px right-0 z-10 flex w-16 items-center justify-end bg-linear-to-l from-background via-background/95 to-transparent pr-1">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon-sm"
+                  className="pointer-events-auto rounded-full bg-background"
+                  aria-label={t(
+                    "releaseDecision.experiments.detailsPage.measuring.nextRuns"
+                  )}
+                  onClick={() => scrollRunTabs(1)}
+                >
+                  <ChevronRight />
+                </Button>
+              </div>
+            ) : null}
           </div>
         ) : null}
       </div>

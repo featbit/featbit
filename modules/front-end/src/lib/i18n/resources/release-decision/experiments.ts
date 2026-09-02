@@ -178,6 +178,8 @@ export const enExperiments = {
       experimentRuns: "Experiment runs",
       run: "Run {{number}}",
       newRun: "New run",
+      previousRuns: "Show previous runs",
+      nextRuns: "Show more runs",
       newRunTitle: "Create experiment run",
       newRunDescription:
         "Choose the analysis method and variation roles for this run.",
@@ -695,6 +697,8 @@ export const zhExperiments = {
       experimentRuns: "实验运行",
       run: "运行 {{number}}",
       newRun: "新建运行",
+      previousRuns: "显示之前的运行",
+      nextRuns: "显示更多运行",
       newRunTitle: "创建实验运行",
       newRunDescription: "选择此运行的分析方法和变体角色。",
       analysisMethod: "分析方法",
