@@ -577,7 +577,7 @@ function FullAnalysis({
       ) : null}
 
       {analysis.srm ? (
-        <div className="flex flex-wrap items-center gap-2 rounded-lg border bg-muted/20 px-4 py-2 text-xs text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-2 border-b pb-2 text-xs text-muted-foreground">
           <span className="font-medium text-foreground">SRM</span>
           <span>·</span>
           <span>p={analysis.srm.pValue?.toFixed(4) ?? "—"}</span>
@@ -770,8 +770,8 @@ function AssignmentSummary({
   }
 
   return (
-    <aside className="rounded-lg border">
-      <div className="flex items-center justify-between gap-4 border-b px-4 py-3">
+    <aside>
+      <div className="flex items-center justify-between gap-4 border-b pb-3">
         <h3 className="font-medium">
           {t(
             "releaseDecision.experiments.detailsPage.measuring.trafficAssignment"
@@ -786,7 +786,7 @@ function AssignmentSummary({
           </Button>
         ) : null}
       </div>
-      <div className="divide-y px-4">
+      <div className="divide-y">
         <section className="space-y-2 py-4">
           <h4 className="text-sm font-medium">
             {t(
@@ -1199,7 +1199,7 @@ export function MeasuringDetails({
               )}
             </p>
           ) : null}
-          <div className="grid items-start gap-0 xl:grid-cols-[minmax(0,1.65fr)_minmax(340px,1fr)]">
+          <div className="grid gap-0 xl:grid-cols-[minmax(0,1.65fr)_minmax(340px,1fr)]">
             <div className="min-w-0 xl:border-r">
               <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-dashed px-4 py-2.5 text-sm text-muted-foreground">
                 <span className="flex min-w-0 flex-1 items-center gap-2">
