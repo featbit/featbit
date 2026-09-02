@@ -29,6 +29,31 @@ function parseObject(value: string | null | undefined) {
   }
 }
 
+export function parseExperimentVariantNames(
+  value: string | null | undefined
+): Record<string, string> {
+  if (!value?.trim()) return {}
+  try {
+    const variants: unknown = JSON.parse(value)
+    if (!Array.isArray(variants)) return {}
+
+    return Object.fromEntries(
+      variants.flatMap((item) => {
+        const variant = objectValue(item)
+        const name = stringValue(variant?.name)
+        if (!variant || !name) return []
+
+        return [variant.key, variant.name, variant.value].flatMap((token) => {
+          const normalized = stringValue(token)
+          return normalized ? [[normalized, name] as const] : []
+        })
+      })
+    )
+  } catch {
+    return {}
+  }
+}
+
 function numberMap(value: unknown) {
   const source = objectValue(value)
   if (!source) return {}

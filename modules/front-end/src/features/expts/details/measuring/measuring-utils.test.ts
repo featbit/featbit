@@ -5,6 +5,7 @@ import {
   orderedRuns,
   parseAnalysis,
   parseAudienceFilters,
+  parseExperimentVariantNames,
   parseSamplingPlan,
   runVariants,
   serializeAudienceFilters,
@@ -148,5 +149,24 @@ describe("measuring utils", () => {
     expect(parseAudienceFilters("")).toEqual([])
     expect(parseAudienceFilters(null)).toEqual([])
     expect(parseAudienceFilters("not-json")).toEqual([])
+  })
+
+  it("maps experiment variant ids and values to their names", () => {
+    expect(
+      parseExperimentVariantNames(
+        JSON.stringify([
+          { key: "normal-id", name: "Normal", value: "normal" },
+          { key: "hard-id", name: "Hard", value: "hard" },
+        ])
+      )
+    ).toEqual({
+      "normal-id": "Normal",
+      Normal: "Normal",
+      normal: "Normal",
+      "hard-id": "Hard",
+      Hard: "Hard",
+      hard: "Hard",
+    })
+    expect(parseExperimentVariantNames("not-json")).toEqual({})
   })
 })

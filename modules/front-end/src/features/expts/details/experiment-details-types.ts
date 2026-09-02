@@ -15,6 +15,7 @@ export type ExperimentDetail = {
   change: string | null
   constraints: string | null
   conflictAnalysis: string | null
+  variants?: string | null
   lastLearning: string | null
   primaryMetric: string | null
   guardrails: string | null

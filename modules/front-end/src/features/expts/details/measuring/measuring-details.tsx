@@ -13,7 +13,7 @@ import {
   Trash2,
 } from "lucide-react"
 import { useMemo, useState } from "react"
-import { useTranslation } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import {
   AlertDialog,
@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Table,
   TableBody,
@@ -78,6 +79,7 @@ import {
   orderedRuns,
   parseAnalysis,
   parseAudienceFilters,
+  parseExperimentVariantNames,
   parseSamplingPlan,
   runVariants,
 } from "./measuring-utils"
@@ -323,10 +325,12 @@ function AnalysisTable({
   section,
   run,
   bandit,
+  variantNames,
 }: {
   section: AnalysisSection
   run: MeasuringRun
   bandit: boolean
+  variantNames: Record<string, string>
 }) {
   const { t } = useTranslation()
   const variants = runVariants(run)
@@ -421,7 +425,9 @@ function AnalysisTable({
           {section.rows.map((row, index) => (
             <TableRow key={`${section.label}-${row.variant}`}>
               <TableCell>
-                <span className="font-medium">{row.variant}</span>
+                <span className="font-medium">
+                  {variantNames[row.variant] ?? row.variant}
+                </span>
                 <span className="ml-1.5 text-xs text-muted-foreground">
                   ({role(row, index)})
                 </span>
@@ -482,7 +488,13 @@ function AnalysisTable({
   )
 }
 
-function FullAnalysis({ run }: { run: MeasuringRun }) {
+function FullAnalysis({
+  run,
+  variantNames,
+}: {
+  run: MeasuringRun
+  variantNames: Record<string, string>
+}) {
   const { t, i18n } = useTranslation()
   const analysis = useMemo(
     () => parseAnalysis(run.analysisResult),
@@ -519,7 +531,11 @@ function FullAnalysis({ run }: { run: MeasuringRun }) {
               {t("releaseDecision.experiments.detailsPage.measuring.algorithm")}
               :
             </strong>{" "}
-            {analysis.algorithm ?? "—"}
+            {analysis.algorithm === "thompson_sampling_top_two"
+              ? t(
+                  "releaseDecision.experiments.detailsPage.measuring.algorithms.thompson_sampling_top_two"
+                )
+              : (analysis.algorithm ?? "—")}
           </span>
         ) : (
           <span>
@@ -576,7 +592,7 @@ function FullAnalysis({ run }: { run: MeasuringRun }) {
           <span>·</span>
           <span>
             {Object.entries(analysis.srm.observed)
-              .map(([key, value]) => `${key}=${value}`)
+              .map(([key, value]) => `${variantNames[key] ?? key}=${value}`)
               .join(", ") || "—"}
           </span>
           {observed === 0 ? (
@@ -610,6 +626,7 @@ function FullAnalysis({ run }: { run: MeasuringRun }) {
               section={analysis.primary}
               run={run}
               bandit={bandit}
+              variantNames={variantNames}
             />
           ) : null}
           {bandit ? (
@@ -699,7 +716,12 @@ function FullAnalysis({ run }: { run: MeasuringRun }) {
             </span>
           </h4>
           {section.rows.length ? (
-            <AnalysisTable section={section} run={run} bandit={false} />
+            <AnalysisTable
+              section={section}
+              run={run}
+              bandit={false}
+              variantNames={variantNames}
+            />
           ) : (
             <p className="text-xs text-muted-foreground">
               {t("releaseDecision.experiments.detailsPage.measuring.noData")}
@@ -930,6 +952,10 @@ export function MeasuringDetails({
     () => orderedRuns(experiment.experimentRuns as MeasuringRun[]),
     [experiment.experimentRuns]
   )
+  const variantNames = useMemo(
+    () => parseExperimentVariantNames(experiment.variants),
+    [experiment.variants]
+  )
   const [selectedId, setSelectedId] = useState(runs.at(-1)?.id ?? null)
   const [newRunOpen, setNewRunOpen] = useState(false)
   const [newRunMethod, setNewRunMethod] =
@@ -942,6 +968,9 @@ export function MeasuringDetails({
   const [assignmentOpen, setAssignmentOpen] = useState(false)
   const selected =
     runs.find((run) => run.id === selectedId) ?? runs.at(-1) ?? null
+  const selectedIndex = selected
+    ? runs.findIndex((run) => run.id === selected.id)
+    : -1
 
   const flagQuery = useQuery({
     queryKey: ["experiment-feature-flag", envId, experiment.flagKey],
@@ -1025,66 +1054,17 @@ export function MeasuringDetails({
   return (
     <section className="overflow-hidden rounded-lg border bg-background">
       <div className="border-b px-4 py-3">
-        <h2 className="font-medium">
-          {t(
-            "releaseDecision.experiments.detailsPage.measuring.experimentRuns"
-          )}
-        </h2>
-        <div className="mt-3 flex items-stretch gap-3 overflow-x-auto pb-1">
-          {runs.map((run, index) => {
-            const active = run.id === selected?.id
-            return (
-              <button
-                key={run.id}
-                type="button"
-                onClick={() => setSelectedId(run.id)}
-                className={cn(
-                  "flex min-w-56 items-center gap-3 rounded-lg border px-3 py-2 text-left transition-colors hover:bg-muted/30",
-                  active && "border-blue-500 ring-1 ring-blue-500/20"
-                )}
-              >
-                <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-medium">
-                    {t(
-                      "releaseDecision.experiments.detailsPage.measuring.run",
-                      { number: index + 1 }
-                    )}
-                  </span>
-                  <code className="block truncate text-xs text-muted-foreground">
-                    {run.slug}
-                  </code>
-                </span>
-                <span className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground">
-                  <span
-                    className={cn(
-                      "size-1.5 rounded-full",
-                      run.status === "decided"
-                        ? "bg-emerald-600"
-                        : run.status === "collecting"
-                          ? "bg-blue-600"
-                          : "bg-zinc-400"
-                    )}
-                  />
-                  {t(
-                    `releaseDecision.experiments.detailsPage.measuring.statuses.${run.status.trim().toLowerCase()}`,
-                    { defaultValue: run.status }
-                  )}
-                </span>
-                {run.decision ? (
-                  <span className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground">
-                    <span className="size-1.5 rounded-full bg-amber-500" />
-                    {t(
-                      `releaseDecision.experiments.detailsPage.measuring.decisions.${run.decision.trim().toLowerCase()}`,
-                      { defaultValue: normalizedDecision(run.decision) }
-                    )}
-                  </span>
-                ) : null}
-              </button>
-            )
-          })}
+        <div className="flex items-center justify-between gap-4">
+          <h2 className="font-medium">
+            {t(
+              "releaseDecision.experiments.detailsPage.measuring.experimentRuns"
+            )}
+          </h2>
           <Button
             type="button"
-            className="shrink-0 self-center"
+            variant="outline"
+            size="sm"
+            className="shrink-0"
             disabled={createMutation.isPending}
             onClick={() => {
               const normalized = normalizeNewRunVariants("", [], flagVariations)
@@ -1099,6 +1079,55 @@ export function MeasuringDetails({
             {t("releaseDecision.experiments.detailsPage.measuring.newRun")}
           </Button>
         </div>
+        {runs.length ? (
+          <div className="mt-3 overflow-x-auto pb-1">
+            <Tabs value={selected?.id ?? ""} onValueChange={setSelectedId}>
+              <TabsList className="w-max min-w-full justify-start gap-1 bg-transparent p-0 group-data-horizontal/tabs:h-auto">
+                {runs.map((run, index) => (
+                  <TabsTrigger
+                    key={run.id}
+                    value={run.id}
+                    className="h-10 min-w-64 flex-none justify-between gap-4 rounded-lg border border-border px-3 font-normal text-foreground hover:bg-muted/30 data-active:border-blue-500 data-active:bg-blue-50/50 data-active:shadow-none data-active:ring-1 data-active:ring-blue-500/20 dark:data-active:border-blue-500 dark:data-active:bg-blue-950/20"
+                  >
+                    <span className="font-medium">
+                      {t(
+                        "releaseDecision.experiments.detailsPage.measuring.run",
+                        { number: index + 1 }
+                      )}
+                    </span>
+                    <span className="flex items-center gap-3 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-2">
+                        <span
+                          className={cn(
+                            "size-1.5 rounded-full",
+                            run.status === "decided"
+                              ? "bg-emerald-600"
+                              : run.status === "collecting"
+                                ? "bg-blue-600"
+                                : "bg-zinc-400"
+                          )}
+                        />
+                        {t(
+                          `releaseDecision.experiments.detailsPage.measuring.statuses.${run.status.trim().toLowerCase()}`,
+                          { defaultValue: run.status }
+                        )}
+                      </span>
+                      {run.decision ? (
+                        <span className="flex items-center gap-2">
+                          <span className="size-1.5 rounded-full bg-amber-500" />
+                          {t(
+                            `releaseDecision.experiments.detailsPage.measuring.decisions.${run.decision.trim().toLowerCase()}`,
+                            { defaultValue: normalizedDecision(run.decision) }
+                          )}
+                        </span>
+                      ) : null}
+                    </span>
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
+          </div>
+        ) : null}
       </div>
 
       {!selected ? (
@@ -1113,18 +1142,19 @@ export function MeasuringDetails({
       ) : (
         <>
           <div className="flex flex-wrap items-center gap-2 border-b px-4 py-3">
-            <h3 className="mr-1 text-lg font-semibold">{selected.slug}</h3>
+            <h3 className="mr-1 text-lg font-semibold">
+              {t("releaseDecision.experiments.detailsPage.measuring.run", {
+                number: selectedIndex + 1,
+              })}
+            </h3>
+            <code className="mr-1 text-xs text-muted-foreground">
+              {selected.slug}
+            </code>
             <Badge variant="outline" className="font-normal">
               {t(
                 `releaseDecision.experiments.detailsPage.measuring.methods.${normalizedMethod(selected.method)}`
               )}
             </Badge>
-            {normalizedMethod(selected.method) === "bandit" ? (
-              <Badge variant="outline" className="font-normal">
-                {parseAnalysis(selected.analysisResult).algorithm ??
-                  "thompson_sampling_top_two"}
-              </Badge>
-            ) : null}
             <StatusBadge value={selected.status} />
             {selected.decision ? (
               <StatusBadge value={selected.decision} kind="decision" />
@@ -1211,7 +1241,7 @@ export function MeasuringDetails({
               </div>
               <div className="space-y-5 p-4">
                 <DecisionPanel run={selected} />
-                <FullAnalysis run={selected} />
+                <FullAnalysis run={selected} variantNames={variantNames} />
               </div>
             </div>
             <div className="min-w-0 border-t p-4 xl:border-t-0">
@@ -1483,10 +1513,15 @@ export function MeasuringDetails({
               )}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {t(
-                "releaseDecision.experiments.detailsPage.measuring.deleteDescription",
-                { run: deleteRun?.slug }
-              )}
+              <Trans
+                i18nKey="releaseDecision.experiments.detailsPage.measuring.deleteDescription"
+                values={{ run: deleteRun?.slug }}
+                components={{
+                  runSlug: (
+                    <span className="rounded bg-muted px-1 py-0.5 font-mono font-medium text-foreground" />
+                  ),
+                }}
+              />
             </AlertDialogDescription>
           </AlertDialogHeader>
           {deleteMutation.isError ? (

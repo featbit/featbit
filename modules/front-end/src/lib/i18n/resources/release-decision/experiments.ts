@@ -215,6 +215,9 @@ export const enExperiments = {
       fullAnalysis: "Full analysis",
       window: "Window",
       algorithm: "Algorithm",
+      algorithms: {
+        thompson_sampling_top_two: "Thompson Sampling (Top-Two)",
+      },
       prior: "Prior",
       flatPrior: "flat (improper)",
       dataAsOf: "Data as of",
@@ -307,7 +310,7 @@ export const enExperiments = {
       deleteRun: "Delete this run",
       deleteTitle: "Delete experiment run?",
       deleteDescription:
-        "This permanently deletes {{run}} and its analysis. This action cannot be undone.",
+        "This permanently deletes <runSlug>{{run}}</runSlug> and its analysis. This action cannot be undone.",
       delete: "Delete run",
       deleting: "Deleting…",
       runDeleted: "Experiment run deleted",
@@ -724,6 +727,9 @@ export const zhExperiments = {
       fullAnalysis: "完整分析",
       window: "窗口",
       algorithm: "算法",
+      algorithms: {
+        thompson_sampling_top_two: "Thompson Sampling (Top-Two)",
+      },
       prior: "先验",
       flatPrior: "平坦（非正规）",
       dataAsOf: "数据截至",
@@ -805,7 +811,8 @@ export const zhExperiments = {
       assignmentSaveFailed: "无法保存分配。",
       deleteRun: "删除此运行",
       deleteTitle: "删除实验运行？",
-      deleteDescription: "这将永久删除 {{run}} 及其分析，且无法撤销。",
+      deleteDescription:
+        "这将永久删除 <runSlug>{{run}}</runSlug> 及其分析，且无法撤销。",
       delete: "删除运行",
       deleting: "正在删除…",
       runDeleted: "实验运行已删除",
