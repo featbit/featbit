@@ -1248,7 +1248,7 @@ export function MeasuringDetails({
         }}
       >
         <DialogContent
-          className="sm:max-w-lg"
+          className="sm:max-w-2xl"
           showCloseButton={!createMutation.isPending}
         >
           <DialogHeader>
