@@ -82,7 +82,7 @@ export function HypothesisDetails({
           return (
             <div
               key={field}
-              className={`grid min-h-16 grid-cols-[220px_minmax(0,1fr)] gap-6 px-4 py-4 text-sm max-[959px]:grid-cols-1 max-[959px]:gap-1 ${
+              className={`grid min-h-12 grid-cols-[220px_minmax(0,1fr)] gap-6 px-4 py-3 text-sm max-[959px]:grid-cols-1 max-[959px]:gap-1 ${
                 index ? "border-t" : ""
               }`}
             >

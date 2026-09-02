@@ -76,7 +76,7 @@ function LoadingPage({ backHref }: { backHref: string }) {
           {Array.from({ length: 6 }).map((_, index) => (
             <div
               key={index}
-              className={`grid min-h-16 grid-cols-[220px_1fr] gap-6 px-4 py-4 ${
+              className={`grid min-h-12 grid-cols-[220px_1fr] gap-6 px-4 py-3 ${
                 index ? "border-t" : ""
               }`}
             >
