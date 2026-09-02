@@ -1,4 +1,7 @@
+import { enReleaseHealthLive, zhReleaseHealthLive } from "./release-health-live"
+
 export const enReleaseHealth = {
+  live: enReleaseHealthLive,
   title: "Release Health",
   subtitle:
     "Observe release signals, evaluate configured rules, and coordinate safe follow-up without treating temporal correlation as proof of causation.",
@@ -11,6 +14,7 @@ export const enReleaseHealth = {
     aria: "Release Health",
     overview: "Overview",
     metrics: "Metrics",
+    connections: "Connections",
     sessions: "Sessions",
   },
   common: {
@@ -49,6 +53,43 @@ export const enReleaseHealth = {
     impact: "Impact",
     quality: "Quality",
     reliability: "Reliability",
+  },
+  resultContract: {
+    measurementKind: {
+      gauge: "Gauge",
+      count: "Count",
+      ratio: "Ratio",
+      rate: "Rate",
+    },
+    unit: {
+      count: "count",
+      percent: "percent (0–100)",
+      ratio: "ratio (0–1)",
+      duration: "millisecond",
+      data: "byte",
+      rate: "structured rate",
+    },
+    singleSeries: "Numeric time series · Single series",
+    rateNumerator: {
+      events: "events",
+      requests: "requests",
+      errors: "errors",
+      operations: "operations",
+      items: "items",
+      bytes: "bytes",
+    },
+    ratePeriod: {
+      second: "second",
+      minute: "minute",
+      hour: "hour",
+    },
+    rateUnit: "{{numerator}} / {{period}}",
+  },
+  reducer: {
+    latest: "latest",
+    average: "average",
+    minimum: "minimum",
+    maximum: "maximum",
   },
   valueType: {
     count: "Count",
@@ -301,6 +342,7 @@ export const enReleaseHealth = {
       "This is the project metric catalog. The Data status, latest value, and freshness columns are always evaluated for the currently selected environment.",
     search: "Search metrics by name, key, or source",
     allCategories: "All categories",
+    uncategorized: "Uncategorized",
     add: "Add metric",
     metric: "Metric",
     name: "Name",
@@ -309,8 +351,11 @@ export const enReleaseHealth = {
     category: "Category",
     scopeColumn: "Context",
     signal: "Value contract",
+    resultProfile: "Result profile",
     template: "Metric template",
     valueType: "Value type",
+    measurementKind: "Measurement kind",
+    resultSemantics: "Result semantics",
     calculation: "Calculation",
     dataStatus: "Data status",
     latest: "Latest value",
@@ -323,6 +368,7 @@ export const enReleaseHealth = {
     sources: {
       "featbit-events": "FeatBit telemetry",
       prometheus: "Prometheus-compatible",
+      prometheusCompatible: "Prometheus-compatible",
     },
     create: {
       title: "Add release metric",
@@ -338,13 +384,34 @@ export const enReleaseHealth = {
         "Use lowercase letters, numbers, and underscores, starting with a letter.",
       contractTitle: "Metric semantics",
       contractHelp:
-        "Category recommends useful templates but does not prohibit a valid custom contract. Value type strictly limits calculation and unit.",
+        "Define the versioned result semantics and choose one supported result profile. Provider calculations are configured later.",
+      resultSemanticsPlaceholder:
+        "Each point is the percentage of checkout requests that returned an error during the provider query window.",
+      resultSemanticsHelp:
+        "Describe exactly what one normalized point means. Do not add thresholds or health conclusions.",
+      resultShape: "Result shape",
+      resultKind: "Result kind",
+      resultKindValue: "Numeric time series",
+      cardinality: "Cardinality",
+      cardinalityValue: "Single series",
+      mixedLocked: "Fixed for MVP",
+      profileSummary: "Result profile:",
+      rateNumerator: "Numerator unit",
+      ratePeriod: "Per",
+      displayAndConstraints: "Constraints and display",
+      displayAndConstraintsHelp:
+        "Optional constraints can narrow the canonical unit range. Fraction digits affect display only.",
+      minimum: "Minimum",
+      maximum: "Maximum",
+      noMaximum: "No upper bound",
+      fractionDigits: "Fraction digits",
+      canonicalRange: "Canonical range: {{range}} {{unit}}.",
       valueContract: "Value contract",
       templateFilled: "Filled by template",
       customContract: "Custom contract",
       calculationSummary: "Result:",
       contractError:
-        "Choose a calculation and unit that are compatible with the value type.",
+        "Choose a unit that is compatible with the measurement kind.",
       previewSaved:
         "Project metric created in this preview. Connect an environment from Metric detail.",
       save: "Create metric",
@@ -381,6 +448,11 @@ export const enReleaseHealth = {
       environmentStreamsDescription:
         "Connect and inspect this project metric independently in every environment.",
       environment: "Environment",
+      provider: "Provider",
+      connection: "Connection",
+      schedule: "Step / Sync",
+      queryConfigured: "Query configured",
+      stepAndSync: "{{step}} step · {{sync}} sync",
       contextCapabilities: "Context capabilities",
       sourceAction: "Data source",
       notConnected: "Not connected",
@@ -389,6 +461,21 @@ export const enReleaseHealth = {
       connectSource: "Connect",
       manageSource: "Manage",
       awaitingSamples: "awaiting samples",
+      contractTitle: "Current version result contract",
+      contractDescription:
+        "This immutable contract defines what each normalized point means and how every environment must return it.",
+      constraints: "Constraints",
+      resultShape: "Result shape",
+      pointCount: "Point count",
+      managementWindow: "in the selected management window",
+      version: "Version",
+      observation: "Observation",
+      windowReducer: "Window / Reducer",
+      versionHistory: "Version history",
+      versionHistoryDescription:
+        "Result meaning changes create a new immutable Metric Version.",
+      currentVersion: "Current",
+      historicalVersion: "Historical contract retained for sessions",
       sessionMarkers: "Related session windows",
       sessionMarkersDescription:
         "Open a session to see the pinned rule, gate, and evidence used for that observation.",
@@ -399,7 +486,7 @@ export const enReleaseHealth = {
       description:
         "Connect {{metric}} to a data stream in {{environment}} without changing its project definition.",
       boundaryNotice:
-        "This environment source binding selects and validates data. A feature flag, observation mode, rule, and action are configured later in a Monitor metric binding.",
+        "This binding connects one Metric Version to one Environment stream. It does not select a feature flag or calculate health.",
       metric: "Project metric",
       environment: "Environment",
       environmentIsolation:
@@ -408,19 +495,53 @@ export const enReleaseHealth = {
       sourceAndMappingHelp:
         "Choose where this environment reads the metric and map the result to the metric value contract.",
       connection: "Environment connection",
+      createConnection: "Create connection",
+      chooseConnection: "Choose a connection",
+      providerStep: "Provider and connection",
+      providerStepHelp:
+        "Select a reusable connection that belongs to this environment and verify read-only access.",
+      queryStep: "Query and schedule",
+      queryStepHelp:
+        "PromQL must return the final canonical value as one numeric time series.",
+      queryResponsibility:
+        "Prometheus performs rate, ratio, aggregation, quantile, and unit conversion. FeatBit only validates and normalizes points.",
+      queryMode: "Query mode",
+      step: "Step",
+      syncInterval: "Sync interval",
+      validationStep: "Validate and preview",
+      validationStepHelp:
+        "Run a controlled query_range request and verify the response against the immutable Result Contract.",
+      previewSummary:
+        "One series with {{points}} valid points. Values are formatted as {{unit}}; no health rule is evaluated.",
+      queryTime: "Query time",
+      previewRange: "Preview range",
+      seriesCount: "Series",
+      pointCount: "Points",
+      timestamp: "Timestamp",
+      normalizedValue: "Normalized value",
+      reviewStep: "Review and save",
+      reviewStepHelp:
+        "Saving creates a new immutable Source Binding Revision for this environment.",
+      resultContract: "Result contract",
+      schedule: "Schedule",
+      validation: "Validation",
+      validated: "Validated",
+      notValidated: "Not validated",
+      collectingNotice:
+        "After saving, the Environment Metric Stream starts in Collecting and changes state only from real synchronization results.",
       eventSelector: "Event / instrument mapping",
       expectedResult: "Expected result contract:",
       testAndPreview: "Test and preview",
       testAndPreviewHelp:
         "Validate access, query or mapping, and a recent result before switching the active binding revision.",
-      previewReady: "Source mapping is valid",
+      previewReady: "Query and result contract are valid",
       previewPending: "Validation required",
       previewSample:
         "Recent preview result: {{value}}. No health verdict is calculated here.",
       previewInstruction:
-        "Run validation after changing the source, connection, query, or mapping.",
+        "Run validation after changing the provider, connection, query, or schedule.",
       validate: "Validate and preview",
-      validationPassed: "Source mapping validated in this design preview.",
+      validationPassed: "Source binding validated in this design preview.",
       capabilities: "Detected context capabilities",
       capabilitiesHelp:
         "These dimensions describe what later Monitor bindings may filter. They do not bind this metric to a particular flag.",
@@ -438,6 +559,160 @@ export const enReleaseHealth = {
         "Whole-environment observation is always available. This flag context requires a retained feature flag key; revision, variation, and exposure may refine that context but cannot replace the flag key.",
       save: "Save source binding",
       savedPreview: "Environment source binding saved in this design preview.",
+    },
+  },
+  connections: {
+    scopeNotice:
+      "Connections are managed inside {{project}} and isolated to {{environment}}. A connection can be reused by multiple metric bindings in this environment only.",
+    search: "Search connections by name, endpoint, or provider",
+    add: "Add connection",
+    connection: "Connection",
+    name: "Name",
+    provider: "Provider",
+    endpoint: "Endpoint",
+    authentication: "Authentication",
+    status: "Status",
+    usedBy: "Used by",
+    lastChecked: "Last checked",
+    actions: "Actions",
+    test: "Test connection",
+    testPassed: "{{name}} is reachable in this design preview.",
+    edit: "Edit {{name}}",
+    empty: "No source connections match the current search.",
+    bindingCount: "{{count}} bindings",
+    justNow: "just now",
+    summary: {
+      total: "Environment connections",
+      connected: "Connected",
+      bindings: "Source bindings",
+    },
+    statusValue: {
+      "not-tested": "Not tested",
+      connected: "Connected",
+      unavailable: "Unavailable",
+      disabled: "Disabled",
+    },
+    auth: {
+      bearer_token: "Bearer token",
+      basic: "Basic authentication",
+      none: "No authentication",
+    },
+    editor: {
+      title: "Add source connection",
+      editTitle: "Edit source connection",
+      description:
+        "Configure a reusable {{provider}} connection for {{environment}}.",
+      scopeNotice:
+        "Connection identity, credentials, test state, and usage remain isolated to {{environment}}. {{queryLanguage}} is configured later in each Source Binding.",
+      available: "Available · MVP",
+      comingSoon: "Coming soon · Preview",
+      providerConfiguration: "{{provider}} configuration",
+      previewOnlyTitle: "{{provider}} is coming soon",
+      previewOnlyDescription:
+        "Explore the planned connection fields now. {{queryLanguage}} remains a later Source Binding step; Test and Save stay unavailable until the adapter ships.",
+      adapterRequired: "Provider adapter required",
+      previewTestHelp:
+        "This preview does not issue a request or create a connection. Test and Save become available only when the provider adapter is supported.",
+      previewFooter: "Configuration preview only",
+      authHelp:
+        "Choose how FeatBit authenticates each read-only request to this endpoint.",
+      endpointHelp:
+        "The endpoint is subject to outbound network and SSRF protection.",
+      token: "Token",
+      username: "Username",
+      password: "Password",
+      tokenPlaceholder: "Paste token",
+      passwordPlaceholder: "Enter password",
+      replaceToken: "Enter a new token to replace the configured token",
+      replacePassword:
+        "Enter a new password to replace the configured password",
+      tokenHelp:
+        "Paste the token only. FeatBit adds the Authorization: Bearer prefix.",
+      usernameHelp:
+        "Username is non-secret connection configuration and can be shown again.",
+      passwordHelp:
+        "Password is write-only. It is never returned after this form is saved.",
+      configuredTitle: "Stored credential",
+      configured: "Configured",
+      configuredHelp:
+        "Leave the secret field empty to keep it, or enter a new value to replace it. The existing value cannot be revealed.",
+      protectedTitle: "Protected by FeatBit",
+      protectedHelp:
+        "This secret is write-only and encrypted before database storage with a deployment key kept outside the database.",
+      noAuthenticationTitle: "No credential will be stored",
+      noAuthenticationHelp:
+        "FeatBit sends no Authorization header. Saving this choice revokes any credential previously attached to the connection.",
+      writeOnlySecret: "Write-only secret",
+      secretHelp:
+        "Secrets are write-only and are never shown in lists, previews, logs, API responses, or audit evidence.",
+      connected: "Connection test passed",
+      testRequired: "Connection test required",
+      testHelp:
+        "Testing verifies endpoint reachability, authentication, and minimum read-only query access.",
+      testPassed: "Connection test passed in this design preview.",
+      save: "Save connection",
+      created: "Source connection created in this design preview.",
+      updated: "Source connection updated in this design preview.",
+      providers: {
+        "prometheus-compatible": {
+          name: "Prometheus-compatible",
+          description: "Read-only Prometheus HTTP API · Pull",
+          queryLanguage: "PromQL",
+          namePlaceholder: "Production metrics",
+          configurationHelp:
+            "Enter the reusable endpoint and authentication. PromQL remains in the Source Binding.",
+        },
+        datadog: {
+          name: "Datadog",
+          description: "Metrics API · Planned pull adapter",
+          queryLanguage: "Datadog metric query",
+          namePlaceholder: "Production Datadog",
+          configurationHelp:
+            "Preview the site and API credentials that a future Datadog adapter would reuse.",
+        },
+        "new-relic": {
+          name: "New Relic",
+          description: "NerdGraph / NRQL · Planned pull adapter",
+          queryLanguage: "NRQL",
+          namePlaceholder: "Production New Relic",
+          configurationHelp:
+            "Preview the region, account, and API identity used for future NRQL reads.",
+        },
+        "azure-data-explorer": {
+          name: "Azure Data Explorer",
+          description: "Cluster query API / KQL · Planned pull adapter",
+          queryLanguage: "KQL",
+          namePlaceholder: "Production ADX",
+          configurationHelp:
+            "Preview the cluster, database, and Microsoft Entra identity used for future KQL reads.",
+        },
+      },
+      datadog: {
+        site: "Datadog site",
+        customSite: "Custom site",
+        siteHelp:
+          "The selected site determines the regional Datadog API endpoint.",
+        apiKey: "API key",
+        applicationKey: "Application key",
+      },
+      newRelic: {
+        region: "Region",
+        accountId: "Account ID",
+        userApiKey: "User API key",
+        apiKeyHelp:
+          "The future adapter uses this write-only identity for NerdGraph and NRQL read access.",
+      },
+      azure: {
+        clusterUri: "Cluster URI",
+        database: "Database",
+        entraApplication: "Microsoft Entra application",
+        managedIdentity: "Managed identity",
+        tenantId: "Tenant ID",
+        clientId: "Client ID",
+        clientSecret: "Client secret",
+        managedIdentityHelp:
+          "The deployed FeatBit identity would need read access to this cluster and database.",
+      },
     },
   },
   sessions: {
@@ -547,7 +822,10 @@ export const enReleaseHealth = {
       "Create a separate snapshot when a supported change is actually applied.",
     metricsTitle: "Metric bindings",
     metricsDescription:
-      "Select connected project metrics, choose their observation context, then decide whether each one only observes or participates in the gate.",
+      "Select connected project metrics and decide whether each one only observes or participates in the gate.",
+    observation: "Observation",
+    wholeEnvironmentHelp:
+      "MVP reads the shared whole-environment stream. It does not filter by flag, revision, variation, or exposure.",
     contextMode: "Observation context",
     flagContextAvailable: "Flag context available",
     environmentOnly: "Environment only",
@@ -676,6 +954,7 @@ export const enReleaseHealth = {
 }
 
 export const zhReleaseHealth: typeof enReleaseHealth = {
+  live: zhReleaseHealthLive,
   title: "发布健康",
   subtitle:
     "观测发布信号、评价已配置规则并协调安全处置；时间相关性不等于因果关系。",
@@ -688,6 +967,7 @@ export const zhReleaseHealth: typeof enReleaseHealth = {
     aria: "发布健康",
     overview: "概览",
     metrics: "指标",
+    connections: "数据连接",
     sessions: "观测会话",
   },
   common: {
@@ -726,6 +1006,43 @@ export const zhReleaseHealth: typeof enReleaseHealth = {
     impact: "业务影响",
     quality: "质量",
     reliability: "可靠性",
+  },
+  resultContract: {
+    measurementKind: {
+      gauge: "Gauge",
+      count: "Count",
+      ratio: "Ratio",
+      rate: "Rate",
+    },
+    unit: {
+      count: "count",
+      percent: "百分比（0–100）",
+      ratio: "比例（0–1）",
+      duration: "毫秒",
+      data: "字节",
+      rate: "结构化速率",
+    },
+    singleSeries: "数值时间序列 · 单序列",
+    rateNumerator: {
+      events: "事件",
+      requests: "请求",
+      errors: "错误",
+      operations: "操作",
+      items: "条目",
+      bytes: "字节",
+    },
+    ratePeriod: {
+      second: "秒",
+      minute: "分钟",
+      hour: "小时",
+    },
+    rateUnit: "{{numerator}} / {{period}}",
+  },
+  reducer: {
+    latest: "最新值",
+    average: "平均值",
+    minimum: "最小值",
+    maximum: "最大值",
   },
   valueType: {
     count: "计数",
@@ -965,6 +1282,7 @@ export const zhReleaseHealth: typeof enReleaseHealth = {
       "这是项目级 Metric 目录。Data Status、最新值和 Freshness 始终来自当前选中的 Environment。",
     search: "按名称、Key 或数据源搜索",
     allCategories: "全部分类",
+    uncategorized: "未分类",
     add: "添加 Metric",
     metric: "Metric",
     name: "名称",
@@ -973,8 +1291,11 @@ export const zhReleaseHealth: typeof enReleaseHealth = {
     category: "分类",
     scopeColumn: "上下文",
     signal: "数值契约",
+    resultProfile: "结果类型",
     template: "Metric 模板",
     valueType: "数值类型",
+    measurementKind: "Measurement kind",
+    resultSemantics: "结果语义",
     calculation: "计算方式",
     dataStatus: "数据状态",
     latest: "最新值",
@@ -987,6 +1308,7 @@ export const zhReleaseHealth: typeof enReleaseHealth = {
     sources: {
       "featbit-events": "FeatBit telemetry",
       prometheus: "Prometheus-compatible",
+      prometheusCompatible: "Prometheus-compatible",
     },
     create: {
       title: "添加 Release Metric",
@@ -1000,12 +1322,33 @@ export const zhReleaseHealth: typeof enReleaseHealth = {
       keyError: "使用小写字母、数字和下划线，并以字母开头。",
       contractTitle: "Metric 数值语义",
       contractHelp:
-        "Category 只推荐常用模板，不禁止合法的自定义契约；数值类型会严格限制计算方式和单位。",
+        "定义版本化结果语义，并选择一个受支持的结果类型；Provider 计算将在后续配置。",
+      resultSemanticsPlaceholder:
+        "每个点表示 Provider 查询窗口内返回错误的结账请求百分比。",
+      resultSemanticsHelp:
+        "精确说明一个标准化结果点代表什么；不要加入阈值或健康结论。",
+      resultShape: "结果形状",
+      resultKind: "结果类型",
+      resultKindValue: "数值时间序列",
+      cardinality: "序列基数",
+      cardinalityValue: "单序列",
+      mixedLocked: "MVP 固定",
+      profileSummary: "结果类型：",
+      rateNumerator: "分子单位",
+      ratePeriod: "每",
+      displayAndConstraints: "数值约束与展示",
+      displayAndConstraintsHelp:
+        "可选约束只能收窄标准单位范围；小数位只影响展示。",
+      minimum: "最小值",
+      maximum: "最大值",
+      noMaximum: "无上限",
+      fractionDigits: "小数位",
+      canonicalRange: "标准范围：{{range}} {{unit}}。",
       valueContract: "数值契约",
       templateFilled: "由模板填写",
       customContract: "自定义契约",
       calculationSummary: "计算结果：",
-      contractError: "请选择与数值类型兼容的计算方式和单位。",
+      contractError: "请选择与 Measurement kind 兼容的单位。",
       previewSaved: "已在设计预览中创建项目 Metric；请从 Metric 详情连接环境。",
       save: "创建 Metric",
     },
@@ -1040,6 +1383,11 @@ export const zhReleaseHealth: typeof enReleaseHealth = {
       environmentStreamsDescription:
         "在每个环境中分别连接和查看这个项目 Metric。",
       environment: "环境",
+      provider: "Provider",
+      connection: "Connection",
+      schedule: "Step / Sync",
+      queryConfigured: "已配置 Query",
+      stepAndSync: "Step {{step}} · 每 {{sync}} 同步",
       contextCapabilities: "上下文能力",
       sourceAction: "数据源",
       notConnected: "未连接",
@@ -1048,6 +1396,21 @@ export const zhReleaseHealth: typeof enReleaseHealth = {
       connectSource: "连接",
       manageSource: "管理",
       awaitingSamples: "等待样本",
+      contractTitle: "当前版本 Result Contract",
+      contractDescription:
+        "该不可变契约定义每个标准化结果点的含义，以及各环境必须返回的结果。",
+      constraints: "数值约束",
+      resultShape: "结果形状",
+      pointCount: "结果点数量",
+      managementWindow: "当前管理视图窗口",
+      version: "版本",
+      observation: "观测范围",
+      windowReducer: "窗口 / Reducer",
+      versionHistory: "版本历史",
+      versionHistoryDescription:
+        "结果含义变化时创建新的不可变 Metric Version。",
+      currentVersion: "当前版本",
+      historicalVersion: "为历史 Session 保留的契约",
       sessionMarkers: "相关 Session 窗口",
       sessionMarkersDescription:
         "打开 Session 查看当次观测固定的 Rule、Gate 与证据。",
@@ -1058,7 +1421,7 @@ export const zhReleaseHealth: typeof enReleaseHealth = {
       description:
         "将 {{metric}} 连接到 {{environment}} 的数据流，而不改变项目级定义。",
       boundaryNotice:
-        "环境 Source Binding 只选择并校验数据。具体 Flag、观测模式、Rule 和 Action 在后续 Monitor Metric Binding 中配置。",
+        "该 Binding 把一个 Metric Version 连接到一个 Environment Stream；它不选择 Feature Flag，也不计算健康结论。",
       metric: "项目 Metric",
       environment: "环境",
       environmentIsolation: "连接、样本和 Freshness 只属于这个环境。",
@@ -1066,17 +1429,51 @@ export const zhReleaseHealth: typeof enReleaseHealth = {
       sourceAndMappingHelp:
         "选择当前环境从哪里读取数据，并把结果映射到 Metric 数值契约。",
       connection: "环境连接",
+      createConnection: "创建 Connection",
+      chooseConnection: "选择 Connection",
+      providerStep: "Provider 与 Connection",
+      providerStepHelp:
+        "选择一个属于当前环境的可复用 Connection，并验证只读访问。",
+      queryStep: "Query 与同步计划",
+      queryStepHelp: "PromQL 必须直接返回标准单位下的最终单一数值时间序列。",
+      queryResponsibility:
+        "Rate、Ratio、聚合、Quantile 和单位转换由 Prometheus 完成；FeatBit 只校验并标准化结果点。",
+      queryMode: "Query mode",
+      step: "Step",
+      syncInterval: "同步频率",
+      validationStep: "校验并预览",
+      validationStepHelp:
+        "执行受控 query_range 请求，并按不可变 Result Contract 验证返回结果。",
+      previewSummary:
+        "返回 1 条序列和 {{points}} 个有效结果点，按 {{unit}} 格式化；这里不执行 Health Rule。",
+      queryTime: "Query 耗时",
+      previewRange: "预览范围",
+      seriesCount: "序列数",
+      pointCount: "结果点",
+      timestamp: "时间戳",
+      normalizedValue: "标准化值",
+      reviewStep: "检查并保存",
+      reviewStepHelp:
+        "保存后为当前环境创建新的不可变 Source Binding Revision。",
+      resultContract: "Result Contract",
+      schedule: "同步计划",
+      validation: "校验状态",
+      validated: "已校验",
+      notValidated: "未校验",
+      collectingNotice:
+        "保存后 Environment Metric Stream 从 Collecting 开始，后续状态只由真实同步结果改变。",
       eventSelector: "事件 / Instrument 映射",
       expectedResult: "预期结果契约：",
       testAndPreview: "测试与预览",
       testAndPreviewHelp:
         "切换当前 Binding Revision 前，校验访问、查询或映射以及近期结果。",
-      previewReady: "数据源映射有效",
+      previewReady: "Query 与 Result Contract 有效",
       previewPending: "需要校验",
       previewSample: "近期预览结果：{{value}}。这里不计算健康结论。",
-      previewInstruction: "修改数据源、连接、查询或映射后请重新校验。",
+      previewInstruction:
+        "修改 Provider、Connection、Query 或同步计划后请重新校验。",
       validate: "校验并预览",
-      validationPassed: "已在设计预览中校验数据源映射。",
+      validationPassed: "已在设计预览中校验 Source Binding。",
       capabilities: "检测到的上下文能力",
       capabilitiesHelp:
         "这些维度只说明后续 Monitor Binding 可以怎样过滤，不会把 Metric 绑定到某个具体 Flag。",
@@ -1094,6 +1491,152 @@ export const zhReleaseHealth: typeof enReleaseHealth = {
         "整个环境观测始终可用；后续选择当前 Flag 上下文必须保留 Feature Flag Key。Revision、Variation 与 Exposure 只能细化上下文，不能替代 Flag Key。",
       save: "保存 Source Binding",
       savedPreview: "已在设计预览中保存环境 Source Binding。",
+    },
+  },
+  connections: {
+    scopeNotice:
+      "Connection 在 {{project}} 内管理，并严格隔离到 {{environment}}；一个 Connection 只能被当前环境的多个 Metric Binding 复用。",
+    search: "按名称、Endpoint 或 Provider 搜索 Connection",
+    add: "添加 Connection",
+    connection: "Connection",
+    name: "名称",
+    provider: "Provider",
+    endpoint: "Endpoint",
+    authentication: "认证方式",
+    status: "状态",
+    usedBy: "使用情况",
+    lastChecked: "最近检查",
+    actions: "操作",
+    test: "测试 Connection",
+    testPassed: "已在设计预览中连通 {{name}}。",
+    edit: "编辑 {{name}}",
+    empty: "没有 Connection 匹配当前搜索。",
+    bindingCount: "{{count}} 个 Binding",
+    justNow: "刚刚",
+    summary: {
+      total: "环境 Connection",
+      connected: "已连接",
+      bindings: "Source Binding",
+    },
+    statusValue: {
+      "not-tested": "未测试",
+      connected: "已连接",
+      unavailable: "不可用",
+      disabled: "已停用",
+    },
+    auth: {
+      bearer_token: "Bearer Token",
+      basic: "Basic Auth",
+      none: "无需认证",
+    },
+    editor: {
+      title: "添加 Source Connection",
+      editTitle: "编辑 Source Connection",
+      description:
+        "为 {{environment}} 配置一个可复用的 {{provider}} Connection。",
+      scopeNotice:
+        "Connection 身份、凭据、测试状态和使用关系只属于 {{environment}}；{{queryLanguage}} 在每个 Source Binding 中另行配置。",
+      available: "可用 · MVP",
+      comingSoon: "即将支持 · 配置预览",
+      providerConfiguration: "{{provider}} 配置",
+      previewOnlyTitle: "{{provider}} 即将支持",
+      previewOnlyDescription:
+        "现在可以查看并填写规划中的 Connection 字段；{{queryLanguage}} 仍在后续 Source Binding 中配置。Provider Adapter 上线前不能测试或保存。",
+      adapterRequired: "需要 Provider Adapter",
+      previewTestHelp:
+        "该预览不会发起请求或创建 Connection；只有系统支持对应 Provider Adapter 后才能测试和保存。",
+      previewFooter: "仅预览配置",
+      authHelp: "选择 FeatBit 每次只读请求这个 Endpoint 时使用的认证方式。",
+      endpointHelp: "Endpoint 必须通过出站网络和 SSRF 安全检查。",
+      token: "Token",
+      username: "Username",
+      password: "Password",
+      tokenPlaceholder: "粘贴 Token",
+      passwordPlaceholder: "输入 Password",
+      replaceToken: "输入新 Token 以替换当前已配置 Token",
+      replacePassword: "输入新 Password 以替换当前已配置 Password",
+      tokenHelp:
+        "只粘贴 Token 本体；FeatBit 会自动添加 Authorization: Bearer 前缀。",
+      usernameHelp: "Username 是非敏感 Connection 配置，可以再次显示。",
+      passwordHelp: "Password 仅写入；保存后不会由 API 返回。",
+      configuredTitle: "已存储 Credential",
+      configured: "已配置",
+      configuredHelp:
+        "Secret 字段留空会保留现有值；输入新值会替换。现有 Secret 永远不可 Reveal。",
+      protectedTitle: "由 FeatBit 安全保护",
+      protectedHelp:
+        "Secret 仅写入，并在进入数据库前使用与数据库分离的部署级密钥加密。",
+      noAuthenticationTitle: "不会保存 Credential",
+      noAuthenticationHelp:
+        "FeatBit 不发送 Authorization Header；保存此选项会撤销此前关联到该 Connection 的 Credential。",
+      writeOnlySecret: "仅写入 Secret",
+      secretHelp:
+        "Secret 只写入，不会出现在列表、预览、日志、API 响应或 Audit Evidence 中。",
+      connected: "Connection 测试通过",
+      testRequired: "需要测试 Connection",
+      testHelp: "测试只验证 Endpoint 可达性、认证和最低只读查询权限。",
+      testPassed: "已在设计预览中通过 Connection 测试。",
+      save: "保存 Connection",
+      created: "已在设计预览中创建 Source Connection。",
+      updated: "已在设计预览中更新 Source Connection。",
+      providers: {
+        "prometheus-compatible": {
+          name: "Prometheus-compatible",
+          description: "只读 Prometheus HTTP API · Pull",
+          queryLanguage: "PromQL",
+          namePlaceholder: "Production metrics",
+          configurationHelp:
+            "填写可复用的 Endpoint 与认证；PromQL 仍在 Source Binding 中配置。",
+        },
+        datadog: {
+          name: "Datadog",
+          description: "Metrics API · 规划中的 Pull Adapter",
+          queryLanguage: "Datadog Metric Query",
+          namePlaceholder: "Production Datadog",
+          configurationHelp:
+            "预览未来 Datadog Adapter 将复用的 Site 与 API 凭据。",
+        },
+        "new-relic": {
+          name: "New Relic",
+          description: "NerdGraph / NRQL · 规划中的 Pull Adapter",
+          queryLanguage: "NRQL",
+          namePlaceholder: "Production New Relic",
+          configurationHelp:
+            "预览未来读取 NRQL 时使用的 Region、Account 与 API 身份。",
+        },
+        "azure-data-explorer": {
+          name: "Azure Data Explorer",
+          description: "Cluster Query API / KQL · 规划中的 Pull Adapter",
+          queryLanguage: "KQL",
+          namePlaceholder: "Production ADX",
+          configurationHelp:
+            "预览未来读取 KQL 时使用的 Cluster、Database 与 Microsoft Entra 身份。",
+        },
+      },
+      datadog: {
+        site: "Datadog Site",
+        customSite: "自定义 Site",
+        siteHelp: "所选 Site 决定 Datadog API 的区域 Endpoint。",
+        apiKey: "API Key",
+        applicationKey: "Application Key",
+      },
+      newRelic: {
+        region: "Region",
+        accountId: "Account ID",
+        userApiKey: "User API Key",
+        apiKeyHelp: "未来 Adapter 使用这个仅写入身份读取 NerdGraph 与 NRQL。",
+      },
+      azure: {
+        clusterUri: "Cluster URI",
+        database: "Database",
+        entraApplication: "Microsoft Entra 应用",
+        managedIdentity: "托管身份",
+        tenantId: "Tenant ID",
+        clientId: "Client ID",
+        clientSecret: "Client Secret",
+        managedIdentityHelp:
+          "部署 FeatBit 时使用的身份需要拥有该 Cluster 与 Database 的只读权限。",
+      },
     },
   },
   sessions: {
@@ -1194,7 +1737,10 @@ export const zhReleaseHealth: typeof enReleaseHealth = {
     flagChangesHelp: "受支持的变更实际应用后创建独立快照。",
     metricsTitle: "Metric 绑定",
     metricsDescription:
-      "选择已连接的项目级 Metric、确定观测上下文，并决定其仅用于 Observe 还是参与 Gate。",
+      "选择已连接的项目级 Metric，并决定其仅用于 Observe 还是参与 Gate。",
+    observation: "观测范围",
+    wholeEnvironmentHelp:
+      "MVP 固定读取共享的整个环境 Stream，不按 Flag、Revision、Variation 或 Exposure 过滤。",
     contextMode: "观测上下文",
     flagContextAvailable: "支持 Flag 上下文",
     environmentOnly: "仅整个环境",

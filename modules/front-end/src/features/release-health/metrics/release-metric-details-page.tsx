@@ -39,7 +39,6 @@ import { MetricTrendChart } from "../components/metric-trend-chart"
 import {
   DataStatusBadge,
   HealthStatusBadge,
-  ObservationModeBadge,
   PurposeBadge,
 } from "../components/status-badges"
 import {
@@ -49,18 +48,16 @@ import {
   sessionSampleText,
 } from "../release-health-display"
 import { healthSessions, metricByKey } from "../release-health-mock-data"
-import { supportsFlagContext } from "./metric-contract"
-import type {
-  DataStatus,
-  HealthStatus,
-  MetricObservationMode,
-} from "../release-health-types"
+import type { DataStatus, HealthStatus } from "../release-health-types"
+import { metricResultProfileLabel, metricUnitLabel } from "./metric-contract"
 
 type MonitorRow = {
   flagKey: string
   monitor: string
   purpose: "observe" | "guard"
-  observationMode: MetricObservationMode
+  version: number
+  window: string
+  reducer: "latest" | "average" | "minimum" | "maximum"
   rule: string
   status: HealthStatus
 }
@@ -69,11 +66,13 @@ type EnvironmentStreamRow = {
   environmentKey: string
   environmentName: string
   connected: boolean
-  source?: string
+  provider?: string
+  connection?: string
+  step?: string
+  syncInterval?: string
   dataStatus?: DataStatus
   latestValue?: string
   freshness?: string
-  supportsFlagContext?: boolean
 }
 
 const monitorRowsByMetricKey: Record<string, MonitorRow[]> = {
@@ -82,7 +81,9 @@ const monitorRowsByMetricKey: Record<string, MonitorRow[]> = {
       flagKey: "checkout-redesign",
       monitor: "Checkout safety monitor",
       purpose: "guard",
-      observationMode: "flag-contextual",
+      version: 3,
+      window: "5 min",
+      reducer: "latest",
       rule: "> 2% for 5 min",
       status: "critical",
     },
@@ -90,7 +91,9 @@ const monitorRowsByMetricKey: Record<string, MonitorRow[]> = {
       flagKey: "payment-routing",
       monitor: "Payment reliability",
       purpose: "guard",
-      observationMode: "flag-contextual",
+      version: 3,
+      window: "10 min",
+      reducer: "maximum",
       rule: "> 3% for 10 min",
       status: "healthy",
     },
@@ -100,23 +103,19 @@ const monitorRowsByMetricKey: Record<string, MonitorRow[]> = {
       flagKey: "checkout-redesign",
       monitor: "Checkout safety monitor",
       purpose: "guard",
-      observationMode: "environment",
+      version: 5,
+      window: "10 min",
+      reducer: "maximum",
       rule: "> 800 ms for 10 min",
       status: "critical",
-    },
-    {
-      flagKey: "payment-routing",
-      monitor: "Payment reliability",
-      purpose: "guard",
-      observationMode: "environment",
-      rule: "> 950 ms for 15 min",
-      status: "healthy",
     },
     {
       flagKey: "recommendations-v2",
       monitor: "Recommendations observation",
       purpose: "observe",
-      observationMode: "environment",
+      version: 5,
+      window: "15 min",
+      reducer: "average",
       rule: "Observe trend",
       status: "not-evaluated",
     },
@@ -126,25 +125,21 @@ const monitorRowsByMetricKey: Record<string, MonitorRow[]> = {
       flagKey: "checkout-redesign",
       monitor: "Checkout conversion guard",
       purpose: "guard",
-      observationMode: "flag-contextual",
+      version: 2,
+      window: "10 min",
+      reducer: "latest",
       rule: "< 65% for 10 min",
       status: "healthy",
     },
   ],
   service_memory_saturation: [
     {
-      flagKey: "checkout-redesign",
-      monitor: "Checkout resource watch",
-      purpose: "guard",
-      observationMode: "environment",
-      rule: "> 85% for 10 min",
-      status: "not-evaluated",
-    },
-    {
       flagKey: "search-ranking-v3",
       monitor: "Search resource watch",
       purpose: "guard",
-      observationMode: "environment",
+      version: 1,
+      window: "10 min",
+      reducer: "maximum",
       rule: "> 90% for 10 min",
       status: "warning",
     },
@@ -154,7 +149,9 @@ const monitorRowsByMetricKey: Record<string, MonitorRow[]> = {
       flagKey: "mobile-navigation",
       monitor: "Mobile stability guard",
       purpose: "guard",
-      observationMode: "flag-contextual",
+      version: 1,
+      window: "10 min",
+      reducer: "minimum",
       rule: "< 99.5% for 10 min",
       status: "not-evaluated",
     },
@@ -197,30 +194,26 @@ export function ReleaseMetricDetailsPage() {
   )
   const monitorRows = monitorRowsByMetricKey[metric.key] ?? []
   const currentEnvironmentKey = context?.envKey ?? "production"
-  const currentSourceBinding = metric.environment.sourceBinding
+  const currentBinding = metric.environment.sourceBinding
   const environmentRows = (
     [
       {
         environmentKey: currentEnvironmentKey,
         environmentName: context?.envName ?? "Production",
-        connected: Boolean(currentSourceBinding),
-        source: currentSourceBinding
-          ? t(
-              `releaseHealth.metrics.sources.${currentSourceBinding.sourceType}`
-            )
+        connected: Boolean(currentBinding),
+        provider: currentBinding
+          ? t("releaseHealth.metrics.sources.prometheusCompatible")
           : undefined,
-        dataStatus: currentSourceBinding
-          ? metric.environment.dataStatus
-          : undefined,
-        latestValue: currentSourceBinding
+        connection: currentBinding?.connectionName,
+        step: currentBinding?.step,
+        syncInterval: currentBinding?.syncInterval,
+        dataStatus: currentBinding ? metric.environment.dataStatus : undefined,
+        latestValue: currentBinding
           ? metric.environment.displayValue
           : undefined,
-        freshness: currentSourceBinding
+        freshness: currentBinding
           ? metricSampleText(t, metric, "updatedAt")
           : undefined,
-        supportsFlagContext: supportsFlagContext(
-          currentSourceBinding?.contextCapabilities ?? []
-        ),
       },
       {
         environmentKey: "staging",
@@ -231,11 +224,13 @@ export function ReleaseMetricDetailsPage() {
         environmentKey: "development",
         environmentName: "Development",
         connected: true,
-        source: t("releaseHealth.metrics.sources.featbit-events"),
+        provider: t("releaseHealth.metrics.sources.prometheusCompatible"),
+        connection: "Development Prometheus",
+        step: "5m",
+        syncInterval: "5m",
         dataStatus: "no-data",
         latestValue: "—",
         freshness: t("releaseHealth.metrics.detail.awaitingSamples"),
-        supportsFlagContext: true,
       },
     ] satisfies EnvironmentStreamRow[]
   ).filter(
@@ -244,6 +239,8 @@ export function ReleaseMetricDetailsPage() {
         (candidate) => candidate.environmentKey === row.environmentKey
       ) === index
   )
+
+  const constraints = metric.resultContract.constraints
 
   return (
     <div className="-m-5 min-h-[calc(100vh-3.5rem)] bg-background px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
@@ -267,14 +264,15 @@ export function ReleaseMetricDetailsPage() {
               {metric.key}
             </code>
             <Badge variant="secondary" className="font-normal">
-              {t(`releaseHealth.category.${metric.category}`)}
+              {metric.category
+                ? t(`releaseHealth.category.${metric.category}`)
+                : t("releaseHealth.metrics.uncategorized")}
             </Badge>
             <Badge variant="outline" className="font-normal">
-              {t(`releaseHealth.valueType.${metric.valueType}`)}
+              {metricResultProfileLabel(t, metric)}
             </Badge>
             <Badge variant="outline" className="font-normal">
-              {t(`releaseHealth.calculation.${metric.calculation}`)} ·{" "}
-              {t(`releaseHealth.unit.${metric.unit}`)}
+              {t("releaseHealth.resultContract.singleSeries")}
             </Badge>
           </div>
         </div>
@@ -294,6 +292,45 @@ export function ReleaseMetricDetailsPage() {
       <Card className="mb-4">
         <CardHeader>
           <CardTitle>
+            {t("releaseHealth.metrics.detail.contractTitle")}
+          </CardTitle>
+          <CardDescription>
+            {t("releaseHealth.metrics.detail.contractDescription")}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-5 lg:grid-cols-[minmax(0,1.5fr)_minmax(20rem,0.5fr)]">
+          <div className="rounded-md border bg-muted/20 p-4">
+            <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+              {t("releaseHealth.metrics.resultSemantics")}
+            </p>
+            <p className="mt-2 text-sm leading-6">{metric.resultSemantics}</p>
+          </div>
+          <dl className="grid grid-cols-2 gap-x-5 gap-y-4 text-sm">
+            <ContractFact
+              label={t("releaseHealth.metrics.measurementKind")}
+              value={t(
+                `releaseHealth.resultContract.measurementKind.${metric.resultContract.measurementKind}`
+              )}
+            />
+            <ContractFact
+              label={t("releaseHealth.metrics.unit")}
+              value={metricUnitLabel(t, metric.resultContract.unit)}
+            />
+            <ContractFact
+              label={t("releaseHealth.metrics.detail.constraints")}
+              value={constraintLabel(constraints.minimum, constraints.maximum)}
+            />
+            <ContractFact
+              label={t("releaseHealth.metrics.detail.resultShape")}
+              value={t("releaseHealth.resultContract.singleSeries")}
+            />
+          </dl>
+        </CardContent>
+      </Card>
+
+      <Card className="mb-4">
+        <CardHeader>
+          <CardTitle>
             {t("releaseHealth.metrics.detail.environmentStreams")}
           </CardTitle>
           <CardDescription>
@@ -307,12 +344,17 @@ export function ReleaseMetricDetailsPage() {
                 <TableHead className="pl-4">
                   {t("releaseHealth.metrics.detail.environment")}
                 </TableHead>
-                <TableHead>{t("releaseHealth.metrics.source")}</TableHead>
+                <TableHead>
+                  {t("releaseHealth.metrics.detail.provider")}
+                </TableHead>
+                <TableHead>
+                  {t("releaseHealth.metrics.detail.connection")}
+                </TableHead>
+                <TableHead>
+                  {t("releaseHealth.metrics.detail.schedule")}
+                </TableHead>
                 <TableHead>{t("releaseHealth.metrics.dataStatus")}</TableHead>
                 <TableHead>{t("releaseHealth.metrics.latest")}</TableHead>
-                <TableHead>
-                  {t("releaseHealth.metrics.detail.contextCapabilities")}
-                </TableHead>
                 <TableHead className="pr-4 text-right">
                   {t("releaseHealth.metrics.detail.sourceAction")}
                 </TableHead>
@@ -327,7 +369,27 @@ export function ReleaseMetricDetailsPage() {
                       {row.environmentKey}
                     </p>
                   </TableCell>
-                  <TableCell>{row.source ?? "—"}</TableCell>
+                  <TableCell>{row.provider ?? "—"}</TableCell>
+                  <TableCell>
+                    <p>{row.connection ?? "—"}</p>
+                    {row.connected ? (
+                      <p className="text-xs text-muted-foreground">
+                        {t("releaseHealth.metrics.detail.queryConfigured")}
+                      </p>
+                    ) : null}
+                  </TableCell>
+                  <TableCell>
+                    {row.connected ? (
+                      <span className="text-sm">
+                        {t("releaseHealth.metrics.detail.stepAndSync", {
+                          step: row.step,
+                          sync: row.syncInterval,
+                        })}
+                      </span>
+                    ) : (
+                      "—"
+                    )}
+                  </TableCell>
                   <TableCell>
                     {row.connected && row.dataStatus ? (
                       <DataStatusBadge status={row.dataStatus} />
@@ -346,19 +408,6 @@ export function ReleaseMetricDetailsPage() {
                         {row.freshness}
                       </p>
                     ) : null}
-                  </TableCell>
-                  <TableCell>
-                    {row.connected ? (
-                      <span className="text-sm">
-                        {t(
-                          row.supportsFlagContext
-                            ? "releaseHealth.metrics.detail.flagContextAvailable"
-                            : "releaseHealth.metrics.detail.environmentOnly"
-                        )}
-                      </span>
-                    ) : (
-                      "—"
-                    )}
                   </TableCell>
                   <TableCell className="pr-4 text-right">
                     <Button
@@ -394,21 +443,11 @@ export function ReleaseMetricDetailsPage() {
       </Card>
 
       <div className="grid gap-4 lg:grid-cols-4">
-        <Card size="sm">
-          <CardHeader>
-            <CardDescription>
-              {t("releaseHealth.metrics.detail.currentValue")}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-semibold tracking-tight tabular-nums">
-              {metric.environment.displayValue}
-            </div>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {metricSampleText(t, metric, "changeLabel")}
-            </p>
-          </CardContent>
-        </Card>
+        <FactCard
+          label={t("releaseHealth.metrics.detail.currentValue")}
+          value={currentBinding ? metric.environment.displayValue : "—"}
+          help={metricSampleText(t, metric, "changeLabel")}
+        />
         <Card size="sm">
           <CardHeader>
             <CardDescription>
@@ -416,7 +455,13 @@ export function ReleaseMetricDetailsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <DataStatusBadge status={metric.environment.dataStatus} />
+            {currentBinding ? (
+              <DataStatusBadge status={metric.environment.dataStatus} />
+            ) : (
+              <Badge variant="outline">
+                {t("releaseHealth.metrics.detail.notConnected")}
+              </Badge>
+            )}
             <p className="mt-2 text-xs text-muted-foreground">
               {t("releaseHealth.metrics.detail.inEnvironment", {
                 environment: context?.envName ?? "Environment",
@@ -424,36 +469,17 @@ export function ReleaseMetricDetailsPage() {
             </p>
           </CardContent>
         </Card>
-        <Card size="sm">
-          <CardHeader>
-            <CardDescription>
-              {t("releaseHealth.metrics.detail.coverage")}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-semibold tracking-tight tabular-nums">
-              {metric.environment.coverage}%
-            </div>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {t("releaseHealth.metrics.detail.selectedWindow")}
-            </p>
-          </CardContent>
-        </Card>
-        <Card size="sm">
-          <CardHeader>
-            <CardDescription>
-              {t("releaseHealth.metrics.freshness")}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-base font-semibold">
-              {metricSampleText(t, metric, "updatedAt")}
-            </div>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {t("releaseHealth.metrics.detail.latestSample")}
-            </p>
-          </CardContent>
-        </Card>
+        <FactCard
+          label={t("releaseHealth.metrics.detail.pointCount")}
+          value={String(metric.environment.history.length)}
+          help={t("releaseHealth.metrics.detail.managementWindow")}
+        />
+        <FactCard
+          label={t("releaseHealth.metrics.freshness")}
+          value={metricSampleText(t, metric, "updatedAt")}
+          help={t("releaseHealth.metrics.detail.latestSample")}
+          compact
+        />
       </div>
 
       <Card className="mt-4">
@@ -501,7 +527,7 @@ export function ReleaseMetricDetailsPage() {
         </CardContent>
       </Card>
 
-      <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(22rem,0.6fr)]">
+      <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(20rem,0.65fr)]">
         <Card>
           <CardHeader>
             <CardTitle>
@@ -512,11 +538,34 @@ export function ReleaseMetricDetailsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="px-0">
-            <div className="grid gap-3 px-4 md:hidden">
-              {monitorRows.map((row) => (
-                <div key={row.flagKey} className="rounded-md border p-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="pl-4">
+                    {t("releaseHealth.metrics.detail.monitor")}
+                  </TableHead>
+                  <TableHead>
+                    {t("releaseHealth.metrics.detail.version")}
+                  </TableHead>
+                  <TableHead>
+                    {t("releaseHealth.metrics.detail.observation")}
+                  </TableHead>
+                  <TableHead>
+                    {t("releaseHealth.metrics.detail.windowReducer")}
+                  </TableHead>
+                  <TableHead>{t("releaseHealth.metrics.detail.use")}</TableHead>
+                  <TableHead>
+                    {t("releaseHealth.metrics.detail.rule")}
+                  </TableHead>
+                  <TableHead className="pr-4">
+                    {t("releaseHealth.metrics.detail.latestAssessment")}
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {monitorRows.map((row) => (
+                  <TableRow key={`${row.flagKey}-${row.monitor}`}>
+                    <TableCell className="pl-4">
                       <Link
                         to={localizedPath(
                           lang,
@@ -528,122 +577,62 @@ export function ReleaseMetricDetailsPage() {
                       >
                         {monitorSampleText(t, row.monitor)}
                       </Link>
-                      <p className="truncate font-mono text-xs text-muted-foreground">
+                      <p className="font-mono text-xs text-muted-foreground">
                         {row.flagKey}
                       </p>
-                    </div>
-                    <HealthStatusBadge status={row.status} />
-                  </div>
-                  <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t pt-3">
-                    <div className="flex flex-wrap gap-2">
+                    </TableCell>
+                    <TableCell>v{row.version}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="font-normal">
+                        {t("releaseHealth.scope.environment")}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {row.window} · {t(`releaseHealth.reducer.${row.reducer}`)}
+                    </TableCell>
+                    <TableCell>
                       <PurposeBadge purpose={row.purpose} />
-                      <ObservationModeBadge mode={row.observationMode} />
-                    </div>
-                    <span className="text-sm">
-                      {ruleSampleText(t, row.rule)}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="hidden md:block">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="pl-4">
-                      {t("releaseHealth.metrics.detail.monitor")}
-                    </TableHead>
-                    <TableHead>
-                      {t("releaseHealth.metrics.detail.use")}
-                    </TableHead>
-                    <TableHead>
-                      {t("releaseHealth.metrics.detail.context")}
-                    </TableHead>
-                    <TableHead>
-                      {t("releaseHealth.metrics.detail.rule")}
-                    </TableHead>
-                    <TableHead className="pr-4">
-                      {t("releaseHealth.metrics.detail.latestAssessment")}
-                    </TableHead>
+                    </TableCell>
+                    <TableCell>{ruleSampleText(t, row.rule)}</TableCell>
+                    <TableCell className="pr-4">
+                      <HealthStatusBadge status={row.status} />
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {monitorRows.map((row) => (
-                    <TableRow key={row.flagKey}>
-                      <TableCell className="pl-4">
-                        <Link
-                          to={localizedPath(
-                            lang,
-                            `/feature-flags/${encodeURIComponent(
-                              row.flagKey
-                            )}/release-health`
-                          )}
-                          className="font-medium hover:underline"
-                        >
-                          {monitorSampleText(t, row.monitor)}
-                        </Link>
-                        <p className="font-mono text-xs text-muted-foreground">
-                          {row.flagKey}
-                        </p>
-                      </TableCell>
-                      <TableCell>
-                        <PurposeBadge purpose={row.purpose} />
-                      </TableCell>
-                      <TableCell>
-                        <ObservationModeBadge mode={row.observationMode} />
-                      </TableCell>
-                      <TableCell>{ruleSampleText(t, row.rule)}</TableCell>
-                      <TableCell className="pr-4">
-                        <HealthStatusBadge status={row.status} />
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                ))}
+              </TableBody>
+            </Table>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
             <CardTitle>
-              {t("releaseHealth.metrics.detail.definitionTitle")}
+              {t("releaseHealth.metrics.detail.versionHistory")}
             </CardTitle>
             <CardDescription>
-              {t("releaseHealth.metrics.detail.definitionDescription")}
+              {t("releaseHealth.metrics.detail.versionHistoryDescription")}
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <dl className="space-y-4 text-sm">
-              {[
-                [
-                  t("releaseHealth.metrics.category"),
-                  t(`releaseHealth.category.${metric.category}`),
-                ],
-                [
-                  t("releaseHealth.metrics.valueType"),
-                  t(`releaseHealth.valueType.${metric.valueType}`),
-                ],
-                [
-                  t("releaseHealth.metrics.calculation"),
-                  t(`releaseHealth.calculation.${metric.calculation}`),
-                ],
-                [
-                  t("releaseHealth.metrics.unit"),
-                  t(`releaseHealth.unit.${metric.unit}`),
-                ],
-              ].map(([label, value]) => (
-                <div
-                  key={label}
-                  className="flex items-start justify-between gap-4 border-b pb-3 last:border-0 last:pb-0"
-                >
-                  <dt className="text-muted-foreground">{label}</dt>
-                  <dd className="max-w-56 text-right font-medium break-words">
-                    {value}
-                  </dd>
-                </div>
-              ))}
-            </dl>
+          <CardContent className="space-y-3">
+            <div className="rounded-md border bg-muted/20 p-3">
+              <div className="flex items-center justify-between gap-3">
+                <p className="font-medium">v{metric.version}</p>
+                <Badge variant="secondary">
+                  {t("releaseHealth.metrics.detail.currentVersion")}
+                </Badge>
+              </div>
+              <p className="mt-2 text-xs text-muted-foreground">
+                {metricResultProfileLabel(t, metric)}
+              </p>
+            </div>
+            {metric.version > 1 ? (
+              <div className="rounded-md border p-3">
+                <p className="font-medium">v{metric.version - 1}</p>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  {t("releaseHealth.metrics.detail.historicalVersion")}
+                </p>
+              </div>
+            ) : null}
           </CardContent>
         </Card>
       </div>
@@ -683,4 +672,54 @@ export function ReleaseMetricDetailsPage() {
       ) : null}
     </div>
   )
+}
+
+function ContractFact({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <dt className="text-xs text-muted-foreground">{label}</dt>
+      <dd className="mt-1 font-medium">{value}</dd>
+    </div>
+  )
+}
+
+function FactCard({
+  label,
+  value,
+  help,
+  compact = false,
+}: {
+  label: string
+  value: string
+  help: string
+  compact?: boolean
+}) {
+  return (
+    <Card size="sm">
+      <CardHeader>
+        <CardDescription>{label}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div
+          className={
+            compact
+              ? "text-base font-semibold"
+              : "text-2xl font-semibold tracking-tight tabular-nums"
+          }
+        >
+          {value}
+        </div>
+        <p className="mt-1 text-xs text-muted-foreground">{help}</p>
+      </CardContent>
+    </Card>
+  )
+}
+
+function constraintLabel(minimum?: number, maximum?: number) {
+  if (minimum !== undefined && maximum !== undefined) {
+    return `${minimum}–${maximum}`
+  }
+  if (minimum !== undefined) return `≥ ${minimum}`
+  if (maximum !== undefined) return `≤ ${maximum}`
+  return "Finite values"
 }

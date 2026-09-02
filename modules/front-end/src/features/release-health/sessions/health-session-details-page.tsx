@@ -303,9 +303,10 @@ export function HealthSessionDetailsPage() {
                   metric={selectedMetric}
                   threshold={thresholds[selectedMetric.id]}
                   thresholdLabel={ruleSampleText(t, selectedAssessment.rule)}
-                  sessionStartLabel={
-                    selectedMetric.environment.history[14]?.label
-                  }
+                  sessionStartLabel={selectedMetric.environment.history[14]?.timestamp.slice(
+                    11,
+                    16
+                  )}
                 />
               </>
             ) : (

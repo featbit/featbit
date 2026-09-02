@@ -1,0 +1,5 @@
+.local/
+reports/*
+!reports/.gitignore
+**/bin/
+**/obj/

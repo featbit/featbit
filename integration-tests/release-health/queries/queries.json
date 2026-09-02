@@ -1,0 +1,5 @@
+{
+  "errorRate": "100 * sum(rate(checkout_requests_total{service=\"checkout\",status=\"500\"}[30s])) / sum(rate(checkout_requests_total{service=\"checkout\"}[30s])) or (0 * sum(rate(checkout_requests_total{service=\"checkout\"}[30s])))",
+  "p95Latency": "1000 * histogram_quantile(0.95, sum by (le) (rate(checkout_request_duration_seconds_bucket{service=\"checkout\"}[30s])))",
+  "throughput": "sum(rate(checkout_requests_total{service=\"checkout\"}[30s]))"
+}

@@ -9,6 +9,7 @@ import {
   YAxis,
 } from "recharts"
 import { useTranslation } from "react-i18next"
+import { formatMetricValue } from "../metrics/metric-contract"
 import { metricSampleText } from "../release-health-display"
 import type { ReleaseMetric } from "../release-health-types"
 
@@ -27,12 +28,16 @@ export function MetricTrendChart({
 }) {
   const { t } = useTranslation()
   const gradientId = `release-health-${metric.key.replace(/[^a-z0-9]/gi, "-")}`
+  const data = metric.environment.history.map((point) => ({
+    ...point,
+    label: point.timestamp.slice(11, 16),
+  }))
 
   return (
     <div style={{ height }}>
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart
-          data={metric.environment.history}
+          data={data}
           margin={{ top: 14, right: 18, bottom: 0, left: 0 }}
         >
           <defs>
@@ -69,9 +74,7 @@ export function MetricTrendChart({
             width={56}
             tick={{ fontSize: 12 }}
             className="text-muted-foreground"
-            tickFormatter={(value) =>
-              `${value}${metric.unit === "percent" ? "%" : ""}`
-            }
+            tickFormatter={(value) => formatMetricValue(metric, Number(value))}
           />
           <ChartTooltip
             contentStyle={{
@@ -81,9 +84,7 @@ export function MetricTrendChart({
               color: "var(--popover-foreground)",
             }}
             formatter={(value) => [
-              `${Number(value).toLocaleString()} ${t(
-                `releaseHealth.unit.${metric.unit}`
-              )}`,
+              formatMetricValue(metric, Number(value)),
               metricSampleText(t, metric, "name"),
             ]}
           />

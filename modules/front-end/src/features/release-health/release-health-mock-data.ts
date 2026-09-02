@@ -2,6 +2,7 @@ import type {
   HealthMonitor,
   HealthSession,
   MetricPoint,
+  MetricSourceConnection,
   ReleaseMetric,
 } from "./release-health-types"
 
@@ -11,12 +12,47 @@ function points(values: number[], startHour = 9): MetricPoint[] {
     const hour = startHour + Math.floor(minute / 60)
     const minutes = String(minute % 60).padStart(2, "0")
     return {
-      time: `2026-08-28T${String(hour).padStart(2, "0")}:${minutes}:00+08:00`,
-      label: `${String(hour).padStart(2, "0")}:${minutes}`,
+      timestamp: `2026-08-28T${String(hour).padStart(2, "0")}:${minutes}:00+08:00`,
       value,
     }
   })
 }
+
+export const metricSourceConnections: MetricSourceConnection[] = [
+  {
+    id: "connection-production-metrics",
+    environmentKey: "production",
+    providerType: "prometheus-compatible",
+    name: "Production metrics",
+    endpoint: "https://prometheus.prod.example.com",
+    authentication: {
+      type: "bearer_token",
+      secretState: "configured",
+      lastRotatedAt: "3 days ago",
+    },
+    revision: 3,
+    status: "connected",
+    lastCheckedAt: "2 min ago",
+    usedByBindings: 4,
+  },
+  {
+    id: "connection-shared-gateway",
+    environmentKey: "production",
+    providerType: "prometheus-compatible",
+    name: "Shared metrics gateway",
+    endpoint: "https://metrics-gateway.example.com/prometheus",
+    authentication: {
+      type: "basic",
+      username: "metrics-reader",
+      secretState: "configured",
+      lastRotatedAt: "18 days ago",
+    },
+    revision: 1,
+    status: "unavailable",
+    lastCheckedAt: "18 min ago",
+    usedByBindings: 0,
+  },
+]
 
 export const releaseMetrics: ReleaseMetric[] = [
   {
@@ -25,9 +61,22 @@ export const releaseMetrics: ReleaseMetric[] = [
     name: "Checkout error rate",
     description: "Failed checkout requests divided by all checkout requests.",
     category: "quality",
-    valueType: "ratio",
-    calculation: "numerator-over-denominator",
-    unit: "percent",
+    resultSemantics:
+      "Each point is the percentage of checkout requests that returned an error during the provider query window.",
+    resultContract: {
+      schemaVersion: 1,
+      resultKind: "numeric_time_series",
+      cardinality: "single",
+      measurementKind: "ratio",
+      unit: { kind: "percent", scale: "zero_to_one_hundred" },
+      constraints: {
+        minimum: 0,
+        maximum: 100,
+        allowNaN: false,
+        allowInfinity: false,
+      },
+    },
+    fractionDigits: 2,
     version: 3,
     usedByMonitors: 3,
     usedByFlags: ["checkout-redesign", "payment-routing"],
@@ -39,11 +88,15 @@ export const releaseMetrics: ReleaseMetric[] = [
       updatedAt: "35 sec ago",
       coverage: 99.4,
       sourceBinding: {
-        sourceType: "featbit-events",
-        sourceLabel: "FeatBit telemetry",
-        selector: "request_error / checkout_request",
+        providerType: "prometheus-compatible",
+        connectionId: "connection-production-metrics",
+        connectionName: "Production metrics",
         bindingRevision: 4,
-        contextCapabilities: ["flag-key", "variation", "exposure"],
+        query:
+          '100 * sum(rate(http_requests_total{service="checkout",status=~"5.."}[5m])) / sum(rate(http_requests_total{service="checkout"}[5m]))',
+        queryMode: "range",
+        step: "1m",
+        syncInterval: "1m",
       },
       history: points([
         0.9, 1.1, 1, 1.2, 1.1, 1.3, 1.4, 1.5, 1.6, 1.8, 2.1, 2.4, 2.6, 2.8, 2.7,
@@ -57,9 +110,21 @@ export const releaseMetrics: ReleaseMetric[] = [
     name: "API P95 latency",
     description: "95th percentile latency across the checkout API service.",
     category: "reliability",
-    valueType: "distribution",
-    calculation: "p95",
-    unit: "milliseconds",
+    resultSemantics:
+      "Each point is the P95 checkout API request duration calculated by Prometheus and returned in milliseconds.",
+    resultContract: {
+      schemaVersion: 1,
+      resultKind: "numeric_time_series",
+      cardinality: "single",
+      measurementKind: "gauge",
+      unit: { kind: "duration", base: "millisecond" },
+      constraints: {
+        minimum: 0,
+        allowNaN: false,
+        allowInfinity: false,
+      },
+    },
+    fractionDigits: 0,
     version: 5,
     usedByMonitors: 6,
     usedByFlags: ["checkout-redesign", "payment-routing", "recommendations-v2"],
@@ -71,13 +136,15 @@ export const releaseMetrics: ReleaseMetric[] = [
       updatedAt: "42 sec ago",
       coverage: 98.8,
       sourceBinding: {
-        sourceType: "prometheus",
-        sourceLabel: "Prometheus-compatible",
-        selector:
-          "histogram_quantile(0.95, sum(rate(http_server_duration_bucket[5m])) by (le))",
+        providerType: "prometheus-compatible",
+        connectionId: "connection-production-metrics",
         connectionName: "Production metrics",
         bindingRevision: 6,
-        contextCapabilities: [],
+        query:
+          "1000 * histogram_quantile(0.95, sum(rate(http_server_duration_bucket[5m])) by (le))",
+        queryMode: "range",
+        step: "1m",
+        syncInterval: "1m",
       },
       history: points([
         610, 625, 604, 632, 650, 671, 688, 721, 760, 790, 815, 832, 847, 861,
@@ -91,9 +158,22 @@ export const releaseMetrics: ReleaseMetric[] = [
     name: "Checkout completion",
     description: "Sessions that complete checkout after entering the flow.",
     category: "impact",
-    valueType: "ratio",
-    calculation: "numerator-over-denominator",
-    unit: "percent",
+    resultSemantics:
+      "Each point is the percentage of checkout sessions completed during the provider query window.",
+    resultContract: {
+      schemaVersion: 1,
+      resultKind: "numeric_time_series",
+      cardinality: "single",
+      measurementKind: "ratio",
+      unit: { kind: "percent", scale: "zero_to_one_hundred" },
+      constraints: {
+        minimum: 0,
+        maximum: 100,
+        allowNaN: false,
+        allowInfinity: false,
+      },
+    },
+    fractionDigits: 1,
     version: 2,
     usedByMonitors: 2,
     usedByFlags: ["checkout-redesign"],
@@ -105,11 +185,15 @@ export const releaseMetrics: ReleaseMetric[] = [
       updatedAt: "1 min ago",
       coverage: 96.7,
       sourceBinding: {
-        sourceType: "featbit-events",
-        sourceLabel: "FeatBit telemetry",
-        selector: "checkout_completed / exposed_users",
+        providerType: "prometheus-compatible",
+        connectionId: "connection-production-metrics",
+        connectionName: "Production metrics",
         bindingRevision: 3,
-        contextCapabilities: ["flag-key", "variation", "exposure"],
+        query:
+          "100 * sum(increase(checkout_completed_total[5m])) / sum(increase(checkout_started_total[5m]))",
+        queryMode: "range",
+        step: "5m",
+        syncInterval: "5m",
       },
       history: points([
         70.1, 70.4, 70.2, 69.9, 70, 69.8, 69.5, 69.3, 69.1, 68.9, 69, 68.8,
@@ -124,9 +208,22 @@ export const releaseMetrics: ReleaseMetric[] = [
     description:
       "Memory working-set saturation for services in this environment.",
     category: "reliability",
-    valueType: "gauge",
-    calculation: "maximum",
-    unit: "percent",
+    resultSemantics:
+      "Each point is the maximum service memory working-set saturation returned as a percentage.",
+    resultContract: {
+      schemaVersion: 1,
+      resultKind: "numeric_time_series",
+      cardinality: "single",
+      measurementKind: "gauge",
+      unit: { kind: "percent", scale: "zero_to_one_hundred" },
+      constraints: {
+        minimum: 0,
+        maximum: 100,
+        allowNaN: false,
+        allowInfinity: false,
+      },
+    },
+    fractionDigits: 0,
     version: 1,
     usedByMonitors: 4,
     usedByFlags: ["checkout-redesign", "search-ranking-v3"],
@@ -138,13 +235,15 @@ export const releaseMetrics: ReleaseMetric[] = [
       updatedAt: "12 min ago",
       coverage: 61.2,
       sourceBinding: {
-        sourceType: "prometheus",
-        sourceLabel: "Prometheus-compatible",
-        selector:
-          "max(process_memory_working_set_bytes / container_memory_limit_bytes)",
+        providerType: "prometheus-compatible",
+        connectionId: "connection-production-metrics",
         connectionName: "Production metrics",
         bindingRevision: 2,
-        contextCapabilities: [],
+        query:
+          "100 * max(process_memory_working_set_bytes / container_memory_limit_bytes)",
+        queryMode: "range",
+        step: "5m",
+        syncInterval: "5m",
       },
       history: points([
         62, 63, 61, 64, 66, 68, 70, 72, 73, 74, 75, 76, 76, 76, 76, 76, 76,
@@ -157,9 +256,22 @@ export const releaseMetrics: ReleaseMetric[] = [
     name: "Crash-free sessions",
     description: "Percentage of application sessions without a crash signal.",
     category: "quality",
-    valueType: "ratio",
-    calculation: "one-minus-ratio",
-    unit: "percent",
+    resultSemantics:
+      "Each point is the percentage of application sessions without a crash during the provider query window.",
+    resultContract: {
+      schemaVersion: 1,
+      resultKind: "numeric_time_series",
+      cardinality: "single",
+      measurementKind: "ratio",
+      unit: { kind: "percent", scale: "zero_to_one_hundred" },
+      constraints: {
+        minimum: 0,
+        maximum: 100,
+        allowNaN: false,
+        allowInfinity: false,
+      },
+    },
+    fractionDigits: 2,
     version: 1,
     usedByMonitors: 1,
     usedByFlags: ["mobile-navigation"],
@@ -171,11 +283,15 @@ export const releaseMetrics: ReleaseMetric[] = [
       updatedAt: "receiving events",
       coverage: 38.5,
       sourceBinding: {
-        sourceType: "featbit-events",
-        sourceLabel: "FeatBit telemetry",
-        selector: "1 - app_crash / app_session",
+        providerType: "prometheus-compatible",
+        connectionId: "connection-production-metrics",
+        connectionName: "Production metrics",
         bindingRevision: 1,
-        contextCapabilities: ["flag-key", "variation", "exposure"],
+        query:
+          "100 * (1 - sum(increase(app_crash_total[5m])) / sum(increase(app_session_total[5m])))",
+        queryMode: "range",
+        step: "5m",
+        syncInterval: "5m",
       },
       history: points([99.8, 99.7, 99.8, 99.7, 99.6, 99.7]),
     },
@@ -192,7 +308,7 @@ export const checkoutMonitor: HealthMonitor = {
   bindings: [
     {
       metricId: "metric-error-rate",
-      observationMode: "flag-contextual",
+      observationMode: "environment",
       purpose: "guard",
       rule: "> 2% for 5 min",
       noDataPolicy: "notify",
@@ -210,7 +326,7 @@ export const checkoutMonitor: HealthMonitor = {
     },
     {
       metricId: "metric-completion",
-      observationMode: "flag-contextual",
+      observationMode: "environment",
       purpose: "observe",
       rule: "Observe trend",
       noDataPolicy: "wait",
@@ -255,7 +371,7 @@ export const healthSessions: HealthSession[] = [
     assessments: [
       {
         metricId: "metric-error-rate",
-        observationMode: "flag-contextual",
+        observationMode: "environment",
         purpose: "guard",
         dataStatus: "ready",
         healthStatus: "critical",
@@ -279,7 +395,7 @@ export const healthSessions: HealthSession[] = [
       },
       {
         metricId: "metric-completion",
-        observationMode: "flag-contextual",
+        observationMode: "environment",
         purpose: "observe",
         dataStatus: "ready",
         healthStatus: "healthy",

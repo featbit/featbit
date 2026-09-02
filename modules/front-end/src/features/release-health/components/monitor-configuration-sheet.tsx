@@ -42,11 +42,7 @@ import { Switch } from "@/components/ui/switch"
 import { cn } from "@/lib/utils"
 import { metricSampleText, ruleSampleText } from "../release-health-display"
 import { releaseMetrics } from "../release-health-mock-data"
-import { supportsFlagContext } from "../metrics/metric-contract"
-import type {
-  MetricObservationMode,
-  MonitorPurpose,
-} from "../release-health-types"
+import type { MonitorPurpose } from "../release-health-types"
 import { DataStatusBadge, PurposeBadge } from "./status-badges"
 
 const schema = z.object({
@@ -113,14 +109,6 @@ export function MonitorConfigurationSheet({
     "metric-api-latency": "guard",
     "metric-completion": "observe",
     "metric-memory": "guard",
-  })
-  const [observationModes, setObservationModes] = useState<
-    Record<string, MetricObservationMode>
-  >({
-    "metric-error-rate": "flag-contextual",
-    "metric-api-latency": "environment",
-    "metric-completion": "flag-contextual",
-    "metric-memory": "environment",
   })
   const [showAdvanced, setShowAdvanced] = useState(false)
   const { control, reset, handleSubmit } = useForm<ConfigurationValues>({
@@ -287,12 +275,6 @@ export function MonitorConfigurationSheet({
                     {releaseMetrics.slice(0, 4).map((metric) => {
                       const selected = selectedMetricIds.includes(metric.id)
                       const purpose = purposes[metric.id] ?? "observe"
-                      const canUseFlagContext = supportsFlagContext(
-                        metric.environment.sourceBinding?.contextCapabilities ??
-                          []
-                      )
-                      const observationMode =
-                        observationModes[metric.id] ?? "environment"
                       return (
                         <div
                           key={metric.id}
@@ -324,11 +306,7 @@ export function MonitorConfigurationSheet({
                                     status={metric.environment.dataStatus}
                                   />
                                   <Badge variant="outline">
-                                    {t(
-                                      canUseFlagContext
-                                        ? "releaseHealth.monitor.flagContextAvailable"
-                                        : "releaseHealth.monitor.environmentOnly"
-                                    )}
+                                    {t("releaseHealth.scope.environment")}
                                   </Badge>
                                 </div>
                               </div>
@@ -338,52 +316,17 @@ export function MonitorConfigurationSheet({
                                     <Label
                                       htmlFor={`metric-context-${metric.id}`}
                                     >
-                                      {t("releaseHealth.monitor.contextMode")}
+                                      {t("releaseHealth.monitor.observation")}
                                     </Label>
-                                    <Select
-                                      value={observationMode}
-                                      onValueChange={(value) => {
-                                        if (!value) return
-                                        setObservationModes((current) => ({
-                                          ...current,
-                                          [metric.id]:
-                                            value as MetricObservationMode,
-                                        }))
-                                      }}
+                                    <div
+                                      id={`metric-context-${metric.id}`}
+                                      className="flex min-h-10 items-center rounded-md border bg-muted/20 px-3 text-sm"
                                     >
-                                      <SelectTrigger
-                                        id={`metric-context-${metric.id}`}
-                                        className="w-full"
-                                      >
-                                        <SelectValue>
-                                          {t(
-                                            `releaseHealth.scope.${observationMode}`
-                                          )}
-                                        </SelectValue>
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        <SelectGroup>
-                                          <SelectItem value="environment">
-                                            {t(
-                                              "releaseHealth.scope.environment"
-                                            )}
-                                          </SelectItem>
-                                          <SelectItem
-                                            value="flag-contextual"
-                                            disabled={!canUseFlagContext}
-                                          >
-                                            {t(
-                                              "releaseHealth.scope.flag-contextual"
-                                            )}
-                                          </SelectItem>
-                                        </SelectGroup>
-                                      </SelectContent>
-                                    </Select>
+                                      {t("releaseHealth.scope.environment")}
+                                    </div>
                                     <p className="text-xs leading-5 text-muted-foreground">
                                       {t(
-                                        canUseFlagContext
-                                          ? "releaseHealth.monitor.contextModeHelp"
-                                          : "releaseHealth.monitor.contextUnavailableHelp"
+                                        "releaseHealth.monitor.wholeEnvironmentHelp"
                                       )}
                                     </p>
                                   </div>

@@ -1,76 +1,87 @@
 import { describe, expect, it } from "vitest"
 import {
-  isMetricValueContractValid,
-  metricTemplates,
-  metricTemplatesByCategory,
-  supportsFlagContext,
+  buildMetricUnit,
+  defaultUnitKindForMeasurementKind,
+  isMetricResultProfileValid,
+  resultContract,
+  resultContractRange,
+  unitKindsByMeasurementKind,
 } from "./metric-contract"
 
-describe("release metric value contracts", () => {
-  it("keeps every recommended template inside the hard compatibility matrix", () => {
-    Object.values(metricTemplates).forEach((template) => {
-      expect(isMetricValueContractValid(template)).toBe(true)
+describe("release metric result contract", () => {
+  it("exposes only the nine MVP result profiles", () => {
+    expect(unitKindsByMeasurementKind).toEqual({
+      gauge: ["count", "percent", "ratio", "duration", "data"],
+      count: ["count"],
+      ratio: ["percent", "ratio"],
+      rate: ["rate"],
     })
   })
 
-  it("rejects incompatible value type, calculation, and unit tuples", () => {
+  it("rejects incompatible measurement kind and unit pairs", () => {
     expect(
-      isMetricValueContractValid({
-        valueType: "count",
-        calculation: "sum",
-        unit: "percent",
+      isMetricResultProfileValid({
+        measurementKind: "count",
+        unitKind: "percent",
       })
     ).toBe(false)
     expect(
-      isMetricValueContractValid({
-        valueType: "ratio",
-        calculation: "p95",
-        unit: "milliseconds",
+      isMetricResultProfileValid({
+        measurementKind: "ratio",
+        unitKind: "duration",
       })
     ).toBe(false)
     expect(
-      isMetricValueContractValid({
-        valueType: "distribution",
-        calculation: "p95",
-        unit: "percent",
-      })
-    ).toBe(false)
-    expect(
-      isMetricValueContractValid({
-        valueType: "rate",
-        calculation: "per-second",
-        unit: "errors-per-minute",
-      })
-    ).toBe(false)
-  })
-
-  it("uses category only to group recommendations", () => {
-    metricTemplatesByCategory.impact.forEach((templateId) => {
-      expect(metricTemplates[templateId].category).toBe("impact")
-    })
-    expect(
-      isMetricValueContractValid({
-        valueType: "distribution",
-        calculation: "p95",
-        unit: "milliseconds",
+      isMetricResultProfileValid({
+        measurementKind: "gauge",
+        unitKind: "duration",
       })
     ).toBe(true)
   })
 
-  it("groups every named template exactly once", () => {
-    const groupedTemplateIds = Object.values(metricTemplatesByCategory).flat()
-
-    expect(groupedTemplateIds).toHaveLength(10)
-    expect(new Set(groupedTemplateIds).size).toBe(10)
-    expect(groupedTemplateIds.toSorted()).toEqual(
-      Object.keys(metricTemplates).toSorted()
-    )
+  it("builds a structured rate unit", () => {
+    expect(
+      buildMetricUnit({
+        unitKind: "rate",
+        rateNumerator: "requests",
+        ratePeriod: "second",
+      })
+    ).toEqual({
+      kind: "rate",
+      numerator: "requests",
+      per: "second",
+    })
   })
 
-  it("requires flag-key capability for flag context", () => {
-    expect(supportsFlagContext(["flag-key"])).toBe(true)
-    expect(supportsFlagContext(["flag-key", "exposure"])).toBe(true)
-    expect(supportsFlagContext(["exposure"])).toBe(false)
-    expect(supportsFlagContext([])).toBe(false)
+  it("creates a fixed single-series numeric contract", () => {
+    expect(
+      resultContract({
+        measurementKind: "ratio",
+        unit: { kind: "percent", scale: "zero_to_one_hundred" },
+        minimum: 0,
+        maximum: 100,
+      })
+    ).toMatchObject({
+      schemaVersion: 1,
+      resultKind: "numeric_time_series",
+      cardinality: "single",
+      measurementKind: "ratio",
+      constraints: {
+        minimum: 0,
+        maximum: 100,
+        allowNaN: false,
+        allowInfinity: false,
+      },
+    })
+  })
+
+  it("uses canonical built-in ranges and compatible defaults", () => {
+    expect(
+      resultContractRange({
+        kind: "percent",
+        scale: "zero_to_one_hundred",
+      })
+    ).toEqual({ minimum: 0, maximum: 100 })
+    expect(defaultUnitKindForMeasurementKind("rate")).toBe("rate")
   })
 })

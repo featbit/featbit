@@ -11,15 +11,18 @@ import {
 const tabs = [
   { key: "overview", href: "/release-health" },
   { key: "metrics", href: "/release-health/metrics" },
+  { key: "connections", href: "/release-health/connections" },
   { key: "sessions", href: "/release-health/sessions" },
 ] as const
 
 export function ReleaseHealthShell({
   activeTab,
   children,
+  live = false,
 }: {
   activeTab: (typeof tabs)[number]["key"]
   children: React.ReactNode
+  live?: boolean
 }) {
   const { t } = useTranslation()
   const params = useParams()
@@ -39,7 +42,7 @@ export function ReleaseHealthShell({
           <h1 className="text-2xl font-semibold tracking-normal">
             {t("releaseHealth.title")}
           </h1>
-          <Badge variant="secondary">{t("releaseHealth.designPreview")}</Badge>
+          <Badge variant="secondary">{t(live ? "releaseHealth.live.badge" : "releaseHealth.designPreview")}</Badge>
         </div>
         <p className="max-w-4xl text-sm text-muted-foreground">
           {t("releaseHealth.subtitle")}
@@ -72,7 +75,7 @@ export function ReleaseHealthShell({
 
       <div className="mb-5 flex items-center gap-2 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-xs text-blue-900 dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-blue-100">
         <span className="size-1.5 shrink-0 rounded-full bg-blue-500" />
-        {t("releaseHealth.sampleDataNotice")}
+        {t(live ? "releaseHealth.live.notice" : "releaseHealth.sampleDataNotice")}
       </div>
 
       {children}

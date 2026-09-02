@@ -30,6 +30,7 @@ import { ReleaseHealthShell } from "../components/release-health-shell"
 import { DataStatusBadge, GateStatusBadge } from "../components/status-badges"
 import { metricSampleText, sessionSampleText } from "../release-health-display"
 import { healthSessions, releaseMetrics } from "../release-health-mock-data"
+import { metricResultProfileLabel } from "../metrics/metric-contract"
 
 const summaryItems = [
   {
@@ -320,10 +321,10 @@ export function ReleaseHealthOverviewPage() {
                       {metricSampleText(t, metric, "updatedAt")}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {t(`releaseHealth.valueType.${metric.valueType}`)} ·{" "}
+                      {metricResultProfileLabel(t, metric)} ·{" "}
                       {metric.environment.sourceBinding
                         ? t(
-                            `releaseHealth.metrics.sources.${metric.environment.sourceBinding.sourceType}`
+                            "releaseHealth.metrics.sources.prometheusCompatible"
                           )
                         : t("releaseHealth.metrics.detail.notConnected")}
                     </p>

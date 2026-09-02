@@ -1,178 +1,178 @@
+import type { TFunction } from "i18next"
 import type {
-  MetricContextCapability,
-  ReleaseMetricCalculation,
-  ReleaseMetricCategory,
-  ReleaseMetricUnit,
-  ReleaseMetricValueType,
+  MetricMeasurementKind,
+  MetricRateNumerator,
+  MetricRatePeriod,
+  MetricResultContract,
+  MetricUnit,
+  ReleaseMetric,
 } from "../release-health-types"
 
-export type MetricTemplateId =
-  | "conversion-rate"
-  | "adoption-rate"
-  | "completed-orders"
-  | "task-failure-rate"
-  | "crash-free-sessions"
-  | "page-load-p95"
-  | "error-rate"
-  | "latency-p95"
-  | "availability"
-  | "resource-utilization"
+export type MetricUnitKind = MetricUnit["kind"]
 
-export type MetricTemplateChoice = MetricTemplateId | "custom"
+export const measurementKinds = ["gauge", "count", "ratio", "rate"] as const
 
-export type MetricValueContract = {
-  valueType: ReleaseMetricValueType
-  calculation: ReleaseMetricCalculation
-  unit: ReleaseMetricUnit
-}
-
-export const metricTemplates: Record<
-  MetricTemplateId,
-  MetricValueContract & { category: ReleaseMetricCategory }
+export const unitKindsByMeasurementKind: Record<
+  MetricMeasurementKind,
+  readonly MetricUnitKind[]
 > = {
-  "conversion-rate": {
-    category: "impact",
-    valueType: "ratio",
-    calculation: "numerator-over-denominator",
-    unit: "percent",
-  },
-  "adoption-rate": {
-    category: "impact",
-    valueType: "ratio",
-    calculation: "numerator-over-denominator",
-    unit: "percent",
-  },
-  "completed-orders": {
-    category: "impact",
-    valueType: "count",
-    calculation: "sum",
-    unit: "count",
-  },
-  "task-failure-rate": {
-    category: "quality",
-    valueType: "ratio",
-    calculation: "numerator-over-denominator",
-    unit: "percent",
-  },
-  "crash-free-sessions": {
-    category: "quality",
-    valueType: "ratio",
-    calculation: "one-minus-ratio",
-    unit: "percent",
-  },
-  "page-load-p95": {
-    category: "quality",
-    valueType: "distribution",
-    calculation: "p95",
-    unit: "milliseconds",
-  },
-  "error-rate": {
-    category: "reliability",
-    valueType: "ratio",
-    calculation: "numerator-over-denominator",
-    unit: "percent",
-  },
-  "latency-p95": {
-    category: "reliability",
-    valueType: "distribution",
-    calculation: "p95",
-    unit: "milliseconds",
-  },
-  availability: {
-    category: "reliability",
-    valueType: "ratio",
-    calculation: "numerator-over-denominator",
-    unit: "percent",
-  },
-  "resource-utilization": {
-    category: "reliability",
-    valueType: "gauge",
-    calculation: "average",
-    unit: "percent",
-  },
-}
-
-export const metricTemplatesByCategory: Record<
-  ReleaseMetricCategory,
-  MetricTemplateId[]
-> = {
-  impact: ["conversion-rate", "adoption-rate", "completed-orders"],
-  quality: ["task-failure-rate", "crash-free-sessions", "page-load-p95"],
-  reliability: [
-    "error-rate",
-    "latency-p95",
-    "availability",
-    "resource-utilization",
-  ],
-}
-
-export const calculationsByValueType: Record<
-  ReleaseMetricValueType,
-  ReleaseMetricCalculation[]
-> = {
-  count: ["sum"],
-  gauge: ["latest", "average", "minimum", "maximum"],
-  rate: ["per-second", "per-minute", "per-hour"],
-  ratio: ["numerator-over-denominator", "one-minus-ratio"],
-  distribution: ["p50", "p90", "p95", "p99"],
-}
-
-export const unitsByValueType: Record<
-  ReleaseMetricValueType,
-  ReleaseMetricUnit[]
-> = {
+  gauge: ["count", "percent", "ratio", "duration", "data"],
   count: ["count"],
-  gauge: ["count", "percent", "milliseconds", "seconds", "bytes", "megabytes"],
-  rate: [
-    "events-per-second",
-    "requests-per-second",
-    "events-per-minute",
-    "errors-per-minute",
-    "events-per-hour",
-  ],
   ratio: ["percent", "ratio"],
-  distribution: ["milliseconds", "seconds", "bytes", "megabytes"],
+  rate: ["rate"],
 }
 
-const rateUnitsByCalculation: Partial<
-  Record<ReleaseMetricCalculation, ReleaseMetricUnit[]>
-> = {
-  "per-second": ["events-per-second", "requests-per-second"],
-  "per-minute": ["events-per-minute", "errors-per-minute"],
-  "per-hour": ["events-per-hour"],
-}
+export const rateNumerators = [
+  "events",
+  "requests",
+  "errors",
+  "operations",
+  "items",
+  "bytes",
+] as const satisfies readonly MetricRateNumerator[]
 
-export function unitsForMetricContract(
-  valueType: ReleaseMetricValueType,
-  calculation: ReleaseMetricCalculation
+export const ratePeriods = [
+  "second",
+  "minute",
+  "hour",
+] as const satisfies readonly MetricRatePeriod[]
+
+export function defaultUnitKindForMeasurementKind(
+  measurementKind: MetricMeasurementKind
 ) {
-  return rateUnitsByCalculation[calculation] ?? unitsByValueType[valueType]
+  return unitKindsByMeasurementKind[measurementKind][0]
 }
 
-export function defaultContractForValueType(
-  valueType: ReleaseMetricValueType
-): MetricValueContract {
-  return {
-    valueType,
-    calculation: calculationsByValueType[valueType][0],
-    unit: unitsForMetricContract(
-      valueType,
-      calculationsByValueType[valueType][0]
-    )[0],
+export function isMetricResultProfileValid({
+  measurementKind,
+  unitKind,
+}: {
+  measurementKind: MetricMeasurementKind
+  unitKind: MetricUnitKind
+}) {
+  return unitKindsByMeasurementKind[measurementKind].includes(unitKind)
+}
+
+export function buildMetricUnit({
+  unitKind,
+  rateNumerator,
+  ratePeriod,
+}: {
+  unitKind: MetricUnitKind
+  rateNumerator: MetricRateNumerator
+  ratePeriod: MetricRatePeriod
+}): MetricUnit {
+  switch (unitKind) {
+    case "count":
+      return { kind: "count" }
+    case "percent":
+      return { kind: "percent", scale: "zero_to_one_hundred" }
+    case "ratio":
+      return { kind: "ratio", scale: "zero_to_one" }
+    case "duration":
+      return { kind: "duration", base: "millisecond" }
+    case "data":
+      return { kind: "data", base: "byte" }
+    case "rate":
+      return {
+        kind: "rate",
+        numerator: rateNumerator,
+        per: ratePeriod,
+      }
   }
 }
 
-export function isMetricValueContractValid({
-  valueType,
-  calculation,
+export function resultContract({
+  measurementKind,
   unit,
-}: MetricValueContract) {
-  return (
-    calculationsByValueType[valueType].includes(calculation) &&
-    unitsForMetricContract(valueType, calculation).includes(unit)
-  )
+  minimum,
+  maximum,
+}: {
+  measurementKind: MetricMeasurementKind
+  unit: MetricUnit
+  minimum?: number
+  maximum?: number
+}): MetricResultContract {
+  return {
+    schemaVersion: 1,
+    resultKind: "numeric_time_series",
+    cardinality: "single",
+    measurementKind,
+    unit,
+    constraints: {
+      minimum,
+      maximum,
+      allowNaN: false,
+      allowInfinity: false,
+    },
+  }
 }
 
-export function supportsFlagContext(capabilities: MetricContextCapability[]) {
-  return capabilities.includes("flag-key")
+export function metricUnitLabel(t: TFunction, unit: MetricUnit) {
+  if (unit.kind === "rate") {
+    return t("releaseHealth.resultContract.rateUnit", {
+      numerator: t(
+        `releaseHealth.resultContract.rateNumerator.${unit.numerator}`
+      ),
+      period: t(`releaseHealth.resultContract.ratePeriod.${unit.per}`),
+    })
+  }
+
+  return t(`releaseHealth.resultContract.unit.${unit.kind}`)
+}
+
+export function metricResultProfileLabel(t: TFunction, metric: ReleaseMetric) {
+  return `${t(
+    `releaseHealth.resultContract.measurementKind.${metric.resultContract.measurementKind}`
+  )} · ${metricUnitLabel(t, metric.resultContract.unit)}`
+}
+
+export function formatMetricValue(metric: ReleaseMetric, value: number) {
+  const unit = metric.resultContract.unit
+  const formatted = new Intl.NumberFormat(undefined, {
+    maximumFractionDigits: metric.fractionDigits,
+  }).format(value)
+
+  switch (unit.kind) {
+    case "percent":
+      return `${formatted}%`
+    case "ratio":
+    case "count":
+      return formatted
+    case "duration":
+      return value >= 1000
+        ? `${new Intl.NumberFormat(undefined, {
+            maximumFractionDigits: metric.fractionDigits,
+          }).format(value / 1000)} s`
+        : `${formatted} ms`
+    case "data":
+      return formatBytes(value, metric.fractionDigits)
+    case "rate":
+      return `${formatted} ${unit.numerator}/${shortPeriod(unit.per)}`
+  }
+}
+
+export function resultContractRange(unit: MetricUnit) {
+  if (unit.kind === "percent") return { minimum: 0, maximum: 100 }
+  if (unit.kind === "ratio") return { minimum: 0, maximum: 1 }
+  return { minimum: 0, maximum: undefined }
+}
+
+function shortPeriod(period: MetricRatePeriod) {
+  if (period === "second") return "s"
+  if (period === "minute") return "min"
+  return "h"
+}
+
+function formatBytes(value: number, fractionDigits: number) {
+  const units = ["B", "KiB", "MiB", "GiB"]
+  let scaled = value
+  let index = 0
+  while (scaled >= 1024 && index < units.length - 1) {
+    scaled /= 1024
+    index += 1
+  }
+  return `${new Intl.NumberFormat(undefined, {
+    maximumFractionDigits: fractionDigits,
+  }).format(scaled)} ${units[index]}`
 }

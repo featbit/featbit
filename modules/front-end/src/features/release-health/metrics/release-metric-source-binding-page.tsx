@@ -1,4 +1,4 @@
-import { Check, CircleMinus, Info, Play, Save } from "lucide-react"
+import { CheckCircle2, Clock3, Info, Play, Plus, Save } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link, useNavigate, useParams } from "react-router-dom"
@@ -22,6 +22,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { Textarea } from "@/components/ui/textarea"
 import { DetailBackLink } from "@/components/detail-back-link"
 import {
@@ -29,38 +37,34 @@ import {
   localizedPath,
   resolveLang,
 } from "@/features/layout/layout-context"
+import { SourceConnectionSheet } from "../components/source-connection-sheet"
 import { metricSampleText } from "../release-health-display"
-import { metricByKey } from "../release-health-mock-data"
-import type {
-  MetricSourceType,
-  ReleaseMetricValueType,
-} from "../release-health-types"
+import {
+  metricByKey,
+  metricSourceConnections,
+} from "../release-health-mock-data"
+import type { MetricSourceConnection } from "../release-health-types"
+import {
+  formatMetricValue,
+  metricResultProfileLabel,
+  metricUnitLabel,
+} from "./metric-contract"
 
 type ValidationState = "idle" | "valid"
+type StepValue = "1m" | "5m" | "15m"
+type SyncIntervalValue = "1m" | "5m"
 
-const featBitSelectorsByValueType: Record<
-  ReleaseMetricValueType,
-  readonly string[]
-> = {
-  count: ["checkout_completed", "order_completed", "signup_completed"],
-  gauge: ["memory_utilization", "cpu_utilization", "queue_depth"],
-  rate: ["request_error", "request_completed", "job_failed"],
-  ratio: [
-    "request_error / checkout_request",
-    "checkout_completed / exposed_users",
-    "1 - app_crash / app_session",
-  ],
-  distribution: ["page_load_duration", "request_duration", "job_duration"],
-}
-
-const prometheusDefaults: Record<ReleaseMetricValueType, string> = {
-  count: "sum(increase(checkout_completed_total[5m]))",
-  gauge: "avg(process_memory_utilization_ratio)",
-  rate: "sum(rate(http_requests_total[5m]))",
-  ratio:
-    "sum(rate(request_error_total[5m])) / sum(rate(checkout_request_total[5m]))",
-  distribution:
-    "histogram_quantile(0.95, sum(rate(http_server_duration_bucket[5m])) by (le))",
+const prometheusDefaults: Record<string, string> = {
+  checkout_error_rate:
+    '100 * sum(rate(http_requests_total{service="checkout",status=~"5.."}[5m])) / sum(rate(http_requests_total{service="checkout"}[5m]))',
+  api_p95_latency:
+    "1000 * histogram_quantile(0.95, sum(rate(http_server_duration_bucket[5m])) by (le))",
+  checkout_completion_rate:
+    "100 * sum(increase(checkout_completed_total[5m])) / sum(increase(checkout_started_total[5m]))",
+  service_memory_saturation:
+    "100 * max(process_memory_working_set_bytes / container_memory_limit_bytes)",
+  crash_free_sessions:
+    "100 * (1 - sum(increase(app_crash_total[5m])) / sum(increase(app_session_total[5m])))",
 }
 
 export function ReleaseMetricSourceBindingPage() {
@@ -79,20 +83,31 @@ export function ReleaseMetricSourceBindingPage() {
   const existingBinding = currentEnvironment
     ? metric?.environment.sourceBinding
     : undefined
-  const existingSource = existingBinding?.sourceType
-  const metricValueType = metric?.valueType ?? "ratio"
-  const initialConnection =
-    existingBinding?.connectionName === "Shared metrics gateway"
-      ? "shared-gateway"
-      : "production-metrics"
-  const initialSelector =
-    existingBinding?.selector ?? featBitSelectorsByValueType[metricValueType][0]
-  const [sourceType, setSourceType] = useState<MetricSourceType>(
-    existingSource ?? "featbit-events"
+  const [connections, setConnections] = useState<MetricSourceConnection[]>(() =>
+    metricSourceConnections.map((connection) => ({
+      ...connection,
+      environmentKey,
+    }))
   )
-  const [connection, setConnection] = useState(initialConnection)
-  const [selector, setSelector] = useState(initialSelector)
-  const [validation, setValidation] = useState<ValidationState>("idle")
+  const initialConnectionId =
+    existingBinding?.connectionId ?? connections[0]?.id ?? ""
+  const initialQuery =
+    existingBinding?.query ?? prometheusDefaults[metricKey] ?? ""
+  const initialStep = existingBinding?.step ?? "1m"
+  const initialSyncInterval = existingBinding?.syncInterval ?? "1m"
+  const [connectionId, setConnectionId] = useState(initialConnectionId)
+  const [query, setQuery] = useState(initialQuery)
+  const [step, setStep] = useState<StepValue>(initialStep)
+  const [syncInterval, setSyncInterval] =
+    useState<SyncIntervalValue>(initialSyncInterval)
+  const [connectionTested, setConnectionTested] = useState(
+    connections.find((connection) => connection.id === initialConnectionId)
+      ?.status === "connected"
+  )
+  const [validation, setValidation] = useState<ValidationState>(
+    existingBinding ? "valid" : "idle"
+  )
+  const [connectionEditorOpen, setConnectionEditorOpen] = useState(false)
 
   if (!metric) {
     return (
@@ -120,55 +135,38 @@ export function ReleaseMetricSourceBindingPage() {
     `/release-health/metrics/${encodeURIComponent(metric.key)}`
   )
   const isManage = Boolean(existingBinding)
+  const selectedConnection = connections.find(
+    (connection) => connection.id === connectionId
+  )
   const isDirty =
     !existingBinding ||
-    sourceType !== existingBinding.sourceType ||
-    selector !== existingBinding.selector ||
-    (sourceType === "prometheus" && connection !== initialConnection)
-  const featBitSelectors = Array.from(
-    new Set([
-      ...(sourceType === "featbit-events" && existingBinding?.selector
-        ? [existingBinding.selector]
-        : []),
-      ...featBitSelectorsByValueType[metric.valueType],
-    ])
-  )
-  const supportsFlagContext = sourceType === "featbit-events"
-  const capabilities = [
-    {
-      key: "environment",
-      available: true,
-    },
-    {
-      key: "flagKey",
-      available: supportsFlagContext,
-    },
-    {
-      key: "revision",
-      available: false,
-    },
-    {
-      key: "variation",
-      available: supportsFlagContext,
-    },
-    {
-      key: "exposure",
-      available: supportsFlagContext,
-    },
-  ] as const
+    connectionId !== existingBinding.connectionId ||
+    query !== existingBinding.query ||
+    step !== existingBinding.step ||
+    syncInterval !== existingBinding.syncInterval
+  const previewPoints = metric.environment.history.slice(-3)
 
-  function changeSource(nextSource: MetricSourceType) {
-    setSourceType(nextSource)
+  function invalidate() {
     setValidation("idle")
-    setSelector(
-      nextSource === "featbit-events"
-        ? featBitSelectorsByValueType[metricValueType][0]
-        : prometheusDefaults[metricValueType]
+  }
+
+  function selectConnection(nextConnectionId: string) {
+    setConnectionId(nextConnectionId)
+    setConnectionTested(
+      connections.find((connection) => connection.id === nextConnectionId)
+        ?.status === "connected"
     )
+    invalidate()
+  }
+
+  function testConnection() {
+    if (!selectedConnection) return
+    setConnectionTested(true)
+    toast.success(t("releaseHealth.connections.editor.testPassed"))
   }
 
   function validate() {
-    if (!selector.trim()) return
+    if (!query.trim() || !connectionTested) return
     setValidation("valid")
     toast.success(t("releaseHealth.metrics.sourceBinding.validationPassed"))
   }
@@ -179,6 +177,13 @@ export function ReleaseMetricSourceBindingPage() {
     navigate(detailPath)
   }
 
+  function saveConnection(connection: MetricSourceConnection) {
+    setConnections((current) => [...current, connection])
+    setConnectionId(connection.id)
+    setConnectionTested(true)
+    invalidate()
+  }
+
   return (
     <div className="-m-5 min-h-[calc(100vh-3.5rem)] bg-background px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
       <DetailBackLink to={detailPath}>
@@ -186,13 +191,20 @@ export function ReleaseMetricSourceBindingPage() {
       </DetailBackLink>
 
       <header className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-normal">
-          {t(
-            isManage
-              ? "releaseHealth.metrics.sourceBinding.manageTitle"
-              : "releaseHealth.metrics.sourceBinding.title"
-          )}
-        </h1>
+        <div className="flex flex-wrap items-center gap-2">
+          <h1 className="text-2xl font-semibold tracking-normal">
+            {t(
+              isManage
+                ? "releaseHealth.metrics.sourceBinding.manageTitle"
+                : "releaseHealth.metrics.sourceBinding.title"
+            )}
+          </h1>
+          {isManage ? (
+            <Badge variant="secondary">
+              r{existingBinding?.bindingRevision}
+            </Badge>
+          ) : null}
+        </div>
         <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
           {t("releaseHealth.metrics.sourceBinding.description", {
             metric: metricSampleText(t, metric, "name"),
@@ -209,267 +221,308 @@ export function ReleaseMetricSourceBindingPage() {
       </Alert>
 
       <div className="mb-4 grid gap-4 md:grid-cols-2">
-        <Card size="sm">
-          <CardHeader>
-            <CardDescription>
-              {t("releaseHealth.metrics.sourceBinding.metric")}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="font-medium">{metricSampleText(t, metric, "name")}</p>
-            <p className="mt-1 font-mono text-xs text-muted-foreground">
-              {metric.key} · v{metric.version}
-            </p>
-            <p className="mt-2 text-xs text-muted-foreground">
-              {t(`releaseHealth.valueType.${metric.valueType}`)} ·{" "}
-              {t(`releaseHealth.calculation.${metric.calculation}`)} ·{" "}
-              {t(`releaseHealth.unit.${metric.unit}`)}
-            </p>
-          </CardContent>
-        </Card>
-        <Card size="sm">
-          <CardHeader>
-            <CardDescription>
-              {t("releaseHealth.metrics.sourceBinding.environment")}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="font-medium">{environmentName}</p>
-            <p className="mt-1 font-mono text-xs text-muted-foreground">
-              {environmentKey}
-            </p>
-            <p className="mt-2 text-xs text-muted-foreground">
-              {t("releaseHealth.metrics.sourceBinding.environmentIsolation")}
-            </p>
-          </CardContent>
-        </Card>
+        <ContextCard
+          label={t("releaseHealth.metrics.sourceBinding.metric")}
+          title={metricSampleText(t, metric, "name")}
+          code={`${metric.key} · v${metric.version}`}
+          help={metricResultProfileLabel(t, metric)}
+        />
+        <ContextCard
+          label={t("releaseHealth.metrics.sourceBinding.environment")}
+          title={environmentName}
+          code={environmentKey}
+          help={t("releaseHealth.metrics.sourceBinding.environmentIsolation")}
+        />
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(22rem,0.65fr)]">
-        <div className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                {t("releaseHealth.metrics.sourceBinding.sourceAndMapping")}
-              </CardTitle>
-              <CardDescription>
-                {t("releaseHealth.metrics.sourceBinding.sourceAndMappingHelp")}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-5">
-              <div className="space-y-2">
-                <Label htmlFor="metric-source-type">
-                  {t("releaseHealth.metrics.source")}
+      <div className="space-y-4">
+        <StepCard
+          number={1}
+          title={t("releaseHealth.metrics.sourceBinding.providerStep")}
+          description={t(
+            "releaseHealth.metrics.sourceBinding.providerStepHelp"
+          )}
+        >
+          <div className="grid gap-4 lg:grid-cols-2">
+            <div className="space-y-2">
+              <Label>{t("releaseHealth.connections.provider")}</Label>
+              <div className="flex min-h-10 items-center justify-between rounded-md border bg-muted/20 px-3 py-2">
+                <span className="text-sm font-medium">
+                  Prometheus-compatible
+                </span>
+                <Badge variant="secondary">Pull · MVP</Badge>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-3">
+                <Label htmlFor="metric-source-connection">
+                  {t("releaseHealth.metrics.sourceBinding.connection")}
                 </Label>
-                <Select
-                  value={sourceType}
-                  onValueChange={(value) =>
-                    value && changeSource(value as MetricSourceType)
-                  }
-                >
-                  <SelectTrigger id="metric-source-type" className="w-full">
-                    <SelectValue>
-                      {t(`releaseHealth.metrics.sources.${sourceType}`)}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectItem value="featbit-events">
-                        {t("releaseHealth.metrics.sources.featbit-events")}
-                      </SelectItem>
-                      <SelectItem value="prometheus">
-                        {t("releaseHealth.metrics.sources.prometheus")}
-                      </SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {sourceType === "prometheus" ? (
-                <div className="space-y-2">
-                  <Label htmlFor="metric-source-connection">
-                    {t("releaseHealth.metrics.sourceBinding.connection")}
-                  </Label>
-                  <Select
-                    value={connection}
-                    onValueChange={(value) => {
-                      if (!value) return
-                      setConnection(value)
-                      setValidation("idle")
-                    }}
-                  >
-                    <SelectTrigger
-                      id="metric-source-connection"
-                      className="w-full"
-                    >
-                      <SelectValue>
-                        {connection === "production-metrics"
-                          ? "Production metrics"
-                          : "Shared metrics gateway"}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectItem value="production-metrics">
-                          Production metrics
-                        </SelectItem>
-                        <SelectItem value="shared-gateway">
-                          Shared metrics gateway
-                        </SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
-              ) : null}
-
-              {sourceType === "featbit-events" ? (
-                <div className="space-y-2">
-                  <Label htmlFor="metric-source-selector">
-                    {t("releaseHealth.metrics.sourceBinding.eventSelector")}
-                  </Label>
-                  <Select
-                    value={selector}
-                    onValueChange={(value) => {
-                      if (!value) return
-                      setSelector(value)
-                      setValidation("idle")
-                    }}
-                  >
-                    <SelectTrigger
-                      id="metric-source-selector"
-                      className="w-full font-mono"
-                    >
-                      <SelectValue>{selector}</SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {featBitSelectors.map((option) => (
-                          <SelectItem key={option} value={option}>
-                            {option}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <Label htmlFor="metric-promql">PromQL</Label>
-                  <Textarea
-                    id="metric-promql"
-                    value={selector}
-                    rows={6}
-                    className="font-mono text-xs"
-                    onChange={(event) => {
-                      setSelector(event.target.value)
-                      setValidation("idle")
-                    }}
-                  />
-                </div>
-              )}
-
-              <div className="rounded-md border bg-muted/20 p-3 text-xs leading-5">
-                <span className="font-medium">
-                  {t("releaseHealth.metrics.sourceBinding.expectedResult")}
-                </span>{" "}
-                {t(`releaseHealth.valueType.${metric.valueType}`)} ·{" "}
-                {t(`releaseHealth.calculation.${metric.calculation}`)} ·{" "}
-                {t(`releaseHealth.unit.${metric.unit}`)}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>
-                {t("releaseHealth.metrics.sourceBinding.testAndPreview")}
-              </CardTitle>
-              <CardDescription>
-                {t("releaseHealth.metrics.sourceBinding.testAndPreviewHelp")}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border p-4">
-                <div>
-                  <p className="text-sm font-medium">
-                    {validation === "valid"
-                      ? t("releaseHealth.metrics.sourceBinding.previewReady")
-                      : t("releaseHealth.metrics.sourceBinding.previewPending")}
-                  </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {validation === "valid"
-                      ? t("releaseHealth.metrics.sourceBinding.previewSample", {
-                          value: metric.environment.displayValue,
-                        })
-                      : t(
-                          "releaseHealth.metrics.sourceBinding.previewInstruction"
-                        )}
-                  </p>
-                </div>
                 <Button
                   type="button"
-                  variant="outline"
-                  disabled={!selector.trim()}
-                  onClick={validate}
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setConnectionEditorOpen(true)}
                 >
-                  <Play />
-                  {t("releaseHealth.metrics.sourceBinding.validate")}
+                  <Plus />
+                  {t("releaseHealth.metrics.sourceBinding.createConnection")}
                 </Button>
               </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <Card className="h-fit">
-          <CardHeader>
-            <CardTitle>
-              {t("releaseHealth.metrics.sourceBinding.capabilities")}
-            </CardTitle>
-            <CardDescription>
-              {t("releaseHealth.metrics.sourceBinding.capabilitiesHelp")}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {capabilities.map((capability) => (
-              <div
-                key={capability.key}
-                className="flex items-center justify-between gap-3 rounded-md border px-3 py-2.5"
+              <Select
+                value={connectionId}
+                onValueChange={(value) => value && selectConnection(value)}
               >
-                <span className="text-sm">
-                  {t(
-                    `releaseHealth.metrics.sourceBinding.capability.${capability.key}`
-                  )}
-                </span>
-                <Badge
-                  variant={
-                    validation === "valid" && capability.available
-                      ? "secondary"
-                      : "outline"
-                  }
-                  className="font-normal"
-                >
-                  {validation !== "valid" ? (
-                    <Info />
-                  ) : capability.available ? (
-                    <Check />
-                  ) : (
-                    <CircleMinus />
-                  )}
-                  {t(
-                    validation !== "valid"
-                      ? "releaseHealth.metrics.sourceBinding.notChecked"
-                      : capability.available
-                        ? "releaseHealth.metrics.sourceBinding.available"
-                        : "releaseHealth.metrics.sourceBinding.notAvailable"
-                  )}
-                </Badge>
-              </div>
-            ))}
-            <div className="rounded-md border border-blue-200 bg-blue-50 p-3 text-xs leading-5 text-blue-900 dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-blue-100">
-              {t("releaseHealth.metrics.sourceBinding.capabilityNotice")}
+                <SelectTrigger id="metric-source-connection" className="w-full">
+                  <SelectValue>
+                    {selectedConnection?.name ??
+                      t("releaseHealth.metrics.sourceBinding.chooseConnection")}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {connections.map((connection) => (
+                      <SelectItem key={connection.id} value={connection.id}>
+                        {connection.name}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-md border bg-muted/10 p-4">
+            <div>
+              <p className="text-sm font-medium">
+                {selectedConnection?.name ?? "—"}
+              </p>
+              <p className="mt-1 font-mono text-xs text-muted-foreground">
+                {selectedConnection?.endpoint ?? "—"}
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              {connectionTested ? (
+                <Badge variant="secondary">
+                  <CheckCircle2 />
+                  {t("releaseHealth.connections.statusValue.connected")}
+                </Badge>
+              ) : null}
+              <Button
+                type="button"
+                variant="outline"
+                disabled={!selectedConnection}
+                onClick={testConnection}
+              >
+                <Play />
+                {t("releaseHealth.connections.test")}
+              </Button>
+            </div>
+          </div>
+        </StepCard>
+
+        <StepCard
+          number={2}
+          title={t("releaseHealth.metrics.sourceBinding.queryStep")}
+          description={t("releaseHealth.metrics.sourceBinding.queryStepHelp")}
+        >
+          <div className="space-y-2">
+            <Label htmlFor="metric-promql">PromQL</Label>
+            <Textarea
+              id="metric-promql"
+              value={query}
+              rows={6}
+              className="font-mono text-xs leading-5"
+              onChange={(event) => {
+                setQuery(event.target.value)
+                invalidate()
+              }}
+            />
+            <p className="text-xs text-muted-foreground">
+              {t("releaseHealth.metrics.sourceBinding.queryResponsibility")}
+            </p>
+          </div>
+
+          <div className="mt-4 grid gap-4 sm:grid-cols-3">
+            <ReadOnlyField
+              label={t("releaseHealth.metrics.sourceBinding.queryMode")}
+              value="query_range · range"
+            />
+            <SelectConfigField
+              id="metric-source-step"
+              label={t("releaseHealth.metrics.sourceBinding.step")}
+              value={step}
+              options={["1m", "5m", "15m"]}
+              onValueChange={(value) => {
+                setStep(value as StepValue)
+                invalidate()
+              }}
+            />
+            <SelectConfigField
+              id="metric-source-sync"
+              label={t("releaseHealth.metrics.sourceBinding.syncInterval")}
+              value={syncInterval}
+              options={["1m", "5m"]}
+              onValueChange={(value) => {
+                setSyncInterval(value as SyncIntervalValue)
+                invalidate()
+              }}
+            />
+          </div>
+
+          <div className="mt-4 rounded-md border bg-muted/20 p-4">
+            <p className="text-xs leading-5">
+              <span className="font-medium">
+                {t("releaseHealth.metrics.sourceBinding.expectedResult")}
+              </span>{" "}
+              {metricResultProfileLabel(t, metric)} ·{" "}
+              {t("releaseHealth.resultContract.singleSeries")}
+            </p>
+            <div className="mt-3 grid gap-3 border-t pt-3 sm:grid-cols-[minmax(0,1fr)_auto]">
+              <div>
+                <p className="text-xs text-muted-foreground">
+                  {t("releaseHealth.metrics.resultSemantics")}
+                </p>
+                <p className="mt-1 text-sm leading-5">
+                  {metric.resultSemantics}
+                </p>
+              </div>
+              <div className="sm:min-w-32">
+                <p className="text-xs text-muted-foreground">
+                  {t("releaseHealth.metrics.detail.constraints")}
+                </p>
+                <p className="mt-1 text-sm font-medium tabular-nums">
+                  {metric.resultContract.constraints.minimum ?? "−∞"}–
+                  {metric.resultContract.constraints.maximum ?? "∞"}
+                </p>
+              </div>
+            </div>
+          </div>
+        </StepCard>
+
+        <StepCard
+          number={3}
+          title={t("releaseHealth.metrics.sourceBinding.validationStep")}
+          description={t(
+            "releaseHealth.metrics.sourceBinding.validationStepHelp"
+          )}
+        >
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border p-4">
+            <div>
+              <p className="text-sm font-medium">
+                {validation === "valid"
+                  ? t("releaseHealth.metrics.sourceBinding.previewReady")
+                  : t("releaseHealth.metrics.sourceBinding.previewPending")}
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {validation === "valid"
+                  ? t("releaseHealth.metrics.sourceBinding.previewSummary", {
+                      points: metric.environment.history.length,
+                      unit: metricUnitLabel(t, metric.resultContract.unit),
+                    })
+                  : t("releaseHealth.metrics.sourceBinding.previewInstruction")}
+              </p>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={!query.trim() || !connectionTested}
+              onClick={validate}
+            >
+              <Play />
+              {t("releaseHealth.metrics.sourceBinding.validate")}
+            </Button>
+          </div>
+
+          {validation === "valid" ? (
+            <div className="mt-4 space-y-4">
+              <div className="grid gap-3 sm:grid-cols-4">
+                <ValidationFact
+                  label={t("releaseHealth.metrics.sourceBinding.queryTime")}
+                  value="284 ms"
+                />
+                <ValidationFact
+                  label={t("releaseHealth.metrics.sourceBinding.previewRange")}
+                  value={t("releaseHealth.metrics.detail.lastHour")}
+                />
+                <ValidationFact
+                  label={t("releaseHealth.metrics.sourceBinding.seriesCount")}
+                  value="1"
+                />
+                <ValidationFact
+                  label={t("releaseHealth.metrics.sourceBinding.pointCount")}
+                  value={String(metric.environment.history.length)}
+                />
+              </div>
+              <div className="overflow-hidden rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>
+                        {t("releaseHealth.metrics.sourceBinding.timestamp")}
+                      </TableHead>
+                      <TableHead>
+                        {t(
+                          "releaseHealth.metrics.sourceBinding.normalizedValue"
+                        )}
+                      </TableHead>
+                      <TableHead>{t("releaseHealth.metrics.unit")}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {previewPoints.map((point) => (
+                      <TableRow key={point.timestamp}>
+                        <TableCell className="font-mono text-xs">
+                          {point.timestamp}
+                        </TableCell>
+                        <TableCell className="font-medium tabular-nums">
+                          {formatMetricValue(metric, point.value)}
+                        </TableCell>
+                        <TableCell>
+                          {metricUnitLabel(t, metric.resultContract.unit)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+          ) : null}
+        </StepCard>
+
+        <StepCard
+          number={4}
+          title={t("releaseHealth.metrics.sourceBinding.reviewStep")}
+          description={t("releaseHealth.metrics.sourceBinding.reviewStepHelp")}
+        >
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+            <ReviewFact
+              label={t("releaseHealth.metrics.sourceBinding.connection")}
+              value={selectedConnection?.name ?? "—"}
+            />
+            <ReviewFact
+              label={t("releaseHealth.metrics.sourceBinding.resultContract")}
+              value={metricResultProfileLabel(t, metric)}
+            />
+            <ReviewFact
+              label={t("releaseHealth.metrics.sourceBinding.schedule")}
+              value={`${step} step · ${syncInterval} sync`}
+            />
+            <ReviewFact
+              label={t("releaseHealth.metrics.sourceBinding.validation")}
+              value={
+                validation === "valid"
+                  ? t("releaseHealth.metrics.sourceBinding.validated")
+                  : t("releaseHealth.metrics.sourceBinding.notValidated")
+              }
+            />
+          </div>
+          <Alert className="mt-4">
+            <Clock3 />
+            <AlertDescription>
+              {t("releaseHealth.metrics.sourceBinding.collectingNotice")}
+            </AlertDescription>
+          </Alert>
+        </StepCard>
       </div>
 
       <div className="mt-6 flex flex-wrap justify-end gap-2 border-t pt-4">
@@ -485,6 +538,134 @@ export function ReleaseMetricSourceBindingPage() {
           {t("releaseHealth.metrics.sourceBinding.save")}
         </Button>
       </div>
+
+      <SourceConnectionSheet
+        open={connectionEditorOpen}
+        onOpenChange={setConnectionEditorOpen}
+        environmentKey={environmentKey}
+        environmentName={environmentName}
+        onSaved={saveConnection}
+      />
+    </div>
+  )
+}
+
+function ContextCard({
+  label,
+  title,
+  code,
+  help,
+}: {
+  label: string
+  title: string
+  code: string
+  help: string
+}) {
+  return (
+    <Card size="sm">
+      <CardHeader>
+        <CardDescription>{label}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <p className="font-medium">{title}</p>
+        <p className="mt-1 font-mono text-xs text-muted-foreground">{code}</p>
+        <p className="mt-2 text-xs text-muted-foreground">{help}</p>
+      </CardContent>
+    </Card>
+  )
+}
+
+function StepCard({
+  number,
+  title,
+  description,
+  children,
+}: {
+  number: number
+  title: string
+  description: string
+  children: React.ReactNode
+}) {
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-start gap-3">
+          <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-foreground text-xs font-semibold text-background">
+            {number}
+          </div>
+          <div>
+            <CardTitle>{title}</CardTitle>
+            <CardDescription className="mt-1">{description}</CardDescription>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>{children}</CardContent>
+    </Card>
+  )
+}
+
+function ReadOnlyField({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="space-y-2">
+      <Label>{label}</Label>
+      <div className="min-h-10 rounded-md border bg-muted/20 px-3 py-2 text-sm">
+        {value}
+      </div>
+    </div>
+  )
+}
+
+function SelectConfigField({
+  id,
+  label,
+  value,
+  options,
+  onValueChange,
+}: {
+  id: string
+  label: string
+  value: string
+  options: string[]
+  onValueChange: (value: string) => void
+}) {
+  return (
+    <div className="space-y-2">
+      <Label htmlFor={id}>{label}</Label>
+      <Select
+        value={value}
+        onValueChange={(nextValue) => nextValue && onValueChange(nextValue)}
+      >
+        <SelectTrigger id={id} className="w-full">
+          <SelectValue>{value}</SelectValue>
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            {options.map((option) => (
+              <SelectItem key={option} value={option}>
+                {option}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+    </div>
+  )
+}
+
+function ValidationFact({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-md border bg-muted/20 p-3">
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="mt-1 font-medium tabular-nums">{value}</p>
+    </div>
+  )
+}
+
+function ReviewFact({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-md border p-3">
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="mt-1 text-sm font-medium">{value}</p>
     </div>
   )
 }

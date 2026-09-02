@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Info, WandSparkles } from "lucide-react"
+import { Info, LockKeyhole } from "lucide-react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
@@ -28,54 +28,28 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { getCurrentProjectEnv } from "@/features/layout/layout-context"
 import {
-  calculationsByValueType,
-  defaultContractForValueType,
-  isMetricValueContractValid,
-  metricTemplates,
-  metricTemplatesByCategory,
-  unitsForMetricContract,
+  buildMetricUnit,
+  defaultUnitKindForMeasurementKind,
+  isMetricResultProfileValid,
+  measurementKinds,
+  metricUnitLabel,
+  rateNumerators,
+  ratePeriods,
+  resultContractRange,
+  unitKindsByMeasurementKind,
 } from "../metrics/metric-contract"
-import type {
-  MetricTemplateChoice,
-  MetricTemplateId,
-} from "../metrics/metric-contract"
-import type {
-  ReleaseMetricCategory,
-  ReleaseMetricValueType,
-} from "../release-health-types"
+import type { MetricMeasurementKind } from "../release-health-types"
 
-const categories = ["impact", "quality", "reliability"] as const
-const valueTypes = ["count", "gauge", "rate", "ratio", "distribution"] as const
-const calculations = [
-  "sum",
-  "latest",
-  "average",
-  "minimum",
-  "maximum",
-  "per-second",
-  "per-minute",
-  "per-hour",
-  "numerator-over-denominator",
-  "one-minus-ratio",
-  "p50",
-  "p90",
-  "p95",
-  "p99",
-] as const
-const units = [
+const categories = ["none", "impact", "quality", "reliability"] as const
+const unitKinds = [
   "count",
   "percent",
   "ratio",
-  "milliseconds",
-  "seconds",
-  "bytes",
-  "megabytes",
-  "events-per-second",
-  "events-per-minute",
-  "events-per-hour",
-  "requests-per-second",
-  "errors-per-minute",
+  "duration",
+  "data",
+  "rate",
 ] as const
+const fractionDigits = ["0", "1", "2", "3", "4"] as const
 
 const schema = z
   .object({
@@ -87,34 +61,45 @@ const schema = z
       .regex(/^[a-z][a-z0-9_]*$/),
     description: z.string(),
     category: z.enum(categories),
-    template: z.string().min(1),
-    valueType: z.enum(valueTypes),
-    calculation: z.enum(calculations),
-    unit: z.enum(units),
+    resultSemantics: z.string().trim().min(12),
+    measurementKind: z.enum(measurementKinds),
+    unitKind: z.enum(unitKinds),
+    rateNumerator: z.enum(rateNumerators),
+    ratePeriod: z.enum(ratePeriods),
+    minimum: z.string(),
+    maximum: z.string(),
+    fractionDigits: z.enum(fractionDigits),
   })
   .superRefine((values, context) => {
-    if (!isMetricValueContractValid(values)) {
+    if (!isMetricResultProfileValid(values)) {
       context.addIssue({
         code: "custom",
-        path: ["valueType"],
-        message: "Incompatible metric value contract",
+        path: ["unitKind"],
+        message: "Incompatible metric result profile",
       })
     }
 
-    if (values.template === "custom") return
-
-    const template = metricTemplates[values.template as MetricTemplateId]
-    if (
-      !template ||
-      template.category !== values.category ||
-      template.valueType !== values.valueType ||
-      template.calculation !== values.calculation ||
-      template.unit !== values.unit
-    ) {
+    const minimum = parseOptionalNumber(values.minimum)
+    const maximum = parseOptionalNumber(values.maximum)
+    if (values.minimum.trim() && minimum === undefined) {
       context.addIssue({
         code: "custom",
-        path: ["template"],
-        message: "Template and value contract do not match",
+        path: ["minimum"],
+        message: "Minimum must be a finite number",
+      })
+    }
+    if (values.maximum.trim() && maximum === undefined) {
+      context.addIssue({
+        code: "custom",
+        path: ["maximum"],
+        message: "Maximum must be a finite number",
+      })
+    }
+    if (minimum !== undefined && maximum !== undefined && minimum > maximum) {
+      context.addIssue({
+        code: "custom",
+        path: ["maximum"],
+        message: "Maximum must not be lower than minimum",
       })
     }
   })
@@ -125,11 +110,15 @@ const defaultValues: MetricDefinitionValues = {
   name: "",
   key: "",
   description: "",
-  category: "reliability",
-  template: "error-rate",
-  valueType: "ratio",
-  calculation: "numerator-over-denominator",
-  unit: "percent",
+  category: "none",
+  resultSemantics: "",
+  measurementKind: "ratio",
+  unitKind: "percent",
+  rateNumerator: "requests",
+  ratePeriod: "second",
+  minimum: "",
+  maximum: "",
+  fractionDigits: "2",
 }
 
 export function MetricDefinitionSheet({
@@ -153,68 +142,26 @@ export function MetricDefinitionSheet({
     resolver: zodResolver(schema),
     defaultValues,
   })
-  const category = useWatch({ control, name: "category" })
-  const template = useWatch({ control, name: "template" })
-  const valueType = useWatch({ control, name: "valueType" })
-  const calculation = useWatch({ control, name: "calculation" })
-  const unit = useWatch({ control, name: "unit" })
-  const isCustom = template === "custom"
-  const templateOptions: MetricTemplateChoice[] = [
-    ...metricTemplatesByCategory[category],
-    "custom",
-  ]
+  const measurementKind = useWatch({ control, name: "measurementKind" })
+  const unitKind = useWatch({ control, name: "unitKind" })
+  const rateNumerator = useWatch({ control, name: "rateNumerator" })
+  const ratePeriod = useWatch({ control, name: "ratePeriod" })
+  const unit = buildMetricUnit({ unitKind, rateNumerator, ratePeriod })
+  const intrinsicRange = resultContractRange(unit)
 
   function setOpen(next: boolean) {
     onOpenChange(next)
     if (!next) reset(defaultValues)
   }
 
-  function applyTemplate(templateId: MetricTemplateId) {
-    const definition = metricTemplates[templateId]
-    setValue("template", templateId, { shouldValidate: false })
-    setValue("valueType", definition.valueType, { shouldValidate: false })
-    setValue("calculation", definition.calculation, { shouldValidate: false })
-    setValue("unit", definition.unit, { shouldValidate: false })
-    void trigger(["category", "template", "valueType", "calculation", "unit"])
-  }
-
-  function changeCategory(nextCategory: ReleaseMetricCategory) {
-    setValue("category", nextCategory, { shouldValidate: false })
-    if (template !== "custom") {
-      applyTemplate(metricTemplatesByCategory[nextCategory][0])
-      return
+  function changeMeasurementKind(next: MetricMeasurementKind) {
+    setValue("measurementKind", next, { shouldValidate: false })
+    if (!unitKindsByMeasurementKind[next].includes(unitKind)) {
+      setValue("unitKind", defaultUnitKindForMeasurementKind(next), {
+        shouldValidate: false,
+      })
     }
-    void trigger(["category", "template", "valueType", "calculation", "unit"])
-  }
-
-  function changeTemplate(nextTemplate: MetricTemplateChoice) {
-    if (nextTemplate === "custom") {
-      setValue("template", "custom", { shouldValidate: false })
-      void trigger(["template", "valueType", "calculation", "unit"])
-      return
-    }
-    applyTemplate(nextTemplate)
-  }
-
-  function changeValueType(nextValueType: ReleaseMetricValueType) {
-    const nextContract = defaultContractForValueType(nextValueType)
-    setValue("valueType", nextContract.valueType, { shouldValidate: false })
-    setValue("calculation", nextContract.calculation, {
-      shouldValidate: false,
-    })
-    setValue("unit", nextContract.unit, { shouldValidate: false })
-    void trigger(["valueType", "calculation", "unit"])
-  }
-
-  function changeCalculation(
-    nextCalculation: MetricDefinitionValues["calculation"]
-  ) {
-    setValue("calculation", nextCalculation, { shouldValidate: false })
-    const compatibleUnits = unitsForMetricContract(valueType, nextCalculation)
-    if (!compatibleUnits.includes(unit)) {
-      setValue("unit", compatibleUnits[0], { shouldValidate: false })
-    }
-    void trigger(["valueType", "calculation", "unit"])
+    void trigger(["measurementKind", "unitKind"])
   }
 
   function save() {
@@ -224,7 +171,7 @@ export function MetricDefinitionSheet({
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetContent className="gap-0 p-0 data-[side=right]:w-[calc(100%-1rem)] data-[side=right]:max-w-[calc(100%-1rem)] data-[side=right]:sm:max-w-2xl">
+      <SheetContent className="gap-0 p-0 data-[side=right]:w-[calc(100%-1rem)] data-[side=right]:max-w-[calc(100%-1rem)] data-[side=right]:sm:max-w-3xl">
         <SheetHeader className="border-b px-4 py-5 sm:px-6">
           <SheetTitle>{t("releaseHealth.metrics.create.title")}</SheetTitle>
           <SheetDescription>
@@ -247,19 +194,16 @@ export function MetricDefinitionSheet({
             </Alert>
 
             <section className="space-y-4">
-              <div>
-                <h3 className="text-sm font-medium">
-                  {t("releaseHealth.metrics.create.definition")}
-                </h3>
-                <p className="text-xs text-muted-foreground">
-                  {t("releaseHealth.metrics.create.definitionHelp")}
-                </p>
-              </div>
+              <SectionHeading
+                title={t("releaseHealth.metrics.create.definition")}
+                description={t("releaseHealth.metrics.create.definitionHelp")}
+              />
               <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="release-metric-name">
-                    {t("releaseHealth.metrics.name")}
-                  </Label>
+                <TextField
+                  id="release-metric-name"
+                  label={t("releaseHealth.metrics.name")}
+                  error={Boolean(errors.name)}
+                >
                   <Input
                     id="release-metric-name"
                     {...register("name")}
@@ -268,11 +212,13 @@ export function MetricDefinitionSheet({
                       "releaseHealth.metrics.create.namePlaceholder"
                     )}
                   />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="release-metric-key">
-                    {t("releaseHealth.metrics.key")}
-                  </Label>
+                </TextField>
+                <TextField
+                  id="release-metric-key"
+                  label={t("releaseHealth.metrics.key")}
+                  error={Boolean(errors.key)}
+                  errorText={t("releaseHealth.metrics.create.keyError")}
+                >
                   <Input
                     id="release-metric-key"
                     {...register("key")}
@@ -280,12 +226,7 @@ export function MetricDefinitionSheet({
                     className="font-mono"
                     placeholder="checkout_error_rate"
                   />
-                  {errors.key ? (
-                    <p className="text-xs text-destructive">
-                      {t("releaseHealth.metrics.create.keyError")}
-                    </p>
-                  ) : null}
-                </div>
+                </TextField>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="release-metric-description">
@@ -297,106 +238,201 @@ export function MetricDefinitionSheet({
                   rows={3}
                 />
               </div>
+              <SelectField
+                control={control}
+                name="category"
+                label={t("releaseHealth.metrics.category")}
+                options={[...categories]}
+                optionLabel={(value) =>
+                  value === "none"
+                    ? t("releaseHealth.metrics.uncategorized")
+                    : t(`releaseHealth.category.${value}`)
+                }
+              />
             </section>
 
             <section className="space-y-4 border-t pt-5">
-              <div>
-                <h3 className="text-sm font-medium">
-                  {t("releaseHealth.metrics.create.contractTitle")}
-                </h3>
-                <p className="text-xs leading-5 text-muted-foreground">
-                  {t("releaseHealth.metrics.create.contractHelp")}
+              <SectionHeading
+                title={t("releaseHealth.metrics.create.contractTitle")}
+                description={t("releaseHealth.metrics.create.contractHelp")}
+              />
+              <div className="space-y-2">
+                <Label htmlFor="release-metric-semantics">
+                  {t("releaseHealth.metrics.resultSemantics")}
+                </Label>
+                <Textarea
+                  id="release-metric-semantics"
+                  {...register("resultSemantics")}
+                  aria-invalid={Boolean(errors.resultSemantics)}
+                  rows={3}
+                  placeholder={t(
+                    "releaseHealth.metrics.create.resultSemanticsPlaceholder"
+                  )}
+                />
+                <p className="text-xs text-muted-foreground">
+                  {t("releaseHealth.metrics.create.resultSemanticsHelp")}
                 </p>
               </div>
+
               <div className="grid gap-4 sm:grid-cols-2">
                 <SelectField
                   control={control}
-                  name="category"
-                  label={t("releaseHealth.metrics.category")}
-                  options={[...categories]}
-                  optionLabel={(value) => t(`releaseHealth.category.${value}`)}
-                  onValueChange={changeCategory}
+                  name="measurementKind"
+                  label={t("releaseHealth.metrics.measurementKind")}
+                  options={[...measurementKinds]}
+                  optionLabel={(value) =>
+                    t(`releaseHealth.resultContract.measurementKind.${value}`)
+                  }
+                  onValueChange={(value) =>
+                    changeMeasurementKind(value as MetricMeasurementKind)
+                  }
                 />
                 <SelectField
                   control={control}
-                  name="template"
-                  label={t("releaseHealth.metrics.template")}
-                  options={templateOptions}
+                  name="unitKind"
+                  label={t("releaseHealth.metrics.unit")}
+                  options={[...unitKindsByMeasurementKind[measurementKind]]}
                   optionLabel={(value) =>
-                    t(`releaseHealth.metricTemplate.${value}.label`)
-                  }
-                  onValueChange={(value) =>
-                    changeTemplate(value as MetricTemplateChoice)
+                    t(`releaseHealth.resultContract.unit.${value}`)
                   }
                 />
               </div>
 
+              {unitKind === "rate" ? (
+                <div className="grid gap-4 rounded-md border bg-muted/20 p-4 sm:grid-cols-2">
+                  <SelectField
+                    control={control}
+                    name="rateNumerator"
+                    label={t("releaseHealth.metrics.create.rateNumerator")}
+                    options={[...rateNumerators]}
+                    optionLabel={(value) =>
+                      t(`releaseHealth.resultContract.rateNumerator.${value}`)
+                    }
+                  />
+                  <SelectField
+                    control={control}
+                    name="ratePeriod"
+                    label={t("releaseHealth.metrics.create.ratePeriod")}
+                    options={[...ratePeriods]}
+                    optionLabel={(value) =>
+                      t(`releaseHealth.resultContract.ratePeriod.${value}`)
+                    }
+                  />
+                </div>
+              ) : null}
+
               <div className="rounded-md border bg-muted/20 p-4">
-                <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <p className="text-sm font-medium">
-                      {t("releaseHealth.metrics.create.valueContract")}
-                    </p>
-                    <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                      {t(
-                        `releaseHealth.metricTemplate.${template}.description`
-                      )}
-                    </p>
-                  </div>
-                  <Badge variant={isCustom ? "outline" : "secondary"}>
-                    <WandSparkles />
-                    {t(
-                      isCustom
-                        ? "releaseHealth.metrics.create.customContract"
-                        : "releaseHealth.metrics.create.templateFilled"
-                    )}
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <p className="text-sm font-medium">
+                    {t("releaseHealth.metrics.create.resultShape")}
+                  </p>
+                  <Badge variant="outline">
+                    <LockKeyhole />
+                    {t("releaseHealth.metrics.create.mixedLocked")}
                   </Badge>
                 </div>
-                <div className="grid gap-4 sm:grid-cols-3">
-                  <SelectField
-                    control={control}
-                    name="valueType"
-                    label={t("releaseHealth.metrics.valueType")}
-                    options={[...valueTypes]}
-                    optionLabel={(value) =>
-                      t(`releaseHealth.valueType.${value}`)
-                    }
-                    onValueChange={changeValueType}
-                    disabled={!isCustom}
-                  />
-                  <SelectField
-                    control={control}
-                    name="calculation"
-                    label={t("releaseHealth.metrics.calculation")}
-                    options={calculationsByValueType[valueType]}
-                    optionLabel={(value) =>
-                      t(`releaseHealth.calculation.${value}`)
-                    }
-                    onValueChange={changeCalculation}
-                    disabled={!isCustom}
-                  />
-                  <SelectField
-                    control={control}
-                    name="unit"
-                    label={t("releaseHealth.metrics.unit")}
-                    options={unitsForMetricContract(valueType, calculation)}
-                    optionLabel={(value) => t(`releaseHealth.unit.${value}`)}
-                    disabled={!isCustom}
-                  />
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <div
+                    aria-label={t("releaseHealth.metrics.create.resultKind")}
+                    className="rounded-md border bg-background px-3 py-2"
+                  >
+                    <p className="text-xs text-muted-foreground">
+                      {t("releaseHealth.metrics.create.resultKind")}
+                    </p>
+                    <p className="mt-1 text-sm font-medium">
+                      {t("releaseHealth.metrics.create.resultKindValue")}
+                    </p>
+                    <code className="text-xs text-muted-foreground">
+                      numeric_time_series
+                    </code>
+                  </div>
+                  <div
+                    aria-label={t("releaseHealth.metrics.create.cardinality")}
+                    className="rounded-md border bg-background px-3 py-2"
+                  >
+                    <p className="text-xs text-muted-foreground">
+                      {t("releaseHealth.metrics.create.cardinality")}
+                    </p>
+                    <p className="mt-1 text-sm font-medium">
+                      {t("releaseHealth.metrics.create.cardinalityValue")}
+                    </p>
+                    <code className="text-xs text-muted-foreground">single</code>
+                  </div>
                 </div>
-                <div className="mt-4 rounded-md border bg-background px-3 py-2 text-xs leading-5">
+                <div className="mt-3 rounded-md border bg-background px-3 py-2 text-xs leading-5">
                   <span className="font-medium">
-                    {t("releaseHealth.metrics.create.calculationSummary")}
+                    {t("releaseHealth.metrics.create.profileSummary")}
                   </span>{" "}
-                  {t(`releaseHealth.calculation.${calculation}`)} ·{" "}
-                  {t(`releaseHealth.unit.${unit}`)}
+                  {t(
+                    `releaseHealth.resultContract.measurementKind.${measurementKind}`
+                  )}{" "}
+                  · {metricUnitLabel(t, unit)}
                 </div>
-                {errors.valueType || errors.template ? (
+                {errors.unitKind ? (
                   <p className="mt-2 text-xs text-destructive">
                     {t("releaseHealth.metrics.create.contractError")}
                   </p>
                 ) : null}
               </div>
+            </section>
+
+            <section className="space-y-4 border-t pt-5">
+              <SectionHeading
+                title={t("releaseHealth.metrics.create.displayAndConstraints")}
+                description={t(
+                  "releaseHealth.metrics.create.displayAndConstraintsHelp"
+                )}
+              />
+              <div className="grid gap-4 sm:grid-cols-3">
+                <TextField
+                  id="release-metric-minimum"
+                  label={t("releaseHealth.metrics.create.minimum")}
+                  error={Boolean(errors.minimum)}
+                >
+                  <Input
+                    id="release-metric-minimum"
+                    type="number"
+                    step="any"
+                    {...register("minimum")}
+                    aria-invalid={Boolean(errors.minimum)}
+                    placeholder={String(intrinsicRange.minimum)}
+                  />
+                </TextField>
+                <TextField
+                  id="release-metric-maximum"
+                  label={t("releaseHealth.metrics.create.maximum")}
+                  error={Boolean(errors.maximum)}
+                >
+                  <Input
+                    id="release-metric-maximum"
+                    type="number"
+                    step="any"
+                    {...register("maximum")}
+                    aria-invalid={Boolean(errors.maximum)}
+                    placeholder={
+                      intrinsicRange.maximum === undefined
+                        ? t("releaseHealth.metrics.create.noMaximum")
+                        : String(intrinsicRange.maximum)
+                    }
+                  />
+                </TextField>
+                <SelectField
+                  control={control}
+                  name="fractionDigits"
+                  label={t("releaseHealth.metrics.create.fractionDigits")}
+                  options={[...fractionDigits]}
+                  optionLabel={(value) => value}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {t("releaseHealth.metrics.create.canonicalRange", {
+                  range:
+                    intrinsicRange.maximum === undefined
+                      ? `${intrinsicRange.minimum}+`
+                      : `${intrinsicRange.minimum}–${intrinsicRange.maximum}`,
+                  unit: metricUnitLabel(t, unit),
+                })}
+              </p>
             </section>
           </div>
           <SheetFooter className="flex-row justify-end border-t px-6 py-4">
@@ -417,15 +453,61 @@ export function MetricDefinitionSheet({
   )
 }
 
+function SectionHeading({
+  title,
+  description,
+}: {
+  title: string
+  description: string
+}) {
+  return (
+    <div>
+      <h3 className="text-sm font-medium">{title}</h3>
+      <p className="mt-1 text-xs leading-5 text-muted-foreground">
+        {description}
+      </p>
+    </div>
+  )
+}
+
+function TextField({
+  id,
+  label,
+  error,
+  errorText,
+  children,
+}: {
+  id: string
+  label: string
+  error: boolean
+  errorText?: string
+  children: React.ReactNode
+}) {
+  return (
+    <div className="space-y-2">
+      <Label htmlFor={id}>{label}</Label>
+      {children}
+      {error && errorText ? (
+        <p className="text-xs text-destructive">{errorText}</p>
+      ) : null}
+    </div>
+  )
+}
+
 function SelectField<
-  TName extends "category" | "template" | "valueType" | "calculation" | "unit",
+  TName extends
+    | "category"
+    | "measurementKind"
+    | "unitKind"
+    | "rateNumerator"
+    | "ratePeriod"
+    | "fractionDigits",
 >({
   control,
   name,
   label,
   options,
   optionLabel,
-  disabled = false,
   onValueChange,
 }: {
   control: ReturnType<typeof useForm<MetricDefinitionValues>>["control"]
@@ -433,7 +515,6 @@ function SelectField<
   label: string
   options: MetricDefinitionValues[TName][]
   optionLabel: (value: MetricDefinitionValues[TName]) => string
-  disabled?: boolean
   onValueChange?: (value: MetricDefinitionValues[TName]) => void
 }) {
   const id = `release-metric-${name}`
@@ -446,7 +527,6 @@ function SelectField<
         render={({ field }) => (
           <Select
             value={field.value}
-            disabled={disabled}
             onValueChange={(value) => {
               if (!value) return
               const typedValue = value as MetricDefinitionValues[TName]
@@ -471,4 +551,10 @@ function SelectField<
       />
     </div>
   )
+}
+
+function parseOptionalNumber(value: string) {
+  if (!value.trim()) return undefined
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : undefined
 }

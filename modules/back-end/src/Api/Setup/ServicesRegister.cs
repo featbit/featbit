@@ -9,6 +9,7 @@ using Domain.Workspaces;
 using Domain.Policies;
 using Infrastructure;
 using Infrastructure.Services;
+using Infrastructure.ReleaseHealth;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -73,6 +74,7 @@ public static class ServicesRegister
         // add infrastructure & application services
         builder.Services.AddInfrastructureServices(builder.Configuration);
         builder.Services.AddApplicationServices(builder.Configuration);
+        builder.Services.AddReleaseHealth(builder.Configuration);
 
         // authentication
         var jwtOptions = JwtOptionsBuilder.Build(builder.Configuration);

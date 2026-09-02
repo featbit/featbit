@@ -1,0 +1,21 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 128
+  batch:
+    timeout: 1s
+exporters:
+  prometheus:
+    endpoint: 0.0.0.0:8889
+    metric_expiration: 15s
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [prometheus]

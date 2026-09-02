@@ -1,44 +1,89 @@
 export type ReleaseMetricCategory = "impact" | "quality" | "reliability"
 
-export type ReleaseMetricValueType =
-  "count" | "gauge" | "rate" | "ratio" | "distribution"
+export type MetricMeasurementKind = "gauge" | "count" | "ratio" | "rate"
 
-export type ReleaseMetricCalculation =
-  | "sum"
-  | "latest"
-  | "average"
-  | "minimum"
-  | "maximum"
-  | "per-second"
-  | "per-minute"
-  | "per-hour"
-  | "numerator-over-denominator"
-  | "one-minus-ratio"
-  | "p50"
-  | "p90"
-  | "p95"
-  | "p99"
+export type MetricRateNumerator =
+  "events" | "requests" | "errors" | "operations" | "items" | "bytes"
 
-export type ReleaseMetricUnit =
-  | "count"
-  | "percent"
-  | "ratio"
-  | "milliseconds"
-  | "seconds"
-  | "bytes"
-  | "megabytes"
-  | "events-per-second"
-  | "events-per-minute"
-  | "events-per-hour"
-  | "requests-per-second"
-  | "errors-per-minute"
+export type MetricRatePeriod = "second" | "minute" | "hour"
 
-export type MetricObservationMode = "flag-contextual" | "environment"
+export type MetricUnit =
+  | { kind: "count" }
+  | { kind: "percent"; scale: "zero_to_one_hundred" }
+  | { kind: "ratio"; scale: "zero_to_one" }
+  | { kind: "duration"; base: "millisecond" }
+  | { kind: "data"; base: "byte" }
+  | {
+      kind: "rate"
+      numerator: MetricRateNumerator
+      per: MetricRatePeriod
+    }
 
-export type MetricContextCapability =
-  "flag-key" | "flag-revision" | "variation" | "exposure"
+export type MetricResultContract = {
+  schemaVersion: 1
+  resultKind: "numeric_time_series"
+  cardinality: "single"
+  measurementKind: MetricMeasurementKind
+  unit: MetricUnit
+  constraints: {
+    minimum?: number
+    maximum?: number
+    allowNaN: false
+    allowInfinity: false
+  }
+}
 
-export type MetricSourceType = "featbit-events" | "prometheus"
+export type MetricObservationMode = "environment"
+
+export type MetricSourceProviderType = "prometheus-compatible"
+
+export type MetricSourceConnectionStatus =
+  "not-tested" | "connected" | "unavailable" | "disabled"
+
+export type MetricSourceAuthenticationType = "none" | "bearer_token" | "basic"
+
+export type MetricSourceAuthentication =
+  | {
+      type: "none"
+      secretState: "not_configured"
+    }
+  | {
+      type: "bearer_token"
+      secretState: "configured" | "revoked"
+      lastRotatedAt?: string
+    }
+  | {
+      type: "basic"
+      username: string
+      secretState: "configured" | "revoked"
+      lastRotatedAt?: string
+    }
+
+export type MetricSourceConnection = {
+  /** Optimistic concurrency token for persisted connections; independent of semantic revision. */
+  backendVersion?: number
+  id: string
+  environmentKey: string
+  providerType: MetricSourceProviderType
+  name: string
+  endpoint: string
+  authentication: MetricSourceAuthentication
+  revision: number
+  status: MetricSourceConnectionStatus
+  lastCheckedAt: string
+  usedByBindings: number
+}
+
+export type MetricSourceBinding = {
+  providerType: MetricSourceProviderType
+  connectionId: string
+  connectionName: string
+  bindingRevision: number
+  query: string
+  queryMode: "range"
+  step: "1m" | "5m" | "15m"
+  syncInterval: "1m" | "5m"
+}
 
 export type DataStatus = "collecting" | "ready" | "no-data" | "stale" | "error"
 
@@ -50,8 +95,7 @@ export type GateStatus =
 export type MonitorPurpose = "observe" | "guard"
 
 export type MetricPoint = {
-  time: string
-  label: string
+  timestamp: string
   value: number
 }
 
@@ -63,14 +107,7 @@ export type EnvironmentMetricState = {
   updatedAt: string
   coverage: number
   history: MetricPoint[]
-  sourceBinding?: {
-    sourceType: MetricSourceType
-    sourceLabel: string
-    selector: string
-    connectionName?: string
-    bindingRevision: number
-    contextCapabilities: MetricContextCapability[]
-  }
+  sourceBinding?: MetricSourceBinding
 }
 
 export type ReleaseMetric = {
@@ -78,10 +115,10 @@ export type ReleaseMetric = {
   key: string
   name: string
   description: string
-  category: ReleaseMetricCategory
-  valueType: ReleaseMetricValueType
-  calculation: ReleaseMetricCalculation
-  unit: ReleaseMetricUnit
+  category?: ReleaseMetricCategory
+  resultSemantics: string
+  resultContract: MetricResultContract
+  fractionDigits: number
   version: number
   usedByMonitors: number
   usedByFlags: string[]

@@ -29,21 +29,27 @@ import { DataStatusBadge } from "../components/status-badges"
 import { metricSampleText } from "../release-health-display"
 import { releaseMetrics } from "../release-health-mock-data"
 import type { ReleaseMetricCategory } from "../release-health-types"
+import { metricResultProfileLabel, metricUnitLabel } from "./metric-contract"
+
+type CategoryFilter = ReleaseMetricCategory | "all" | "uncategorized"
 
 export function ReleaseMetricsPage() {
   const { t } = useTranslation()
   const params = useParams()
   const lang = resolveLang(params.lang)
   const [search, setSearch] = useState("")
-  const [category, setCategory] = useState<ReleaseMetricCategory | "all">("all")
+  const [category, setCategory] = useState<CategoryFilter>("all")
   const [createOpen, setCreateOpen] = useState(false)
   const filtered = useMemo(
     () =>
       releaseMetrics.filter(
         (metric) =>
-          (category === "all" || metric.category === category) &&
+          (category === "all" ||
+            (category === "uncategorized"
+              ? !metric.category
+              : metric.category === category)) &&
           (!search.trim() ||
-            `${metricSampleText(t, metric, "name")} ${metric.name} ${metric.key} ${metric.environment.sourceBinding?.sourceLabel ?? ""}`
+            `${metricSampleText(t, metric, "name")} ${metric.name} ${metric.key} ${metric.environment.sourceBinding?.providerType ?? ""} ${metric.environment.sourceBinding?.connectionName ?? ""}`
               .toLowerCase()
               .includes(search.trim().toLowerCase()))
       ),
@@ -74,20 +80,25 @@ export function ReleaseMetricsPage() {
             <Select
               value={category}
               onValueChange={(value) =>
-                value && setCategory(value as ReleaseMetricCategory | "all")
+                value && setCategory(value as CategoryFilter)
               }
             >
               <SelectTrigger className="w-44">
                 <SelectValue>
                   {category === "all"
                     ? t("releaseHealth.metrics.allCategories")
-                    : t(`releaseHealth.category.${category}`)}
+                    : category === "uncategorized"
+                      ? t("releaseHealth.metrics.uncategorized")
+                      : t(`releaseHealth.category.${category}`)}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
                   <SelectItem value="all">
                     {t("releaseHealth.metrics.allCategories")}
+                  </SelectItem>
+                  <SelectItem value="uncategorized">
+                    {t("releaseHealth.metrics.uncategorized")}
                   </SelectItem>
                   {(["impact", "quality", "reliability"] as const).map(
                     (value) => (
@@ -127,7 +138,13 @@ export function ReleaseMetricsPage() {
                     {metric.key} · v{metric.version}
                   </p>
                 </div>
-                <DataStatusBadge status={metric.environment.dataStatus} />
+                {metric.environment.sourceBinding ? (
+                  <DataStatusBadge status={metric.environment.dataStatus} />
+                ) : (
+                  <Badge variant="outline" className="font-normal">
+                    {t("releaseHealth.metrics.detail.notConnected")}
+                  </Badge>
+                )}
               </div>
               <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
                 <div>
@@ -135,7 +152,9 @@ export function ReleaseMetricsPage() {
                     {t("releaseHealth.metrics.latest")}
                   </p>
                   <p className="mt-1 text-sm font-medium tabular-nums">
-                    {metric.environment.displayValue}
+                    {metric.environment.sourceBinding
+                      ? metric.environment.displayValue
+                      : "—"}
                   </p>
                 </div>
                 <div>
@@ -143,16 +162,20 @@ export function ReleaseMetricsPage() {
                     {t("releaseHealth.metrics.freshness")}
                   </p>
                   <p className="mt-1 text-sm">
-                    {metricSampleText(t, metric, "updatedAt")}
+                    {metric.environment.sourceBinding
+                      ? metricSampleText(t, metric, "updatedAt")
+                      : "—"}
                   </p>
                 </div>
               </div>
               <div className="mt-4 flex flex-wrap items-center gap-2 border-t pt-3">
                 <Badge variant="secondary" className="font-normal">
-                  {t(`releaseHealth.category.${metric.category}`)}
+                  {metric.category
+                    ? t(`releaseHealth.category.${metric.category}`)
+                    : "—"}
                 </Badge>
                 <Badge variant="outline" className="font-normal">
-                  {t(`releaseHealth.valueType.${metric.valueType}`)}
+                  {metricResultProfileLabel(t, metric)}
                 </Badge>
                 <span className="text-xs text-muted-foreground">
                   {t("releaseHealth.metrics.monitorCount", {
@@ -177,7 +200,9 @@ export function ReleaseMetricsPage() {
                   {t("releaseHealth.metrics.metric")}
                 </TableHead>
                 <TableHead>{t("releaseHealth.metrics.category")}</TableHead>
-                <TableHead>{t("releaseHealth.metrics.signal")}</TableHead>
+                <TableHead>
+                  {t("releaseHealth.metrics.resultProfile")}
+                </TableHead>
                 <TableHead>{t("releaseHealth.metrics.dataStatus")}</TableHead>
                 <TableHead>{t("releaseHealth.metrics.latest")}</TableHead>
                 <TableHead>{t("releaseHealth.metrics.usedBy")}</TableHead>
@@ -205,23 +230,35 @@ export function ReleaseMetricsPage() {
                   </TableCell>
                   <TableCell>
                     <Badge variant="secondary" className="font-normal">
-                      {t(`releaseHealth.category.${metric.category}`)}
+                      {metric.category
+                        ? t(`releaseHealth.category.${metric.category}`)
+                        : "—"}
                     </Badge>
                   </TableCell>
                   <TableCell>
                     <div className="text-sm">
-                      {t(`releaseHealth.valueType.${metric.valueType}`)}
+                      {t(
+                        `releaseHealth.resultContract.measurementKind.${metric.resultContract.measurementKind}`
+                      )}
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      {t(`releaseHealth.calculation.${metric.calculation}`)} ·{" "}
-                      {t(`releaseHealth.unit.${metric.unit}`)}
+                      {metricUnitLabel(t, metric.resultContract.unit)} ·{" "}
+                      {t("releaseHealth.resultContract.singleSeries")}
                     </p>
                   </TableCell>
                   <TableCell>
-                    <DataStatusBadge status={metric.environment.dataStatus} />
+                    {metric.environment.sourceBinding ? (
+                      <DataStatusBadge status={metric.environment.dataStatus} />
+                    ) : (
+                      <Badge variant="outline" className="font-normal">
+                        {t("releaseHealth.metrics.detail.notConnected")}
+                      </Badge>
+                    )}
                   </TableCell>
                   <TableCell className="font-medium tabular-nums">
-                    {metric.environment.displayValue}
+                    {metric.environment.sourceBinding
+                      ? metric.environment.displayValue
+                      : "—"}
                   </TableCell>
                   <TableCell>
                     {t("releaseHealth.metrics.monitorCount", {
@@ -229,7 +266,9 @@ export function ReleaseMetricsPage() {
                     })}
                   </TableCell>
                   <TableCell className="pr-4 text-right text-muted-foreground">
-                    {metricSampleText(t, metric, "updatedAt")}
+                    {metric.environment.sourceBinding
+                      ? metricSampleText(t, metric, "updatedAt")
+                      : "—"}
                   </TableCell>
                 </TableRow>
               ))}

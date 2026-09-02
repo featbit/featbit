@@ -196,7 +196,7 @@ const ReleaseHealthOverviewPage = lazy(() =>
   )
 )
 const ReleaseMetricsPage = lazy(() =>
-  import("@/features/release-health/metrics/release-metrics-page").then(
+  import("@/features/release-health/metrics/live-metrics-page").then(
     (module) => ({
       default: module.ReleaseMetricsPage,
     })
@@ -213,6 +213,13 @@ const ReleaseMetricSourceBindingPage = lazy(() =>
   import("@/features/release-health/metrics/release-metric-source-binding-page").then(
     (module) => ({
       default: module.ReleaseMetricSourceBindingPage,
+    })
+  )
+)
+const SourceConnectionsPage = lazy(() =>
+  import("@/features/release-health/connections/live-source-connections-page").then(
+    (module) => ({
+      default: module.SourceConnectionsPage,
     })
   )
 )
@@ -461,6 +468,10 @@ export function AppRoutes() {
           <Route
             path="release-health/metrics/:metricKey/source-bindings/:environmentKey"
             element={<ReleaseMetricSourceBindingPage />}
+          />
+          <Route
+            path="release-health/connections"
+            element={<SourceConnectionsPage />}
           />
           <Route
             path="release-health/sessions"
