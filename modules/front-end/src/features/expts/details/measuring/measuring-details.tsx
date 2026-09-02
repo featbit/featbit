@@ -1259,10 +1259,6 @@ export function MeasuringDetails({
                 `releaseDecision.experiments.detailsPage.measuring.methods.${normalizedMethod(selected.method)}`
               )}
             </Badge>
-            <StatusBadge value={selected.status} />
-            {selected.decision ? (
-              <StatusBadge value={selected.decision} kind="decision" />
-            ) : null}
             <Badge variant="outline" className="gap-2 font-normal">
               <CalendarDays />
               {t(
