@@ -102,10 +102,10 @@ export function EditDetailsDialog({
         }}
       >
         <DialogContent
-          className="max-h-[88vh] gap-0 overflow-hidden p-0 sm:max-w-2xl"
+          className="max-h-[88vh] sm:max-w-3xl"
           showCloseButton={!saving}
         >
-          <DialogHeader className="border-b px-6 py-5 pr-12">
+          <DialogHeader>
             <DialogTitle>
               {t("releaseDecision.experiments.detailsPage.edit.title")}
             </DialogTitle>
@@ -114,7 +114,7 @@ export function EditDetailsDialog({
             </DialogDescription>
           </DialogHeader>
           <form
-            className="flex min-h-0 flex-1 flex-col"
+            className="contents"
             onSubmit={form.handleSubmit(async (values) => {
               try {
                 await onSave(
@@ -131,7 +131,7 @@ export function EditDetailsDialog({
               }
             })}
           >
-            <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 py-5">
+            <div className="min-h-0 space-y-4 overflow-y-auto">
               {FIELDS.map((field) => (
                 <div key={field.name} className="space-y-2">
                   <Label htmlFor={`experiment-${field.name}`}>
@@ -154,7 +154,7 @@ export function EditDetailsDialog({
                 </p>
               ) : null}
             </div>
-            <DialogFooter className="m-0 rounded-none px-6 py-4">
+            <DialogFooter className="border-t-0 bg-transparent">
               <Button
                 type="button"
                 variant="outline"
