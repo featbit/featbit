@@ -476,11 +476,7 @@ function AnalysisTable({
         </TableBody>
       </Table>
       {section.verdict ? (
-        <div className="border-t px-4 py-2 text-xs text-muted-foreground">
-          <span className="font-medium text-foreground">
-            {t("releaseDecision.experiments.detailsPage.measuring.verdict")}
-          </span>
-          <span className="mx-2">·</span>
+        <div className="border-t px-4 py-2 text-xs text-muted-foreground italic">
           {section.verdict}
         </div>
       ) : null}
