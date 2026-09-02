@@ -135,7 +135,7 @@ function MetricRow({
           </p>
         </div>
       </TableCell>
-      <TableCell className="px-4 py-3 text-muted-foreground">
+      <TableCell className="px-4 py-3 font-normal text-foreground">
         {role === "primary"
           ? t(
               `releaseDecision.experiments.detailsPage.exposure.${metric.direction === "decrease_good" ? "lowerIsBetter" : "higherIsBetter"}`
