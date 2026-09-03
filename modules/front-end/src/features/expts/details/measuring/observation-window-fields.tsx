@@ -33,7 +33,6 @@ export function ObservationWindowFields({
 }) {
   const { t } = useTranslation()
   const key = "releaseDecision.experiments.detailsPage.measuring"
-  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
   return (
     <div className="space-y-4">
@@ -152,11 +151,7 @@ export function ObservationWindowFields({
         <p className="text-xs text-destructive">
           {t(`${key}.windowErrors.${error}`)}
         </p>
-      ) : (
-        <p className="text-xs text-muted-foreground">
-          {t(`${key}.timezone`, { timezone })}
-        </p>
-      )}
+      ) : null}
     </div>
   )
 }

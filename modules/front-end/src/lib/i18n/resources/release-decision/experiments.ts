@@ -215,7 +215,6 @@ export const enExperiments = {
         weeks: "Weeks",
       },
       endDateTime: "End date and time",
-      timezone: "Time zone: {{timezone}}",
       collectingWindowHelp:
         "The start time is locked. You can set or extend the end time; this changes the data window used in analysis.",
       saveWindow: "Save window",
@@ -761,7 +760,6 @@ export const zhExperiments = {
         weeks: "周",
       },
       endDateTime: "结束日期和时间",
-      timezone: "时区：{{timezone}}",
       collectingWindowHelp:
         "开始时间已锁定。你可以设置或延长结束时间；这会改变分析所使用的数据窗口。",
       saveWindow: "保存窗口",
