@@ -8,6 +8,11 @@ export type NewRunSetup = {
   treatmentVariant: string
 }
 
+export type ObservationWindowUpdate = {
+  observationStart: string
+  observationEnd: string | null
+}
+
 export type MeasuringRun = ExperimentRunDetail & {
   hypothesis?: string | null
   methodReason?: string | null

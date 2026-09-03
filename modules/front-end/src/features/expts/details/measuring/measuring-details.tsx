@@ -63,6 +63,7 @@ import {
   createExperimentRun,
   deleteExperimentRun,
   updateExperimentRunAssignment,
+  updateExperimentRunObservationWindow,
   updateExperimentRunSetup,
 } from "./measuring-api"
 import type {
@@ -71,6 +72,7 @@ import type {
   AnalysisSection,
   MeasuringRun,
   NewRunSetup,
+  ObservationWindowUpdate,
 } from "./measuring-types"
 import {
   formatPercent,
@@ -83,6 +85,13 @@ import {
   parseSamplingPlan,
   runVariants,
 } from "./measuring-utils"
+import { ObservationWindowFields } from "./observation-window-fields"
+import {
+  createObservationWindowDraft,
+  resolveObservationWindow,
+  type ObservationWindowDraft,
+  type ObservationWindowError,
+} from "./observation-window-utils"
 
 function normalizeNewRunVariants(
   controlVariant: string,
@@ -554,8 +563,18 @@ function FullAnalysis({
           <strong className="font-medium text-foreground">
             {t("releaseDecision.experiments.detailsPage.measuring.window")}:
           </strong>{" "}
-          {formatDate(run.observationStart, i18n.language)} →{" "}
-          {formatDate(run.observationEnd, i18n.language)}
+          {run.observationStart ? (
+            <>
+              {formatDate(run.observationStart, i18n.language)} →{" "}
+              {run.observationEnd
+                ? formatDate(run.observationEnd, i18n.language)
+                : t(
+                    "releaseDecision.experiments.detailsPage.measuring.ongoing"
+                  )}
+            </>
+          ) : (
+            t("releaseDecision.experiments.detailsPage.measuring.notConfigured")
+          )}
         </span>
         {bandit ? (
           <span>
@@ -1002,8 +1021,18 @@ export function MeasuringDetails({
   const [newRunTreatmentVariants, setNewRunTreatmentVariants] = useState<
     string[]
   >([])
+  const [newRunWindow, setNewRunWindow] = useState<ObservationWindowDraft>(() =>
+    createObservationWindowDraft()
+  )
+  const [newRunWindowError, setNewRunWindowError] =
+    useState<ObservationWindowError | null>(null)
   const [deleteRun, setDeleteRun] = useState<MeasuringRun | null>(null)
   const [assignmentOpen, setAssignmentOpen] = useState(false)
+  const [runSettingsOpen, setRunSettingsOpen] = useState(false)
+  const [runSettingsWindow, setRunSettingsWindow] =
+    useState<ObservationWindowDraft>(() => createObservationWindowDraft())
+  const [runSettingsWindowError, setRunSettingsWindowError] =
+    useState<ObservationWindowError | null>(null)
   const effectiveSelectedRunId = selectedRunId ?? localSelectedRunId
   const selectRun = (runId: string) => {
     setLocalSelectedRunId(runId)
@@ -1035,18 +1064,25 @@ export function MeasuringDetails({
     queryClient.setQueryData(queryKey, updated)
   const flagVariations = flagQuery.data?.variations ?? []
   const createMutation = useMutation({
-    mutationFn: async (setup: NewRunSetup) => {
+    mutationFn: async ({
+      setup,
+      observationWindow,
+    }: {
+      setup: NewRunSetup
+      observationWindow: ObservationWindowUpdate
+    }) => {
       const createdState = await createExperimentRun(envId, experiment.id)
       const createdRun = orderedRuns(
         createdState.experimentRuns as MeasuringRun[]
       ).at(-1)
       if (!createdRun) return createdState
 
-      return updateExperimentRunSetup(
+      await updateExperimentRunSetup(envId, experiment.id, createdRun.id, setup)
+      return updateExperimentRunObservationWindow(
         envId,
         experiment.id,
         createdRun.id,
-        setup
+        observationWindow
       )
     },
     onSuccess: (updated) => {
@@ -1093,6 +1129,28 @@ export function MeasuringDetails({
       )
     },
   })
+  const runSettingsMutation = useMutation({
+    mutationFn: ({
+      runId,
+      observationWindow,
+    }: {
+      runId: string
+      observationWindow: ObservationWindowUpdate
+    }) =>
+      updateExperimentRunObservationWindow(
+        envId,
+        experiment.id,
+        runId,
+        observationWindow
+      ),
+    onSuccess: (updated) => {
+      updateCache(updated)
+      setRunSettingsOpen(false)
+      toast.success(
+        t("releaseDecision.experiments.detailsPage.measuring.windowSaved")
+      )
+    },
+  })
 
   const openNewRunDialog = () => {
     const normalized = normalizeNewRunVariants("", [], flagVariations)
@@ -1100,7 +1158,61 @@ export function MeasuringDetails({
     setNewRunMethod("bayesian_ab")
     setNewRunControlVariant(normalized.control)
     setNewRunTreatmentVariants(normalized.treatments)
+    setNewRunWindow(createObservationWindowDraft())
+    setNewRunWindowError(null)
     setNewRunOpen(true)
+  }
+
+  const selectedStatus = selected?.status.trim().toLowerCase()
+  const runSettingsEditable =
+    selectedStatus === "draft" || selectedStatus === "collecting"
+
+  const openRunSettingsDialog = () => {
+    if (!selected || !runSettingsEditable) return
+    runSettingsMutation.reset()
+    setRunSettingsWindow(
+      createObservationWindowDraft(
+        selected.observationStart,
+        selected.observationEnd,
+        selectedStatus !== "collecting"
+      )
+    )
+    setRunSettingsWindowError(null)
+    setRunSettingsOpen(true)
+  }
+
+  const submitNewRun = () => {
+    const resolved = resolveObservationWindow(newRunWindow)
+    if (resolved.error) {
+      setNewRunWindowError(resolved.error)
+      return
+    }
+
+    createMutation.mutate({
+      setup: {
+        method: newRunMethod,
+        controlVariant: newRunControlVariant,
+        treatmentVariant: newRunTreatmentVariants.join("|"),
+      },
+      observationWindow: resolved.value,
+    })
+  }
+
+  const saveRunSettings = () => {
+    if (!selected) return
+    const resolved = resolveObservationWindow(
+      runSettingsWindow,
+      selectedStatus === "collecting" ? selected.observationEnd : null
+    )
+    if (resolved.error) {
+      setRunSettingsWindowError(resolved.error)
+      return
+    }
+
+    runSettingsMutation.mutate({
+      runId: selected.id,
+      observationWindow: resolved.value,
+    })
   }
 
   return (
@@ -1168,14 +1280,68 @@ export function MeasuringDetails({
                 `releaseDecision.experiments.detailsPage.measuring.methods.${normalizedMethod(selected.method)}`
               )}
             </Badge>
-            <Badge variant="outline" className="gap-2 font-normal">
-              <CalendarDays />
-              {t(
-                "releaseDecision.experiments.detailsPage.measuring.observationWindow"
-              )}{" "}
-              · {formatDate(selected.observationStart, i18n.language)} →{" "}
-              {formatDate(selected.observationEnd, i18n.language)}
-            </Badge>
+            {runSettingsEditable ? (
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="xs"
+                      className="h-5 rounded-full px-2 font-normal"
+                      onClick={openRunSettingsDialog}
+                    />
+                  }
+                >
+                  <CalendarDays />
+                  {t(
+                    "releaseDecision.experiments.detailsPage.measuring.observationWindow"
+                  )}{" "}
+                  ·{" "}
+                  {selected.observationStart ? (
+                    <>
+                      {formatDate(selected.observationStart, i18n.language)} →{" "}
+                      {selected.observationEnd
+                        ? formatDate(selected.observationEnd, i18n.language)
+                        : t(
+                            "releaseDecision.experiments.detailsPage.measuring.ongoing"
+                          )}
+                    </>
+                  ) : (
+                    t(
+                      "releaseDecision.experiments.detailsPage.measuring.notConfigured"
+                    )
+                  )}
+                </TooltipTrigger>
+                <TooltipContent>
+                  {t(
+                    "releaseDecision.experiments.detailsPage.measuring.editObservationWindow"
+                  )}
+                </TooltipContent>
+              </Tooltip>
+            ) : (
+              <Badge variant="outline" className="gap-2 font-normal">
+                <CalendarDays />
+                {t(
+                  "releaseDecision.experiments.detailsPage.measuring.observationWindow"
+                )}{" "}
+                ·{" "}
+                {selected.observationStart ? (
+                  <>
+                    {formatDate(selected.observationStart, i18n.language)} →{" "}
+                    {selected.observationEnd
+                      ? formatDate(selected.observationEnd, i18n.language)
+                      : t(
+                          "releaseDecision.experiments.detailsPage.measuring.ongoing"
+                        )}
+                  </>
+                ) : (
+                  t(
+                    "releaseDecision.experiments.detailsPage.measuring.notConfigured"
+                  )
+                )}
+              </Badge>
+            )}
             <div className="ml-auto flex items-center gap-2">
               <Button
                 type="button"
@@ -1280,6 +1446,90 @@ export function MeasuringDetails({
         />
       ) : null}
 
+      {selected ? (
+        <Dialog
+          open={runSettingsOpen}
+          onOpenChange={(open) => {
+            if (!runSettingsMutation.isPending) setRunSettingsOpen(open)
+          }}
+        >
+          <DialogContent
+            className="sm:max-w-lg"
+            showCloseButton={!runSettingsMutation.isPending}
+          >
+            <DialogHeader>
+              <DialogTitle>
+                {t(
+                  "releaseDecision.experiments.detailsPage.measuring.observationWindow"
+                )}
+              </DialogTitle>
+              <DialogDescription>
+                {t(
+                  "releaseDecision.experiments.detailsPage.measuring.observationWindowDescription",
+                  { run: selected.slug }
+                )}
+              </DialogDescription>
+            </DialogHeader>
+
+            {selectedStatus === "collecting" ? (
+              <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
+                <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+                <span>
+                  {t(
+                    "releaseDecision.experiments.detailsPage.measuring.collectingWindowHelp"
+                  )}
+                </span>
+              </div>
+            ) : null}
+
+            <ObservationWindowFields
+              idPrefix="run-settings-window"
+              value={runSettingsWindow}
+              error={runSettingsWindowError}
+              disabled={runSettingsMutation.isPending}
+              startDisabled={selectedStatus === "collecting"}
+              onChange={(value) => {
+                setRunSettingsWindow(value)
+                setRunSettingsWindowError(null)
+              }}
+            />
+
+            {runSettingsMutation.isError ? (
+              <p className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+                {t(
+                  "releaseDecision.experiments.detailsPage.measuring.windowSaveFailed"
+                )}
+              </p>
+            ) : null}
+
+            <DialogFooter className="mx-0 mb-0 border-t-0 bg-transparent p-0 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                disabled={runSettingsMutation.isPending}
+                onClick={() => setRunSettingsOpen(false)}
+              >
+                {t("releaseDecision.experiments.detailsPage.cancel")}
+              </Button>
+              <Button
+                type="button"
+                disabled={runSettingsMutation.isPending}
+                onClick={saveRunSettings}
+              >
+                {runSettingsMutation.isPending ? (
+                  <Loader2 className="animate-spin" />
+                ) : null}
+                {t(
+                  runSettingsMutation.isPending
+                    ? "releaseDecision.experiments.detailsPage.measuring.saving"
+                    : "releaseDecision.experiments.detailsPage.measuring.saveWindow"
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      ) : null}
+
       <Dialog
         open={newRunOpen}
         onOpenChange={(open) => {
@@ -1287,7 +1537,7 @@ export function MeasuringDetails({
         }}
       >
         <DialogContent
-          className="sm:max-w-2xl"
+          className="max-h-[calc(100vh-2rem)] grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden sm:max-w-2xl"
           showCloseButton={!createMutation.isPending}
         >
           <DialogHeader>
@@ -1302,7 +1552,7 @@ export function MeasuringDetails({
               )}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-5 pt-2">
+          <div className="-mx-1 space-y-5 overflow-y-auto px-1 pt-2">
             <section className="space-y-3">
               <Label>
                 {t(
@@ -1462,6 +1712,31 @@ export function MeasuringDetails({
               )}
             </section>
 
+            <section className="space-y-3 border-t pt-5">
+              <div className="space-y-1">
+                <h3 className="font-medium">
+                  {t(
+                    "releaseDecision.experiments.detailsPage.measuring.observationWindow"
+                  )}
+                </h3>
+                <p className="text-xs leading-5 text-muted-foreground">
+                  {t(
+                    "releaseDecision.experiments.detailsPage.measuring.observationWindowHelp"
+                  )}
+                </p>
+              </div>
+              <ObservationWindowFields
+                idPrefix="new-run-window"
+                value={newRunWindow}
+                error={newRunWindowError}
+                disabled={createMutation.isPending}
+                onChange={(value) => {
+                  setNewRunWindow(value)
+                  setNewRunWindowError(null)
+                }}
+              />
+            </section>
+
             {createMutation.isError ? (
               <p className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
                 {t(
@@ -1487,13 +1762,7 @@ export function MeasuringDetails({
                 newRunTreatmentVariants.length === 0 ||
                 flagVariations.length < 2
               }
-              onClick={() =>
-                createMutation.mutate({
-                  method: newRunMethod,
-                  controlVariant: newRunControlVariant,
-                  treatmentVariant: newRunTreatmentVariants.join("|"),
-                })
-              }
+              onClick={submitNewRun}
             >
               {createMutation.isPending ? (
                 <Loader2 className="animate-spin" />

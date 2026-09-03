@@ -182,7 +182,7 @@ export const enExperiments = {
       nextRuns: "Show more runs",
       newRunTitle: "Create experiment run",
       newRunDescription:
-        "Choose the analysis method and variation roles for this run.",
+        "Choose the analysis method, variation roles, and observation window for this run.",
       analysisMethod: "Analysis method",
       newRunRolesHelp:
         "Choose one primary variation and at least one comparison variation.",
@@ -196,6 +196,40 @@ export const enExperiments = {
       noRunsHelp:
         "Create a run to configure assignment, collect evidence, and make a decision.",
       observationWindow: "Observation window",
+      observationWindowHelp:
+        "Only events within this time window are included in the analysis.",
+      ongoing: "Ongoing",
+      editObservationWindow: "Edit observation window",
+      observationWindowDescription:
+        "Set the time range used when analyzing {{run}}.",
+      startDateTime: "Start date and time",
+      end: "End",
+      endModes: {
+        open: "No fixed end",
+        duration: "After a duration",
+        date: "On a specific date",
+      },
+      duration: "Duration",
+      durationUnits: {
+        hours: "Hours",
+        days: "Days",
+        weeks: "Weeks",
+      },
+      endDateTime: "End date and time",
+      timezone: "Time zone: {{timezone}}",
+      collectingWindowHelp:
+        "The start time is locked. You can set or extend the end time; this changes the data window used in analysis.",
+      saveWindow: "Save window",
+      windowSaved: "Observation window saved",
+      windowSaveFailed: "The observation window could not be saved.",
+      windowErrors: {
+        startRequired: "Enter a valid start date and time.",
+        durationInvalid: "Enter a duration greater than zero.",
+        endRequired: "Enter a valid end date and time.",
+        endAfterStart: "The end must be later than the start.",
+        endCannotShorten:
+          "The end cannot be earlier than the current end time.",
+      },
       analyze: "Analyze latest data",
       analyzing: "Analyzing…",
       analysisUpdated: "Analysis updated",
@@ -700,7 +734,7 @@ export const zhExperiments = {
       previousRuns: "显示之前的运行",
       nextRuns: "显示更多运行",
       newRunTitle: "创建实验运行",
-      newRunDescription: "选择此运行的分析方法和变体角色。",
+      newRunDescription: "选择此运行的分析方法、变体角色和观察窗口。",
       analysisMethod: "分析方法",
       newRunRolesHelp: "选择一个主要变体和至少一个对比变体。",
       newRunVariationsRequired:
@@ -712,6 +746,37 @@ export const zhExperiments = {
       noRuns: "尚无实验运行。",
       noRunsHelp: "创建运行以配置分配、收集依据并做出决策。",
       observationWindow: "观察窗口",
+      observationWindowHelp: "只有此时间窗口内的事件会被纳入分析。",
+      ongoing: "持续中",
+      editObservationWindow: "编辑观察窗口",
+      observationWindowDescription: "设置分析 {{run}} 时使用的时间范围。",
+      startDateTime: "开始日期和时间",
+      end: "结束时间",
+      endModes: {
+        open: "不设固定结束时间",
+        duration: "经过一段时间后",
+        date: "指定日期和时间",
+      },
+      duration: "持续时间",
+      durationUnits: {
+        hours: "小时",
+        days: "天",
+        weeks: "周",
+      },
+      endDateTime: "结束日期和时间",
+      timezone: "时区：{{timezone}}",
+      collectingWindowHelp:
+        "开始时间已锁定。你可以设置或延长结束时间；这会改变分析所使用的数据窗口。",
+      saveWindow: "保存窗口",
+      windowSaved: "观察窗口已保存",
+      windowSaveFailed: "无法保存观察窗口。",
+      windowErrors: {
+        startRequired: "请输入有效的开始日期和时间。",
+        durationInvalid: "请输入大于零的持续时间。",
+        endRequired: "请输入有效的结束日期和时间。",
+        endAfterStart: "结束时间必须晚于开始时间。",
+        endCannotShorten: "结束时间不能早于当前结束时间。",
+      },
       analyze: "分析最新数据",
       analyzing: "正在分析…",
       analysisUpdated: "分析已更新",

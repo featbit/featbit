@@ -1,6 +1,10 @@
 import { fetchApi } from "@/lib/api/authenticated-api"
 import type { ExperimentDetail } from "../experiment-details-types"
-import type { NewRunSetup, RunAssignmentUpdate } from "./measuring-types"
+import type {
+  NewRunSetup,
+  ObservationWindowUpdate,
+  RunAssignmentUpdate,
+} from "./measuring-types"
 
 function runPath(envId: string, experimentId: string, runId?: string) {
   const base = `/api/v1/envs/${encodeURIComponent(envId)}/experiments/${encodeURIComponent(experimentId)}/runs`
@@ -59,6 +63,22 @@ export function updateExperimentRunAssignment(
 ) {
   return fetchApi<ExperimentDetail>(
     `${runPath(envId, experimentId, runId)}/audience`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(update),
+    }
+  )
+}
+
+export function updateExperimentRunObservationWindow(
+  envId: string,
+  experimentId: string,
+  runId: string,
+  update: ObservationWindowUpdate
+) {
+  return fetchApi<ExperimentDetail>(
+    `${runPath(envId, experimentId, runId)}/observation-window`,
     {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
