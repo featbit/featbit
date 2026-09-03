@@ -1094,6 +1094,15 @@ export function MeasuringDetails({
     },
   })
 
+  const openNewRunDialog = () => {
+    const normalized = normalizeNewRunVariants("", [], flagVariations)
+    createMutation.reset()
+    setNewRunMethod("bayesian_ab")
+    setNewRunControlVariant(normalized.control)
+    setNewRunTreatmentVariants(normalized.treatments)
+    setNewRunOpen(true)
+  }
+
   return (
     <section className="overflow-hidden rounded-lg border bg-background">
       <div className="border-b px-4 py-3">
@@ -1109,14 +1118,7 @@ export function MeasuringDetails({
             size="sm"
             className="shrink-0"
             disabled={createMutation.isPending}
-            onClick={() => {
-              const normalized = normalizeNewRunVariants("", [], flagVariations)
-              createMutation.reset()
-              setNewRunMethod("bayesian_ab")
-              setNewRunControlVariant(normalized.control)
-              setNewRunTreatmentVariants(normalized.treatments)
-              setNewRunOpen(true)
-            }}
+            onClick={openNewRunDialog}
           >
             <Plus />
             {t("releaseDecision.experiments.detailsPage.measuring.newRun")}
@@ -1140,6 +1142,15 @@ export function MeasuringDetails({
           <p className="mt-1 max-w-md text-sm text-muted-foreground">
             {t("releaseDecision.experiments.detailsPage.measuring.noRunsHelp")}
           </p>
+          <Button
+            type="button"
+            className="mt-4"
+            disabled={createMutation.isPending}
+            onClick={openNewRunDialog}
+          >
+            <Plus />
+            {t("releaseDecision.experiments.detailsPage.measuring.newRun")}
+          </Button>
         </div>
       ) : (
         <>
