@@ -176,7 +176,6 @@ export const enExperiments = {
     },
     measuring: {
       experimentRuns: "Experiment runs",
-      run: "Run {{number}}",
       newRun: "New run",
       previousRuns: "Show previous runs",
       nextRuns: "Show more runs",
@@ -416,7 +415,6 @@ export const enExperiments = {
       hypothesis: "Hypothesis",
       keyLearning: "Key learning",
       runsTitle: "Experiment run learnings",
-      run: "Run {{number}}",
       noRuns: "No experiment runs yet.",
       noRunsHelp:
         "Return to Measuring to create and analyze an experiment run.",
@@ -729,7 +727,6 @@ export const zhExperiments = {
     },
     measuring: {
       experimentRuns: "实验运行",
-      run: "运行 {{number}}",
       newRun: "新建运行",
       previousRuns: "显示之前的运行",
       nextRuns: "显示更多运行",
@@ -941,7 +938,6 @@ export const zhExperiments = {
       hypothesis: "假设",
       keyLearning: "关键学习",
       runsTitle: "实验运行学习",
-      run: "运行 {{number}}",
       noRuns: "尚无实验运行。",
       noRunsHelp: "返回衡量阶段，创建并分析实验运行。",
       runEmpty: "此运行尚未记录学习。",

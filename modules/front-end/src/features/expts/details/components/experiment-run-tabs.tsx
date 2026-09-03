@@ -123,7 +123,7 @@ export function ExperimentRunTabs({
               listClassName
             )}
           >
-            {runs.map((run, index) => {
+            {runs.map((run) => {
               const status = run.status.trim().toLowerCase()
               const decision = run.decision?.trim().toLowerCase()
 
@@ -137,12 +137,9 @@ export function ExperimentRunTabs({
                   }}
                   className="h-11 min-w-52 flex-none justify-between gap-4 rounded-none border-0 border-r border-border px-4 font-normal text-foreground last:border-r-0 hover:bg-muted/40 focus-visible:z-20 data-active:bg-blue-50/60 data-active:shadow-none data-active:after:bottom-0 data-active:after:bg-blue-600 data-active:after:opacity-100 dark:data-active:bg-blue-950/25"
                 >
-                  <span className="font-medium">
-                    {t(
-                      "releaseDecision.experiments.detailsPage.measuring.run",
-                      { number: index + 1 }
-                    )}
-                  </span>
+                  <code className="font-medium text-foreground">
+                    {run.slug}
+                  </code>
                   <span className="flex items-center gap-3 text-xs text-muted-foreground">
                     <span className="flex items-center gap-2">
                       <span

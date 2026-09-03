@@ -83,12 +83,17 @@ describe("LearningDetails", () => {
     expect(
       screen.getByText("The shorter flow improved conversion.")
     ).toBeInTheDocument()
-    expect(screen.getByText("checkout-v2-run-2")).toBeInTheDocument()
+    expect(
+      screen.getByRole("heading", { level: 4, name: "checkout-v2-run-2" })
+    ).toBeInTheDocument()
+    expect(screen.queryByText(/^Run \d+$/)).not.toBeInTheDocument()
     expect(screen.getByText("The sample was too small.")).toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole("tab", { name: /Run 1/ }))
+    fireEvent.click(screen.getByRole("tab", { name: /checkout-v2-run-1/i }))
 
-    expect(screen.getByText("checkout-v2-run-1")).toBeInTheDocument()
+    expect(
+      screen.getByRole("heading", { level: 4, name: "checkout-v2-run-1" })
+    ).toBeInTheDocument()
     expect(screen.getByText("Changed the checkout layout.")).toBeInTheDocument()
   })
 
@@ -104,7 +109,9 @@ describe("LearningDetails", () => {
       )
     })
 
-    expect(screen.getByText("run-without-learning")).toBeInTheDocument()
+    expect(
+      screen.getByRole("heading", { level: 4, name: "run-without-learning" })
+    ).toBeInTheDocument()
     expect(
       screen.getByText("No learning captured for this run.")
     ).toBeInTheDocument()

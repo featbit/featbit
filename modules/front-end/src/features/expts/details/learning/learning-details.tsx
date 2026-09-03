@@ -104,13 +104,7 @@ function EvidenceRationale({ value }: { value: string }) {
   )
 }
 
-function RunLearning({
-  run,
-  runNumber,
-}: {
-  run: LearningRun
-  runNumber: number
-}) {
+function RunLearning({ run }: { run: LearningRun }) {
   const { t, i18n } = useTranslation()
   const fields = LEARNING_FIELDS.filter((field) => Boolean(run[field]?.trim()))
   const hasLearning = hasCapturedLearning(run)
@@ -118,12 +112,7 @@ function RunLearning({
   return (
     <div>
       <div className="flex min-h-13 flex-wrap items-center gap-2 px-4 py-3">
-        <h4 className="mr-1 text-lg font-semibold">
-          {t("releaseDecision.experiments.detailsPage.measuring.run", {
-            number: runNumber,
-          })}
-        </h4>
-        <code className="mr-1 text-xs text-muted-foreground">{run.slug}</code>
+        <h4 className="mr-1 font-mono text-lg font-semibold">{run.slug}</h4>
         <Badge variant="outline" className="font-normal">
           {run.method === "bandit"
             ? t("releaseDecision.experiments.methods.bandit")
@@ -221,9 +210,6 @@ export function LearningDetails({
   const effectiveSelectedRunId = selectedRunId ?? localSelectedRunId
   const selectedRun =
     runs.find((run) => run.id === effectiveSelectedRunId) ?? runs.at(-1)
-  const selectedRunNumber = selectedRun
-    ? runs.findIndex((run) => run.id === selectedRun.id) + 1
-    : 0
   const selectRun = (runId: string) => {
     setLocalSelectedRunId(runId)
     onSelectedRunChange?.(runId)
@@ -304,9 +290,7 @@ export function LearningDetails({
               onSelectedRunChange={selectRun}
               listClassName="border-t-0 border-b"
             />
-            {selectedRun ? (
-              <RunLearning run={selectedRun} runNumber={selectedRunNumber} />
-            ) : null}
+            {selectedRun ? <RunLearning run={selectedRun} /> : null}
           </div>
         )}
       </div>

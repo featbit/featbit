@@ -1040,10 +1040,6 @@ export function MeasuringDetails({
   }
   const selected =
     runs.find((run) => run.id === effectiveSelectedRunId) ?? runs.at(-1) ?? null
-  const selectedIndex = selected
-    ? runs.findIndex((run) => run.id === selected.id)
-    : -1
-
   const flagQuery = useQuery({
     queryKey: ["experiment-feature-flag", envId, experiment.flagKey],
     queryFn: () => fetchFeatureFlag(envId, experiment.flagKey!),
@@ -1267,14 +1263,9 @@ export function MeasuringDetails({
       ) : (
         <>
           <div className="flex flex-wrap items-center gap-2 border-b px-4 py-3">
-            <h3 className="mr-1 text-lg font-semibold">
-              {t("releaseDecision.experiments.detailsPage.measuring.run", {
-                number: selectedIndex + 1,
-              })}
-            </h3>
-            <code className="mr-1 text-xs text-muted-foreground">
+            <h3 className="mr-1 font-mono text-lg font-semibold">
               {selected.slug}
-            </code>
+            </h3>
             <Badge variant="outline" className="font-normal">
               {t(
                 `releaseDecision.experiments.detailsPage.measuring.methods.${normalizedMethod(selected.method)}`
