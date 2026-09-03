@@ -79,22 +79,24 @@ export function ExperimentSettings({
           {rows.map((row, index) => (
             <div
               key={row.label}
-              className={`grid min-h-14 grid-cols-[220px_minmax(0,1fr)_auto] items-center gap-6 px-5 py-3 ${
+              className={`grid min-h-14 grid-cols-[220px_minmax(0,1fr)] items-center gap-6 px-5 py-3 ${
                 index ? "border-t" : ""
               }`}
             >
               <span className="text-sm font-medium">{row.label}</span>
-              <span
-                className={`${
-                  row.technical
-                    ? "truncate font-mono text-sm"
-                    : "text-sm whitespace-pre-wrap"
-                } ${row.muted ? "text-muted-foreground" : "text-foreground"}`}
-                title={row.technical ? row.value : undefined}
-              >
-                {row.value}
-              </span>
-              {row.technical ? <CopyValueButton value={row.value} /> : null}
+              <div className="flex min-w-0 items-center gap-2">
+                <span
+                  className={`${
+                    row.technical
+                      ? "truncate font-mono text-sm"
+                      : "text-sm whitespace-pre-wrap"
+                  } ${row.muted ? "text-muted-foreground" : "text-foreground"}`}
+                  title={row.technical ? row.value : undefined}
+                >
+                  {row.value}
+                </span>
+                {row.technical ? <CopyValueButton value={row.value} /> : null}
+              </div>
             </div>
           ))}
         </div>

@@ -24,8 +24,9 @@ export function CopyValueButton({ value }: { value: string }) {
         render={
           <Button
             type="button"
-            variant="outline"
-            size="icon"
+            variant="ghost"
+            size="icon-xs"
+            className="size-5 shrink-0 text-muted-foreground"
             aria-label={t(
               copied
                 ? "releaseDecision.experiments.detailsPage.copied"
@@ -35,7 +36,7 @@ export function CopyValueButton({ value }: { value: string }) {
           />
         }
       >
-        {copied ? <Check /> : <Copy />}
+        {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
       </TooltipTrigger>
       <TooltipContent>
         {t(
