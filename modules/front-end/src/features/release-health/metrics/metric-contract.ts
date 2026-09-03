@@ -121,7 +121,10 @@ export function metricUnitLabel(t: TFunction, unit: MetricUnit) {
   return t(`releaseHealth.resultContract.unit.${unit.kind}`)
 }
 
-export function metricResultProfileLabel(t: TFunction, metric: ReleaseMetric) {
+export function metricResultProfileLabel(
+  t: TFunction,
+  metric: { resultContract: MetricResultContract }
+) {
   return `${t(
     `releaseHealth.resultContract.measurementKind.${metric.resultContract.measurementKind}`
   )} · ${metricUnitLabel(t, metric.resultContract.unit)}`

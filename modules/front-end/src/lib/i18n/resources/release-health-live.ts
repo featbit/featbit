@@ -1,4 +1,28 @@
 export const enReleaseHealthLive = {
+  metricSaved: "Metric definition and version v1 saved.",
+  selectUnit: "Choose a unit",
+  keyExists: "This key is already used in this project.",
+  semanticsError:
+    "Describe what each value means (12–2000 characters), not just the metric name.",
+  discardTitle: "Discard unsaved changes?",
+  discardHelp: "Your changes have not been saved.",
+  keepEditing: "Keep editing",
+  discard: "Discard",
+  createPermission: "Requires project settings permission.",
+  usageUnavailable: "Not yet available",
+  relatedUnavailable:
+    "Monitor and Session references are not connected to the API yet.",
+  versionsUnavailable:
+    "Editing definitions and creating additional versions are not implemented yet.",
+  lastSuccessful: "Last successful",
+  rangeUnavailable:
+    "The API currently supports up to one hour; longer ranges are not available yet.",
+  onDemand: "On demand",
+  syncUnavailable:
+    "Background synchronization is not implemented yet. Queries run while the page is open.",
+  retry: "Retry",
+  urlEnvironment:
+    "You are configuring {{environment}}, as specified in this page's URL, not the environment selected in the header.",
   badge: "Live integration",
   notice:
     "Connections and Metrics use the real API and Prometheus. Trends are queried on demand, not a persisted stream. Monitor and Session pages remain design previews.",
@@ -44,6 +68,25 @@ export const enReleaseHealthLive = {
   },
 }
 export const zhReleaseHealthLive: typeof enReleaseHealthLive = {
+  metricSaved: "指标定义和 v1 已保存。",
+  selectUnit: "请选择单位",
+  keyExists: "当前项目已使用此 Key。",
+  semanticsError: "请描述每个数值的含义（12–2000 字符），不要只重复指标名称。",
+  discardTitle: "放弃未保存的修改？",
+  discardHelp: "当前修改尚未保存。",
+  keepEditing: "继续编辑",
+  discard: "放弃修改",
+  createPermission: "需要项目配置权限。",
+  usageUnavailable: "尚未接入",
+  relatedUnavailable: "Monitor 和 Session 引用尚未接入真实 API。",
+  versionsUnavailable: "编辑定义及创建后续版本尚未实现。",
+  lastSuccessful: "最后成功值",
+  rangeUnavailable: "API 当前最多支持一小时，较长时间范围尚未开放。",
+  onDemand: "按需查询",
+  syncUnavailable: "后台定时同步尚未实现；当前仅在页面打开时查询。",
+  retry: "重试",
+  urlEnvironment:
+    "当前配置目标是 URL 指定的 {{environment}}，不是顶部选择的环境。",
   badge: "真实链路",
   notice:
     "Connections 和 Metrics 已接入真实 API 与 Prometheus。趋势按需查询，尚非持久化 Stream；Monitor 和 Session 仍为设计预览。",

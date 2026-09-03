@@ -104,10 +104,15 @@ public sealed class ReleaseHealthService(IReleaseHealthStore store, ICredentialP
     public async Task<IReadOnlyList<MetricView>> Metrics(Guid projectId, CancellationToken ct) => (await store.ListAsync(projectId, "metric", ct)).Select(Read<MetricView>).ToArray();
     public async Task<MetricView> CreateMetric(Guid projectId, MetricWrite write, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(write.Key) || !Regex.IsMatch(write.Key, "^[a-z][a-z0-9_-]{0,99}$") ||
+        if (string.IsNullOrWhiteSpace(write.Key) || !Regex.IsMatch(write.Key, "^[a-z][a-z0-9_]{0,99}$") ||
             string.IsNullOrWhiteSpace(write.Name) || write.Name.Length > 120 || string.IsNullOrWhiteSpace(write.ResultSemantics) || write.ResultSemantics.Length > 2000) throw Schema.Invalid("invalid_metric");
+        if (write.Description?.Length > 2000 || write.Category is not (null or "impact" or "quality" or "reliability") ||
+            write.FractionDigits is < 0 or > 4) throw Schema.Invalid("invalid_metric_metadata");
+        if (write.ResultSemantics.Trim().Length < 12 || string.Equals(write.ResultSemantics.Trim(), write.Name.Trim(), StringComparison.OrdinalIgnoreCase))
+            throw Schema.Invalid("invalid_metric_semantics");
         Schema.ResultContract(write.ResultContract);
-        var metric = new MetricView(Guid.NewGuid(), projectId, Guid.NewGuid(), 1, write.Key, write.Name.Trim(), write.ResultSemantics, write.ResultContract);
+        var metric = new MetricView(Guid.NewGuid(), projectId, Guid.NewGuid(), 1, write.Key, write.Name.Trim(), write.ResultSemantics.Trim(), write.ResultContract,
+            write.Description?.Trim(), write.Category, write.FractionDigits ?? 2);
         await store.PutAsync(new(metric.Id, projectId, projectId, "metric", metric.Key, 1, Serialize(metric), null), null, ct);
         return metric;
     }
@@ -149,7 +154,8 @@ public sealed class ReleaseHealthService(IReleaseHealthStore store, ICredentialP
         if (binding is null) return new("not_connected", DateTimeOffset.UtcNow, metric.ResultContract, [], null);
         var connection = await Required(envId, "connection", binding.ConnectionId, ct);
         if (Read<ConnectionState>(connection).Revision != binding.ConnectionRevision) throw Schema.Invalid("connection_changed_revalidate");
-        return await Query(metric, connection, binding.ProviderConfig, minutes, ct);
+        var result = await Query(metric, connection, binding.ProviderConfig, minutes, ct);
+        return result with { Source = new(binding.ProviderType, Read<ConnectionState>(connection).Name, Schema.Text(binding.ProviderConfig, "step")) };
     }
     private async Task<QueryView> Query(MetricView metric, ReleaseHealthDocument connection, JsonElement config, int minutes, CancellationToken ct)
     {

@@ -26,14 +26,26 @@ import { localizedPath, resolveLang } from "@/features/layout/layout-context"
 import { MetricDefinitionSheet } from "../components/metric-definition-sheet"
 import { ReleaseHealthShell } from "../components/release-health-shell"
 import { DataStatusBadge } from "../components/status-badges"
-import { metricSampleText } from "../release-health-display"
-import { releaseMetrics } from "../release-health-mock-data"
+import type { CatalogEntry } from "./live-metric-data"
+import type { MetricDefinitionWrite } from "../release-health-api"
 import type { ReleaseMetricCategory } from "../release-health-types"
 import { metricResultProfileLabel, metricUnitLabel } from "./metric-contract"
 
 type CategoryFilter = ReleaseMetricCategory | "all" | "uncategorized"
 
-export function ReleaseMetricsPage() {
+export function MetricCatalog({
+  metrics,
+  loading,
+  failed,
+  canCreate,
+  onCreate,
+}: {
+  metrics: CatalogEntry[]
+  loading: boolean
+  failed: boolean
+  canCreate: boolean
+  onCreate: (value: MetricDefinitionWrite) => Promise<void>
+}) {
   const { t } = useTranslation()
   const params = useParams()
   const lang = resolveLang(params.lang)
@@ -42,22 +54,22 @@ export function ReleaseMetricsPage() {
   const [createOpen, setCreateOpen] = useState(false)
   const filtered = useMemo(
     () =>
-      releaseMetrics.filter(
+      metrics.filter(
         (metric) =>
           (category === "all" ||
             (category === "uncategorized"
               ? !metric.category
               : metric.category === category)) &&
           (!search.trim() ||
-            `${metricSampleText(t, metric, "name")} ${metric.name} ${metric.key} ${metric.environment.sourceBinding?.providerType ?? ""} ${metric.environment.sourceBinding?.connectionName ?? ""}`
+            `${metric.name} ${metric.key} ${metric.source?.providerType ?? ""} ${metric.source?.connectionName ?? ""}`
               .toLowerCase()
               .includes(search.trim().toLowerCase()))
       ),
-    [category, search, t]
+    [category, search, metrics]
   )
 
   return (
-    <ReleaseHealthShell activeTab="metrics">
+    <ReleaseHealthShell activeTab="metrics" live>
       <div className="space-y-4">
         <Alert>
           <Info />
@@ -111,12 +123,29 @@ export function ReleaseMetricsPage() {
               </SelectContent>
             </Select>
           </div>
-          <Button onClick={() => setCreateOpen(true)}>
+          <Button
+            disabled={!canCreate}
+            title={
+              !canCreate ? t("releaseHealth.live.createPermission") : undefined
+            }
+            onClick={() => setCreateOpen(true)}
+          >
             <Plus />
             {t("releaseHealth.metrics.add")}
           </Button>
         </div>
 
+        {loading || failed ? (
+          <Alert variant={failed ? "destructive" : "default"}>
+            <AlertDescription>
+              {t(
+                failed
+                  ? "releaseHealth.live.loadFailed"
+                  : "releaseHealth.live.loading"
+              )}
+            </AlertDescription>
+          </Alert>
+        ) : null}
         <div className="grid gap-3 md:hidden">
           {filtered.map((metric) => (
             <div
@@ -132,17 +161,28 @@ export function ReleaseMetricsPage() {
                     )}
                     className="font-medium text-foreground hover:underline"
                   >
-                    {metricSampleText(t, metric, "name")}
+                    {metric.name}
                   </Link>
                   <p className="truncate font-mono text-xs text-muted-foreground">
                     {metric.key} · v{metric.version}
                   </p>
                 </div>
-                {metric.environment.sourceBinding ? (
-                  <DataStatusBadge status={metric.environment.dataStatus} />
+                {metric.status === "ready" ||
+                metric.status === "stale" ||
+                metric.status === "error" ||
+                metric.status === "no_data" ? (
+                  <DataStatusBadge
+                    status={
+                      metric.status === "no_data" ? "no-data" : metric.status
+                    }
+                  />
                 ) : (
-                  <Badge variant="outline" className="font-normal">
-                    {t("releaseHealth.metrics.detail.notConnected")}
+                  <Badge variant="outline">
+                    {t(
+                      metric.status === "loading"
+                        ? "releaseHealth.live.loading"
+                        : "releaseHealth.metrics.detail.notConnected"
+                    )}
                   </Badge>
                 )}
               </div>
@@ -152,20 +192,14 @@ export function ReleaseMetricsPage() {
                     {t("releaseHealth.metrics.latest")}
                   </p>
                   <p className="mt-1 text-sm font-medium tabular-nums">
-                    {metric.environment.sourceBinding
-                      ? metric.environment.displayValue
-                      : "—"}
+                    {metric.displayValue}
                   </p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">
                     {t("releaseHealth.metrics.freshness")}
                   </p>
-                  <p className="mt-1 text-sm">
-                    {metric.environment.sourceBinding
-                      ? metricSampleText(t, metric, "updatedAt")
-                      : "—"}
-                  </p>
+                  <p className="mt-1 text-sm">{metric.freshness}</p>
                 </div>
               </div>
               <div className="mt-4 flex flex-wrap items-center gap-2 border-t pt-3">
@@ -178,14 +212,12 @@ export function ReleaseMetricsPage() {
                   {metricResultProfileLabel(t, metric)}
                 </Badge>
                 <span className="text-xs text-muted-foreground">
-                  {t("releaseHealth.metrics.monitorCount", {
-                    count: metric.usedByMonitors,
-                  })}
+                  {t("releaseHealth.live.usageUnavailable")}
                 </span>
               </div>
             </div>
           ))}
-          {!filtered.length ? (
+          {!loading && !failed && !filtered.length ? (
             <div className="rounded-md border py-16 text-center text-sm text-muted-foreground">
               {t("releaseHealth.metrics.empty")}
             </div>
@@ -222,7 +254,7 @@ export function ReleaseMetricsPage() {
                       )}
                       className="font-medium text-foreground hover:underline"
                     >
-                      {metricSampleText(t, metric, "name")}
+                      {metric.name}
                     </Link>
                     <p className="font-mono text-xs text-muted-foreground">
                       {metric.key} · v{metric.version}
@@ -247,32 +279,39 @@ export function ReleaseMetricsPage() {
                     </p>
                   </TableCell>
                   <TableCell>
-                    {metric.environment.sourceBinding ? (
-                      <DataStatusBadge status={metric.environment.dataStatus} />
+                    {metric.status === "ready" ||
+                    metric.status === "stale" ||
+                    metric.status === "error" ||
+                    metric.status === "no_data" ? (
+                      <DataStatusBadge
+                        status={
+                          metric.status === "no_data"
+                            ? "no-data"
+                            : metric.status
+                        }
+                      />
                     ) : (
-                      <Badge variant="outline" className="font-normal">
-                        {t("releaseHealth.metrics.detail.notConnected")}
+                      <Badge variant="outline">
+                        {t(
+                          metric.status === "loading"
+                            ? "releaseHealth.live.loading"
+                            : "releaseHealth.metrics.detail.notConnected"
+                        )}
                       </Badge>
                     )}
                   </TableCell>
                   <TableCell className="font-medium tabular-nums">
-                    {metric.environment.sourceBinding
-                      ? metric.environment.displayValue
-                      : "—"}
+                    {metric.displayValue}
                   </TableCell>
                   <TableCell>
-                    {t("releaseHealth.metrics.monitorCount", {
-                      count: metric.usedByMonitors,
-                    })}
+                    {t("releaseHealth.live.usageUnavailable")}
                   </TableCell>
                   <TableCell className="pr-4 text-right text-muted-foreground">
-                    {metric.environment.sourceBinding
-                      ? metricSampleText(t, metric, "updatedAt")
-                      : "—"}
+                    {metric.freshness}
                   </TableCell>
                 </TableRow>
               ))}
-              {!filtered.length ? (
+              {!loading && !failed && !filtered.length ? (
                 <TableRow>
                   <TableCell
                     colSpan={7}
@@ -287,7 +326,11 @@ export function ReleaseMetricsPage() {
         </div>
       </div>
 
-      <MetricDefinitionSheet open={createOpen} onOpenChange={setCreateOpen} />
+      <MetricDefinitionSheet
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        onCreate={onCreate}
+      />
     </ReleaseHealthShell>
   )
 }

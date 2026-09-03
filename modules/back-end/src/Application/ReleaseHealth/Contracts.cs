@@ -14,9 +14,11 @@ public sealed record ConnectionView(Guid Id, Guid EnvironmentId, string Name, st
     long Version, string Status, DateTimeOffset LastCheckedAt);
 
 [JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
-public sealed record MetricWrite(string Key, string Name, string ResultSemantics, JsonElement ResultContract);
+public sealed record MetricWrite(string Key, string Name, string ResultSemantics, JsonElement ResultContract,
+    string? Description = null, string? Category = null, int? FractionDigits = null);
 public sealed record MetricView(Guid Id, Guid ProjectId, Guid MetricVersionId, int Version,
-    string Key, string Name, string ResultSemantics, JsonElement ResultContract);
+    string Key, string Name, string ResultSemantics, JsonElement ResultContract,
+    string? Description = null, string? Category = null, int? FractionDigits = null);
 
 [JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
 public sealed record BindingWrite(Guid ConnectionId, int ConnectionRevision, string ProviderType,
@@ -25,8 +27,9 @@ public sealed record BindingView(Guid Id, Guid EnvironmentId, Guid MetricVersion
     int ConnectionRevision, string ProviderType, int ProviderSchemaVersion, JsonElement ProviderConfig,
     long Revision, DateTimeOffset ValidatedAt);
 public sealed record MetricPoint(DateTimeOffset Timestamp, double Value);
+public sealed record MetricSourceSummary(string ProviderType, string ConnectionName, string Step);
 public sealed record QueryView(string Status, DateTimeOffset QueriedAt, JsonElement ResultContract,
-    IReadOnlyList<MetricPoint> Points, double? FreshnessSeconds);
+    IReadOnlyList<MetricPoint> Points, double? FreshnessSeconds, MetricSourceSummary? Source = null);
 
 // Persistence only. Never return or log this document: ProtectedSecrets is not a read model.
 public sealed record ReleaseHealthDocument(Guid Id, Guid ScopeId, Guid ProjectId, string Kind,

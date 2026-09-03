@@ -1,16 +1,71 @@
 import { fireEvent, render, screen } from "@testing-library/react"
-import { beforeEach, describe, expect, it } from "vitest"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 import { MemoryRouter, Route, Routes } from "react-router-dom"
 import "@/lib/i18n/i18n"
 import { i18n } from "@/lib/i18n/i18n"
 import type { FeatureFlag } from "@/features/flags/flags-types"
 import { SourceConnectionsPage } from "./connections/source-connections-page"
 import { FlagReleaseHealthTab } from "./flag/flag-release-health-tab"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { releaseHealthApi } from "./release-health-api"
 import { ReleaseMetricDetailsPage } from "./metrics/release-metric-details-page"
 import { ReleaseMetricSourceBindingPage } from "./metrics/release-metric-source-binding-page"
 import { ReleaseHealthOverviewPage } from "./overview/release-health-overview-page"
 import { HealthSessionDetailsPage } from "./sessions/health-session-details-page"
 
+vi.mock("./release-health-api", async (original) => ({
+  ...(await original<typeof import("./release-health-api")>()),
+  releaseHealthApi: {
+    metrics: vi.fn(),
+    trend: vi.fn(),
+    binding: vi.fn(),
+    connections: vi.fn(),
+  },
+}))
+vi.mock("@/features/layout/layout-context", async (original) => ({
+  ...(await original<typeof import("@/features/layout/layout-context")>()),
+  fetchProjects: vi.fn(async () => [
+    {
+      id: "project-commerce",
+      name: "Commerce",
+      key: "commerce",
+      environments: [
+        { id: "env-production", key: "production", name: "Production" },
+        { id: "env-staging", key: "staging", name: "Staging" },
+      ],
+    },
+  ]),
+}))
+const contract = {
+  schemaVersion: 1 as const,
+  resultKind: "numeric_time_series" as const,
+  cardinality: "single" as const,
+  measurementKind: "ratio" as const,
+  unit: { kind: "percent" as const, scale: "zero_to_one_hundred" as const },
+  constraints: { allowNaN: false as const, allowInfinity: false as const },
+}
+function renderLive(ui: React.ReactNode) {
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  })
+  client.setQueryData(
+    ["current-user-policies", ""],
+    [
+      {
+        type: "custom",
+        statements: [
+          {
+            resourceType: "*",
+            effect: "allow",
+            actions: ["*"],
+            resources: ["*"],
+          },
+        ],
+      },
+    ]
+  )
+  return render(<QueryClientProvider client={client}>{ui}</QueryClientProvider>)
+}
 const flag: FeatureFlag = {
   id: "flag-1",
   name: "Search ranking v3",
@@ -42,6 +97,37 @@ describe("Release Health design pages", () => {
         envKey: "production",
       })
     )
+    vi.mocked(releaseHealthApi.metrics).mockResolvedValue([
+      {
+        id: "metric-error",
+        projectId: "project-commerce",
+        metricVersionId: "v1",
+        version: 1,
+        key: "checkout_error_rate",
+        name: "Checkout error rate",
+        resultSemantics: "Error rate across all requests.",
+        resultContract: contract,
+      },
+      {
+        id: "metric-latency",
+        projectId: "project-commerce",
+        metricVersionId: "v2",
+        version: 1,
+        key: "api_p95_latency",
+        name: "API P95 latency",
+        resultSemantics: "95th percentile response latency.",
+        resultContract: contract,
+      },
+    ])
+    vi.mocked(releaseHealthApi.trend).mockImplementation(async (scope) => ({
+      status: scope.envId === "env-staging" ? "not_connected" : "no_data",
+      queriedAt: "2026-09-03T00:00:00Z",
+      resultContract: contract,
+      points: [],
+      freshnessSeconds: null,
+    }))
+    vi.mocked(releaseHealthApi.binding).mockResolvedValue(null)
+    vi.mocked(releaseHealthApi.connections).mockResolvedValue([])
     await i18n.changeLanguage("en")
   })
 
@@ -63,8 +149,8 @@ describe("Release Health design pages", () => {
     expect(screen.getByText("Environment metric streams")).toBeVisible()
   })
 
-  it("keeps a shared metric free of a standalone health verdict", () => {
-    render(
+  it("keeps a shared metric free of a standalone health verdict", async () => {
+    renderLive(
       <MemoryRouter
         initialEntries={["/en/release-health/metrics/api_p95_latency"]}
       >
@@ -78,7 +164,7 @@ describe("Release Health design pages", () => {
     )
 
     expect(
-      screen.getByRole("heading", { name: "API P95 latency" })
+      await screen.findByRole("heading", { name: "API P95 latency" })
     ).toBeVisible()
     expect(
       screen.getByText(
@@ -87,8 +173,8 @@ describe("Release Health design pages", () => {
     ).toBeVisible()
     expect(screen.getByText("Environment trend")).toBeVisible()
     expect(screen.getByText("Environment streams")).toBeVisible()
-    expect(screen.getByText("Not connected")).toBeVisible()
-    expect(screen.getByText("No data")).toBeVisible()
+    expect(await screen.findByText("Not connected")).toBeVisible()
+    expect(screen.getAllByText("No data")[0]).toBeVisible()
     expect(screen.getByText("Monitor bindings")).toBeVisible()
   })
 
@@ -265,8 +351,8 @@ describe("Release Health design pages", () => {
     expect(screen.getByLabelText("Client secret")).toBeVisible()
   })
 
-  it("configures an environment source through the four-step PromQL flow", () => {
-    render(
+  it("configures an environment source through the four-step PromQL flow", async () => {
+    renderLive(
       <MemoryRouter
         initialEntries={[
           "/en/release-health/metrics/checkout_error_rate/source-bindings/production",
@@ -282,14 +368,14 @@ describe("Release Health design pages", () => {
     )
 
     expect(
-      screen.getByRole("heading", { name: "Manage data source" })
+      await screen.findByRole("heading", { name: "Manage source binding" })
     ).toBeVisible()
-    expect(screen.getByText("Provider and connection")).toBeVisible()
-    expect(screen.getByText("Query and schedule")).toBeVisible()
-    expect(screen.getAllByText("Validate and preview")).toHaveLength(2)
-    expect(screen.getByText("Review and save")).toBeVisible()
+    expect(await screen.findByText("1. Provider and connection")).toBeVisible()
+    expect(screen.getByText("2. Query and schedule")).toBeVisible()
+    expect(screen.getByText("3. Validate and preview")).toBeVisible()
+    expect(screen.getByText("4. Review and save")).toBeVisible()
     expect(screen.getByLabelText("PromQL")).toBeVisible()
-    expect(screen.getByText("query_range · range")).toBeVisible()
+    expect(screen.getByText(/query_range · range/)).toBeVisible()
     expect(screen.queryByLabelText("Feature flag")).not.toBeInTheDocument()
     expect(screen.queryByText("Observation scope")).not.toBeInTheDocument()
     expect(
@@ -297,8 +383,8 @@ describe("Release Health design pages", () => {
     ).not.toBeInTheDocument()
   })
 
-  it("shows monitor rules in the selected metric unit", () => {
-    render(
+  it("does not attach preview monitor rules to persisted metric keys", async () => {
+    renderLive(
       <MemoryRouter
         initialEntries={["/en/release-health/metrics/checkout_error_rate"]}
       >
@@ -312,10 +398,14 @@ describe("Release Health design pages", () => {
     )
 
     expect(
-      screen.getByRole("heading", { name: "Checkout error rate" })
+      await screen.findByRole("heading", { name: "Checkout error rate" })
     ).toBeVisible()
-    expect(screen.getAllByText("> 2% for 5 min").length).toBeGreaterThan(0)
-    expect(screen.getAllByText("> 3% for 10 min").length).toBeGreaterThan(0)
+    expect(screen.queryByText("> 2% for 5 min")).toBeNull()
+    expect(
+      screen.getAllByText(
+        "Monitor and Session references are not connected to the API yet."
+      ).length
+    ).toBeGreaterThan(0)
     expect(screen.queryByText("> 800 ms for 10 min")).not.toBeInTheDocument()
   })
 

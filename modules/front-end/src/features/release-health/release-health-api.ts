@@ -1,6 +1,7 @@
 import { fetchApi } from "@/lib/api/authenticated-api"
 import type {
   MetricResultContract,
+  ReleaseMetricCategory,
   MetricSourceConnection,
 } from "./release-health-types"
 import type { SourceConnectionConfigurationDraft } from "./components/source-connection-provider-types"
@@ -21,6 +22,9 @@ export type PrometheusConnectionView = {
   lastCheckedAt: string
 }
 export type LiveMetric = {
+  description?: string | null
+  category?: ReleaseMetricCategory | null
+  fractionDigits?: number | null
   id: string
   projectId: string
   metricVersionId: string
@@ -30,6 +34,17 @@ export type LiveMetric = {
   resultSemantics: string
   resultContract: MetricResultContract
 }
+
+export type MetricDefinitionWrite = Pick<
+  LiveMetric,
+  | "key"
+  | "name"
+  | "description"
+  | "category"
+  | "fractionDigits"
+  | "resultSemantics"
+  | "resultContract"
+>
 export type LiveBinding = {
   id: string
   connectionId: string
@@ -41,6 +56,7 @@ export type LiveBinding = {
   validatedAt: string
 }
 export type LiveTrend = {
+  source?: { providerType: string; connectionName: string; step: string } | null
   status: "not_connected" | "ready" | "no_data" | "stale"
   queriedAt: string
   resultContract: MetricResultContract
@@ -144,8 +160,8 @@ export const releaseHealthApi = {
       `${releaseHealthRoot(scope)}/metrics/${metricId}/binding`,
       body(value, "PUT")
     ),
-  trend: (scope: ReleaseHealthScope, metricId: string) =>
+  trend: (scope: ReleaseHealthScope, metricId: string, minutes = 15) =>
     fetchApi<LiveTrend>(
-      `${releaseHealthRoot(scope)}/metrics/${metricId}/trend?minutes=15`
+      `${releaseHealthRoot(scope)}/metrics/${metricId}/trend?minutes=${minutes}`
     ),
 }

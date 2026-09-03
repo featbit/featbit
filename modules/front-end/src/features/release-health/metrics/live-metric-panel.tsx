@@ -1,5 +1,3 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import {
   Line,
@@ -10,87 +8,16 @@ import {
   YAxis,
   CartesianGrid,
 } from "recharts"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import {
-  releaseHealthApi,
-  type LiveMetric,
-  type LiveTrend,
-  type ReleaseHealthScope,
-} from "../release-health-api"
-import { LiveBindingEditor } from "./live-source-binding-editor"
+import type { LiveTrend } from "../release-health-api"
 
-export function LiveMetricPanel({
-  metric,
-  scope,
+export function LiveTrendChart({
+  trend,
+  fractionDigits = 2,
 }: {
-  metric: LiveMetric
-  scope: ReleaseHealthScope
+  trend: LiveTrend
+  fractionDigits?: number
 }) {
-  const { t } = useTranslation()
-  const client = useQueryClient()
-  const [editing, setEditing] = useState(false)
-  const key = [
-    "release-health",
-    scope.projectId,
-    scope.envId,
-    metric.id,
-    "trend",
-  ]
-  const trend = useQuery({
-    queryKey: key,
-    queryFn: () => releaseHealthApi.trend(scope, metric.id),
-    refetchInterval: 10000,
-    retry: false,
-  })
-  return (
-    <section className="space-y-5 rounded-lg border p-5">
-      <div className="flex flex-wrap justify-between gap-3">
-        <div>
-          <h2 className="text-lg font-semibold">
-            {metric.name} <Badge variant="outline">v{metric.version}</Badge>
-          </h2>
-          <p className="mt-1 font-mono text-xs text-muted-foreground">
-            {metric.key}
-          </p>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {metric.resultSemantics}
-          </p>
-        </div>
-        <Button variant="outline" onClick={() => setEditing(!editing)}>
-          {t("releaseHealth.live.manageBinding")}
-        </Button>
-      </div>
-      <p className="text-xs text-muted-foreground">
-        {t("releaseHealth.live.trendHelp")}
-      </p>
-      {trend.isError ? (
-        <Alert variant="destructive">
-          <AlertDescription>
-            {t("releaseHealth.live.queryFailed")}
-          </AlertDescription>
-        </Alert>
-      ) : trend.data ? (
-        <LiveTrendChart trend={trend.data} />
-      ) : (
-        <p>{t("releaseHealth.live.loading")}</p>
-      )}
-      {editing ? (
-        <LiveBindingEditor
-          scope={scope}
-          metric={metric}
-          onSaved={() => {
-            setEditing(false)
-            void client.invalidateQueries({ queryKey: key })
-          }}
-        />
-      ) : null}
-    </section>
-  )
-}
-
-export function LiveTrendChart({ trend }: { trend: LiveTrend }) {
   const { t } = useTranslation()
   const unit = trend.resultContract.unit
   const suffix =
@@ -112,7 +39,7 @@ export function LiveTrendChart({ trend }: { trend: LiveTrend }) {
         </Badge>
         <span className="font-mono text-xl tabular-nums">
           {latest
-            ? `${latest.value.toLocaleString(undefined, { maximumFractionDigits: 4 })} ${suffix}`
+            ? `${latest.value.toLocaleString(undefined, { maximumFractionDigits: fractionDigits })} ${suffix}`
             : "—"}
         </span>
         <span className="text-xs text-muted-foreground">

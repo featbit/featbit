@@ -112,6 +112,52 @@ public class ReleaseHealthTests
         Assert.Throws<BusinessException>(() => Schema.ResultContract(Schema.Json(contract with { constraints = contract.constraints with { maximum = 200 } })));
     }
 
+    private static MetricWrite MetricDefinition() => new("checkout_ratio", "Checkout ratio", "Percentage of failed checkout requests in the query window.",
+        Schema.Json(new { schemaVersion = 1, resultKind = "numeric_time_series", cardinality = "single", measurementKind = "ratio",
+            unit = new { kind = "percent", scale = "zero_to_one_hundred" }, constraints = new { minimum = 0, maximum = 80, allowNaN = false, allowInfinity = false } }),
+        "Checkout reliability", "reliability", 3);
+
+    [Fact]
+    public async Task MetricDefinitionRoundTripsAllDrawerFieldsWithoutCreatingAnEnvironmentBinding()
+    {
+        var store = new MemoryStore();
+        var service = Service(store, Configuration(), out _);
+        var project = Guid.NewGuid();
+        var saved = await service.CreateMetric(project, MetricDefinition(), default);
+        var read = Assert.Single(await service.Metrics(project, default));
+        Assert.Equal(saved.Id, read.Id);
+        Assert.Equal(saved.MetricVersionId, read.MetricVersionId);
+        Assert.Equal(saved.ResultContract.GetRawText(), read.ResultContract.GetRawText());
+        Assert.Equal("Checkout reliability", read.Description);
+        Assert.Equal("reliability", read.Category);
+        Assert.Equal(3, read.FractionDigits);
+        Assert.Equal(1, read.Version);
+        Assert.Equal(80, read.ResultContract.GetProperty("constraints").GetProperty("maximum").GetInt32());
+        Assert.Empty(await service.Metrics(Guid.NewGuid(), default));
+        Assert.Null(await service.Binding(project, Guid.NewGuid(), saved.Id, default));
+    }
+
+    [Theory]
+    [InlineData("invalid-key", "reliability", 2)]
+    [InlineData("valid_key", "unknown", 2)]
+    [InlineData("valid_key", "quality", 5)]
+    public async Task MetricDefinitionRejectsInvalidKeyCategoryAndPrecision(string key, string category, int digits)
+    {
+        var service = Service(new MemoryStore(), Configuration(), out _);
+        await Assert.ThrowsAsync<BusinessException>(() => service.CreateMetric(Guid.NewGuid(), MetricDefinition() with { Key = key, Category = category, FractionDigits = digits }, default));
+    }
+
+    [Fact]
+    public void ExistingMetricDocumentsWithoutOptionalMetadataRemainReadable()
+    {
+        var legacy = Schema.Json(new { id = Guid.NewGuid(), projectId = Guid.NewGuid(), metricVersionId = Guid.NewGuid(), version = 1,
+            key = "legacy_metric", name = "Legacy metric", resultSemantics = "Legacy metric semantics.", resultContract = MetricDefinition().ResultContract });
+        var read = legacy.Deserialize<MetricView>(new JsonSerializerOptions(JsonSerializerDefaults.Web))!;
+        Assert.Null(read.Description);
+        Assert.Null(read.Category);
+        Assert.Null(read.FractionDigits);
+    }
+
     private sealed class MemoryStore : IReleaseHealthStore
     {
         public ReleaseHealthDocument? Document;

@@ -69,7 +69,7 @@ public sealed class PrometheusProvider(IConfiguration configuration, IHostEnviro
         if (!value.TryGetProperty("promql", out var queryValue) || queryValue.ValueKind != JsonValueKind.String) throw Schema.Invalid("invalid_query");
         var query = queryValue.GetString()!;
         if (string.IsNullOrWhiteSpace(query) || query.Length > 4096 || query.Contains('\0')) throw Schema.Invalid("invalid_query");
-        if (Schema.Text(value, "queryMode") != "range" || Schema.Text(value, "step") is not ("5s" or "15s" or "1m" or "5m")) throw Schema.Invalid("invalid_query_configuration");
+        if (Schema.Text(value, "queryMode") != "range" || Schema.Text(value, "step") is not ("5s" or "15s" or "1m" or "5m" or "15m")) throw Schema.Invalid("invalid_query_configuration");
         return value.Clone();
     }
 

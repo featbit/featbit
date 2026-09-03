@@ -35,136 +35,45 @@ import {
   localizedPath,
   resolveLang,
 } from "@/features/layout/layout-context"
-import { MetricTrendChart } from "../components/metric-trend-chart"
+import { LiveTrendChart } from "./live-metric-panel"
 import {
-  DataStatusBadge,
-  HealthStatusBadge,
-  PurposeBadge,
-} from "../components/status-badges"
-import {
-  metricSampleText,
-  monitorSampleText,
-  ruleSampleText,
-  sessionSampleText,
-} from "../release-health-display"
-import { healthSessions, metricByKey } from "../release-health-mock-data"
-import type { DataStatus, HealthStatus } from "../release-health-types"
+  useLiveMetrics,
+  useMetricReadings,
+  metricValue,
+} from "./live-metric-data"
+import { useEnvironmentStreams } from "./live-environment-streams"
+import type { LiveMetric } from "../release-health-api"
+import type { ProjectEnv } from "@/features/layout/layout-types"
+import { DataStatusBadge } from "../components/status-badges"
 import { metricResultProfileLabel, metricUnitLabel } from "./metric-contract"
-
-type MonitorRow = {
-  flagKey: string
-  monitor: string
-  purpose: "observe" | "guard"
-  version: number
-  window: string
-  reducer: "latest" | "average" | "minimum" | "maximum"
-  rule: string
-  status: HealthStatus
-}
-
-type EnvironmentStreamRow = {
-  environmentKey: string
-  environmentName: string
-  connected: boolean
-  provider?: string
-  connection?: string
-  step?: string
-  syncInterval?: string
-  dataStatus?: DataStatus
-  latestValue?: string
-  freshness?: string
-}
-
-const monitorRowsByMetricKey: Record<string, MonitorRow[]> = {
-  checkout_error_rate: [
-    {
-      flagKey: "checkout-redesign",
-      monitor: "Checkout safety monitor",
-      purpose: "guard",
-      version: 3,
-      window: "5 min",
-      reducer: "latest",
-      rule: "> 2% for 5 min",
-      status: "critical",
-    },
-    {
-      flagKey: "payment-routing",
-      monitor: "Payment reliability",
-      purpose: "guard",
-      version: 3,
-      window: "10 min",
-      reducer: "maximum",
-      rule: "> 3% for 10 min",
-      status: "healthy",
-    },
-  ],
-  api_p95_latency: [
-    {
-      flagKey: "checkout-redesign",
-      monitor: "Checkout safety monitor",
-      purpose: "guard",
-      version: 5,
-      window: "10 min",
-      reducer: "maximum",
-      rule: "> 800 ms for 10 min",
-      status: "critical",
-    },
-    {
-      flagKey: "recommendations-v2",
-      monitor: "Recommendations observation",
-      purpose: "observe",
-      version: 5,
-      window: "15 min",
-      reducer: "average",
-      rule: "Observe trend",
-      status: "not-evaluated",
-    },
-  ],
-  checkout_completion_rate: [
-    {
-      flagKey: "checkout-redesign",
-      monitor: "Checkout conversion guard",
-      purpose: "guard",
-      version: 2,
-      window: "10 min",
-      reducer: "latest",
-      rule: "< 65% for 10 min",
-      status: "healthy",
-    },
-  ],
-  service_memory_saturation: [
-    {
-      flagKey: "search-ranking-v3",
-      monitor: "Search resource watch",
-      purpose: "guard",
-      version: 1,
-      window: "10 min",
-      reducer: "maximum",
-      rule: "> 90% for 10 min",
-      status: "warning",
-    },
-  ],
-  crash_free_sessions: [
-    {
-      flagKey: "mobile-navigation",
-      monitor: "Mobile stability guard",
-      purpose: "guard",
-      version: 1,
-      window: "10 min",
-      reducer: "minimum",
-      rule: "< 99.5% for 10 min",
-      status: "not-evaluated",
-    },
-  ],
-}
 
 export function ReleaseMetricDetailsPage() {
   const { t } = useTranslation()
   const params = useParams()
   const lang = resolveLang(params.lang)
   const context = getCurrentProjectEnv()
-  const metric = metricByKey(decodeURIComponent(params.metricKey ?? ""))
-  const [range, setRange] = useState("1h")
+  const metrics = useLiveMetrics(context?.projectId ?? "")
+  const metric = metrics.data?.find((item) => item.key === params.metricKey)
+  if (metrics.isPending || metrics.isError)
+    return (
+      <Alert variant={metrics.isError ? "destructive" : "default"}>
+        <AlertDescription>
+          {t(
+            metrics.isError
+              ? "releaseHealth.live.loadFailed"
+              : "releaseHealth.live.loading"
+          )}
+        </AlertDescription>
+      </Alert>
+    )
+  if (metric && context)
+    return (
+      <MetricDetails
+        key={context.projectId + metric.id}
+        definition={metric}
+        context={context}
+      />
+    )
 
   if (!metric) {
     return (
@@ -187,59 +96,40 @@ export function ReleaseMetricDetailsPage() {
     )
   }
 
-  const metricSessions = healthSessions.filter((session) =>
-    session.snapshot.metricVersions.some((version) =>
-      version.startsWith(metric.key)
-    )
-  )
-  const monitorRows = monitorRowsByMetricKey[metric.key] ?? []
-  const currentEnvironmentKey = context?.envKey ?? "production"
-  const currentBinding = metric.environment.sourceBinding
-  const environmentRows = (
-    [
-      {
-        environmentKey: currentEnvironmentKey,
-        environmentName: context?.envName ?? "Production",
-        connected: Boolean(currentBinding),
-        provider: currentBinding
-          ? t("releaseHealth.metrics.sources.prometheusCompatible")
-          : undefined,
-        connection: currentBinding?.connectionName,
-        step: currentBinding?.step,
-        syncInterval: currentBinding?.syncInterval,
-        dataStatus: currentBinding ? metric.environment.dataStatus : undefined,
-        latestValue: currentBinding
-          ? metric.environment.displayValue
-          : undefined,
-        freshness: currentBinding
-          ? metricSampleText(t, metric, "updatedAt")
-          : undefined,
-      },
-      {
-        environmentKey: "staging",
-        environmentName: "Staging",
-        connected: false,
-      },
-      {
-        environmentKey: "development",
-        environmentName: "Development",
-        connected: true,
-        provider: t("releaseHealth.metrics.sources.prometheusCompatible"),
-        connection: "Development Prometheus",
-        step: "5m",
-        syncInterval: "5m",
-        dataStatus: "no-data",
-        latestValue: "—",
-        freshness: t("releaseHealth.metrics.detail.awaitingSamples"),
-      },
-    ] satisfies EnvironmentStreamRow[]
-  ).filter(
-    (row, index, rows) =>
-      rows.findIndex(
-        (candidate) => candidate.environmentKey === row.environmentKey
-      ) === index
-  )
+  return null
+}
 
+function MetricDetails({
+  definition,
+  context,
+}: {
+  definition: LiveMetric
+  context: ProjectEnv
+}) {
+  const { t } = useTranslation()
+  const lang = resolveLang(useParams().lang)
+  const [range, setRange] = useState("1h")
+  const reading = useMetricReadings(context, [definition], 60)[0]
+  const currentBinding =
+    reading.data?.status !== "not_connected" && Boolean(reading.data)
+  const point = reading.data?.points.at(-1)
+  const metric = {
+    ...definition,
+    environment: {
+      dataStatus: reading.isError
+        ? ("error" as const)
+        : reading.data?.status === "stale"
+          ? ("stale" as const)
+          : reading.data?.status === "no_data"
+            ? ("no-data" as const)
+            : ("ready" as const),
+      displayValue: point ? metricValue(definition, point.value) : "—",
+      history: reading.data?.points ?? [],
+      updatedAt: point ? new Date(point.timestamp).toLocaleString() : "—",
+    },
+  }
+  const streams = useEnvironmentStreams(context, definition)
+  const environmentRows = streams.rows
   const constraints = metric.resultContract.constraints
 
   return (
@@ -252,12 +142,12 @@ export function ReleaseMetricDetailsPage() {
         <div className="min-w-0 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="truncate text-2xl font-semibold tracking-normal">
-              {metricSampleText(t, metric, "name")}
+              {metric.name}
             </h1>
             <Badge variant="secondary">v{metric.version}</Badge>
           </div>
           <p className="max-w-3xl text-sm text-muted-foreground">
-            {metricSampleText(t, metric, "description")}
+            {metric.description || "—"}
           </p>
           <div className="flex flex-wrap items-center gap-2">
             <code className="rounded-md border bg-muted/30 px-2 py-1 text-xs">
@@ -276,7 +166,12 @@ export function ReleaseMetricDetailsPage() {
             </Badge>
           </div>
         </div>
-        <Button variant="outline" size="sm">
+        <Button
+          variant="outline"
+          size="sm"
+          disabled
+          title={t("releaseHealth.live.versionsUnavailable")}
+        >
           <MoreHorizontal />
           {t("releaseHealth.metrics.detail.actions")}
         </Button>
@@ -338,6 +233,15 @@ export function ReleaseMetricDetailsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="px-0">
+          {streams.pending || streams.failed ? (
+            <p className="px-4 py-3 text-sm text-muted-foreground">
+              {t(
+                streams.failed
+                  ? "releaseHealth.live.loadFailed"
+                  : "releaseHealth.live.loading"
+              )}
+            </p>
+          ) : null}
           <Table>
             <TableHeader>
               <TableRow>
@@ -391,7 +295,11 @@ export function ReleaseMetricDetailsPage() {
                     )}
                   </TableCell>
                   <TableCell>
-                    {row.connected && row.dataStatus ? (
+                    {row.pending ? (
+                      <Badge variant="outline">
+                        {t("releaseHealth.live.loading")}
+                      </Badge>
+                    ) : row.dataStatus ? (
                       <DataStatusBadge status={row.dataStatus} />
                     ) : (
                       <Badge variant="outline" className="font-normal">
@@ -414,6 +322,7 @@ export function ReleaseMetricDetailsPage() {
                       nativeButton={false}
                       variant={row.connected ? "outline" : "default"}
                       size="sm"
+                      disabled={!row.canConfigure}
                       render={
                         <Link
                           to={localizedPath(
@@ -446,7 +355,7 @@ export function ReleaseMetricDetailsPage() {
         <FactCard
           label={t("releaseHealth.metrics.detail.currentValue")}
           value={currentBinding ? metric.environment.displayValue : "—"}
-          help={metricSampleText(t, metric, "changeLabel")}
+          help={t("releaseHealth.live.onDemand")}
         />
         <Card size="sm">
           <CardHeader>
@@ -455,7 +364,11 @@ export function ReleaseMetricDetailsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {currentBinding ? (
+            {reading.isPending ? (
+              <Badge variant="outline">{t("releaseHealth.live.loading")}</Badge>
+            ) : reading.isError ? (
+              <DataStatusBadge status="error" />
+            ) : currentBinding ? (
               <DataStatusBadge status={metric.environment.dataStatus} />
             ) : (
               <Badge variant="outline">
@@ -471,12 +384,16 @@ export function ReleaseMetricDetailsPage() {
         </Card>
         <FactCard
           label={t("releaseHealth.metrics.detail.pointCount")}
-          value={String(metric.environment.history.length)}
+          value={
+            reading.isPending || reading.isError
+              ? "—"
+              : String(metric.environment.history.length)
+          }
           help={t("releaseHealth.metrics.detail.managementWindow")}
         />
         <FactCard
           label={t("releaseHealth.metrics.freshness")}
-          value={metricSampleText(t, metric, "updatedAt")}
+          value={metric.environment.updatedAt}
           help={t("releaseHealth.metrics.detail.latestSample")}
           compact
         />
@@ -511,10 +428,10 @@ export function ReleaseMetricDetailsPage() {
                   <SelectItem value="1h">
                     {t("releaseHealth.metrics.detail.lastHour")}
                   </SelectItem>
-                  <SelectItem value="6h">
+                  <SelectItem value="6h" disabled>
                     {t("releaseHealth.metrics.detail.lastSixHours")}
                   </SelectItem>
-                  <SelectItem value="24h">
+                  <SelectItem value="24h" disabled>
                     {t("releaseHealth.metrics.detail.lastDay")}
                   </SelectItem>
                 </SelectGroup>
@@ -523,7 +440,24 @@ export function ReleaseMetricDetailsPage() {
           </CardAction>
         </CardHeader>
         <CardContent>
-          <MetricTrendChart metric={metric} />
+          <p className="mb-3 text-xs text-muted-foreground">
+            {t("releaseHealth.live.rangeUnavailable")}{" "}
+            {t("releaseHealth.live.syncUnavailable")}
+          </p>
+          {reading.isError ? (
+            <Alert variant="destructive">
+              <AlertDescription>
+                {t("releaseHealth.live.queryFailed")}
+              </AlertDescription>
+            </Alert>
+          ) : reading.data ? (
+            <LiveTrendChart
+              trend={reading.data}
+              fractionDigits={metric.fractionDigits ?? 2}
+            />
+          ) : (
+            <p>{t("releaseHealth.live.loading")}</p>
+          )}
         </CardContent>
       </Card>
 
@@ -563,42 +497,14 @@ export function ReleaseMetricDetailsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {monitorRows.map((row) => (
-                  <TableRow key={`${row.flagKey}-${row.monitor}`}>
-                    <TableCell className="pl-4">
-                      <Link
-                        to={localizedPath(
-                          lang,
-                          `/feature-flags/${encodeURIComponent(
-                            row.flagKey
-                          )}/release-health`
-                        )}
-                        className="font-medium hover:underline"
-                      >
-                        {monitorSampleText(t, row.monitor)}
-                      </Link>
-                      <p className="font-mono text-xs text-muted-foreground">
-                        {row.flagKey}
-                      </p>
-                    </TableCell>
-                    <TableCell>v{row.version}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="font-normal">
-                        {t("releaseHealth.scope.environment")}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {row.window} · {t(`releaseHealth.reducer.${row.reducer}`)}
-                    </TableCell>
-                    <TableCell>
-                      <PurposeBadge purpose={row.purpose} />
-                    </TableCell>
-                    <TableCell>{ruleSampleText(t, row.rule)}</TableCell>
-                    <TableCell className="pr-4">
-                      <HealthStatusBadge status={row.status} />
-                    </TableCell>
-                  </TableRow>
-                ))}
+                <TableRow>
+                  <TableCell
+                    colSpan={7}
+                    className="h-24 text-center text-muted-foreground"
+                  >
+                    {t("releaseHealth.live.relatedUnavailable")}
+                  </TableCell>
+                </TableRow>
               </TableBody>
             </Table>
           </CardContent>
@@ -614,6 +520,9 @@ export function ReleaseMetricDetailsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
+            <p className="text-xs text-muted-foreground">
+              {t("releaseHealth.live.versionsUnavailable")}
+            </p>
             <div className="rounded-md border bg-muted/20 p-3">
               <div className="flex items-center justify-between gap-3">
                 <p className="font-medium">v{metric.version}</p>
@@ -625,51 +534,25 @@ export function ReleaseMetricDetailsPage() {
                 {metricResultProfileLabel(t, metric)}
               </p>
             </div>
-            {metric.version > 1 ? (
-              <div className="rounded-md border p-3">
-                <p className="font-medium">v{metric.version - 1}</p>
-                <p className="mt-2 text-xs text-muted-foreground">
-                  {t("releaseHealth.metrics.detail.historicalVersion")}
-                </p>
-              </div>
-            ) : null}
           </CardContent>
         </Card>
       </div>
 
-      {metricSessions.length ? (
-        <Card className="mt-4">
-          <CardHeader>
-            <CardTitle>
-              {t("releaseHealth.metrics.detail.sessionMarkers")}
-            </CardTitle>
-            <CardDescription>
-              {t("releaseHealth.metrics.detail.sessionMarkersDescription")}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-wrap gap-2">
-            {metricSessions.map((session) => (
-              <Button
-                key={session.id}
-                nativeButton={false}
-                variant="outline"
-                size="sm"
-                render={
-                  <Link
-                    to={localizedPath(
-                      lang,
-                      `/release-health/sessions/${session.id}`
-                    )}
-                  />
-                }
-              >
-                {session.displayId} ·{" "}
-                {sessionSampleText(t, session, "flagName")}
-              </Button>
-            ))}
-          </CardContent>
-        </Card>
-      ) : null}
+      <Card className="mt-4">
+        <CardHeader>
+          <CardTitle>
+            {t("releaseHealth.metrics.detail.sessionMarkers")}
+          </CardTitle>
+          <CardDescription>
+            {t("releaseHealth.metrics.detail.sessionMarkersDescription")}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            {t("releaseHealth.live.relatedUnavailable")}
+          </p>
+        </CardContent>
+      </Card>
     </div>
   )
 }
