@@ -1,4 +1,5 @@
-import { Copy } from "lucide-react"
+import { ChevronDown, ChevronUp, Copy } from "lucide-react"
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -99,6 +100,7 @@ function UsageGroup({ usage }: { usage: MetricExperimentUsage }) {
 
 function ExperimentRuns({ usage }: { usage?: MetricExperimentUsage[] }) {
   const { t } = useTranslation()
+  const [expanded, setExpanded] = useState(false)
   const usageWithRuns = usage?.filter((item) => item.runs?.length)
   if (!usageWithRuns?.length) {
     return (
@@ -108,13 +110,43 @@ function ExperimentRuns({ usage }: { usage?: MetricExperimentUsage[] }) {
     )
   }
 
+  const allRuns = usageWithRuns.flatMap((item) => item.runs ?? [])
+  const runCount = allRuns.length
+  const visibleRuns = new Set(expanded ? allRuns : allRuns.slice(0, 2))
+  const visibleUsage = usageWithRuns.flatMap((item) => {
+    const runs = (item.runs ?? []).filter((run) => visibleRuns.has(run))
+    return runs.length ? [{ ...item, runs }] : []
+  })
+
   return (
-    <div className="min-w-64 divide-y">
-      {usageWithRuns.map((item) => (
-        <div key={item.experimentId} className="py-2 first:pt-0 last:pb-0">
-          <UsageGroup usage={item} />
-        </div>
-      ))}
+    <div className="min-w-64">
+      <div className="divide-y">
+        {visibleUsage.map((item) => (
+          <div key={item.experimentId} className="py-2 first:pt-0 last:pb-0">
+            <UsageGroup usage={item} />
+          </div>
+        ))}
+      </div>
+      {runCount > 2 ? (
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="mt-2 h-7 justify-start gap-1.5 px-0 text-muted-foreground hover:text-foreground"
+          onClick={() => setExpanded((value) => !value)}
+        >
+          {expanded ? (
+            <ChevronUp className="size-3.5" />
+          ) : (
+            <ChevronDown className="size-3.5" />
+          )}
+          {t(
+            expanded
+              ? "releaseDecision.metrics.showLessRuns"
+              : "releaseDecision.metrics.showMoreRuns"
+          )}
+        </Button>
+      ) : null}
     </div>
   )
 }

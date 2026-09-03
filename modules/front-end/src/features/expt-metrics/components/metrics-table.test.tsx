@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react"
+import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import "@/lib/i18n/i18n"
 import type { Metric } from "../metrics-types"
@@ -22,6 +22,7 @@ const metric: Metric = {
       runs: [
         { id: "run-3", key: "Run 3", status: "running", role: "primary" },
         { id: "run-2", key: "Run 2", status: "completed", role: "guardrail" },
+        { id: "run-1", key: "Run 1", status: "draft", role: "primary" },
       ],
     },
   ],
@@ -56,6 +57,16 @@ describe("MetricsTable", () => {
     expect(screen.getByText("Running")).toBeVisible()
     expect(screen.getByText("Run 2")).toBeVisible()
     expect(screen.getByText("Completed")).toBeVisible()
+    expect(screen.queryByText("Run 1")).not.toBeInTheDocument()
+    expect(screen.queryByText("Draft")).not.toBeInTheDocument()
+
+    const showMore = screen.getByRole("button", { name: "Show more" })
+    expect(showMore).toHaveClass("justify-start", "px-0")
+    fireEvent.click(showMore)
+
+    expect(screen.getByText("Run 1")).toBeVisible()
+    expect(screen.getByText("Draft")).toBeVisible()
+    expect(screen.getByRole("button", { name: "Show less" })).toBeVisible()
     expect(screen.getByRole("button", { name: "Edit" })).toBeVisible()
     expect(screen.getByRole("button", { name: "Archive" })).toBeVisible()
   })
