@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import {
+  experimentRunSearchParams,
   experimentStageFromParam,
   experimentStageSearchParams,
 } from "./experiment-stage-route"
@@ -40,5 +41,16 @@ describe("experiment stage URL state", () => {
     expect(next.get("context")).toBe("environment")
     expect(next.get("projectId")).toBe("project-1")
     expect(current.get("stage")).toBe("hypothesis")
+  })
+
+  it("selects a run while preserving the measuring stage", () => {
+    const current = new URLSearchParams("stage=measuring&context=environment")
+
+    const next = experimentRunSearchParams(current, "run-4")
+
+    expect(next.get("runId")).toBe("run-4")
+    expect(next.get("stage")).toBe("measuring")
+    expect(next.get("context")).toBe("environment")
+    expect(current.has("runId")).toBe(false)
   })
 })

@@ -97,7 +97,15 @@ describe("LayersTable server allocation summary", () => {
     expect(screen.getByText("No conflicts")).toBeInTheDocument()
     expect(screen.getByText("Archived")).toBeInTheDocument()
     expect(screen.getByText("Collecting")).toBeInTheDocument()
+    expect(screen.queryByText("Draft")).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole("button", { name: "Show more" }))
+
     expect(screen.getByText("Draft")).toBeInTheDocument()
+    expect(screen.getAllByRole("link", { name: "expt 1" })[0]).toHaveAttribute(
+      "href",
+      "/en/experiments/experiment-1?stage=measuring&runId=archived-run"
+    )
     expect(
       screen.getByRole("button", { name: "Edit" }).querySelector("svg")
     ).toBeNull()
@@ -144,6 +152,127 @@ describe("LayersTable server allocation summary", () => {
     expect(screen.getAllByText("Allocation unavailable")).toHaveLength(2)
     expect(screen.queryByText("No allocation")).not.toBeInTheDocument()
     expect(screen.queryByText("No conflicts")).not.toBeInTheDocument()
+  })
+
+  it("shows two runs by default and expands the complete list", () => {
+    renderTable({
+      ...layer,
+      experimentRuns: [
+        ...layer.experimentRuns!,
+        {
+          id: "fourth-run",
+          experimentId: "experiment-1",
+          experimentName: "expt 1",
+          key: "run-4",
+          start: 20,
+          end: 30,
+          status: "draft",
+          includedInAllocation: true,
+        },
+        {
+          id: "fifth-run",
+          experimentId: "experiment-1",
+          experimentName: "expt 1",
+          key: "run-5",
+          start: 30,
+          end: 40,
+          status: "draft",
+          includedInAllocation: true,
+        },
+      ].map((run, index) => ({ ...run, key: `run-${index + 1}` })),
+    })
+
+    expect(screen.queryByText("run-3")).not.toBeInTheDocument()
+    expect(screen.queryByText("run-4")).not.toBeInTheDocument()
+    expect(screen.queryByText("run-5")).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole("button", { name: "Show more" }))
+
+    expect(screen.getByText("run-3")).toBeVisible()
+    expect(screen.getByText("run-4")).toBeVisible()
+    expect(screen.getByText("run-5")).toBeVisible()
+    expect(screen.getByRole("button", { name: "Show less" })).toBeVisible()
+  })
+
+  it("shows every allocation run contributing to an overlap", async () => {
+    renderTable({
+      ...layer,
+      experimentRuns: [
+        ...layer.experimentRuns!,
+        {
+          id: "analyzing-run",
+          experimentId: "experiment-3",
+          experimentName: "expt 3",
+          key: "run-4",
+          start: 20,
+          end: 50,
+          status: "analyzing",
+          includedInAllocation: true,
+        },
+      ],
+      allocationSummary: {
+        activeRunCount: 3,
+        reservedPercent: 100,
+        freePercent: 0,
+        overlaps: [
+          {
+            start: 20,
+            end: 50,
+            runIds: ["archived-run", "collecting-run", "analyzing-run"],
+          },
+        ],
+        mixedAssignmentUnits: false,
+        overAllocated: true,
+        status: "over-allocated",
+      },
+    })
+
+    const overlap = screen.getByRole("button", {
+      name: "View 2 overlapping experiment runs from 20% to 50%",
+    })
+    fireEvent.mouseEnter(overlap)
+
+    await waitFor(() =>
+      expect(screen.getByText("Overlap 20–50% · 2 runs")).toBeVisible()
+    )
+    const popover = screen.getByText("Overlap 20–50% · 2 runs").parentElement
+      ?.parentElement
+    expect(popover).not.toBeNull()
+    if (!popover) throw new Error("Expected overlap details to be rendered")
+    expect(within(popover).getByText("expt 1")).toBeVisible()
+    expect(within(popover).getByText("expt 3")).toBeVisible()
+    expect(within(popover).queryByText("Archived")).not.toBeInTheDocument()
+    expect(within(popover).getByText("Collecting")).toBeVisible()
+    expect(within(popover).getByText("Analyzing")).toBeVisible()
+    const experimentLink = within(popover).getByRole("link", {
+      name: "expt 1",
+    })
+    expect(experimentLink).toHaveAttribute(
+      "href",
+      "/en/experiments/experiment-1?stage=measuring&runId=collecting-run"
+    )
+    expect(experimentLink).not.toHaveFocus()
+
+    fireEvent.pointerDown(document.body)
+
+    await waitFor(() =>
+      expect(
+        screen.queryByText("Overlap 20–50% · 2 runs")
+      ).not.toBeInTheDocument()
+    )
+
+    fireEvent.mouseEnter(overlap)
+    await waitFor(() =>
+      expect(screen.getByText("Overlap 20–50% · 2 runs")).toBeVisible()
+    )
+
+    fireEvent.pointerMove(document.body)
+
+    await waitFor(() =>
+      expect(
+        screen.queryByText("Overlap 20–50% · 2 runs")
+      ).not.toBeInTheDocument()
+    )
   })
 
   it("uses aligned ghost actions and restores archived layers", () => {

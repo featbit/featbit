@@ -17,6 +17,7 @@ import { ExperimentDetailsHeader } from "../components/experiment-details-header
 import { ExperimentSettings } from "../components/experiment-settings"
 import { ExperimentStageNavigation } from "../components/experiment-stage-navigation"
 import {
+  experimentRunSearchParams,
   experimentStageFromParam,
   experimentStageSearchParams,
 } from "../experiment-stage-route"
@@ -102,7 +103,11 @@ export function ExperimentDetailsPage() {
   const backHref = localizedPath(lang, "/experiments")
   const [settingsActive, setSettingsActive] = useState(false)
   const [agentSetupOpen, setAgentSetupOpen] = useState(false)
-  const [selectedRunId, setSelectedRunId] = useState<string>()
+  const selectedRunId = searchParams.get("runId") ?? undefined
+  const setSelectedRunId = (runId: string) =>
+    setSearchParams((current) => experimentRunSearchParams(current, runId), {
+      replace: true,
+    })
   const queryKey = ["experiment-details", envId, experimentId]
 
   const detailQuery = useQuery({

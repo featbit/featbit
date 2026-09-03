@@ -40,13 +40,13 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>
 type FieldName = keyof FormValues
 
-const FIELDS: { name: FieldName; rows: number }[] = [
-  { name: "description", rows: 2 },
-  { name: "goal", rows: 2 },
-  { name: "intent", rows: 2 },
-  { name: "hypothesis", rows: 3 },
-  { name: "change", rows: 3 },
-  { name: "constraints", rows: 3 },
+const FIELDS: FieldName[] = [
+  "description",
+  "goal",
+  "intent",
+  "hypothesis",
+  "change",
+  "constraints",
 ]
 
 function valuesOf(experiment: ExperimentDetail): FormValues {
@@ -133,18 +133,18 @@ export function EditDetailsDialog({
           >
             <div className="min-h-0 space-y-4 overflow-y-auto">
               {FIELDS.map((field) => (
-                <div key={field.name} className="space-y-2">
-                  <Label htmlFor={`experiment-${field.name}`}>
+                <div key={field} className="space-y-2">
+                  <Label htmlFor={`experiment-${field}`}>
                     {t(
-                      `releaseDecision.experiments.detailsPage.fields.${field.name}`
+                      `releaseDecision.experiments.detailsPage.fields.${field}`
                     )}
                   </Label>
                   <Textarea
-                    id={`experiment-${field.name}`}
-                    rows={field.rows}
-                    className="resize-none"
+                    id={`experiment-${field}`}
+                    rows={1}
+                    className="max-h-32 min-h-12 resize-none overflow-y-auto"
                     disabled={saving}
-                    {...form.register(field.name)}
+                    {...form.register(field)}
                   />
                 </div>
               ))}

@@ -1,8 +1,14 @@
-import { Copy, Info, TriangleAlert } from "lucide-react"
+import { ChevronDown, ChevronUp, Copy, Info, TriangleAlert } from "lucide-react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
@@ -21,6 +27,7 @@ import { localizedPath } from "@/features/layout/layout-context"
 import type { Lang } from "@/features/layout/layout-types"
 import type {
   Layer,
+  LayerAllocationOverlap,
   LayerAllocationSummary,
   LayerRunSummary,
 } from "../layers-types"
@@ -41,12 +48,180 @@ type Props = {
   onCreate: () => void
 }
 
+function OverlapDetails({
+  overlap,
+  runs,
+  lang,
+}: {
+  overlap: LayerAllocationOverlap
+  runs: LayerRunSummary[]
+  lang: Lang
+}) {
+  const { t } = useTranslation()
+  const [open, setOpen] = useState(false)
+  const triggerRef = useRef<HTMLButtonElement | null>(null)
+  const contentRef = useRef<HTMLDivElement | null>(null)
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const overlappingRunIds = new Set(overlap.runIds)
+  const overlappingRuns = runs
+    .map((run, colorIndex) => ({ run, colorIndex }))
+    .filter(
+      ({ run }) => run.includedInAllocation && overlappingRunIds.has(run.id)
+    )
+
+  const cancelClose = useCallback(() => {
+    if (closeTimer.current) {
+      clearTimeout(closeTimer.current)
+      closeTimer.current = null
+    }
+  }, [])
+
+  const openDetails = () => {
+    cancelClose()
+    setOpen(true)
+  }
+
+  const scheduleClose = useCallback(() => {
+    if (closeTimer.current) return
+    closeTimer.current = setTimeout(() => {
+      closeTimer.current = null
+      setOpen(false)
+    }, 120)
+  }, [])
+
+  useEffect(() => {
+    if (!open) return
+
+    const isWithinPopover = (target: EventTarget | null) =>
+      target instanceof Node &&
+      (triggerRef.current?.contains(target) ||
+        contentRef.current?.contains(target))
+
+    const handlePointerMove = (event: PointerEvent) => {
+      if (isWithinPopover(event.target)) {
+        cancelClose()
+        return
+      }
+
+      scheduleClose()
+    }
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (isWithinPopover(event.target)) return
+      cancelClose()
+      setOpen(false)
+    }
+
+    document.addEventListener("pointermove", handlePointerMove)
+    document.addEventListener("pointerdown", handlePointerDown, true)
+    return () => {
+      document.removeEventListener("pointermove", handlePointerMove)
+      document.removeEventListener("pointerdown", handlePointerDown, true)
+      cancelClose()
+    }
+  }, [cancelClose, open, scheduleClose])
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger
+        render={
+          <button
+            ref={triggerRef}
+            type="button"
+            aria-label={t("releaseDecision.layers.openOverlapDetails", {
+              start: overlap.start,
+              end: overlap.end,
+              count: overlappingRuns.length,
+            })}
+            className="absolute inset-y-0 z-10 cursor-pointer focus-visible:ring-2 focus-visible:ring-amber-600 focus-visible:outline-none focus-visible:ring-inset"
+            style={{
+              left: `${overlap.start}%`,
+              width: `${overlap.end - overlap.start}%`,
+              backgroundImage:
+                "repeating-linear-gradient(135deg, var(--color-amber-500) 0, var(--color-amber-500) 3px, transparent 3px, transparent 6px)",
+            }}
+            onMouseEnter={openDetails}
+            onMouseLeave={scheduleClose}
+            onFocus={openDetails}
+            onBlur={scheduleClose}
+          />
+        }
+      />
+      <PopoverContent
+        ref={contentRef}
+        align="start"
+        className="w-80 p-0"
+        initialFocus={false}
+        finalFocus={false}
+        onMouseEnter={cancelClose}
+        onMouseLeave={scheduleClose}
+      >
+        <div className="border-b px-3 py-2.5">
+          <p className="text-sm font-medium">
+            {t("releaseDecision.layers.overlapDetails", {
+              start: overlap.start,
+              end: overlap.end,
+              count: overlappingRuns.length,
+            })}
+          </p>
+        </div>
+        <div className="max-h-64 divide-y overflow-y-auto px-3">
+          {overlappingRuns.map(({ run, colorIndex }) => (
+            <div key={run.id} className="space-y-1.5 py-2.5">
+              <div className="flex min-w-0 items-center gap-2">
+                <span
+                  className={`size-3 shrink-0 rounded-sm ${runColor(colorIndex)}`}
+                />
+                {run.experimentId ? (
+                  <Link
+                    to={localizedPath(
+                      lang,
+                      `/experiments/${encodeURIComponent(run.experimentId)}?stage=measuring&runId=${encodeURIComponent(run.id)}`
+                    )}
+                    className="min-w-0 truncate text-sm font-medium underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                    onClick={() => setOpen(false)}
+                  >
+                    {run.experimentName}
+                  </Link>
+                ) : (
+                  <span className="min-w-0 truncate text-sm font-medium">
+                    {run.experimentName}
+                  </span>
+                )}
+                <code className="ml-auto shrink-0 rounded border bg-muted/60 px-1.5 py-0.5 text-xs text-muted-foreground">
+                  {run.key}
+                </code>
+              </div>
+              <div className="flex items-center justify-between gap-4 pl-5 text-xs text-muted-foreground">
+                <span className="tabular-nums">
+                  {run.start}–{run.end}%
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span
+                    className={`size-2 rounded-full ${runStateColor(run.status)}`}
+                  />
+                  {t(
+                    `releaseDecision.layers.runStatus.${run.status.toLowerCase()}`,
+                    { defaultValue: run.status }
+                  )}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </PopoverContent>
+    </Popover>
+  )
+}
+
 function TrafficAllocation({
   runs,
   summary,
+  lang,
 }: {
   runs: LayerRunSummary[]
   summary?: LayerAllocationSummary
+  lang: Lang
 }) {
   const { t } = useTranslation()
   const allocationRuns = runs
@@ -113,15 +288,11 @@ function TrafficAllocation({
           </div>
         )}
         {summary?.overlaps.map((overlap) => (
-          <div
+          <OverlapDetails
             key={`${overlap.start}-${overlap.end}`}
-            className="pointer-events-none absolute inset-y-0 z-10"
-            style={{
-              left: `${overlap.start}%`,
-              width: `${overlap.end - overlap.start}%`,
-              backgroundImage:
-                "repeating-linear-gradient(135deg, var(--color-amber-500) 0, var(--color-amber-500) 3px, transparent 3px, transparent 6px)",
-            }}
+            overlap={overlap}
+            runs={runs}
+            lang={lang}
           />
         ))}
       </div>
@@ -207,6 +378,7 @@ function ExperimentRuns({
   lang: Lang
 }) {
   const { t } = useTranslation()
+  const [expanded, setExpanded] = useState(false)
   if (!runs.length) {
     return (
       <span className="text-sm text-muted-foreground">
@@ -215,40 +387,74 @@ function ExperimentRuns({
     )
   }
 
+  const visibleRuns = expanded ? runs : runs.slice(0, 2)
+  const hasMoreRuns = runs.length > 2
+
   return (
-    <div className="min-w-64 divide-y">
-      {runs.map((run, index) => (
-        <div key={run.id} className="space-y-1.5 py-2 first:pt-0 last:pb-0">
-          <div className="flex min-w-0 items-center gap-2">
-            <span className={`size-3 shrink-0 rounded-sm ${runColor(index)}`} />
-            <Link
-              to={localizedPath(lang, "/experiments")}
-              className="truncate text-sm font-semibold text-foreground hover:underline"
-            >
-              {run.experimentName}
-            </Link>
-            <code className="ml-auto max-w-32 truncate rounded border bg-muted/60 px-1.5 py-0.5 text-xs text-muted-foreground">
-              {run.key}
-            </code>
-          </div>
-          <div className="flex items-center justify-between gap-4 text-xs text-muted-foreground">
-            <span className="tabular-nums">
-              {run.start}–{run.end}%
-            </span>
-            <span className="flex items-center gap-1.5">
+    <div className="min-w-64">
+      <div className="divide-y">
+        {visibleRuns.map((run, index) => (
+          <div key={run.id} className="space-y-1.5 py-2 first:pt-0 last:pb-0">
+            <div className="flex min-w-0 items-center gap-2">
               <span
-                className={`size-2 rounded-full ${runStateColor(run.status)}`}
+                className={`size-3 shrink-0 rounded-sm ${runColor(index)}`}
               />
-              {t(
-                `releaseDecision.layers.runStatus.${run.status.toLowerCase()}`,
-                {
-                  defaultValue: run.status,
+              <Link
+                to={
+                  run.experimentId
+                    ? localizedPath(
+                        lang,
+                        `/experiments/${encodeURIComponent(run.experimentId)}?stage=measuring&runId=${encodeURIComponent(run.id)}`
+                      )
+                    : localizedPath(lang, "/experiments")
                 }
-              )}
-            </span>
+                className="truncate text-sm font-semibold text-foreground hover:underline"
+              >
+                {run.experimentName}
+              </Link>
+              <code className="ml-auto max-w-32 truncate rounded border bg-muted/60 px-1.5 py-0.5 text-xs text-muted-foreground">
+                {run.key}
+              </code>
+            </div>
+            <div className="flex items-center justify-between gap-4 text-xs text-muted-foreground">
+              <span className="tabular-nums">
+                {run.start}–{run.end}%
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span
+                  className={`size-2 rounded-full ${runStateColor(run.status)}`}
+                />
+                {t(
+                  `releaseDecision.layers.runStatus.${run.status.toLowerCase()}`,
+                  {
+                    defaultValue: run.status,
+                  }
+                )}
+              </span>
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
+      {hasMoreRuns ? (
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="mt-2 h-7 w-full gap-1.5 text-muted-foreground hover:text-foreground"
+          onClick={() => setExpanded((value) => !value)}
+        >
+          {expanded ? (
+            <ChevronUp className="size-3.5" />
+          ) : (
+            <ChevronDown className="size-3.5" />
+          )}
+          {t(
+            expanded
+              ? "releaseDecision.layers.showLessRuns"
+              : "releaseDecision.layers.showMoreRuns"
+          )}
+        </Button>
+      ) : null}
     </div>
   )
 }
@@ -419,6 +625,7 @@ export function LayersTable({
                   <TrafficAllocation
                     runs={runs}
                     summary={layer.allocationSummary}
+                    lang={lang}
                   />
                 </TableCell>
                 <TableCell className="px-5 py-3 align-middle">

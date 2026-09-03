@@ -32,3 +32,12 @@ export function experimentStageSearchParams(
   next.set("stage", STAGE_PARAM_BY_STAGE[stage])
   return next
 }
+
+export function experimentRunSearchParams(
+  current: URLSearchParams,
+  runId: string
+) {
+  const next = new URLSearchParams(current)
+  next.set("runId", runId)
+  return next
+}

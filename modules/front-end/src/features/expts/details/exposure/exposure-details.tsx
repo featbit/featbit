@@ -58,8 +58,9 @@ function VariationIdCopy({ value }: { value: string }) {
         render={
           <Button
             type="button"
-            variant="outline"
-            size="icon-sm"
+            variant="ghost"
+            size="icon-xs"
+            className="size-5 shrink-0 text-muted-foreground"
             aria-label={t(
               copied
                 ? "releaseDecision.experiments.detailsPage.copied"
@@ -74,7 +75,7 @@ function VariationIdCopy({ value }: { value: string }) {
           />
         }
       >
-        {copied ? <Check /> : <Copy />}
+        {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
       </TooltipTrigger>
       <TooltipContent>
         {t(
@@ -381,9 +382,9 @@ export function ExposureDetails({
                             </code>
                           </TableCell>
                           <TableCell className="px-4 py-3">
-                            <div className="flex min-w-72 items-center gap-3">
+                            <div className="inline-flex max-w-full min-w-0 items-center gap-1.5">
                               <code
-                                className="min-w-0 flex-1 truncate text-xs"
+                                className="min-w-0 truncate text-xs"
                                 title={variation.id}
                               >
                                 {variation.id}

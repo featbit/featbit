@@ -18,12 +18,20 @@ export const enLayers = {
   allocationUnavailable: "Allocation unavailable",
   allocationSummary: "{{reserved}}% reserved · {{free}}% free",
   overlapRange: "Overlap {{start}}–{{end}}%",
+  overlapDetails_one: "Overlap {{start}}–{{end}}% · {{count}} run",
+  overlapDetails_other: "Overlap {{start}}–{{end}}% · {{count}} runs",
+  openOverlapDetails_one:
+    "View {{count}} overlapping experiment run from {{start}}% to {{end}}%",
+  openOverlapDetails_other:
+    "View {{count}} overlapping experiment runs from {{start}}% to {{end}}%",
   noConflicts: "No conflicts",
   overlap_one: "{{count}}% overlap",
   overlap_other: "{{count}}% overlap",
   mixedAssignmentUnits: "Mixed assignment units",
   overAllocated: "Allocation exceeds 100%",
   noExperimentRuns: "No experiment runs",
+  showMoreRuns: "Show more",
+  showLessRuns: "Show less",
   runStatus: {
     draft: "Draft",
     collecting: "Collecting",
@@ -122,11 +130,16 @@ export const zhLayers = {
   allocationUnavailable: "分配数据不可用",
   allocationSummary: "已预留 {{reserved}}% · 空闲 {{free}}%",
   overlapRange: "重叠 {{start}}–{{end}}%",
+  overlapDetails: "重叠 {{start}}–{{end}}% · {{count}} 个运行",
+  openOverlapDetails:
+    "查看 {{start}}% 至 {{end}}% 区间内重叠的 {{count}} 个实验运行",
   noConflicts: "无冲突",
   overlap: "重叠 {{count}}%",
   mixedAssignmentUnits: "分配单元不一致",
   overAllocated: "分配超过 100%",
   noExperimentRuns: "暂无实验运行",
+  showMoreRuns: "展开",
+  showLessRuns: "收起",
   runStatus: {
     draft: "草稿",
     collecting: "收集中",

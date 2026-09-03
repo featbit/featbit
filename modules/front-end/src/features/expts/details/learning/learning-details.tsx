@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronUp, Pencil } from "lucide-react"
+import { CalendarDays, ChevronDown, ChevronUp, Pencil } from "lucide-react"
 import { useLayoutEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Badge } from "@/components/ui/badge"
@@ -16,6 +16,24 @@ import {
   LEARNING_FIELDS,
   orderExperimentRuns,
 } from "./learning-utils"
+
+type LearningRun = ExperimentRunDetail & {
+  observationStart?: string | null
+  observationEnd?: string | null
+}
+
+function formatDate(value: string | null | undefined, language: string) {
+  if (!value) return "—"
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return "—"
+  return new Intl.DateTimeFormat(language, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date)
+}
 
 function EvidenceRationale({ value }: { value: string }) {
   const { t } = useTranslation()
@@ -86,21 +104,38 @@ function EvidenceRationale({ value }: { value: string }) {
   )
 }
 
-function RunLearning({ run }: { run: ExperimentRunDetail }) {
-  const { t } = useTranslation()
+function RunLearning({
+  run,
+  runNumber,
+}: {
+  run: LearningRun
+  runNumber: number
+}) {
+  const { t, i18n } = useTranslation()
   const fields = LEARNING_FIELDS.filter((field) => Boolean(run[field]?.trim()))
   const hasLearning = hasCapturedLearning(run)
 
   return (
     <div>
       <div className="flex min-h-13 flex-wrap items-center gap-2 px-4 py-3">
-        <code className="mr-2 rounded bg-muted px-2 py-1 text-xs">
-          {run.slug}
-        </code>
+        <h4 className="mr-1 text-lg font-semibold">
+          {t("releaseDecision.experiments.detailsPage.measuring.run", {
+            number: runNumber,
+          })}
+        </h4>
+        <code className="mr-1 text-xs text-muted-foreground">{run.slug}</code>
         <Badge variant="outline" className="font-normal">
           {run.method === "bandit"
             ? t("releaseDecision.experiments.methods.bandit")
             : t("releaseDecision.experiments.methods.bayesian")}
+        </Badge>
+        <Badge variant="outline" className="gap-2 font-normal">
+          <CalendarDays />
+          {t(
+            "releaseDecision.experiments.detailsPage.measuring.observationWindow"
+          )}{" "}
+          · {formatDate(run.observationStart, i18n.language)} →{" "}
+          {formatDate(run.observationEnd, i18n.language)}
         </Badge>
       </div>
 
@@ -175,7 +210,7 @@ export function LearningDetails({
 }) {
   const { t } = useTranslation()
   const runs = useMemo(
-    () => orderExperimentRuns(experiment.experimentRuns ?? []),
+    () => orderExperimentRuns(experiment.experimentRuns ?? []) as LearningRun[],
     [experiment.experimentRuns]
   )
   const [localSelectedRunId, setLocalSelectedRunId] = useState(
@@ -186,6 +221,9 @@ export function LearningDetails({
   const effectiveSelectedRunId = selectedRunId ?? localSelectedRunId
   const selectedRun =
     runs.find((run) => run.id === effectiveSelectedRunId) ?? runs.at(-1)
+  const selectedRunNumber = selectedRun
+    ? runs.findIndex((run) => run.id === selectedRun.id) + 1
+    : 0
   const selectRun = (runId: string) => {
     setLocalSelectedRunId(runId)
     onSelectedRunChange?.(runId)
@@ -266,7 +304,9 @@ export function LearningDetails({
               onSelectedRunChange={selectRun}
               listClassName="border-t-0 border-b"
             />
-            {selectedRun ? <RunLearning run={selectedRun} /> : null}
+            {selectedRun ? (
+              <RunLearning run={selectedRun} runNumber={selectedRunNumber} />
+            ) : null}
           </div>
         )}
       </div>
