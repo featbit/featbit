@@ -108,6 +108,202 @@ async function mockGlobalUsers(page: Page) {
 }
 
 test.describe("workspace global users", () => {
+  test("evaluate tabs share pagination with independent page sizes", async ({
+    page,
+  }, testInfo) => {
+    await setupGlobalUsersPage({ page })
+    await mockGlobalUsers(page)
+    await page.route("**/api/v1/envs/*/end-users/user-1/flags?*", (route) => {
+      const params = new URL(route.request().url()).searchParams
+      const size = Number(params.get("pageSize"))
+      const start = Number(params.get("pageIndex")) * size
+      const items = Array.from({ length: 23 }, (_, i) => ({
+        name: `Flag ${i + 1}`,
+        key: `flag-${i + 1}`,
+        variationType: "boolean",
+        variations: [{ value: "false" }],
+        matchVariation: "false",
+      }))
+      return route.fulfill({
+        json: {
+          success: true,
+          data: {
+            totalCount: items.length,
+            items: items.slice(start, start + size),
+          },
+        },
+      })
+    })
+    await page.route("**/api/v1/envs/*/end-users/user-1/segments", (route) =>
+      route.fulfill({
+        json: {
+          success: true,
+          data: Array.from({ length: 23 }, (_, i) => ({
+            id: `segment-${i + 1}`,
+            name: `Segment ${i + 1}`,
+            type: "environment-specific",
+            scopes: [],
+            updatedAt: "2026-09-04T08:00:00Z",
+          })),
+        },
+      })
+    )
+    await page.goto("/en/workspace/global-users", {
+      waitUntil: "domcontentloaded",
+    })
+    await page
+      .getByRole("row")
+      .filter({ hasText: "Alpha User" })
+      .getByRole("button", { name: "Evaluate", exact: true })
+      .click()
+    const sheet = page.getByRole("dialog", { name: "Evaluate", exact: true })
+    const flags = sheet.getByRole("tabpanel", {
+      name: "Feature Flags",
+      exact: true,
+    })
+    await expect(flags.getByText("Flag 1", { exact: true })).toBeVisible()
+    await expect(flags.getByRole("row")).toHaveCount(6)
+    await flags.getByRole("button", { name: "Next page", exact: true }).click()
+    await expect(flags.getByText("Flag 6", { exact: true })).toBeVisible()
+    await sheet.getByRole("tab", { name: "Segments", exact: true }).click()
+    const segments = sheet.getByRole("tabpanel", {
+      name: "Segments",
+      exact: true,
+    })
+    await expect(segments.getByRole("row")).toHaveCount(6)
+    await segments.getByRole("button", { name: "5", exact: true }).click()
+    await expect(
+      segments.getByText("Segment 21", { exact: true })
+    ).toBeVisible()
+    await expect(
+      segments.getByRole("button", { name: "Next page", exact: true })
+    ).toBeDisabled()
+    await segments.getByRole("textbox").fill("Segment 1")
+    await expect(segments.getByText("Segment 1", { exact: true })).toBeVisible()
+    await expect(
+      segments.getByRole("button", { name: "1", exact: true })
+    ).toHaveAttribute("aria-current", "page")
+    await segments.getByRole("textbox").fill("")
+    await segments.getByRole("combobox", { name: "Rows per page" }).click()
+    await page.getByRole("option", { name: /20/ }).click()
+    await expect(segments.getByRole("row")).toHaveCount(21)
+    await segments.getByRole("button", { name: "2", exact: true }).click()
+    await expect(
+      segments.getByText("Segment 21", { exact: true })
+    ).toBeVisible()
+    await expect(
+      segments.getByRole("button", { name: "2", exact: true })
+    ).toHaveAttribute("aria-current", "page")
+    await page.screenshot({
+      path: testInfo.outputPath("global-evaluate-segments.png"),
+      animations: "disabled",
+    })
+    await sheet.getByRole("tab", { name: "Feature Flags", exact: true }).click()
+    await expect(flags.getByText("Flag 6", { exact: true })).toBeVisible()
+    await flags.getByRole("combobox", { name: "Rows per page" }).click()
+    await page.getByRole("option", { name: /20/ }).click()
+    await expect(flags.getByText("Flag 1", { exact: true })).toBeVisible()
+    await expect(flags.getByRole("row")).toHaveCount(21)
+    await page.route("**/api/v1/envs/*/end-users/user-2/flags?*", (route) => {
+      const params = new URL(route.request().url()).searchParams
+      expect(params.get("pageIndex")).toBe("0")
+      expect(params.get("pageSize")).toBe("5")
+      return route.fulfill({
+        json: {
+          success: true,
+          data: {
+            totalCount: 1,
+            items: [
+              {
+                name: "Beta flag",
+                key: "beta-flag",
+                variationType: "boolean",
+                variations: [],
+                matchVariation: "true",
+              },
+            ],
+          },
+        },
+      })
+    })
+    await page.route("**/api/v1/envs/*/end-users/user-2/segments", (route) =>
+      route.fulfill({ json: { success: true, data: [] } })
+    )
+    await page.keyboard.press("Escape")
+    await page
+      .getByRole("row")
+      .filter({ hasText: "Beta User" })
+      .getByRole("button", { name: "Evaluate", exact: true })
+      .click()
+    await expect(sheet.getByText("Beta flag", { exact: true })).toBeVisible()
+    await expect(sheet.getByText("Flag 1", { exact: true })).toHaveCount(0)
+  })
+
+  test("uses shared numbered pagination and changes page size", async ({
+    page,
+  }, testInfo) => {
+    await setupGlobalUsersPage({ page })
+    await page.route("**/api/v1/global-users?*", (route) => {
+      const params = new URL(route.request().url()).searchParams
+      const size = Number(params.get("pageSize"))
+      const offset = Number(params.get("pageIndex")) * size
+      const users = Array.from({ length: 80 }, (_, i) => ({
+        id: `user-${i + 1}`,
+        keyId: `key-${i + 1}`,
+        name: `Pagination user ${i + 1}`,
+        customizedProperties: [],
+      }))
+      return route.fulfill({
+        json: {
+          success: true,
+          data: {
+            totalCount: users.length,
+            items: users.slice(offset, offset + size),
+          },
+        },
+      })
+    })
+    await page.goto("/en/workspace/global-users", {
+      waitUntil: "domcontentloaded",
+    })
+    await expect(
+      page.getByText("Pagination user 1", { exact: true })
+    ).toBeVisible()
+    const pagination = page.getByRole("navigation", {
+      name: "Pagination",
+      exact: true,
+    })
+    await expect(
+      pagination.locator('[data-slot="pagination-ellipsis"]')
+    ).toHaveCount(1)
+    await pagination.getByRole("button", { name: "8", exact: true }).click()
+    await expect(
+      page.getByText("Pagination user 71", { exact: true })
+    ).toBeVisible()
+    await expect(
+      pagination.getByRole("button", { name: "8", exact: true })
+    ).toHaveAttribute("aria-current", "page")
+    await expect(
+      pagination.getByRole("button", { name: "Next page", exact: true })
+    ).toBeDisabled()
+    await pagination.scrollIntoViewIfNeeded()
+    await page.screenshot({
+      path: testInfo.outputPath("global-users-pagination.png"),
+      animations: "disabled",
+    })
+    await page.getByRole("combobox", { name: "Rows per page" }).click()
+    await page.getByRole("option", { name: /20/ }).click()
+    await expect(
+      page.getByText("Pagination user 1", { exact: true })
+    ).toBeVisible()
+    await expect(
+      page.getByText("Pagination user 20", { exact: true })
+    ).toBeVisible()
+    await expect(
+      pagination.getByRole("button", { name: "Previous page", exact: true })
+    ).toBeDisabled()
+  })
+
   test("renders global users and custom columns", async ({ page }) => {
     await setupGlobalUsersPage({ page })
     await mockGlobalUsers(page)

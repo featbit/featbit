@@ -1,3 +1,4 @@
+import { enPagination, zhPagination } from "./resources/pagination"
 import i18n from "i18next"
 import { initReactI18next } from "react-i18next"
 import { enAccessTokens, zhAccessTokens } from "./resources/access-tokens"
@@ -30,6 +31,7 @@ i18n.use(initReactI18next).init({
   resources: {
     en: {
       common: {
+        pagination: enPagination,
         auth: enAuth,
         selectWorkspace: enWorkspaceSelection,
         onboarding: enOnboarding,
@@ -53,6 +55,7 @@ i18n.use(initReactI18next).init({
     },
     zh: {
       common: {
+        pagination: zhPagination,
         auth: zhAuth,
         selectWorkspace: zhWorkspaceSelection,
         onboarding: zhOnboarding,

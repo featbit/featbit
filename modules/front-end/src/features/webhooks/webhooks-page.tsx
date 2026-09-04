@@ -1,7 +1,6 @@
+import { ListPaginationControls } from "@/components/list-pagination-controls"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
-  ChevronLeft,
-  ChevronRight,
   ChevronsUpDown,
   Plus,
   Search,
@@ -25,14 +24,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
 import { getCurrentWorkspace } from "@/features/layout/layout-context"
 import {
@@ -169,7 +160,6 @@ export function WebhooksPage() {
   })
 
   const data = listQuery.data ?? { totalCount: 0, items: [] }
-  const pageCount = Math.max(1, Math.ceil(data.totalCount / pageSize))
   const from = data.totalCount === 0 ? 0 : (pageIndex - 1) * pageSize + 1
   const to = Math.min(pageIndex * pageSize, data.totalCount)
   const filtersActive = Boolean(debouncedSearch || projectId)
@@ -335,52 +325,19 @@ export function WebhooksPage() {
           <span>
             {t("webhooks.showing", { from, to, total: data.totalCount })}
           </span>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="icon-sm"
-              disabled={pageIndex <= 1}
-              aria-label={t("webhooks.previous")}
-              onClick={() => setPageIndex((current) => current - 1)}
-            >
-              <ChevronLeft />
-            </Button>
-            <span className="min-w-14 text-center text-foreground">
-              {pageIndex} / {pageCount}
-            </span>
-            <Button
-              variant="outline"
-              size="icon-sm"
-              disabled={pageIndex >= pageCount}
-              aria-label={t("webhooks.next")}
-              onClick={() => setPageIndex((current) => current + 1)}
-            >
-              <ChevronRight />
-            </Button>
-            <Select
-              value={String(pageSize)}
-              onValueChange={(value) => {
-                if (!value) return
-                setPageSize(Number(value))
-                setPageIndex(1)
-              }}
-            >
-              <SelectTrigger className="w-32">
-                <SelectValue>
-                  {t("webhooks.perPage", { count: pageSize })}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  {[10, 20, 30].map((size) => (
-                    <SelectItem key={size} value={String(size)}>
-                      {t("webhooks.perPage", { count: size })}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div>
+          <ListPaginationControls
+            pageIndex={pageIndex}
+            pageSize={pageSize}
+            totalCount={data.totalCount}
+            onPageIndexChange={setPageIndex}
+            onPageSizeChange={(size) => {
+              setPageSize(size)
+              setPageIndex(1)
+            }}
+            perPage={(count) => t("webhooks.perPage", { count })}
+            previousLabel={t("webhooks.previous")}
+            nextLabel={t("webhooks.next")}
+          />
         </div>
       ) : null}
 

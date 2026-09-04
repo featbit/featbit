@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
+import { ListPaginationControls } from "@/components/list-pagination-controls"
 import {
   Dialog,
   DialogContent,
@@ -30,15 +31,10 @@ import {
 import { SegmentTypeCell } from "@/features/segments/components/segment-type-cell"
 import { fetchEndUserFlags, fetchEndUserSegments } from "../end-users-api"
 import type { EndUser, EndUserFlag } from "../end-users-types"
-import {
-  NumberedPagination,
-  SearchInput,
-  TableMessage,
-  TableSkeleton,
-} from "./shared"
+import { SearchInput, TableMessage, TableSkeleton } from "./shared"
 import { cn } from "@/lib/utils"
 
-const FLAG_PAGE_SIZE = 5
+const PAGE_SIZE_OPTIONS = [5, 10, 20, 30]
 const DOT_COLORS = [
   "bg-emerald-600",
   "bg-sky-600",
@@ -64,15 +60,19 @@ export function EvaluateSheet({
   const [debouncedFlagSearch, setDebouncedFlagSearch] = useState("")
   const [segmentSearch, setSegmentSearch] = useState("")
   const [flagPage, setFlagPage] = useState(1)
+  const [flagPageSize, setFlagPageSize] = useState(5)
+  const [segmentPage, setSegmentPage] = useState(1)
+  const [segmentPageSize, setSegmentPageSize] = useState(5)
   const [expandedFlag, setExpandedFlag] = useState<EndUserFlag | null>(null)
 
   useEffect(() => {
+    if (flagSearch.trim() === debouncedFlagSearch) return
     const timeout = window.setTimeout(() => {
       setDebouncedFlagSearch(flagSearch.trim())
       setFlagPage(1)
     }, 400)
     return () => window.clearTimeout(timeout)
-  }, [flagSearch])
+  }, [flagSearch, debouncedFlagSearch])
 
   const flagsQuery = useQuery({
     queryKey: [
@@ -82,12 +82,13 @@ export function EvaluateSheet({
       "flags",
       debouncedFlagSearch,
       flagPage,
+      flagPageSize,
     ],
     queryFn: () =>
       fetchEndUserFlags(envId, user!.id, {
         searchText: debouncedFlagSearch,
         pageIndex: flagPage - 1,
-        pageSize: FLAG_PAGE_SIZE,
+        pageSize: flagPageSize,
       }),
     enabled: Boolean(user && envId),
   })
@@ -102,6 +103,14 @@ export function EvaluateSheet({
       segment.name.toLowerCase().includes(filter)
     )
   }, [segmentSearch, segmentsQuery.data])
+  const currentSegmentPage = Math.min(
+    segmentPage,
+    Math.max(1, Math.ceil(filteredSegments.length / segmentPageSize))
+  )
+  const visibleSegments = filteredSegments.slice(
+    (currentSegmentPage - 1) * segmentPageSize,
+    currentSegmentPage * segmentPageSize
+  )
 
   function copy(value: string) {
     void navigator.clipboard.writeText(value)
@@ -270,14 +279,19 @@ export function EvaluateSheet({
                   </Table>
                 </div>
                 {flagsQuery.data?.totalCount ? (
-                  <NumberedPagination
+                  <EvaluatePagination
                     page={flagPage}
-                    pageSize={FLAG_PAGE_SIZE}
+                    pageSize={flagPageSize}
                     total={flagsQuery.data.totalCount}
                     summary={(from, to, total) =>
                       t("endUsers.evaluateDrawer.showing", { from, to, total })
                     }
                     onPageChange={setFlagPage}
+                    disabled={flagsQuery.isFetching}
+                    onPageSizeChange={(size) => {
+                      setFlagPageSize(size)
+                      setFlagPage(1)
+                    }}
                   />
                 ) : null}
               </TabsContent>
@@ -286,7 +300,10 @@ export function EvaluateSheet({
                   value={segmentSearch}
                   placeholder={t("endUsers.evaluateDrawer.filterSegments")}
                   className="my-4"
-                  onChange={setSegmentSearch}
+                  onChange={(value) => {
+                    setSegmentSearch(value)
+                    setSegmentPage(1)
+                  }}
                 />
                 <div className="overflow-hidden rounded-md border">
                   <Table className="table-fixed">
@@ -323,7 +340,7 @@ export function EvaluateSheet({
                           }
                         />
                       ) : filteredSegments.length ? (
-                        filteredSegments.map((segment) => (
+                        visibleSegments.map((segment) => (
                           <TableRow key={segment.id}>
                             <TableCell className="truncate px-5 py-4">
                               {segment.name}
@@ -366,6 +383,26 @@ export function EvaluateSheet({
                     </TableBody>
                   </Table>
                 </div>
+                {filteredSegments.length > 0 && !segmentsQuery.isError ? (
+                  <EvaluatePagination
+                    page={currentSegmentPage}
+                    pageSize={segmentPageSize}
+                    total={filteredSegments.length}
+                    summary={(from, to, total) =>
+                      t("endUsers.evaluateDrawer.showingSegments", {
+                        from,
+                        to,
+                        total,
+                      })
+                    }
+                    disabled={segmentsQuery.isFetching}
+                    onPageChange={setSegmentPage}
+                    onPageSizeChange={(size) => {
+                      setSegmentPageSize(size)
+                      setSegmentPage(1)
+                    }}
+                  />
+                ) : null}
               </TabsContent>
             </Tabs>
           </div>
@@ -379,6 +416,47 @@ export function EvaluateSheet({
         />
       ) : null}
     </>
+  )
+}
+
+function EvaluatePagination({
+  page,
+  pageSize,
+  total,
+  summary,
+  disabled,
+  onPageChange,
+  onPageSizeChange,
+}: {
+  page: number
+  pageSize: number
+  total: number
+  summary: (from: number, to: number, total: number) => string
+  disabled: boolean
+  onPageChange: (page: number) => void
+  onPageSizeChange: (size: number) => void
+}) {
+  const { t } = useTranslation()
+  return (
+    <div className="mt-4 flex flex-wrap items-center justify-between gap-4 text-sm text-muted-foreground">
+      <span>
+        {summary(
+          (page - 1) * pageSize + 1,
+          Math.min(page * pageSize, total),
+          total
+        )}
+      </span>
+      <ListPaginationControls
+        pageIndex={page}
+        pageSize={pageSize}
+        totalCount={total}
+        disabled={disabled}
+        onPageIndexChange={onPageChange}
+        onPageSizeChange={onPageSizeChange}
+        pageSizeOptions={PAGE_SIZE_OPTIONS}
+        perPage={(count) => t("endUsers.perPage", { count })}
+      />
+    </div>
   )
 }
 
