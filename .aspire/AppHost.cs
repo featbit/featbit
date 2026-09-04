@@ -28,7 +28,7 @@ ValidateLocalTopology();
 const string postgresConnectionString =
     "Host=localhost;Port=5432;Username=postgres;Password=please_change_me;Database=featbit";
 const string mongoDbConnectionString = "mongodb://admin:password@localhost:27017";
-const string redisConnectionString = "localhost:6379";
+const string redisConnectionString = "127.0.0.1:6379";
 const string kafkaBootstrapServers = "localhost:29092";
 const string clickHouseHttpEndpoint = "http://localhost:8123";
 

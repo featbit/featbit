@@ -21,17 +21,55 @@ from older Aspire data volumes. The overlay replaces legacy experiment tables
 only when they are empty and otherwise stops initialization rather than
 discarding data.
 
-## Run the UI stack
+## Start or restart the UI comparison stack
 
-From the repository root (`aspire.config.json` points to this AppHost):
+Use the `StandardPostgres` topology for the current/new UI comparison workflow.
+It runs PostgreSQL, Redis, the API, the Evaluation Server, and both React UIs.
+Docker Desktop must be running first.
+
+PowerShell environment variables only apply to the current terminal. Run this
+complete sequence after opening a new PowerShell terminal or restarting the
+machine:
 
 ```powershell
-aspire start --non-interactive
-aspire wait postgresql --non-interactive
-aspire wait api-server --non-interactive
-aspire wait ui --non-interactive
-aspire wait release-decision-web --non-interactive
+cd C:\Code\featbit\featbit
+
+$env:FeatBit__Topology = 'StandardPostgres'
+$env:FeatBit__UseExistingInfrastructure = 'false'
+$env:FeatBit__IncludeUi = 'true'
+$env:FeatBit__IncludeReleaseDecisionWeb = 'true'
+$env:FeatBit__IncludeEvaluationServer = 'true'
+
+aspire start
+aspire wait postgresql
+aspire wait redis
+aspire wait api-server
+aspire wait evaluation-server
+aspire wait ui --timeout 600
+aspire wait release-decision-web --timeout 600
 ```
+
+Run the commands from the repository root. Its `aspire.config.json` already
+points to `.aspire/FeatBit.AppHost.csproj`, so `--apphost` is unnecessary. The
+configuration variable names contain two literal underscores (`__`); do not add
+backslashes.
+
+`aspire start` starts the AppHost in the background and returns control to the
+terminal. Get the current Dashboard URL at any time with:
+
+```powershell
+aspire ps
+```
+
+For foreground operation, use `aspire run` instead. That terminal must remain
+open: pressing `Ctrl+C`, closing the terminal, or stopping the terminal task
+shuts down the entire AppHost and invalidates its Dashboard URL.
+
+With `UseExistingInfrastructure=false`, Aspire starts PostgreSQL and Redis in
+Docker automatically; do not also start `docker-compose-infra.yml`, because it
+uses the same ports. PostgreSQL data is stored in the named Docker volume
+`featbit-aspire-postgres-vnext`, and Redis data uses `featbit-aspire-redis`.
+Normal `aspire stop`/`aspire start` cycles preserve both volumes.
 
 Open the `ui` and `release-decision-web` endpoints reported by:
 
@@ -45,31 +83,20 @@ Useful fixed endpoints:
 - UI backend API: http://localhost:5000
 - Seeded login: `test@featbit.com` / `123456`
 
-## Optional services
+## Alternative configurations
 
 Use .NET configuration environment variables to opt into a larger topology.
 Set them in the same PowerShell session before `aspire start`.
 
-### Evaluation and SDK streaming
+### UI-only stack without Evaluation Server
 
-Enable the Evaluation Server only when testing SDK evaluation, streaming/event
-URLs, or the quick demo:
-
-```powershell
-$env:FeatBit__IncludeEvaluationServer = 'true'
-aspire start --non-interactive
-aspire wait evaluation-server --non-interactive
-```
-
-It uses `http://localhost:5100` and `https://localhost:5101`.
-
-### Redis-backed standard topology
-
-Enable Redis as both message queue and cache:
+The comparison workflow above enables the Evaluation Server for SDK evaluation,
+streaming/event URLs, and experiment E2E testing. Disable it for ordinary
+management-UI testing:
 
 ```powershell
-$env:FeatBit__Topology = 'StandardPostgres'
-aspire start --non-interactive
+$env:FeatBit__IncludeEvaluationServer = 'false'
+aspire start
 ```
 
 ### Existing local infrastructure
@@ -120,5 +147,5 @@ Stop the AppHost through Aspire so project processes and port bindings are
 released cleanly:
 
 ```powershell
-aspire stop --non-interactive
+aspire stop
 ```
