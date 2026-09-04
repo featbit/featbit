@@ -31,6 +31,11 @@ public class FlagTargeting
 
     public bool IsValid(ICollection<Variation> flagVariations)
     {
+        if (flagVariations.All(variation => variation.Id != DisabledVariationId))
+        {
+            return false;
+        }
+
         if (Rules == null || Fallthrough == null)
         {
             return false;

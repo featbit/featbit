@@ -109,6 +109,7 @@ public class RuleValidationTests
     {
         var targeting = new FlagTargeting
         {
+            DisabledVariationId = "variation-1",
             Rules =
             [
                 new TargetRule
@@ -128,6 +129,7 @@ public class RuleValidationTests
     {
         var targeting = new FlagTargeting
         {
+            DisabledVariationId = "variation-1",
             Rules =
             [
                 new TargetRule
@@ -147,11 +149,25 @@ public class RuleValidationTests
     {
         var targeting = new FlagTargeting
         {
+            DisabledVariationId = "variation-1",
             Rules = [],
             Fallthrough = new Fallthrough
             {
                 Variations = [FullRollout("unknown-variation")]
             }
+        };
+
+        Assert.False(targeting.IsValid(FlagVariations("variation-1")));
+    }
+
+    [Fact]
+    public void FlagTargeting_DisabledVariationDoesNotBelongToFlag_IsInvalid()
+    {
+        var targeting = new FlagTargeting
+        {
+            DisabledVariationId = "unknown-variation",
+            Rules = [],
+            Fallthrough = ValidFallthrough()
         };
 
         Assert.False(targeting.IsValid(FlagVariations("variation-1")));
