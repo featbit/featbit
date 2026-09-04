@@ -183,7 +183,7 @@ Live runs use the configured `--users` synthetic-user seed budget and the config
 | Exposure data | Experiment stats for `rd-checkout-treatment-fixed-v1` must include rows for both `controlVariationId` and `treatmentVariationId`. FeatBit rollout hashing decides the exact split from the fixed flag key plus fixed user keys, and both variants must meet the configured `--min-users-per-variant` floor. |
 | Primary metric data | Binary `once` metric. Based on the exact users assigned by FeatBit, the runner seeds `Round(controlUsers * 0.30)` control conversions and `Round(treatmentUsers * 0.45)` treatment conversions. Manual acceptance: both variant user counts meet the configured sample floor, observed conversion counts equal those deterministic targets, and treatment conversion rate is greater than control. |
 | Error guardrail data | Binary `once` metric. Based on the exact users assigned by FeatBit, the runner seeds `Round(controlUsers * 0.018)` control errors and `Round(treatmentUsers * 0.020)` treatment errors. Manual acceptance: both variant user counts meet the configured sample floor, observed error counts equal those deterministic targets, and both error rates are below `5.00%`. |
-| Latency guardrail data | Continuous `average` metric. The runner seeds one deterministic latency value per assigned user: control `340ms`, treatment `320ms`. Manual acceptance: both variant user counts meet the configured sample floor, observed averages equal those deterministic values, and treatment average latency is no higher than control. |
+| Latency guardrail data | Numeric `average` metric. The runner seeds one deterministic latency value per assigned user: control `340ms`, treatment `320ms`. Manual acceptance: both variant user counts meet the configured sample floor, observed averages equal those deterministic values, and treatment average latency is no higher than control. |
 
 ### Traffic-Assignment Scenario Contract
 
@@ -220,7 +220,7 @@ Manual acceptance for every scenario:
 | Experiment exposure stats | `POST /api/v1/envs/{envId}/experiment-stats/query` returns users for both `control` and `treatment` variation IDs of `rd-checkout-treatment-fixed-v1`. Each variant must meet the configured sample floor shown in the report. |
 | Primary metric | `e2e_checkout_activated_fixed_v1` is binary/once. Expected result: use the exact control/treatment users and conversions from the report; control conversions equal `Round(controlUsers * 0.30)`, treatment conversions equal `Round(treatmentUsers * 0.45)`, and treatment rate must be greater than control. |
 | Error guardrail | `e2e_checkout_error_fixed_v1` is binary/once. Expected result: use the exact control/treatment users and error counts from the report; control errors equal `Round(controlUsers * 0.018)`, treatment errors equal `Round(treatmentUsers * 0.020)`, and both rates must stay below the `5.00%` threshold. |
-| Latency guardrail | `e2e_checkout_latency_ms_fixed_v1` is continuous/average. Expected result: use the exact control/treatment users, sums, and averages from the report; control average equals `340ms`, treatment average equals `320ms`, and treatment must be faster. |
+| Latency guardrail | `e2e_checkout_latency_ms_fixed_v1` is numeric/average. Expected result: use the exact control/treatment users, sums, and averages from the report; control average equals `340ms`, treatment average equals `320ms`, and treatment must be faster. |
 | Traffic-assignment scenario metrics | Scenario flag keys, metric keys, and preset observation windows are unique per scenario, for example `rd-e2e-scenario-skewed-90-10-to-10-10-fixed-v1` and `e2e_skewed_90_10_to_10_10_activated_fixed_v1`. Expected result: each scenario report row shows its dedicated flag key, experiment id, run id, sampled control/treatment users, and conversions equal to `Round(users * configuredScenarioRate)`. |
 
 ### Expected Analyze Result
@@ -406,14 +406,14 @@ Metrics:
 | --- | --- | --- | --- |
 | Primary | `e2e_checkout_activated_fixed_v1` | binary | conversion / once |
 | Guardrail | `e2e_checkout_error_fixed_v1` | binary | conversion / once |
-| Guardrail | `e2e_checkout_latency_ms_fixed_v1` | continuous | average |
+| Guardrail | `e2e_checkout_latency_ms_fixed_v1` | numeric | average |
 
 Assertions:
 
 - Primary metric is registered as an active environment-level metric, then selected onto the experiment by metric id/key
 - A second experiment is created, bound to the checkout flag, selects the same primary metric, and has its own configured run, so the metric catalog includes a multi-experiment usage case with runs on both experiments
 - At least two guardrail metrics are registered as active environment-level metrics, then selected onto the experiment by metric id/key
-- Guardrails cover both binary and continuous metrics
+- Guardrails cover both binary and numeric metrics
 
 ### 7. Create Run And Seed Evaluation/Metric Data
 
@@ -436,7 +436,7 @@ Data setup:
 - Require each control/treatment variant to meet the configured sample floor
 - Treatment primary metric success rate is intentionally higher than control
 - Binary guardrail failure rate remains controlled
-- Continuous guardrail latency should not show severe regression
+- Numeric guardrail latency should not show severe regression
 
 Assertions:
 
@@ -445,7 +445,7 @@ Assertions:
 - Primary stats query returns samples after preset insight ingest
 - Treatment primary conversion rate is higher than control
 - Binary guardrail stats query returns samples
-- Continuous guardrail stats query returns samples and numeric values
+- Numeric guardrail stats query returns samples and numeric values
 
 ### 8. Call Analyze
 
@@ -516,9 +516,9 @@ Assertions:
 - All 10 flags have the expected rule traffic, fallthrough traffic, `includedInExpt`, and `exptIncludeAllTargets`
 - The experiment is bound to the expected flag
 - Primary metric direction matches the preset: treatment performs better than control
-- Binary and continuous guardrail metrics contain data
+- Binary and numeric guardrail metrics contain data
 - Analyze run status is `analyzing`
-- Analyze `inputData` contains the primary metric, binary guardrail, and continuous guardrail event keys
+- Analyze `inputData` contains the primary metric, binary guardrail, and numeric guardrail event keys
 - Analyze result exists
 - The report does not print the access token or Server SDK secret in plain text
 
@@ -580,7 +580,7 @@ Use this checklist after a live run. The Markdown report is the primary artifact
 | --- | --- | --- |
 | Primary: `e2e_checkout_activated_fixed_v1` | Live report stats/analyze section, or experiment stats query | Binary `once` metric. Expected data: exact users and conversions come from the report; each variant meets the configured sample floor; control conversions equal `Round(controlUsers * 0.30)`; treatment conversions equal `Round(treatmentUsers * 0.45)`; treatment conversion rate must be greater than control. |
 | Guardrail: `e2e_checkout_error_fixed_v1` | Live report stats/analyze section, or experiment stats query | Binary `once` metric. Expected data: exact users and error counts come from the report; each variant meets the configured sample floor; control errors equal `Round(controlUsers * 0.018)`; treatment errors equal `Round(treatmentUsers * 0.020)`; both rates must be below the `5.00%` threshold. |
-| Guardrail: `e2e_checkout_latency_ms_fixed_v1` | Live report stats/analyze section, or experiment stats query | Continuous `average` metric. Expected data: exact users, sums, and averages come from the report; each variant meets the configured sample floor; control average equals `340ms`; treatment average equals `320ms`; treatment average must be no higher than control. |
+| Guardrail: `e2e_checkout_latency_ms_fixed_v1` | Live report stats/analyze section, or experiment stats query | Numeric `average` metric. Expected data: exact users, sums, and averages come from the report; each variant meets the configured sample floor; control average equals `340ms`; treatment average equals `320ms`; treatment average must be no higher than control. |
 
 #### Experiment And Analyze Result
 
@@ -592,7 +592,7 @@ Use this checklist after a live run. The Markdown report is the primary artifact
 | Bound flag | Experiment detail | `flagKey = rd-checkout-treatment-fixed-v1` |
 | Control/treatment variants | Experiment detail and flag detail | Control maps to the generated `control` variation ID/value `false`; treatment maps to the generated `treatment` variation ID/value `true` |
 | Primary metric config | Experiment detail | Event key is `e2e_checkout_activated_fixed_v1`; metric type is binary; aggregation is once/conversion; direction is treatment higher than control |
-| Guardrail metric config | Experiment detail | Contains `e2e_checkout_error_fixed_v1` as binary/once and `e2e_checkout_latency_ms_fixed_v1` as continuous/average |
+| Guardrail metric config | Experiment detail | Contains `e2e_checkout_error_fixed_v1` as binary/once and `e2e_checkout_latency_ms_fixed_v1` as numeric/average |
 | Analyze status | Experiment run detail after analyze | Run status is `analyzing` after the analyze call |
 | Analyze `inputData` | Experiment run detail after analyze | Non-empty JSON with top-level `metrics`; contains entries for the primary metric and both guardrails; each metric has non-empty control/treatment variant data |
 | Analyze `analysisResult` | Experiment run detail after analyze | Non-empty structured JSON. Do not manually expect one exact posterior value; this test checks that analysis runs and returns structured output from the seeded data. |

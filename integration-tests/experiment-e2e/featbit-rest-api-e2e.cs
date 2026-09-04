@@ -415,11 +415,11 @@ static async Task ExecuteAsync(FeatBitApiClient api, TestReport report, E2ERun r
         run.EnvId,
         run.LatencyMetric,
         "Checkout Latency",
-        "continuous",
+        "numeric",
         "average",
         "Checkout latency should not increase.",
-        "6.3 Register continuous guardrail metric",
-        "Create or update the environment-level continuous guardrail metric.");
+        "6.3 Register numeric guardrail metric",
+        "Create or update the environment-level numeric guardrail metric.");
 
     var primaryMetricId = RequiredString(primaryMetric, "id");
     var errorMetricId = RequiredString(errorMetric, "id");
@@ -458,7 +458,7 @@ static async Task ExecuteAsync(FeatBitApiClient api, TestReport report, E2ERun r
         {
             eventName = run.LatencyMetric,
             @event = run.LatencyMetric,
-            metricType = "continuous",
+            metricType = "numeric",
             metricAgg = "average",
             direction = "increase_bad",
             description = "Checkout latency should not increase."
@@ -750,13 +750,13 @@ static async Task ExecuteAsync(FeatBitApiClient api, TestReport report, E2ERun r
         run.LatencyMetric,
         startDate,
         endDate,
-        "continuous",
+        "numeric",
         "average",
-        "7.8 Query continuous guardrail stats",
+        "7.8 Query numeric guardrail stats",
         "Verify preset-timestamp checkout latency guardrail data is observable.");
-    AssertStatsObservedUsers(report, latencyStats, "7.8 Continuous guardrail users observed");
+    AssertStatsObservedUsers(report, latencyStats, "7.8 Numeric guardrail users observed");
     var latencyRows = latencyStats?["variants"]?.AsArray() ?? [];
-    AssertVariantMinimumUsers(report, latencyRows, run, options, "7.8 Continuous guardrail per-variant sample minimum");
+    AssertVariantMinimumUsers(report, latencyRows, run, options, "7.8 Numeric guardrail per-variant sample minimum");
     run.LatencyMetricUsersObserved = ObservedUsers(latencyRows);
     run.LatencyMetricVariantRows = latencyRows.Count;
     run.ControlLatencyUsersObserved = FindUsers(latencyRows, run.ControlVariationId);
@@ -765,7 +765,7 @@ static async Task ExecuteAsync(FeatBitApiClient api, TestReport report, E2ERun r
     run.TreatmentLatencySumObserved = FindSumValue(latencyRows, run.TreatmentVariationId);
     report.Assert(
         latencyRows.Any(x => ((double?)x?["avgValue"] ?? 0) > 0 || ((double?)x?["sumValue"] ?? 0) > 0),
-        "7.8 Continuous guardrail values observed",
+        "7.8 Numeric guardrail values observed",
         $"variants={latencyRows.Count}, metric={run.LatencyMetric}");
     var controlLatency = FindAverageValue(latencyRows, run.ControlVariationId);
     var treatmentLatency = FindAverageValue(latencyRows, run.TreatmentVariationId);
@@ -774,11 +774,11 @@ static async Task ExecuteAsync(FeatBitApiClient api, TestReport report, E2ERun r
     report.Assert(
         Math.Abs(controlLatency - 340.0) < 0.0001 &&
         Math.Abs(treatmentLatency - 320.0) < 0.0001,
-        "7.8 Deterministic continuous guardrail values verified",
+        "7.8 Deterministic numeric guardrail values verified",
         $"controlLatency={controlLatency:0.####}, treatmentLatency={treatmentLatency:0.####}");
     report.Assert(
         treatmentLatency <= controlLatency,
-        "7.8 Continuous guardrail direction verified",
+        "7.8 Numeric guardrail direction verified",
         $"controlLatency={controlLatency:0.####}, treatmentLatency={treatmentLatency:0.####}");
 
     var analyzed = await api.SendAsync(
@@ -1057,14 +1057,20 @@ static async Task<JsonNode?> UpsertExperimentMetricAsync(
     string stepName,
     string meaning)
 {
-    var payload = new
+    var createPayload = new
     {
         name,
         key,
         description,
         metricType,
-        metricAgg,
-        status = "active"
+        metricAgg
+    };
+    var updatePayload = new
+    {
+        name,
+        description,
+        metricType,
+        metricAgg
     };
     var encodedKey = Uri.EscapeDataString(key);
     var existingMetrics = await api.SendAsync(
@@ -1081,7 +1087,7 @@ static async Task<JsonNode?> UpsertExperimentMetricAsync(
         metric = await api.SendAsync(
             HttpMethod.Put,
             $"/api/v1/envs/{envId}/experiment-metrics/{metricId}",
-            payload,
+            updatePayload,
             $"{stepName} update",
             meaning);
     }
@@ -1090,7 +1096,7 @@ static async Task<JsonNode?> UpsertExperimentMetricAsync(
         metric = await api.SendAsync(
             HttpMethod.Post,
             $"/api/v1/envs/{envId}/experiment-metrics",
-            payload,
+            createPayload,
             $"{stepName} create",
             meaning);
     }
@@ -1483,8 +1489,7 @@ static async Task<string> EnsureScenarioLayerAsync(
             name = $"E2E {scenario.Name} layer",
             key = layerKey,
             description = $"Layer for E2E traffic scenario {scenario.Id}",
-            assignmentUnitSelector = "user.keyId",
-            status = "active"
+            assignmentUnitSelector = "user.keyId"
         },
         $"10.{scenario.Order}.0 Create scenario layer {scenario.Id}",
         "Create the registered layer that owns assignment-unit hashing for this scenario.");
@@ -4239,7 +4244,7 @@ sealed class TestReport
         sb.AppendLine($"| Primary | `{run.PrimaryMetricId}` | `{run.PrimaryMetric}` | `binary` | `once` |");
         sb.AppendLine($"| Reused primary in experiment `{run.MetricReuseExperimentId}` run `{run.MetricReuseRunId}` | `{run.PrimaryMetricId}` | `{run.PrimaryMetric}` | `binary` | `once` |");
         sb.AppendLine($"| Guardrail | `{run.ErrorMetricId}` | `{run.ErrorMetric}` | `binary` | `once` |");
-        sb.AppendLine($"| Guardrail | `{run.LatencyMetricId}` | `{run.LatencyMetric}` | `continuous` | `average` |");
+        sb.AppendLine($"| Guardrail | `{run.LatencyMetricId}` | `{run.LatencyMetric}` | `numeric` | `average` |");
         sb.AppendLine();
         sb.AppendLine("## Expected Final Feature Flags");
         sb.AppendLine();

@@ -83,7 +83,7 @@
       },
       {
         "key": "e2e_checkout_latency_ms_fixed_v1",
-        "type": "continuous",
+        "type": "numeric",
         "aggregation": "average",
         "alarmDirection": "increase_bad"
       }
@@ -348,7 +348,7 @@
         "guardrails are registered as active environment-level metrics",
         "experiment selects primary and guardrail metrics by metric id/key",
         "a second experiment selects the same primary metric and creates its own configured run to verify multi-experiment metric usage",
-        "guardrails include binary/once and continuous/average metrics"
+        "guardrails include binary/once and numeric/average metrics"
       ]
     },
     {
@@ -367,7 +367,7 @@
         "stats query observes users",
         "treatment conversion rate is higher than control",
         "binary guardrail stats observe users",
-        "continuous guardrail stats observe users and values"
+        "numeric guardrail stats observe users and values"
       ]
     },
     {

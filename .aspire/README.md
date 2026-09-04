@@ -1,11 +1,13 @@
 # FeatBit Aspire AppHost
 
-This AppHost defaults to the smallest self-contained stack needed to test the
-new React UI in `modules/front-end`:
+This AppHost defaults to a self-contained stack that runs the current and
+comparison React UIs side by side:
 
 - `postgresql`: PostgreSQL 15.10 on `localhost:5432`, created and seeded by Aspire.
 - `api-server`: `modules/back-end/src/Api/Api.csproj` on ports `5000` and `5001`.
 - `ui`: the Vite app in `modules/front-end`; Aspire runs `npm ci` and `npm run dev`.
+- `release-decision-web`: the comparison Vite app in `modules/front-end-rda-tempo`;
+  it uses the same `api-server` and therefore the same PostgreSQL data.
 
 The default `Standalone` topology uses PostgreSQL for storage and messaging and
 disables the distributed cache. Redis and the Evaluation Server are not needed
@@ -28,9 +30,10 @@ aspire start --non-interactive
 aspire wait postgresql --non-interactive
 aspire wait api-server --non-interactive
 aspire wait ui --non-interactive
+aspire wait release-decision-web --non-interactive
 ```
 
-Open the `ui` endpoint reported by:
+Open the `ui` and `release-decision-web` endpoints reported by:
 
 ```powershell
 aspire describe --format Json --non-interactive
@@ -85,10 +88,16 @@ Store the connection strings in the AppHost user secrets under
 create, stop, or migrate those external services, so their schema must already
 match the current backend model.
 
-`release-decision-web` remains disabled through
-`FeatBit:IncludeReleaseDecisionWeb`; the old Angular `front-end-v1`, MongoDB,
-Kafka, ClickHouse, and control-plane services are not part of the default UI
-test stack.
+Both React UIs are enabled by default. To run only the current UI, disable the
+comparison app before starting Aspire:
+
+```powershell
+$env:FeatBit__IncludeReleaseDecisionWeb = 'false'
+aspire start --non-interactive
+```
+
+The old Angular `front-end-v1`, MongoDB, Kafka, ClickHouse, and control-plane
+services are not part of the default UI test stack.
 
 ## OpenTelemetry
 

@@ -8,7 +8,7 @@ var topology = builder.Configuration.GetValue("FeatBit:Topology", LocalTopology.
 var useExistingInfrastructure = builder.Configuration.GetValue("FeatBit:UseExistingInfrastructure", false);
 var includeUi = builder.Configuration.GetValue("FeatBit:IncludeUi", true);
 var includeEvaluationServer = builder.Configuration.GetValue("FeatBit:IncludeEvaluationServer", false);
-var includeReleaseDecisionWeb = builder.Configuration.GetValue("FeatBit:IncludeReleaseDecisionWeb", false);
+var includeReleaseDecisionWeb = builder.Configuration.GetValue("FeatBit:IncludeReleaseDecisionWeb", true);
 
 var (dbProvider, mqProvider, cacheProvider, olapProvider) = topology switch
 {
@@ -261,12 +261,12 @@ if (includeUi)
 if (includeReleaseDecisionWeb)
 {
     builder
-        .AddExecutable("release-decision-web", "npm", "../modules/release-decision-web", "run", "dev")
-        .WithHttpEndpoint(port: 3000, targetPort: 3000, isProxied: false)
-        .WithEnvironment("PORT", "3000")
-        .WithEnvironment("VITE_FEATBIT_APP_URL", "http://localhost:4200")
-        .WithEnvironment("VITE_FEATBIT_API_URL", "http://localhost:5000")
-        .WithEnvironment("VITE_BASE_PATH", "/release-decision")
+        .AddViteApp("release-decision-web", "../modules/front-end-rda-tempo")
+        .WithNpm(installCommand: "ci")
+        .WithReference(apiServer)
+        .WithEnvironment("VITE_FEATBIT_API_URL", apiServer.GetEndpoint("http"))
+        .WithEnvironment("VITE_BASE_PATH", "/")
+        .WithExternalHttpEndpoints()
         .WaitFor(apiServer);
 }
 
