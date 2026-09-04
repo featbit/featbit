@@ -21,6 +21,37 @@ export interface Layer {
   status: string;
   createdAt: Date;
   updatedAt: Date;
+  experimentRuns: LayerRunSummary[];
+  allocationSummary: LayerAllocationSummary;
+}
+
+export interface LayerRunSummary {
+  id: string;
+  experimentId: string;
+  experimentName: string;
+  key: string;
+  layerId: string | null;
+  layerKey: string | null;
+  assignmentUnitSelector: string;
+  start: number;
+  end: number;
+  status: string;
+  includedInAllocation: boolean;
+}
+
+export interface LayerAllocationSummary {
+  activeRunCount: number;
+  reservedPercent: number;
+  freePercent: number;
+  overlaps: Array<{
+    start: number;
+    end: number;
+    runIds: string[];
+  }>;
+  mixedAssignmentUnits: boolean;
+  overAllocated: boolean;
+  status:
+    "mixed-assignment-units" | "over-allocated" | "overlap" | "no-conflicts";
 }
 
 export interface Metric {

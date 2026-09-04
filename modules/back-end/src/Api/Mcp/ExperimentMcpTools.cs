@@ -149,8 +149,8 @@ public class ExperimentMcpTools(
                 TreatmentVariant = request.TreatmentVariant,
                 TrafficPercent = request.TrafficPercent,
                 TrafficOffset = request.TrafficOffset,
-                LayerId = Normalize(request.LayerId) ?? Normalize(request.LayerKey),
-                LayerKey = Normalize(request.LayerKey) ?? Normalize(request.LayerId),
+                LayerId = request.LayerId,
+                LayerKey = Normalize(request.LayerKey),
                 AllocationKeySelector = Normalize(request.AllocationKeySelector),
                 SliceStart = request.SliceStart,
                 SliceEnd = request.SliceEnd,
@@ -398,7 +398,7 @@ public class ExperimentMcpRunTrafficRequest
     public string LayerKey { get; set; } = string.Empty;
 
     [Description("Optional mutual-exclusion layer id. Prefer layerKey when the user is selecting by registered layer key.")]
-    public string LayerId { get; set; } = string.Empty;
+    public Guid? LayerId { get; set; }
 
     [Description("Legacy analysis traffic percentage, from 1 to 100. Prefer sliceStart/sliceEnd plus layerTrafficPercent for layer bucket assignments.")]
     public double? TrafficPercent { get; set; }

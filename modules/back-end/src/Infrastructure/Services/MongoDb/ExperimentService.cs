@@ -3,6 +3,7 @@ using Application.Bases.Exceptions;
 using Application.Bases.Models;
 using Application.ExperimentStats;
 using Application.Experiments;
+using Application.Experiments.ExperimentMetrics;
 using Application.Services;
 using Application.Users;
 using Domain.FeatureFlags;
@@ -10,6 +11,7 @@ using Domain.Experiments;
 using Domain.Users;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using System.Text.RegularExpressions;
 using System.Text.Json;
 
 namespace Infrastructure.Services.MongoDb;
@@ -156,7 +158,7 @@ public class ExperimentService(
         var updatedAt = DateTime.UtcNow;
         var primaryMetric = await ResolveMetricAsync(envId, update.MetricId, Normalize(update.MetricKey, update.MetricEvent));
         experiment.PrimaryMetric = BuildPrimaryMetricJson(primaryMetric, update.ExpectedDirection);
-        experiment.Guardrails = await BuildGuardrailsJsonAsync(envId, update.Guardrails);
+        experiment.Guardrails = await BuildGuardrailsJsonAsync(envId, update.Guardrails, primaryMetric);
         experiment.UpdatedAt = updatedAt;
 
         await mongoDb.CollectionOf<Experiment>().ReplaceOneAsync(
@@ -224,7 +226,7 @@ public class ExperimentService(
             TrafficPercent = previous?.TrafficPercent ?? 100,
             TrafficOffset = previous?.TrafficOffset ?? 0,
             LayerId = previous?.LayerId,
-            LayerKey = previous?.LayerKey ?? previous?.LayerId,
+            LayerKey = previous?.LayerKey,
             AllocationKeySelector = previous?.AllocationKeySelector ?? "user.keyId",
             SliceStart = previous?.SliceStart ?? previous?.TrafficOffset ?? 0,
             SliceEnd = previous?.SliceEnd ?? Math.Min(100, (previous?.TrafficOffset ?? 0) + (previous?.TrafficPercent ?? 100)),
@@ -320,8 +322,8 @@ public class ExperimentService(
 
         run.TrafficPercent = Math.Clamp(update.TrafficPercent ?? sliceEnd - sliceStart, 1, 100);
         run.TrafficOffset = (int)Math.Clamp(update.TrafficOffset ?? Math.Floor(sliceStart), 0, 99);
-        run.LayerId = Normalize(update.LayerId);
-        run.LayerKey = Normalize(update.LayerKey, Normalize(update.LayerId, run.LayerKey));
+        run.LayerId = update.LayerId;
+        run.LayerKey = Normalize(update.LayerKey, run.LayerKey);
         run.AllocationKeySelector = Normalize(update.AllocationKeySelector, run.AllocationKeySelector) ?? "user.keyId";
         run.SliceStart = sliceStart;
         run.SliceEnd = sliceEnd;
@@ -418,7 +420,7 @@ public class ExperimentService(
             MetricAgg = metricAgg,
             TrafficPercent = run.TrafficPercent,
             TrafficOffset = run.TrafficOffset,
-            LayerId = run.LayerId,
+            LayerId = run.LayerId?.ToString("D"),
             ControlVariant = run.ControlVariant,
             TreatmentVariants = run.TreatmentVariant,
             LayerKey = run.LayerKey,
@@ -461,7 +463,7 @@ public class ExperimentService(
                 MetricAgg = guardrail.MetricAgg,
                 TrafficPercent = run.TrafficPercent,
                 TrafficOffset = run.TrafficOffset,
-                LayerId = run.LayerId,
+                LayerId = run.LayerId?.ToString("D"),
                 ControlVariant = run.ControlVariant,
                 TreatmentVariants = run.TreatmentVariant,
                 LayerKey = run.LayerKey,
@@ -517,6 +519,80 @@ public class ExperimentService(
             run.UpdatedAt);
 
         return await GetAsync(envId, id);
+    }
+
+    public async Task<IReadOnlyCollection<ExperimentRunForLayer>> GetExperimentRunsByLayersAsync(
+        Guid envId,
+        IReadOnlyCollection<ExperimentLayer> layers)
+    {
+        ArgumentNullException.ThrowIfNull(layers);
+        if (layers.Count == 0)
+        {
+            return [];
+        }
+
+        var layerIds = layers.Select(x => (Guid?)x.Id).ToArray();
+        var layerKeys = layers.Select(x => x.Key).ToArray();
+        var runBuilder = Builders<ExperimentRun>.Filter;
+        var runs = await mongoDb.CollectionOf<ExperimentRun>()
+            .Find(runBuilder.Or(
+                runBuilder.In(x => x.LayerId, layerIds),
+                runBuilder.In(x => x.LayerKey, layerKeys)))
+            .ToListAsync();
+        if (runs.Count == 0)
+        {
+            return [];
+        }
+
+        var experimentIds = runs.Select(x => x.ExperimentId).Distinct().ToArray();
+        var experiments = await mongoDb.CollectionOf<Experiment>()
+            .Find(x => experimentIds.Contains(x.Id) && x.FeatBitEnvId == envId)
+            .ToListAsync();
+        var experimentNames = experiments.ToDictionary(x => x.Id, x => x.Name);
+
+        return runs
+            .Where(x => experimentNames.ContainsKey(x.ExperimentId))
+            .Select(run => new ExperimentRunForLayer
+            {
+                Run = run,
+                ExperimentName = experimentNames[run.ExperimentId]
+            })
+            .ToArray();
+    }
+
+    public async Task<IReadOnlyCollection<ExperimentWithRuns>> GetExperimentsWithRunsAsync(
+        Guid envId,
+        string? nameSearchText = null)
+    {
+        var builder = Builders<Experiment>.Filter;
+        var experimentFilter = builder.Eq(x => x.FeatBitEnvId, envId);
+        if (!string.IsNullOrWhiteSpace(nameSearchText))
+        {
+            var search = new BsonRegularExpression(Regex.Escape(nameSearchText.Trim()), "i");
+            experimentFilter &= builder.Regex(x => x.Name, search);
+        }
+
+        var experiments = await mongoDb.CollectionOf<Experiment>()
+            .Find(experimentFilter)
+            .ToListAsync();
+        if (experiments.Count == 0)
+        {
+            return [];
+        }
+
+        var experimentIds = experiments.Select(x => x.Id).ToArray();
+        var runs = await mongoDb.CollectionOf<ExperimentRun>()
+            .Find(x => experimentIds.Contains(x.ExperimentId))
+            .ToListAsync();
+        var runsByExperiment = runs.ToLookup(x => x.ExperimentId);
+
+        return experiments
+            .Select(experiment => new ExperimentWithRuns
+            {
+                Experiment = experiment,
+                Runs = runsByExperiment[experiment.Id].ToArray()
+            })
+            .ToArray();
     }
 
     public async Task<PagedResult<ExperimentVm>> GetListAsync(
@@ -709,7 +785,6 @@ public class ExperimentService(
             ConfirmedOrRefuted = run.ConfirmedOrRefuted,
             WhyItHappened = run.WhyItHappened,
             NextHypothesis = run.NextHypothesis,
-            RunId = run.RunId,
             PrimaryMetricAgg = run.PrimaryMetricAgg,
             PrimaryMetricType = run.PrimaryMetricType,
             TrafficPercent = run.TrafficPercent,
@@ -980,10 +1055,9 @@ public class ExperimentService(
         run.ConfirmedOrRefuted = Normalize(update.ConfirmedOrRefuted, run.ConfirmedOrRefuted);
         run.WhyItHappened = Normalize(update.WhyItHappened, run.WhyItHappened);
         run.NextHypothesis = Normalize(update.NextHypothesis, run.NextHypothesis);
-        run.RunId = Normalize(update.RunId, run.RunId);
         run.PrimaryMetricAgg = NormalizeMetricAgg(update.PrimaryMetricAgg ?? run.PrimaryMetricAgg);
         run.PrimaryMetricType = NormalizeMetricType(update.PrimaryMetricType ?? run.PrimaryMetricType);
-        run.LayerId = Normalize(update.LayerId, run.LayerId);
+        run.LayerId = update.LayerId ?? run.LayerId;
         run.LayerKey = Normalize(update.LayerKey, run.LayerKey);
         run.AllocationKeySelector = Normalize(update.AllocationKeySelector, run.AllocationKeySelector);
         run.AllocationPlan = Normalize(update.AllocationPlan, run.AllocationPlan);
@@ -1076,9 +1150,9 @@ public class ExperimentService(
 
     private async Task NormalizeAndValidateLayerAssignmentAsync(Guid envId, ExperimentRun run)
     {
-        var layerToken = Normalize(run.LayerId, run.LayerKey);
-        var layerKey = Normalize(run.LayerKey, run.LayerId);
-        if (string.IsNullOrWhiteSpace(layerToken) && string.IsNullOrWhiteSpace(layerKey))
+        var layerId = run.LayerId;
+        var layerKey = Normalize(run.LayerKey);
+        if (!layerId.HasValue && string.IsNullOrWhiteSpace(layerKey))
         {
             run.AssignmentUnitSelector = Normalize(run.AssignmentUnitSelector, run.AllocationKeySelector) ?? "user.keyId";
             run.AllocationKeySelector = Normalize(run.AllocationKeySelector, run.AssignmentUnitSelector) ?? "user.keyId";
@@ -1086,10 +1160,10 @@ public class ExperimentService(
             return;
         }
 
-        var layer = await FindActiveLayerAsync(envId, layerToken, layerKey);
+        var layer = await FindActiveLayerAsync(envId, layerId, layerKey);
         if (layer != null)
         {
-            run.LayerId = layer.Id.ToString("D");
+            run.LayerId = layer.Id;
             run.LayerKey = layer.Key;
             run.AssignmentUnitSelector = Normalize(layer.AssignmentUnitSelector) ?? "user.keyId";
             run.AllocationKeySelector = run.AssignmentUnitSelector;
@@ -1139,12 +1213,12 @@ public class ExperimentService(
         }
     }
 
-    private async Task<ExperimentLayer?> FindActiveLayerAsync(Guid envId, string? layerToken, string? layerKey)
+    private async Task<ExperimentLayer?> FindActiveLayerAsync(Guid envId, Guid? layerId, string? layerKey)
     {
-        if (Guid.TryParse(layerToken, out var layerId))
+        if (layerId.HasValue)
         {
             var byId = await mongoDb.CollectionOf<ExperimentLayer>()
-                .Find(x => x.Id == layerId && x.FeatBitEnvId == envId && x.Status == "active")
+                .Find(x => x.Id == layerId.Value && x.FeatBitEnvId == envId && x.Status == "active")
                 .FirstOrDefaultAsync();
             if (byId != null)
             {
@@ -1246,7 +1320,7 @@ public class ExperimentService(
         return run;
     }
 
-    private async Task<ExperimentMetricVm> ResolveMetricAsync(Guid envId, Guid? metricId, string? metricKey)
+    private async Task<ExperimentMetric> ResolveMetricAsync(Guid envId, Guid? metricId, string? metricKey)
     {
         if (!metricId.HasValue && string.IsNullOrWhiteSpace(metricKey))
         {
@@ -1256,7 +1330,10 @@ public class ExperimentService(
         return await metricService.GetBySelectorAsync(envId, metricId, metricKey);
     }
 
-    private async Task<string?> BuildGuardrailsJsonAsync(Guid envId, string? raw)
+    private async Task<string?> BuildGuardrailsJsonAsync(
+        Guid envId,
+        string? raw,
+        ExperimentMetric primaryMetric)
     {
         if (string.IsNullOrWhiteSpace(raw))
         {
@@ -1270,6 +1347,7 @@ public class ExperimentService(
         }
 
         var guardrails = new List<Dictionary<string, object>>();
+        var guardrailMetricIds = new HashSet<Guid>();
         foreach (var item in doc.RootElement.EnumerateArray())
         {
             if (item.ValueKind != JsonValueKind.Object)
@@ -1283,6 +1361,16 @@ public class ExperimentService(
                 GetJsonString(item, "key") ??
                 GetJsonString(item, "event");
             var metric = await ResolveMetricAsync(envId, metricId, metricKey);
+            if (metric.Id == primaryMetric.Id)
+            {
+                throw new ArgumentException("Primary metric cannot also be selected as a guardrail.");
+            }
+
+            if (!guardrailMetricIds.Add(metric.Id))
+            {
+                throw new ArgumentException("A guardrail metric can only be selected once.");
+            }
+
             var direction = GetJsonString(item, "direction");
             if (direction is not ("increase_bad" or "decrease_bad"))
             {
@@ -1310,7 +1398,7 @@ public class ExperimentService(
         return JsonSerializer.Serialize(guardrails);
     }
 
-    private static string BuildPrimaryMetricJson(ExperimentMetricVm metric, string? expectedDirection)
+    private static string BuildPrimaryMetricJson(ExperimentMetric metric, string? expectedDirection)
     {
         var payload = new Dictionary<string, object>
         {
@@ -1771,7 +1859,7 @@ public class ExperimentService(
         var section = new Dictionary<string, object?>
         {
             ["event"] = label,
-            ["metric_type"] = isProp ? "proportion" : "continuous",
+            ["metric_type"] = isProp ? "proportion" : "numeric",
             ["rows"] = rows,
             ["verdict"] = verdicts.Count > 0 ? string.Join("; ", verdicts) : "no data"
         };
@@ -2630,7 +2718,7 @@ public class ExperimentService(
 
     private static string NormalizeMetricType(string? value)
     {
-        return value is "continuous" or "numeric" ? "continuous" : "binary";
+        return value == "numeric" ? "numeric" : "binary";
     }
 
     private static string NormalizeMetricAgg(string? value)

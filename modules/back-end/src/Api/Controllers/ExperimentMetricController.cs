@@ -1,5 +1,5 @@
 using Application.Bases.Models;
-using Application.Experiments;
+using Application.Experiments.ExperimentMetrics;
 using Api.Authentication;
 using Domain.Policies;
 
@@ -15,7 +15,7 @@ public class ExperimentMetricController : ApiControllerBase
         Guid envId,
         [FromQuery] ExperimentMetricFilter filter)
     {
-        var metrics = await Mediator.Send(new QueryExperimentMetrics
+        var metrics = await Mediator.Send(new GetExperimentMetricList
         {
             EnvId = envId,
             Filter = filter
@@ -28,12 +28,12 @@ public class ExperimentMetricController : ApiControllerBase
     [HttpPost]
     public async Task<ApiResponse<ExperimentMetricVm>> CreateAsync(
         Guid envId,
-        ExperimentMetricUpdate update)
+        CreateExperimentMetricRequest request)
     {
         var metric = await Mediator.Send(new CreateExperimentMetric
         {
             EnvId = envId,
-            Update = update
+            Request = request
         });
 
         return Ok(metric);
@@ -44,23 +44,36 @@ public class ExperimentMetricController : ApiControllerBase
     public async Task<ApiResponse<ExperimentMetricVm>> UpdateAsync(
         Guid envId,
         Guid id,
-        ExperimentMetricUpdate update)
+        UpdateExperimentMetricRequest request)
     {
         var metric = await Mediator.Send(new UpdateExperimentMetric
         {
             EnvId = envId,
             Id = id,
-            Update = update
+            Request = request
         });
 
         return Ok(metric);
     }
 
     [OpenApi]
-    [HttpDelete("{id:guid}")]
-    public async Task<ApiResponse<bool>> DeleteAsync(Guid envId, Guid id)
+    [HttpPut("{id:guid}/archive")]
+    public async Task<ApiResponse<bool>> ArchiveAsync(Guid envId, Guid id)
     {
-        await Mediator.Send(new DeleteExperimentMetric
+        await Mediator.Send(new ArchiveExperimentMetric
+        {
+            EnvId = envId,
+            Id = id
+        });
+
+        return Ok(true);
+    }
+
+    [OpenApi]
+    [HttpPut("{id:guid}/restore")]
+    public async Task<ApiResponse<bool>> RestoreAsync(Guid envId, Guid id)
+    {
+        await Mediator.Send(new RestoreExperimentMetric
         {
             EnvId = envId,
             Id = id

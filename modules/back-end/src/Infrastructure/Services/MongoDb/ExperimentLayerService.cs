@@ -1,6 +1,7 @@
+using System.Text.RegularExpressions;
 using Application.Bases.Models;
 using Application.Bases.Exceptions;
-using Application.Experiments;
+using Application.Experiments.ExperimentLayers;
 using Application.Services;
 using Domain.Experiments;
 using MongoDB.Bson;
@@ -10,7 +11,7 @@ namespace Infrastructure.Services.MongoDb;
 
 public class ExperimentLayerService(MongoDbClient mongoDb) : IExperimentLayerService
 {
-    public async Task<PagedResult<ExperimentLayerVm>> GetListAsync(
+    public async Task<PagedResult<ExperimentLayer>> GetListAsync(
         Guid envId,
         ExperimentLayerFilter filter)
     {
@@ -20,6 +21,14 @@ public class ExperimentLayerService(MongoDbClient mongoDb) : IExperimentLayerSer
         {
             builder.Eq(x => x.FeatBitEnvId, envId)
         };
+
+        if (!string.IsNullOrWhiteSpace(filter.SearchText))
+        {
+            var search = new BsonRegularExpression(Regex.Escape(filter.SearchText.Trim()), "i");
+            filters.Add(builder.Or(
+                builder.Regex(x => x.Name, search),
+                builder.Regex(x => x.Key, search)));
+        }
 
         if (!string.IsNullOrWhiteSpace(filter.Name))
         {
@@ -48,56 +57,64 @@ public class ExperimentLayerService(MongoDbClient mongoDb) : IExperimentLayerSer
             .Limit(pageSize)
             .ToListAsync();
 
-        return new PagedResult<ExperimentLayerVm>(totalCount, layers.Select(ToVm).ToArray());
+        return new PagedResult<ExperimentLayer>(totalCount, layers);
     }
 
-    public async Task<ExperimentLayerVm> CreateAsync(
+    public async Task<ExperimentLayer> CreateAsync(
         Guid envId,
-        ExperimentLayerUpdate update)
+        CreateExperimentLayerRequest request)
     {
-        update ??= new ExperimentLayerUpdate();
+        ArgumentNullException.ThrowIfNull(request);
         var now = DateTime.UtcNow;
         var layer = new ExperimentLayer
         {
             Id = Guid.NewGuid(),
             FeatBitEnvId = envId,
-            Name = Normalize(update.Name)!,
-            Key = Normalize(update.Key)!,
-            Description = Normalize(update.Description),
-            AssignmentUnitSelector = Normalize(update.AssignmentUnitSelector) ?? "user.keyId",
-            Status = NormalizeStatus(update.Status),
+            Name = Normalize(request.Name)!,
+            Key = Normalize(request.Key)!,
+            Description = Normalize(request.Description),
+            AssignmentUnitSelector = Normalize(request.AssignmentUnitSelector) ?? "user.keyId",
+            Status = "active",
             CreatedAt = now,
             UpdatedAt = now
         };
 
         await mongoDb.CollectionOf<ExperimentLayer>().InsertOneAsync(layer);
-        return ToVm(layer);
+        return layer;
     }
 
-    public async Task<ExperimentLayerVm> UpdateAsync(
+    public async Task<ExperimentLayer> UpdateAsync(
         Guid envId,
         Guid id,
-        ExperimentLayerUpdate update)
+        UpdateExperimentLayerRequest request)
     {
-        update ??= new ExperimentLayerUpdate();
+        ArgumentNullException.ThrowIfNull(request);
         var layer = await GetLayerAsync(envId, id);
-        layer.Name = Normalize(update.Name, layer.Name)!;
-        layer.Key = Normalize(update.Key, layer.Key)!;
-        layer.Description = Normalize(update.Description);
-        layer.AssignmentUnitSelector = Normalize(update.AssignmentUnitSelector) ?? "user.keyId";
-        layer.Status = NormalizeStatus(update.Status, layer.Status);
+        layer.Name = Normalize(request.Name, layer.Name)!;
+        layer.Description = Normalize(request.Description);
+        layer.AssignmentUnitSelector = Normalize(request.AssignmentUnitSelector) ?? "user.keyId";
         layer.UpdatedAt = DateTime.UtcNow;
 
         await mongoDb.CollectionOf<ExperimentLayer>()
             .ReplaceOneAsync(x => x.Id == id && x.FeatBitEnvId == envId, layer);
 
-        return ToVm(layer);
+        return layer;
     }
 
     public async Task ArchiveAsync(Guid envId, Guid id)
     {
         var layer = await GetLayerAsync(envId, id);
         layer.Status = "archived";
+        layer.UpdatedAt = DateTime.UtcNow;
+
+        await mongoDb.CollectionOf<ExperimentLayer>()
+            .ReplaceOneAsync(x => x.Id == id && x.FeatBitEnvId == envId, layer);
+    }
+
+    public async Task RestoreAsync(Guid envId, Guid id)
+    {
+        var layer = await GetLayerAsync(envId, id);
+        layer.Status = "active";
         layer.UpdatedAt = DateTime.UtcNow;
 
         await mongoDb.CollectionOf<ExperimentLayer>()
@@ -118,29 +135,8 @@ public class ExperimentLayerService(MongoDbClient mongoDb) : IExperimentLayerSer
         return layer;
     }
 
-    private static ExperimentLayerVm ToVm(ExperimentLayer layer)
-    {
-        return new ExperimentLayerVm
-        {
-            Id = layer.Id,
-            FeatBitEnvId = layer.FeatBitEnvId,
-            Name = layer.Name,
-            Key = layer.Key,
-            Description = layer.Description,
-            AssignmentUnitSelector = layer.AssignmentUnitSelector,
-            Status = layer.Status,
-            CreatedAt = layer.CreatedAt,
-            UpdatedAt = layer.UpdatedAt
-        };
-    }
-
     private static string? Normalize(string? value, string? fallback = null)
     {
         return string.IsNullOrWhiteSpace(value) ? fallback : value.Trim();
-    }
-
-    private static string NormalizeStatus(string? value, string fallback = "active")
-    {
-        return string.Equals(value, "archived", StringComparison.OrdinalIgnoreCase) ? "archived" : fallback;
     }
 }

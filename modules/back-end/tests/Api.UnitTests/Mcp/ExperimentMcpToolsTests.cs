@@ -82,6 +82,7 @@ public class ExperimentMcpToolsTests
     {
         var experimentId = Guid.NewGuid();
         var runId = Guid.NewGuid();
+        var layerId = Guid.NewGuid();
         var envId = Guid.NewGuid();
         var httpContext = new DefaultHttpContext();
         var sender = new Mock<ISender>();
@@ -111,6 +112,7 @@ public class ExperimentMcpToolsTests
             Method = "bayesian_ab",
             ControlVariant = "control",
             TreatmentVariant = "treatment",
+            LayerId = layerId,
             LayerKey = "checkout",
             AssignmentUnitSelector = "user.keyId",
             LayerTrafficPercent = 30,
@@ -126,7 +128,7 @@ public class ExperimentMcpToolsTests
         Assert.Equal("control", dispatched.Update.ControlVariant);
         Assert.Equal("treatment", dispatched.Update.TreatmentVariant);
         Assert.Equal("checkout", dispatched.Update.LayerKey);
-        Assert.Equal("checkout", dispatched.Update.LayerId);
+        Assert.Equal(layerId, dispatched.Update.LayerId);
         Assert.Equal("user.keyId", dispatched.Update.AssignmentUnitSelector);
         Assert.Equal(30, dispatched.Update.LayerTrafficPercent);
         Assert.Equal(ValidSamplingPlan, dispatched.Update.AnalysisSamplingPlan);

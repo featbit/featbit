@@ -1,26 +1,30 @@
 using Application.Bases.Models;
-using Application.Experiments;
+using Application.Experiments.ExperimentMetrics;
+using Domain.Experiments;
 
 namespace Application.Services;
 
 public interface IExperimentMetricService
 {
-    Task<PagedResult<ExperimentMetricVm>> GetListAsync(
+    Task<PagedResult<ExperimentMetric>> GetListAsync(
         Guid envId,
-        ExperimentMetricFilter filter);
+        ExperimentMetricFilter filter,
+        IReadOnlyCollection<string> referencedKeys);
 
-    Task<ExperimentMetricVm> CreateAsync(
+    Task<ExperimentMetric> CreateAsync(
         Guid envId,
-        ExperimentMetricUpdate update);
+        CreateExperimentMetricRequest request);
 
-    Task<ExperimentMetricVm> UpdateAsync(
+    Task<ExperimentMetric> UpdateAsync(
         Guid envId,
         Guid id,
-        ExperimentMetricUpdate update);
+        UpdateExperimentMetricRequest request);
 
     Task ArchiveAsync(Guid envId, Guid id);
 
-    Task<ExperimentMetricVm> GetBySelectorAsync(
+    Task RestoreAsync(Guid envId, Guid id);
+
+    Task<ExperimentMetric> GetBySelectorAsync(
         Guid envId,
         Guid? id,
         string key);

@@ -119,6 +119,37 @@ export interface ReleaseDecisionLayer {
   status: string;
   createdAt: string;
   updatedAt: string;
+  experimentRuns: ReleaseDecisionLayerRun[];
+  allocationSummary: ReleaseDecisionLayerAllocationSummary;
+}
+
+export interface ReleaseDecisionLayerRun {
+  id: string;
+  experimentId: string;
+  experimentName: string;
+  key: string;
+  layerId: string | null;
+  layerKey: string | null;
+  assignmentUnitSelector: string;
+  start: number;
+  end: number;
+  status: string;
+  includedInAllocation: boolean;
+}
+
+export interface ReleaseDecisionLayerAllocationSummary {
+  activeRunCount: number;
+  reservedPercent: number;
+  freePercent: number;
+  overlaps: Array<{
+    start: number;
+    end: number;
+    runIds: string[];
+  }>;
+  mixedAssignmentUnits: boolean;
+  overAllocated: boolean;
+  status:
+    "mixed-assignment-units" | "over-allocated" | "overlap" | "no-conflicts";
 }
 
 export interface ReleaseDecisionMetric {
@@ -192,11 +223,12 @@ export type ReleaseDecisionMetricsUpdate = {
   guardrails?: string | null;
 };
 
-export type ReleaseDecisionExperimentRunUpdate =
-  Partial<Omit<ReleaseDecisionExperimentRun, "observationStart" | "observationEnd">> & {
-    observationStart?: string | Date | null;
-    observationEnd?: string | Date | null;
-  };
+export type ReleaseDecisionExperimentRunUpdate = Partial<
+  Omit<ReleaseDecisionExperimentRun, "observationStart" | "observationEnd">
+> & {
+  observationStart?: string | Date | null;
+  observationEnd?: string | Date | null;
+};
 
 async function apiRequest<T>(
   path: string,
@@ -235,7 +267,10 @@ export async function apiListLayers(
   );
 }
 
-export async function apiCreateLayer(envId: string, body: ReleaseDecisionLayerUpdate) {
+export async function apiCreateLayer(
+  envId: string,
+  body: ReleaseDecisionLayerUpdate,
+) {
   return apiRequest<ReleaseDecisionLayer>(releaseDecisionLayersPath(envId), {
     method: "POST",
     body,
@@ -269,7 +304,10 @@ export async function apiListMetrics(
   );
 }
 
-export async function apiCreateMetric(envId: string, body: ReleaseDecisionMetricUpdate) {
+export async function apiCreateMetric(
+  envId: string,
+  body: ReleaseDecisionMetricUpdate,
+) {
   return apiRequest<ReleaseDecisionMetric>(releaseDecisionMetricsPath(envId), {
     method: "POST",
     body,
@@ -348,10 +386,9 @@ export async function apiUpdateExperimentMetrics(
 }
 
 export async function apiDeleteExperiment(envId: string, id: string) {
-  return apiRequest<boolean>(
-    releaseDecisionExperimentsPath(envId, `/${id}`),
-    { method: "DELETE" },
-  );
+  return apiRequest<boolean>(releaseDecisionExperimentsPath(envId, `/${id}`), {
+    method: "DELETE",
+  });
 }
 
 export async function apiUpdateExperimentStage(
@@ -372,7 +409,11 @@ export async function apiCreateExperimentRun(envId: string, id: string) {
   );
 }
 
-export async function apiDeleteExperimentRun(envId: string, id: string, runId: string) {
+export async function apiDeleteExperimentRun(
+  envId: string,
+  id: string,
+  runId: string,
+) {
   return apiRequest<ReleaseDecisionExperimentDetail>(
     releaseDecisionExperimentsPath(envId, `/${id}/runs/${runId}`),
     { method: "DELETE" },
@@ -402,4 +443,3 @@ export async function apiAnalyzeExperimentRun(
     { method: "POST", body: { forceFresh: Boolean(forceFresh) } },
   );
 }
-

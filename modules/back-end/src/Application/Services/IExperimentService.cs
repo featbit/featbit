@@ -1,5 +1,6 @@
 using Application.Bases.Models;
 using Application.Experiments;
+using Application.Experiments.ExperimentMetrics;
 using Domain.Experiments;
 
 namespace Application.Services;
@@ -56,6 +57,14 @@ public interface IExperimentService
         Guid id,
         Guid runId,
         ExperimentRunAnalyzeRequest request);
+
+    Task<IReadOnlyCollection<ExperimentRunForLayer>> GetExperimentRunsByLayersAsync(
+        Guid envId,
+        IReadOnlyCollection<ExperimentLayer> layers);
+
+    Task<IReadOnlyCollection<ExperimentWithRuns>> GetExperimentsWithRunsAsync(
+        Guid envId,
+        string nameSearchText = null);
 
     Task<PagedResult<ExperimentVm>> GetListAsync(
         Guid envId,
