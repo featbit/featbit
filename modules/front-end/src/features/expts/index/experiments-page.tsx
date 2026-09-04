@@ -87,13 +87,15 @@ export function ExperimentsPage() {
   )
 
   useEffect(() => {
+    if (name.trim() === debouncedName) return
+
     const timeout = window.setTimeout(() => {
       const value = name.trim()
       setDebouncedName(value)
       updateParams({ name: value || null }, true)
     }, 350)
     return () => window.clearTimeout(timeout)
-  }, [name, updateParams])
+  }, [name, debouncedName, updateParams])
 
   const listQuery = useQuery({
     queryKey: [

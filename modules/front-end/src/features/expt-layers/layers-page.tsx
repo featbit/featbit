@@ -48,12 +48,14 @@ export function LayersPage() {
   const [archiveConfirmationKey, setArchiveConfirmationKey] = useState("")
 
   useEffect(() => {
+    if (search.trim() === debouncedSearch) return
+
     const timeout = window.setTimeout(() => {
       setDebouncedSearch(search.trim())
       setPageIndex(1)
     }, 400)
     return () => window.clearTimeout(timeout)
-  }, [search])
+  }, [search, debouncedSearch])
 
   const listQuery = useQuery({
     queryKey: ["layers", envId, debouncedSearch, archived, pageIndex, pageSize],
