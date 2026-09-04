@@ -27,6 +27,10 @@ public class ServedVariationsValidatorTests
     [InlineData(0, 0.6, 0.5, 1)]
     [InlineData(0.1, 0.5, 0.5, 1)]
     [InlineData(0, 0.5, 0.5, 0.9)]
+    [InlineData(0, 0.5, 0.500001, 1)]
+    [InlineData(0, 0.500001, 0.5, 1)]
+    [InlineData(0.000001, 0.5, 0.5, 1)]
+    [InlineData(0, 0.5, 0.5, 0.999999)]
     public void IsValid_RolloutDoesNotCompletelyAllocateOneHundredPercent_ReturnsFalse(
         double firstStart,
         double firstEnd,

@@ -51,6 +51,14 @@ public class RuleValidationTests
     }
 
     [Fact]
+    public void MatchRule_NoConditions_IsInvalid()
+    {
+        var rule = new MatchRule { Conditions = [] };
+
+        Assert.False(rule.IsValid());
+    }
+
+    [Fact]
     public void TargetRule_SegmentCondition_IsValid()
     {
         var rule = new TargetRule { Conditions = [SegmentCondition], Variations = [FullRollout()] };
@@ -68,6 +76,18 @@ public class RuleValidationTests
         };
 
         Assert.False(rule.IsValid(FlagVariations("variation-1", "variation-2")));
+    }
+
+    [Fact]
+    public void TargetRule_NoConditions_IsInvalid()
+    {
+        var rule = new TargetRule
+        {
+            Conditions = [],
+            Variations = [FullRollout()]
+        };
+
+        Assert.False(rule.IsValid(FlagVariations("variation-1")));
     }
 
     [Fact]

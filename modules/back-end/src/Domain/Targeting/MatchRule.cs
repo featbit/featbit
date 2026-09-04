@@ -19,7 +19,7 @@ public class MatchRule
 
     public bool IsValid()
     {
-        if (Conditions == null)
+        if (Conditions == null || Conditions.Count == 0)
         {
             return false;
         }
