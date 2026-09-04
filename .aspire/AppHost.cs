@@ -4,9 +4,10 @@ using Microsoft.Extensions.Configuration;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-var topology = LocalTopology.StandardPostgres;
-var useExistingInfrastructure = builder.Configuration.GetValue("FeatBit:UseExistingInfrastructure", true);
+var topology = builder.Configuration.GetValue("FeatBit:Topology", LocalTopology.Standalone);
+var useExistingInfrastructure = builder.Configuration.GetValue("FeatBit:UseExistingInfrastructure", false);
 var includeUi = builder.Configuration.GetValue("FeatBit:IncludeUi", true);
+var includeEvaluationServer = builder.Configuration.GetValue("FeatBit:IncludeEvaluationServer", false);
 var includeReleaseDecisionWeb = builder.Configuration.GetValue("FeatBit:IncludeReleaseDecisionWeb", false);
 
 var (dbProvider, mqProvider, cacheProvider, olapProvider) = topology switch
@@ -63,9 +64,11 @@ if (!useExistingInfrastructure && IsProvider(dbProvider, "Postgres"))
         .WithEnvironment("POSTGRES_USER", "postgres")
         .WithEnvironment("POSTGRES_PASSWORD", "please_change_me")
         .WithEnvironment("PGDATA", "/var/lib/postgresql/data/pgdata")
-        .WithBindMount("../infra/postgresql/docker-entrypoint-initdb.d", "/docker-entrypoint-initdb.d", isReadOnly: true)
+        .WithBindMount("postgres-init", "/docker-entrypoint-initdb.d", isReadOnly: true)
+        .WithBindMount("../infra/postgresql/docker-entrypoint-initdb.d", "/featbit-init/released", isReadOnly: true)
+        .WithBindMount("../modules/back-end/tests/Infrastructure.IntegrationTests/Fixtures", "/featbit-init/pending", isReadOnly: true)
         .WithEndpoint(port: 5432, targetPort: 5432, name: "tcp", isProxied: false)
-        .WithVolume("featbit-aspire-postgres", "/var/lib/postgresql/data");
+        .WithVolume("featbit-aspire-postgres-vnext", "/var/lib/postgresql/data");
 }
 else if (!useExistingInfrastructure && IsProvider(dbProvider, "MongoDb"))
 {
@@ -176,72 +179,83 @@ if (!useExistingInfrastructure && useClickHouseOlap)
         .WaitFor(kafka!);
 }
 
-var evaluationServer = builder
-    .AddProject<EvaluationApiProject>("evaluation-server")
-    .WithHttpEndpoint(port: 5100, targetPort: 5100, isProxied: false)
-    .WithHttpsEndpoint(port: 5101, targetPort: 5101, isProxied: false)
-    .WithEnvironment("ASPNETCORE_ENVIRONMENT", "Development")
-    .WithEnvironment("ASPNETCORE_URLS", "http://localhost:5100;https://localhost:5101")
-    .WithEnvironment("DbProvider", dbProvider)
-    .WithEnvironment("MqProvider", mqProvider)
-    .WithEnvironment("CacheProvider", cacheProvider)
-    .WithHttpHealthCheck("/health/readiness", endpointName: "http");
-
-if (useExistingInfrastructure)
-{
-    evaluationServer = evaluationServer
-        .WithReference(externalPostgres!)
-        .WithReference(externalRedis!)
-        .WithEnvironment("Postgres__ConnectionString", externalPostgres!.Resource.ConnectionStringExpression)
-        .WithEnvironment("Redis__ConnectionString", externalRedis!.Resource.ConnectionStringExpression)
-        .WaitFor(externalPostgres!)
-        .WaitFor(externalRedis!);
-}
-else
-{
-    evaluationServer = evaluationServer.WaitFor(mainDb!);
-}
-
-if (!useExistingInfrastructure && IsProvider(dbProvider, "Postgres"))
-{
-    evaluationServer = evaluationServer.WithEnvironment("Postgres__ConnectionString", postgresConnectionString);
-}
-
-if (!useExistingInfrastructure && IsProvider(dbProvider, "MongoDb"))
-{
-    evaluationServer = evaluationServer
-        .WithEnvironment("MongoDb__ConnectionString", mongoDbConnectionString)
-        .WithEnvironment("MongoDb__Database", "featbit");
-}
-
-if (!useExistingInfrastructure && useRedis)
-{
-    evaluationServer = evaluationServer
-        .WithEnvironment("Redis__ConnectionString", redisConnectionString)
-        .WaitFor(redis!);
-}
-
-if (!useExistingInfrastructure && useClickHouseOlap)
-{
-    evaluationServer = evaluationServer
-        .WithEnvironment("Kafka__Producer__bootstrap.servers", kafkaBootstrapServers)
-        .WithEnvironment("Kafka__Consumer__bootstrap.servers", kafkaBootstrapServers)
-        .WaitFor(kafka!);
-}
-
 ConfigureFeatBitOpenTelemetry(apiServer, "featbit-api");
-ConfigureFeatBitOpenTelemetry(evaluationServer, "featbit-els");
+
+IResourceBuilder<ProjectResource>? evaluationServer = null;
+
+if (includeEvaluationServer)
+{
+    evaluationServer = builder
+        .AddProject<EvaluationApiProject>("evaluation-server")
+        .WithHttpEndpoint(port: 5100, targetPort: 5100, isProxied: false)
+        .WithHttpsEndpoint(port: 5101, targetPort: 5101, isProxied: false)
+        .WithEnvironment("ASPNETCORE_ENVIRONMENT", "Development")
+        .WithEnvironment("ASPNETCORE_URLS", "http://localhost:5100;https://localhost:5101")
+        .WithEnvironment("DbProvider", dbProvider)
+        .WithEnvironment("MqProvider", mqProvider)
+        .WithEnvironment("CacheProvider", cacheProvider)
+        .WithHttpHealthCheck("/health/readiness", endpointName: "http");
+
+    if (useExistingInfrastructure)
+    {
+        evaluationServer = evaluationServer
+            .WithReference(externalPostgres!)
+            .WithReference(externalRedis!)
+            .WithEnvironment("Postgres__ConnectionString", externalPostgres!.Resource.ConnectionStringExpression)
+            .WithEnvironment("Redis__ConnectionString", externalRedis!.Resource.ConnectionStringExpression)
+            .WaitFor(externalPostgres!)
+            .WaitFor(externalRedis!);
+    }
+    else
+    {
+        evaluationServer = evaluationServer.WaitFor(mainDb!);
+    }
+
+    if (!useExistingInfrastructure && IsProvider(dbProvider, "Postgres"))
+    {
+        evaluationServer = evaluationServer.WithEnvironment("Postgres__ConnectionString", postgresConnectionString);
+    }
+
+    if (!useExistingInfrastructure && IsProvider(dbProvider, "MongoDb"))
+    {
+        evaluationServer = evaluationServer
+            .WithEnvironment("MongoDb__ConnectionString", mongoDbConnectionString)
+            .WithEnvironment("MongoDb__Database", "featbit");
+    }
+
+    if (!useExistingInfrastructure && useRedis)
+    {
+        evaluationServer = evaluationServer
+            .WithEnvironment("Redis__ConnectionString", redisConnectionString)
+            .WaitFor(redis!);
+    }
+
+    if (!useExistingInfrastructure && useClickHouseOlap)
+    {
+        evaluationServer = evaluationServer
+            .WithEnvironment("Kafka__Producer__bootstrap.servers", kafkaBootstrapServers)
+            .WithEnvironment("Kafka__Consumer__bootstrap.servers", kafkaBootstrapServers)
+            .WaitFor(kafka!);
+    }
+
+    ConfigureFeatBitOpenTelemetry(evaluationServer, "featbit-els");
+}
 
 if (includeUi)
 {
-    builder
+    var ui = builder
         .AddViteApp("ui", "../modules/front-end")
         .WithNpm(installCommand: "ci")
         .WithReference(apiServer)
-        .WithReference(evaluationServer)
         .WithExternalHttpEndpoints()
-        .WaitFor(apiServer)
-        .WaitFor(evaluationServer);
+        .WaitFor(apiServer);
+
+    if (evaluationServer is not null)
+    {
+        ui
+            .WithReference(evaluationServer)
+            .WaitFor(evaluationServer);
+    }
 }
 
 if (includeReleaseDecisionWeb)
