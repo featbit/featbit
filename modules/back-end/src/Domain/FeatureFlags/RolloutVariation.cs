@@ -19,6 +19,21 @@ public class RolloutVariation
     /// </summary>
     public double ExptRollout { get; set; }
 
+    public bool IsValid(ICollection<Variation> flagVariations)
+    {
+        if (flagVariations.All(variation => variation.Id != Id))
+        {
+            return false;
+        }
+
+        return Rollout is { Length: 2 } &&
+               double.IsFinite(Rollout[0]) &&
+               double.IsFinite(Rollout[1]) &&
+               Rollout[0] >= 0 &&
+               Rollout[0] <= Rollout[1] &&
+               Rollout[1] <= 1;
+    }
+
     public bool IsEmpty()
     {
         return Rollout[1] - Rollout[0] == 0;

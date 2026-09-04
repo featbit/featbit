@@ -2,6 +2,7 @@ using Application.Bases;
 using Application.FeatureFlags;
 using Domain.FeatureFlags;
 using Domain.Policies;
+using FluentValidation;
 
 namespace Application.UnitTests.Validators;
 
@@ -126,24 +127,6 @@ public class FeatureFlagValidatorTests
     }
 
     [Fact]
-    public void UpdateTargeting_EmptyDisabledVariationId_RequiredError()
-    {
-        var request = new UpdateTargeting(
-            Guid.NewGuid(),
-            Guid.NewGuid(),
-            "flag",
-            new UpdateTargetingPayload
-            {
-                Targeting = new FlagTargeting { DisabledVariationId = string.Empty }
-            },
-            Array.Empty<PolicyStatement>());
-
-        var result = new UpdateTargetingValidator().Validate(request);
-
-        Assert.Contains(result.Errors, e => e.ErrorCode == ErrorCodes.Required("disabledVariationId"));
-    }
-
-    [Fact]
     public void UpdateVariations_NullValueOk_VariationsValid()
     {
         var req = new UpdateVariations { Variations = new[] { V("a") } };
@@ -201,4 +184,62 @@ public class FeatureFlagValidatorTests
         Assert.Contains(result.Errors, e => e.ErrorCode == ErrorCodes.Invalid("key"));
     }
 
+    [Fact]
+    public void FlagTargeting_AllServedVariationsBelongToFlag_NoErrors()
+    {
+        Variation[] flagVariations = [V("variation-1")];
+        var targeting = new FlagTargeting
+        {
+            DisabledVariationId = "variation-1",
+            Rules = [],
+            Fallthrough = new Fallthrough
+            {
+                Variations = [new RolloutVariation { Id = "variation-1", Rollout = [0, 1] }]
+            }
+        };
+
+        FlagTargetingValidator.EnsureValid(targeting, flagVariations);
+    }
+
+    [Fact]
+    public void FlagTargeting_InvalidServedVariation_TargetingInvalidError()
+    {
+        Variation[] flagVariations = [V("variation-1")];
+        var targeting = new FlagTargeting
+        {
+            DisabledVariationId = "variation-1",
+            Rules = [],
+            Fallthrough = new Fallthrough
+            {
+                Variations = [new RolloutVariation { Id = "unknown", Rollout = [0, 1] }]
+            }
+        };
+
+        var exception = Assert.Throws<ValidationException>(() =>
+            FlagTargetingValidator.EnsureValid(targeting, flagVariations)
+        );
+
+        Assert.Contains(exception.Errors, error => error.ErrorCode == ErrorCodes.Invalid("targeting"));
+    }
+
+    [Fact]
+    public void FlagTargeting_InvalidDisabledVariation_TargetingInvalidError()
+    {
+        Variation[] flagVariations = [V("variation-1")];
+        var targeting = new FlagTargeting
+        {
+            DisabledVariationId = "unknown",
+            Rules = [],
+            Fallthrough = new Fallthrough
+            {
+                Variations = [new RolloutVariation { Id = "variation-1", Rollout = [0, 1] }]
+            }
+        };
+
+        var exception = Assert.Throws<ValidationException>(() =>
+            FlagTargetingValidator.EnsureValid(targeting, flagVariations)
+        );
+
+        Assert.Contains(exception.Errors, error => error.ErrorCode == ErrorCodes.Invalid("targeting"));
+    }
 }

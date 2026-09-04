@@ -34,44 +34,39 @@ public class CreateFlagSchedule : IRequest<bool>
     public ICollection<Guid> Reviewers { get; set; }
 }
 
-public class CreateFlagScheduleHandler : IRequestHandler<CreateFlagSchedule, bool>
+public class CreateFlagScheduleValidator : AbstractValidator<CreateFlagSchedule>
 {
-    private readonly IFeatureFlagService _flagService;
-    private readonly ILicenseService _licenseService;
-    private readonly IFlagScheduleService _flagScheduleService;
-    private readonly IFlagChangeRequestService _flagChangeRequestService;
-    private readonly IFlagDraftService _flagDraftService;
-    private readonly ICurrentUser _currentUser;
-
-    public CreateFlagScheduleHandler(
-        IFeatureFlagService flagService,
-        ILicenseService licenseService,
-        IFlagScheduleService flagScheduleService,
-        IFlagChangeRequestService flagChangeRequestService,
-        IFlagDraftService flagDraftService,
-        ICurrentUser currentUser)
+    public CreateFlagScheduleValidator()
     {
-        _flagService = flagService;
-        _licenseService = licenseService;
-        _flagScheduleService = flagScheduleService;
-        _flagChangeRequestService = flagChangeRequestService;
-        _flagDraftService = flagDraftService;
-        _currentUser = currentUser;
+        RuleFor(x => x.Targeting)
+            .NotNull().WithErrorCode(ErrorCodes.Required("targeting"));
     }
+}
 
+public class CreateFlagScheduleHandler(
+    IFeatureFlagService flagService,
+    ILicenseService licenseService,
+    IFlagScheduleService flagScheduleService,
+    IFlagChangeRequestService flagChangeRequestService,
+    IFlagDraftService flagDraftService,
+    ICurrentUser currentUser)
+    : IRequestHandler<CreateFlagSchedule, bool>
+{
     public async Task<bool> Handle(CreateFlagSchedule request, CancellationToken cancellationToken)
     {
-        var flag = await _flagService.GetAsync(request.EnvId, request.Key);
+        var flag = await flagService.GetAsync(request.EnvId, request.Key);
         if (!flag.Revision.Equals(request.Revision))
         {
             throw new ConflictException(nameof(FeatureFlag), flag.Id);
         }
 
-        var dataChange = flag.UpdateTargeting(request.Targeting, _currentUser.Id);
+        FlagTargetingValidator.EnsureValid(request.Targeting, flag.Variations);
+
+        var dataChange = flag.UpdateTargeting(request.Targeting, currentUser.Id);
 
         // create draft
-        var flagDraft = new FlagDraft(request.EnvId, flag.Id, dataChange, _currentUser.Id, comment: request.Reason);
-        await _flagDraftService.AddOneAsync(flagDraft);
+        var flagDraft = new FlagDraft(request.EnvId, flag.Id, dataChange, currentUser.Id, comment: request.Reason);
+        await flagDraftService.AddOneAsync(flagDraft);
 
         // create change request if needed
         var changeRequest = request.WithChangeRequest ? await CreateChangeRequest() : null;
@@ -83,7 +78,7 @@ public class CreateFlagScheduleHandler : IRequestHandler<CreateFlagSchedule, boo
         if (changeRequest != null)
         {
             changeRequest.AttachSchedule(schedule.Id);
-            await _flagChangeRequestService.UpdateAsync(changeRequest);
+            await flagChangeRequestService.UpdateAsync(changeRequest);
         }
 
         return true;
@@ -102,10 +97,10 @@ public class CreateFlagScheduleHandler : IRequestHandler<CreateFlagSchedule, boo
                 status,
                 request.Title,
                 request.ScheduledTime,
-                _currentUser.Id,
+                currentUser.Id,
                 changeRequestId
             );
-            await _flagScheduleService.AddOneAsync(newSchedule);
+            await flagScheduleService.AddOneAsync(newSchedule);
 
             return newSchedule;
         }
@@ -114,7 +109,7 @@ public class CreateFlagScheduleHandler : IRequestHandler<CreateFlagSchedule, boo
         {
             // check license
             var isChangeRequestGranted =
-                await _licenseService.IsFeatureGrantedAsync(request.WorkspaceId, LicenseFeatures.ChangeRequest);
+                await licenseService.IsFeatureGrantedAsync(request.WorkspaceId, LicenseFeatures.ChangeRequest);
             if (!isChangeRequestGranted)
             {
                 throw new BusinessException(ErrorCodes.Unauthorized);
@@ -127,10 +122,10 @@ public class CreateFlagScheduleHandler : IRequestHandler<CreateFlagSchedule, boo
                 flagDraft.Id,
                 flag.Id,
                 request.Reviewers,
-                _currentUser.Id,
+                currentUser.Id,
                 reason: request.Reason
             );
-            await _flagChangeRequestService.AddOneAsync(newChangeRequest);
+            await flagChangeRequestService.AddOneAsync(newChangeRequest);
 
             return newChangeRequest;
         }

@@ -33,4 +33,19 @@ public class TargetRule
     /// The served variations.
     /// </summary>
     public ICollection<RolloutVariation> Variations { get; set; }
+
+    public bool IsValid(ICollection<Variation> flagVariations)
+    {
+        if (Conditions == null || Variations == null)
+        {
+            return false;
+        }
+
+        if (Conditions.Any(condition => condition == null || !condition.IsValid(isSegmentConditionAllowed: true)))
+        {
+            return false;
+        }
+
+        return ServedVariationsValidator.IsValid(Variations, flagVariations);
+    }
 }
