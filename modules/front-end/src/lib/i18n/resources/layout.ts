@@ -15,7 +15,7 @@ export const enLayout = {
     groups: {
       getStarted: "Get Started",
       release: "Release",
-      experimentation: "Experimentation",
+      releaseDecision: "Release Decision",
       governance: "Governance",
       integrations: "Integrations",
       admin: "Admin",
@@ -27,6 +27,7 @@ export const enLayout = {
       endUsers: "End Users",
       experiments: "Experiments",
       metrics: "Metrics",
+      layers: "Layers",
       auditLogs: "Audit Logs",
       changeRequests: "Change Requests",
       workspace: "Workspace",
@@ -110,7 +111,7 @@ export const zhLayout = {
     groups: {
       getStarted: "开始",
       release: "发布",
-      experimentation: "实验",
+      releaseDecision: "发布决策",
       governance: "治理",
       integrations: "集成",
       admin: "管理",
@@ -122,6 +123,7 @@ export const zhLayout = {
       endUsers: "目标用户",
       experiments: "实验",
       metrics: "指标",
+      layers: "互斥层",
       auditLogs: "审计日志",
       changeRequests: "变更请求",
       workspace: "工作区",

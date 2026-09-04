@@ -1,6 +1,7 @@
+using System.Text.RegularExpressions;
 using Application.Bases.Exceptions;
 using Application.Bases.Models;
-using Application.Experiments;
+using Application.Experiments.ExperimentMetrics;
 using Application.Services;
 using Domain.Experiments;
 using MongoDB.Bson;
@@ -10,16 +11,35 @@ namespace Infrastructure.Services.MongoDb;
 
 public class ExperimentMetricService(MongoDbClient mongoDb) : IExperimentMetricService
 {
-    public async Task<PagedResult<ExperimentMetricVm>> GetListAsync(
+    public async Task<PagedResult<ExperimentMetric>> GetListAsync(
         Guid envId,
-        ExperimentMetricFilter filter)
+        ExperimentMetricFilter filter,
+        IReadOnlyCollection<string> referencedKeys)
     {
+        referencedKeys ??= [];
+
         filter ??= new ExperimentMetricFilter();
         var builder = Builders<ExperimentMetric>.Filter;
         var filters = new List<FilterDefinition<ExperimentMetric>>
         {
             builder.Eq(x => x.FeatBitEnvId, envId)
         };
+
+        if (!string.IsNullOrWhiteSpace(filter.SearchText))
+        {
+            var search = new BsonRegularExpression(Regex.Escape(filter.SearchText.Trim()), "i");
+            var searchFilters = new List<FilterDefinition<ExperimentMetric>>
+            {
+                builder.Regex(x => x.Name, search),
+                builder.Regex(x => x.Key, search),
+            };
+            if (referencedKeys.Count > 0)
+            {
+                searchFilters.Add(builder.In(x => x.Key, referencedKeys));
+            }
+
+            filters.Add(builder.Or(searchFilters));
+        }
 
         if (!string.IsNullOrWhiteSpace(filter.Name))
         {
@@ -48,52 +68,50 @@ public class ExperimentMetricService(MongoDbClient mongoDb) : IExperimentMetricS
             .Limit(pageSize)
             .ToListAsync();
 
-        return new PagedResult<ExperimentMetricVm>(totalCount, metrics.Select(ToVm).ToArray());
+        return new PagedResult<ExperimentMetric>(totalCount, metrics);
     }
 
-    public async Task<ExperimentMetricVm> CreateAsync(
+    public async Task<ExperimentMetric> CreateAsync(
         Guid envId,
-        ExperimentMetricUpdate update)
+        CreateExperimentMetricRequest request)
     {
-        update ??= new ExperimentMetricUpdate();
+        ArgumentNullException.ThrowIfNull(request);
         var now = DateTime.UtcNow;
         var metric = new ExperimentMetric
         {
             Id = Guid.NewGuid(),
             FeatBitEnvId = envId,
-            Name = Normalize(update.Name)!,
-            Key = Normalize(update.Key)!,
-            Description = Normalize(update.Description),
-            MetricType = NormalizeMetricType(update.MetricType),
-            MetricAgg = NormalizeMetricAgg(update.MetricType, update.MetricAgg),
-            Status = NormalizeStatus(update.Status),
+            Name = Normalize(request.Name)!,
+            Key = Normalize(request.Key)!,
+            Description = Normalize(request.Description),
+            MetricType = NormalizeMetricType(request.MetricType),
+            MetricAgg = NormalizeMetricAgg(request.MetricType, request.MetricAgg),
+            Status = "active",
             CreatedAt = now,
             UpdatedAt = now
         };
 
         await mongoDb.CollectionOf<ExperimentMetric>().InsertOneAsync(metric);
-        return ToVm(metric);
+        return metric;
     }
 
-    public async Task<ExperimentMetricVm> UpdateAsync(
+    public async Task<ExperimentMetric> UpdateAsync(
         Guid envId,
         Guid id,
-        ExperimentMetricUpdate update)
+        UpdateExperimentMetricRequest request)
     {
-        update ??= new ExperimentMetricUpdate();
+        ArgumentNullException.ThrowIfNull(request);
         var metric = await GetMetricAsync(envId, id);
-        metric.Name = Normalize(update.Name, metric.Name)!;
-        metric.Key = Normalize(update.Key, metric.Key)!;
-        metric.Description = Normalize(update.Description);
-        metric.MetricType = NormalizeMetricType(update.MetricType);
-        metric.MetricAgg = NormalizeMetricAgg(metric.MetricType, update.MetricAgg);
-        metric.Status = NormalizeStatus(update.Status, metric.Status);
+        metric.Name = Normalize(request.Name, metric.Name)!;
+        metric.Description = Normalize(request.Description);
+        metric.MetricType = NormalizeMetricType(request.MetricType);
+        metric.MetricAgg = NormalizeMetricAgg(metric.MetricType, request.MetricAgg);
         metric.UpdatedAt = DateTime.UtcNow;
 
         await mongoDb.CollectionOf<ExperimentMetric>()
             .ReplaceOneAsync(x => x.Id == id && x.FeatBitEnvId == envId, metric);
 
-        return ToVm(metric);
+        return metric;
     }
 
     public async Task ArchiveAsync(Guid envId, Guid id)
@@ -106,7 +124,17 @@ public class ExperimentMetricService(MongoDbClient mongoDb) : IExperimentMetricS
             .ReplaceOneAsync(x => x.Id == id && x.FeatBitEnvId == envId, metric);
     }
 
-    public async Task<ExperimentMetricVm> GetBySelectorAsync(
+    public async Task RestoreAsync(Guid envId, Guid id)
+    {
+        var metric = await GetMetricAsync(envId, id);
+        metric.Status = "active";
+        metric.UpdatedAt = DateTime.UtcNow;
+
+        await mongoDb.CollectionOf<ExperimentMetric>()
+            .ReplaceOneAsync(x => x.Id == id && x.FeatBitEnvId == envId, metric);
+    }
+
+    public async Task<ExperimentMetric> GetBySelectorAsync(
         Guid envId,
         Guid? id,
         string key)
@@ -125,7 +153,7 @@ public class ExperimentMetricService(MongoDbClient mongoDb) : IExperimentMetricS
             throw new EntityNotFoundException(nameof(ExperimentMetric), $"{envId}-{id}-{normalizedKey}");
         }
 
-        return ToVm(metric);
+        return metric;
     }
 
     private async Task<ExperimentMetric> GetMetricAsync(Guid envId, Guid id)
@@ -142,23 +170,6 @@ public class ExperimentMetricService(MongoDbClient mongoDb) : IExperimentMetricS
         return metric;
     }
 
-    private static ExperimentMetricVm ToVm(ExperimentMetric metric)
-    {
-        return new ExperimentMetricVm
-        {
-            Id = metric.Id,
-            FeatBitEnvId = metric.FeatBitEnvId,
-            Name = metric.Name,
-            Key = metric.Key,
-            Description = metric.Description,
-            MetricType = metric.MetricType,
-            MetricAgg = metric.MetricAgg,
-            Status = metric.Status,
-            CreatedAt = metric.CreatedAt,
-            UpdatedAt = metric.UpdatedAt
-        };
-    }
-
     private static string? Normalize(string? value, string? fallback = null)
     {
         return string.IsNullOrWhiteSpace(value) ? fallback : value.Trim();
@@ -166,7 +177,7 @@ public class ExperimentMetricService(MongoDbClient mongoDb) : IExperimentMetricS
 
     private static string NormalizeMetricType(string? value)
     {
-        return value is "continuous" or "numeric" ? "continuous" : "binary";
+        return value == "numeric" ? "numeric" : "binary";
     }
 
     private static string NormalizeMetricAgg(string? metricType, string? value)
@@ -179,8 +190,4 @@ public class ExperimentMetricService(MongoDbClient mongoDb) : IExperimentMetricS
         return value is "count" or "sum" or "average" ? value : "once";
     }
 
-    private static string NormalizeStatus(string? value, string fallback = "active")
-    {
-        return string.Equals(value, "archived", StringComparison.OrdinalIgnoreCase) ? "archived" : fallback;
-    }
 }

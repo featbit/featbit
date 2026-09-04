@@ -89,7 +89,7 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
             ]
         });
         await using var db = CreateDbContext();
-        await SeedExperimentAsync(db, method: "bayesian_ab", metricType: "continuous", metricAgg: metricAgg, metricEvent: "revenue");
+        await SeedExperimentAsync(db, method: "bayesian_ab", metricType: "numeric", metricAgg: metricAgg, metricEvent: "revenue");
 
         var result = await CreateService(db, stats).AnalyzeRunAsync(
             EnvId,
@@ -224,6 +224,7 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
     [DockerFact]
     public async Task AnalyzeRun_SamplingScope_PassesFieldsToStatsQuery()
     {
+        var layerId = Guid.Parse("44444444-4444-4444-4444-444444444444");
         var stats = new FixedExperimentStatsService(new ExperimentStatsVm
         {
             EnvId = EnvId,
@@ -244,7 +245,7 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
             metricAgg: "once",
             trafficPercent: 20,
             trafficOffset: 10,
-            layerId: "checkout-layer",
+            layerId: layerId,
             assignmentUnitSelector: "accountId",
             layerTrafficPercent: 30,
             analysisSamplingPlan: """[{"variation":"control-id","role":"control","includeRate":25},{"variation":"treatment-id","role":"treatment","includeRate":100}]""");
@@ -258,7 +259,7 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
         var request = Assert.Single(stats.Requests);
         Assert.Equal(20, request.TrafficPercent);
         Assert.Equal(10, request.TrafficOffset);
-        Assert.Equal("checkout-layer", request.LayerId);
+        Assert.Equal(layerId.ToString("D"), request.LayerId);
         Assert.Equal("accountId", request.AssignmentUnitSelector);
         Assert.Equal(30, request.LayerTrafficPercent);
         Assert.Equal("""[{"variation":"control-id","role":"control","includeRate":25},{"variation":"treatment-id","role":"treatment","includeRate":100}]""", request.AnalysisSamplingPlan);
@@ -294,7 +295,7 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
         string treatmentVariant = "treatment",
         double? trafficPercent = null,
         int? trafficOffset = null,
-        string? layerId = null,
+        Guid? layerId = null,
         string? assignmentUnitSelector = null,
         double? layerTrafficPercent = null,
         string? analysisSamplingPlan = null)

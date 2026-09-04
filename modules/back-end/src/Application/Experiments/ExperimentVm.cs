@@ -145,15 +145,13 @@ public class ExperimentRunVm
 
     public string NextHypothesis { get; set; }
 
-    public string RunId { get; set; }
-
     public string PrimaryMetricAgg { get; set; }
 
     public string PrimaryMetricType { get; set; }
 
     public double? TrafficPercent { get; set; }
 
-    public string LayerId { get; set; }
+    public Guid? LayerId { get; set; }
 
     public string AudienceFilters { get; set; }
 

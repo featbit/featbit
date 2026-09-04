@@ -1,5 +1,5 @@
 using Application.Bases.Models;
-using Application.Experiments;
+using Application.Experiments.ExperimentLayers;
 using Api.Authentication;
 using Domain.Policies;
 
@@ -15,7 +15,7 @@ public class ExperimentLayerController : ApiControllerBase
         Guid envId,
         [FromQuery] ExperimentLayerFilter filter)
     {
-        var layers = await Mediator.Send(new QueryExperimentLayers
+        var layers = await Mediator.Send(new GetExperimentLayerList
         {
             EnvId = envId,
             Filter = filter
@@ -28,12 +28,12 @@ public class ExperimentLayerController : ApiControllerBase
     [HttpPost]
     public async Task<ApiResponse<ExperimentLayerVm>> CreateAsync(
         Guid envId,
-        ExperimentLayerUpdate update)
+        CreateExperimentLayerRequest request)
     {
         var layer = await Mediator.Send(new CreateExperimentLayer
         {
             EnvId = envId,
-            Update = update
+            Request = request
         });
 
         return Ok(layer);
@@ -44,23 +44,36 @@ public class ExperimentLayerController : ApiControllerBase
     public async Task<ApiResponse<ExperimentLayerVm>> UpdateAsync(
         Guid envId,
         Guid id,
-        ExperimentLayerUpdate update)
+        UpdateExperimentLayerRequest request)
     {
         var layer = await Mediator.Send(new UpdateExperimentLayer
         {
             EnvId = envId,
             Id = id,
-            Update = update
+            Request = request
         });
 
         return Ok(layer);
     }
 
     [OpenApi]
-    [HttpDelete("{id:guid}")]
-    public async Task<ApiResponse<bool>> DeleteAsync(Guid envId, Guid id)
+    [HttpPut("{id:guid}/archive")]
+    public async Task<ApiResponse<bool>> ArchiveAsync(Guid envId, Guid id)
     {
-        await Mediator.Send(new DeleteExperimentLayer
+        await Mediator.Send(new ArchiveExperimentLayer
+        {
+            EnvId = envId,
+            Id = id
+        });
+
+        return Ok(true);
+    }
+
+    [OpenApi]
+    [HttpPut("{id:guid}/restore")]
+    public async Task<ApiResponse<bool>> RestoreAsync(Guid envId, Guid id)
+    {
+        await Mediator.Send(new RestoreExperimentLayer
         {
             EnvId = envId,
             Id = id

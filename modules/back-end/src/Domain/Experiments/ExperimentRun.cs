@@ -60,15 +60,13 @@ public class ExperimentRun : AuditedEntity
 
     public string NextHypothesis { get; set; }
 
-    public string RunId { get; set; }
-
     public string PrimaryMetricAgg { get; set; } = "once";
 
     public string PrimaryMetricType { get; set; } = "binary";
 
     public double? TrafficPercent { get; set; } = 100;
 
-    public string LayerId { get; set; }
+    public Guid? LayerId { get; set; }
 
     public string AudienceFilters { get; set; }
 

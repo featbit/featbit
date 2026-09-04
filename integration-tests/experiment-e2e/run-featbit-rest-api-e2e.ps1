@@ -1,0 +1,158 @@
+[CmdletBinding()]
+param(
+    [string]$AccessToken = $env:FEATBIT_ACCESS_TOKEN,
+    [string]$LoginEmail = $env:FEATBIT_LOGIN_EMAIL,
+    [string]$LoginPassword = $env:FEATBIT_LOGIN_PASSWORD,
+    [string]$ApiUrl = $env:FEATBIT_API_URL,
+    [string]$EventUrl = $env:FEATBIT_EVENT_URL,
+    [string]$StreamingUrl = $env:FEATBIT_STREAMING_URL,
+    [string]$AuthMode = $env:FEATBIT_AUTH_MODE,
+    [string]$Organization = $env:FEATBIT_ORGANIZATION,
+    [string]$OrganizationKey = $env:FEATBIT_ORGANIZATION_KEY,
+    [string]$Workspace = $env:FEATBIT_WORKSPACE,
+    [string]$ProjectKey = $env:FEATBIT_PROJECT_KEY,
+    [string]$EnvId = $env:FEATBIT_ENV_ID,
+    [string]$DataSetId = $env:FEATBIT_DATA_SET_ID,
+    [int]$Users = 1500,
+    [int]$MinUsersPerVariant = 500,
+    [int]$BatchSize = 10,
+    [int]$SeedBatchDelayMs = 100,
+    [int]$PostSdkWaitSeconds = 8,
+    [string]$ReportDir = $env:FEATBIT_REPORT_DIR,
+    [switch]$Cleanup,
+    [switch]$SelfCheck,
+    [switch]$PrintPlan,
+    [switch]$OpenApiPreflight,
+    [string]$SwaggerUrl = "",
+    [string]$PlanSuffix = "fixed-v1"
+)
+
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
+
+$HasExplicitAccessToken = $PSBoundParameters.ContainsKey("AccessToken")
+$HasExplicitLogin = $PSBoundParameters.ContainsKey("LoginEmail") -or $PSBoundParameters.ContainsKey("LoginPassword")
+if ($HasExplicitAccessToken -and $HasExplicitLogin) {
+    throw "Use either AccessToken or LoginEmail/LoginPassword, not both."
+}
+
+if ($HasExplicitLogin) {
+    $AccessToken = ""
+}
+elseif ($HasExplicitAccessToken -or -not [string]::IsNullOrWhiteSpace($AccessToken)) {
+    $LoginEmail = ""
+    $LoginPassword = ""
+}
+
+if ([string]::IsNullOrWhiteSpace($ApiUrl)) {
+    $ApiUrl = "https://app-api.featbit.co"
+}
+
+if ([string]::IsNullOrWhiteSpace($EventUrl)) {
+    $EventUrl = "https://app-eval.featbit.co"
+}
+
+if ([string]::IsNullOrWhiteSpace($StreamingUrl)) {
+    $StreamingUrl = "wss://app-eval.featbit.co"
+}
+
+if ([string]::IsNullOrWhiteSpace($AuthMode)) {
+    $AuthMode = "raw"
+}
+
+if ($AuthMode -ne "raw" -and $AuthMode -ne "bearer") {
+    throw "AuthMode must be 'raw' or 'bearer'."
+}
+
+if ([string]::IsNullOrWhiteSpace($ReportDir)) {
+    $ReportDir = Join-Path $PSScriptRoot "reports"
+}
+
+$Runner = Join-Path $PSScriptRoot "featbit-rest-api-e2e.cs"
+
+function Invoke-Runner {
+    param(
+        [string[]]$RunnerArgs
+    )
+
+    $DotnetArgs = @("run", $Runner, "--") + $RunnerArgs
+    & dotnet @DotnetArgs
+
+    if ($LASTEXITCODE -ne 0) {
+        exit $LASTEXITCODE
+    }
+}
+
+if ($SelfCheck) {
+    Invoke-Runner @("--self-check")
+    return
+}
+
+if ($PrintPlan) {
+    Invoke-Runner @("--print-plan", "--plan-suffix", $PlanSuffix)
+    return
+}
+
+if ($OpenApiPreflight) {
+    $PreflightArgs = @("--openapi-preflight", "--api-url", $ApiUrl)
+    if (-not [string]::IsNullOrWhiteSpace($SwaggerUrl)) {
+        $PreflightArgs += @("--swagger-url", $SwaggerUrl)
+    }
+
+    Invoke-Runner $PreflightArgs
+    return
+}
+
+if ([string]::IsNullOrWhiteSpace($AccessToken) -and
+    ([string]::IsNullOrWhiteSpace($LoginEmail) -or [string]::IsNullOrWhiteSpace($LoginPassword))) {
+    throw "AccessToken is required unless LoginEmail and LoginPassword are provided."
+}
+
+$LiveRunnerArgs = @(
+    "--api-url", $ApiUrl,
+    "--event-url", $EventUrl,
+    "--streaming-url", $StreamingUrl,
+    "--auth-mode", $AuthMode,
+    "--organization-key", $(if ([string]::IsNullOrWhiteSpace($OrganizationKey)) { "playground" } else { $OrganizationKey }),
+    "--users", $Users.ToString(),
+    "--min-users-per-variant", $MinUsersPerVariant.ToString(),
+    "--batch-size", $BatchSize.ToString(),
+    "--seed-batch-delay-ms", $SeedBatchDelayMs.ToString(),
+    "--post-sdk-wait-seconds", $PostSdkWaitSeconds.ToString(),
+    "--cleanup", $(if ($Cleanup) { "true" } else { "false" }),
+    "--report-dir", $ReportDir
+)
+
+if (-not [string]::IsNullOrWhiteSpace($AccessToken)) {
+    $LiveRunnerArgs += @("--access-token", $AccessToken)
+}
+
+if (-not [string]::IsNullOrWhiteSpace($LoginEmail) -or -not [string]::IsNullOrWhiteSpace($LoginPassword)) {
+    if ([string]::IsNullOrWhiteSpace($LoginEmail) -or [string]::IsNullOrWhiteSpace($LoginPassword)) {
+        throw "LoginEmail and LoginPassword must be provided together."
+    }
+
+    $LiveRunnerArgs += @("--login-email", $LoginEmail, "--login-password", $LoginPassword)
+}
+
+if (-not [string]::IsNullOrWhiteSpace($Organization)) {
+    $LiveRunnerArgs += @("--organization", $Organization)
+}
+
+if (-not [string]::IsNullOrWhiteSpace($Workspace)) {
+    $LiveRunnerArgs += @("--workspace", $Workspace)
+}
+
+if (-not [string]::IsNullOrWhiteSpace($ProjectKey) -or -not [string]::IsNullOrWhiteSpace($EnvId)) {
+    if ([string]::IsNullOrWhiteSpace($ProjectKey) -or [string]::IsNullOrWhiteSpace($EnvId)) {
+        throw "ProjectKey and EnvId must be provided together."
+    }
+
+    $LiveRunnerArgs += @("--project-key", $ProjectKey, "--env-id", $EnvId)
+}
+
+if (-not [string]::IsNullOrWhiteSpace($DataSetId)) {
+    $LiveRunnerArgs += @("--data-set-id", $DataSetId)
+}
+
+Invoke-Runner $LiveRunnerArgs
