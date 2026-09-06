@@ -78,6 +78,10 @@ export type AnalysisRow = {
 
 export type AnalysisSection = {
   label: string
+  event?: string
+  inverse?: boolean
+  metricType?: string
+  metricAgg?: string
   rows: AnalysisRow[]
   verdict?: string
 }

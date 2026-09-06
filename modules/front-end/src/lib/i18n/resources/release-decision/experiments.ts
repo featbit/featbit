@@ -262,6 +262,7 @@ export const enExperiments = {
       checkFailed: "check failed",
       primaryMetric: "Primary metric",
       guardrail: "Guardrail",
+      directionNotRecorded: "Direction not recorded",
       noData: "No data",
       observedPerformance: "Observed performance",
       banditRecommendation: "Bandit recommendation",
@@ -270,6 +271,20 @@ export const enExperiments = {
       events: "Events",
       rate: "Rate",
       mean: "Mean",
+      eventsPerUser: "Events / user",
+      valuePerUserSum: "Value / user (sum)",
+      valuePerUserAverage: "Value / user (avg)",
+      valueColumnHelp: "About {{column}}",
+      valueColumnTooltips: {
+        rate: "Per-variant conversion rate = <code>k / n</code>. The Bayesian test compares treatment's rate against control's.",
+        eventsPerUser:
+          "Mean events per user = <code>Σ x / n</code>, where each user's <code>x</code> = number of events they fired. You picked “Count all” aggregation. The Bayesian test compares this per-user average across variants.",
+        valuePerUserSum:
+          "Mean per-user total = <code>Σ x / n</code>, where each user's <code>x</code> = sum of their event values (LTV-style). You picked “Sum values”.",
+        valuePerUserAverage:
+          "Mean per-user mean = <code>Σ x / n</code>, where each user's <code>x</code> = mean of their event values (AOV-style). You picked “Average values per user”.",
+        mean: "Per-user mean = <code>Σ x / n</code>. The Bayesian test compares treatment's mean against control's.",
+      },
       pBest: "P(best)",
       recommendedWeight: "Recommended weight",
       relativeLift: "Relative lift",
@@ -818,6 +833,7 @@ export const zhExperiments = {
       checkFailed: "检查失败",
       primaryMetric: "主要指标",
       guardrail: "护栏指标",
+      directionNotRecorded: "未记录指标方向",
       noData: "无数据",
       observedPerformance: "观测表现",
       banditRecommendation: "Bandit 建议",
@@ -826,6 +842,20 @@ export const zhExperiments = {
       events: "事件数",
       rate: "比率",
       mean: "均值",
+      eventsPerUser: "事件数 / 用户",
+      valuePerUserSum: "数值 / 用户（求和）",
+      valuePerUserAverage: "数值 / 用户（平均）",
+      valueColumnHelp: "关于{{column}}",
+      valueColumnTooltips: {
+        rate: "各变体的转化率 = <code>k / n</code>。贝叶斯检验比较实验组与对照组的转化率。",
+        eventsPerUser:
+          "每用户平均事件数 = <code>Σ x / n</code>，其中每个用户的 <code>x</code> 为其触发的事件次数。你选择了“统计全部次数”聚合方式。贝叶斯检验比较各变体的每用户平均值。",
+        valuePerUserSum:
+          "用户总值的平均值 = <code>Σ x / n</code>，其中每个用户的 <code>x</code> 为其所有事件值之和（类似 LTV）。你选择了“数值求和”聚合方式。",
+        valuePerUserAverage:
+          "用户均值的平均值 = <code>Σ x / n</code>，其中每个用户的 <code>x</code> 为其事件值的平均值（类似 AOV）。你选择了“数值平均”聚合方式。",
+        mean: "每用户均值 = <code>Σ x / n</code>。贝叶斯检验比较实验组与对照组的均值。",
+      },
       pBest: "P(最佳)",
       recommendedWeight: "建议权重",
       relativeLift: "相对提升",

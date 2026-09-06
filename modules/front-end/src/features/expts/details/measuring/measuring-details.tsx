@@ -57,6 +57,8 @@ import type { Layer } from "@/features/expt-layers/layers-types"
 import { cn } from "@/lib/utils"
 import { ExperimentRunTabs } from "../components/experiment-run-tabs"
 import type { ExperimentDetail } from "../experiment-details-types"
+import { AnalysisMetricHeader } from "./analysis-metric-header"
+import { AnalysisValueHeader } from "./analysis-value-header"
 import { EditAssignmentSheet } from "./edit-assignment-sheet"
 import {
   analyzeExperimentRun,
@@ -76,6 +78,7 @@ import type {
 } from "./measuring-types"
 import {
   analysisSignalClassName,
+  analysisValueColumn,
   formatPercent,
   formatProbability,
   normalizedDecision,
@@ -384,9 +387,8 @@ function AnalysisTable({
   const { t } = useTranslation()
   const variants = runVariants(run)
   const control = variants[0]
-  const binary = section.rows.some(
-    (row) => row.conversions !== undefined || row.rate !== undefined
-  )
+  const valueColumn = analysisValueColumn(section)
+  const binary = valueColumn === "rate"
   const role = (row: AnalysisRow, index: number) => {
     if (bandit)
       return index === 0
@@ -434,8 +436,12 @@ function AnalysisTable({
               </TableHead>
             ) : null}
             <TableHead className="text-right">
-              {t(
-                `releaseDecision.experiments.detailsPage.measuring.${binary ? "rate" : "mean"}`
+              {bandit ? (
+                t(
+                  `releaseDecision.experiments.detailsPage.measuring.${binary ? "rate" : "mean"}`
+                )
+              ) : (
+                <AnalysisValueHeader column={valueColumn} />
               )}
             </TableHead>
             {bandit ? (
@@ -547,8 +553,8 @@ function FullAnalysis({
 }) {
   const { t, i18n } = useTranslation()
   const analysis = useMemo(
-    () => parseAnalysis(run.analysisResult),
-    [run.analysisResult]
+    () => parseAnalysis(run.analysisResult, run.inputData),
+    [run.analysisResult, run.inputData]
   )
   const observed = analysis.srm
     ? Object.values(analysis.srm.observed).reduce(
@@ -668,15 +674,17 @@ function FullAnalysis({
 
       {analysis.primary ? (
         <section className="space-y-2">
-          <div>
-            <h4 className="text-sm font-medium">
-              {t(
-                "releaseDecision.experiments.detailsPage.measuring.primaryMetric"
-              )}{" "}
-              <span className="font-normal text-muted-foreground">
-                · {analysis.primary.label || run.primaryMetricEvent || "—"}
-              </span>
-            </h4>
+          <div className="space-y-1">
+            <AnalysisMetricHeader
+              kind="primaryMetric"
+              eventKey={
+                analysis.primary.event ||
+                run.primaryMetricEvent ||
+                analysis.primary.label ||
+                "—"
+              }
+              inverse={analysis.primary.inverse}
+            />
             <p className="text-xs text-muted-foreground">
               {run.metricDescription}
             </p>
@@ -742,13 +750,15 @@ function FullAnalysis({
       {!bandit ? <SampleCheck analysis={analysis} /> : null}
 
       {analysis.guardrails.map((section, index) => (
-        <section key={`${section.label}-${index}`} className="space-y-2">
-          <h4 className="text-sm font-medium">
-            {t("releaseDecision.experiments.detailsPage.measuring.guardrail")}{" "}
-            <span className="font-normal text-muted-foreground">
-              · {section.label || index + 1}
-            </span>
-          </h4>
+        <section
+          key={`${section.event || section.label}-${index}`}
+          className="space-y-2"
+        >
+          <AnalysisMetricHeader
+            kind="guardrail"
+            eventKey={section.event || section.label || String(index + 1)}
+            inverse={section.inverse}
+          />
           {section.rows.length ? (
             <AnalysisTable
               section={section}

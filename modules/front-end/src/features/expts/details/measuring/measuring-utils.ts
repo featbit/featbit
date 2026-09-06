@@ -97,13 +97,39 @@ function section(value: unknown): AnalysisSection | undefined {
     : []
   return {
     label: stringValue(source.label) ?? stringValue(source.metric) ?? "",
+    event: stringValue(source.event),
+    // Bayesian results omit inverse when increases are beneficial.
+    inverse: source.inverse === true,
+    metricType: stringValue(source.metric_type),
+    metricAgg: stringValue(source.metric_agg),
     rows,
     verdict: stringValue(source.verdict),
   }
 }
 
+export function analysisValueColumn(section: AnalysisSection) {
+  const proportion = section.metricType
+    ? section.metricType === "proportion"
+    : section.rows.some(
+        (row) => row.conversions !== undefined || row.rate !== undefined
+      )
+  if (proportion) return "rate"
+
+  switch (section.metricAgg) {
+    case "count":
+      return "eventsPerUser"
+    case "sum":
+      return "valuePerUserSum"
+    case "average":
+      return "valuePerUserAverage"
+    default:
+      return "mean"
+  }
+}
+
 export function parseAnalysis(
-  value: string | null | undefined
+  value: string | null | undefined,
+  inputData?: string | null
 ): ParsedAnalysis {
   const source = parseObject(value)
   if (!source) return { type: "unknown", guardrails: [] }
@@ -112,6 +138,9 @@ export function parseAnalysis(
   const sample = objectValue(source.sample_check)
   const thompson = objectValue(source.thompson_sampling)
   const stopping = objectValue(source.stopping)
+  const banditEvent = stringValue(source.metric)
+  const inputMetrics = objectValue(parseObject(inputData)?.metrics)
+  const banditMetric = objectValue(inputMetrics?.[banditEvent ?? ""])
   const banditRows = Array.isArray(source.arms)
     ? source.arms
         .map(analysisRow)
@@ -160,7 +189,17 @@ export function parseAnalysis(
       : undefined,
     primary:
       rawType === "bandit"
-        ? { label: stringValue(source.metric) ?? "", rows: banditRows }
+        ? {
+            label: banditEvent ?? "",
+            event: banditEvent,
+            inverse:
+              typeof source.inverse === "boolean"
+                ? source.inverse
+                : banditMetric
+                  ? banditMetric.inverse === true
+                  : undefined,
+            rows: banditRows,
+          }
         : section(source.primary_metric),
     guardrails,
     enoughUnits:
