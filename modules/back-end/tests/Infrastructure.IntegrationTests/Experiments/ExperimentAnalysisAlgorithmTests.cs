@@ -29,6 +29,84 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
     private static readonly Guid RunId = Guid.Parse("33333333-3333-3333-3333-333333333333");
     private static readonly Guid UserId = Guid.Parse("55555555-5555-5555-5555-555555555555");
 
+    [DockerTheory]
+    [InlineData("bayesian_ab", false)]
+    [InlineData("bayesian_ab", true)]
+    [InlineData("bandit", false)]
+    [InlineData("bandit", true)]
+    public async Task UpdateRunRoles_AnalysisAndNewRunPreserveExplicitSelection(string method, bool audienceUpdate)
+    {
+        var stats = new FixedExperimentStatsService(new ExperimentStatsVm
+        {
+            Variants =
+            [
+                Variant("control-id", users: 200, conversions: 80, sumValue: 80, sumSquares: 80),
+                Variant("treatment-id", users: 200, conversions: 100, sumValue: 100, sumSquares: 100)
+            ]
+        });
+        await using var db = CreateDbContext();
+        await SeedExperimentAsync(db, method, metricType: "binary", metricAgg: "once",
+            controlVariant: "control-id", treatmentVariant: "treatment-id");
+        var service = CreateService(db, stats);
+        const string samplingPlan = """[{"variation":"treatment-id","role":"control","includeRate":100},{"variation":"control-id","role":"treatment","includeRate":100}]""";
+
+        var updated = audienceUpdate
+            ? await service.UpdateRunAudienceAsync(EnvId, ExperimentId, RunId, new ExperimentRunAudienceUpdate
+            {
+                Method = method,
+                ControlVariant = "treatment-id",
+                TreatmentVariant = "control-id",
+                AnalysisSamplingPlan = samplingPlan
+            })
+            : await service.UpdateRunAsync(EnvId, ExperimentId, RunId, new ExperimentRunUpdate
+            {
+                ControlVariant = "treatment-id",
+                TreatmentVariant = "control-id",
+                AnalysisSamplingPlan = samplingPlan
+            });
+        Assert.Equal("treatment-id", Assert.Single(updated.ExperimentRuns).ControlVariant);
+
+        var analyzed = await service.AnalyzeRunAsync(EnvId, ExperimentId, RunId, new ExperimentRunAnalyzeRequest());
+
+        var query = Assert.Single(stats.Requests);
+        Assert.Equal("treatment-id", query.ControlVariant);
+        Assert.Equal("control-id", query.TreatmentVariants);
+        var run = Assert.Single(analyzed.ExperimentRuns);
+        Assert.Equal("treatment-id", run.ControlVariant);
+        Assert.Equal("control-id", run.TreatmentVariant);
+        Assert.Equal(samplingPlan, run.AnalysisSamplingPlan);
+        if (method == "bayesian_ab")
+        {
+            using var analysis = JsonDocument.Parse(run.AnalysisResult);
+            Assert.Equal("treatment-id", analysis.RootElement.GetProperty("control").GetString());
+        }
+
+        db.ChangeTracker.Clear();
+        var persisted = await db.Set<ExperimentRun>().AsNoTracking().SingleAsync(x => x.Id == RunId);
+        Assert.Equal("treatment-id", persisted.ControlVariant);
+        Assert.Equal("control-id", persisted.TreatmentVariant);
+
+        var withNewRun = await service.CreateRunAsync(EnvId, ExperimentId);
+        var copied = Assert.Single(withNewRun.ExperimentRuns, x => x.Id != RunId);
+        Assert.Equal("treatment-id", copied.ControlVariant);
+        Assert.Equal("control-id", copied.TreatmentVariant);
+    }
+
+    [DockerFact]
+    public async Task CreateRun_UnconfiguredRoles_InfersNamedDefaults()
+    {
+        await using var db = CreateDbContext();
+        await SeedExperimentAsync(db, method: "bayesian_ab", metricType: "binary", metricAgg: "once",
+            controlVariant: "", treatmentVariant: "");
+        var service = CreateService(db, new FixedExperimentStatsService(new ExperimentStatsVm { Variants = [] }));
+
+        var detail = await service.CreateRunAsync(EnvId, ExperimentId);
+
+        var created = Assert.Single(detail.ExperimentRuns, x => x.Id != RunId);
+        Assert.Equal("control-id", created.ControlVariant);
+        Assert.Equal("treatment-id", created.TreatmentVariant);
+    }
+
     [DockerFact]
     public async Task AnalyzeRun_BayesianBinary_ReportsConversionRateAndWinProbability()
     {
@@ -246,6 +324,8 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
             trafficPercent: 20,
             trafficOffset: 10,
             layerId: layerId,
+            controlVariant: "control-id",
+            treatmentVariant: "treatment-id",
             assignmentUnitSelector: "accountId",
             layerTrafficPercent: 30,
             analysisSamplingPlan: """[{"variation":"control-id","role":"control","includeRate":25},{"variation":"treatment-id","role":"treatment","includeRate":100}]""");

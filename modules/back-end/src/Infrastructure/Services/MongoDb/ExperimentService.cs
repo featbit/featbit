@@ -886,7 +886,10 @@ public class ExperimentService(
             return;
         }
 
+        // Named defaults must not replace roles explicitly selected for this run.
         if (inferMissing &&
+            string.IsNullOrWhiteSpace(run.ControlVariant) &&
+            string.IsNullOrWhiteSpace(run.TreatmentVariant) &&
             TryResolveNamedControlAndTreatments(variations, out var namedControl, out var namedTreatments))
         {
             run.ControlVariant = namedControl;
