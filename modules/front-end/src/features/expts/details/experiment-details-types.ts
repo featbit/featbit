@@ -27,6 +27,7 @@ export type ExperimentDetail = {
 export type ExperimentRunDetail = {
   id: string
   slug: string
+  /** @deprecated Backend compatibility only; never use for UI or action gating. */
   status: string
   method: string | null
   decision: string | null

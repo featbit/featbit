@@ -134,6 +134,7 @@ export function parseAnalysis(
   const source = parseObject(value)
   if (!source) return { type: "unknown", guardrails: [] }
   const rawType = stringValue(source.type)
+  const window = objectValue(source.window)
   const srm = objectValue(source.srm)
   const sample = objectValue(source.sample_check)
   const thompson = objectValue(source.thompson_sampling)
@@ -171,6 +172,12 @@ export function parseAnalysis(
   return {
     type: rawType === "bandit" || rawType === "bayesian" ? rawType : "unknown",
     computedAt: stringValue(source.computed_at),
+    window: window
+      ? {
+          start: stringValue(window.start) ?? null,
+          end: stringValue(window.end) ?? null,
+        }
+      : undefined,
     algorithm: stringValue(source.algorithm),
     prior: stringValue(source.prior),
     srm: srm
@@ -358,21 +365,23 @@ export function analysisSignalClassName(row: AnalysisRow) {
   if (signalLabel === "pHarm") {
     if (signal <= 0.01)
       return "font-semibold text-green-700 dark:text-green-400"
-    if (signal >= 0.95)
-      return "font-semibold text-red-700 dark:text-red-400"
-    if (signal >= 0.8)
-      return "font-medium text-amber-700 dark:text-amber-400"
+    if (signal >= 0.95) return "font-semibold text-red-700 dark:text-red-400"
+    if (signal >= 0.8) return "font-medium text-amber-700 dark:text-amber-400"
     return "text-muted-foreground"
   }
 
-  if (signal >= 0.95)
-    return "font-semibold text-green-700 dark:text-green-400"
+  if (signal >= 0.95) return "font-semibold text-green-700 dark:text-green-400"
   if (signal >= 0.76) return "text-amber-700 dark:text-amber-400"
   return "text-red-700 dark:text-red-400"
 }
 
 export function formatProbability(value: number | undefined) {
-  if (value === undefined || !Number.isFinite(value) || value < 0 || value > 1) {
+  if (
+    value === undefined ||
+    !Number.isFinite(value) ||
+    value < 0 ||
+    value > 1
+  ) {
     return "—"
   }
   if (value > 0.999) return ">99.9%"

@@ -38,7 +38,7 @@ const handlers = {
 }
 
 describe("MetricsTable", () => {
-  it("shows every experiment run, its role, and lifecycle directly", () => {
+  it("shows every experiment run and its role without lifecycle labels", () => {
     render(
       <MetricsTable
         items={[metric]}
@@ -54,9 +54,9 @@ describe("MetricsTable", () => {
     expect(screen.getByText("Primary")).toBeVisible()
     expect(screen.getByText("Guardrail")).toBeVisible()
     expect(screen.getByText("Run 3")).toBeVisible()
-    expect(screen.getByText("Running")).toBeVisible()
+    expect(screen.queryByText("Running")).not.toBeInTheDocument()
     expect(screen.getByText("Run 2")).toBeVisible()
-    expect(screen.getByText("Completed")).toBeVisible()
+    expect(screen.queryByText("Completed")).not.toBeInTheDocument()
     expect(screen.queryByText("Run 1")).not.toBeInTheDocument()
     expect(screen.queryByText("Draft")).not.toBeInTheDocument()
 
@@ -65,7 +65,7 @@ describe("MetricsTable", () => {
     fireEvent.click(showMore)
 
     expect(screen.getByText("Run 1")).toBeVisible()
-    expect(screen.getByText("Draft")).toBeVisible()
+    expect(screen.queryByText("Draft")).not.toBeInTheDocument()
     expect(screen.getByRole("button", { name: "Show less" })).toBeVisible()
     expect(screen.getByRole("button", { name: "Edit" })).toBeVisible()
     expect(screen.getByRole("button", { name: "Archive" })).toBeVisible()

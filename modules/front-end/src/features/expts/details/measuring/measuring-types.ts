@@ -89,6 +89,7 @@ export type AnalysisSection = {
 export type ParsedAnalysis = {
   type: "bandit" | "bayesian" | "unknown"
   computedAt?: string
+  window?: { start: string | null; end: string | null }
   algorithm?: string
   prior?: string
   srm?: {

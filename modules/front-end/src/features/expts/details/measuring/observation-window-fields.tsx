@@ -21,14 +21,12 @@ export function ObservationWindowFields({
   value,
   error,
   disabled,
-  startDisabled,
   onChange,
 }: {
   idPrefix: string
   value: ObservationWindowDraft
   error?: ObservationWindowError | null
   disabled?: boolean
-  startDisabled?: boolean
   onChange: (value: ObservationWindowDraft) => void
 }) {
   const { t } = useTranslation()
@@ -46,7 +44,7 @@ export function ObservationWindowFields({
           type="datetime-local"
           required
           value={value.start}
-          disabled={disabled || startDisabled}
+          disabled={disabled}
           aria-invalid={error === "startRequired"}
           onClick={(event) => event.currentTarget.showPicker?.()}
           onChange={(event) =>
@@ -134,11 +132,7 @@ export function ObservationWindowFields({
             min={value.start || undefined}
             value={value.end}
             disabled={disabled}
-            aria-invalid={
-              error === "endRequired" ||
-              error === "endAfterStart" ||
-              error === "endCannotShorten"
-            }
+            aria-invalid={error === "endRequired" || error === "endAfterStart"}
             onClick={(event) => event.currentTarget.showPicker?.()}
             onChange={(event) =>
               onChange({ ...value, end: event.target.value })

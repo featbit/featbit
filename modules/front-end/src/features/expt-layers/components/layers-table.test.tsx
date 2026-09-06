@@ -95,13 +95,16 @@ describe("LayersTable server allocation summary", () => {
 
     expect(screen.getByText("70% reserved · 30% free")).toBeInTheDocument()
     expect(screen.getByText("No conflicts")).toBeInTheDocument()
-    expect(screen.getByText("Archived")).toBeInTheDocument()
-    expect(screen.getByText("Collecting")).toBeInTheDocument()
+    expect(screen.getByText("run-2")).toBeInTheDocument()
+    expect(screen.getByText("run-1")).toBeInTheDocument()
+    expect(screen.queryByText("Archived")).not.toBeInTheDocument()
+    expect(screen.queryByText("Collecting")).not.toBeInTheDocument()
     expect(screen.queryByText("Draft")).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByRole("button", { name: "Show more" }))
 
-    expect(screen.getByText("Draft")).toBeInTheDocument()
+    expect(screen.getAllByText("run-1")).toHaveLength(2)
+    expect(screen.queryByText("Draft")).not.toBeInTheDocument()
     expect(screen.getAllByRole("link", { name: "expt 1" })[0]).toHaveAttribute(
       "href",
       "/en/experiments/experiment-1?stage=measuring&runId=archived-run"
@@ -242,8 +245,10 @@ describe("LayersTable server allocation summary", () => {
     expect(within(popover).getByText("expt 1")).toBeVisible()
     expect(within(popover).getByText("expt 3")).toBeVisible()
     expect(within(popover).queryByText("Archived")).not.toBeInTheDocument()
-    expect(within(popover).getByText("Collecting")).toBeVisible()
-    expect(within(popover).getByText("Analyzing")).toBeVisible()
+    expect(within(popover).getByText("run-1")).toBeVisible()
+    expect(within(popover).getByText("run-4")).toBeVisible()
+    expect(within(popover).queryByText("Collecting")).not.toBeInTheDocument()
+    expect(within(popover).queryByText("Analyzing")).not.toBeInTheDocument()
     const experimentLink = within(popover).getByRole("link", {
       name: "expt 1",
     })

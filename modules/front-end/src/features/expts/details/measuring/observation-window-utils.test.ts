@@ -49,20 +49,23 @@ describe("observation window utils", () => {
     ).toBe("endAfterStart")
   })
 
-  it("does not allow a collecting window to be shortened", () => {
-    expect(
-      resolveObservationWindow(
-        {
-          ...baseDraft,
-          endMode: "date",
-          end: "2026-09-05T10:00",
-        },
-        new Date("2026-09-06T10:00").toISOString()
-      ).error
-    ).toBe("endCannotShorten")
+  it("allows an existing window to be shortened", () => {
+    const draft = createObservationWindowDraft(
+      new Date(baseDraft.start).toISOString(),
+      new Date("2026-09-06T10:00").toISOString()
+    )
+    const result = resolveObservationWindow({
+      ...draft,
+      end: "2026-09-05T10:00",
+    })
+
+    expect(result.error).toBeUndefined()
+    expect(result.value?.observationEnd).toBe(
+      new Date("2026-09-05T10:00").toISOString()
+    )
   })
 
-  it("can preserve a missing start for a locked legacy run", () => {
+  it("can preserve a missing start for a legacy run", () => {
     expect(createObservationWindowDraft(null, null, false).start).toBe("")
   })
 })

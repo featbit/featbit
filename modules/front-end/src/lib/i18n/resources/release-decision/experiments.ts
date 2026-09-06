@@ -215,8 +215,6 @@ export const enExperiments = {
         weeks: "Weeks",
       },
       endDateTime: "End date and time",
-      collectingWindowHelp:
-        "The start time is locked. You can set or extend the end time; this changes the data window used in analysis.",
       saveWindow: "Save window",
       windowSaved: "Observation window saved",
       windowSaveFailed: "The observation window could not be saved.",
@@ -225,25 +223,32 @@ export const enExperiments = {
         durationInvalid: "Enter a duration greater than zero.",
         endRequired: "Enter a valid end date and time.",
         endAfterStart: "The end must be later than the start.",
-        endCannotShorten:
-          "The end cannot be earlier than the current end time.",
       },
+      analysisNeedsConfiguration:
+        "Configure the feature flag, primary metric, analysis method, and control/treatment variants before analyzing.",
+      analysisNeedsWindow:
+        "Set a valid observation start and an optional end later than the start before analyzing.",
+      analysisWindowChanged:
+        "The observation window has changed. The results below use the saved analysis window; analyze again to use the current window.",
+      recommendation: "Coding Agent recommendation",
+      recommendationGuidance:
+        "This recommendation does not record human approval or an executed rollout change.",
+      recommendationSummary: "Summary",
+      recommendationReason: "Reason",
+      historicalRecommendation: "Historical agent recommendation",
+      historicalRecommendationHelp:
+        "The analysis used for this recommendation was not recorded separately. It may refer to an earlier window or analysis. Review its summary and reason against the evidence below, and ask the coding agent to refresh it after changes.",
+      recommendationWindow: "Analysis window",
+      notRecorded: "Not recorded",
       analyze: "Analyze latest data",
       analyzing: "Analyzing…",
       analysisUpdated: "Analysis updated",
       analysisFailed: "The latest data could not be analyzed.",
       agentPromptHelp:
-        "Ask the coding agent to revisit this run decision against the latest analysis and update the next action.",
+        "Ask the coding agent to review the latest evidence and record a recommendation with its analysis window and data timestamp.",
       agentPrompt: "Copy coding agent prompt",
       promptCopied: "Coding agent prompt copied",
       promptCopyFailed: "The coding agent prompt could not be copied.",
-      decisionPending: "Decision pending",
-      decisionPendingHelp:
-        "Analyze the latest data before making a rollout decision.",
-      decisionGuidance:
-        "Use the evidence and observation readiness together before changing rollout.",
-      evidenceSummary: "Evidence Summary",
-      evidenceRationale: "Evidence Rationale",
       showLess: "Show less",
       showFullRationale: "Show full rationale",
       fullAnalysis: "Full analysis",
@@ -388,47 +393,12 @@ export const enExperiments = {
         bandit:
           "Use multiple arms and reweight traffic toward stronger variants as reward evidence changes.",
       },
-      statuses: {
-        draft: "Draft",
-        collecting: "Collecting",
-        running: "Running",
-        active: "Active",
-        analyzing: "Analyzing",
-        decided: "Decided",
-        archived: "Archived",
-      },
+
       decisions: {
         continue: "Continue",
         pause: "Pause",
         rollback: "Rollback",
         inconclusive: "Inconclusive",
-      },
-      decisionCopy: {
-        bayesian_ab_inconclusive: {
-          title: "Inconclusive: fix measurement before deciding",
-          action:
-            "Verify exposure and metric collection before starting a new observation window.",
-        },
-        continue: {
-          title: "Continue: advance the rollout",
-          action:
-            "Proceed with the recommended rollout change while monitoring guardrails.",
-        },
-        pause: {
-          title: "Pause: hold the current rollout",
-          action:
-            "Keep exposure stable while the identified risk or measurement issue is resolved.",
-        },
-        rollback: {
-          title: "Rollback: revert the change",
-          action:
-            "Return traffic to the safe baseline and investigate the observed regression.",
-        },
-        inconclusive: {
-          title: "Inconclusive: keep observing",
-          action:
-            "Extend the observation window, collect the required sample, or fix instrumentation before deciding.",
-        },
       },
     },
     learning: {
@@ -455,13 +425,7 @@ export const enExperiments = {
         whyItHappened: "Why it happened",
         nextHypothesis: "Next hypothesis",
       },
-      statuses: {
-        draft: "Draft",
-        collecting: "Collecting",
-        analyzing: "Analyzing",
-        decided: "Decided",
-        archived: "Archived",
-      },
+
       decisions: {
         continue: "CONTINUE",
         pause: "PAUSE",
@@ -790,8 +754,6 @@ export const zhExperiments = {
         weeks: "周",
       },
       endDateTime: "结束日期和时间",
-      collectingWindowHelp:
-        "开始时间已锁定。你可以设置或延长结束时间；这会改变分析所使用的数据窗口。",
       saveWindow: "保存窗口",
       windowSaved: "观察窗口已保存",
       windowSaveFailed: "无法保存观察窗口。",
@@ -800,22 +762,32 @@ export const zhExperiments = {
         durationInvalid: "请输入大于零的持续时间。",
         endRequired: "请输入有效的结束日期和时间。",
         endAfterStart: "结束时间必须晚于开始时间。",
-        endCannotShorten: "结束时间不能早于当前结束时间。",
       },
+      analysisNeedsConfiguration:
+        "请先配置功能开关、主要指标、分析方法及对照/处理变体。",
+      analysisNeedsWindow:
+        "请先设置有效的观察开始时间；如设置结束时间，必须晚于开始时间。",
+      analysisWindowChanged:
+        "观察窗口已修改。下方结果仍对应已保存的分析窗口，请重新分析以使用当前窗口。",
+      recommendation: "Coding Agent recommendation",
+      recommendationGuidance:
+        "此建议不代表已获得人工确认，也不代表已执行发布变更。",
+      recommendationSummary: "摘要",
+      recommendationReason: "原因",
+      historicalRecommendation: "历史 Agent 建议",
+      historicalRecommendationHelp:
+        "此建议所依据的分析未单独记录，可能对应旧窗口或旧分析。请结合下方依据审阅摘要和原因，并在修改后让编程智能体更新建议。",
+      recommendationWindow: "分析窗口",
+      notRecorded: "未记录",
       analyze: "分析最新数据",
       analyzing: "正在分析…",
       analysisUpdated: "分析已更新",
       analysisFailed: "无法分析最新数据。",
       agentPromptHelp:
-        "让编程智能体根据最新分析重新审视本次运行决策，并更新下一步行动。",
+        "让编程智能体审阅最新依据，记录建议及其对应的分析窗口和数据时间。",
       agentPrompt: "复制编程智能体提示词",
       promptCopied: "编程智能体提示词已复制",
       promptCopyFailed: "无法复制编程智能体提示词。",
-      decisionPending: "等待决策",
-      decisionPendingHelp: "请先分析最新数据，再做出发布决策。",
-      decisionGuidance: "更改发布策略前，请同时考虑实验依据和观察就绪情况。",
-      evidenceSummary: "依据摘要",
-      evidenceRationale: "依据说明",
       showLess: "收起",
       showFullRationale: "显示完整说明",
       fullAnalysis: "完整分析",
@@ -944,42 +916,12 @@ export const zhExperiments = {
         bandit:
           "使用多个分支，并随着奖励依据变化，将流量重新分配给表现更好的变体。",
       },
-      statuses: {
-        draft: "草稿",
-        collecting: "收集中",
-        running: "运行中",
-        active: "活动",
-        analyzing: "分析中",
-        decided: "已决策",
-        archived: "已归档",
-      },
+
       decisions: {
         continue: "继续",
         pause: "暂停",
         rollback: "回滚",
         inconclusive: "无定论",
-      },
-      decisionCopy: {
-        bayesian_ab_inconclusive: {
-          title: "无定论：先修复度量再决策",
-          action: "开始新的观察窗口前，请验证曝光和指标采集。",
-        },
-        continue: {
-          title: "继续：推进发布",
-          action: "在持续监控护栏指标的同时，执行建议的发布变更。",
-        },
-        pause: {
-          title: "暂停：保持当前发布",
-          action: "在解决风险或度量问题期间保持曝光不变。",
-        },
-        rollback: {
-          title: "回滚：撤销变更",
-          action: "将流量恢复到安全基准，并调查观测到的退化。",
-        },
-        inconclusive: {
-          title: "无定论：继续观察",
-          action: "延长观察窗口、收集所需样本，或先修复埋点再做决定。",
-        },
       },
     },
     learning: {
@@ -1004,13 +946,7 @@ export const zhExperiments = {
         whyItHappened: "原因",
         nextHypothesis: "下一个假设",
       },
-      statuses: {
-        draft: "草稿",
-        collecting: "收集中",
-        analyzing: "分析中",
-        decided: "已决策",
-        archived: "已归档",
-      },
+
       decisions: {
         continue: "继续",
         pause: "暂停",

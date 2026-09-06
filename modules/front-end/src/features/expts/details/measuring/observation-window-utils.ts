@@ -3,11 +3,7 @@ import type { ObservationWindowUpdate } from "./measuring-types"
 export type ObservationEndMode = "open" | "duration" | "date"
 export type ObservationDurationUnit = "hours" | "days" | "weeks"
 export type ObservationWindowError =
-  | "startRequired"
-  | "durationInvalid"
-  | "endRequired"
-  | "endAfterStart"
-  | "endCannotShorten"
+  "startRequired" | "durationInvalid" | "endRequired" | "endAfterStart"
 
 export type ObservationWindowDraft = {
   start: string
@@ -49,8 +45,7 @@ export function createObservationWindowDraft(
 }
 
 export function resolveObservationWindow(
-  draft: ObservationWindowDraft,
-  minimumEnd?: string | null
+  draft: ObservationWindowDraft
 ):
   | { value: ObservationWindowUpdate; error?: never }
   | { value?: never; error: ObservationWindowError } {
@@ -79,16 +74,6 @@ export function resolveObservationWindow(
 
   if (end && end.getTime() <= start.getTime()) {
     return { error: "endAfterStart" }
-  }
-
-  if (end && minimumEnd) {
-    const currentEnd = new Date(minimumEnd)
-    if (
-      !Number.isNaN(currentEnd.getTime()) &&
-      end.getTime() < currentEnd.getTime()
-    ) {
-      return { error: "endCannotShorten" }
-    }
   }
 
   return {

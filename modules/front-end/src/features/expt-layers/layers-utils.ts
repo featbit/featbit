@@ -1,5 +1,3 @@
-import type { LayerRunSummary } from "./layers-types"
-
 export function slugifyLayerKey(value: string) {
   return value
     .trim()
@@ -15,15 +13,4 @@ export function runColor(index: number) {
     "bg-violet-400 dark:bg-violet-600",
     "bg-indigo-300 dark:bg-indigo-700",
   ][index % 4]
-}
-
-export function runStateColor(status: LayerRunSummary["status"]) {
-  switch (status.toLowerCase()) {
-    case "collecting":
-      return "bg-emerald-600"
-    case "analyzing":
-      return "bg-amber-500"
-    default:
-      return "bg-zinc-400"
-  }
 }

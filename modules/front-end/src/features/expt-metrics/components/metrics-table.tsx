@@ -18,7 +18,6 @@ import type {
   MetricRole,
   MetricRun,
 } from "../metrics-types"
-import { metricRunStateColor } from "../metrics-utils"
 
 type Props = {
   items: Metric[]
@@ -51,21 +50,11 @@ function RoleBadge({ role }: { role: MetricRole }) {
 }
 
 function RunLine({ run }: { run: MetricRun }) {
-  const { t } = useTranslation()
-  const normalizedStatus = run.status.toLowerCase()
   return (
     <div className="flex min-h-5 items-center gap-2 text-xs">
       <code className="max-w-36 min-w-0 truncate text-muted-foreground">
         {run.key}
       </code>
-      <span
-        className={`size-2 shrink-0 rounded-full ${metricRunStateColor(run.status)}`}
-      />
-      <span className="text-foreground">
-        {t(`releaseDecision.metrics.runStatus.${normalizedStatus}`, {
-          defaultValue: run.status,
-        })}
-      </span>
     </div>
   )
 }

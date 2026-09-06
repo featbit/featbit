@@ -4,15 +4,13 @@ import {
   Bot,
   CalendarDays,
   Check,
-  ChevronDown,
-  ChevronUp,
   Copy,
   Loader2,
   Pencil,
   Plus,
   Trash2,
 } from "lucide-react"
-import { useLayoutEffect, useMemo, useRef, useState } from "react"
+import { useMemo, useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import {
@@ -81,7 +79,6 @@ import {
   analysisValueColumn,
   formatPercent,
   formatProbability,
-  normalizedDecision,
   normalizedMethod,
   orderedRuns,
   parseAnalysis,
@@ -93,6 +90,8 @@ import {
 import { ObservationWindowFields } from "./observation-window-fields"
 import { PosteriorCharts } from "./posterior-charts"
 import { SampleCheck } from "./sample-check"
+import { RecommendationPanel } from "./recommendation-panel"
+import { analysisBlocker, analysisWindowChanged } from "./analysis-readiness"
 import {
   createObservationWindowDraft,
   resolveObservationWindow,
@@ -172,46 +171,6 @@ function VariationIdCopy({ value }: { value: string }) {
   )
 }
 
-function StatusBadge({
-  value,
-  kind = "status",
-}: {
-  value: string
-  kind?: "status" | "decision"
-}) {
-  const { t } = useTranslation()
-  const normalized = value
-    .trim()
-    .toLowerCase()
-    .replaceAll(" ", "_")
-    .replaceAll("-", "_")
-  const dot =
-    kind === "decision"
-      ? normalized.includes("continue")
-        ? "bg-emerald-600"
-        : normalized.includes("rollback")
-          ? "bg-rose-600"
-          : "bg-amber-500"
-      : normalized === "decided"
-        ? "bg-emerald-600"
-        : normalized === "collecting" ||
-            normalized === "running" ||
-            normalized === "active"
-          ? "bg-blue-600"
-          : "bg-zinc-400"
-  return (
-    <Badge variant="outline" className="gap-2 font-normal">
-      <span className={cn("size-1.5 rounded-full", dot)} />
-      {t(
-        `releaseDecision.experiments.detailsPage.measuring.${kind === "decision" ? "decisions" : "statuses"}.${normalized}`,
-        {
-          defaultValue: kind === "decision" ? normalizedDecision(value) : value,
-        }
-      )}
-    </Badge>
-  )
-}
-
 function formatDate(value: string | null | undefined, language: string) {
   if (!value) return "—"
   const date = new Date(value)
@@ -230,146 +189,6 @@ function formatNumber(value: number | undefined, percent = false) {
   if (percent) return formatPercent(value)
   return new Intl.NumberFormat(undefined, { maximumFractionDigits: 4 }).format(
     value
-  )
-}
-
-function DecisionPanel({ run }: { run: MeasuringRun }) {
-  const { t } = useTranslation()
-  const [expanded, setExpanded] = useState(false)
-  const [rationaleOverflows, setRationaleOverflows] = useState(false)
-  const rationaleRef = useRef<HTMLSpanElement>(null)
-  const decision = normalizedDecision(run.decision)
-  const key = decision.toLowerCase().replaceAll(" ", "_")
-  const methodKey = `${normalizedMethod(run.method)}_${key}`
-  const title = t(
-    `releaseDecision.experiments.detailsPage.measuring.decisionCopy.${methodKey}.title`,
-    {
-      defaultValue: t(
-        `releaseDecision.experiments.detailsPage.measuring.decisionCopy.${key}.title`,
-        {
-          defaultValue:
-            run.decisionSummary ||
-            t(
-              "releaseDecision.experiments.detailsPage.measuring.decisionPending"
-            ),
-        }
-      ),
-    }
-  )
-  const action = t(
-    `releaseDecision.experiments.detailsPage.measuring.decisionCopy.${methodKey}.action`,
-    {
-      defaultValue: t(
-        `releaseDecision.experiments.detailsPage.measuring.decisionCopy.${key}.action`,
-        {
-          defaultValue: t(
-            "releaseDecision.experiments.detailsPage.measuring.decisionPendingHelp"
-          ),
-        }
-      ),
-    }
-  )
-
-  useLayoutEffect(() => {
-    if (expanded) return
-
-    const rationale = rationaleRef.current
-    if (!rationale) return
-
-    const updateOverflow = () => {
-      setRationaleOverflows(rationale.scrollHeight > rationale.clientHeight + 1)
-    }
-
-    updateOverflow()
-    const resizeObserver =
-      typeof ResizeObserver === "undefined"
-        ? null
-        : new ResizeObserver(updateOverflow)
-    resizeObserver?.observe(rationale)
-    window.addEventListener("resize", updateOverflow)
-
-    return () => {
-      resizeObserver?.disconnect()
-      window.removeEventListener("resize", updateOverflow)
-    }
-  }, [expanded, rationaleOverflows, run.decisionReason])
-
-  const rationaleContent = (
-    <span className="min-w-0 flex-1">
-      <span className="block text-sm font-medium">
-        {t(
-          "releaseDecision.experiments.detailsPage.measuring.evidenceRationale"
-        )}
-      </span>
-      <span
-        ref={rationaleRef}
-        className={cn(
-          "mt-1 block text-xs leading-5 text-muted-foreground",
-          !expanded && "line-clamp-2"
-        )}
-      >
-        {run.decisionReason}
-      </span>
-    </span>
-  )
-
-  if (!run.decision && !run.decisionSummary && !run.decisionReason) return null
-
-  return (
-    <div className="overflow-hidden rounded-lg border">
-      <div className="space-y-2 px-4 py-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <h3 className="font-medium">{title}</h3>
-          {run.decision ? (
-            <StatusBadge value={run.decision} kind="decision" />
-          ) : null}
-        </div>
-        <p className="text-sm leading-5">{action}</p>
-        <p className="text-xs leading-5 text-muted-foreground">
-          {t(
-            "releaseDecision.experiments.detailsPage.measuring.decisionGuidance"
-          )}
-        </p>
-      </div>
-      {run.decisionSummary ? (
-        <div className="border-t px-4 py-3">
-          <p className="mb-1 text-sm font-medium">
-            {t(
-              "releaseDecision.experiments.detailsPage.measuring.evidenceSummary"
-            )}
-          </p>
-          <p className="text-sm leading-5 text-muted-foreground">
-            {run.decisionSummary}
-          </p>
-        </div>
-      ) : null}
-      {run.decisionReason ? (
-        rationaleOverflows ? (
-          <button
-            type="button"
-            className="flex w-full items-start gap-2 border-t px-4 py-3 text-left hover:bg-muted/30"
-            aria-expanded={expanded}
-            onClick={() => setExpanded((current) => !current)}
-          >
-            {expanded ? (
-              <ChevronUp className="mt-0.5 size-4 shrink-0" />
-            ) : (
-              <ChevronDown className="mt-0.5 size-4 shrink-0" />
-            )}
-            {rationaleContent}
-            <span className="mt-0.5 shrink-0 text-xs text-muted-foreground">
-              {t(
-                expanded
-                  ? "releaseDecision.experiments.detailsPage.measuring.showLess"
-                  : "releaseDecision.experiments.detailsPage.measuring.showFullRationale"
-              )}
-            </span>
-          </button>
-        ) : (
-          <div className="border-t px-4 py-3">{rationaleContent}</div>
-        )
-      ) : null}
-    </div>
   )
 }
 
@@ -578,17 +397,17 @@ function FullAnalysis({
           <strong className="font-medium text-foreground">
             {t("releaseDecision.experiments.detailsPage.measuring.window")}:
           </strong>{" "}
-          {run.observationStart ? (
+          {analysis.window?.start ? (
             <>
-              {formatDate(run.observationStart, i18n.language)} →{" "}
-              {run.observationEnd
-                ? formatDate(run.observationEnd, i18n.language)
+              {formatDate(analysis.window?.start, i18n.language)} →{" "}
+              {analysis.window?.end
+                ? formatDate(analysis.window?.end, i18n.language)
                 : t(
                     "releaseDecision.experiments.detailsPage.measuring.ongoing"
                   )}
             </>
           ) : (
-            t("releaseDecision.experiments.detailsPage.measuring.notConfigured")
+            t("releaseDecision.experiments.detailsPage.measuring.notRecorded")
           )}
         </span>
         {bandit ? (
@@ -623,6 +442,14 @@ function FullAnalysis({
           {formatDate(analysis.computedAt, i18n.language)}
         </span>
       </div>
+
+      {run.analysisResult && analysisWindowChanged(run, analysis) ? (
+        <p className="rounded-lg border px-4 py-3 text-sm text-muted-foreground">
+          {t(
+            "releaseDecision.experiments.detailsPage.measuring.analysisWindowChanged"
+          )}
+        </p>
+      ) : null}
 
       {!run.analysisResult || !hasRows || observed === 0 ? (
         <div className="flex items-start gap-3 rounded-lg border border-amber-300 bg-amber-50/60 px-4 py-3 text-amber-950 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100">
@@ -1152,18 +979,25 @@ export function MeasuringDetails({
     setNewRunOpen(true)
   }
 
-  const selectedStatus = selected?.status.trim().toLowerCase()
-  const runSettingsEditable =
-    selectedStatus === "draft" || selectedStatus === "collecting"
+  const canEditWindow = Boolean(selected) && !runSettingsMutation.isPending
+  const blockedAnalysis = selected
+    ? analysisBlocker(experiment, selected)
+    : null
+  const canAnalyze =
+    Boolean(selected) &&
+    !blockedAnalysis &&
+    !analyzeMutation.isPending &&
+    !runSettingsMutation.isPending &&
+    !assignmentMutation.isPending
 
   const openRunSettingsDialog = () => {
-    if (!selected || !runSettingsEditable) return
+    if (!selected || !canEditWindow) return
     runSettingsMutation.reset()
     setRunSettingsWindow(
       createObservationWindowDraft(
         selected.observationStart,
         selected.observationEnd,
-        selectedStatus !== "collecting"
+        false
       )
     )
     setRunSettingsWindowError(null)
@@ -1188,11 +1022,8 @@ export function MeasuringDetails({
   }
 
   const saveRunSettings = () => {
-    if (!selected) return
-    const resolved = resolveObservationWindow(
-      runSettingsWindow,
-      selectedStatus === "collecting" ? selected.observationEnd : null
-    )
+    if (!selected || !canEditWindow) return
+    const resolved = resolveObservationWindow(runSettingsWindow)
     if (resolved.error) {
       setRunSettingsWindowError(resolved.error)
       return
@@ -1264,47 +1095,22 @@ export function MeasuringDetails({
                 `releaseDecision.experiments.detailsPage.measuring.methods.${normalizedMethod(selected.method)}`
               )}
             </Badge>
-            {runSettingsEditable ? (
-              <Tooltip>
-                <TooltipTrigger
-                  render={
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="xs"
-                      className="h-5 rounded-full px-2 font-normal"
-                      onClick={openRunSettingsDialog}
-                    />
-                  }
-                >
-                  <CalendarDays />
-                  {t(
-                    "releaseDecision.experiments.detailsPage.measuring.observationWindow"
-                  )}{" "}
-                  ·{" "}
-                  {selected.observationStart ? (
-                    <>
-                      {formatDate(selected.observationStart, i18n.language)} →{" "}
-                      {selected.observationEnd
-                        ? formatDate(selected.observationEnd, i18n.language)
-                        : t(
-                            "releaseDecision.experiments.detailsPage.measuring.ongoing"
-                          )}
-                    </>
-                  ) : (
-                    t(
-                      "releaseDecision.experiments.detailsPage.measuring.notConfigured"
-                    )
-                  )}
-                </TooltipTrigger>
-                <TooltipContent>
-                  {t(
-                    "releaseDecision.experiments.detailsPage.measuring.editObservationWindow"
-                  )}
-                </TooltipContent>
-              </Tooltip>
-            ) : (
-              <Badge variant="outline" className="gap-2 font-normal">
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="xs"
+                    className="h-5 rounded-full px-2 font-normal"
+                    aria-label={t(
+                      "releaseDecision.experiments.detailsPage.measuring.editObservationWindow"
+                    )}
+                    onClick={openRunSettingsDialog}
+                    disabled={!canEditWindow}
+                  />
+                }
+              >
                 <CalendarDays />
                 {t(
                   "releaseDecision.experiments.detailsPage.measuring.observationWindow"
@@ -1324,8 +1130,14 @@ export function MeasuringDetails({
                     "releaseDecision.experiments.detailsPage.measuring.notConfigured"
                   )
                 )}
-              </Badge>
-            )}
+                <Pencil className="size-3" />
+              </TooltipTrigger>
+              <TooltipContent>
+                {t(
+                  "releaseDecision.experiments.detailsPage.measuring.editObservationWindow"
+                )}
+              </TooltipContent>
+            </Tooltip>
             <div className="ml-auto flex items-center gap-2">
               <Button
                 type="button"
@@ -1340,8 +1152,10 @@ export function MeasuringDetails({
               </Button>
               <Button
                 type="button"
-                disabled={analyzeMutation.isPending}
-                onClick={() => analyzeMutation.mutate(selected.id)}
+                disabled={!canAnalyze}
+                onClick={() =>
+                  canAnalyze && analyzeMutation.mutate(selected.id)
+                }
               >
                 {t(
                   analyzeMutation.isPending
@@ -1351,6 +1165,13 @@ export function MeasuringDetails({
               </Button>
             </div>
           </div>
+          {blockedAnalysis ? (
+            <p className="border-b px-4 py-2 text-sm text-muted-foreground">
+              {t(
+                `releaseDecision.experiments.detailsPage.measuring.${blockedAnalysis}`
+              )}
+            </p>
+          ) : null}
           {analyzeMutation.isError ? (
             <p className="border-b px-4 py-2 text-sm text-destructive">
               {t(
@@ -1373,7 +1194,7 @@ export function MeasuringDetails({
                   size="sm"
                   className="ml-auto text-foreground"
                   onClick={() => {
-                    const prompt = `@featbit-experimentation ${experiment.id}\nReview run ${selected.slug} (${selected.id}) against the latest analysis and update its decision and next action.`
+                    const prompt = `@featbit-experimentation ${experiment.id}\nReview run ${selected.slug} (${selected.id}) against the latest analysis. Record a Coding Agent recommendation (CONTINUE / PAUSE / ROLLBACK / INCONCLUSIVE), summary, reason, and the analysis Window and Data as of in the recommendation text. Treat it as advice that requires human review. Leave the legacy run status unchanged; it must not control window editing or re-analysis.`
                     void navigator.clipboard
                       .writeText(prompt)
                       .then(() =>
@@ -1399,7 +1220,7 @@ export function MeasuringDetails({
                 </Button>
               </div>
               <div className="space-y-5 p-4">
-                <DecisionPanel key={selected.id} run={selected} />
+                <RecommendationPanel key={selected.id} run={selected} />
                 <FullAnalysis run={selected} variantNames={variantNames} />
               </div>
             </div>
@@ -1455,23 +1276,11 @@ export function MeasuringDetails({
               </DialogDescription>
             </DialogHeader>
 
-            {selectedStatus === "collecting" ? (
-              <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
-                <AlertTriangle className="mt-0.5 size-4 shrink-0" />
-                <span>
-                  {t(
-                    "releaseDecision.experiments.detailsPage.measuring.collectingWindowHelp"
-                  )}
-                </span>
-              </div>
-            ) : null}
-
             <ObservationWindowFields
               idPrefix="run-settings-window"
               value={runSettingsWindow}
               error={runSettingsWindowError}
               disabled={runSettingsMutation.isPending}
-              startDisabled={selectedStatus === "collecting"}
               onChange={(value) => {
                 setRunSettingsWindow(value)
                 setRunSettingsWindowError(null)

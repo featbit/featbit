@@ -31,7 +31,7 @@ import type {
   LayerAllocationSummary,
   LayerRunSummary,
 } from "../layers-types"
-import { runColor, runStateColor } from "../layers-utils"
+import { runColor } from "../layers-utils"
 
 type Props = {
   items: Layer[]
@@ -195,15 +195,6 @@ function OverlapDetails({
               <div className="flex items-center justify-between gap-4 pl-5 text-xs text-muted-foreground">
                 <span className="tabular-nums">
                   {run.start}–{run.end}%
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span
-                    className={`size-2 rounded-full ${runStateColor(run.status)}`}
-                  />
-                  {t(
-                    `releaseDecision.layers.runStatus.${run.status.toLowerCase()}`,
-                    { defaultValue: run.status }
-                  )}
                 </span>
               </div>
             </div>
@@ -419,17 +410,6 @@ function ExperimentRuns({
             <div className="flex items-center justify-between gap-4 text-xs text-muted-foreground">
               <span className="tabular-nums">
                 {run.start}–{run.end}%
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span
-                  className={`size-2 rounded-full ${runStateColor(run.status)}`}
-                />
-                {t(
-                  `releaseDecision.layers.runStatus.${run.status.toLowerCase()}`,
-                  {
-                    defaultValue: run.status,
-                  }
-                )}
               </span>
             </div>
           </div>
