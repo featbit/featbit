@@ -15,7 +15,7 @@ The approved visual scope currently includes:
 - the read-only Details presentation and its edit entry;
 - Feature Flag and Run summary states;
 - the primary transition to **Exposure**;
-- the Agent setup Dialog and Experiment settings entry;
+- the Coding Agent Mode Dialog and Experiment settings entry;
 - conditional conflict feedback.
 
 Explicitly excluded:
@@ -307,9 +307,9 @@ When a Run has no captured learning, keep its tab available and show a compact d
 
 Long learning text wraps inside its value region. Labels stay fixed and scannable, Run slugs use monospace, and semantic color is limited to real Run status and decision Badges. The page remains useful when only some optional learning fields are present: populated fields retain their normal order and absent fields are omitted rather than filled with `Not set` rows.
 
-### Agent setup Dialog
+### Coding Agent Mode Dialog
 
-![Release Decision Experiment Agent setup](release-decision-experiment-agent-setup-light.png)
+![Release Decision Experiment Coding Agent Mode](release-decision-experiment-agent-setup-light.png)
 
 ### Settings page
 
@@ -379,30 +379,31 @@ Long names, descriptions, and Flag Keys must truncate before they displace the s
 
 Right-aligned actions are:
 
-1. `Agent setup` — the single entry to the coding-agent setup flow;
+1. `Coding Agent Mode` — the single entry to the coding-agent setup flow;
 2. Settings icon button — opens Experiment settings.
 
 Do not add:
 
-- a second `Open Agent setup` action at the bottom of the page;
+- a second `Open Coding Agent Mode` action at the bottom of the page;
 - Audit log;
 - an ellipsis menu;
 - last-updated time;
 - modified-by identity.
 
-Agent setup is optional support functionality and must not compete visually with the primary stage action.
+Coding Agent Mode is optional support functionality and must not compete visually with the primary stage action.
 
-## Agent Setup Dialog
+## Coding Agent Mode Dialog
 
-Clicking the header `Agent setup` action opens a large centered Dialog over the current Experiment detail page. It does not navigate away from the Experiment and does not introduce a local sidebar.
+Clicking the header `Coding Agent Mode` action opens a large centered Dialog over the current Experiment detail page. It does not navigate away from the Experiment and does not introduce a local sidebar.
 
 ### Dialog frame
 
 - width approximately `900–980px` on large desktop;
 - maximum height constrained to the viewport;
 - fixed header and scrollable body;
+- compact header and step padding, with the MCP setup prompt preview collapsed by default;
 - standard translucent overlay with the current Experiment page preserved behind it;
-- title: `Agent setup`;
+- title: `Coding Agent Mode`;
 - description: `Connect a coding agent to this experiment through FeatBit MCP.`;
 - standard close icon in the top-right.
 
@@ -427,20 +428,11 @@ The command block uses a compact muted monospace treatment with a direct `Copy` 
 Show:
 
 - title: `2. Connect FeatBit MCP`;
-- helper: `Create a scoped token, then register the MCP server in your coding agent.`;
-- one segmented Agent selector;
-- token status and token lifecycle action;
-- Agent-specific registration and configuration snippets.
+- helper: `Set up MCP once for your account and organization. Reuse the same token across experiments you have permission to access.`;
+- one compact row for token status and lifecycle actions;
+- one `MCP setup prompt` card with a primary `Copy setup prompt` action and a collapsed `Preview prompt` disclosure.
 
-Agent selector options remain:
-
-1. `Codex`;
-2. `Claude Code`;
-3. `OpenCode`;
-4. `Copilot CLI`;
-5. `Generic MCP`.
-
-Use a neutral segmented control. The selected Agent uses the dark active treatment; inactive choices remain neutral. Switching Agent changes only the configuration help and snippets below it.
+Do not maintain Agent selectors, individual connection-field cards, CLI commands, configuration-file paths, or Agent-specific JSON/TOML examples. The copied prompt supplies the connection values and asks the coding agent to configure itself using its current MCP documentation.
 
 #### Token states
 
@@ -448,62 +440,56 @@ Before token creation:
 
 - status: `No token created`;
 - primary action: `Create MCP token`;
-- configuration examples use `<create-token-first>` and never fabricate a credential.
+- the prompt preview uses `<create-token-first>` and `Copy setup prompt` is disabled.
 
 During creation:
 
 - disable repeated submission;
 - label the action `Creating token...`;
-- retain the selected Agent and visible instructions.
+- retain the prompt card and visible instructions;
+- disable prompt copying and token revocation until creation finishes.
 
 After creation:
 
-- show the token creation and expiry information without displaying the complete token as ordinary page text;
-- inject the token only into the copyable configuration value required by the current behavior;
-- expose `Revoke saved token` as a destructive outline action;
-- retain copy actions for each configuration block.
+- show `Token ready · Expires {expiry}` as compact status text;
+- mask the token in the prompt preview, while `Copy setup prompt` copies the complete prompt with the real token;
+- state `Includes connection details and your token.` beside the copy action;
+- expose `Revoke saved token` as a compact destructive ghost action, and keep token creation available as a secondary outline action;
+- disable prompt copying and token creation during revocation.
 
 Expired token:
 
 - show a compact warning that a new token is required;
 - keep `Create MCP token` available;
-- do not silently reuse the expired credential.
+- replace the credential with `<create-token-first>` in the preview and disable prompt copying.
 
 Creation or revocation error:
 
 - show recoverable inline feedback inside Step 2;
-- retain all previously selected configuration state;
+- retain the prompt card and saved token state;
 - do not close the Dialog.
 
 If the Experiment is not bound to a FeatBit environment, disable token creation and show:
 
 `Bind a FeatBit environment before connecting an agent.`
 
-#### Codex configuration
+#### Setup prompt
 
-For Codex, provide these copyable groups:
+The prompt is localized in English and Chinese and includes:
 
-1. `Codex MCP registration`;
-2. `Authorization header`;
-3. collapsible `Open Codex config` instructions.
+| Parameter | Value |
+| --- | --- |
+| Server name | `featbit-experimentation` |
+| Transport | `Streamable HTTP` |
+| MCP server URL | Current deployment’s public API base URL followed by `/mcp` |
+| Authorization header | `Authorization: Bearer <token>`, with the complete valid user token in the copied prompt |
+| Experiment to read for verification | Current Experiment ID |
 
-Registration command:
+Resolve the URL from `DISPLAY_API_URL`, falling back to `API_URL`. Remove trailing slashes before appending `/mcp`, preserve any deployment path prefix, and resolve relative URLs against the current origin. Do not hardcode a localhost endpoint.
 
-```text
-codex mcp add featbit-experimentation --url http://localhost:5000/mcp
-```
+Keep the preview collapsed by default. When expanded, show the complete prompt with the token masked in a scrollable region no taller than approximately `192px`. The copy action remains visible outside this preview. Allow token controls and the prompt header to wrap on narrow screens.
 
-Authorization configuration:
-
-```toml
-[mcp_servers.featbit-experimentation]
-url = "http://localhost:5000/mcp"
-http_headers = { "Authorization" = "Bearer <create-token-first>" }
-```
-
-`Open Codex config` is collapsed by default to keep the Dialog compact. Expanding it exposes the existing Windows PowerShell and macOS/Linux commands.
-
-Claude Code, OpenCode, Copilot CLI, and Generic MCP retain their HTTP MCP JSON configuration. The design reuses the same configuration region rather than rendering five separate panels.
+Ask the coding agent to inspect its supported MCP configuration, add or update this server while preserving unrelated settings, and use either the Authorization header or a dedicated Bearer token field. The prompt instructs the agent to keep the token out of version control and responses, verify the connection by listing tools and reading the current Experiment without modifying it, and explain any required restart or manual steps and verification limits.
 
 ### Step 3: Start using it
 
@@ -521,7 +507,11 @@ Show:
 
 ### Security and interaction rules
 
-- create a token scoped to the current environment and Experiment;
+- tokens represent the creating user with organization/workspace defaults; each MCP operation checks that user's permission on the target environment;
+- reuse the browser's saved token across experiments and environments, keyed by API URL, user, organization, and workspace; the current Experiment ID is only used for the verification and start prompts;
+- migrate valid legacy per-experiment tokens only when their JWT user, organization, and workspace match the current context; an explicitly revoked cache entry must not restore a legacy token;
+- creating another token does not revoke existing tokens; only explicit revocation or expiry invalidates a token;
+- synchronize saved-token changes across dialogs and browser tabs, and keep in-flight token operations tied to the context in which they started;
 - never place a real access token in a static design asset, log, helper sentence, or unmasked status label;
 - all code and prompt blocks provide an explicit `Copy` action;
 - a successful copy may temporarily replace `Copy` with `Copied`;
@@ -630,7 +620,7 @@ Place one primary action at the bottom-right of the Intent & Hypothesis content:
 
 The action advances the workflow to Exposure using the persisted stage value `implementing`. It is the only prominent page-level action in this stage.
 
-Do not add a bottom Agent setup button or a duplicate stage action.
+Do not add a bottom Coding Agent Mode button or a duplicate stage action.
 
 ## Settings Boundary
 
@@ -643,7 +633,7 @@ While Settings is active:
 - hide the four-stage navigation because Settings is not a release-decision stage;
 - replace stage content with the Settings page;
 - provide `Back to Intent & Hypothesis` so the user can return to the previously active stage;
-- keep Agent setup available in the header without duplicating it in Settings.
+- keep Coding Agent Mode available in the header without duplicating it in Settings.
 
 The Settings content uses a left-aligned reading column approximately `1000–1080px` wide on large desktop. Do not stretch administrative rows across the complete viewport.
 
@@ -746,7 +736,7 @@ Settings must not reintroduce Audit log merely because the ellipsis menu was rem
 ### Medium desktop: 960px to 1279px
 
 - allow header metadata to wrap beneath the Experiment name;
-- keep Agent setup and Settings together;
+- keep Coding Agent Mode and Settings together;
 - retain four stage columns and truncate subtitles only when required;
 - allow field values more vertical space rather than shrinking type.
 
@@ -785,7 +775,7 @@ This document is design guidance only. It does not authorize React, API, backend
 - [ ] Experiment identity shows name, current stage, optional description, Feature Flag state, and Run summary.
 - [ ] A newly created Experiment displays `Feature flag · Not bound`.
 - [ ] Bound Experiments display the exact Flag Key.
-- [ ] Agent setup has exactly one entry in the header.
+- [ ] Coding Agent Mode has exactly one entry in the header.
 - [ ] Settings remains available through the header icon.
 - [ ] Settings hides the four-stage navigation and provides `Back to Intent & Hypothesis`.
 - [ ] Settings shows read-only Name, Description, Experiment ID, and optional Environment ID only.
@@ -807,7 +797,7 @@ This document is design guidance only. It does not authorize React, API, backend
 - [ ] A real conflict renders compact conditional warning feedback.
 - [ ] Stage readiness is not shown.
 - [ ] `Continue to Exposure` is the only prominent bottom action.
-- [ ] There is no duplicate bottom Agent setup action.
+- [ ] There is no duplicate bottom Coding Agent Mode action.
 - [ ] Exposure and Learning follow their own approved assets; Bayesian A/B/n and Bandit Measuring follow their respective approved assets.
 - [ ] A Bandit Run header shows Run slug, `Bandit`, algorithm, status, decision, and observation window without introducing phases.
 - [ ] Bandit Measuring preserves `DecisionCallout`, `Evidence Summary`, and expandable `Evidence Rationale` without information loss.
@@ -831,5 +821,5 @@ This document is design guidance only. It does not authorize React, API, backend
 - [ ] Key learning reads and writes the Experiment-level `lastLearning` field through the existing partial Experiment update endpoint.
 - [ ] Clearing an existing Key learning is not presented as successful until PostgreSQL and MongoDB clearing semantics are aligned.
 - [ ] Learning uses Run tabs for multiple Runs and keeps an explicit empty state for Runs without captured learning.
-- [ ] Learning does not duplicate Measuring analysis or the global Agent setup entry.
+- [ ] Learning does not duplicate Measuring analysis or the global Coding Agent Mode entry.
 - [ ] No implementation work is inferred from this design document.

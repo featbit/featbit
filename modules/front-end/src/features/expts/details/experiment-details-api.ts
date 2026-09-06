@@ -94,7 +94,7 @@ export function deleteExperiment(envId: string, experimentId: string) {
   })
 }
 
-export function createExperimentMcpToken(envId: string, experimentId: string) {
+export function createExperimentMcpToken(envId: string) {
   return fetchApi<McpTokenResponse>(
     `/api/v1/envs/${encodeURIComponent(envId)}/mcp/oauth/token`,
     {
@@ -102,7 +102,6 @@ export function createExperimentMcpToken(envId: string, experimentId: string) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         client_id: "featbit-coding-agent",
-        experiment_id: experimentId,
       }),
     }
   )

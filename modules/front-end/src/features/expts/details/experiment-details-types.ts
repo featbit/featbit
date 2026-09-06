@@ -66,6 +66,5 @@ export type McpTokenResponse = {
 }
 
 export type StoredMcpToken = McpTokenResponse & {
-  created_at: string
   expires_at: string
 }
