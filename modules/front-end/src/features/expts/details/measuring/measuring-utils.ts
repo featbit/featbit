@@ -74,6 +74,7 @@ function analysisRow(value: unknown): AnalysisRow | null {
   return {
     variant,
     n: numberValue(row.n) ?? 0,
+    isControl: typeof row.is_control === "boolean" ? row.is_control : undefined,
     conversions: numberValue(row.conversions),
     rate: numberValue(row.rate),
     mean: numberValue(row.mean),
@@ -300,4 +301,13 @@ export function formatPercent(value: number | undefined) {
   return value === undefined
     ? "—"
     : `${(value * 100).toFixed(value === 0 ? 0 : 1)}%`
+}
+
+export function formatProbability(value: number | undefined) {
+  if (value === undefined || !Number.isFinite(value) || value < 0 || value > 1) {
+    return "—"
+  }
+  if (value > 0.999) return ">99.9%"
+  if (value < 0.001) return "<0.1%"
+  return `${(value * 100).toFixed(1)}%`
 }

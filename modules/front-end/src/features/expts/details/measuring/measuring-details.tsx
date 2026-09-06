@@ -76,6 +76,7 @@ import type {
 } from "./measuring-types"
 import {
   formatPercent,
+  formatProbability,
   normalizedDecision,
   normalizedMethod,
   orderedRuns,
@@ -86,6 +87,7 @@ import {
   runVariants,
 } from "./measuring-utils"
 import { ObservationWindowFields } from "./observation-window-fields"
+import { PosteriorCharts } from "./posterior-charts"
 import {
   createObservationWindowDraft,
   resolveObservationWindow,
@@ -489,7 +491,7 @@ function AnalysisTable({
               {bandit ? (
                 <>
                   <TableCell className="text-right tabular-nums">
-                    {formatPercent(row.pBest)}
+                    {formatProbability(row.pBest)}
                   </TableCell>
                   <TableCell className="text-right tabular-nums">
                     {formatPercent(row.recommendedWeight)}
@@ -511,7 +513,7 @@ function AnalysisTable({
                   </TableCell>
                   <TableCell className="text-right tabular-nums">
                     {row.signalLabel && row.signal !== undefined
-                      ? `${t(`releaseDecision.experiments.detailsPage.measuring.${row.signalLabel}`)} ${formatPercent(row.signal)}`
+                      ? `${t(`releaseDecision.experiments.detailsPage.measuring.${row.signalLabel}`)} ${formatProbability(row.signal)}`
                       : "—"}
                   </TableCell>
                 </>
@@ -677,6 +679,13 @@ function FullAnalysis({
               section={analysis.primary}
               run={run}
               bandit={bandit}
+              variantNames={variantNames}
+            />
+          ) : null}
+          {!bandit ? (
+            <PosteriorCharts
+              section={analysis.primary}
+              controlVariant={runVariants(run)[0]}
               variantNames={variantNames}
             />
           ) : null}

@@ -63,6 +63,7 @@ export type RunAssignmentUpdate = {
 export type AnalysisRow = {
   variant: string
   n: number
+  isControl?: boolean
   conversions?: number
   rate?: number
   mean?: number

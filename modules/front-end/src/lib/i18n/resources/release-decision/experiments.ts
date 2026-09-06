@@ -273,7 +273,15 @@ export const enExperiments = {
       pBest: "P(best)",
       recommendedWeight: "Recommended weight",
       relativeLift: "Relative lift",
-      interval: "95% interval",
+      posteriorTitle: "Posterior Distribution of Relative Effect (δ)",
+      posteriorApproximation:
+        "Normal approximation · shading: 95% credible interval",
+      posteriorComparison: "{{treatment}} vs {{control}}",
+      posteriorDescription:
+        "Posterior distribution: {{comparison}}, δ = {{effect}}, 95% credible interval [{{lower}}, {{upper}}]",
+      posteriorSummary:
+        "δ = {{effect}} · 95% credible interval [{{lower}}, {{upper}}]",
+      interval: "95% credible interval",
       signal: "Signal",
       pWin: "P(win)",
       pHarm: "P(harm)",
@@ -819,7 +827,13 @@ export const zhExperiments = {
       pBest: "P(最佳)",
       recommendedWeight: "建议权重",
       relativeLift: "相对提升",
-      interval: "95% 区间",
+      posteriorTitle: "相对效应（δ）的后验分布",
+      posteriorApproximation: "正态近似 · 阴影：95% 可信区间",
+      posteriorComparison: "{{treatment}} 对比 {{control}}",
+      posteriorDescription:
+        "后验分布：{{comparison}}，δ = {{effect}}，95% 可信区间 [{{lower}}, {{upper}}]",
+      posteriorSummary: "δ = {{effect}} · 95% 可信区间 [{{lower}}, {{upper}}]",
+      interval: "95% 可信区间",
       signal: "信号",
       pWin: "P(获胜)",
       pHarm: "P(有害)",
