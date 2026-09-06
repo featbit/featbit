@@ -88,6 +88,7 @@ import {
 } from "./measuring-utils"
 import { ObservationWindowFields } from "./observation-window-fields"
 import { PosteriorCharts } from "./posterior-charts"
+import { SampleCheck } from "./sample-check"
 import {
   createObservationWindowDraft,
   resolveObservationWindow,
@@ -728,44 +729,11 @@ function FullAnalysis({
                 )}
               </span>
             </div>
-          ) : analysis.sampleCheck ? (
-            <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-              <strong className="font-medium text-foreground">
-                {t(
-                  "releaseDecision.experiments.detailsPage.measuring.sampleCheck"
-                )}
-              </strong>
-              <span>·</span>
-              <span>
-                {analysis.sampleCheck.ok
-                  ? t(
-                      "releaseDecision.experiments.detailsPage.measuring.passed"
-                    )
-                  : t(
-                      "releaseDecision.experiments.detailsPage.measuring.checkFailed"
-                    )}
-              </span>
-              <span>·</span>
-              <span>
-                {t(
-                  "releaseDecision.experiments.detailsPage.measuring.minimumPerVariant",
-                  { count: analysis.sampleCheck.minimum }
-                )}
-              </span>
-              {observed === 0 ? (
-                <Badge
-                  variant="outline"
-                  className="border-amber-300 bg-amber-50 font-normal text-amber-700 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-300"
-                >
-                  {t(
-                    "releaseDecision.experiments.detailsPage.measuring.zeroNotEvidence"
-                  )}
-                </Badge>
-              ) : null}
-            </div>
           ) : null}
         </section>
       ) : null}
+
+      {!bandit ? <SampleCheck analysis={analysis} /> : null}
 
       {analysis.guardrails.map((section, index) => (
         <section key={`${section.label}-${index}`} className="space-y-2">
