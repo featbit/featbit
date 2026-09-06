@@ -25,7 +25,7 @@ const experiment: ExperimentDetail = {
   id: "experiment-1",
   name: "Checkout experiment",
   description: "Test checkout changes",
-  stage: "learning",
+  stage: "measuring",
   flagKey: "checkout-flow",
   featBitProjectKey: "project-1",
   featBitEnvId: "environment-1",
@@ -45,7 +45,7 @@ const experiment: ExperimentDetail = {
 }
 
 describe("ExperimentDetailsHeader", () => {
-  it("uses the list stage color and the real detail run collection", () => {
+  it("shows the real detail run count without a saved stage badge", () => {
     render(
       <MemoryRouter>
         <ExperimentDetailsHeader
@@ -58,8 +58,7 @@ describe("ExperimentDetailsHeader", () => {
       </MemoryRouter>
     )
 
-    const stageBadge = screen.getByText("Learning")
-    expect(stageBadge.querySelector("span")).toHaveClass("bg-amber-500")
+    expect(screen.queryByText("Measuring")).not.toBeInTheDocument()
     expect(screen.getByText("2 runs")).toBeInTheDocument()
     expect(screen.queryByText("No runs")).not.toBeInTheDocument()
 

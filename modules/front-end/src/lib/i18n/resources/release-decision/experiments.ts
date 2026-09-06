@@ -26,6 +26,14 @@ export const enExperiments = {
     measuring: "Measuring",
     learning: "Learning",
   },
+  listStates: {
+    hypothesis: "Intent & Hypothesis",
+    implementing: "Exposure",
+    measuring: "Measuring",
+    waitDecision: "Wait decision",
+    decision: "Decision",
+    learnt: "Learnt",
+  },
   methods: {
     bayesian: "Bayesian A/B/n",
     bandit: "Bandit",
@@ -581,6 +589,14 @@ export const zhExperiments = {
     implementing: "曝光",
     measuring: "衡量",
     learning: "学习",
+  },
+  listStates: {
+    hypothesis: "意图与假设",
+    implementing: "曝光",
+    measuring: "衡量",
+    waitDecision: "等待决策",
+    decision: "决策",
+    learnt: "已学习",
   },
   methods: {
     bayesian: "贝叶斯 A/B/n",

@@ -14,13 +14,16 @@ import {
 import type { Lang } from "@/features/layout/layout-types"
 import type { ExperimentListItem } from "../experiment-types"
 import {
+  experimentListStateDot,
+  type ExperimentListRow,
+} from "../experiment-list-state"
+import {
   experimentMethodKeys,
-  experimentStageDot,
   formatExperimentDate,
 } from "../experiments-utils"
 
 type Props = {
-  items: ExperimentListItem[]
+  items: ExperimentListRow[]
   loading: boolean
   filtered: boolean
   lang: Lang
@@ -185,11 +188,13 @@ export function ExperimentsTable({
                 <TableCell className="px-5 py-4">
                   <Badge variant="outline" className="gap-1.5 font-normal">
                     <span
-                      className={`size-2 rounded-full ${experimentStageDot(experiment.stage)}`}
+                      className={`size-2 rounded-full ${experimentListStateDot(experiment.listState.key)}`}
                     />
-                    {t(
-                      `releaseDecision.experiments.stages.${experiment.stage}`
-                    )}
+                    {experiment.listState.key === "decision"
+                      ? experiment.listState.decision
+                      : t(
+                          `releaseDecision.experiments.listStates.${experiment.listState.key}`
+                        )}
                   </Badge>
                 </TableCell>
                 <TableCell className="px-5 py-4 tabular-nums">

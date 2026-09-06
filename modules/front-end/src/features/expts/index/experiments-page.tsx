@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { Plus, Search, X } from "lucide-react"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { toast } from "sonner"
@@ -23,15 +23,13 @@ import { ExperimentSheet } from "./components/experiment-sheet"
 import { FlagKeyFilter } from "./components/flag-key-filter"
 import { ExperimentsPagination } from "./components/experiments-pagination"
 import { ExperimentsTable } from "./components/experiments-table"
-import type { ExperimentStage } from "./experiment-types"
-import { createExperiment, fetchExperiments } from "./experiments-api"
-
-const STAGES: ExperimentStage[] = [
-  "hypothesis",
-  "implementing",
-  "measuring",
-  "learning",
-]
+import {
+  EXPERIMENT_LIST_STATES,
+  selectExperimentListPage,
+  type ExperimentListFilter,
+  type ExperimentListStateKey,
+} from "./experiment-list-state"
+import { createExperiment, fetchExperimentList } from "./experiments-api"
 
 function positiveInt(
   value: string | null,
@@ -46,9 +44,10 @@ function positiveInt(
     : fallback
 }
 
-function stageFromParam(value: string | null): ExperimentStage | "all" {
-  return STAGES.includes(value as ExperimentStage)
-    ? (value as ExperimentStage)
+function stageFromParam(value: string | null): ExperimentListFilter {
+  if (value === "learning") return "learnt"
+  return EXPERIMENT_LIST_STATES.includes(value as ExperimentListStateKey)
+    ? (value as ExperimentListStateKey)
     : "all"
 }
 
@@ -63,10 +62,15 @@ export function ExperimentsPage() {
   const [name, setName] = useState(() => searchParams.get("name") ?? "")
   const [debouncedName, setDebouncedName] = useState(name.trim())
   const [sheetOpen, setSheetOpen] = useState(false)
+  const [now, setNow] = useState(() => Date.now())
   const flagKey = searchParams.get("flagKey") ?? ""
   const stage = stageFromParam(searchParams.get("stage"))
   const pageIndex = positiveInt(searchParams.get("page"), 1)
   const pageSize = positiveInt(searchParams.get("pageSize"), 10, [10, 20, 30])
+  // Only stage filtering needs the full matching set. Ordinary browsing stays paged.
+  const scope = stage === "all" ? "page" : "all"
+  const requestPage = scope === "page" ? pageIndex - 1 : 0
+  const requestPageSize = scope === "page" ? pageSize : 100
 
   const updateParams = useCallback(
     (updates: Record<string, string | null>, resetPage = false) => {
@@ -97,27 +101,61 @@ export function ExperimentsPage() {
     return () => window.clearTimeout(timeout)
   }, [name, debouncedName, updateParams])
 
+  useEffect(() => {
+    const refreshClock = () => setNow(Date.now())
+    const interval = window.setInterval(refreshClock, 30_000)
+    window.addEventListener("focus", refreshClock)
+    return () => {
+      window.clearInterval(interval)
+      window.removeEventListener("focus", refreshClock)
+    }
+  }, [])
+
   const listQuery = useQuery({
     queryKey: [
       "experiments",
       envId,
       debouncedName,
       flagKey,
-      stage,
-      pageIndex,
-      pageSize,
+      scope,
+      requestPage,
+      requestPageSize,
     ],
-    queryFn: () =>
-      fetchExperiments(envId, {
-        name: debouncedName,
-        flagKey,
-        stage,
-        pageIndex: pageIndex - 1,
-        pageSize,
-      }),
+    queryFn: ({ signal }) =>
+      fetchExperimentList(
+        envId,
+        {
+          name: debouncedName,
+          flagKey,
+          scope,
+          pageIndex: requestPage,
+          pageSize: requestPageSize,
+        },
+        signal
+      ),
     enabled: Boolean(envId),
-    placeholderData: (previous) => previous,
+    refetchOnMount: "always",
   })
+
+  const data = useMemo(
+    () =>
+      selectExperimentListPage(
+        listQuery.data ?? { items: [], totalCount: 0, scope },
+        stage,
+        pageIndex,
+        pageSize,
+        now
+      ),
+    [listQuery.data, scope, stage, pageIndex, pageSize, now]
+  )
+
+  useEffect(() => {
+    if (listQuery.isSuccess && data.pageIndex !== pageIndex) {
+      updateParams({
+        page: data.pageIndex === 1 ? null : String(data.pageIndex),
+      })
+    }
+  }, [listQuery.isSuccess, data.pageIndex, pageIndex, updateParams])
 
   const createMutation = useMutation({
     mutationFn: (payload: Parameters<typeof createExperiment>[1]) =>
@@ -132,7 +170,6 @@ export function ExperimentsPage() {
   })
 
   const filtered = Boolean(debouncedName || flagKey || stage !== "all")
-  const data = listQuery.data ?? { items: [], totalCount: 0 }
 
   function clearFilters() {
     setName("")
@@ -178,7 +215,7 @@ export function ExperimentsPage() {
                 {t(
                   stage === "all"
                     ? "releaseDecision.experiments.allStages"
-                    : `releaseDecision.experiments.stages.${stage}`
+                    : `releaseDecision.experiments.listStates.${stage}`
                 )}
               </SelectValue>
             </SelectTrigger>
@@ -187,9 +224,9 @@ export function ExperimentsPage() {
                 <SelectItem value="all">
                   {t("releaseDecision.experiments.allStages")}
                 </SelectItem>
-                {STAGES.map((item) => (
+                {EXPERIMENT_LIST_STATES.map((item) => (
                   <SelectItem key={item} value={item}>
-                    {t(`releaseDecision.experiments.stages.${item}`)}
+                    {t(`releaseDecision.experiments.listStates.${item}`)}
                   </SelectItem>
                 ))}
               </SelectGroup>
@@ -218,41 +255,45 @@ export function ExperimentsPage() {
                 type="button"
                 variant="outline"
                 size="sm"
+                disabled={listQuery.isFetching}
                 onClick={() => void listQuery.refetch()}
               >
                 {t("releaseDecision.experiments.retry")}
               </Button>
             ) : null}
           </div>
-        ) : null}
-        <ExperimentsTable
-          items={data.items}
-          loading={listQuery.isLoading}
-          filtered={filtered}
-          lang={lang}
-          detailsHref={(id) =>
-            localizedPath(lang, `/experiments/${encodeURIComponent(id)}`)
-          }
-          onFlagFilter={(key) => {
-            updateParams({ flagKey: key }, true)
-          }}
-          onClearFilters={clearFilters}
-          onCreate={() => setSheetOpen(true)}
-        />
+        ) : (
+          <ExperimentsTable
+            items={data.items}
+            loading={listQuery.isFetching}
+            filtered={filtered}
+            lang={lang}
+            detailsHref={(id) =>
+              localizedPath(lang, `/experiments/${encodeURIComponent(id)}`)
+            }
+            onFlagFilter={(key) => {
+              updateParams({ flagKey: key }, true)
+            }}
+            onClearFilters={clearFilters}
+            onCreate={() => setSheetOpen(true)}
+          />
+        )}
       </div>
 
-      <ExperimentsPagination
-        pageIndex={pageIndex}
-        pageSize={pageSize}
-        totalCount={data.totalCount}
-        disabled={listQuery.isFetching}
-        onPageIndexChange={(page) =>
-          updateParams({ page: page === 1 ? null : String(page) })
-        }
-        onPageSizeChange={(size) =>
-          updateParams({ pageSize: String(size) }, true)
-        }
-      />
+      {listQuery.isSuccess && !listQuery.isFetching ? (
+        <ExperimentsPagination
+          pageIndex={data.pageIndex}
+          pageSize={pageSize}
+          totalCount={data.totalCount}
+          disabled={false}
+          onPageIndexChange={(page) =>
+            updateParams({ page: page === 1 ? null : String(page) })
+          }
+          onPageSizeChange={(size) =>
+            updateParams({ pageSize: String(size) }, true)
+          }
+        />
+      ) : null}
 
       {sheetOpen ? (
         <ExperimentSheet

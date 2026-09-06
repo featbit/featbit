@@ -24,8 +24,6 @@ export type MeasuringRun = ExperimentRunDetail & {
   treatmentVariant?: string | null
   trafficAllocation?: string | null
   minimumSample?: number | null
-  observationStart?: string | null
-  observationEnd?: string | null
   priorProper?: boolean
   priorMean?: number | null
   priorStddev?: number | null

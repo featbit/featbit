@@ -30,6 +30,8 @@ export type ExperimentRunDetail = {
   /** @deprecated Backend compatibility only; never use for UI or action gating. */
   status: string
   method: string | null
+  observationStart?: string | null
+  observationEnd?: string | null
   decision: string | null
   decisionSummary: string | null
   decisionReason: string | null

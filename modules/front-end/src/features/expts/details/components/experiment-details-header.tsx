@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/tooltip"
 import { localizedPath } from "@/features/layout/layout-context"
 import type { Lang } from "@/features/layout/layout-types"
-import { experimentStageDot } from "../../index/experiments-utils"
 import type { ExperimentDetail } from "../experiment-details-types"
 
 type Props = {
@@ -50,12 +49,6 @@ export function ExperimentDetailsHeader({
             >
               {experiment.name}
             </h1>
-            <Badge variant="outline" className="gap-1.5 font-normal">
-              <span
-                className={`size-2 rounded-full ${experimentStageDot(experiment.stage)}`}
-              />
-              {t(`releaseDecision.experiments.stages.${experiment.stage}`)}
-            </Badge>
           </div>
 
           <div className="flex min-w-0 flex-wrap items-center gap-2 text-sm">

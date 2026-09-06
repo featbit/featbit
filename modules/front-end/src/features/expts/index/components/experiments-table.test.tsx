@@ -2,14 +2,15 @@ import { fireEvent, render, screen } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
 import { describe, expect, it, vi } from "vitest"
 import "@/lib/i18n/i18n"
-import type { ExperimentListItem } from "../experiment-types"
+import type { ExperimentListRow } from "../experiment-list-state"
 import { ExperimentsTable } from "./experiments-table"
 
-const experiment: ExperimentListItem = {
+const experiment: ExperimentListRow = {
   id: "experiment-1",
   name: "Checkout optimization",
   description: "Reduce friction from cart to completed order",
-  stage: "measuring",
+  stage: "hypothesis",
+  listState: { key: "measuring" },
   flagKey: "checkout-redesign",
   featBitProjectKey: "ecommerce",
   featBitEnvId: "env-1",
@@ -66,6 +67,7 @@ describe("ExperimentsTable", () => {
               runCount: 0,
               runMethodSummary: null,
               stage: "hypothesis",
+              listState: { key: "hypothesis" },
             },
           ]}
           loading={false}
@@ -81,6 +83,33 @@ describe("ExperimentsTable", () => {
 
     expect(screen.getByText("Not bound")).toBeInTheDocument()
     expect(screen.getByText("No runs")).toBeInTheDocument()
+    expect(screen.getByText("Intent & Hypothesis")).toBeInTheDocument()
     expect(screen.queryByText("Bayesian A/B/n")).not.toBeInTheDocument()
   })
+
+  it.each([
+    [{ key: "waitDecision" }, "Wait decision"],
+    [{ key: "decision", decision: "ROLLBACK" }, "ROLLBACK"],
+    [{ key: "learnt" }, "Learnt"],
+  ] as const)(
+    "renders the derived state %s instead of the saved stage",
+    (listState, label) => {
+      render(
+        <MemoryRouter>
+          <ExperimentsTable
+            items={[{ ...experiment, listState }]}
+            loading={false}
+            filtered={false}
+            lang="en"
+            detailsHref={(id) => `/en/experiments/${id}`}
+            onFlagFilter={vi.fn()}
+            onClearFilters={vi.fn()}
+            onCreate={vi.fn()}
+          />
+        </MemoryRouter>
+      )
+      expect(screen.getByText(label)).toBeInTheDocument()
+      expect(screen.queryByText("Intent & Hypothesis")).not.toBeInTheDocument()
+    }
+  )
 })
