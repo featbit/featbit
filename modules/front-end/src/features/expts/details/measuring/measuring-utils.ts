@@ -303,6 +303,35 @@ export function formatPercent(value: number | undefined) {
     : `${(value * 100).toFixed(value === 0 ? 0 : 1)}%`
 }
 
+export function analysisSignalClassName(row: AnalysisRow) {
+  const { signal, signalLabel } = row
+  if (
+    row.isControl ||
+    !signalLabel ||
+    signal === undefined ||
+    !Number.isFinite(signal) ||
+    signal < 0 ||
+    signal > 1
+  ) {
+    return ""
+  }
+
+  if (signalLabel === "pHarm") {
+    if (signal <= 0.01)
+      return "font-semibold text-green-700 dark:text-green-400"
+    if (signal >= 0.95)
+      return "font-semibold text-red-700 dark:text-red-400"
+    if (signal >= 0.8)
+      return "font-medium text-amber-700 dark:text-amber-400"
+    return "text-muted-foreground"
+  }
+
+  if (signal >= 0.95)
+    return "font-semibold text-green-700 dark:text-green-400"
+  if (signal >= 0.76) return "text-amber-700 dark:text-amber-400"
+  return "text-red-700 dark:text-red-400"
+}
+
 export function formatProbability(value: number | undefined) {
   if (value === undefined || !Number.isFinite(value) || value < 0 || value > 1) {
     return "—"

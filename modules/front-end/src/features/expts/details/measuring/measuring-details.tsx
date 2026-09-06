@@ -75,6 +75,7 @@ import type {
   ObservationWindowUpdate,
 } from "./measuring-types"
 import {
+  analysisSignalClassName,
   formatPercent,
   formatProbability,
   normalizedDecision,
@@ -512,7 +513,12 @@ function AnalysisTable({
                       ? "—"
                       : `${formatPercent(row.ciLower)} – ${formatPercent(row.ciUpper)}`}
                   </TableCell>
-                  <TableCell className="text-right tabular-nums">
+                  <TableCell
+                    className={cn(
+                      "text-right tabular-nums",
+                      row.variant !== control && analysisSignalClassName(row)
+                    )}
+                  >
                     {row.signalLabel && row.signal !== undefined
                       ? `${t(`releaseDecision.experiments.detailsPage.measuring.${row.signalLabel}`)} ${formatProbability(row.signal)}`
                       : "—"}
