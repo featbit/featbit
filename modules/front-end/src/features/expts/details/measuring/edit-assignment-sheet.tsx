@@ -100,7 +100,7 @@ function LayerPicker({
             id="assignment-layer-key"
             type="button"
             variant="outline"
-            className="w-full justify-between px-3 font-normal"
+            className="w-full min-w-0 justify-between px-3 font-normal"
           />
         }
       >
@@ -358,7 +358,7 @@ export function EditAssignmentSheet({
                   "releaseDecision.experiments.detailsPage.measuring.layerEligibility"
                 )}
               </h3>
-              <div className="grid grid-cols-[140px_1fr] items-center gap-x-4 gap-y-3">
+              <div className="grid grid-cols-[140px_minmax(0,1fr)] items-center gap-x-4 gap-y-3">
                 <Label
                   htmlFor="assignment-layer-key"
                   className="font-normal text-muted-foreground"
