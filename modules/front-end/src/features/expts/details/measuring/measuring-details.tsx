@@ -209,7 +209,7 @@ function AnalysisTable({
   const valueColumn = analysisValueColumn(section)
   const binary = valueColumn === "rate"
   const role = (row: AnalysisRow, index: number) => {
-    if (bandit)
+    if (normalizedMethod(run.method) === "bandit")
       return index === 0
         ? t("releaseDecision.experiments.detailsPage.measuring.baseline")
         : t("releaseDecision.experiments.detailsPage.measuring.arm")
@@ -363,7 +363,7 @@ function AnalysisTable({
   )
 }
 
-function FullAnalysis({
+export function FullAnalysis({
   run,
   variantNames,
 }: {

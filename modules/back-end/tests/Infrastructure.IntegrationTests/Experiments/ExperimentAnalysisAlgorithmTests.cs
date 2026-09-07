@@ -347,14 +347,114 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
         Assert.Equal("treatment-id", request.TreatmentVariants);
     }
 
+    [DockerTheory]
+    [InlineData(0)]
+    [InlineData(200)]
+    public async Task AnalyzeRun_BanditGuardrails_ReportsEachArmAndHarmDirection(int users)
+    {
+        var stats = new FixedExperimentStatsService(
+            new ExperimentStatsVm
+            {
+                Variants =
+                [
+                    Variant("control-id", users, users * 2 / 5, users * 2 / 5, users * 2 / 5),
+                    Variant("treatment-id", users, users * 3 / 5, users * 3 / 5, users * 3 / 5),
+                    Variant("other-id", users, users / 2, users / 2, users / 2)
+                ]
+            },
+            new Dictionary<string, ExperimentStatsVm>
+            {
+                ["errors"] = new()
+                {
+                    Variants =
+                    [
+                        Variant("control-id", users, users / 10, users / 10, users / 10),
+                        Variant("treatment-id", users, users / 2, users / 2, users / 2),
+                        Variant("other-id", users, 0, 0, 0)
+                    ]
+                },
+                ["engagement"] = new()
+                {
+                    Variants =
+                    [
+                        Variant("control-id", users, 0, users * 10, users * 110),
+                        Variant("treatment-id", users, 0, users * 5, users * 30),
+                        Variant("other-id", users, 0, users * 15, users * 240)
+                    ]
+                }
+            });
+        await using var db = CreateDbContext();
+        await SeedExperimentAsync(db, method: "bandit", metricType: "binary", metricAgg: "once",
+            controlVariant: "control-id", treatmentVariant: "treatment-id|other-id");
+        var run = await db.Set<ExperimentRun>().AsTracking().SingleAsync(x => x.Id == RunId);
+        run.GuardrailEvents = """
+            [
+              {"event":"errors","metricType":"binary","metricAgg":"once","inverse":true},
+              {"event":"engagement","metricType":"numeric","metricAgg":"count","inverse":false}
+            ]
+            """;
+        await db.SaveChangesAsync();
+
+        var result = await CreateService(db, stats, includeThirdArm: true).AnalyzeRunAsync(
+            EnvId, ExperimentId, RunId, new ExperimentRunAnalyzeRequest());
+
+        using var document = JsonDocument.Parse(result.ExperimentRuns.Single().AnalysisResult);
+        var root = document.RootElement;
+        Assert.Equal("bandit", root.GetProperty("type").GetString());
+        Assert.Equal(3, root.GetProperty("thompson_sampling").GetProperty("results").GetArrayLength());
+        var guardrails = root.GetProperty("guardrails").EnumerateArray().ToArray();
+        Assert.Equal(2, guardrails.Length);
+        var errors = guardrails.Single(x => x.GetProperty("event").GetString() == "errors");
+        var engagement = guardrails.Single(x => x.GetProperty("event").GetString() == "engagement");
+        Assert.True(errors.GetProperty("inverse").GetBoolean());
+        Assert.Equal("proportion", errors.GetProperty("metric_type").GetString());
+        Assert.Equal("once", errors.GetProperty("metric_agg").GetString());
+        Assert.False(engagement.TryGetProperty("inverse", out _));
+        Assert.Equal("numeric", engagement.GetProperty("metric_type").GetString());
+        Assert.Equal("count", engagement.GetProperty("metric_agg").GetString());
+
+        foreach (var guardrail in guardrails)
+        {
+            var rows = guardrail.GetProperty("rows").EnumerateArray().ToArray();
+            Assert.Equal(new[] { "control-id", "treatment-id", "other-id" },
+                rows.Select(x => x.GetProperty("variant").GetString()));
+            Assert.All(rows, row => Assert.Equal(users, row.GetProperty("n").GetInt64()));
+            Assert.True(rows[0].GetProperty("is_control").GetBoolean());
+            Assert.False(rows[0].TryGetProperty("p_harm", out _));
+
+            if (users == 0)
+            {
+                Assert.All(rows, row => Assert.False(row.TryGetProperty("p_harm", out _)));
+                Assert.Equal("no data", guardrail.GetProperty("verdict").GetString());
+            }
+            else
+            {
+                Assert.True(rows[1].GetProperty("p_harm").GetDouble() >= 0.95);
+                Assert.True(rows[2].GetProperty("p_harm").GetDouble() <= 0.01);
+                Assert.Contains("guardrail ALARM", guardrail.GetProperty("verdict").GetString());
+                Assert.Contains("guardrail clear", guardrail.GetProperty("verdict").GetString());
+            }
+        }
+
+        Assert.Equal(new[] { "purchase", "errors", "engagement" },
+            stats.Requests.Select(x => x.MetricEvent));
+        Assert.All(stats.Requests, request =>
+        {
+            Assert.Equal(RunId, request.RunId);
+            Assert.Equal("control-id", request.ControlVariant);
+            Assert.Equal("treatment-id|other-id", request.TreatmentVariants);
+        });
+    }
+
     private static ExperimentService CreateService(
         AppDbContext db,
-        IExperimentStatsService stats)
+        IExperimentStatsService stats,
+        bool includeThirdArm = false)
     {
         return new ExperimentService(
             db,
             stats,
-            CreateFeatureFlagService(),
+            CreateFeatureFlagService(includeThirdArm),
             null!,
             new TestCurrentUser(UserId),
             CreateUserService());
@@ -443,7 +543,9 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
         };
     }
 
-    private sealed class FixedExperimentStatsService(ExperimentStatsVm stats) : IExperimentStatsService
+    private sealed class FixedExperimentStatsService(
+        ExperimentStatsVm stats,
+        IReadOnlyDictionary<string, ExperimentStatsVm>? metricStats = null) : IExperimentStatsService
     {
         public List<QueryExperimentStats> Requests { get; } = [];
 
@@ -460,13 +562,23 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
                     Start = request.StartDate,
                     End = request.EndDate
                 },
-                Variants = stats.Variants
+                Variants = metricStats?.GetValueOrDefault(request.MetricEvent, stats).Variants ?? stats.Variants
             });
         }
     }
 
-    private static IFeatureFlagService CreateFeatureFlagService()
+    private static IFeatureFlagService CreateFeatureFlagService(bool includeThirdArm = false)
     {
+        var variations = new List<Variation>
+        {
+            new() { Id = "control-id", Name = "control", Value = "true" },
+            new() { Id = "treatment-id", Name = "treatment", Value = "false" }
+        };
+        if (includeThirdArm)
+        {
+            variations.Add(new Variation { Id = "other-id", Name = "other", Value = "other" });
+        }
+
         var service = new Mock<IFeatureFlagService>();
         service
             .Setup(x => x.GetAsync(It.IsAny<Guid>(), It.IsAny<string>()))
@@ -478,11 +590,7 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
                 Name = "Checkout flow",
                 VariationType = "string",
                 DisabledVariationId = "control-id",
-                Variations =
-                [
-                    new Variation { Id = "control-id", Name = "control", Value = "true" },
-                    new Variation { Id = "treatment-id", Name = "treatment", Value = "false" }
-                ],
+                Variations = [.. variations],
                 Tags = []
             });
         return service.Object;

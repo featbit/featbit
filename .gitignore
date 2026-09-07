@@ -54,6 +54,7 @@ e2e/control-plane/**/.quickstart-state-*.json
 
 # Temporary local experimentation data generator
 /tempo/expt-data-generation/
+/tempo/bandit-sdk-simulator/
 
 # otel-demo upstream source clone (fetched on demand by Build-OtelDemoImages.ps1)
 e2e/control-plane/01-Infrastructure/otel-demo/build/

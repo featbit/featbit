@@ -552,7 +552,7 @@ public class ExperimentService(
             control,
             treatments);
         var analysisResult = run.Method == "bandit"
-            ? BuildBanditAnalysisJson(run, primaryMetricEvent, metrics, analysisControl, analysisTreatments)
+            ? BuildBanditAnalysisJson(run, primaryMetricEvent, metrics, guardrails, analysisControl, analysisTreatments)
             : BuildBayesianAnalysisJson(run, experiment.Name ?? id.ToString(), primaryMetricEvent, metricAgg, metrics, guardrails, analysisControl, analysisTreatments);
 
         run.InputData = inputData;
@@ -1692,7 +1692,50 @@ public class ExperimentService(
             }
         }
 
-        var guardrailSections = new List<Dictionary<string, object?>>();
+        var payload = new Dictionary<string, object?>
+        {
+            ["type"] = "bayesian",
+            ["experiment"] = experimentName,
+            ["computed_at"] = DateTime.UtcNow,
+            ["window"] = new Dictionary<string, object?>
+            {
+                ["start"] = run.ObservationStart,
+                ["end"] = run.ObservationEnd
+            },
+            ["control"] = control,
+            ["treatments"] = treatments,
+            ["prior"] = priorLabel,
+            ["srm"] = new Dictionary<string, object>
+            {
+                ["chi2_p_value"] = Round(srmPValue, 4),
+                ["ok"] = srmPValue >= 0.01,
+                ["observed"] = observed
+            },
+            ["primary_metric"] = primaryMetric,
+            ["guardrails"] = BuildGuardrailSections(metrics, guardrails, control, treatments),
+            ["sample_check"] = new Dictionary<string, object>
+            {
+                ["minimum_per_variant"] = minimumSample,
+                ["ok"] = minimumSample == 0 || minN >= minimumSample,
+                ["variants"] = observed
+            }
+        };
+
+        if (warnings.Count > 0)
+        {
+            payload["warnings"] = warnings;
+        }
+
+        return JsonSerializer.Serialize(payload);
+    }
+
+    private static List<Dictionary<string, object?>> BuildGuardrailSections(
+        Dictionary<string, Dictionary<string, object>> metrics,
+        IReadOnlyCollection<GuardrailDefinition> guardrails,
+        string control,
+        string[] treatments)
+    {
+        var sections = new List<Dictionary<string, object?>>();
         foreach (var guardrail in guardrails)
         {
             if (!metrics.TryGetValue(guardrail.Event, out var guardrailData))
@@ -1715,51 +1758,18 @@ public class ExperimentService(
                 guardrail.MetricAgg);
             if (section != null)
             {
-                guardrailSections.Add(section);
+                sections.Add(section);
             }
         }
 
-        var payload = new Dictionary<string, object?>
-        {
-            ["type"] = "bayesian",
-            ["experiment"] = experimentName,
-            ["computed_at"] = DateTime.UtcNow,
-            ["window"] = new Dictionary<string, object?>
-            {
-                ["start"] = run.ObservationStart,
-                ["end"] = run.ObservationEnd
-            },
-            ["control"] = control,
-            ["treatments"] = treatments,
-            ["prior"] = priorLabel,
-            ["srm"] = new Dictionary<string, object>
-            {
-                ["chi2_p_value"] = Round(srmPValue, 4),
-                ["ok"] = srmPValue >= 0.01,
-                ["observed"] = observed
-            },
-            ["primary_metric"] = primaryMetric,
-            ["guardrails"] = guardrailSections,
-            ["sample_check"] = new Dictionary<string, object>
-            {
-                ["minimum_per_variant"] = minimumSample,
-                ["ok"] = minimumSample == 0 || minN >= minimumSample,
-                ["variants"] = observed
-            }
-        };
-
-        if (warnings.Count > 0)
-        {
-            payload["warnings"] = warnings;
-        }
-
-        return JsonSerializer.Serialize(payload);
+        return sections;
     }
 
     private static string BuildBanditAnalysisJson(
         ExperimentRun run,
         string metricEvent,
         Dictionary<string, Dictionary<string, object>> metrics,
+        IReadOnlyCollection<GuardrailDefinition> guardrails,
         string control,
         string[] treatments)
     {
@@ -1814,6 +1824,7 @@ public class ExperimentService(
                 ["conversions"] = x.Conversions,
                 ["rate"] = x.Rate
             }).ToArray(),
+            ["guardrails"] = BuildGuardrailSections(metrics, guardrails, control, treatments),
             ["thompson_sampling"] = new Dictionary<string, object?>
             {
                 ["results"] = arms.Select(arm => new Dictionary<string, object>
