@@ -13,6 +13,19 @@ public struct EvaluationScope
 
     public EvaluationScope(JsonElement flag, EndUser user, Variation[] variations)
     {
+        for (var i = 0; i < variations.Length; i++)
+        {
+            var variation = variations[i];
+
+            if (variation is null || !variation.IsValid())
+            {
+                throw EntityJsonReader.FeatureFlag.Malformed(
+                    "Variation must have a valid ID and a non-null value",
+                    $"variations[{i}]"
+                );
+            }
+        }
+
         Flag = flag;
         User = user;
         Variations = variations;
