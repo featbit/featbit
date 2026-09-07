@@ -36,8 +36,7 @@ public class TargetRule
 
     public bool IsValid(ICollection<Variation> flagVariations)
     {
-        if (Conditions == null ||
-            Conditions.Count == 0 ||
+        if (Conditions.IsNullOrEmpty() ||
             Conditions.Any(condition => condition == null || !condition.IsValid(isSegmentConditionAllowed: true)))
         {
             return false;
