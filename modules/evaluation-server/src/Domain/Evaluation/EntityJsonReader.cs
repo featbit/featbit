@@ -118,7 +118,7 @@ public sealed class EntityJsonReader(EvaluationEntityType entityType, string? en
             var values = property.Deserialize<T[]>(ReusableJsonSerializerOptions.Web) ??
                          throw Malformed($"Property '{propertyName}' must not be null", propertyName);
 
-            if (values.Any(value => value is null))
+            if (default(T) is null && values.Any(value => value is null))
             {
                 throw Malformed(
                     $"Property '{propertyName}' must not contain null values",
