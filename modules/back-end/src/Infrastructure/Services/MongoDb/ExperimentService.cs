@@ -155,9 +155,12 @@ public class ExperimentService(
         experiment.Guardrails = await BuildGuardrailsJsonAsync(envId, update.Guardrails, primaryMetric);
         experiment.UpdatedAt = updatedAt;
 
-        await mongoDb.CollectionOf<Experiment>().ReplaceOneAsync(
+        await mongoDb.CollectionOf<Experiment>().UpdateOneAsync(
             x => x.Id == id && x.FeatBitEnvId == envId,
-            experiment);
+            Builders<Experiment>.Update
+                .Set(x => x.PrimaryMetric, experiment.PrimaryMetric)
+                .Set(x => x.Guardrails, experiment.Guardrails)
+                .Set(x => x.UpdatedAt, updatedAt));
 
         var latestRun = await mongoDb.CollectionOf<ExperimentRun>()
             .Find(x => x.ExperimentId == id)
@@ -191,21 +194,12 @@ public class ExperimentService(
             .ToListAsync();
 
         var previous = existingRuns.LastOrDefault();
-        var usedSlugs = existingRuns.Select(x => x.Slug).ToHashSet(StringComparer.OrdinalIgnoreCase);
-        var number = existingRuns.Count + 1;
-        var slug = $"run-{number}";
-        while (usedSlugs.Contains(slug))
-        {
-            number++;
-            slug = $"run-{number}";
-        }
 
         var now = DateTime.UtcNow;
         var run = new ExperimentRun
         {
             Id = Guid.NewGuid(),
             ExperimentId = id,
-            Slug = slug,
             Method = previous?.Method ?? "bayesian_ab",
             MethodReason = previous?.MethodReason,
             PrimaryMetricEvent = previous?.PrimaryMetricEvent,
@@ -241,21 +235,66 @@ public class ExperimentService(
         await AlignRunVariantsAsync(envId, experiment, run, inferMissing: true);
 
         await NormalizeAndValidateLayerAssignmentAsync(envId, run);
+        var number = await AllocateRunNumberAsync(envId, experiment, existingRuns);
+        run.Slug = $"run-{number}";
         await mongoDb.CollectionOf<ExperimentRun>().InsertOneAsync(run);
         await PersistExperimentAsync(envId, experiment);
         await AddActivityAsync(
             id,
             "note",
-            $"New experiment run created: {slug}",
+            $"{ExperimentRunNumber.CreationTitlePrefix}{run.Slug}",
             previous == null ? "Empty template" : $"Copied config from {previous.Slug}",
             now);
 
         return await GetAsync(envId, id);
     }
 
+    private async Task<long> AllocateRunNumberAsync(
+        Guid envId, Experiment experiment, IReadOnlyCollection<ExperimentRun> existingRuns)
+    {
+        await InitializeRunNumberAsync(envId, experiment, existingRuns.Select(x => x.Slug));
+        var experiments = mongoDb.CollectionOf<Experiment>();
+        var filter = Builders<Experiment>.Filter.Where(x => x.Id == experiment.Id && x.FeatBitEnvId == envId);
+
+        // Reserve on the experiment document, independently of run deletion or insertion.
+        var allocated = await experiments.FindOneAndUpdateAsync(
+            filter,
+            Builders<Experiment>.Update.Inc(x => x.LastRunNumber, 1L),
+            new FindOneAndUpdateOptions<Experiment> { ReturnDocument = ReturnDocument.After });
+
+        return allocated?.LastRunNumber
+            ?? throw new EntityNotFoundException(nameof(Experiment), $"{envId}-{experiment.Id}");
+    }
+
+    private async Task InitializeRunNumberAsync(
+        Guid envId, Experiment experiment, IEnumerable<string>? existingSlugs = null)
+    {
+        if (experiment.LastRunNumber.HasValue)
+        {
+            return;
+        }
+
+        existingSlugs ??= await mongoDb.CollectionOf<ExperimentRun>()
+            .Find(x => x.ExperimentId == experiment.Id)
+            .Project(x => x.Slug)
+            .ToListAsync();
+        var creationTitles = await mongoDb.CollectionOf<ExperimentActivity>()
+            .Find(x => x.ExperimentId == experiment.Id && x.Type == "note" &&
+                       x.Title.StartsWith(ExperimentRunNumber.CreationTitlePrefix))
+            .Project(x => x.Title)
+            .ToListAsync();
+        var lastUsed = ExperimentRunNumber.LastUsed(existingSlugs, creationTitles);
+
+        // Seed before either creation or deletion, even when legacy creation activities are absent.
+        // $max handles null/missing counters without lowering a concurrent allocation.
+        await mongoDb.CollectionOf<Experiment>().UpdateOneAsync(
+            x => x.Id == experiment.Id && x.FeatBitEnvId == envId,
+            Builders<Experiment>.Update.Max(x => x.LastRunNumber, lastUsed));
+    }
+
     public async Task<ExperimentDetailVm> DeleteRunAsync(Guid envId, Guid id, Guid runId)
     {
-        await EnsureExperimentExistsAsync(envId, id);
+        var experiment = await GetExperimentAsync(envId, id);
 
         var run = await mongoDb.CollectionOf<ExperimentRun>()
             .Find(x => x.Id == runId && x.ExperimentId == id)
@@ -265,6 +304,7 @@ public class ExperimentService(
             throw new EntityNotFoundException(nameof(ExperimentRun), $"{id}-{runId}");
         }
 
+        await InitializeRunNumberAsync(envId, experiment);
         await mongoDb.CollectionOf<ExperimentRun>().DeleteOneAsync(x => x.Id == runId && x.ExperimentId == id);
         await AddActivityAsync(id, "note", $"Experiment run deleted: {run.Slug}");
         return await GetAsync(envId, id);
@@ -1266,9 +1306,12 @@ public class ExperimentService(
     private async Task PersistExperimentAsync(Guid envId, Experiment experiment)
     {
         experiment.UpdatedAt = experiment.UpdatedAt == default ? DateTime.UtcNow : experiment.UpdatedAt;
-        await mongoDb.CollectionOf<Experiment>().ReplaceOneAsync(
+        // Run operations only update these fields. Replacing a stale document could reset the counter.
+        await mongoDb.CollectionOf<Experiment>().UpdateOneAsync(
             x => x.Id == experiment.Id && x.FeatBitEnvId == envId,
-            experiment);
+            Builders<Experiment>.Update
+                .Set(x => x.Variants, experiment.Variants)
+                .Set(x => x.UpdatedAt, experiment.UpdatedAt));
     }
 
     private async Task EnsureExperimentExistsAsync(Guid envId, Guid id)

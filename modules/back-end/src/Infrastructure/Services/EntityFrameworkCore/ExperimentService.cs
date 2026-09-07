@@ -204,21 +204,12 @@ public class ExperimentService(
             .ToListAsync();
 
         var previous = existingRuns.LastOrDefault();
-        var usedSlugs = existingRuns.Select(x => x.Slug).ToHashSet(StringComparer.OrdinalIgnoreCase);
-        var number = existingRuns.Count + 1;
-        var slug = $"run-{number}";
-        while (usedSlugs.Contains(slug))
-        {
-            number++;
-            slug = $"run-{number}";
-        }
 
         var now = DateTime.UtcNow;
         var run = new ExperimentRun
         {
             Id = Guid.NewGuid(),
             ExperimentId = id,
-            Slug = slug,
             Method = previous?.Method ?? "bayesian_ab",
             MethodReason = previous?.MethodReason,
             PrimaryMetricEvent = previous?.PrimaryMetricEvent,
@@ -253,11 +244,13 @@ public class ExperimentService(
         await AlignRunVariantsAsync(envId, experiment, run, inferMissing: true);
 
         await NormalizeAndValidateLayerAssignmentAsync(envId, run);
+        var number = await AllocateRunNumberAsync(envId, experiment, existingRuns);
+        run.Slug = $"run-{number}";
         await dbContext.Set<ExperimentRun>().AddAsync(run);
         await AddActivityAsync(
             id,
             "note",
-            $"New experiment run created: {slug}",
+            $"{ExperimentRunNumber.CreationTitlePrefix}{run.Slug}",
             previous == null ? "Empty template" : $"Copied config from {previous.Slug}",
             now);
 
@@ -265,9 +258,59 @@ public class ExperimentService(
         return await GetAsync(envId, id);
     }
 
+    private async Task<long> AllocateRunNumberAsync(
+        Guid envId, Experiment experiment, IReadOnlyCollection<ExperimentRun> existingRuns)
+    {
+        await InitializeRunNumberAsync(envId, experiment, existingRuns.Select(x => x.Slug));
+
+        return await dbContext.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
+        {
+            await using var transaction = await dbContext.Database.BeginTransactionAsync();
+            var experiments = dbContext.Set<Experiment>()
+                .Where(x => x.Id == experiment.Id && x.FeatBitEnvId == envId);
+
+            // Keep the row lock until this caller has read its reserved number.
+            // A failed run insertion may leave a gap; reserved numbers are never reused.
+            await experiments.ExecuteUpdateAsync(setters => setters
+                .SetProperty(x => x.LastRunNumber, x => x.LastRunNumber + 1));
+            var number = await experiments.Select(x => x.LastRunNumber).SingleOrDefaultAsync()
+                         ?? throw new EntityNotFoundException(nameof(Experiment), $"{envId}-{experiment.Id}");
+
+            await transaction.CommitAsync();
+            return number;
+        });
+    }
+
+    private async Task InitializeRunNumberAsync(
+        Guid envId, Experiment experiment, IEnumerable<string>? existingSlugs = null)
+    {
+        if (experiment.LastRunNumber.HasValue)
+        {
+            return;
+        }
+
+        existingSlugs ??= await dbContext.Set<ExperimentRun>()
+            .Where(x => x.ExperimentId == experiment.Id)
+            .Select(x => x.Slug)
+            .ToListAsync();
+        var creationTitles = await dbContext.Set<ExperimentActivity>()
+            .Where(x => x.ExperimentId == experiment.Id && x.Type == "note" &&
+                        x.Title.StartsWith(ExperimentRunNumber.CreationTitlePrefix))
+            .Select(x => x.Title)
+            .ToListAsync();
+        var lastUsed = ExperimentRunNumber.LastUsed(existingSlugs, creationTitles);
+
+        // Seed before either creation or deletion, even when legacy creation activities are absent.
+        // Never lower a value initialized or incremented by a concurrent request.
+        await dbContext.Set<Experiment>()
+            .Where(x => x.Id == experiment.Id && x.FeatBitEnvId == envId)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(x => x.LastRunNumber, x => Math.Max(x.LastRunNumber ?? 0, lastUsed)));
+    }
+
     public async Task<ExperimentDetailVm> DeleteRunAsync(Guid envId, Guid id, Guid runId)
     {
-        await EnsureExperimentExistsAsync(envId, id);
+        var experiment = await GetTrackedExperimentAsync(envId, id);
 
         var run = await dbContext.Set<ExperimentRun>()
             .FirstOrDefaultAsync(x => x.Id == runId && x.ExperimentId == id);
@@ -277,6 +320,7 @@ public class ExperimentService(
             throw new EntityNotFoundException(nameof(ExperimentRun), $"{id}-{runId}");
         }
 
+        await InitializeRunNumberAsync(envId, experiment);
         dbContext.Set<ExperimentRun>().Remove(run);
         await AddActivityAsync(id, "note", $"Experiment run deleted: {run.Slug}");
         await dbContext.SaveChangesAsync();

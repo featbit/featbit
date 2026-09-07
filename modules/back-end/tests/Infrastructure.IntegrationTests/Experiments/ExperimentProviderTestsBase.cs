@@ -29,6 +29,9 @@ public abstract class ExperimentProviderTestsBase(ExperimentProviderParityFixtur
     protected (IExperimentService ExperimentService, IExperimentMetricService MetricService)
         CreateExperimentServices() => fixture.CreateExperimentServices(ProviderName);
 
+    protected Task SeedRunHistoryAsync(Guid experimentId, string[] slugs, string[] createdSlugs) =>
+        fixture.SeedRunHistoryAsync(ProviderName, experimentId, slugs, createdSlugs);
+
     private const string TenTenSamplingPlan = """
         [
           { "variation": "control", "role": "control", "includeRate": 11.111111 },
@@ -678,6 +681,134 @@ public abstract class WritableExperimentProviderTestsBase(
         var run = Assert.Single(detail.ExperimentRuns);
         Assert.NotEqual(Guid.Empty, run.Id);
         Assert.Equal("run-1", run.Slug);
+    }
+
+    [DockerTheory]
+    [InlineData(5, "2")]
+    [InlineData(5, "2,4")]
+    [InlineData(3, "3")]
+    [InlineData(3, "1,2,3")]
+    public async Task CreateExperimentRun_AfterDeletion_DoesNotReuseNumbers(int count, string deletedNumbers)
+    {
+        var experiment = NewExperiment("Run numbering after deletion");
+        await CreateExperimentServices().ExperimentService.CreateAsync(experiment);
+
+        for (var number = 1; number <= count; number++)
+        {
+            await CreateExperimentServices().ExperimentService.CreateRunAsync(
+                ExperimentProviderParityFixture.EnvId, experiment.Id);
+        }
+
+        var before = await CreateExperimentServices().ExperimentService.GetAsync(
+            ExperimentProviderParityFixture.EnvId, experiment.Id);
+        foreach (var number in deletedNumbers.Split(','))
+        {
+            var run = before.ExperimentRuns.Single(x => x.Slug == $"run-{number}");
+            await CreateExperimentServices().ExperimentService.DeleteRunAsync(
+                ExperimentProviderParityFixture.EnvId, experiment.Id, run.Id);
+        }
+
+        var after = await CreateExperimentServices().ExperimentService.CreateRunAsync(
+            ExperimentProviderParityFixture.EnvId, experiment.Id);
+        var created = Assert.Single(after.ExperimentRuns, x => before.ExperimentRuns.All(y => y.Id != x.Id));
+        Assert.Equal($"run-{count + 1}", created.Slug);
+    }
+
+    [DockerTheory]
+    [InlineData("run-1,run-3,run-5", "", 6)]
+    [InlineData("run-2,run-10,manual,run-999x", "", 11)]
+    [InlineData("", "run-1,run-2,run-3", 4)]
+    [InlineData("run-1", "run-1,run-12", 13)]
+    public async Task CreateExperimentRun_LegacyHistory_InitializesCounter(
+        string currentSlugs, string createdSlugs, int expectedNumber)
+    {
+        var experiment = NewExperiment("Legacy run numbering");
+        await CreateExperimentServices().ExperimentService.CreateAsync(experiment);
+        await SeedRunHistoryAsync(
+            experiment.Id,
+            currentSlugs.Split(',', StringSplitOptions.RemoveEmptyEntries),
+            createdSlugs.Split(',', StringSplitOptions.RemoveEmptyEntries));
+
+        var detail = await CreateExperimentServices().ExperimentService.CreateRunAsync(
+            ExperimentProviderParityFixture.EnvId, experiment.Id);
+        Assert.Single(detail.ExperimentRuns, x => x.Slug == $"run-{expectedNumber}");
+
+        foreach (var run in detail.ExperimentRuns)
+        {
+            await CreateExperimentServices().ExperimentService.DeleteRunAsync(
+                ExperimentProviderParityFixture.EnvId, experiment.Id, run.Id);
+        }
+
+        var next = await CreateExperimentServices().ExperimentService.CreateRunAsync(
+            ExperimentProviderParityFixture.EnvId, experiment.Id);
+        Assert.Equal($"run-{expectedNumber + 1}", Assert.Single(next.ExperimentRuns).Slug);
+    }
+
+    [DockerTheory]
+    [InlineData("2")]
+    [InlineData("2,4")]
+    [InlineData("5")]
+    [InlineData("1,2,3,4,5")]
+    public async Task CreateExperimentRun_LegacyRunsDeletedBeforeFirstCreation_PreservesNumbers(string deletedNumbers)
+    {
+        var experiment = NewExperiment("Legacy deletion before counter initialization");
+        await CreateExperimentServices().ExperimentService.CreateAsync(experiment);
+        await SeedRunHistoryAsync(experiment.Id, ["run-1", "run-2", "run-3", "run-4", "run-5"], []);
+        var detail = await CreateExperimentServices().ExperimentService.GetAsync(
+            ExperimentProviderParityFixture.EnvId, experiment.Id);
+
+        foreach (var number in deletedNumbers.Split(','))
+        {
+            var run = detail.ExperimentRuns.Single(x => x.Slug == $"run-{number}");
+            await CreateExperimentServices().ExperimentService.DeleteRunAsync(
+                ExperimentProviderParityFixture.EnvId, experiment.Id, run.Id);
+        }
+
+        var next = await CreateExperimentServices().ExperimentService.CreateRunAsync(
+            ExperimentProviderParityFixture.EnvId, experiment.Id);
+        Assert.Single(next.ExperimentRuns, x => x.Slug == "run-6");
+    }
+
+    [DockerTheory]
+    [InlineData(0)]
+    [InlineData(10)]
+    public async Task CreateExperimentRun_ConcurrentRequests_AllocateDistinctNumbers(int lastUsed)
+    {
+        const int count = 12;
+        var experiment = NewExperiment("Concurrent run numbering");
+        await CreateExperimentServices().ExperimentService.CreateAsync(experiment);
+        if (lastUsed > 0)
+        {
+            await SeedRunHistoryAsync(experiment.Id, [], [$"run-{lastUsed}"]);
+        }
+        var start = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var requests = Enumerable.Range(0, count).Select(async _ =>
+        {
+            var service = CreateExperimentServices().ExperimentService;
+            await start.Task;
+            await service.CreateRunAsync(ExperimentProviderParityFixture.EnvId, experiment.Id);
+        }).ToArray();
+
+        start.SetResult();
+        await Task.WhenAll(requests);
+
+        var detail = await CreateExperimentServices().ExperimentService.GetAsync(
+            ExperimentProviderParityFixture.EnvId, experiment.Id);
+        Assert.Equal(count, detail.ExperimentRuns.Count);
+        Assert.Equal(count, detail.ExperimentRuns.Select(x => x.Id).Distinct().Count());
+        Assert.Equal(
+            Enumerable.Range(lastUsed + 1, count),
+            detail.ExperimentRuns.Select(x => int.Parse(x.Slug[4..])).Order());
+
+        foreach (var run in detail.ExperimentRuns)
+        {
+            await CreateExperimentServices().ExperimentService.DeleteRunAsync(
+                ExperimentProviderParityFixture.EnvId, experiment.Id, run.Id);
+        }
+
+        var next = await CreateExperimentServices().ExperimentService.CreateRunAsync(
+            ExperimentProviderParityFixture.EnvId, experiment.Id);
+        Assert.Equal($"run-{lastUsed + count + 1}", Assert.Single(next.ExperimentRuns).Slug);
     }
 
     [DockerFact]
