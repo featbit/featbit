@@ -1,7 +1,5 @@
 export type LayerStatus = "active" | "archived"
 
-export type LayerRunStatus = "draft" | "collecting" | "analyzing" | string
-
 export type LayerRunSummary = {
   id: string
   experimentId?: string
@@ -9,7 +7,6 @@ export type LayerRunSummary = {
   key: string
   start: number
   end: number
-  status: LayerRunStatus
   assignmentUnitSelector?: string
   includedInAllocation: boolean
 }

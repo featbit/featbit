@@ -126,9 +126,9 @@ The design preserves the complete RDA Bandit information contract while expressi
 
 #### Run selection and identity
 
-- show `Experiment runs` as a compact horizontal Run selector with the Run slug, status, and decision;
+- show `Experiment runs` as a compact horizontal Run selector with the Run slug and decision;
 - keep `New run` in the Run selector row and keep destructive Run removal scoped to the individual Run;
-- the selected Run header shows its slug, the `Bandit` method Badge, algorithm, status, decision, and observation window;
+- the selected Run header shows its slug, the `Bandit` method Badge, algorithm, decision, and observation window;
 - showing `Bandit` and `thompson_sampling_top_two` in the selected Run header is intentional because they identify how the visible evidence was produced;
 - do not show an invented Phase, generic traffic percentage, or a method switch in the selected Run header.
 
@@ -214,8 +214,8 @@ The Bayesian page reuses the same Measuring workbench, Run selector, decision/ev
 #### Bayesian Run identity
 
 - the Experiment header uses the loaded Run collection count; the approved asset therefore shows `3 runs` rather than an inherited or stale aggregate;
-- keep all Runs available in the compact selector and identify each by its stable slug, status, and decision;
-- the selected Run header shows `run-3`, `Bayesian A/B/n`, status, decision, and observation window;
+- keep all Runs available in the compact selector and identify each by its stable slug and decision;
+- the selected Run header shows `run-3`, `Bayesian A/B/n`, decision, and observation window;
 - do not show Bandit algorithm, Thompson Sampling, burn-in, stopping, `P(best)`, or recommended weights for a Bayesian Run;
 - Bayesian prior information belongs in Full analysis. Do not invent an algorithm label to parallel Bandit.
 
@@ -289,7 +289,7 @@ The workspace preserves the existing `front-end-rda-tempo` learning contract whi
 - the experiment-level summary presents `Hypothesis` and `Key learning` side by side, separated by one thin divider;
 - `Edit learning` edits only those experiment-level fields and uses the standard compact Dialog behavior already established for Experiment details;
 - `Experiment run learnings` uses Run tabs when more than one Run exists; label them consistently as `Run 1`, `Run 2`, and so on, regardless of observation-window order, and retain the Run slug as the stable identity;
-- each selected Run shows its immutable slug, method, status, and decision without turning the decision into a large colored banner;
+- each selected Run shows its immutable slug, method, and decision without turning the decision into a large colored banner;
 - the selected Run preserves `What changed`, `What happened`, `Confirmed or refuted`, `Why it happened`, and `Next hypothesis` as structured read-only learning fields;
 - `Decision summary` is shown as a compact row when present, and the complete evidence rationale remains available through the existing collapsed rationale pattern rather than occupying the whole Learning page;
 
@@ -305,7 +305,7 @@ Do not promise reliable clearing of an existing Key learning until backend seman
 
 When a Run has no captured learning, keep its tab available and show a compact dashed empty state: `No learning captured for this run.` with helper text that learning is recorded after evidence is reviewed. Do not hide the Run, fabricate learning, or render empty field labels. When the Experiment has no Runs, show `No experiment runs yet.` and direct the user back to Measuring without designing the Measuring body.
 
-Long learning text wraps inside its value region. Labels stay fixed and scannable, Run slugs use monospace, and semantic color is limited to real Run status and decision Badges. The page remains useful when only some optional learning fields are present: populated fields retain their normal order and absent fields are omitted rather than filled with `Not set` rows.
+Long learning text wraps inside its value region. Labels stay fixed and scannable, Run slugs use monospace, and semantic color is limited to Run decision Badges. The page remains useful when only some optional learning fields are present: populated fields retain their normal order and absent fields are omitted rather than filled with `Not set` rows.
 
 ### Coding Agent Mode Dialog
 
@@ -799,7 +799,7 @@ This document is design guidance only. It does not authorize React, API, backend
 - [ ] `Continue to Exposure` is the only prominent bottom action.
 - [ ] There is no duplicate bottom Coding Agent Mode action.
 - [ ] Exposure and Learning follow their own approved assets; Bayesian A/B/n and Bandit Measuring follow their respective approved assets.
-- [ ] A Bandit Run header shows Run slug, `Bandit`, algorithm, status, decision, and observation window without introducing phases.
+- [ ] A Bandit Run header shows Run slug, `Bandit`, algorithm, decision, and observation window without introducing phases.
 - [ ] Bandit Measuring preserves `DecisionCallout`, `Evidence Summary`, and expandable `Evidence Rationale` without information loss.
 - [ ] Full analysis preserves Window, Algorithm, Data as of, and the raw SRM p-value/status.
 - [ ] A combined Bandit table retains distinct `Observed performance` and `Bandit recommendation` column groups.
@@ -808,7 +808,7 @@ This document is design guidance only. It does not authorize React, API, backend
 - [ ] Audience filters never appear inside Layer eligibility.
 - [ ] The traffic-assignment summary and Edit assignment Sheet do not display or edit Method.
 - [ ] Edit assignment changes only supported roles, Layer eligibility, sampling, and Audience filters.
-- [ ] A Bayesian Run header shows Run slug, `Bayesian A/B/n`, status, decision, and observation window without Bandit-only fields.
+- [ ] A Bayesian Run header shows Run slug, `Bayesian A/B/n`, decision, and observation window without Bandit-only fields.
 - [ ] Bayesian Full analysis preserves Window, Prior, Data as of, SRM, Primary metric, every Guardrail, and Sample check.
 - [ ] Bayesian Numeric results use Samples, Mean, Relative lift, 95% interval, and the persisted Signal; Binary results retain event count and Rate.
 - [ ] Missing Bayesian lift, interval, Signal, risk, and posterior values render as absent and are never fabricated.

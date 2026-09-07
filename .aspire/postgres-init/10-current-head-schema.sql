@@ -133,7 +133,6 @@ CREATE TABLE IF NOT EXISTS public.experiment_runs (
     id uuid NOT NULL,
     experiment_id uuid NOT NULL,
     slug character varying(128) NOT NULL,
-    status character varying(64) NOT NULL,
     hypothesis text,
     method character varying(64),
     method_reason text,

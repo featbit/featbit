@@ -91,8 +91,6 @@ public class ExperimentRunVm
 
     public string Slug { get; set; }
 
-    public string Status { get; set; }
-
     public string Hypothesis { get; set; }
 
     public string Method { get; set; }

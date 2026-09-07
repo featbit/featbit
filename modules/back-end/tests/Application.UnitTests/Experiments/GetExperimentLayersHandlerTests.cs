@@ -28,7 +28,6 @@ public class GetExperimentLayersHandlerTests
                 AssignmentUnitSelector = layer.AssignmentUnitSelector,
                 SliceStart = 10,
                 SliceEnd = 40,
-                Status = "collecting"
             }
         };
         var layerService = new Mock<IExperimentLayerService>();

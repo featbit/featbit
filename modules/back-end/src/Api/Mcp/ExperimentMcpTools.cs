@@ -121,7 +121,7 @@ public class ExperimentMcpTools(
     }
 
     [McpServerTool(Name = "featbit_experiment_update_run_traffic")]
-    [Description("Configure experiment traffic assignment for a experiment run. Feature flag evaluation decides the served variation; layer only gates eligibility; analysis sampling happens inside each actual served variation. Supports layer id/key, assignment unit, bucket slice start/end, traffic offset, allocation plan, audience filters, and analysis sampling plan. Choose includeRate from the actual exposure distribution in the run window: includeRate = desired analyzed users for that variation / observed served users for that variation * 100, capped at 100. If the run is already collecting, analyzing, or decided, set confirmedByUser true only after the user explicitly approves changing evidence scope.")]
+    [Description("Configure a run's analysis scope and sampling without modifying the Feature Flag. Supports layer id/key, assignment unit, bucket slice start/end, traffic offset, allocation plan, audience filters, and analysis sampling plan. Layer reservations are validated against observation windows, including future reservations. Decisions do not change reservations. Choose includeRate from actual exposure counts in the run window: desired analyzed users / observed served users * 100, capped at 100. Actual rollout, targeting, or flag toggle changes must use Feature Flag tools with explicit customer confirmation; a run decision is not confirmation.")]
     public async Task<ExperimentDetailVm> UpdateRunTraffic(
         [Description("Experiment experiment id.")]
         Guid experimentId,
@@ -132,10 +132,12 @@ public class ExperimentMcpTools(
     {
         var envId = await ResolveAuthorizedEnvIdAsync(experimentId);
         var experiment = await experimentService.GetAsync(envId, experimentId);
-        var run = experiment.ExperimentRuns.FirstOrDefault(x => x.Id == runId)
-                  ?? throw new InvalidOperationException($"Run {runId} was not found in experiment {experimentId}.");
+        if (!experiment.ExperimentRuns.Any(x => x.Id == runId))
+        {
+            throw new InvalidOperationException($"Run {runId} was not found in experiment {experimentId}.");
+        }
 
-        ValidateRunTrafficRequest(request, run);
+        ValidateRunTrafficRequest(request);
 
         return await mediator.Send(new UpdateExperimentRunAudience
         {
@@ -185,8 +187,7 @@ public class ExperimentMcpTools(
     }
 
     private static void ValidateRunTrafficRequest(
-        ExperimentMcpRunTrafficRequest request,
-        ExperimentRunVm run)
+        ExperimentMcpRunTrafficRequest request)
     {
         if (request is null)
         {
@@ -267,12 +268,6 @@ public class ExperimentMcpTools(
         if (!treatmentSet.SetEquals(treatmentEntries))
         {
             throw new ArgumentException("analysisSamplingPlan must contain one treatment entry for every treatmentVariant.");
-        }
-
-        var evidenceSensitive = Normalize(run.Status) is "collecting" or "analyzing" or "decided";
-        if (evidenceSensitive && request.ConfirmedByUser != true)
-        {
-            throw new InvalidOperationException("Changing traffic/sampling for a collecting, analyzing, or decided run requires confirmedByUser=true after explicit user approval.");
         }
     }
 
@@ -429,7 +424,4 @@ public class ExperimentMcpRunTrafficRequest
 
     [Description("Optional audience filters stored on the run for operator visibility.")]
     public string AudienceFilters { get; set; } = string.Empty;
-
-    [Description("Set true only after the user explicitly approves changing traffic/sampling for a collecting, analyzing, or decided run.")]
-    public bool? ConfirmedByUser { get; set; }
 }

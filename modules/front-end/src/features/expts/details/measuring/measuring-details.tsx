@@ -1194,7 +1194,7 @@ export function MeasuringDetails({
                   size="sm"
                   className="ml-auto text-foreground"
                   onClick={() => {
-                    const prompt = `@featbit-experimentation ${experiment.id}\nReview run ${selected.slug} (${selected.id}) against the latest analysis. Record a Coding Agent recommendation (CONTINUE / PAUSE / ROLLBACK / INCONCLUSIVE), summary, reason, and the analysis Window and Data as of in the recommendation text. Treat it as advice that requires human review. Leave the legacy run status unchanged; it must not control window editing or re-analysis.`
+                    const prompt = `@featbit-experimentation ${experiment.id}\nReview run ${selected.slug} (${selected.id}) against the latest analysis. Record a Coding Agent recommendation (CONTINUE / PAUSE / ROLLBACK / INCONCLUSIVE), summary, reason, and the analysis Window and Data as of in the recommendation text. Treat it as advice that requires human review. Record advice without executing any Feature Flag changes.`
                     void navigator.clipboard
                       .writeText(prompt)
                       .then(() =>

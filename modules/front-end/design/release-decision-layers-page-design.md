@@ -52,10 +52,10 @@ The page must keep three different concepts distinct:
    - Describes the Layer's complete allocation health, not one run.
    - Examples: `No conflicts`, `5% overlap`, mixed assignment units, or allocation above 100%.
 
-3. **Experiment-run lifecycle status**
-   - Belongs to each individual run.
-   - Examples: `Draft`, `Collecting`, and `Analyzing`.
-   - Displayed inside the Experiment runs column and never substituted for Allocation status.
+3. **Run Observation Window**
+   - Each run reserves its bucket range during `[observationStart, observationEnd)`.
+   - A missing end means ongoing occupancy.
+   - Current allocation includes only windows covering the current time; historical and future runs remain listed.
 
 The page contains only registered Layer records returned by the Layers API. It must not synthesize rows from Experiment runs that reference missing Layer keys. Missing references belong to Experiment configuration and validation, where the user can repair the source of the problem.
 
@@ -185,7 +185,7 @@ Warning examples:
 - total allocated range above 100%;
 - invalid or otherwise conflicting ranges.
 
-Warnings must identify the problem rather than using a generic label such as `Needs attention`. Allocation status does not display `Draft`, `Collecting`, or `Analyzing`; those are run states.
+Warnings must identify the problem rather than using a generic label such as `Needs attention`. Run lifecycle labels are not displayed.
 
 ### Experiment runs column
 
@@ -202,9 +202,8 @@ First line:
 Second line:
 
 - left: bucket range, for example `0-25%`;
-- right: colored state dot and run lifecycle, for example `Collecting`.
 
-Separate adjacent runs with a subtle horizontal divider. Archived and otherwise inactive runs remain visible in this column, but do not occupy the Traffic allocation bar. When the Layer has no runs at all, show `No experiment runs` in muted text.
+Separate adjacent runs with a subtle horizontal divider. Historical and future runs remain visible in this column, but do not occupy the current Traffic allocation bar. When the Layer has no runs at all, show `No experiment runs` in muted text.
 
 Do not display a Feature Flag key in this column. Combining an Experiment run key and a Flag key without explicit labels creates unnecessary ambiguity, and the Flag is not required for the Layer-management task.
 
@@ -373,9 +372,9 @@ The backend rejects an update when the submitted Key differs from the stored Lay
 - Keys: muted monospace pills.
 - Descriptions, summaries, empty values, and pagination: muted foreground.
 - Normal actions: foreground.
-- Green: active, healthy, or collecting state dots only.
-- Amber: overlap, analyzing, or other allocation warnings only.
-- Gray: archived or draft state dots.
+- Green: active Layer or healthy allocation state dots only.
+- Amber: overlap or other allocation warnings only.
+- Gray: archived Layer state dots.
 - Blue and purple: allocation segments and matching run markers only.
 - No decorative gradients, colored card borders, or ambient shadows.
 
@@ -432,7 +431,8 @@ type PagedLayerResult = {
       assignmentUnitSelector: string
       start: number
       end: number
-      status: string
+      observationStart: string
+      observationEnd: string | null
       includedInAllocation: boolean
     }>
     allocationSummary: {
@@ -470,21 +470,21 @@ This shape is additive to the existing Layer identity fields, so existing consum
 
 The backend owns the calculation and applies one shared rule for every client:
 
-1. Return **all** associated runs in `experimentRuns`, including archived or otherwise inactive runs.
-2. Only statuses `draft`, `collecting`, and `analyzing`, compared case-insensitively, participate in allocation.
+1. Return **all** associated runs in `experimentRuns`, including historical and future runs.
+2. Include a run in current allocation when its `[observationStart, observationEnd)` window covers the current time. A missing end means ongoing occupancy. Decision does not affect allocation.
 3. Clamp each participating range to `0-100` and ignore invalid ranges where `end <= start`.
-4. `reservedPercent` is the sum of every participating run's `end - start`. It represents reserved run capacity, so overlapping ranges are counted for each run.
+4. Merge participating bucket ranges within each experiment, then sum the resulting lengths across experiments for `reservedPercent`. Multiple runs from the same experiment do not duplicate reserved capacity.
 5. `freePercent` is `max(0, 100 - reservedPercent)`.
-6. `overlaps` contains every exact conflicting interval and the IDs of the involved runs.
+6. `overlaps` contains exact bucket intervals covered by different experiments and the IDs of their current runs. Reservation writes check both time and bucket overlap, including future windows; adjacent windows do not conflict.
 7. `overAllocated` is true when the uncapped reserved sum is above `100`.
 8. `mixedAssignmentUnits` is true when participating runs do not all use the Layer's assignment unit.
 9. `allocationSummary.status` is selected by deterministic severity: mixed assignment units, over-allocated, overlap, then no conflicts.
 
 For the example Layer shown in the comparison screenshots:
 
-- archived run `0-50%`: returned in `experimentRuns`, excluded from allocation;
-- collecting run `0-60%`: contributes `60%`;
-- draft run `80-90%`: contributes `10%`;
+- historical run `0-50%`: returned in `experimentRuns`, excluded from current allocation;
+- current run `0-60%`: contributes `60%`;
+- another current run `80-90%`: contributes `10%`;
 - server result: `70% reserved`, `30% free`, no overlap.
 
 The response must be computed from one consistent backend view of the Layer and its runs. Avoid an N+1 API contract and avoid arbitrary Experiment-list caps such as the reference frontend's first-200 lookup.
@@ -493,7 +493,7 @@ The response must be computed from one consistent backend view of the Layer and 
 
 - Render `experimentRuns` directly; do not re-fetch Experiment details to populate the Layer row.
 - Render the Traffic allocation bar and Allocation status from `allocationSummary`.
-- Frontend code may map values to visual components, but must not independently decide which statuses count, recalculate overlap, or substitute an empty array when the summary is absent.
+- Frontend code may map values to visual components, but must not independently decide which windows count, recalculate overlap, or substitute an empty array when the summary is absent.
 - If the backend response does not contain a usable summary, show `Allocation unavailable`; never turn missing data into `No allocation` or `No conflicts`.
 - Loading, unavailable, and genuinely empty allocation are three different states.
 
@@ -549,8 +549,8 @@ This contract makes the same paged backend response the source of truth for `fro
 - Missing summary data renders as unavailable, not as an empty or conflict-free Layer.
 - Every table cell is vertically centered relative to its complete row.
 - Layer and Experiment names use foreground styling rather than default blue links.
-- All runs, including inactive runs, are visible directly with Experiment name, run key, range, and run lifecycle; only active statuses occupy allocation.
-- Allocation status describes the complete Layer and is visually separate from run lifecycle.
+- All historical, current, and future runs are visible with Experiment name, run key, and range; only current windows occupy allocation.
+- Allocation status describes the complete Layer.
 - Overlap hatching maps to an exact bucket interval and has explicit text.
 - Actions remain on one horizontal line and use icons plus labels.
 - New layer opens a right Sheet with only Name, Key, Assignment unit, and Description.

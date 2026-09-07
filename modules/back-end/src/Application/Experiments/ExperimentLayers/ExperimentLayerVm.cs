@@ -45,9 +45,11 @@ public class ExperimentLayerRunVm
 
     public double End { get; set; }
 
-    public string Status { get; set; }
-
     public bool IncludedInAllocation { get; set; }
+
+    public DateTime ObservationStart { get; set; }
+
+    public DateTime? ObservationEnd { get; set; }
 }
 
 public class ExperimentLayerOverlapVm

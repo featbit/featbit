@@ -565,7 +565,6 @@ static async Task ExecuteAsync(FeatBitApiClient api, TestReport report, E2ERun r
         $"/api/v1/envs/{run.EnvId}/experiments/{run.MetricReuseExperimentId}/runs/{run.MetricReuseRunId}",
         new
         {
-            status = "collecting",
             hypothesis = "Metric catalog reuse probe uses the same checkout activation metric in a second experiment.",
             method = "bayesian_ab",
             methodReason = "E2E verifies that a registered metric can back multiple configured experiment runs.",
@@ -575,8 +574,8 @@ static async Task ExecuteAsync(FeatBitApiClient api, TestReport report, E2ERun r
             minimumSample = options.MinUsersPerVariant,
             dataSourceMode = "featbit-api"
         },
-        "6.5 Mark metric reuse run collecting",
-        "Populate the second run with primary metric metadata so the run is not an empty draft.");
+        "6.5 Configure metric reuse run analysis",
+        "Populate the second run with primary metric metadata for analysis.");
 
     await api.SendAsync(
         HttpMethod.Put,
@@ -634,7 +633,6 @@ static async Task ExecuteAsync(FeatBitApiClient api, TestReport report, E2ERun r
         $"/api/v1/envs/{run.EnvId}/experiments/{run.ExperimentId}/runs/{run.RunId}",
         new
         {
-            status = "collecting",
             hypothesis,
             method = "bayesian_ab",
             methodReason = "E2E validates two fixed variants with synthetic evidence.",
@@ -645,8 +643,8 @@ static async Task ExecuteAsync(FeatBitApiClient api, TestReport report, E2ERun r
             minimumSample = options.MinUsersPerVariant,
             dataSourceMode = "featbit-api"
         },
-        "7.4 Mark run collecting",
-        "Put the run into collecting mode before preset insight seeding.");
+        "7.4 Configure run analysis",
+        "Configure the run metrics and analysis method before preset insight seeding.");
 
     var seedSummary = await SeedWithPresetInsightsAsync(run, experimentFlag, options);
     report.Assert(seedSummary.TotalEvaluations > 0, "7.5 Preset-timestamp evaluation evidence generated", seedSummary.ToString());
@@ -790,7 +788,6 @@ static async Task ExecuteAsync(FeatBitApiClient api, TestReport report, E2ERun r
 
     var analyzedRun = analyzed?["experimentRuns"]?.AsArray()
         .FirstOrDefault(x => string.Equals(NodeString(x, "id"), run.RunId, StringComparison.OrdinalIgnoreCase));
-    run.AnalysisStatus = NodeString(analyzedRun, "status");
     run.AnalysisInputDataHasExpectedMetrics = InputDataContainsMetrics(
         NodeString(analyzedRun, "inputData"),
         run.PrimaryMetric,
@@ -801,11 +798,7 @@ static async Task ExecuteAsync(FeatBitApiClient api, TestReport report, E2ERun r
         !string.IsNullOrWhiteSpace(NodeString(analyzedRun, "inputData")) &&
         run.AnalysisResultGenerated,
         "8 Analysis generated inputData and analysisResult",
-        $"status={run.AnalysisStatus}");
-    report.Assert(
-        run.AnalysisStatus == "analyzing",
-        "8 Analysis status verified",
-        $"status={run.AnalysisStatus}");
+        "Analysis output is present.");
     report.Assert(
         run.AnalysisInputDataHasExpectedMetrics,
         "8 Analysis inputData contains configured metrics",
@@ -1359,7 +1352,6 @@ static async Task RunTrafficScenarioAsync(
         $"/api/v1/envs/{run.EnvId}/experiments/{experimentId}/runs/{runId}",
         new
         {
-            status = "collecting",
             hypothesis,
             method = "bayesian_ab",
             methodReason = scenario.Description,
@@ -1374,8 +1366,8 @@ static async Task RunTrafficScenarioAsync(
             minimumSample = options.MinUsersPerVariant,
             dataSourceMode = "featbit-api"
         },
-        $"10.{scenario.Order}.8 Mark scenario collecting {scenario.Id}",
-        "Move the scenario run into collecting mode before analysis.");
+        $"10.{scenario.Order}.8 Configure scenario analysis {scenario.Id}",
+        "Configure the scenario run metrics and analysis method.");
 
     if (options.PostSdkWaitSeconds > 0)
     {
@@ -2394,7 +2386,7 @@ static string BuildPlanMarkdown(string dataSetId, FlagSpec[] flags)
     sb.AppendLine("- Primary metric `e2e_checkout_activated_fixed_v1` evidence target: control conversions equal `Round(controlUsers * 0.30)`, treatment conversions equal `Round(treatmentUsers * 0.45)`, treatment conversion > control conversion.");
     sb.AppendLine("- Error guardrail `e2e_checkout_error_fixed_v1` evidence target: control errors equal `Round(controlUsers * 0.018)`, treatment errors equal `Round(treatmentUsers * 0.020)`, both below `5.00%`.");
     sb.AppendLine("- Latency guardrail `e2e_checkout_latency_ms_fixed_v1` evidence target: control average `340ms`, treatment average `320ms`, treatment <= control.");
-    sb.AppendLine("- Analyze should set run status to `analyzing`, write non-empty `inputData` containing all three metric events, and write non-empty `analysisResult`.");
+    sb.AppendLine("- Analyze should write non-empty `inputData` containing all three metric events, and write non-empty `analysisResult`.");
     sb.AppendLine("- Additional traffic-assignment scenarios each create an independent experiment, run, metric event, and observation window. The covered scenarios are no-layer `50/50 -> use all`, no-layer `90/10 -> 10/10`, layer `[0,30) + 34/33/33`, layer `[0,30) + 80/20 -> 20/20`, and same-layer exclusive companion `[30,60)`.");
 
     sb.AppendLine();
@@ -2414,7 +2406,7 @@ static string BuildPlanMarkdown(string dataSetId, FlagSpec[] flags)
     AppendPlanStep(sb, "5", "Create experiment", "POST /api/v1/envs/{envId}/experiments", "Bind the experiment to the first boolean flag.");
     AppendPlanStep(sb, "5 update", "Fill intent/hypothesis", "PUT /api/v1/envs/{envId}/experiments/{id}", "Persist intent, hypothesis, change, constraints, env secret, and event URL.");
     AppendPlanStep(sb, "6", "Register, select, and reuse metrics", "GET/POST/PUT /api/v1/envs/{envId}/experiment-metrics; POST /experiments; PUT /experiments/{id}/metrics", "Register primary/guardrail metrics, select them for the main experiment, then select the primary metric again in a second experiment.");
-    AppendPlanStep(sb, "7", "Create and configure run", "POST /runs; PUT /runs/{runId}; PUT /audience; PUT /observation-window", "Configure experiment traffic assignment and move run into collecting mode.");
+    AppendPlanStep(sb, "7", "Create and configure run", "POST /runs; PUT /runs/{runId}; PUT /audience; PUT /observation-window", "Configure experiment analysis sampling, metrics, and observation window.");
     AppendPlanStep(sb, "7 seed", "Seed exposure and metric data", "POST /api/public/insight/track", "Generate preset-timestamp exposure, primary metric, and guardrail evidence.");
     AppendPlanStep(sb, "7 verify", "Query experiment stats", "POST /api/v1/envs/{envId}/experiment-stats/query", "Verify users, treatment conversion rate > control, and guardrail data.");
     AppendPlanStep(sb, "8", "Analyze", "POST /api/v1/envs/{envId}/experiments/{id}/runs/{runId}/analyze", "Generate inputData and analysisResult.");
@@ -3524,7 +3516,6 @@ sealed class E2ERun
     public long TreatmentLatencyUsersObserved { get; set; }
     public double ControlLatencySumObserved { get; set; }
     public double TreatmentLatencySumObserved { get; set; }
-    public string AnalysisStatus { get; set; } = "";
     public bool AnalysisInputDataHasExpectedMetrics { get; set; }
     public bool AnalysisResultGenerated { get; set; }
     public bool CreatedProject { get; set; }
@@ -4119,7 +4110,7 @@ sealed class TestReport
                 primaryMetric = "treatment conversion rate > control conversion rate",
                 errorGuardrail = "control and treatment error rates < 0.05",
                 latencyGuardrail = "treatment average latency <= control average latency",
-                analyze = "status=analyzing, inputData contains primary/error/latency metrics, analysisResult is non-empty",
+                analyze = "inputData contains primary/error/latency metrics, analysisResult is non-empty",
                 trafficScenarios = "each traffic-assignment scenario creates an independent experiment/run/metric and validates analyzed samples",
                 finalFeatureFlags = run.ExpectedFinalFlags
             },
@@ -4163,7 +4154,6 @@ sealed class TestReport
                     controlSum = run.ControlLatencySumObserved,
                     treatmentSum = run.TreatmentLatencySumObserved
                 },
-                run.AnalysisStatus,
                 run.AnalysisInputDataHasExpectedMetrics,
                 run.AnalysisResultGenerated,
                 trafficScenarios = run.TrafficScenarioResults,
@@ -4215,7 +4205,7 @@ sealed class TestReport
         sb.AppendLine($"| Primary metric | each variant meets configured sample floor `{_options.MinUsersPerVariant}`; treatment conversion > control conversion | total users `{run.PrimaryMetricUsersObserved}`, variants `{run.PrimaryMetricVariantRows}`, control `{run.ControlPrimaryConversionsObserved}/{run.ControlPrimaryUsersObserved}` rate `{run.ControlPrimaryRate:0.####}`, treatment `{run.TreatmentPrimaryConversionsObserved}/{run.TreatmentPrimaryUsersObserved}` rate `{run.TreatmentPrimaryRate:0.####}` |");
         sb.AppendLine($"| Error guardrail | each variant meets configured sample floor `{_options.MinUsersPerVariant}`; control and treatment error rates < `0.05` | total users `{run.ErrorMetricUsersObserved}`, variants `{run.ErrorMetricVariantRows}`, control `{run.ControlErrorConversionsObserved}/{run.ControlErrorUsersObserved}` rate `{run.ControlErrorRate:0.####}`, treatment `{run.TreatmentErrorConversionsObserved}/{run.TreatmentErrorUsersObserved}` rate `{run.TreatmentErrorRate:0.####}` |");
         sb.AppendLine($"| Latency guardrail | each variant meets configured sample floor `{_options.MinUsersPerVariant}`; treatment average latency <= control average latency | total users `{run.LatencyMetricUsersObserved}`, variants `{run.LatencyMetricVariantRows}`, control users `{run.ControlLatencyUsersObserved}` sum `{run.ControlLatencySumObserved:0.####}ms` avg `{run.ControlLatencyMs:0.####}ms`, treatment users `{run.TreatmentLatencyUsersObserved}` sum `{run.TreatmentLatencySumObserved:0.####}ms` avg `{run.TreatmentLatencyMs:0.####}ms` |");
-        sb.AppendLine($"| Analyze | status `analyzing`, expected metrics in `inputData`, non-empty `analysisResult` | status `{run.AnalysisStatus}`, inputData metrics `{run.AnalysisInputDataHasExpectedMetrics}`, analysisResult `{run.AnalysisResultGenerated}` |");
+        sb.AppendLine($"| Analyze | expected metrics in `inputData`, non-empty `analysisResult` | inputData metrics `{run.AnalysisInputDataHasExpectedMetrics}`, analysisResult `{run.AnalysisResultGenerated}` |");
         sb.AppendLine();
         if (run.TrafficScenarioResults.Count > 0)
         {

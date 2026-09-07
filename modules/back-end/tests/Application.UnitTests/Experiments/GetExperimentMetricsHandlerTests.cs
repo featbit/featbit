@@ -34,7 +34,6 @@ public class GetExperimentMetricsHandlerTests
                 {
                     Id = Guid.NewGuid(),
                     Slug = "run-1",
-                    Status = "completed",
                     PrimaryMetricEvent = metric.Key
                 }
             ]

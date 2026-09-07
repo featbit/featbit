@@ -12,7 +12,6 @@ function run(
 ): ExperimentRunDetail {
   return {
     slug: values.id,
-    status: "decided",
     method: "bayesian_ab",
     decision: "CONTINUE",
     decisionSummary: null,

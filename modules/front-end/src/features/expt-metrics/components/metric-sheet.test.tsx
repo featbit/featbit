@@ -23,7 +23,6 @@ const metric: Metric = {
         {
           id: "run-id",
           key: "run-1",
-          status: "completed",
           role: "primary",
         },
       ],

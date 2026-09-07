@@ -25,12 +25,6 @@ public class ExperimentService(
 {
     private const double GuardrailHealthyHarmProbability = 0.01;
     private const double GuardrailAlarmHarmProbability = 0.95;
-    private static readonly HashSet<string> ActiveRunStatuses = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "draft",
-        "collecting",
-        "analyzing"
-    };
 
     public async Task<ExperimentVm> CreateAsync(Experiment experiment)
     {
@@ -225,7 +219,6 @@ public class ExperimentService(
             Id = Guid.NewGuid(),
             ExperimentId = id,
             Slug = slug,
-            Status = "draft",
             Method = previous?.Method ?? "bayesian_ab",
             MethodReason = previous?.MethodReason,
             PrimaryMetricEvent = previous?.PrimaryMetricEvent,
@@ -252,12 +245,14 @@ public class ExperimentService(
             PriorProper = previous?.PriorProper ?? false,
             PriorMean = previous?.PriorMean,
             PriorStddev = previous?.PriorStddev,
+            ObservationStart = now,
             CreatedAt = now,
             UpdatedAt = now
         };
         HydrateRunMetricConfig(run, experiment);
         await AlignRunVariantsAsync(envId, experiment, run, inferMissing: true);
 
+        await NormalizeAndValidateLayerAssignmentAsync(envId, run);
         await dbContext.Set<ExperimentRun>().AddAsync(run);
         await AddActivityAsync(
             id,
@@ -365,11 +360,17 @@ public class ExperimentService(
         ExperimentRunObservationWindowUpdate update)
     {
         update ??= new ExperimentRunObservationWindowUpdate();
+        if (!update.ObservationStart.HasValue)
+        {
+            throw new BusinessException(ErrorCodes.Required("observationStart"));
+        }
+
         await EnsureExperimentExistsAsync(envId, id);
 
         var run = await GetTrackedRunAsync(id, runId);
         run.ObservationStart = update.ObservationStart;
         run.ObservationEnd = update.ObservationEnd;
+        await NormalizeAndValidateLayerAssignmentAsync(envId, run);
         run.UpdatedAt = DateTime.UtcNow;
 
         await AddActivityAsync(
@@ -409,7 +410,7 @@ public class ExperimentService(
         }
 
         var now = DateTime.UtcNow;
-        var start = run.ObservationStart ?? now.AddDays(-30);
+        var start = ExperimentRunAllocation.ObservationStart(run);
         var end = run.ObservationEnd ?? now;
         var startDate = DateOnly.FromDateTime(start).ToString("yyyy-MM-dd");
         var endDate = DateOnly.FromDateTime(end).ToString("yyyy-MM-dd");
@@ -512,9 +513,6 @@ public class ExperimentService(
 
         run.InputData = inputData;
         run.AnalysisResult = analysisResult;
-        run.Status = variants.Length == 0 || variants.All(x => x.Users == 0)
-            ? "collecting"
-            : "analyzing";
         run.UpdatedAt = DateTime.UtcNow;
 
         await AddActivityAsync(
@@ -976,7 +974,6 @@ public class ExperimentService(
             Id = run.Id,
             ExperimentId = run.ExperimentId,
             Slug = run.Slug,
-            Status = run.Status,
             Hypothesis = run.Hypothesis,
             Method = run.Method,
             MethodReason = run.MethodReason,
@@ -1066,7 +1063,6 @@ public class ExperimentService(
     private static void ApplyRunUpdate(ExperimentRun run, ExperimentRunUpdate update)
     {
         run.Slug = Normalize(update.Slug, run.Slug);
-        run.Status = Normalize(update.Status, run.Status);
         run.Hypothesis = Normalize(update.Hypothesis, run.Hypothesis);
         run.Method = Normalize(update.Method, run.Method);
         run.MethodReason = Normalize(update.MethodReason, run.MethodReason);
@@ -1182,6 +1178,7 @@ public class ExperimentService(
 
     private async Task NormalizeAndValidateLayerAssignmentAsync(Guid envId, ExperimentRun run)
     {
+        ExperimentRunAllocation.NormalizeAndValidateWindow(run);
         var layerId = run.LayerId;
         var layerKey = Normalize(run.LayerKey);
         if (!layerId.HasValue && string.IsNullOrWhiteSpace(layerKey))
@@ -1209,38 +1206,18 @@ public class ExperimentService(
 
         NormalizeRunSlice(run);
 
-        if (!IsActiveRunStatus(run.Status) || string.IsNullOrWhiteSpace(run.LayerKey))
-        {
-            return;
-        }
-
-        var layerAssignmentUnit = Normalize(run.AssignmentUnitSelector, run.AllocationKeySelector) ?? "user.keyId";
-        var (sliceStart, sliceEnd) = GetRunSlice(run);
-        var activeRuns = await (
-            from candidate in dbContext.Set<ExperimentRun>()
+        var candidates = await (
+            from candidate in dbContext.Set<ExperimentRun>().AsNoTracking()
             join experiment in dbContext.Set<Experiment>()
                 on candidate.ExperimentId equals experiment.Id
             where experiment.FeatBitEnvId == envId &&
                   candidate.Id != run.Id &&
                   candidate.ExperimentId != run.ExperimentId &&
-                  candidate.LayerKey == run.LayerKey &&
-                  ActiveRunStatuses.Contains(candidate.Status)
+                  ((run.LayerId.HasValue && candidate.LayerId == run.LayerId) ||
+                   (run.LayerKey != null && candidate.LayerKey == run.LayerKey))
             select candidate).ToListAsync();
 
-        foreach (var candidate in activeRuns)
-        {
-            var candidateAssignmentUnit = Normalize(candidate.AssignmentUnitSelector, candidate.AllocationKeySelector) ?? "user.keyId";
-            if (!string.Equals(candidateAssignmentUnit, layerAssignmentUnit, StringComparison.Ordinal))
-            {
-                throw new BusinessException(ErrorCodes.Conflict);
-            }
-
-            var (candidateStart, candidateEnd) = GetRunSlice(candidate);
-            if (candidateStart < sliceEnd && sliceStart < candidateEnd)
-            {
-                throw new BusinessException(ErrorCodes.Conflict);
-            }
-        }
+        ExperimentRunAllocation.ValidateReservation(run, candidates);
     }
 
     private async Task<ExperimentLayer?> FindActiveLayerAsync(Guid envId, Guid? layerId, string? layerKey)
@@ -1296,9 +1273,6 @@ public class ExperimentService(
 
         return (start, end);
     }
-
-    private static bool IsActiveRunStatus(string? status) =>
-        !string.IsNullOrWhiteSpace(status) && ActiveRunStatuses.Contains(status);
 
     private async Task<Experiment> GetTrackedExperimentAsync(Guid envId, Guid id)
     {

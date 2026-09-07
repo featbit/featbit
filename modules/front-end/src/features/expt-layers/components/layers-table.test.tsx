@@ -24,33 +24,30 @@ const layer: Layer = {
   updatedAt: "2026-08-28T00:00:00Z",
   experimentRuns: [
     {
-      id: "archived-run",
+      id: "historical-run",
       experimentId: "experiment-1",
       experimentName: "expt 1",
       key: "run-2",
       start: 0,
       end: 50,
-      status: "archived",
       includedInAllocation: false,
     },
     {
-      id: "collecting-run",
+      id: "current-run",
       experimentId: "experiment-1",
       experimentName: "expt 1",
       key: "run-1",
       start: 0,
       end: 60,
-      status: "collecting",
       includedInAllocation: true,
     },
     {
-      id: "draft-run",
+      id: "future-run",
       experimentId: "experiment-2",
       experimentName: "expt 2",
       key: "run-1",
       start: 80,
       end: 90,
-      status: "draft",
       includedInAllocation: true,
     },
   ],
@@ -107,7 +104,7 @@ describe("LayersTable server allocation summary", () => {
     expect(screen.queryByText("Draft")).not.toBeInTheDocument()
     expect(screen.getAllByRole("link", { name: "expt 1" })[0]).toHaveAttribute(
       "href",
-      "/en/experiments/experiment-1?stage=measuring&runId=archived-run"
+      "/en/experiments/experiment-1?stage=measuring&runId=historical-run"
     )
     expect(
       screen.getByRole("button", { name: "Edit" }).querySelector("svg")
@@ -169,7 +166,6 @@ describe("LayersTable server allocation summary", () => {
           key: "run-4",
           start: 20,
           end: 30,
-          status: "draft",
           includedInAllocation: true,
         },
         {
@@ -179,7 +175,6 @@ describe("LayersTable server allocation summary", () => {
           key: "run-5",
           start: 30,
           end: 40,
-          status: "draft",
           includedInAllocation: true,
         },
       ].map((run, index) => ({ ...run, key: `run-${index + 1}` })),
@@ -203,13 +198,12 @@ describe("LayersTable server allocation summary", () => {
       experimentRuns: [
         ...layer.experimentRuns!,
         {
-          id: "analyzing-run",
+          id: "overlapping-run",
           experimentId: "experiment-3",
           experimentName: "expt 3",
           key: "run-4",
           start: 20,
           end: 50,
-          status: "analyzing",
           includedInAllocation: true,
         },
       ],
@@ -221,7 +215,7 @@ describe("LayersTable server allocation summary", () => {
           {
             start: 20,
             end: 50,
-            runIds: ["archived-run", "collecting-run", "analyzing-run"],
+            runIds: ["historical-run", "current-run", "overlapping-run"],
           },
         ],
         mixedAssignmentUnits: false,
@@ -254,7 +248,7 @@ describe("LayersTable server allocation summary", () => {
     })
     expect(experimentLink).toHaveAttribute(
       "href",
-      "/en/experiments/experiment-1?stage=measuring&runId=collecting-run"
+      "/en/experiments/experiment-1?stage=measuring&runId=current-run"
     )
     expect(experimentLink).not.toHaveFocus()
 

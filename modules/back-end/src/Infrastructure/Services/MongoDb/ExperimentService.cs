@@ -27,12 +27,6 @@ public class ExperimentService(
 {
     private const double GuardrailHealthyHarmProbability = 0.01;
     private const double GuardrailAlarmHarmProbability = 0.95;
-    private static readonly HashSet<string> ActiveRunStatuses = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "draft",
-        "collecting",
-        "analyzing"
-    };
 
     public async Task<ExperimentVm> CreateAsync(Experiment experiment)
     {
@@ -212,7 +206,6 @@ public class ExperimentService(
             Id = Guid.NewGuid(),
             ExperimentId = id,
             Slug = slug,
-            Status = "draft",
             Method = previous?.Method ?? "bayesian_ab",
             MethodReason = previous?.MethodReason,
             PrimaryMetricEvent = previous?.PrimaryMetricEvent,
@@ -239,6 +232,7 @@ public class ExperimentService(
             PriorProper = previous?.PriorProper ?? false,
             PriorMean = previous?.PriorMean,
             PriorStddev = previous?.PriorStddev,
+            ObservationStart = now,
             CreatedAt = now,
             UpdatedAt = now
         };
@@ -246,6 +240,7 @@ public class ExperimentService(
         HydrateRunMetricConfig(run, experiment);
         await AlignRunVariantsAsync(envId, experiment, run, inferMissing: true);
 
+        await NormalizeAndValidateLayerAssignmentAsync(envId, run);
         await mongoDb.CollectionOf<ExperimentRun>().InsertOneAsync(run);
         await PersistExperimentAsync(envId, experiment);
         await AddActivityAsync(
@@ -354,11 +349,17 @@ public class ExperimentService(
         ExperimentRunObservationWindowUpdate update)
     {
         update ??= new ExperimentRunObservationWindowUpdate();
+        if (!update.ObservationStart.HasValue)
+        {
+            throw new BusinessException(ErrorCodes.Required("observationStart"));
+        }
+
         await EnsureExperimentExistsAsync(envId, id);
 
         var run = await GetRunAsync(id, runId);
         run.ObservationStart = update.ObservationStart;
         run.ObservationEnd = update.ObservationEnd;
+        await NormalizeAndValidateLayerAssignmentAsync(envId, run);
         run.UpdatedAt = DateTime.UtcNow;
 
         await mongoDb.CollectionOf<ExperimentRun>().ReplaceOneAsync(
@@ -399,7 +400,7 @@ public class ExperimentService(
         }
 
         var now = DateTime.UtcNow;
-        var start = run.ObservationStart ?? now.AddDays(-30);
+        var start = ExperimentRunAllocation.ObservationStart(run);
         var end = run.ObservationEnd ?? now;
         var startDate = DateOnly.FromDateTime(start).ToString("yyyy-MM-dd");
         var endDate = DateOnly.FromDateTime(end).ToString("yyyy-MM-dd");
@@ -502,9 +503,6 @@ public class ExperimentService(
 
         run.InputData = inputData;
         run.AnalysisResult = analysisResult;
-        run.Status = variants.Length == 0 || variants.All(x => x.Users == 0)
-            ? "collecting"
-            : "analyzing";
         run.UpdatedAt = DateTime.UtcNow;
 
         await PersistExperimentAsync(envId, experiment);
@@ -758,7 +756,6 @@ public class ExperimentService(
             Id = run.Id,
             ExperimentId = run.ExperimentId,
             Slug = run.Slug,
-            Status = run.Status,
             Hypothesis = run.Hypothesis,
             Method = run.Method,
             MethodReason = run.MethodReason,
@@ -1037,7 +1034,6 @@ public class ExperimentService(
     private static void ApplyRunUpdate(ExperimentRun run, ExperimentRunUpdate update)
     {
         run.Slug = Normalize(update.Slug, run.Slug);
-        run.Status = Normalize(update.Status, run.Status);
         run.Hypothesis = Normalize(update.Hypothesis, run.Hypothesis);
         run.Method = Normalize(update.Method, run.Method);
         run.MethodReason = Normalize(update.MethodReason, run.MethodReason);
@@ -1153,6 +1149,7 @@ public class ExperimentService(
 
     private async Task NormalizeAndValidateLayerAssignmentAsync(Guid envId, ExperimentRun run)
     {
+        ExperimentRunAllocation.NormalizeAndValidateWindow(run);
         var layerId = run.LayerId;
         var layerKey = Normalize(run.LayerKey);
         if (!layerId.HasValue && string.IsNullOrWhiteSpace(layerKey))
@@ -1180,40 +1177,20 @@ public class ExperimentService(
 
         NormalizeRunSlice(run);
 
-        if (!IsActiveRunStatus(run.Status) || string.IsNullOrWhiteSpace(run.LayerKey))
-        {
-            return;
-        }
-
-        var layerAssignmentUnit = Normalize(run.AssignmentUnitSelector, run.AllocationKeySelector) ?? "user.keyId";
-        var (sliceStart, sliceEnd) = GetRunSlice(run);
         var experimentIds = await mongoDb.CollectionOf<Experiment>()
             .Find(x => x.FeatBitEnvId == envId)
             .Project(x => x.Id)
             .ToListAsync();
-        var activeRuns = await mongoDb.CollectionOf<ExperimentRun>()
+        var candidates = await mongoDb.CollectionOf<ExperimentRun>()
             .Find(x =>
                 experimentIds.Contains(x.ExperimentId) &&
                 x.Id != run.Id &&
                 x.ExperimentId != run.ExperimentId &&
-                x.LayerKey == run.LayerKey &&
-                ActiveRunStatuses.Contains(x.Status))
+                ((run.LayerId.HasValue && x.LayerId == run.LayerId) ||
+                 (run.LayerKey != null && x.LayerKey == run.LayerKey)))
             .ToListAsync();
 
-        foreach (var candidate in activeRuns)
-        {
-            var candidateAssignmentUnit = Normalize(candidate.AssignmentUnitSelector, candidate.AllocationKeySelector) ?? "user.keyId";
-            if (!string.Equals(candidateAssignmentUnit, layerAssignmentUnit, StringComparison.Ordinal))
-            {
-                throw new BusinessException(ErrorCodes.Conflict);
-            }
-
-            var (candidateStart, candidateEnd) = GetRunSlice(candidate);
-            if (candidateStart < sliceEnd && sliceStart < candidateEnd)
-            {
-                throw new BusinessException(ErrorCodes.Conflict);
-            }
-        }
+        ExperimentRunAllocation.ValidateReservation(run, candidates);
     }
 
     private async Task<ExperimentLayer?> FindActiveLayerAsync(Guid envId, Guid? layerId, string? layerKey)
@@ -1271,9 +1248,6 @@ public class ExperimentService(
 
         return (start, end);
     }
-
-    private static bool IsActiveRunStatus(string? status) =>
-        !string.IsNullOrWhiteSpace(status) && ActiveRunStatuses.Contains(status);
 
     private async Task<Experiment> GetExperimentAsync(Guid envId, Guid id)
     {

@@ -11,7 +11,6 @@ function run(
 ): ExperimentRunDetail {
   return {
     slug: values.id,
-    status: "draft",
     method: "bayesian_ab",
     decision: null,
     decisionSummary: null,

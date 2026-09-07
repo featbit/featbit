@@ -60,7 +60,6 @@ const experiment: ExperimentListDataItem = {
     {
       id: "run-1",
       slug: "run-1",
-      status: "draft",
       method: "bayesian_ab",
       observationStart: "2026-09-01T00:00:00Z",
       observationEnd: "2026-09-06T12:00:15Z",

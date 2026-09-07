@@ -160,17 +160,13 @@ if ($nonExperimentTargeting.condition -ne "plan Equal enterprise" -or
     throw "Manifest must define non-experiment flag targeting and traffic."
 }
 
-if ($manifestJson.expectedFinalState.analyze.runStatus -ne "analyzing") {
-    throw "Manifest must define expected analyze run status."
-}
-
 $finalStepAssertions = @(($manifestJson.steps | Where-Object id -eq "10").assertions)
 foreach ($requiredFinalAssertion in @(
     "all 10 flags match expected final enabled state",
     "all 10 flags match expected final variants",
     "all 10 flags match expected final rule condition",
     "all 10 flags match expected rule traffic, fallthrough traffic, includedInExpt, and exptIncludeAllTargets",
-    "analyze status, inputData, and analysisResult match expected final state"
+    "analyze inputData and analysisResult match expected final state"
 )) {
     if ($finalStepAssertions -notcontains $requiredFinalAssertion) {
         throw "Manifest final verification assertions are missing: $requiredFinalAssertion"
@@ -225,7 +221,7 @@ try {
         '| Key | Type | Final enabled | Final variants | Rule | Traffic | Experimentation |',
         '## Expected Insight, Stats, And Analyze State',
         'fallthrough control 50%, treatment 50%',
-        'Analyze should set run status to `analyzing`'
+        'Analyze should write non-empty'
     )) {
         if (-not $planOutput.Contains($requiredPlanText)) {
             throw "Runner plan output is missing required text: $requiredPlanText"

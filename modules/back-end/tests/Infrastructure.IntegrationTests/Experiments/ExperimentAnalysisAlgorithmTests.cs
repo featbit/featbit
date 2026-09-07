@@ -401,7 +401,6 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
             Id = RunId,
             ExperimentId = ExperimentId,
             Slug = "run-1",
-            Status = "running",
             Method = method,
             PrimaryMetricEvent = metricEvent,
             PrimaryMetricType = metricType,

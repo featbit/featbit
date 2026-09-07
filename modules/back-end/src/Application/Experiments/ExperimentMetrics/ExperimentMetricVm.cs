@@ -40,7 +40,5 @@ public class ExperimentMetricRunVm
 
     public string Key { get; set; }
 
-    public string Status { get; set; }
-
     public string Role { get; set; }
 }

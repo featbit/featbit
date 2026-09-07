@@ -9,7 +9,6 @@ export type MetricRole = "primary" | "guardrail"
 export type MetricRun = {
   id: string
   key: string
-  status: string
   role: MetricRole
 }
 

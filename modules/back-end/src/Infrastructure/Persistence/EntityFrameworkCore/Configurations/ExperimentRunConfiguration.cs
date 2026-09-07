@@ -14,7 +14,6 @@ public class ExperimentRunConfiguration : IEntityTypeConfiguration<ExperimentRun
 
         builder.Property(x => x.ExperimentId).HasColumnName("experiment_id");
         builder.Property(x => x.Slug).HasMaxLength(128).IsRequired();
-        builder.Property(x => x.Status).HasMaxLength(64).IsRequired();
         builder.Property(x => x.Method).HasMaxLength(64);
         builder.Property(x => x.MethodReason).HasColumnName("method_reason");
         builder.Property(x => x.PrimaryMetricEvent).HasColumnName("primary_metric_event").HasMaxLength(256);

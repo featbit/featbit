@@ -16,7 +16,6 @@ function run(overrides: Partial<MeasuringRun> = {}): MeasuringRun {
   return {
     id: "run-id",
     slug: "run-1",
-    status: "collecting",
     method: "bayesian_ab",
     decision: null,
     decisionSummary: null,

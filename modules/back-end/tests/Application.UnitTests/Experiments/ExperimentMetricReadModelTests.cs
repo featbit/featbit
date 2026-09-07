@@ -20,9 +20,9 @@ public class ExperimentMetricReadModelTests
             },
             Runs =
             [
-                NewRun("run-3", "running", "checkout_completed", "[]"),
-                NewRun("run-2", "completed", "other_metric", "[\"checkout_completed\"]"),
-                NewRun("run-1", "stopped", "other_metric", "[]")
+                NewRun("run-3", "checkout_completed", "[]"),
+                NewRun("run-2", "other_metric", "[\"checkout_completed\"]"),
+                NewRun("run-1", "other_metric", "[]")
             ]
         };
 
@@ -30,8 +30,8 @@ public class ExperimentMetricReadModelTests
 
         Assert.NotNull(usage);
         Assert.Equal(2, usage.Runs.Count);
-        Assert.Contains(usage.Runs, x => x.Key == "run-3" && x.Role == "primary" && x.Status == "running");
-        Assert.Contains(usage.Runs, x => x.Key == "run-2" && x.Role == "guardrail" && x.Status == "completed");
+        Assert.Contains(usage.Runs, x => x.Key == "run-3" && x.Role == "primary");
+        Assert.Contains(usage.Runs, x => x.Key == "run-2" && x.Role == "guardrail");
         Assert.DoesNotContain(usage.Runs, x => x.Key == "run-1");
     }
 
@@ -67,7 +67,7 @@ public class ExperimentMetricReadModelTests
             },
             Runs =
             [
-                NewRun("run-1", "completed", "activation", "[{\"event\":\"retention\"}]")
+                NewRun("run-1", "activation", "[{\"event\":\"retention\"}]")
             ]
         };
 
@@ -88,13 +88,11 @@ public class ExperimentMetricReadModelTests
 
     private static ExperimentRun NewRun(
         string key,
-        string status,
         string primaryMetric,
         string guardrails) => new()
         {
             Id = Guid.NewGuid(),
             Slug = key,
-            Status = status,
             PrimaryMetricEvent = primaryMetric,
             GuardrailEvents = guardrails,
             CreatedAt = DateTime.UtcNow

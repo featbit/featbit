@@ -60,7 +60,6 @@ public static class ExperimentMetricReadModel
         {
             Id = run.Id,
             Key = Normalize(run.Slug) ?? run.Id.ToString("D"),
-            Status = Normalize(run.Status) ?? "draft",
             Role = role
         };
     }

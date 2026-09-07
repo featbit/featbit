@@ -29,6 +29,7 @@ $migration$;
 
 ALTER TABLE public.experiment_runs
     ALTER COLUMN layer_id DROP NOT NULL,
-    DROP COLUMN IF EXISTS run_id;
+    DROP COLUMN IF EXISTS run_id,
+    DROP COLUMN IF EXISTS status;
 
 COMMIT;

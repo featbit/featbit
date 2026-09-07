@@ -20,9 +20,9 @@ const metric: Metric = {
       experimentId: "experiment-id",
       experimentName: "Pricing experiment",
       runs: [
-        { id: "run-3", key: "Run 3", status: "running", role: "primary" },
-        { id: "run-2", key: "Run 2", status: "completed", role: "guardrail" },
-        { id: "run-1", key: "Run 1", status: "draft", role: "primary" },
+        { id: "run-3", key: "Run 3", role: "primary" },
+        { id: "run-2", key: "Run 2", role: "guardrail" },
+        { id: "run-1", key: "Run 1", role: "primary" },
       ],
     },
   ],

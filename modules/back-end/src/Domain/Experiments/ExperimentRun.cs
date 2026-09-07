@@ -6,8 +6,6 @@ public class ExperimentRun : AuditedEntity
 
     public string Slug { get; set; }
 
-    public string Status { get; set; } = "draft";
-
     public string Hypothesis { get; set; }
 
     public string Method { get; set; }

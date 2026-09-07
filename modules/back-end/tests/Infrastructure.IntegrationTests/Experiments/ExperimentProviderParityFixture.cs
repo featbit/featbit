@@ -272,23 +272,23 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
     };
 
     public (IExperimentService ExperimentService, IExperimentMetricService MetricService)
-        CreateExperimentServices(string provider) => provider switch
+        CreateExperimentServices(string provider, IExperimentStatsService? stats = null, IFeatureFlagService? flags = null) => provider switch
     {
-        "Postgres" => CreatePostgresExperimentServices(),
-        "MongoDb" => CreateMongoExperimentServices(),
+        "Postgres" => CreatePostgresExperimentServices(stats, flags),
+        "MongoDb" => CreateMongoExperimentServices(stats, flags),
         _ => throw new ArgumentOutOfRangeException(nameof(provider), provider, null)
     };
 
     private (IExperimentService ExperimentService, IExperimentMetricService MetricService)
-        CreatePostgresExperimentServices()
+        CreatePostgresExperimentServices(IExperimentStatsService? stats, IFeatureFlagService? flags)
     {
         var dbContext = CreateDbContext();
         var metricService = new global::Infrastructure.Services.EntityFrameworkCore.ExperimentMetricService(dbContext);
         return (
             new global::Infrastructure.Services.EntityFrameworkCore.ExperimentService(
                 dbContext,
-                new global::Infrastructure.Services.EntityFrameworkCore.ExperimentStatsService(dbContext),
-                new global::Infrastructure.Services.EntityFrameworkCore.FeatureFlagService(
+                stats ?? new global::Infrastructure.Services.EntityFrameworkCore.ExperimentStatsService(dbContext),
+                flags ?? new global::Infrastructure.Services.EntityFrameworkCore.FeatureFlagService(
                     dbContext,
                     NullLogger<FeatureFlagService>.Instance),
                 metricService,
@@ -298,15 +298,15 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
     }
 
     private (IExperimentService ExperimentService, IExperimentMetricService MetricService)
-        CreateMongoExperimentServices()
+        CreateMongoExperimentServices(IExperimentStatsService? stats, IFeatureFlagService? flags)
     {
         var client = CreateMongoDbClient();
         var metricService = new global::Infrastructure.Services.MongoDb.ExperimentMetricService(client);
         return (
             new global::Infrastructure.Services.MongoDb.ExperimentService(
                 client,
-                new global::Infrastructure.Services.MongoDb.ExperimentStatsService(client),
-                new global::Infrastructure.Services.MongoDb.FeatureFlagService(client),
+                stats ?? new global::Infrastructure.Services.MongoDb.ExperimentStatsService(client),
+                flags ?? new global::Infrastructure.Services.MongoDb.FeatureFlagService(client),
                 metricService,
                 new FixtureCurrentUser(),
                 new global::Infrastructure.Services.MongoDb.UserService(client)),
@@ -433,7 +433,6 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
                 id uuid primary key,
                 experiment_id uuid not null,
                 slug varchar(128) not null,
-                status varchar(64) not null,
                 hypothesis text null,
                 method varchar(64) null,
                 method_reason text null,
@@ -476,6 +475,19 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
                 analysis_sampling_plan text null,
                 data_source_mode varchar(64) null,
                 customer_endpoint_config text null,
+                created_at timestamp with time zone not null,
+                updated_at timestamp with time zone not null
+            );
+
+            CREATE TABLE IF NOT EXISTS experiment_layers
+            (
+                id uuid primary key,
+                featbit_env_id uuid not null,
+                name varchar(256) not null,
+                key varchar(128) not null,
+                description text null,
+                assignment_unit_selector varchar(256) null,
+                status varchar(64) not null,
                 created_at timestamp with time zone not null,
                 updated_at timestamp with time zone not null
             );

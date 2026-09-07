@@ -235,7 +235,6 @@
       "latencyGuardrail": "use report exact users/sums/averages; each variant meets configured min users per variant; control average equals 340ms; treatment average equals 320ms; treatment <= control"
     },
     "analyze": {
-      "runStatus": "analyzing",
       "inputData": "non-empty JSON with primary and guardrail metrics",
       "analysisResult": "non-empty JSON"
     }
@@ -423,7 +422,7 @@
         "experiment binding is correct",
         "seeded result direction is correct",
         "primary metric and guardrail stats contain observed data",
-        "analyze status, inputData, and analysisResult match expected final state",
+        "analyze inputData and analysisResult match expected final state",
         "secrets are masked in reports"
       ]
     }

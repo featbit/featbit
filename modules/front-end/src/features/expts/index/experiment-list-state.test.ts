@@ -10,7 +10,6 @@ const now = Date.parse("2026-09-06T12:00:00Z")
 const run: ExperimentRunDetail = {
   id: "run-1",
   slug: "run-1",
-  status: "draft",
   method: "bayesian_ab",
   observationStart: "2026-09-01T00:00:00Z",
   observationEnd: "2026-09-07T00:00:00Z",
@@ -41,14 +40,12 @@ const experiment: ExperimentListDataItem = {
 }
 
 describe("experiment list state", () => {
-  it("uses the observation window regardless of saved stage or obsolete run status", () => {
-    for (const status of ["draft", "collecting", "analyzing", "decided", ""]) {
-      expect(
-        experimentListState(
-          { ...experiment, experimentRuns: [{ ...run, status }] },
-          now
-        )
-      ).toEqual({ key: "measuring" })
+  it("uses the observation window regardless of saved stage", () => {
+    for (const stage of ["hypothesis", "implementing", "measuring", "learning"]) {
+      const savedExperiment = { ...experiment, stage }
+      expect(experimentListState(savedExperiment, now)).toEqual({
+        key: "measuring",
+      })
     }
   })
 

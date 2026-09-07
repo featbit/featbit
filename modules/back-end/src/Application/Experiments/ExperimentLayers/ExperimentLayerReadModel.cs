@@ -5,21 +5,20 @@ namespace Application.Experiments.ExperimentLayers;
 
 public static class ExperimentLayerReadModel
 {
-    private static readonly HashSet<string> ActiveRunStatuses =
-        new(StringComparer.OrdinalIgnoreCase) { "draft", "collecting", "analyzing" };
-
     public static ExperimentLayerReadResult Build(
         ExperimentLayer layer,
-        IEnumerable<ExperimentRunForLayer> sources)
+        IEnumerable<ExperimentRunForLayer> sources,
+        DateTime? now = null)
     {
+        var instant = now ?? DateTime.UtcNow;
         var runs = sources
-            .Select(source => ToRun(source, layer.AssignmentUnitSelector))
+            .Select(source => ToRun(source, layer.AssignmentUnitSelector, instant))
             .OrderBy(x => x.Start)
             .ThenBy(x => x.ExperimentName)
             .ThenBy(x => x.Key)
             .ToArray();
         var activeRuns = runs.Where(x => x.IncludedInAllocation).ToArray();
-        var reserved = activeRuns.Sum(x => x.End - x.Start);
+        var reserved = activeRuns.GroupBy(x => x.ExperimentId).Sum(ReservedPercent);
         var overlaps = GetOverlaps(activeRuns);
         var layerAssignmentUnit = Normalize(layer.AssignmentUnitSelector) ?? "user.keyId";
         var mixedAssignmentUnits = activeRuns.Any(
@@ -66,14 +65,12 @@ public static class ExperimentLayerReadModel
 
     private static ExperimentLayerRunVm ToRun(
         ExperimentRunForLayer source,
-        string layerAssignmentUnit)
+        string layerAssignmentUnit,
+        DateTime instant)
     {
         var run = source.Run;
-        var start = Clamp(run.SliceStart ?? run.TrafficOffset ?? 0);
-        var fallbackWidth = Math.Max(0, run.LayerTrafficPercent ?? run.TrafficPercent ?? 100);
-        var end = Clamp(run.SliceEnd ?? (start + fallbackWidth));
-        var status = Normalize(run.Status) ?? "draft";
-        var included = ActiveRunStatuses.Contains(status) && end > start;
+        var (start, end) = ExperimentRunAllocation.Slice(run);
+        var included = ExperimentRunAllocation.Includes(run, instant) && end > start;
 
         return new ExperimentLayerRunVm
         {
@@ -88,7 +85,8 @@ public static class ExperimentLayerReadModel
                 run.AllocationKeySelector) ?? Normalize(layerAssignmentUnit) ?? "user.keyId",
             Start = Round(start),
             End = Round(end),
-            Status = status,
+            ObservationStart = ExperimentRunAllocation.ObservationStart(run),
+            ObservationEnd = run.ObservationEnd,
             IncludedInAllocation = included
         };
     }
@@ -112,15 +110,18 @@ public static class ExperimentLayerReadModel
                 continue;
             }
 
-            var runIds = runs
+            var coveringRuns = runs
                 .Where(x => x.Start < end && start < x.End)
-                .Select(x => x.Id)
-                .OrderBy(x => x)
                 .ToArray();
-            if (runIds.Length < 2)
+            if (coveringRuns.Select(x => x.ExperimentId).Distinct().Count() < 2)
             {
                 continue;
             }
+
+            var runIds = coveringRuns
+                .Select(x => x.Id)
+                .OrderBy(x => x)
+                .ToArray();
 
             var previous = overlaps.LastOrDefault();
             if (previous != null &&
@@ -143,7 +144,17 @@ public static class ExperimentLayerReadModel
         return overlaps;
     }
 
-    private static double Clamp(double value) => Math.Max(0, Math.Min(100, value));
+    private static double ReservedPercent(IEnumerable<ExperimentLayerRunVm> runs)
+    {
+        double reserved = 0, previousEnd = 0;
+        foreach (var run in runs.OrderBy(x => x.Start))
+        {
+            reserved += Math.Max(0, run.End - Math.Max(run.Start, previousEnd));
+            previousEnd = Math.Max(previousEnd, run.End);
+        }
+
+        return reserved;
+    }
 
     private static double Round(double value) =>
         Math.Round(value, 4, MidpointRounding.AwayFromZero);
