@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace Domain.Evaluation;
@@ -44,14 +45,8 @@ public class Operator
     ) => (userValue, ruleValue) =>
     {
         // not a number, return false
-        if (!double.TryParse(userValue, out var userDoubleValue) ||
-            !double.TryParse(ruleValue, out var ruleDoubleValue))
-        {
-            return false;
-        }
-
-        // is NaN, return false
-        if (double.IsNaN(userDoubleValue) || double.IsNaN(ruleDoubleValue))
+        if (!TryParseFiniteNumber(userValue, out var userDoubleValue) ||
+            !TryParseFiniteNumber(ruleValue, out var ruleDoubleValue))
         {
             return false;
         }
@@ -59,6 +54,10 @@ public class Operator
         var result = userDoubleValue.CompareTo(ruleDoubleValue);
         return result == desiredComparisonResult || result == otherDesiredComparisonResult;
     };
+
+    private static bool TryParseFiniteNumber(string value, out double number) =>
+        double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out number) &&
+        double.IsFinite(number);
 
     #endregion
 

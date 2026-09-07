@@ -47,11 +47,9 @@ public class UpdateTargetingValidator : AbstractValidator<UpdateTargeting>
     public UpdateTargetingValidator()
     {
         RuleFor(x => x.Rules)
-            .Must(rules =>
-            {
-                var conditions = rules.SelectMany(x => x.Conditions);
-                return conditions.All(x => !x.IsSegmentCondition());
-            }).WithErrorCode(ErrorCodes.Invalid("rules"));
+            .NotNull().WithErrorCode(ErrorCodes.Required("rules"))
+            .Must(rules => rules.All(rule => rule != null && rule.IsValid()))
+            .WithErrorCode(ErrorCodes.Invalid("rules"));
     }
 }
 
