@@ -282,7 +282,7 @@ public class DataSyncService(
             exception,
             "Failed to evaluate feature flag {FlagKey} ({FlagId}) in environment {EnvId}. " +
             "Malformed entity: {EntityType} ({EntityId}), property: {PropertyPath}. " +
-            "The malformed feature flag was skipped without failing the client data-sync.",
+            "The malformed entity was skipped without failing the client data-sync.",
             flagKey,
             flagId,
             envId,
