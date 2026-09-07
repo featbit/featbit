@@ -288,4 +288,26 @@ public class FeatureFlagValidatorTests
 
         Assert.Contains(exception.Errors, error => error.ErrorCode == ErrorCodes.Invalid("targeting"));
     }
+
+    [Fact]
+    public void FlagTargeting_TargetUserWithoutKeys_TargetingInvalidError()
+    {
+        Variation[] flagVariations = [V("variation-1")];
+        var targeting = new FlagTargeting
+        {
+            DisabledVariationId = "variation-1",
+            TargetUsers = [new TargetUser { VariationId = "variation-1", KeyIds = null! }],
+            Rules = [],
+            Fallthrough = new Fallthrough
+            {
+                Variations = [new RolloutVariation { Id = "variation-1", Rollout = [0, 1] }]
+            }
+        };
+
+        var exception = Assert.Throws<ValidationException>(() =>
+            FlagTargetingValidator.EnsureValid(targeting, flagVariations)
+        );
+
+        Assert.Contains(exception.Errors, error => error.ErrorCode == ErrorCodes.Invalid("targeting"));
+    }
 }

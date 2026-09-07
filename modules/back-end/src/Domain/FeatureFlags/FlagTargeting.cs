@@ -50,7 +50,7 @@ public class FlagTargeting
         }
 
         // validate that all target users have valid variations
-        if (TargetUsers.Any(tu => tu == null || flagVariations.All(variation => variation.Id != tu.VariationId)))
+        if (TargetUsers.Any(tu => tu?.KeyIds == null || flagVariations.All(variation => variation.Id != tu.VariationId)))
         {
             return false;
         }

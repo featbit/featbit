@@ -267,4 +267,32 @@ public class RuleValidationTests
 
         Assert.False(targeting.IsValid(FlagVariations("variation-1")));
     }
+
+    [Fact]
+    public void FlagTargeting_TargetUserWithoutKeys_IsInvalid()
+    {
+        var targeting = new FlagTargeting
+        {
+            DisabledVariationId = "variation-1",
+            TargetUsers = [new TargetUser { VariationId = "variation-1", KeyIds = null! }],
+            Rules = [],
+            Fallthrough = ValidFallthrough()
+        };
+
+        Assert.False(targeting.IsValid(FlagVariations("variation-1")));
+    }
+
+    [Fact]
+    public void FlagTargeting_TargetUserWithEmptyKeys_IsValid()
+    {
+        var targeting = new FlagTargeting
+        {
+            DisabledVariationId = "variation-1",
+            TargetUsers = [new TargetUser { VariationId = "variation-1", KeyIds = [] }],
+            Rules = [],
+            Fallthrough = ValidFallthrough()
+        };
+
+        Assert.True(targeting.IsValid(FlagVariations("variation-1")));
+    }
 }
