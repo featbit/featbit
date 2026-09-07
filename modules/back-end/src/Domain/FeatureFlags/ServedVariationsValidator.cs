@@ -4,7 +4,7 @@ public static class ServedVariationsValidator
 {
     public static bool IsValid(ICollection<RolloutVariation> servedVariations, ICollection<Variation> flagVariations)
     {
-        if (servedVariations == null || servedVariations.Count == 0)
+        if (servedVariations.IsNullOrEmpty() || flagVariations.IsNullOrEmpty())
         {
             return false;
         }

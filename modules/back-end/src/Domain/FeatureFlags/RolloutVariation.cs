@@ -21,6 +21,11 @@ public class RolloutVariation
 
     public bool IsValid(ICollection<Variation> flagVariations)
     {
+        if (flagVariations.IsNullOrEmpty())
+        {
+            return false;
+        }
+
         if (flagVariations.All(variation => variation.Id != Id))
         {
             return false;

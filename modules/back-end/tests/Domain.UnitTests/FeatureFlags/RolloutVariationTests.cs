@@ -43,4 +43,13 @@ public class RolloutVariationTests
             Assert.False(variation.IsValid(FlagVariations));
         }
     }
+
+    [Fact]
+    public void IsValid_NoFlagVariations_ReturnsFalse()
+    {
+        var variation = new RolloutVariation { Id = "variation-1", Rollout = [0, 1] };
+
+        Assert.False(variation.IsValid(null!));
+        Assert.False(variation.IsValid([]));
+    }
 }

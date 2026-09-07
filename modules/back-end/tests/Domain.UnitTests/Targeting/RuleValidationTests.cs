@@ -130,6 +130,7 @@ public class RuleValidationTests
         var targeting = new FlagTargeting
         {
             DisabledVariationId = "variation-1",
+            TargetUsers = [],
             Rules =
             [
                 new TargetRule
@@ -150,6 +151,7 @@ public class RuleValidationTests
         var targeting = new FlagTargeting
         {
             DisabledVariationId = "variation-1",
+            TargetUsers = [],
             Rules =
             [
                 new TargetRule
@@ -170,6 +172,7 @@ public class RuleValidationTests
         var targeting = new FlagTargeting
         {
             DisabledVariationId = "variation-1",
+            TargetUsers = [],
             Rules = [],
             Fallthrough = new Fallthrough
             {
@@ -186,6 +189,78 @@ public class RuleValidationTests
         var targeting = new FlagTargeting
         {
             DisabledVariationId = "unknown-variation",
+            TargetUsers = [],
+            Rules = [],
+            Fallthrough = ValidFallthrough()
+        };
+
+        Assert.False(targeting.IsValid(FlagVariations("variation-1")));
+    }
+
+    [Fact]
+    public void FlagTargeting_NoFlagVariations_IsInvalid()
+    {
+        var targeting = new FlagTargeting
+        {
+            DisabledVariationId = "variation-1",
+            TargetUsers = [],
+            Rules = [],
+            Fallthrough = ValidFallthrough()
+        };
+
+        Assert.False(targeting.IsValid(null!));
+        Assert.False(targeting.IsValid([]));
+    }
+
+    [Fact]
+    public void FlagTargeting_TargetUserVariationBelongsToFlag_IsValid()
+    {
+        var targeting = new FlagTargeting
+        {
+            DisabledVariationId = "variation-1",
+            TargetUsers = [new TargetUser { VariationId = "variation-1", KeyIds = ["user-1"] }],
+            Rules = [],
+            Fallthrough = ValidFallthrough()
+        };
+
+        Assert.True(targeting.IsValid(FlagVariations("variation-1")));
+    }
+
+    [Fact]
+    public void FlagTargeting_TargetUserVariationDoesNotBelongToFlag_IsInvalid()
+    {
+        var targeting = new FlagTargeting
+        {
+            DisabledVariationId = "variation-1",
+            TargetUsers = [new TargetUser { VariationId = "unknown-variation", KeyIds = ["user-1"] }],
+            Rules = [],
+            Fallthrough = ValidFallthrough()
+        };
+
+        Assert.False(targeting.IsValid(FlagVariations("variation-1")));
+    }
+
+    [Fact]
+    public void FlagTargeting_NullTargetUser_IsInvalid()
+    {
+        var targeting = new FlagTargeting
+        {
+            DisabledVariationId = "variation-1",
+            TargetUsers = [null!],
+            Rules = [],
+            Fallthrough = ValidFallthrough()
+        };
+
+        Assert.False(targeting.IsValid(FlagVariations("variation-1")));
+    }
+
+    [Fact]
+    public void FlagTargeting_NoTargetUsersCollection_IsInvalid()
+    {
+        var targeting = new FlagTargeting
+        {
+            DisabledVariationId = "variation-1",
+            TargetUsers = null!,
             Rules = [],
             Fallthrough = ValidFallthrough()
         };
