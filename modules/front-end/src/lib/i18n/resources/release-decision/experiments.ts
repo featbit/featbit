@@ -263,7 +263,7 @@ export const enExperiments = {
       window: "Window",
       algorithm: "Algorithm",
       algorithms: {
-        thompson_sampling_top_two: "Thompson Sampling (Top-Two)",
+        thompson_sampling_top_two: "Posterior sampling (top-two allocation)",
       },
       prior: "Prior",
       flatPrior: "flat (improper)",
@@ -272,6 +272,7 @@ export const enExperiments = {
       noEvaluableDataHelp:
         "The current analysis does not contain enough valid samples to evaluate a rollout decision.",
       noSamples: "No samples — not evaluable",
+      notEvaluable: "Not evaluable",
       checkFailed: "check failed",
       primaryMetric: "Primary metric",
       guardrail: "Guardrail",
@@ -298,6 +299,20 @@ export const enExperiments = {
           "Mean per-user mean = <code>Σ x / n</code>, where each user's <code>x</code> = mean of their event values (AOV-style). You picked “Average values per user”.",
         mean: "Per-user mean = <code>Σ x / n</code>. The Bayesian test compares treatment's mean against control's.",
       },
+      banditValueColumnTooltips: {
+        rate: "Conversion rate = <code>k / n</code>, where <code>k</code> is the number of users who converted and <code>n</code> is the number of analyzed users.",
+        eventsPerUser:
+          "Mean events per user = <code>Σ x / n</code>, where each user's <code>x</code> is the number of events they fired. You picked “Count all” aggregation. This is an event count per user, not a conversion percentage.",
+        valuePerUserSum:
+          "Mean per-user total = <code>Σ x / n</code>, where each user's <code>x</code> is the sum of their event values. You picked “Sum values”.",
+        valuePerUserAverage:
+          "Mean per-user mean = <code>Σ x / n</code>, where each user's <code>x</code> is the mean of their event values. You picked “Average values per user”.",
+        mean: "Per-user mean = <code>Σ x / n</code>, where <code>x</code> is each user's metric value and <code>n</code> is the number of analyzed users.",
+      },
+      banditPrimaryComparisonHelp:
+        "P(best) estimates each arm's chance of having the best primary metric. Recommended weights split allocation between the two strongest arms in each posterior draw, so they can differ from P(best).",
+      banditGuardrailComparisonHelp:
+        "Bandit guardrail check: compare each arm with the baseline. P(harm) estimates the probability of a change in the configured harmful direction; the 95% credible interval describes relative lift. This check does not change the traffic weights recommended from the primary metric.",
       pBest: "P(best)",
       recommendedWeight: "Recommended weight",
       relativeLift: "Relative lift",
@@ -810,7 +825,7 @@ export const zhExperiments = {
       window: "窗口",
       algorithm: "算法",
       algorithms: {
-        thompson_sampling_top_two: "Thompson Sampling (Top-Two)",
+        thompson_sampling_top_two: "后验采样（前两名分配）",
       },
       prior: "先验",
       flatPrior: "平坦（非正规）",
@@ -818,6 +833,7 @@ export const zhExperiments = {
       noEvaluableData: "无可评估数据",
       noEvaluableDataHelp: "当前分析没有足够的有效样本来评估发布决策。",
       noSamples: "无样本 — 不可评估",
+      notEvaluable: "不可评估",
       checkFailed: "检查失败",
       primaryMetric: "主要指标",
       guardrail: "护栏指标",
@@ -844,6 +860,20 @@ export const zhExperiments = {
           "用户均值的平均值 = <code>Σ x / n</code>，其中每个用户的 <code>x</code> 为其事件值的平均值（类似 AOV）。你选择了“数值平均”聚合方式。",
         mean: "每用户均值 = <code>Σ x / n</code>。贝叶斯检验比较实验组与对照组的均值。",
       },
+      banditValueColumnTooltips: {
+        rate: "转化率 = <code>k / n</code>，其中 <code>k</code> 是发生转化的用户数，<code>n</code> 是纳入分析的用户数。",
+        eventsPerUser:
+          "每用户平均事件数 = <code>Σ x / n</code>，其中每个用户的 <code>x</code> 为其触发的事件次数。你选择了“统计全部次数”聚合方式。此值表示人均事件次数，不是转化百分比。",
+        valuePerUserSum:
+          "用户总值的平均值 = <code>Σ x / n</code>，其中每个用户的 <code>x</code> 为其所有事件值之和。你选择了“数值求和”聚合方式。",
+        valuePerUserAverage:
+          "用户均值的平均值 = <code>Σ x / n</code>，其中每个用户的 <code>x</code> 为其事件值的平均值。你选择了“数值平均”聚合方式。",
+        mean: "每用户均值 = <code>Σ x / n</code>，其中 <code>x</code> 为每个用户的指标值，<code>n</code> 为纳入分析的用户数。",
+      },
+      banditPrimaryComparisonHelp:
+        "P(最佳) 估计各方案在主指标上最优的概率。建议权重按每次后验抽样中表现最好的两个方案分配，因此可能与 P(最佳) 不同。",
+      banditGuardrailComparisonHelp:
+        "Bandit 护栏检查：比较各候选方案与基线。P(恶化) 表示指标朝所配置的不利方向变化的估计概率；95% 可信区间描述相对提升的范围。护栏检查不会改变根据主指标计算的建议流量权重。",
       pBest: "P(最佳)",
       recommendedWeight: "建议权重",
       relativeLift: "相对提升",

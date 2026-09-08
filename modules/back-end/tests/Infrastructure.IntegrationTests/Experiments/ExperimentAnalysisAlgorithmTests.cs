@@ -259,7 +259,9 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
         Assert.Equal("bandit", document.RootElement.GetProperty("type").GetString());
         Assert.False(thompson.GetProperty("enough_units").GetBoolean());
         Assert.Contains("burn-in", thompson.GetProperty("update_message").GetString());
-        Assert.Equal(0, thompson.GetProperty("results")[0].GetProperty("recommended_weight").GetDouble());
+        Assert.Equal(100, thompson.GetProperty("minimum_units_per_arm").GetInt32());
+        Assert.Equal(JsonValueKind.Null, thompson.GetProperty("results")[0].GetProperty("recommended_weight").ValueKind);
+        Assert.Equal(JsonValueKind.Null, thompson.GetProperty("results")[0].GetProperty("p_best").ValueKind);
         Assert.False(document.RootElement.GetProperty("stopping").GetProperty("met").GetBoolean());
     }
 
@@ -297,6 +299,51 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
         Assert.Equal(1, weightSum, 6);
         Assert.True(treatment.GetProperty("p_best").GetDouble() > 0.9);
         Assert.True(treatment.GetProperty("recommended_weight").GetDouble() > 0.49);
+    }
+
+    [DockerTheory]
+    [InlineData("count", 200)]
+    [InlineData("sum", 200)]
+    [InlineData("average", 200)]
+    [InlineData("count", 0)]
+    public async Task AnalyzeRun_BanditNumeric_ReportsTypedPerUserMean(string aggregation, int users)
+    {
+        var stats = new FixedExperimentStatsService(new ExperimentStatsVm
+        {
+            Variants =
+            [
+                Variant("control", users, users / 2, users * 3.1227, users * 13.048),
+                Variant("treatment", users, users / 2, users * 3.3526, users * 14.733)
+            ]
+        });
+        await using var db = CreateDbContext();
+        await SeedExperimentAsync(db, method: "bandit", metricType: "numeric", metricAgg: aggregation, metricEvent: "engagement");
+
+        var result = await CreateService(db, stats).AnalyzeRunAsync(
+            EnvId, ExperimentId, RunId, new ExperimentRunAnalyzeRequest());
+
+        using var document = JsonDocument.Parse(result.ExperimentRuns.Single().AnalysisResult);
+        var root = document.RootElement;
+        Assert.Equal("numeric", root.GetProperty("metric_type").GetString());
+        Assert.Equal(aggregation, root.GetProperty("metric_agg").GetString());
+        var rows = root.GetProperty("arms").EnumerateArray().ToArray();
+        Assert.Equal(users == 0 ? 0 : 3.1227, rows[0].GetProperty("mean").GetDouble(), 4);
+        Assert.Equal(users == 0 ? 0 : 3.3526, rows[1].GetProperty("mean").GetDouble(), 4);
+        Assert.All(rows, row =>
+        {
+            Assert.Equal(users, row.GetProperty("n").GetInt64());
+            Assert.False(row.TryGetProperty("rate", out _));
+            Assert.False(row.TryGetProperty("conversions", out _));
+        });
+        var weights = root.GetProperty("thompson_sampling").GetProperty("results").EnumerateArray();
+        if (users == 0)
+        {
+            Assert.All(weights, row => Assert.Equal(JsonValueKind.Null, row.GetProperty("recommended_weight").ValueKind));
+        }
+        else
+        {
+            Assert.Equal(1, weights.Sum(row => row.GetProperty("recommended_weight").GetDouble()), 6);
+        }
     }
 
     [DockerFact]

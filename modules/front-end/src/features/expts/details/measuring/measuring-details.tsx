@@ -77,6 +77,7 @@ import type {
 import {
   analysisSignalClassName,
   analysisValueColumn,
+  formatAnalysisVerdict,
   formatPercent,
   formatProbability,
   normalizedMethod,
@@ -208,6 +209,7 @@ function AnalysisTable({
   const control = variants[0]
   const valueColumn = analysisValueColumn(section)
   const binary = valueColumn === "rate"
+  const banditRun = normalizedMethod(run.method) === "bandit"
   const role = (row: AnalysisRow, index: number) => {
     if (normalizedMethod(run.method) === "bandit")
       return index === 0
@@ -255,13 +257,16 @@ function AnalysisTable({
               </TableHead>
             ) : null}
             <TableHead className="text-right">
-              {bandit ? (
-                t(
-                  `releaseDecision.experiments.detailsPage.measuring.${binary ? "rate" : "mean"}`
-                )
-              ) : (
-                <AnalysisValueHeader column={valueColumn} />
-              )}
+              <AnalysisValueHeader
+                column={valueColumn}
+                context={
+                  normalizedMethod(run.method) === "bandit"
+                    ? bandit
+                      ? "banditPrimary"
+                      : "banditGuardrail"
+                    : "bayesian"
+                }
+              />
             </TableHead>
             {bandit ? (
               <>
@@ -313,7 +318,14 @@ function AnalysisTable({
                 </TableCell>
               ) : null}
               <TableCell className="text-right tabular-nums">
-                {formatNumber(binary ? row.rate : row.mean, binary)}
+                {formatNumber(
+                  banditRun && row.n === 0
+                    ? undefined
+                    : binary
+                      ? row.rate
+                      : row.mean,
+                  binary
+                )}
               </TableCell>
               {bandit ? (
                 <>
@@ -356,7 +368,7 @@ function AnalysisTable({
       </Table>
       {section.verdict ? (
         <div className="border-t px-4 py-2 text-xs text-muted-foreground italic">
-          {section.verdict}
+          {formatAnalysisVerdict(section.verdict, variantNames)}
         </div>
       ) : null}
     </div>
@@ -372,8 +384,21 @@ export function FullAnalysis({
 }) {
   const { t, i18n } = useTranslation()
   const analysis = useMemo(
-    () => parseAnalysis(run.analysisResult, run.inputData),
-    [run.analysisResult, run.inputData]
+    () =>
+      parseAnalysis(run.analysisResult, run.inputData, {
+        primaryMetricEvent: run.primaryMetricEvent,
+        primaryMetricType: run.primaryMetricType,
+        primaryMetricAgg: run.primaryMetricAgg,
+        guardrailEvents: run.guardrailEvents,
+      }),
+    [
+      run.analysisResult,
+      run.inputData,
+      run.primaryMetricEvent,
+      run.primaryMetricType,
+      run.primaryMetricAgg,
+      run.guardrailEvents,
+    ]
   )
   const observed = analysis.srm
     ? Object.values(analysis.srm.observed).reduce(
@@ -473,14 +498,23 @@ export function FullAnalysis({
         <div className="flex flex-wrap items-center gap-2 border-b pb-2 text-xs text-muted-foreground">
           <span className="font-medium text-foreground">SRM</span>
           <span>·</span>
-          <span>p={analysis.srm.pValue?.toFixed(4) ?? "—"}</span>
+          <span>
+            p=
+            {bandit && observed === 0
+              ? "—"
+              : (analysis.srm.pValue?.toFixed(4) ?? "—")}
+          </span>
           <span>·</span>
           <span>
-            {analysis.srm.ok
-              ? "ok"
-              : t(
-                  "releaseDecision.experiments.detailsPage.measuring.checkFailed"
-                )}
+            {bandit && observed === 0
+              ? t(
+                  "releaseDecision.experiments.detailsPage.measuring.notEvaluable"
+                )
+              : analysis.srm.ok
+                ? "ok"
+                : t(
+                    "releaseDecision.experiments.detailsPage.measuring.checkFailed"
+                  )}
           </span>
           <span>·</span>
           <span>
@@ -545,11 +579,15 @@ export function FullAnalysis({
                   : t(
                       "releaseDecision.experiments.detailsPage.measuring.notReady"
                     )}{" "}
-                ·{" "}
-                {t(
-                  "releaseDecision.experiments.detailsPage.measuring.minimumUsers",
-                  { count: run.minimumSample ?? 0 }
-                )}
+                {analysis.minimumUnitsPerArm !== undefined ? (
+                  <>
+                    ·{" "}
+                    {t(
+                      "releaseDecision.experiments.detailsPage.measuring.minimumUsers",
+                      { count: analysis.minimumUnitsPerArm }
+                    )}
+                  </>
+                ) : null}
               </span>
               <span>
                 <strong className="font-medium text-foreground">

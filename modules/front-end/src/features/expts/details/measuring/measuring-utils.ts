@@ -54,6 +54,25 @@ export function parseExperimentVariantNames(
   }
 }
 
+export function formatAnalysisVerdict(
+  verdict: string,
+  variantNames: Record<string, string>
+): string {
+  const tokens = Object.keys(variantNames)
+    .filter((token) => token && variantNames[token]?.trim())
+    .sort((left, right) => right.length - left.length)
+    .map((token) => token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+  if (!tokens.length) return verdict
+
+  // The API prefixes each comparison with its variant token. Resolve only those
+  // prefixes, leaving the conclusion itself and unknown historical IDs intact.
+  return verdict.replace(
+    new RegExp(`(^|; )(${tokens.join("|")}): `, "g"),
+    (_match, separator: string, token: string) =>
+      `${separator}${variantNames[token]}: `
+  )
+}
+
 function numberMap(value: unknown) {
   const source = objectValue(value)
   if (!source) return {}
@@ -129,7 +148,14 @@ export function analysisValueColumn(section: AnalysisSection) {
 
 export function parseAnalysis(
   value: string | null | undefined,
-  inputData?: string | null
+  inputData?: string | null,
+  runMetric?: Pick<
+    MeasuringRun,
+    | "primaryMetricEvent"
+    | "primaryMetricType"
+    | "primaryMetricAgg"
+    | "guardrailEvents"
+  >
 ): ParsedAnalysis {
   const source = parseObject(value)
   if (!source) return { type: "unknown", guardrails: [] }
@@ -142,6 +168,22 @@ export function parseAnalysis(
   const banditEvent = stringValue(source.metric)
   const inputMetrics = objectValue(parseObject(inputData)?.metrics)
   const banditMetric = objectValue(inputMetrics?.[banditEvent ?? ""])
+  const matchingRunMetric =
+    banditEvent && banditEvent === runMetric?.primaryMetricEvent
+      ? runMetric
+      : undefined
+  // Older Bandit results put numeric means in `rate` and always emit conversions=0.
+  // Prefer the analyzed metric's metadata/input over those ambiguous row fields.
+  const inputRows = Object.values(banditMetric ?? {}).map(objectValue)
+  const banditMetricType =
+    stringValue(source.metric_type) ??
+    (inputRows.some((row) => row && "sum" in row)
+      ? "numeric"
+      : inputRows.some((row) => row && "k" in row)
+        ? "proportion"
+        : matchingRunMetric?.primaryMetricType === "binary"
+          ? "proportion"
+          : (matchingRunMetric?.primaryMetricType ?? undefined))
   const banditRows = Array.isArray(source.arms)
     ? source.arms
         .map(analysisRow)
@@ -158,9 +200,23 @@ export function parseAnalysis(
     : new Map<string, Record<string, unknown>>()
 
   banditRows.forEach((row) => {
+    if (banditMetricType === "numeric" || banditMetricType === "continuous") {
+      const inputRow = objectValue(banditMetric?.[row.variant])
+      const sum = numberValue(inputRow?.sum)
+      row.mean ??= sum !== undefined ? (row.n > 0 ? sum / row.n : 0) : row.rate
+      row.conversions = undefined
+      row.rate = undefined
+    }
     const recommendation = recommendations.get(row.variant)
-    row.pBest = numberValue(recommendation?.p_best)
-    row.recommendedWeight = numberValue(recommendation?.recommended_weight)
+    // Older results used zero placeholders before burn-in completed.
+    row.pBest =
+      thompson?.enough_units === false
+        ? undefined
+        : numberValue(recommendation?.p_best)
+    row.recommendedWeight =
+      thompson?.enough_units === false
+        ? undefined
+        : numberValue(recommendation?.recommended_weight)
   })
 
   const guardrails = Array.isArray(source.guardrails)
@@ -168,6 +224,38 @@ export function parseAnalysis(
         .map(section)
         .filter((item): item is AnalysisSection => Boolean(item))
     : []
+
+  if (rawType === "bandit") {
+    let definitions: unknown[] = []
+    try {
+      const parsed: unknown = JSON.parse(runMetric?.guardrailEvents ?? "[]")
+      if (Array.isArray(parsed)) definitions = parsed
+    } catch {
+      /* Missing legacy configuration cannot identify a metric type. */
+    }
+    for (const guardrail of guardrails) {
+      const definition = definitions
+        .map(objectValue)
+        .find(
+          (item) =>
+            item?.event === guardrail.event &&
+            item?.metricAgg === guardrail.metricAgg
+        )
+      // Empty legacy results guessed "numeric". Repair only from the matching
+      // run's declared binary guardrail; aggregation alone does not identify type.
+      if (
+        definition?.metricType === "binary" &&
+        guardrail.rows.every((row) => row.n === 0)
+      ) {
+        guardrail.metricType = "proportion"
+        for (const row of guardrail.rows) {
+          row.conversions = 0
+          row.rate = undefined
+          row.mean = undefined
+        }
+      }
+    }
+  }
 
   return {
     type: rawType === "bandit" || rawType === "bayesian" ? rawType : "unknown",
@@ -199,6 +287,11 @@ export function parseAnalysis(
         ? {
             label: banditEvent ?? "",
             event: banditEvent,
+            metricType: banditMetricType,
+            metricAgg:
+              stringValue(source.metric_agg) ??
+              matchingRunMetric?.primaryMetricAgg ??
+              undefined,
             inverse:
               typeof source.inverse === "boolean"
                 ? source.inverse
@@ -212,6 +305,11 @@ export function parseAnalysis(
     enoughUnits:
       typeof thompson?.enough_units === "boolean"
         ? thompson.enough_units
+        : undefined,
+    minimumUnitsPerArm:
+      rawType === "bandit"
+        ? (numberValue(thompson?.minimum_units_per_arm) ??
+          (source.algorithm === "thompson_sampling_top_two" ? 100 : undefined))
         : undefined,
     stopping: stopping
       ? {

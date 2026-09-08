@@ -103,6 +103,7 @@ export type ParsedAnalysis = {
   primary?: AnalysisSection
   guardrails: AnalysisSection[]
   enoughUnits?: boolean
+  minimumUnitsPerArm?: number
   stopping?: { met?: boolean; threshold?: number; message?: string }
 }
 
