@@ -1,9 +1,7 @@
 import type {
-  ExperimentDetail,
-  ExperimentRunDetail,
-} from "../details/experiment-details-types"
-import { hasCapturedLearning } from "../details/learning/learning-utils"
-import type { ExperimentListItem } from "./experiment-types"
+  ExperimentListItem,
+  ExperimentRunStateSummary,
+} from "./experiment-types"
 
 export const EXPERIMENT_LIST_STATES = [
   "hypothesis",
@@ -20,8 +18,10 @@ export type ExperimentListState =
   | { key: Exclude<ExperimentListStateKey, "decision"> }
   | { key: "decision"; decision: string }
 
-export type ExperimentListDataItem = ExperimentListItem &
-  Pick<ExperimentDetail, "experimentRuns" | "lastLearning">
+export type ExperimentListDataItem = ExperimentListItem & {
+  experimentRuns: ExperimentRunStateSummary[]
+  hasLearning: boolean
+}
 
 export type ExperimentListRow = ExperimentListItem & {
   listState: ExperimentListState
@@ -33,7 +33,7 @@ export type ExperimentListData = {
   scope: "page" | "all"
 }
 
-function observationWindow(run: ExperimentRunDetail) {
+function observationWindow(run: ExperimentRunStateSummary) {
   const start = run.observationStart ? Date.parse(run.observationStart) : null
   const end = run.observationEnd ? Date.parse(run.observationEnd) : null
   if (
@@ -48,7 +48,7 @@ function observationWindow(run: ExperimentRunDetail) {
 export function experimentListState(
   experiment: Pick<
     ExperimentListDataItem,
-    "flagKey" | "experimentRuns" | "lastLearning"
+    "flagKey" | "experimentRuns" | "hasLearning"
   >,
   now: number
 ): ExperimentListState {
@@ -62,7 +62,7 @@ export function experimentListState(
 
   // A decision from an earlier run must not hide a new observation cycle.
   if (decision) {
-    if (experiment.lastLearning?.trim() || hasCapturedLearning(latestRun)) {
+    if (experiment.hasLearning || latestRun.hasLearning) {
       return { key: "learnt" }
     }
     return { key: "decision", decision }

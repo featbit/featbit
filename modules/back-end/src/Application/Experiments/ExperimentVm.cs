@@ -1,4 +1,5 @@
 using Application.Bases.Models;
+using System.Text.Json.Serialization;
 
 namespace Application.Experiments;
 
@@ -34,6 +35,9 @@ public class ExperimentVm
     public int RunCount { get; set; }
 
     public string RunMethodSummary { get; set; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public ExperimentListStateSummaryVm StateSummary { get; set; }
 
     public DateTime CreatedAt { get; set; }
 

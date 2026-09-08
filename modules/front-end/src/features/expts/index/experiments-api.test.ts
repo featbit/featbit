@@ -36,30 +36,27 @@ describe("experiments API", () => {
     })
   })
 
-  it("reads run details for display without writing stage or loading no-run details", async () => {
+  it("loads ten experiments with runs in one list request, without fetching details", async () => {
     const controller = new AbortController()
-    const summary = {
-      id: "with / run",
-      name: "Checkout",
-      runCount: 1,
-      stage: "hypothesis",
-      flagKey: "checkout",
-    }
     const run = {
       id: "run-1",
+      createdAt: "2026-09-01T00:00:00Z",
       observationStart: "2026-09-01T00:00:00Z",
+      observationEnd: null,
       decision: "CONTINUE",
+      hasLearning: false,
     }
-    vi.mocked(fetchApi)
-      .mockResolvedValueOnce({
-        items: [summary, { ...summary, id: "no-run", runCount: 0 }],
-        totalCount: 20,
-      })
-      .mockResolvedValueOnce({
+    vi.mocked(fetchApi).mockResolvedValueOnce({
+      items: Array.from({ length: 10 }, (_, index) => ({
+        id: String(index),
+        name: "Checkout",
+        runCount: 1,
+        stage: "hypothesis",
         flagKey: "checkout",
-        experimentRuns: [run],
-        lastLearning: null,
-      })
+        stateSummary: { runs: [run], hasLearning: index === 0 },
+      })),
+      totalCount: 30,
+    })
 
     const result = await fetchExperimentList(
       "env-1",
@@ -73,13 +70,17 @@ describe("experiments API", () => {
       controller.signal
     )
 
-    expect(result.totalCount).toBe(20)
+    expect(result.totalCount).toBe(30)
     expect(result.scope).toBe("page")
-    expect(result.items[0]?.experimentRuns).toEqual([run])
-    expect(result.items[1]?.experimentRuns).toEqual([])
-    expect(fetchApi).toHaveBeenCalledTimes(2)
+    expect(result.items).toHaveLength(10)
+    expect(result.items.every((item) => item.experimentRuns[0] === run)).toBe(
+      true
+    )
+    expect(result.items[0]?.hasLearning).toBe(true)
+    expect(result.items[1]?.hasLearning).toBe(false)
+    expect(fetchApi).toHaveBeenCalledTimes(1)
     expect(fetchApi).toHaveBeenLastCalledWith(
-      "/api/v1/envs/env-1/experiments/with%20%2F%20run",
+      "/api/v1/envs/env-1/experiments?pageIndex=2&pageSize=10",
       { signal: controller.signal }
     )
     expect(
@@ -98,17 +99,19 @@ describe("experiments API", () => {
     const firstPage = Array.from({ length: 100 }, (_, index) => ({
       id: String(index),
       runCount: 0,
+      stateSummary: { runs: [], hasLearning: false },
     }))
     vi.mocked(fetchApi)
       .mockResolvedValueOnce({ items: firstPage, totalCount: 101 })
       .mockResolvedValueOnce({
-        items: [{ id: "last", runCount: 1 }],
+        items: [
+          {
+            id: "last",
+            runCount: 1,
+            stateSummary: { runs: [{ id: "run-1" }], hasLearning: false },
+          },
+        ],
         totalCount: 101,
-      })
-      .mockResolvedValueOnce({
-        flagKey: "checkout",
-        experimentRuns: [{ id: "run-1" }],
-        lastLearning: null,
       })
 
     const result = await fetchExperimentList("env-1", {
@@ -121,7 +124,10 @@ describe("experiments API", () => {
 
     expect(result.items).toHaveLength(101)
     expect(result.items.at(-1)?.id).toBe("last")
+    expect(result.items.at(-1)?.experimentRuns).toEqual([{ id: "run-1" }])
+    expect(result.items[0]?.experimentRuns).toEqual([])
     expect(result.scope).toBe("all")
+    expect(fetchApi).toHaveBeenCalledTimes(2)
     const listRequests = vi
       .mocked(fetchApi)
       .mock.calls.slice(0, 2)
@@ -137,13 +143,8 @@ describe("experiments API", () => {
     }
   })
 
-  it("surfaces a detail read failure rather than falling back to the stale stage", async () => {
-    vi.mocked(fetchApi)
-      .mockResolvedValueOnce({
-        items: [{ id: "experiment-1", runCount: 1 }],
-        totalCount: 1,
-      })
-      .mockRejectedValueOnce(new Error("Detail unavailable"))
+  it("surfaces a list read failure", async () => {
+    vi.mocked(fetchApi).mockRejectedValueOnce(new Error("List unavailable"))
 
     await expect(
       fetchExperimentList("env-1", {
@@ -153,7 +154,7 @@ describe("experiments API", () => {
         pageIndex: 0,
         pageSize: 10,
       })
-    ).rejects.toThrow("Detail unavailable")
+    ).rejects.toThrow("List unavailable")
   })
 
   it("keeps creation limited to name, description, and project key", async () => {
@@ -175,32 +176,30 @@ describe("experiments API", () => {
     )
   })
 
-  it("does not start another detail batch after cancellation", async () => {
+  it("does not load another list page after cancellation", async () => {
     const controller = new AbortController()
     let completeBatch!: (value: unknown) => void
     const batchRequest = new Promise((resolve) => {
       completeBatch = resolve
     })
-    vi.mocked(fetchApi)
-      .mockResolvedValueOnce({
-        items: Array.from({ length: 6 }, (_, index) => ({
-          id: String(index),
-          runCount: 1,
-        })),
-        totalCount: 6,
-      })
-      .mockReturnValue(batchRequest)
+    vi.mocked(fetchApi).mockReturnValueOnce(batchRequest)
 
     const request = fetchExperimentList(
       "env-1",
-      { name: "", flagKey: "", scope: "page", pageIndex: 0, pageSize: 10 },
+      { name: "", flagKey: "", scope: "all", pageIndex: 0, pageSize: 10 },
       controller.signal
     )
     const cancelled = expect(request).rejects.toThrow()
-    await vi.waitFor(() => expect(fetchApi).toHaveBeenCalledTimes(6))
+    await vi.waitFor(() => expect(fetchApi).toHaveBeenCalledTimes(1))
     controller.abort()
-    completeBatch({ experimentRuns: [], flagKey: null, lastLearning: null })
+    completeBatch({
+      items: Array.from({ length: 100 }, (_, index) => ({
+        id: String(index),
+        stateSummary: { runs: [], hasLearning: false },
+      })),
+      totalCount: 101,
+    })
     await cancelled
-    expect(fetchApi).toHaveBeenCalledTimes(6)
+    expect(fetchApi).toHaveBeenCalledTimes(1)
   })
 })

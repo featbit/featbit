@@ -682,28 +682,42 @@ public class ExperimentService(
             experiments.Select(experiment => ToVm(experiment, runLookup)).ToArray());
     }
 
-    private async Task<Dictionary<Guid, string[]>> BuildRunLookupAsync(Guid[] experimentIds)
+    private async Task<Dictionary<Guid, ExperimentRun[]>> BuildRunLookupAsync(Guid[] experimentIds)
     {
         if (experimentIds.Length == 0)
         {
-            return new Dictionary<Guid, string[]>();
+            return new Dictionary<Guid, ExperimentRun[]>();
         }
 
         return (await mongoDb.CollectionOf<ExperimentRun>()
                 .Find(x => experimentIds.Contains(x.ExperimentId))
-                .Project(x => new { x.ExperimentId, x.Method })
+                .Project(x => new ExperimentRun
+                {
+                    Id = x.Id,
+                    ExperimentId = x.ExperimentId,
+                    Method = x.Method,
+                    CreatedAt = x.CreatedAt,
+                    ObservationStart = x.ObservationStart,
+                    ObservationEnd = x.ObservationEnd,
+                    Decision = x.Decision,
+                    WhatChanged = x.WhatChanged,
+                    WhatHappened = x.WhatHappened,
+                    ConfirmedOrRefuted = x.ConfirmedOrRefuted,
+                    WhyItHappened = x.WhyItHappened,
+                    NextHypothesis = x.NextHypothesis
+                })
                 .ToListAsync())
             .GroupBy(x => x.ExperimentId)
-            .ToDictionary(x => x.Key, x => x.Select(run => run.Method).ToArray());
+            .ToDictionary(x => x.Key, x => x.ToArray());
     }
 
     private static ExperimentVm ToVm(
         Experiment experiment,
-        IReadOnlyDictionary<Guid, string[]>? runLookup = null)
+        IReadOnlyDictionary<Guid, ExperimentRun[]>? runLookup = null)
     {
-        var methods = runLookup != null && runLookup.TryGetValue(experiment.Id, out var lookupMethods)
-            ? lookupMethods
-            : experiment.ExperimentRuns.Select(x => x.Method).ToArray();
+        var runs = runLookup != null && runLookup.TryGetValue(experiment.Id, out var lookupRuns)
+            ? lookupRuns
+            : experiment.ExperimentRuns.ToArray();
 
         return new ExperimentVm
         {
@@ -714,8 +728,9 @@ public class ExperimentService(
             FlagKey = experiment.FlagKey,
             FeatBitProjectKey = experiment.FeatBitProjectKey,
             FeatBitEnvId = experiment.FeatBitEnvId,
-            RunCount = methods.Length,
-            RunMethodSummary = BuildRunMethodSummary(methods),
+            RunCount = runs.Length,
+            RunMethodSummary = BuildRunMethodSummary(runs.Select(run => run.Method)),
+            StateSummary = ExperimentListStateSummaryVm.From(experiment.LastLearning, runs),
             CreatedAt = experiment.CreatedAt,
             UpdatedAt = experiment.UpdatedAt
         };

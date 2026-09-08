@@ -16,8 +16,24 @@ export type ExperimentListItem = {
 }
 
 export type PagedExperiments = {
-  items: ExperimentListItem[]
+  items: ExperimentListSummary[]
   totalCount: number
+}
+
+export type ExperimentRunStateSummary = {
+  id: string
+  createdAt: string
+  observationStart: string | null
+  observationEnd: string | null
+  decision: string | null
+  hasLearning: boolean
+}
+
+export type ExperimentListSummary = ExperimentListItem & {
+  stateSummary: {
+    hasLearning: boolean
+    runs: ExperimentRunStateSummary[]
+  }
 }
 
 export type CreateExperimentPayload = {

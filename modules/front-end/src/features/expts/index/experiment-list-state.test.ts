@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import type { ExperimentRunDetail } from "../details/experiment-details-types"
+import type { ExperimentRunStateSummary } from "./experiment-types"
 import {
   experimentListState,
   selectExperimentListPage,
@@ -7,20 +7,12 @@ import {
 } from "./experiment-list-state"
 
 const now = Date.parse("2026-09-06T12:00:00Z")
-const run: ExperimentRunDetail = {
+const run: ExperimentRunStateSummary = {
   id: "run-1",
-  slug: "run-1",
-  method: "bayesian_ab",
   observationStart: "2026-09-01T00:00:00Z",
   observationEnd: "2026-09-07T00:00:00Z",
   decision: null,
-  decisionSummary: null,
-  decisionReason: null,
-  whatChanged: null,
-  whatHappened: null,
-  confirmedOrRefuted: null,
-  whyItHappened: null,
-  nextHypothesis: null,
+  hasLearning: false,
   createdAt: "2026-09-01T00:00:00Z",
 }
 const experiment: ExperimentListDataItem = {
@@ -33,7 +25,7 @@ const experiment: ExperimentListDataItem = {
   featBitEnvId: "env-1",
   runCount: 1,
   runMethodSummary: "Bayesian",
-  lastLearning: null,
+  hasLearning: false,
   experimentRuns: [run],
   createdAt: run.createdAt,
   updatedAt: run.createdAt,
@@ -41,7 +33,12 @@ const experiment: ExperimentListDataItem = {
 
 describe("experiment list state", () => {
   it("uses the observation window regardless of saved stage", () => {
-    for (const stage of ["hypothesis", "implementing", "measuring", "learning"]) {
+    for (const stage of [
+      "hypothesis",
+      "implementing",
+      "measuring",
+      "learning",
+    ]) {
       const savedExperiment = { ...experiment, stage }
       expect(experimentListState(savedExperiment, now)).toEqual({
         key: "measuring",
@@ -63,7 +60,7 @@ describe("experiment list state", () => {
       ...run,
       id: "old",
       decision: "PAUSE",
-      whatHappened: "Old finding",
+      hasLearning: true,
     }
     const newest = { ...run, id: "new", createdAt: "2026-09-06T08:00:00+08:00" }
     for (const experimentRuns of [
@@ -72,7 +69,7 @@ describe("experiment list state", () => {
     ]) {
       expect(
         experimentListState(
-          { ...experiment, lastLearning: "Previous cycle", experimentRuns },
+          { ...experiment, hasLearning: true, experimentRuns },
           now
         )
       ).toEqual({ key: "measuring" })
@@ -104,9 +101,7 @@ describe("experiment list state", () => {
       experimentListState(
         {
           ...experiment,
-          experimentRuns: [
-            { ...run, decision: "CONTINUE", whatHappened: "Improved" },
-          ],
+          experimentRuns: [{ ...run, decision: "CONTINUE", hasLearning: true }],
         },
         now
       )
@@ -115,7 +110,7 @@ describe("experiment list state", () => {
       experimentListState(
         {
           ...experiment,
-          lastLearning: "Improved",
+          hasLearning: true,
           experimentRuns: [{ ...run, decision: "CONTINUE" }],
         },
         now
@@ -123,20 +118,20 @@ describe("experiment list state", () => {
     ).toEqual({ key: "learnt" })
   })
 
-  it("does not count whitespace or an earlier run's learning as the latest run's learning", () => {
+  it("does not count an earlier run's learning as the latest run's learning", () => {
     expect(
       experimentListState(
         {
           ...experiment,
-          lastLearning: " \n ",
+          hasLearning: false,
           experimentRuns: [
-            { ...run, whatHappened: "Old finding" },
+            { ...run, hasLearning: true },
             {
               ...run,
               id: "new",
               createdAt: "2026-09-06T00:00:00Z",
               decision: "PAUSE",
-              whatHappened: "  ",
+              hasLearning: false,
             },
           ],
         },
@@ -150,7 +145,7 @@ describe("experiment list state", () => {
       experimentListState(
         {
           ...experiment,
-          lastLearning: "A finding",
+          hasLearning: true,
           experimentRuns: [{ ...run, decision: "  " }],
         },
         now

@@ -507,6 +507,69 @@ public abstract class WritableExperimentProviderTestsBase(
     ExperimentProviderParityFixture fixture) : ExperimentProviderTestsBase(fixture)
 {
     [DockerFact]
+    public async Task GetExperimentList_ReturnsPagedStateSummariesWithoutFullDetails()
+    {
+        var name = $"list-summary-{Guid.NewGuid():N}";
+        var service = CreateExperimentServices().ExperimentService;
+        var emptyExperiment = NewExperiment($"{name}-empty");
+        emptyExperiment.LastLearning = " \t\n ";
+        await service.CreateAsync(emptyExperiment);
+        var experiment = NewExperiment($"{name}-with-runs");
+        experiment.LastLearning = "Experiment learning";
+        await service.CreateAsync(experiment);
+
+        var detail = await service.CreateRunAsync(ExperimentProviderParityFixture.EnvId, experiment.Id);
+        var firstRun = Assert.Single(detail.ExperimentRuns);
+        var start = new DateTime(2026, 9, 1, 0, 0, 0, DateTimeKind.Utc);
+        await service.UpdateRunAsync(ExperimentProviderParityFixture.EnvId, experiment.Id, firstRun.Id,
+            new ExperimentRunUpdate
+            {
+                Method = "bayesian_ab", ObservationStart = start, ObservationEnd = start.AddDays(1),
+                Decision = "PAUSE", NextHypothesis = "Try the next change",
+                InputData = "{\"privateInput\":true}", AnalysisResult = "{\"fullAnalysis\":true}"
+            });
+        detail = await service.CreateRunAsync(ExperimentProviderParityFixture.EnvId, experiment.Id);
+        var secondRun = Assert.Single(detail.ExperimentRuns, run => run.Id != firstRun.Id);
+        await service.UpdateRunAsync(ExperimentProviderParityFixture.EnvId, experiment.Id, secondRun.Id,
+            new ExperimentRunUpdate { Method = "bandit", ObservationStart = start.AddDays(2) });
+
+        var firstPage = await service.GetListAsync(ExperimentProviderParityFixture.EnvId,
+            new ExperimentFilter { Name = name, PageSize = 1, PageIndex = 0 });
+        var secondPage = await service.GetListAsync(ExperimentProviderParityFixture.EnvId,
+            new ExperimentFilter { Name = name, PageSize = 1, PageIndex = 1 });
+        Assert.Equal(2, firstPage.TotalCount);
+        Assert.Equal(2, secondPage.TotalCount);
+        var items = new[] { Assert.Single(firstPage.Items), Assert.Single(secondPage.Items) };
+        var empty = Assert.Single(items, item => item.Id == emptyExperiment.Id);
+        Assert.Equal(0, empty.RunCount);
+        Assert.False(empty.StateSummary.HasLearning);
+        Assert.Empty(empty.StateSummary.Runs);
+        var listed = Assert.Single(items, item => item.Id == experiment.Id);
+        Assert.Equal(2, listed.RunCount);
+        Assert.Equal("Bayesian + Bandit arms", listed.RunMethodSummary);
+        Assert.True(listed.StateSummary.HasLearning);
+        Assert.Equal(2, listed.StateSummary.Runs.Count);
+        var previous = Assert.Single(listed.StateSummary.Runs, run => run.Id == firstRun.Id);
+        Assert.Equal(firstRun.CreatedAt, previous.CreatedAt);
+        Assert.Equal(start, previous.ObservationStart);
+        Assert.Equal(start.AddDays(1), previous.ObservationEnd);
+        Assert.Equal("PAUSE", previous.Decision);
+        Assert.True(previous.HasLearning);
+        var current = Assert.Single(listed.StateSummary.Runs, run => run.Id == secondRun.Id);
+        Assert.Equal(start.AddDays(2), current.ObservationStart);
+        Assert.Null(current.ObservationEnd);
+        Assert.Null(current.Decision);
+        Assert.False(current.HasLearning);
+
+        var json = JsonSerializer.Serialize(listed, new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        Assert.DoesNotContain("\"inputData\"", json);
+        Assert.DoesNotContain("\"analysisResult\"", json);
+        Assert.DoesNotContain("\"activities\"", json);
+        Assert.DoesNotContain("\"nextHypothesis\"", json);
+        Assert.DoesNotContain("\"lastLearning\"", json);
+    }
+
+    [DockerFact]
     public async Task AddInsights_MixedBatch_PersistsEvents()
     {
         var envId = Guid.NewGuid();
