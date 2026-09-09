@@ -1,8 +1,8 @@
 # FeatBit REST API E2E Test Script
 
-For the `auto-test-001` four-experiment UI workflow, including step 7 traffic
-configuration and subsequent SDK/Bandit screenshot checks, follow
-[UI_SDK_TEST_SCRIPT.md](./UI_SDK_TEST_SCRIPT.md). The numbered steps below belong
+For the `auto-test-001` six-experiment UI workflow, including Average values,
+step 7 traffic configuration and subsequent SDK/Bandit screenshot checks, follow
+[UI_AUTO_TEST_SCRIPT.md](./UI_AUTO_TEST_SCRIPT.md). The numbered steps below belong
 to this separate REST API suite.
 
 This document is the human-readable fixed test script for testers and developers. It explains what is being tested, why each step exists, which API endpoints are used, and what assertions must pass.

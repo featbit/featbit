@@ -1,8 +1,8 @@
-# FeatBit UI + .NET Server SDK 自动测试脚本
+# FeatBit UI 自动测试脚本
 
-这是本任务的固定操作步骤，供 `auto-test` 技能通过 Computer Use 执行。第 1–6 步保存用户最初的初始化要求，第 7–14 步补充分流、SDK 数据、分析、动态 Bandit 和截图验收。
+这是本任务的固定操作步骤，供 `auto-test` 技能通过 Computer Use 执行。第 1–6 步定义初始化要求，包含原四个实验及新增的两个 Average values 实验；第 7–14 步涵盖全部六个实验的分流、.NET Server SDK 数据、分析、动态 Bandit 和截图验收。
 
-文档状态：2026-09-09 整理完成；本次仅编写步骤，未执行第 7–14 步，未生成相应截图或分析结果。初始化的历史执行证据位于 `reports/ui-auto-20260908-initialization/report.md`，不能替代下一次运行的现场检查。
+文档状态：2026-09-09 更新；本次仅修改测试脚本。原四个实验已初始化，新增的两个 Average metric、一个 flag 和两个实验尚未创建；第 7–14 步尚未执行，未生成相应截图或分析结果。初始化的历史执行证据位于 `reports/ui-auto-20260908-initialization/report.md`，不能替代下一次运行的现场检查。
 
 本脚本与 [REST API 测试脚本](./TEST_SCRIPT.md) 是两套独立用例。不要直接运行 REST runner 来准备这里的数据：它会创建和修改另一套资源。这里的 evaluation、曝光与 metric track 必须使用官方 `FeatBit.ServerSdk`；管理 API 可用于资源准备与读取统计，不能直接构造 insight 请求、写数据库或写入自制 `analysisResult`。
 
@@ -30,6 +30,10 @@
 | numeric-once-per-user-primary-metric | Numeric value | Once per user |
 | numeric-sum-guarail-metric | Numeric value | Sum values |
 | numeric-sum-primary-metric | Numeric value | Sum values |
+| numeric-average-guarail-metric | Numeric value | Average values |
+| numeric-average-primary-metric | Numeric value | Average values |
+
+扩展后共 10 个 metric。两个 Average metric 的 `metricType=numeric`、`metricAgg=average`；在创建、重新打开编辑表单及刷新后的列表中均核对聚合方式，不能使用 Sum values 替代。
 
 ## 3. 创建并核对 layer
 
@@ -39,7 +43,7 @@
 | --- | --- | --- |
 | layer-001 | user.keyId | for 3 experimentations |
 
-第 5 步的三个 Run 分别使用 `[0,33)`、`[33,66)`、`[66,100)`，无重叠，共占 100%。这些是分析准入的 Layer 切片，不是 feature flag 的变体分流比例。
+第 5 步原有的三个分层 Run 分别使用 `[0,33)`、`[33,66)`、`[66,100)`，无重叠，共占 100%。新增的两个 Average Run 均不绑定 Layer，使用独立用户池，不改变这三个既有切片。这些是分析准入的 Layer 切片，不是 feature flag 的变体分流比例。
 
 ## 4. 创建并核对 feature flags
 
@@ -52,10 +56,11 @@ Name 与 Key 相同；字符串值不包含引号。此步骤允许管理 API，
 | search-ranking | String | algo-a, algo-b | layer-001 |
 | rd-notification-style | String | style-a, style-b, style-c | layer-001 |
 | rd-risk-threshold | String | bar-low, bar-medium, bar-high | layer-001 |
+| rd-average-value | String | avg-a, avg-b, avg-c | 无 |
 
-绑定和数据校验使用实际 variation ID 与 value 的映射，不依赖 UI 展示名称或数组序号。`ai-assistant-route` 没有本轮实验，不参与第 7 步之后的数据流程。
+绑定和数据校验使用实际 variation ID 与 value 的映射，不依赖 UI 展示名称或数组序号。扩展后共 6 个 flag：复用此前尚未绑定实验的 `ai-assistant-route` 作为 Bayesian Average 的专用 flag，新增 `rd-average-value` 作为 Bandit Average 的专用 flag；两者均参与第 7 步之后的数据流程。
 
-## 5. 创建并核对四个实验及唯一的 Run 1
+## 5. 创建并核对六个实验及各自唯一的 Run 1
 
 通过 Computer Use 操作 `/en/experiments`。每个实验在 Exposure 绑定指定 flag、一个 Primary 和两个 Guardrails；在 Measuring 创建唯一的 Run 1，保存后刷新检查。
 
@@ -63,17 +68,23 @@ Name 与 Key 相同；字符串值不包含引号。此步骤允许管理 API，
 | --- | --- | --- | --- | --- | --- |
 | e2e-bayesian-binary-primary | e2e-scenario-balanced | Bayesian A/B/n | false | true | 无 |
 | e2e-bayesian-numeric-count-all-primary | search-ranking | Bayesian A/B/n | algo-a | algo-b | [0,33) |
+| e2e-bayesian-numeric-average-primary | ai-assistant-route | Bayesian A/B/n | path-a | path-b | 无 |
 | e2e-bandit-numeric-once-per-user-primary | rd-notification-style | Bandit | style-a | style-b, style-c，均勾选 | [33,66) |
 | e2e-bandit-numeric-sum-primary | rd-risk-threshold | Bandit | bar-low | bar-medium, bar-high，均勾选 | [66,100) |
+| e2e-bandit-numeric-average-primary | rd-average-value | Bandit | avg-a | avg-b, avg-c，均勾选 | 无 |
 
 | 实验 | Primary | Guardrail 1 | Guardrail 2 |
 | --- | --- | --- | --- |
 | Bayesian Binary | binary-primary-metric | numeric-count-all-guarail-metric | numeric-sum-guarail-metric |
 | Bayesian Count all | numeric-count-all-primary-metric | numeric-binary-conversion-guarail-metric | numeric-once-per-user-guarail-metric |
+| Bayesian Average | numeric-average-primary-metric | numeric-average-guarail-metric | numeric-count-all-guarail-metric |
 | Bandit Once per user | numeric-once-per-user-primary-metric | numeric-binary-conversion-guarail-metric | numeric-count-all-guarail-metric |
 | Bandit Sum | numeric-sum-primary-metric | numeric-once-per-user-guarail-metric | numeric-sum-guarail-metric |
+| Bandit Average | numeric-average-primary-metric | numeric-average-guarail-metric | numeric-binary-conversion-guarail-metric |
 
 Primary 为 Higher is better；Guardrails 为 Increase is bad。Assignment unit 为 `user.keyId`；每个已选择变体的 analysis sampling 为 100%；不添加额外 Run audience filters。
+
+新增两个 Average 实验都绑定一个 Average Primary 和两个 Guardrails，其中一个 Guardrail 也为 Average values。它们复用上述两个 Average metric，但测试用户池严格分开。完成扩展后应为三个 Bayesian、三个 Bandit，各只有一个 Run 1。保存后刷新 Exposure 和 Measuring，核对 flag、metric 类型及聚合、角色、Run type 与无 Layer 状态。
 
 历史对象 ID 仅供定位，执行时必须核对名称、flag 和 Run 归属：
 
@@ -83,6 +94,8 @@ Primary 为 Higher is better；Guardrails 为 Increase is bad。Assignment unit 
 | Bayesian Count all | a99f8324-2440-45b4-a278-19843a837dac | f2b7cada-43ca-4aa1-ac92-f0c4fe44229c |
 | Bandit Once per user | fb1476d1-690d-4c61-a803-e7e064ef48e0 | c9da1f5b-d22e-479b-a346-d3a4ee4f8e20 |
 | Bandit Sum | a61daf7e-597a-41d2-9e7a-0a1e67560687 | ed383019-94f7-44aa-8e4e-1ad09c04f84f |
+| Bayesian Average | 尚未创建；首次执行时记录实际 ID | 首次创建唯一的 Run 1 后记录 |
+| Bandit Average | 尚未创建；首次执行时记录实际 ID | 首次创建唯一的 Run 1 后记录 |
 
 ## 6. 初始化期间的其他自动化测试
 
@@ -94,26 +107,29 @@ Primary 为 Higher is better；Guardrails 为 Increase is bad。Assignment unit 
 - Primary / Guardrails 不能重复选择同一 metric。
 - Layer 显示三个关联 Run、无切片冲突；Show more / Show less 可展开和收起。
 - 按实验筛选 metrics，正确显示一个 Primary 和两个 Guardrails。
-- 实验列表恰好包含四个目标实验，每个只有一个 Run，方法和角色正确。
+- 实验列表包含六个目标实验：三个 Bayesian、三个 Bandit，每个只有一个 Run，方法和角色正确。
+- 新增 Average metric 的编辑与刷新保留检查通过；两个 Average 实验都显示一个 Average Primary、一个 Average Guardrail 和指定的另一 Guardrail。
 
 ## 7. 配置初始 feature flag 分流并截图
 
 用户无需手动准备分流。自动执行以下操作；管理 API 可以提交配置，保存结果必须通过 Computer Use 打开 Targeting 页面、刷新并验证。
 
-1. 读取并备份四个 flag 的 revision、启用状态、规则、默认返回、variation ID/value 与实验采集配置。
-2. 在指定环境为这四个 flag 添加或更新专用规则，例如 `UI SDK experiment test`。规则匹配 `expt_simulator IsOneOf [ui-sdk-e2e-v1]`，放在可覆盖其他匹配规则的位置；SDK 测试用户携带相同属性。保留无关规则和默认返回。
-3. 分流使用用户 key；启用这条规则的实验采集，使正常 SDK evaluation 能记录 eligible exposure。启用四个 flag。
+1. 读取并备份六个 flag 的 revision、启用状态、规则、默认返回、variation ID/value 与实验采集配置。
+2. 在指定环境为这六个 flag 添加或更新专用规则，例如 `UI SDK experiment test`。规则匹配 `expt_simulator IsOneOf [ui-sdk-e2e-v1]`，放在可覆盖其他匹配规则的位置；SDK 测试用户携带相同属性。保留无关规则和默认返回。
+3. 分流使用用户 key；启用这条规则的实验采集，使正常 SDK evaluation 能记录 eligible exposure。启用六个 flag。
 4. 保存后重新读取当前 revision，通过 UI 刷新核对下表；为每个 flag 截图。
-5. 记录两个 Bandit 的初始配置快照为各自的阶段 A 配置；保持第 5 步的 Layer 和 analysis sampling 配置。
+5. 记录三个 Bandit 的初始配置快照为各自的阶段 A 配置；保持第 5 步的 Layer 和 analysis sampling 配置。
 
 | Flag | 初始分流（按实际 value） |
 | --- | --- |
 | e2e-scenario-balanced | false 50%，true 50% |
 | search-ranking | algo-a 50%，algo-b 50% |
+| ai-assistant-route | path-a 50%，path-b 50% |
 | rd-notification-style | style-a 70%，style-b 15%，style-c 15% |
 | rd-risk-threshold | bar-low 70%，bar-medium 15%，bar-high 15% |
+| rd-average-value | avg-a 70%，avg-b 15%，avg-c 15% |
 
-这两个 flag 分别专用于对应的 Bandit 实验，均为一个 Baseline 加两个候选 Arm，共三个变体。70%/15%/15% 是本用例选定的初始策略：先保留较多 Baseline 流量，同时让两个候选都有采样机会；它不是 Bandit 算法的固定初始比例。70%/10%/10%/10% 则需要四个实际变体，本轮不额外创建第四个变体或新 flag。
+上述三个 Bandit flag 分别专用于对应的实验，均为一个 Baseline 加两个候选 Arm，共三个变体。70%/15%/15% 是本用例选定的初始策略：先保留较多 Baseline 流量，同时让两个候选都有采样机会；它不是 Bandit 算法的固定初始比例。70%/10%/10%/10% 则需要四个实际变体，本轮不将这三个 Bandit 扩展为四变体。
 
 阶段 A 使用上述不等比分流，阶段 B 再应用实际分析推荐的权重。Baseline 不享有算法内置的永久 70% 保留比例；若要求全程保留至少 70%，需要另外定义受约束的分配策略，不能直接套用当前 Top-Two 推荐。先前的三组近似均分方案用于快速收集平衡样本，本版已改为不等比起步，以覆盖用户提出的场景。
 
@@ -123,7 +139,7 @@ Primary 为 Higher is better；Guardrails 为 Increase is bad。Assignment unit 
 
 ## 8. 准备并运行 .NET Server SDK 数据生成器
 
-使用官方 `FeatBit.ServerSdk`，记录实际安装版本。可参考工作区 `tempo/bandit-sdk-simulator/Program.cs` 的 SDK 用法；该旧模拟器绑定其他实验，不能直接用旧配置运行。完整的四实验生成器需要按本脚本适配，Markdown 不代表它已经实现。
+使用官方 `FeatBit.ServerSdk`，记录实际安装版本。可参考工作区 `tempo/bandit-sdk-simulator/Program.cs` 的 SDK 用法；该旧模拟器绑定其他实验，不能直接用旧配置运行。完整的六实验生成器需要按本脚本适配，Markdown 不代表它已经实现。
 
 ### 8.1 SDK 和时间约束
 
@@ -143,6 +159,7 @@ Primary 为 Higher is better；Guardrails 为 Increase is bad。Assignment unit 
 - Layer 准入按保存的 layer key、assignment unit 和 slice 独立计算；可以在求值前筛出属于目标 Layer 的用户以控制有效样本规模，但不能按变体或结果筛选。
 - 不同实验共用 metric key，事件本身没有 experiment ID。独立用户池避免相互污染；同一业务事件不能为不同实验再上报一份。
 - 每个 Bayesian 预先固定 2,000 名合格用户。每个 Bandit 阶段 A 固定 3,000 名、阶段 B 固定 3,000 名合格新用户；A 的前 150 人用于低样本检查，包含在 A 的 3,000 人内。固定批量在观察结果之前决定。
+- 六个实验的主批次共 24,000 名合格用户：三个 Bayesian 共 6,000 人，三个 Bandit 的 A/B 阶段共 18,000 人。Layer / 归因探针单独记录，不计入这一预设主批次数量。
 - 保存逐用户的 SDK value / variation ID、阶段、Layer eligibility、每个 metric 的实际调用次数与数值、曝光和发送时间边界。预期聚合来自这些明细，不能从服务端统计反推。
 - 附加 Layer / 归因负例单独标记，并明确是否属于主分析的预期分母。严禁把未发送的事件记入已发送计数，或盲目重放发送结果不确定的批次。
 
@@ -154,9 +171,11 @@ Primary 为 Higher is better；Guardrails 为 Increase is bad。Assignment unit 
 | --- | --- | --- | --- | --- |
 | Bayesian Binary：false / true | 转化率 30% / 45%，部分转化者重复触发 | 每用户平均 0.10 / 0.10 次 | 每用户累计均值 10 / 9 | Binary 去重、主指标提升、护栏稳定或改善 |
 | Bayesian Count all：algo-a / algo-b | 每用户平均 2 / 3 次 | 触发率 2% / 12% | 触发率 3% / 3% | 只计事件次数；主指标提高但一项护栏恶化 |
+| Bayesian Average：path-a / path-b | 用户均值的期望 50 / 65，使用第 8.4 节模板 | 用户均值的期望均为 4 | 每用户平均均为 0.10 次 | 验证 Average Primary / Guardrail；区分用户平均、事件平均和用户求和 |
 | Bandit Once：style-a / style-b / style-c，A/B 相同 | 触发率 25% / 45% / 25% | 触发率均为 2% | 每用户平均均为 0.10 次 | 重复触发仍按 0/1；style-b P(best) 较高；验证两轮分流 |
 | Bandit Sum：bar-low / bar-medium / bar-high，A | 每用户累计均值 10 / 14 / 18 | 触发率均为 2% | 每用户累计均值均为 1 | 第一轮护栏正常，能够演示更新分流 |
 | Bandit Sum：bar-low / bar-medium / bar-high，B | 每用户累计均值 10 / 14 / 18 | 触发率 2% / 2% / 12% | 每用户累计均值 1 / 1 / 4 | 第二轮制造 bar-high 护栏恶化，区分收益推荐与后续放量决定 |
+| Bandit Average：avg-a / avg-b / avg-c，A/B 相同 | 用户均值的期望 50 / 65 / 57.5，使用第 8.4 节模板 | 用户均值的期望均为 4 | 触发率均为 2% | 验证 Average 两轮分析、avg-b 的较好表现、推荐分流和稳定护栏 |
 
 当前实现的聚合口径：
 
@@ -180,22 +199,52 @@ Average values 的当前口径也需要明确：先对每个用户在有效曝�
 
 该例原始事件总和为 150，全部四条事件的平均为 37.5；这两个数与 Average values 的变体均值 36.67 不同。Numeric Once per user 也不表示“保留用户第一条事件的 numericValue”：当前实现忽略数值，只根据是否有事件贡献 0/1；其分析数据类型仍与 Binary 区分。
 
+### 8.4 Average values 的事件模板与精确断言
+
+两个 Average 实验的 Primary 按下表设置基准数值 `b`；阶段 B 的结果分布保持不变，只改变实际分流，便于检查动态流量与聚合。
+
+| 实验 | SDK 实际 value | b |
+| --- | --- | ---: |
+| Bayesian Average | path-a | 50 |
+| Bayesian Average | path-b | 70 |
+| Bandit Average | avg-a | 50 |
+| Bandit Average | avg-b | 70 |
+| Bandit Average | avg-c | 60 |
+
+以独立于 flag 分流的固定随机 seed 为每位用户选择一种模板，各模板概率为 25%。模板选择不根据已观察的结果修改；每个非空数组元素代表一次真实 SDK Track，空数组代表不发送该 metric：
+
+| 模板 | Primary 的 numericValue 列表 | Primary 用户贡献 | Average Guardrail 的 numericValue 列表 | Guardrail 用户贡献 |
+| --- | --- | ---: | --- | ---: |
+| P0 | 无事件 | 0 | 无事件 | 0 |
+| P1 | b | b | 4 | 4 |
+| P2 | b, b+20 | b+10 | 2, 6 | 4 |
+| P3 | b+20, b+40, b+60 | b+40 | 6, 8, 10 | 8 |
+
+因此 Primary 的期望为 `0.75*b + 12.5`，即表中 50 / 65 / 57.5；Average Guardrail 的期望为 4。第二个 Guardrail 按第 8.3 节另行生成。实际各变体模板比例允许随机波动，精确预期一律从发送明细计算。
+
+校验必须覆盖以下内容：
+
+1. 对每用户的事件数值先求平均，未触发用户为 0；再计算 `n`、`sum`、`sum_squares`。Primary 和 Average Guardrail 都使用 numeric 结构，不得变为 `n/k`。
+2. 对于 `b=50` 且四个模板各一人的示例，Primary 应为 `n=4, sum=200, sum_squares=14200, mean=50`；Average Guardrail 应为 `n=4, sum=16, sum_squares=96, mean=4`。这一示例用于独立校验预期计算器，不要求实际变体人数被人为配平。
+3. 同一示例 Primary 的全部事件均值为 `440/6≈73.33`，每用户累计值均值为 `440/4=110`。服务端 Average 结果若取这两个数，属于聚合错误。
+4. 用实际完整账本核对 API 聚合、持久化 inputData、UI 显示均值及 metric aggregation。二次分析后的累计结果须按 A+B 的所有用户重算，不能简单平均 A、B 两个阶段的均值。
+
 ## 9. Bayesian：注入、Analyze、核对和截图
 
-两个 Bayesian 分别执行：
+三个 Bayesian 分别执行：
 
 1. 保存注入前页面及当前分析时间；按第 8 步生成固定用户批次，通过 SDK 上报。
 2. 等待统计查询中的新增 `users`、`conversions`、`sumValue`、`sumSquares` 与预期账本一致；计数精确比较，浮点数使用记录在报告中的绝对/相对容差。
 3. 通过 Computer Use 在现有 Run 1 点击 Analyze；等待加载结束及 computed_at 更新。单纯刷新页面不算重新分析。
 4. 核对 Run type、Control/Treatment、三个 metric、样本量、转化率或均值、提升方向、护栏信号；核对服务端持久化 inputData 的 numeric / proportion 结构与精确统计。
-5. Bayesian Binary 应显示 true 的转化表现更好；Count all 应同时呈现 algo-b 主指标改善与 Binary guardrail 恶化。护栏恶化是预设结果，正确显示它才通过这一用例。
+5. Bayesian Binary 应显示 true 的转化表现更好；Count all 应同时呈现 algo-b 主指标改善与 Binary guardrail 恶化；Average 应显示 path-b 的用户平均值较高，Average Guardrail 稳定，且 Primary / Guardrail 均保留 `metricAgg=average`。护栏恶化是 Count all 用例的预设结果，正确显示它才通过这一用例。
 6. 刷新后核对结果保留。每次分析立即保存原始 inputData、analysisResult 和截图，不等后续分析覆盖。
 
 截图：`09-<experiment>-before-data`、`09-<experiment>-data-ready`、`09-<experiment>-analysis-primary`、`09-<experiment>-analysis-guardrails`、`09-<experiment>-after-refresh`。
 
 ## 10. Bandit：第一批数据与第一次完整分析
 
-两个 Bandit 均按相同顺序自动执行：
+三个 Bandit（Once per user、Sum、Average）均按相同顺序自动执行：
 
 1. 截图初始 Targeting 和现有 Measuring 页面，记录阶段 A 的已生效权重及 SDK 同步证据。
 2. 上报 A 的前 150 名合格用户，核对入库，使用 UI Analyze。至少一个 Arm 少于 100 人，预期 `enough_units=false`，P(best) / recommended weights 不应伪装成有效推荐；截图低样本状态。
@@ -203,6 +252,8 @@ Average values 的当前口径也需要明确：先对每个用户在有效曝�
 4. 在调用下一次 Analyze 前截图当前页面并保存新的统计查询。页面若仍显示低样本分析，明确标为“尚未重新分析”，不能把旧数字当作新数据结果。
 5. 通过 UI Analyze，核对三个 Arm 都参与、每个 Arm >= 100、Primary 和两个 Guardrails 的聚合准确。
 6. 保存 A 的 inputData、analysisResult、完整推荐权重、P(best)、停止提示和 SRM；截图主指标/推荐区及两个护栏。
+
+Average 实验还需按第 8.4 节核对 Primary 和 Average Guardrail 的 numeric 聚合；avg-b 应具有较好的用户平均值和 P(best)，不能用原始事件平均或累计总量替代用户平均。
 
 判定规则：P(best) 与 recommended_weight 各自检查其含义和总和，允许模型抽样误差及显示舍入。当前 Top-Two 算法中 P(best) 接近 100% 的 Arm 仍可能只得到约一半推荐权重，不能要求推荐权重等于 P(best)。护栏结论按实际配置和输出判断，不用手写结论覆盖模型。
 
@@ -226,7 +277,7 @@ Average values 的当前口径也需要明确：先对每个用户在有效曝�
 3. 完成 flush，保存 B 的精确账本、服务端增量统计与结束时间。分别核对 A、B 和累计 A+B；第二次累计分析的样本不能只有 B，也不能把 A 重复计算。
 4. 再次 Analyze 前截图页面，注明当时仍显示的上一轮 computed_at，并把 B 数据快照与截图关联。
 5. 通过 UI 再次 Analyze，保存新的 inputData / analysisResult，截图三个 Arm 的人数、Primary、P(best)、推荐权重、停止提示及两个 Guardrails。
-6. Once 实验检查新流量按已保存的 B 比例分配、style-b 仍具有较好表现。Sum 实验检查 B 注入的 bar-high 护栏恶化能在相应数据/累计分析中反映。
+6. Once 实验检查新流量按已保存的 B 比例分配、style-b 仍具有较好表现。Sum 实验检查 B 注入的 bar-high 护栏恶化能在相应数据/累计分析中反映。Average 实验检查 avg-b 仍具有较好的用户均值，Average Guardrail 稳定，A+B 的 `n/sum/sum_squares` 和 UI 均值符合完整账本。
 7. 第二轮仅观察和核对，不自动应用下一次推荐。测试执行器对 Sum 护栏恶化停止进一步放量，是执行器的决定，不声称产品已经实现自动护栏阻断。
 8. 刷新后重新核对配置、累计分析、方法和角色，确认每个实验仍只有 Run 1。
 
@@ -249,7 +300,7 @@ Average values 的当前口径也需要明确：先对每个用户在有效曝�
 1. 每阶段服务端归因人数必须精确等于 SDK 明细中符合窗口、Layer、角色和 sampling 的用户数；每个指标的贡献与统计精确匹配。这一步检查采集和归因，不依赖 SRM 的概率阈值。
 2. 对阶段 `t`，用本阶段有效新曝光总数 `N_t` 和阶段开始前已固定的、实际生效的条件分流概率 `p[t,i]`，计算 `E[t,i] = N_t * p[t,i]`。本脚本只有一条匹配测试规则、固定 Layer 和 100% sampling，且阶段内不变更权重；若实际出现其他分支或变更，先分层/拆阶段，不能直接套用原权重。
 3. 在每阶段使用与该阶段概率匹配的多项分布检验或 Pearson chi-square；小期望计数使用精确/Monte Carlo 方法。阶段批量预先固定，不能为得到通过的 p 值根据结果延长、截断或重采样。
-4. SRM 检查清单预先固定为两个 Bayesian 批次和两个 Bandit 的 A/B 阶段，共 6 次；报告全部 p 值，族错误率阈值设为 0.01，可用 Bonferroni 得到单次阈值 `0.01/6`。低样本截图和累计快照不额外开展反复显著性检验。
+4. SRM 检查清单预先固定为三个 Bayesian 批次和三个 Bandit 的 A/B 阶段，共 9 次；报告全部 p 值，族错误率阈值设为 0.01，可用 Bonferroni 得到单次阈值 `0.01/9`。低样本截图和累计快照不额外开展反复显著性检验。
 5. 累计期望可以展示为 `E[i] = sum_t N_t * p[t,i]`，但动态权重根据早期结果变化，不能把累计人数直接塞入“各组等量”的检验，也不能把累计期望简单代入固定多项分布就宣称取得严格的全程 p 值。正式的整体自适应检验需要覆盖权重选择过程；本轮采用按阶段校验与精确账本。
 6. 报告并列展示“页面 SRM（原始输出）”“按阶段实际比例的校验”“SDK 到服务端的精确计数核对”，分别下结论。阶段检验异常也须调查，不能因为存在已知 SRM 限制而掩盖真实漏报。
 
@@ -260,6 +311,7 @@ Average values 的当前口径也需要明确：先对每个用户在有效曝�
 ### 13.3 附加归因测试
 
 - 同用户重复曝光不增加独立用户数；重复业务 Track 在 Once / Count / Sum 中按各自定义计入。
+- Average 使用第 8.4 节的不等事件数与空事件模板；检查用户均值、全部事件均值和用户累计值三个结果可区分，重复事件按用户内平均公式计入。
 - 同一小时内使用子窗口验证 `[start,end)` 和曝光先于指标的归因边界；SDK 时间戳保持真实，不回填。
 - 用独立的共同 Layer 探针用户池评估三个分层 flag，计算每个用户只有一个 slice 可准入；事件只按定义发一次，探针贡献全部进入预期账本。若与主批次同窗口，主批次汇总应明确包含这些额外用户；否则使用分开的诊断窗口。
 - 曝光前事件不计入该用户后续曝光的结果；没有指标事件的曝光用户仍在分母中。
@@ -305,15 +357,18 @@ data/phase-srm.json
 | --- | --- | --- | --- | --- | --- | --- |
 | 执行时填写 | 执行时填写 | 实际操作 | 事先定义的断言 | 现场观察 | 不得预填 PASS | 真实文件或观察标识 |
 
-只把执行过且断言满足的用例记为 PASS；数据正确、UI 正确、动态分流正确和 SRM 提示正确分别判定。保存所有测试数据和当前 Aspire 会话；无需等待一小时，也不自动创建新 Run、变更实验方法、提交上线决定或清理历史记录。
+只把执行过且断言满足的用例记为 PASS；数据正确、UI 正确、动态分流正确和 SRM 提示正确分别判定。保存所有测试数据和当前 Aspire 会话；无需等待一小时。第 5 步完成后不额外创建 Run、变更实验方法、提交上线决定或清理历史记录。
 
-## 待补充的 Average values 覆盖
+## 扩展后的目标资源与执行状态
 
-当前本任务已初始化的范围仍为四个实验：两个 Bayesian、两个 Bandit，各一个 Run 1；八个 metric 中没有 `metricAgg=average`，也没有以 Average values 为 Primary 的实验。
+| 资源 | 原初始化已创建 | 本版执行后目标 | 本次文档扩展 |
+| --- | ---: | ---: | --- |
+| Metrics | 8 | 10 | 新增 Average Primary / Guardrail 各一个 |
+| Feature flags | 5 | 6 | 新增 rd-average-value；ai-assistant-route 开始用于 Bayesian Average |
+| Experiments / Run 1 | 4 / 4 | 6 / 6 | 新增 Bayesian Average、Bandit Average，各一个 Run 1 |
+| Layers | 1 | 1 | 两个 Average 实验均不绑定 Layer |
 
-为覆盖 Average 的完整分析路径，后续应补充一个 Bayesian Average-primary 用例和一个 Bandit Average-primary 用例，并准备相应 Numeric / Average values 指标。补齐这两项后，本任务实验数为六个。此处记录的是覆盖缺口，尚未创建对应 metric、flag 或实验；第 1–14 步仍指当前四实验用例。
-
-新增 Average 用例的数据必须让各用户的事件条数不同，并包含已曝光但没有指标事件的用户，才能区分“用户均值的平均”“全部事件的平均”和“每用户累计值”。同时检查 numeric 输入中的 `n`、`sum`、`sum_squares`；不能仅检查页面出现了一个平均数。
+Average 的资源、数据和断言已经纳入第 1–14 步，属于本版完整执行范围。此表的目标数不代表已在 UI 中创建；本次仅更新文档，实际新增资源和执行证据待运行时记录。
 
 ## 实现参考
 
