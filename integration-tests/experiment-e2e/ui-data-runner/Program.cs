@@ -17,14 +17,27 @@ try
             PowerShell entry reads ui-data-runner/config.local.json by default; copy config.example.json and set current local endpoints.
             FEATBIT_UI_CONFIG or -Config overrides that path; credentials stay in process environment variables.
             UI procedure: integration-tests/experiment-e2e/UI_AUTO_TEST_SCRIPT.md. Analyze and result review happen in the UI.
+            Exact 2,000 UUID binary program: use run-binary-exact-data.ps1 (preview|inject|verify|self-check).
             Exit: 0 passed; 1 verification failed; 2 precondition; 3 uncertain delivery.
             """);
+        return 0;
+    }
+    if (cli.Action == "exact-self-check") { ExactBinarySelfCheck.Run(); return 0; }
+    if (cli.Action.StartsWith("exact-", StringComparison.Ordinal))
+    {
+        await new ExactBinaryRunner(cli, Settings.Load(cli)).Execute();
         return 0;
     }
     var cases = Catalog.Load(cli.Scenarios);
     if (cli.Action == "plan")
     {
-        Console.WriteLine(JsonSerializer.Serialize(new { sdk = "FeatBit.ServerSdk/1.2.11", mainUsers = cases.Sum(c => c.MainUsers + c.PhaseAUsers + c.PhaseBUsers), cases }, Json.Options)); return 0;
+        Console.WriteLine(JsonSerializer.Serialize(new
+        {
+            sdk = "FeatBit.ServerSdk/1.2.11", userPoolPolicy = Generator.UserPoolPolicy,
+            plannedSentUsers = cases.Sum(c => c.MainUsers + c.PhaseAUsers + c.PhaseBUsers),
+            expectedLayerUsers = cases.Sum(c => (c.MainUsers + c.PhaseAUsers + c.PhaseBUsers) * (c.LayerKey == null ? 1 : (c.SliceEnd - c.SliceStart) / 100)),
+            note = "User counts are fixed before Layer filtering. Expected Layer counts are estimates; verify compares actual ingestion with the exact per-user ledger.", cases
+        }, Json.Options)); return 0;
     }
     var settings = Settings.Load(cli); await new Runner(cli, settings, cases).Execute();
     return 0;

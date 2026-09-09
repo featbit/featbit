@@ -58,8 +58,11 @@ public sealed class Cli
         var cli = new Cli { Action = values.GetValueOrDefault("action", "help"), Session = values.GetValueOrDefault("session-id", ""),
             Case = values.GetValueOrDefault("case", ""), Batch = values.GetValueOrDefault("batch", ""),
             Config = values.GetValueOrDefault("config", ""), Scenarios = values.GetValueOrDefault("scenarios", ""), ReportRoot = values.GetValueOrDefault("report-root", "") };
-        if (!new[] { "help", "plan", "preflight", "inject", "verify" }.Contains(cli.Action)) throw new Stop("Unknown action.");
+        if (!new[] { "help", "plan", "preflight", "inject", "verify", "exact-preview", "exact-inject", "exact-verify", "exact-self-check" }.Contains(cli.Action)) throw new Stop("Unknown action.");
         if (cli.Action is "preflight" or "inject" or "verify") SafeId(cli.Session);
+        if (cli.Action is "exact-preview" or "exact-inject" or "exact-verify") SafeId(cli.Session);
+        if (cli.Action.StartsWith("exact-", StringComparison.Ordinal) && (cli.Case.Length > 0 || cli.Batch.Length > 0 || cli.Scenarios.Length > 0))
+            throw new Stop("The exact binary program has fixed quotas; --case, --batch and --scenarios do not apply.");
         if (cli.Action is "inject" or "verify") { SafeId(cli.Case); SafeId(cli.Batch); }
         return cli;
     }

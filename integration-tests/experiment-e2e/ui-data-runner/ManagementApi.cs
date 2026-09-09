@@ -140,14 +140,14 @@ public sealed class ManagementApi : IDisposable
             if (i == 0) check.Add("Run primary snapshot", Json.Text(run["primaryMetricEvent"]) == m.Key && Json.Text(run["primaryMetricType"]) == m.Type && Json.Text(run["primaryMetricAgg"]) == m.Agg);
         }
         var rules = Json.Array(flag["rules"]);
-        var rule = rules.FirstOrDefault();
-        var conditions = Json.Array(rule?["conditions"]);
-        check.Add("First rule is the isolated test rule", rule != null && Json.Text(rule["name"]) == "UI SDK experiment test" && conditions.Count == 1 && Json.Text(conditions[0]?["property"]) == "expt_simulator" && Json.Text(conditions[0]?["op"]) == "IsOneOf" && Json.Array(Json.ParseField(conditions[0]?["value"])).Select(Json.Text).SequenceEqual(["ui-sdk-e2e-v1"]), "Configure the test rule in UI step 7, before other rules.");
-        check.Add("Experiment collection enabled", rule?["includedInExpt"]?.GetValue<bool>() == true, "Enable experiment collection on the test rule.");
-        check.Add("Dispatch by user key", Json.Text(rule?["dispatchKey"]) is "" or "keyId" or "key");
+        var fallthrough = flag["fallthrough"];
+        check.Add("No targeting rules", rules.Count == 0, "Configure traffic split only in Default rule / When flag is ON.");
+        check.Add("No individual targeting", Json.Array(flag["targetUsers"]).Count == 0, "All test users must reach the default split.");
+        check.Add("Default experiment collection enabled", fallthrough?["includedInExpt"]?.GetValue<bool>() == true, "Enable experiment collection on the default split.");
+        check.Add("Default dispatch by user key", Json.Text(fallthrough?["dispatchKey"]) is "keyId" or "key");
         check.Require();
         var weights = new Dictionary<string, double>(); var end = 0d;
-        foreach (var variation in Json.Array(rule?["variations"]))
+        foreach (var variation in Json.Array(fallthrough?["variations"]))
         {
             var range = Json.Array(variation?["rollout"]);
             var id = Json.Text(variation?["id"]);
@@ -169,13 +169,15 @@ public sealed class ManagementApi : IDisposable
         var detail = await Get($"/api/v1/envs/{EnvId}/experiments/{target.ExperimentId}");
         return Json.Array(detail["experimentRuns"]).Single(r => Json.Text(r?["id"]) == target.RunId)!.DeepClone();
     }
-    public async Task<JsonNode> Stats(Target target, Scenario c, MetricSpec m, DateTimeOffset start, DateTimeOffset end)
+    public async Task<JsonNode> Stats(Target target, Scenario c, MetricSpec m, DateTimeOffset start, DateTimeOffset end, bool includeLayer = true)
     {
         var body = new JsonObject { ["envId"] = EnvId, ["flagKey"] = c.FlagKey, ["metricEvent"] = m.Key, ["metricType"] = m.Type, ["metricAgg"] = m.Agg,
             ["startDate"] = start.UtcDateTime.ToString("yyyy-MM-dd"), ["endDate"] = end.UtcDateTime.ToString("yyyy-MM-dd"), ["startTime"] = start.UtcDateTime, ["endTime"] = end.UtcDateTime };
         // Omit RunId: this read-only query must not upsert experiment_run_assignments.
         foreach (var key in new[] { "controlVariant", "layerId", "layerKey", "assignmentUnitSelector", "allocationKeySelector", "sliceStart", "sliceEnd", "layerTrafficPercent", "analysisSamplingPlan", "trafficPercent", "trafficOffset" }) body[key] = target.Run[key]?.DeepClone();
         body["treatmentVariants"] = target.Run["treatmentVariant"]?.DeepClone();
+        if (!includeLayer)
+            foreach (var key in new[] { "layerId", "layerKey", "sliceStart", "sliceEnd", "layerTrafficPercent" }) body.Remove(key);
         using var response = await http.PostAsJsonAsync($"/api/v1/envs/{EnvId}/experiment-stats/query", body);
         return await Decode(response);
     }

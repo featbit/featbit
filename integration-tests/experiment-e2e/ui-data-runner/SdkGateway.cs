@@ -30,7 +30,7 @@ public sealed class SdkGateway : IAsyncDisposable
     private readonly ILoggerFactory loggers;
     private readonly SdkDiagnostics diagnostics = new();
     public static FbUser User(string key, string session, string phase) => FbUser.Builder(key).Name("UI experiment test user")
-        .Custom("expt_simulator", "ui-sdk-e2e-v1").Custom("simulation_batch", session).Custom("simulation_phase", phase).Build();
+        .Custom("simulation_batch", session).Custom("simulation_phase", phase).Build();
     public SdkGateway(Settings settings, string sdkKey, Target[] targets)
     {
         loggers = diagnostics;
@@ -94,7 +94,7 @@ public sealed class SdkGateway : IAsyncDisposable
         }
         if (string.IsNullOrEmpty(id) || !target.VariationIds.TryGetValue(value, out var wantedId) || wantedId != id ||
             expected.ValueId != id || expected.Value != value || expected.Kind.ToString() != kind || expected.Reason != reason)
-            throw new Stop("SDK fallback, wrong variant, rule mismatch or configuration change during evaluation. Delivery is uncertain; do not replay.", 3);
+            throw new Stop("SDK fallback, wrong variant, default targeting mismatch or configuration change during evaluation. Delivery is uncertain; do not replay.", 3);
         return new(c.Id, id, value, at, c.Eligible(user.Key));
     }
     public MetricCall Track(FbUser user, string key, double value)

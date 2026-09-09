@@ -23,12 +23,20 @@ public sealed class Stat
 }
 public static class Ledger
 {
-    public static Dictionary<string, Dictionary<string, Stat>> Aggregate(Scenario c, IReadOnlyDictionary<string, string> ids, IEnumerable<UserRecord> records, DateTimeOffset start, DateTimeOffset end)
+    public static PopulationCount Population(Scenario c, IEnumerable<UserRecord> records, DateTimeOffset start, DateTimeOffset end)
+    {
+        var users = records.GroupBy(r => r.UserKey)
+            .Select(group => group.SelectMany(r => r.Exposures)
+                .Where(e => e.CaseId == c.Id && e.At >= start && e.At < end).ToArray())
+            .Where(exposures => exposures.Length > 0).ToArray();
+        return new(users.Length, users.Count(exposures => exposures.Any(e => e.Eligible)));
+    }
+    public static Dictionary<string, Dictionary<string, Stat>> Aggregate(Scenario c, IReadOnlyDictionary<string, string> ids, IEnumerable<UserRecord> records, DateTimeOffset start, DateTimeOffset end, bool applyLayer = true)
     {
         var result = c.Metrics.ToDictionary(m => m.Key, _ => ids.Values.ToDictionary(id => id, _ => new Stat()));
         foreach (var group in records.GroupBy(r => r.UserKey))
         {
-            var exposure = group.SelectMany(r => r.Exposures).Where(e => e.CaseId == c.Id && e.Eligible && e.At >= start && e.At < end).OrderBy(e => e.At).FirstOrDefault();
+            var exposure = group.SelectMany(r => r.Exposures).Where(e => e.CaseId == c.Id && (!applyLayer || e.Eligible) && e.At >= start && e.At < end).OrderBy(e => e.At).FirstOrDefault();
             if (exposure == null) continue;
             if (!ids.Values.Contains(exposure.VariationId)) throw new Stop("Unknown variation in ledger.");
             foreach (var metric in c.Metrics)
@@ -61,6 +69,11 @@ public static class Ledger
     }
 }
 
+public sealed record PopulationCount(int ExposedUsersWithoutLayer, int ExpectedLayerUsers)
+{
+    public int ExpectedExcludedUsers => ExposedUsersWithoutLayer - ExpectedLayerUsers;
+}
+
 public sealed class Target
 {
     public string CaseId { get; set; } = "";
@@ -77,7 +90,8 @@ public sealed class Target
 }
 public sealed class Receipt
 {
-    public int FormatVersion { get; set; } = 1;
+    public int FormatVersion { get; set; } = 2;
+    public string UserPoolPolicy { get; set; } = "";
     public string SessionId { get; set; } = "";
     public string CaseId { get; set; } = "";
     public string BatchId { get; set; } = "";

@@ -20,13 +20,13 @@ public sealed class Runner(Cli cli, Settings settings, Scenario[] catalog)
         if (cli.Batch == "probe-layer" && cli.Case != "layer-isolation") throw new Stop("Use -Case layer-isolation for the shared-user layer probe.");
         if (cli.Action is "inject" or "verify") _ = BatchPlan.For(cases[0], cli.Batch);
         using var api = new ManagementApi(settings); await api.Connect();
-        var identity = new { formatVersion = 1, cli.Session, api.ProjectId, api.EnvId, settings.ProjectKey, settings.ProjectName,
+        var identity = new { formatVersion = 2, userPoolPolicy = Generator.UserPoolPolicy, cli.Session, api.ProjectId, api.EnvId, settings.ProjectKey, settings.ProjectName,
             settings.EnvironmentName, settings.ApiUrl, settings.EventUrl, settings.StreamingUrl, settings.Seed, catalogHash, sdk = "FeatBit.ServerSdk/1.2.11" };
         var identityFile = Path.Combine(store.Root, "session.json");
         if (File.Exists(identityFile))
         {
             if (!JsonNode.DeepEquals(JsonNode.Parse(File.ReadAllText(identityFile)), JsonSerializer.SerializeToNode(identity, Json.Options)))
-                throw new Stop("Session identity/configuration changed. Use a new session after verifying the existing data.");
+                throw new Stop("Session identity/configuration or user-pool policy changed. Preserve existing receipts and use a new session.");
         }
         else Json.Write(identityFile, identity);
         if (cli.Action == "preflight") { await Preflight(api, cases); return; }
@@ -69,8 +69,9 @@ public sealed class Runner(Cli cli, Settings settings, Scenario[] catalog)
     private void AssertReceipt(Receipt receipt)
     {
         if (receipt.Status != "completed") throw new Stop("Delivery is incomplete or uncertain. Inspect receipt, journal and server ingestion; do not replay this batch.", 3);
-        if (receipt.SessionId != cli.Session || receipt.CatalogHash != catalogHash || receipt.Seed != settings.Seed)
-            throw new Stop("Receipt does not match this session/scenario/seed.");
+        if (receipt.FormatVersion != 2 || receipt.UserPoolPolicy != Generator.UserPoolPolicy ||
+            receipt.SessionId != cli.Session || receipt.CatalogHash != catalogHash || receipt.Seed != settings.Seed)
+            throw new Stop("Receipt does not match this session/scenario/seed/user-pool policy. Preserve it; never replay an old batch.");
         var records = store.Records(receipt.CaseId, receipt.BatchId);
         if (records.Count != receipt.RecordedUsers || receipt.RecordedUsers != receipt.RequestedUsers || Json.Hash(records) != receipt.LedgerHash)
             throw new Stop("Ledger is incomplete or changed since completion.", 1);
@@ -93,7 +94,7 @@ public sealed class Runner(Cli cli, Settings settings, Scenario[] catalog)
             {
                 var desired = c.Bandit ? new[] { .7, .15, .15 } : new[] { .5, .5 };
                 if (c.Values.Where((v, i) => Math.Abs(t.Weights[t.VariationIds[v]] - desired[i]) > 1e-8).Any())
-                    throw new Stop("Initial test-rule allocation must be " + string.Join("/", desired.Select(v => v * 100)) + ".");
+                    throw new Stop("Initial default split must be " + string.Join("/", desired.Select(v => v * 100)) + ".");
             }
             if (!plan.Diagnostic && (Json.Date(t.Run["observationStart"]) is not { } start || start > Clock.Now() || Json.Date(t.Run["observationEnd"]) != null))
                 throw new Stop("Save an observation start at or before now and leave the end open in the UI before injecting a main batch.");
@@ -101,7 +102,7 @@ public sealed class Runner(Cli cli, Settings settings, Scenario[] catalog)
         var phaseAAnalysis = plan.Phase == "b" ? await CheckRecommendations(api, targets[0], previous!) : null;
         var windowStart = plan.Diagnostic ? await Clock.NextMinute() : Json.Date(targets[0].Run["observationStart"])!.Value;
         if (previous != null && windowStart != previous.WindowStart) throw new Stop("Observation start changed between checkpoints.");
-        var receipt = new Receipt { SessionId = cli.Session, CaseId = cli.Case, BatchId = cli.Batch, Phase = plan.Phase, Diagnostic = plan.Diagnostic,
+        var receipt = new Receipt { UserPoolPolicy = Generator.UserPoolPolicy, SessionId = cli.Session, CaseId = cli.Case, BatchId = cli.Batch, Phase = plan.Phase, Diagnostic = plan.Diagnostic,
             CatalogHash = catalogHash, Seed = settings.Seed, RequestedUsers = plan.NewUsers, StartedAt = Clock.Now(), WindowStart = windowStart,
             Targets = targets.ToArray(), PhaseAAnalysis = phaseAAnalysis, Dependencies = previous == null ? [] : previous.Dependencies.Append(previous.BatchId).ToArray() };
         var oldRecords = previous == null ? new List<UserRecord>() : store.Cumulative(previous);
@@ -184,9 +185,6 @@ public sealed class Runner(Cli cli, Settings settings, Scenario[] catalog)
             foreach (var (t, c) in receipt.Targets.Zip(cases)) SameConfig(t, await api.Resolve(c), true);
             sdk.Flush(); await sdk.DisposeAsync(); sdk = null;
             receipt.CompletedAt = Clock.Now(); receipt.Status = "completed"; receipt.LedgerHash = Json.Hash(records); store.Save(receipt);
-            WriteExpected(cases, receipt, oldRecords.Concat(records).ToList(), receipt.WindowEnd ?? receipt.CompletedAt.Value);
-            Summary(receipt, "Delivery completed; ingestion is not yet verified. Run verify, then Analyze and review results in the UI.");
-            Console.WriteLine("Saved " + store.DirectoryFor(cli.Case, cli.Batch));
         }
         catch (Exception e)
         {
@@ -196,6 +194,10 @@ public sealed class Runner(Cli cli, Settings settings, Scenario[] catalog)
             throw new Stop(receipt.Error, 3);
         }
         finally { if (sdk != null) { try { await sdk.DisposeAsync(); } catch { /* receipt remains uncertain */ } } }
+        // Writers are closed before reports read the ledger. Reporting failures must not downgrade completed delivery.
+        WriteExpected(cases, receipt, oldRecords.Concat(records).ToList(), receipt.WindowEnd ?? receipt.CompletedAt!.Value);
+        Summary(receipt, "Delivery completed; ingestion is not yet verified. Run verify, then Analyze and review results in the UI.");
+        Console.WriteLine("Saved " + store.DirectoryFor(cli.Case, cli.Batch));
     }
     private StreamWriter Writer(string name) => new(new FileStream(store.FileFor(cli.Case, cli.Batch, name), FileMode.CreateNew, FileAccess.Write, FileShare.Read), new UTF8Encoding(false)) { AutoFlush = true };
     private static void WriteLine(StreamWriter writer, object value)
@@ -248,10 +250,11 @@ public sealed class Runner(Cli cli, Settings settings, Scenario[] catalog)
         }
         return analysis;
     }
-    private sealed record QueryResult(Checks Checks, Dictionary<string, object> Expected, Dictionary<string, object> Observed);
+    private sealed record QueryResult(Checks Checks, Dictionary<string, object> Expected, Dictionary<string, object> Observed, Dictionary<string, JsonNode> WithoutLayerObserved);
     private async Task<QueryResult> Query(ManagementApi api, Scenario[] cases, Receipt r, List<UserRecord> records, DateTimeOffset end, DateTimeOffset? startOverride = null)
     {
         var checks = new Checks(); var expected = new Dictionary<string, object>(); var observed = new Dictionary<string, object>(); var start = startOverride ?? r.WindowStart;
+        var withoutLayerObserved = new Dictionary<string, JsonNode>();
         foreach (var (t, c) in r.Targets.Zip(cases))
         {
             var aggregate = Ledger.Aggregate(c, t.VariationIds, records, start, end); expected[c.Id] = aggregate;
@@ -261,8 +264,13 @@ public sealed class Runner(Cli cli, Settings settings, Scenario[] catalog)
                 var result = await api.Stats(t, c, m, start, end); results[m.Key] = result;
                 CompareStats(c.Id + "/" + m.Key, aggregate[m.Key], result, checks);
             }
+            var primary = c.Metrics[0];
+            var unfiltered = c.LayerKey == null ? results[primary.Key] : await api.Stats(t, c, primary, start, end, includeLayer: false);
+            withoutLayerObserved[c.Id] = unfiltered;
+            if (c.LayerKey != null)
+                CompareStats(c.Id + "/without-layer/" + primary.Key, Ledger.Aggregate(c, t.VariationIds, records, start, end, applyLayer: false)[primary.Key], unfiltered, checks);
         }
-        return new(checks, expected, observed);
+        return new(checks, expected, observed, withoutLayerObserved);
     }
     public static void CompareStats(string prefix, Dictionary<string, Stat> expected, JsonNode result, Checks checks)
     {
@@ -293,6 +301,8 @@ public sealed class Runner(Cli cli, Settings settings, Scenario[] catalog)
         } while (true);
         Json.Write(store.FileFor(cli.Case, cli.Batch, "expected.json"), data.Expected);
         Json.Write(store.FileFor(cli.Case, cli.Batch, "observed.json"), data.Observed);
+        Json.Write(store.FileFor(cli.Case, cli.Batch, "observed-without-layer.json"), data.WithoutLayerObserved);
+        WritePopulation(cases, r, records, end, data.Observed, data.WithoutLayerObserved);
         prechecks.Items.AddRange(data.Checks.Items);
         if (data.Checks.Passed)
         {
@@ -300,7 +310,7 @@ public sealed class Runner(Cli cli, Settings settings, Scenario[] catalog)
             {
                 var increment = await Query(api, cases, r, store.Records(cli.Case, cli.Batch), r.CompletedAt!.Value, r.StartedAt);
                 prechecks.Items.AddRange(increment.Checks.Items.Select(x => x with { Name = "B-increment/" + x.Name }));
-                Json.Write(store.FileFor(cli.Case, cli.Batch, "increment.json"), new { increment.Expected, increment.Observed });
+                Json.Write(store.FileFor(cli.Case, cli.Batch, "increment.json"), new { increment.Expected, increment.Observed, increment.WithoutLayerObserved });
             }
             WriteSrm(cases, r, records, prechecks);
         }
@@ -333,14 +343,35 @@ public sealed class Runner(Cli cli, Settings settings, Scenario[] catalog)
         Json.Write(store.FileFor(cli.Case, cli.Batch, "traffic.json"), reports);
     }
     private void WriteExpected(Scenario[] cases, Receipt receipt, List<UserRecord> records, DateTimeOffset end)
-        => Json.Write(store.FileFor(cli.Case, cli.Batch, "expected.json"), receipt.Targets.Zip(cases).ToDictionary(pair => pair.Second.Id, pair => Ledger.Aggregate(pair.Second, pair.First.VariationIds, records, receipt.WindowStart, end)));
+    {
+        Json.Write(store.FileFor(cli.Case, cli.Batch, "expected.json"), receipt.Targets.Zip(cases).ToDictionary(pair => pair.Second.Id, pair => Ledger.Aggregate(pair.Second, pair.First.VariationIds, records, receipt.WindowStart, end)));
+        WritePopulation(cases, receipt, records, end);
+    }
+    private void WritePopulation(Scenario[] cases, Receipt receipt, List<UserRecord> records, DateTimeOffset end, Dictionary<string, object>? observed = null, Dictionary<string, JsonNode>? withoutLayerObserved = null)
+    {
+        var batchRecords = store.Records(receipt.CaseId, receipt.BatchId);
+        var population = cases.Select(c => new
+        {
+            c.Id, c.LayerKey, c.SliceStart, c.SliceEnd,
+            batch = Ledger.Population(c, batchRecords, receipt.WindowStart, end),
+            cumulative = Ledger.Population(c, records, receipt.WindowStart, end),
+            observedCumulativeLayerUsers = observed == null ? (double?)null : Json.Array(((Dictionary<string, JsonNode>)observed[c.Id])[c.Metrics[0].Key]["variants"]).Sum(row => Json.Number(row?["users"])),
+            observedCumulativeUsersWithoutLayer = withoutLayerObserved == null ? (double?)null : Json.Array(withoutLayerObserved[c.Id]["variants"]).Sum(row => Json.Number(row?["users"]))
+        });
+        Json.Write(store.FileFor(cli.Case, cli.Batch, "population.json"), new
+        {
+            receipt.UserPoolPolicy, receipt.RequestedUsers, receipt.RecordedUsers, population,
+            note = "All planned users are evaluated and tracked. Expected counts come from the ledger. Observed cumulative counts query the same flag and window with and without Layer, without modifying Run assignments. No layer preselection or replacement users."
+        });
+    }
     private void Summary(Receipt r, string message)
     {
         var collectionEnd = r.WindowEnd ?? r.CompletedAt;
         var suggestedEnd = collectionEnd == null ? (DateTimeOffset?)null : Clock.FloorMinute(collectionEnd.Value).AddMinutes(collectionEnd.Value.Second == 0 && collectionEnd.Value.Millisecond == 0 ? 0 : 1);
         var warnings = r.Targets.Where(t => !Catalog.Find(catalog, t.CaseId).Bandit && t.Run["minimumSample"]?.GetValue<int>() != 500)
             .Select(t => $"{t.CaseId}: minimumSample is not 500; insufficient-sample UI coverage remains unconfigured.");
-        var text = $"# {r.CaseId} / {r.BatchId}\n\n{message}\n\nSession: {r.SessionId}; status: {r.Status}; new users: {r.RecordedUsers}/{r.RequestedUsers}.\n\n" +
+        var text = $"# {r.CaseId} / {r.BatchId}\n\n{message}\n\nSession: {r.SessionId}; status: {r.Status}; new users sent (before Layer): {r.RecordedUsers}/{r.RequestedUsers}.\n\n" +
+            $"User pool policy: {r.UserPoolPolicy}. See [population.json](population.json) for sent, Layer-included and excluded users; [observed.json](observed.json) is available after verify.\n\n" +
             $"UTC observation start: {r.WindowStart:O}\n\nUTC suggested UI end: {suggestedEnd:O} (keep open while more main batches are pending).\n\n" +
             $"Local display ({TimeZoneInfo.Local.Id}): {r.WindowStart.ToLocalTime():yyyy-MM-dd HH:mm} → {suggestedEnd?.ToLocalTime():yyyy-MM-dd HH:mm}.\n\n" +
             $"Collected: {r.StartedAt:O} → {r.CompletedAt:O}; dependency batches: {string.Join(", ", r.Dependencies)}.\n\n" +

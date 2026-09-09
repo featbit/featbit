@@ -67,26 +67,20 @@ public sealed record BatchPlan(string Id, string Phase, int Offset, int NewUsers
         "probe-constant" when c.Id == "bayesian-average" => new(batch, batch, 0, 64, null, true),
         "probe-attribution" when c.Id == "bayesian-count" => new(batch, batch, 0, 32, null, true),
         "probe-layer" when c.Id is "bayesian-count" or "bandit-sum" => new(batch, batch, 0, 60, null, true),
+        "probe-layer-population" when c.LayerKey != null => new(batch, batch, 0, 5000, null, true),
         _ => throw new Stop("Unsupported batch for this case.")
     };
 }
 
 public static class Generator
 {
+    public const string UserPoolPolicy = "unfiltered-default-split-v1";
     public static string[] Users(Scenario c, BatchPlan batch, string session)
     {
-        var result = new List<string>();
-        var eligible = 0;
-        for (var candidate = 0; candidate < (batch.Offset + batch.NewUsers) * 1000 + 1000; candidate++)
-        {
-            var scope = batch.Id == "probe-layer" ? "layer-isolation" : c.Id;
-            var key = $"ui-e2e-{session}-{scope}-{batch.Phase}-{candidate:D6}";
-            if (batch.Id != "probe-layer" && !c.Eligible(key)) continue;
-            if (eligible++ < batch.Offset) continue;
-            result.Add(key);
-            if (result.Count == batch.NewUsers) return result.ToArray();
-        }
-        throw new Stop("Unable to obtain the planned Layer-eligible users.");
+        var scope = batch.Id == "probe-layer" ? "layer-isolation" : c.Id;
+        // Fix the population before evaluation. Layer eligibility is only used when reconciling analysis.
+        return Enumerable.Range(batch.Offset, batch.NewUsers)
+            .Select(index => $"ui-e2e-{session}-{scope}-{batch.Phase}-{index:D6}").ToArray();
     }
     public static double[] Values(MetricSpec m, int variant, string phase, string userKey, int seed)
     {
