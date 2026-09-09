@@ -1,0 +1,11 @@
+# Generated .NET build output.
+/bin/
+/obj/
+
+# Per-machine configuration and an optional local NuGet package cache.
+*.local.json
+/.packages/
+
+# Optional output when -ReportRoot points inside this project.
+# The default ../reports/ directory has its own .gitignore.
+/reports/

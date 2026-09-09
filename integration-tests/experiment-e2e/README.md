@@ -2,11 +2,12 @@
 
 For the UI experiment workflow in `auto-test-001`, use
 [UI_AUTO_TEST_SCRIPT.md](./UI_AUTO_TEST_SCRIPT.md). It covers initialization
-steps 1–6, including Average values metrics and two additional experiments
-(three Bayesian and three Bandit experiments in total), followed by step 7 flag
-traffic setup, .NET Server SDK data generation, two-phase Bandit checks,
-per-stage screenshots, and allocation-aware SRM checks.
-It is a Computer Use procedure; the REST runner below does not execute it.
+steps 1–6 for four Bayesian and two Bandit experiments, followed by flag traffic
+setup, data-program calls, analysis checks, and per-stage screenshots. It includes
+an all-metrics-healthy Bayesian case and both guardrail directions.
+The [UI data runner](./run-ui-experiment-data.ps1) uses the official SDK to inject
+data and verify ingestion. The UI script is a Computer
+Use procedure; the REST runner below neither executes it nor supplies its data.
 
 This folder contains an executable end-to-end test runner for FeatBit REST API,
 public evaluation, experimentation insight ingest, and analysis flows.
