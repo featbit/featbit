@@ -1,5 +1,11 @@
 # FeatBit REST API E2E Test
 
+For the four existing UI experiments in `auto-test-001`, use
+[UI_SDK_TEST_SCRIPT.md](./UI_SDK_TEST_SCRIPT.md). It preserves the initialization
+steps 1–6 and adds flag traffic setup as step 7, .NET Server SDK data generation,
+two-phase Bandit checks, per-stage screenshots, and allocation-aware SRM checks.
+It is a Computer Use procedure; the REST runner below does not execute it.
+
 This folder contains an executable end-to-end test runner for FeatBit REST API,
 public evaluation, experimentation insight ingest, and analysis flows.
 
