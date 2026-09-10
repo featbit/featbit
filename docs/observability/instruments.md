@@ -84,6 +84,7 @@ site is instrumented for free.
 | `featbit.<svc>.messaging.unroutable` | Messages received for a topic with no registered handler | Counter\<long\> | `{message}` | `provider`, `destination` | as above |
 | `featbit.<svc>.messaging.redelivered` | Messages delivered more than once | Counter\<long\> | `{message}` | `provider`, `destination` | back-end `PostgresMessageConsumer` |
 | `featbit.<svc>.messaging.delivery_failures` | Broker-reported failures arriving after the publish call returned | Counter\<long\> | `{message}` | `provider`, `destination`, `error_type` | `KafkaMessageProducer` delivery handler |
+| `featbit.<svc>.messaging.backlog` | Messages awaiting consumption, sampled in the background. `-1` when unknown | ObservableGauge\<long\> | `{message}` | `provider`, `destination` | `MessagingBacklogSampler` |
 
 `published{outcome=enqueued}` means *accepted by the transport*, **not** *delivered*. Every producer
 is fire-and-forget and swallows publish exceptions, so `enqueued` is the strongest honest claim the
@@ -106,11 +107,50 @@ the series is legitimately absent rather than zero. Alert on the *rate*, not the
 trickle after a restart is crash recovery working correctly, while a sustained rate means handlers
 are failing to make progress.
 
-Backlog depth (Redis `LLEN`, the Postgres `queue_messages` count, Kafka consumer lag) is
-**not implemented**. `MessagingMetrics.RegisterBacklogGauge` exists and is deliberately unused: it
-needs a background sampler issuing periodic I/O against production datastores, which is new runtime
-behavior rather than new instrumentation. See
-[Known gaps](#known-gaps-what-is-deliberately-not-measured).
+#### Backlog depth and the background sampler
+
+`backlog` answers the one question the rate counters cannot: **is the queue draining or filling?**
+A healthy `consumed` rate and a growing backlog look identical until the depth is measured.
+
+It is the only instrument in this registry produced by a **background service** rather than by the
+code path it describes, and that is deliberate. Reading depth costs a round trip to Redis, Postgres,
+or Kafka. An `ObservableGauge` callback runs on the collector's schedule and is expected to return
+immediately, so issuing that I/O from inside one would put unbounded blocking work on the metrics
+export path, where a slow datastore stalls collection for *every other instrument in the process*.
+`MessagingBacklogSampler` therefore does the I/O on its own loop and the gauge callback reads one
+cached `long`.
+
+**This is the one part of the observability work that adds runtime behavior** — a new periodic query
+against a production datastore. Everything about it is bounded and fail-quiet as a result:
+
+| Property | Behavior |
+| --- | --- |
+| Interval | `Observability:Messaging:BacklogSampleIntervalSeconds`, default **30 s**, floored at **5 s**. `0` or negative **disables** sampling entirely; an unparseable value falls back to the default, so a typo cannot silently turn the diagnostic off |
+| Topic set | Fixed at startup from the same list the consumer drains, so gauge cardinality is bounded and a topic can never be consumed without being watched |
+| Unknown | Reported as **`-1`**, never `0`. A zero reads as "drained", which is the most misleading thing a backlog gauge can say while a broker is unreachable |
+| Probe failure | Caught per provider. That provider's topics go to `-1`, other providers are still sampled, the loop does not fault, and `worker.loop_failures` records it. A diagnostic must never be the reason a service stops |
+| Postgres cost | The count query sends `set local statement_timeout = 3000` **and** a client-side command timeout. The `queue_messages` index leads with `not_visible_until`, so a grouped count over a large backlog can degrade — and a large backlog is exactly when someone is reading this number |
+
+**Alert on `-1` as well as on a high value.** A gauge stuck at `-1` means the sampler cannot reach
+the datastore, which is a different and usually more urgent problem than a deep queue.
+
+Per-transport meaning and scope:
+
+| Transport | Service | How depth is read | Notes |
+| --- | --- | --- | --- |
+| Redis | API | `LLEN` per list-consumed topic | O(1). Pub/sub channels are excluded — an undelivered pub/sub message is discarded rather than queued, so its depth is permanently `0`, which would read as "healthy and drained" |
+| Postgres | API | `count(*)` over `status = 'Pending'`, grouped by topic | `Processing` rows have been claimed and are not waiting; `Failed` rows are terminal, so counting them would make the backlog appear to grow forever after one poison message |
+| Kafka | API and ELS | Committed offset vs. high watermark, per partition, summed per topic | Read through `KafkaLagReader`, shared with the `Kafka Consumer Group Progress` diagnostic check so the endpoint and the gauge cannot disagree. Never joins the consumer group |
+
+**The evaluation server samples Kafka only, and the omissions are deliberate rather than
+unfinished.** Its Postgres consumer uses `LISTEN`/`NOTIFY`, so there is no queue table to count; its
+Redis consumer uses a pub/sub subscription, which has no backlog by construction. For that service
+Kafka lag is also the most direct available answer to "are flag changes reaching SDK clients?",
+because everything downstream of its consume loop is in-process fan-out.
+
+**Kafka lag reads as unknown immediately after an ELS restart.** That service assigns itself a fresh
+consumer group per process (`evaluation-server-{guid}`), which has committed nothing yet — so `-1`
+here is startup, not a fault.
 
 ### Change propagation (`PropagationMetrics`)
 
@@ -133,9 +173,12 @@ the loop catches per-connection exceptions and continues.
 `stages{outcome=partial}` is distinct from both success and failure: a fan-out that reached most
 connections is neither, and collapsing it into either hides the only interesting case.
 
-There is deliberately **no end-to-end propagation latency**. That needs trace context carried across
-the message queue, which is a wire-format change. Per-stage timings still localize
-a stall to a service, which is most of the diagnostic value.
+There is deliberately **no end-to-end propagation latency instrument**, even under Kafka where trace
+context now does cross the queue. A metric spanning services would have to be recorded by whichever
+service happens to be last, attributing another service's time to itself; and it would be absent
+under Redis and Postgres, so a dashboard built on it would be right on one transport and empty on
+two. Per-stage timings localize a stall to a service on every deployment, and under Kafka the joined
+trace supplies the end-to-end number for the individual change you are actually looking at.
 
 ### Workers and buffers (`WorkerObservability`, `BufferObservability`)
 
@@ -156,6 +199,13 @@ a stall to a service, which is most of the diagnostic value.
 means the loop is spinning but accomplishing nothing; both stale means it has stopped. Neither is
 distinguishable from a healthy idle worker without both gauges. Ages report `-1` before the first
 occurrence, never `0`, so "never happened" cannot be mistaken for "just happened".
+
+**The backlog sampler is itself a worker**, registered as `mq_backlog_sampler`. So the question "is
+the queue depth I am looking at current?" has a direct answer:
+`worker.last_success_age{worker="mq_backlog_sampler"}` is the age of the newest reading, and
+`worker.loop_failures` counts probes that failed. A sampler with no probes to run — every provider
+except Kafka in the evaluation server — exits immediately rather than spinning an empty timer, so
+`worker.running` stays honest about what is actually running.
 
 **Buffer signal depends on the buffer's full mode, and they are not interchangeable.**
 `InsightsTracker` is `FullMode.Wait`, so it back-pressures the calling request thread — blocked
@@ -807,9 +857,9 @@ done.**
 | Not measured | Status | Why, and what it would take |
 |---|---|---|
 | `buffer.bytes` on `UsageTracker` and the ELS Postgres channel | Not built | Shipped for `InsightsTracker` only. The other two are not alike: ELS's `PostgresMessageConsumer` holds `ChannelMessage(string, long)` — a channel name and a row id, **no payload** — so bytes would be a constant multiple of `buffer.items` and carry no information beyond it. `UsageTracker`'s `Channel<UsageRecord>` has no caller holding a serialized form, so measuring it would mean serializing purely for telemetry on the ingest path. For both, `buffer.items` and `buffer.capacity` already answer the question |
-| `queue.depth`, `oldest_message.age` — MQ backlog | Not built | Needs a background sampler issuing periodic I/O against production Redis, Postgres, and Kafka on a timer. That is new runtime behavior and new load on the datastores, not new instrumentation. The instrument side is already done — `MessagingMetrics.RegisterBacklogGauge(...)` is in place and deliberately unused — and the Kafka lag computation already exists in `KafkaConsumerGroupHealthCheck`, so this is wiring plus a timer once the added load is accepted |
+| `oldest_message.age` — MQ backlog | Not built | `messaging.backlog` ships (see [Backlog depth and the background sampler](#backlog-depth-and-the-background-sampler)), so *depth* is answered. Age is not: Redis lists expose no enqueue timestamp without reading the head element, Kafka's committed-offset arithmetic yields a message count rather than a time, and only the Postgres transport has an `enqueued_at` column to read. One transport out of three would give a series absent for reasons an operator cannot see from the metric, which is worse than a consistently absent one |
 | `messaging.redelivered` under Kafka and Redis | Not built | Shipped for Postgres only, where the consumer's poll already increments `deliver_count` on every delivery and the count is readable with no behavior change. Under Kafka and Redis there is genuinely nothing to count — no retry or dead-letter path exists, both Kafka consumers `StoreOffset` in a `finally` regardless of outcome, and the Redis consumer pops before processing — so a message is delivered exactly once or not at all. The absent series means "not applicable to this provider", not zero |
-| A single end-to-end trace across the message queue | Partially built | Spans stitch together **within** a service but stop at the queue, because no transport carries trace context. `insights.ingest` and `insights.flush` are therefore **two traces, not a parent/child pair**, and must not be read as one; the same applies to change propagation and data sync across the boundary. Kafka could carry a `traceparent` header additively (ignorable by old and new consumers alike); Redis has no header concept and would need a payload envelope, where a new producer against an old consumer would silently stop flag propagation; Postgres would need a nullable column and a migration. `change_id` correlates the two halves today, which still localizes a stall to a service |
+| A single end-to-end trace across the message queue | Partially built | **Kafka carries trace context**; Redis and Postgres do not. Under `MqProvider=Kafka` a `traceparent` header is written by the producer and adopted by the consumer, so change propagation and data sync join into one trace across the boundary. Under Redis or Postgres the spans still stitch together **within** a service and stop at the queue — Redis has no header concept and would need a payload envelope, where a new producer against an old consumer would silently stop flag propagation, and Postgres would need a nullable column and a migration. `insights.ingest` and `insights.flush` remain **two traces, not a parent/child pair**, under every transport: they are separated by a buffer and a flush cycle, not just by the queue. `change_id` correlates the halves where the trace cannot, which still localizes a stall to a service |
 | Evaluation batch size | Not applicable | `/api/public/featureflag/evaluate` evaluates the flags of one environment for one end user; there is no caller-supplied batch to size. `sync.payload_items` already carries the count where a count exists |
 
 ### Instruments you might expect but will not find

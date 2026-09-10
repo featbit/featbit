@@ -46,6 +46,9 @@ public static class WorkerNames
 
     /// <summary>Probes data-store availability and selects the store to serve from.</summary>
     public const string StoreSentinel = "store_sentinel";
+
+    /// <summary>Samples message-queue backlog depth on a timer.</summary>
+    public const string BacklogSampler = "mq_backlog_sampler";
 }
 
 /// <summary>

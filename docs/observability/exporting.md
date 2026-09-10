@@ -192,14 +192,15 @@ alongside the `Microsoft.AspNetCore` and `MongoDB.Driver` scopes.
 
 ## 7. What is not wired up here
 
-- **Cross-service trace context.** A trace stops at each service boundary; the message-queue hop
-  does not carry `traceparent` yet. Each service's stages still stitch together internally, which
-  localizes a stall to a service. See
+- **Cross-service trace context beyond Kafka.** Under `MqProvider=Kafka` a `traceparent` header
+  joins the two halves of a message-queue hop into one trace. Under Redis or Postgres it does not,
+  so a trace still stops at the service boundary — each service's stages stitch together
+  internally, which localizes a stall to a service. See
   [Known gaps](instruments.md#known-gaps-what-is-deliberately-not-measured).
 - **Dashboards and alerts.** No dashboard JSON or alert rules ship with FeatBit.
   [`instruments.md`](instruments.md) is the source list to build them from.
 - **Kubernetes manifests.** The `kubernetes/` manifests do not set these variables; add them to
   your own deployment.
-- **Queue depth.** There is no backlog sampler, so "is the queue backing up?" is answerable only by
-  inference from consume rate. See
-  [Known gaps](instruments.md#known-gaps-what-is-deliberately-not-measured).
+- **Message age in the queue.** `featbit.<svc>.messaging.backlog` reports queue *depth* from a
+  background sampler, but how long the oldest waiting message has been there is not measured. See
+  [Backlog depth and the background sampler](instruments.md#backlog-depth-and-the-background-sampler).

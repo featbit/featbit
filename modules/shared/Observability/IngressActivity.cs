@@ -34,7 +34,7 @@ public static class IngressActivity
     public const string SystemTag = "messaging.system";
 
     /// <summary>
-    /// Starts the root activity for handling one consumed message.
+    /// Starts the root activity for handling one consumed message, with no remote parent.
     /// </summary>
     /// <param name="topic">Topic the message was read from.</param>
     /// <param name="system">Transport that delivered it.</param>
@@ -43,16 +43,35 @@ public static class IngressActivity
     /// <c>using var</c> at the call site is enough, and a null result makes that a no-op.
     /// </returns>
     /// <remarks>
-    /// Started with no parent so each message gets its own trace. Trace context is not carried on
-    /// the wire today, so linking to the producer's trace is not yet possible; the derived
-    /// <see cref="ChangeId"/> is what ties the producing and consuming services together until it is.
+    /// Each message gets its own trace. Use the overload taking an
+    /// <see cref="ActivityContext"/> on transports that carry trace context on the wire; the Redis
+    /// and Postgres transports do not, so they call this one and rely on the derived
+    /// <see cref="ChangeId"/> to tie the producing and consuming services together.
     /// </remarks>
     public static Activity? StartConsume(string topic, string system)
+        => StartConsume(topic, system, default);
+
+    /// <summary>
+    /// Starts the root activity for handling one consumed message, continuing the producer's trace
+    /// when the transport carried one.
+    /// </summary>
+    /// <param name="topic">Topic the message was read from.</param>
+    /// <param name="system">Transport that delivered it.</param>
+    /// <param name="parentContext">
+    /// Trace context extracted from the message, from
+    /// <see cref="TraceContextPropagation.Extract"/>. Pass <see langword="default"/> when the
+    /// message carried none — that starts a fresh trace, which is the behavior every transport had
+    /// before trace context was propagated at all.
+    /// </param>
+    /// <returns>
+    /// The activity, or <c>null</c> if nothing is listening. Dispose it when handling completes.
+    /// </returns>
+    public static Activity? StartConsume(string topic, string system, ActivityContext parentContext)
     {
         var activity = FeatBitActivitySources.Ingress.StartActivity(
             ConsumeActivityName,
             ActivityKind.Consumer,
-            parentContext: default);
+            parentContext);
 
         if (activity is not null)
         {

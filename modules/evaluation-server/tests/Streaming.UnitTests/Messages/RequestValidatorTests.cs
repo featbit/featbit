@@ -167,7 +167,7 @@ public class RequestValidatorTests
     }
 
     [Fact]
-    public async Task ParseTokenThrows()
+    public async Task ValidateAsync_WhenTokenParsingThrows_IsInvalidRatherThanUnavailable()
     {
         // A throwing ITokenValidator simulates a parsing-stage failure.
         // It must produce Failed (permanent rejection / WS 4003), never Unavailable (transient / WS 1011).

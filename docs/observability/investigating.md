@@ -156,7 +156,10 @@ all the same token hash.
 The same method, across more than one service. Flag propagation is instrumented as **stages**, so
 the question is always *which stage is the last one that succeeded*.
 
-Join on **`change_id`**, not `trace_id` — trace context does not yet cross the message queue.
+Join on **`change_id`**. Under `MqProvider=Kafka` the two halves also share a `trace_id`, because
+the producer writes a `traceparent` header the consumer adopts — so there the whole change is one
+trace. Under Redis or Postgres no trace context crosses the queue, and `change_id` is the only join
+that works. Using `change_id` first is therefore the method that works on every deployment.
 
 **1. Find where the stage counts diverge.** Every stage increments the same counter with a
 different `stage` attribute:
@@ -194,7 +197,7 @@ problem. `failed > 0` names it as a push problem.
 
 **3. Join the logs across services.** Search every service for the `change_id` from the span. This
 is the step that reaches across the queue hop, and it returns the API-side and ELS-side records for
-the *same* change even though they are in different traces.
+the *same* change even under a transport where the two are in different traces.
 
 > A shared segment fans out to one message per environment, so the consumer derives a
 > per-environment `change_id` that differs from the producer's. This is intentional and documented
@@ -249,6 +252,51 @@ batch sizes and, on the ingest side, the received-versus-rejected split for a si
 per request" from "many SDKs are each sending a normal amount" — identical on an event-count chart,
 opposite remedies. It is read from `Content-Length`, so a chunked request contributes nothing to it
 rather than contributing a misleading zero.
+
+### "Is the message queue backing up?"
+
+A healthy `consumed` rate and a queue filling faster than it drains look identical from the rate
+counters alone. Depth is what separates them:
+
+```
+featbit_api_messaging_backlog{provider="…", destination="…"}
+```
+
+Read it together with the rate, not instead of it:
+
+| Backlog | `messaging_consumed_total` rate | Reading |
+| --- | --- | --- |
+| Flat and low | Steady | Healthy — consumers keep up |
+| Climbing | Steady | **Producers outpace consumers.** The consumer is working, just not fast enough |
+| Climbing | Zero | **Consumers have stopped.** Check `featbit_<svc>_worker_running` and `worker_loop_failures` for the consumer worker |
+| Flat | Zero | Idle, *or* nothing is being published — confirm with `messaging_published_total` before relaxing |
+| **`-1`** | anything | **The sampler cannot reach the datastore.** Not a queue problem; see below |
+
+**`-1` means unknown and never zero**, which matters more than it looks: a zero here would read as
+"drained" at precisely the moment a broker is unreachable, which is the most expensive wrong answer
+this gauge could give. If you see `-1`, the queue depth is not the finding — the probe failure is.
+Confirm with:
+
+```
+featbit_<svc>_worker_last_success_age{worker="mq_backlog_sampler"}
+featbit_<svc>_worker_loop_failures_total{worker="mq_backlog_sampler"}
+```
+
+A `last_success_age` that keeps climbing means every reading you are looking at is stale, regardless
+of what the numbers say.
+
+Two cases where an absent or `-1` series is expected rather than a fault:
+
+- **Immediately after an evaluation-server restart.** It assigns itself a fresh Kafka consumer group
+  per process, which has committed no offsets yet, so lag is genuinely unknown for the first cycle.
+- **Any evaluation-server transport other than Kafka.** Its Postgres consumer uses `LISTEN`/`NOTIFY`
+  and its Redis consumer uses pub/sub; neither has a queue to measure, so no series is registered at
+  all. See
+  [`instruments.md`](instruments.md#backlog-depth-and-the-background-sampler).
+
+For Kafka, `health/diagnostics` reports the same lag through the same reader, so the endpoint and
+the gauge cannot disagree — a useful cross-check when you suspect the metrics pipeline rather than
+the queue.
 
 ### "Is evaluation behaving the way the flag is configured?"
 
@@ -378,7 +426,7 @@ checker that it has no rule for, which is a FeatBit bug rather than a customer m
 |---|---|---|
 | Log records have empty `Trace ID` / `Span ID` | The record was emitted outside any request — startup, or a background worker loop with no ingress activity | Expected. Correlate background work by `service.name` and worker name instead |
 | No logs at all for a trace on `/health/*` | Health-endpoint request logging is deliberately at `Debug`, so orchestrator polling does not flood the log | Expected. Lower the level, or investigate using the span alone |
-| `trace_id` present but stops at a service boundary | Trace context does not cross the message queue yet | Join on `change_id` instead — §4 |
+| `trace_id` present but stops at a service boundary | Trace context crosses the queue only under `MqProvider=Kafka`; Redis and Postgres carry none | Join on `change_id` instead — §4 |
 | Hashed tokens do not match across pods | `Observability__RedactionSalt` differs, or is unset (random per process) | Set the same salt everywhere — [`exporting.md` §5](exporting.md) |
 | `featbit_*` metrics absent, others present | `OTEL_DOTNET_AUTO_*_ADDITIONAL_SOURCES` misconfigured | [`exporting.md` §2](exporting.md) |
 | `flag.*` spans absent | Custom traces are off by default | Set `Observability__Traces__Categories` |

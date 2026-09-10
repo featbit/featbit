@@ -177,3 +177,57 @@ PowerShell scripts in `e2e/control-plane/` use approved PowerShell verbs in thei
   inconsistencies, so copying a nearby file can reproduce a violation rather than
   avoid one. If a change genuinely cannot follow the standard, record the deviation
   in that file rather than leaving it undocumented.
+- **Instrumentation follows `docs/observability/index.md`.** Read it before adding or
+  changing any metric, span, or log statement. Same warning: do not infer the
+  conventions from surrounding code.
+
+---
+
+## Observability
+
+Observability is a first-class requirement in the three .NET modules, not an optional
+extra. When you add a code path that can fail, retry, queue, drop work, take an
+unbounded amount of time, or silently do nothing, instrument it **in the same change**.
+The bar is: *if this breaks in production, is there enough signal to find out why
+without attaching a debugger?*
+
+The standard lives in four documents under `docs/observability/`:
+
+| Document | Use it for |
+|---|---|
+| `index.md` | The rules: naming, attribute allowlist, cardinality budget, log levels, redaction, trace gating, health-check tags |
+| `instruments.md` | The registry of every instrument, plus the "known gaps" list of what is deliberately not measured |
+| `exporting.md` | Getting signals to a collector, and the traps that drop them silently |
+| `investigating.md` | The operator runbook — how these signals are meant to be used during an incident |
+
+Rules that are easy to get wrong and expensive to fix later:
+
+- **Names are a contract.** `featbit.<service>.<area>.<name>`; the unit belongs in the
+  instrument's `unit` field, never in its name. These instruments export today, so
+  renaming one breaks live dashboards.
+- **Attributes come from a fixed allowlist**, and an attribute is safe *only if its
+  value set is defined by FeatBit's own code*. Never tag with a value taken from a
+  request body, a socket frame, a customer-authored rule or flag name, a URL, a user
+  identifier, or an environment id. Map untrusted input onto a closed set first, or
+  leave it out. Unbounded cardinality is the most expensive mistake available here.
+- **Register every new instrument in `instruments.md`**, with a description matching the
+  `description:` string in code. An undocumented instrument and a missing one cost the
+  same during an incident.
+- **Add a test.** `MetricCollector` (in `modules/shared/Observability.TestKit`) asserts
+  name, unit, and attributes; extend the `CardinalityBudgetTests` sweeps so new
+  instruments are checked against the allowlist mechanically.
+- **Telemetry must never change behavior.** No I/O on a request, streaming, or
+  evaluation path; nothing that blocks; gauge callbacks read cached or atomic state
+  only. If measuring something would require new runtime behavior, say so and record it
+  rather than doing it quietly.
+- **Credentials are hashed, never logged raw** — SDK secrets, streaming and relay-proxy
+  tokens, JWTs. Everything else (message payloads, client IPs, webhook URLs) is logged
+  raw on purpose, because that is what makes an incident diagnosable. New
+  credential-bearing field names must be added to `Redaction.CredentialNames`.
+- **Shared primitives live in `modules/shared/Observability` and are deliberately
+  BCL-only.** Do not add a package dependency to that project; keep transport- or
+  framework-specific glue in the module that needs it.
+- **Scope gaps honestly.** If something is specified but not built, record it in the
+  "known gaps" section of `instruments.md` with a reason. Documentation that overclaims
+  coverage is worse than documentation that admits a hole — an overclaim is how the
+  original M7–M10 gap stayed hidden.

@@ -17,7 +17,7 @@ public sealed class AlwaysLeaderElectionTests
     private readonly FakeLogger<AlwaysLeaderElection> _logger = new();
 
     [Fact]
-    public void IsLeader_IsAlwaysTrue()
+    public void IsLeader_ForAnyInstance_IsAlwaysTrue()
     {
         using var sut = new AlwaysLeaderElection(_logger);
 
@@ -25,7 +25,7 @@ public sealed class AlwaysLeaderElectionTests
     }
 
     [Fact]
-    public void InstanceId_IsSetAndStable()
+    public void InstanceId_ReadRepeatedly_IsNonEmptyAndStable()
     {
         using var sut = new AlwaysLeaderElection(_logger);
 
@@ -34,7 +34,7 @@ public sealed class AlwaysLeaderElectionTests
     }
 
     [Fact]
-    public async Task StartAsync_LogsDiscoverabilityHint()
+    public async Task StartAsync_WhenLeaderElectionIsDisabled_LogsADiscoverabilityHint()
     {
         using var sut = new AlwaysLeaderElection(_logger);
 
@@ -47,7 +47,7 @@ public sealed class AlwaysLeaderElectionTests
     }
 
     [Fact]
-    public async Task StopAsync_CompletesWithoutError()
+    public async Task StopAsync_AfterStartAsync_CompletesWithoutError()
     {
         using var sut = new AlwaysLeaderElection(_logger);
 

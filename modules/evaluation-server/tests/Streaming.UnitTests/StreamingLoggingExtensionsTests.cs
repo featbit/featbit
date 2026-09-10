@@ -14,7 +14,7 @@ public class StreamingLoggingExtensionsTests
     private string Message() => Assert.Single(_logger.Collector.GetSnapshot()).Message;
 
     [Fact]
-    public void RequestRejected_FormatsMessageAndCarriesEventName()
+    public void RequestRejected_ForARejectedRequest_FormatsTheMessageAndCarriesTheEventName()
     {
         _logger.RequestRejected(QueryString, "missing-type");
 
@@ -39,7 +39,7 @@ public class StreamingLoggingExtensionsTests
     }
 
     [Fact]
-    public void FailedToResolveHost_FormatsMessageAndCapturesException()
+    public void FailedToResolveHost_WithAnException_FormatsTheMessageAndCapturesIt()
     {
         var ex = new InvalidOperationException("dns down");
 
@@ -54,7 +54,7 @@ public class StreamingLoggingExtensionsTests
     }
 
     [Fact]
-    public void ErrorValidateRequest_FormatsMessageAndCapturesException()
+    public void ErrorValidateRequest_WithAnException_FormatsTheMessageAndCapturesIt()
     {
         var ex = new InvalidOperationException("bad");
 

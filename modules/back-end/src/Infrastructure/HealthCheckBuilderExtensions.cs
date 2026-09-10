@@ -91,6 +91,9 @@ public static class HealthCheckBuilderExtensions
         {
             // Singleton so the endpoint can be polled without churning a broker connection per
             // request; AddCheck resolves the registered instance rather than constructing a new one.
+            // The reader is shared with the backlog gauge — whichever registers first wins, and both
+            // then read the same broker connection and report the same lag.
+            builder.Services.TryAddSingleton<KafkaLagReader>();
             builder.Services.TryAddSingleton<KafkaConsumerGroupHealthCheck>();
             builder.AddCheck<KafkaConsumerGroupHealthCheck>(
                 "Kafka Consumer Group Progress",

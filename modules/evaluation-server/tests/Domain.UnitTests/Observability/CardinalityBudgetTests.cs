@@ -214,6 +214,10 @@ public sealed class CardinalityBudgetTests
         metrics.RecordUnroutable("kafka", "featbit-cardinality-probe");
         metrics.RecordRedelivered("postgres", "featbit-cardinality-probe", 2);
         metrics.RecordDeliveryFailure("kafka", "featbit-cardinality-probe");
+
+        // The backlog gauge is registered by the background sampler rather than recorded inline,
+        // so it would escape this sweep entirely unless it is registered here too.
+        metrics.RegisterBacklogGauge("kafka", "featbit-cardinality-probe", () => 7);
     }
 
     private static void ExercisePropagation()

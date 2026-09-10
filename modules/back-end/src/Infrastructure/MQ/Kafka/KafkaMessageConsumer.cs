@@ -29,16 +29,10 @@ public partial class KafkaMessageConsumer : BackgroundService
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        // Unwrap() is load-bearing. StartNew over an async delegate returns a Task<Task> that
-        // completes as soon as the loop reaches its first suspension point, so without it the host
-        // observes neither the loop's lifetime nor any exception escaping it: a crashed consumer
-        // looks healthy forever, and shutdown does not wait for the loop to drain.
-        return Task.Factory.StartNew(
-            () => StartConsumerLoop(stoppingToken),
-            CancellationToken.None,
-            TaskCreationOptions.LongRunning,
-            TaskScheduler.Default
-        ).Unwrap();
+        // WorkerLoop.Run is load-bearing: it unwraps the inner loop task so the host observes the
+        // loop's real lifetime and any exception escaping it. See WorkerLoop for what breaks
+        // silently without it.
+        return WorkerLoop.Run(() => StartConsumerLoop(stoppingToken));
     }
 
     private async Task StartConsumerLoop(CancellationToken cancellationToken)
@@ -79,9 +73,13 @@ public partial class KafkaMessageConsumer : BackgroundService
                         continue;
                     }
 
-                    // Root activity for this message: a consumed message has no ambient activity, so
-                    // without one nothing logged while handling it can be correlated.
-                    using var activity = IngressActivity.StartConsume(topic, MessagingSystems.Kafka);
+                    // Root activity for this message. When the producer carried trace context on
+                    // headers this continues that trace across the queue hop; when it did not, the
+                    // context is default and the message starts its own trace as before.
+                    using var activity = IngressActivity.StartConsume(
+                        topic,
+                        MessagingSystems.Kafka,
+                        KafkaTraceContext.Extract(consumeResult.Message?.Headers));
 
                     using var scope = _serviceProvider.CreateScope();
 

@@ -249,9 +249,31 @@ registered by the first middleware in the pipeline, so failed responses carry it
 
 **Header only.** Error response *bodies* are part of the API contract and are unchanged.
 
-Correlation is currently **in-process only**. Trace context is not propagated across the message
-queue, so a flag change produces one trace per service rather than a single end-to-end trace. This
-is a known limitation, not a defect.
+### Trace context across the message queue
+
+**Kafka carries it; Redis and Postgres do not.** Under `MqProvider=Kafka`, the producer writes the
+W3C `traceparent` (and `tracestate`) into the message headers and the consumer adopts it as the
+ingress activity's parent, so a flag change is **one trace end to end** across services.
+
+Three properties made this safe to add without a rollout plan:
+
+- **Headers are ignorable in both directions.** An old consumer skips a header it does not know; a
+  new consumer treats an absent header as "no parent" and starts a root span, exactly as before. So
+  producers and consumers can be upgraded in any order.
+- **The message body is untouched.** No envelope, no schema change, nothing for a non-FeatBit
+  consumer of the same topic to trip over.
+- **A malformed header degrades to a root span**, never to an exception on the consume path.
+  Instrumentation must not be able to stop message delivery.
+
+The other two transports are not comparable in cost. Redis has no header concept at either the list
+or pub/sub layer, so carrying context means an envelope around the payload — and a new producer
+against an old consumer would silently stop flag propagation, which is the worst failure this
+codebase has. Postgres would need a nullable column and a migration in two modules. Both are
+deferred deliberately rather than pending.
+
+Under Redis or Postgres, correlation is **in-process only**: a flag change produces one trace per
+service. `change_id` still joins them, so join on `change_id` first if you want a method that works
+on every deployment — see [`investigating.md` §4](./investigating.md).
 
 ## 6. Logging
 
@@ -480,6 +502,7 @@ first statement of each service's `RegisterServices`.
 | `Observability:Traces:Categories` | `FEATBIT_TRACES_CATEGORIES` | *(unset — all custom tracing off)* | Comma-separated trace categories to enable, or `all`. Categories are listed in `TraceCategories`. |
 | `Observability:Traces:SampleRatio` | `FEATBIT_TRACES_SAMPLE_RATIO` | `1.0` | Sample ratio, `0.0`–`1.0`, applied only to enabled categories. Out-of-range values are clamped; unparseable values fall back to the default. |
 | `Observability:RedactionSalt` | `FEATBIT_REDACTION_SALT` | *(unset — random per process)* | HMAC salt for hashed credentials (§7). **Set this to a strong random value, identical across all pods**, to correlate a caller across instances and restarts. Left unset, hashing still works but correlation is confined to a single process lifetime. |
+| `Observability:Messaging:BacklogSampleIntervalSeconds` | *(none)* | `30` | How often the message-queue backlog sampler queries Redis, Postgres, or Kafka for queue depth. Floored at 5 s. **`0` or negative disables sampling**, which is the supported way to opt out of the periodic query; an unparseable value falls back to the default rather than disabling. See [`instruments.md`](./instruments.md#backlog-depth-and-the-background-sampler). |
 
 ```jsonc
 // appsettings.Development.json
@@ -536,7 +559,9 @@ The primitives live in **one place**, `modules/shared/`, referenced by all three
 | `TraceGate` | The §8 category switch and sample ratio |
 | `ActivityCorrelation`, `CorrelationFields` | The §5 listener and canonical correlation field names |
 | `ChangeId` | Derived identifier for one flag/segment change (§5) |
-| `IngressActivity` | Root activity for a consumed MQ message |
+| `IngressActivity` | Root activity for a consumed MQ message, optionally parented by an extracted upstream context |
+| `TraceContextPropagation` | W3C `traceparent`/`tracestate` inject and extract, BCL-only — no propagator package |
+| `WorkerLoop` | The `Task.Factory.StartNew(..., LongRunning, ...).Unwrap()` pattern for consumer loops, named so its fault-propagation is testable |
 | `ObservableGaugeSnapshot<T>` | Volatile snapshot behind an observable gauge |
 | `MessagingMetrics`, `PropagationMetrics` | The messaging and change-propagation instrument families |
 | `InsightsMetrics` | The insights instrument family — emitted by two hosts |

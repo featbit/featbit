@@ -26,23 +26,18 @@ public partial class KafkaMessageConsumer : BackgroundService
 
         config.GroupId = $"evaluation-server-{Guid.NewGuid()}";
         _consumer = new ConsumerBuilder<Null, string>(config).Build();
-        _topics = configuration.UseControlPlane()
-            ? [Topics.FeatureFlagChange, Topics.SegmentChange, Topics.ControlPlaneCommand]
-            : [Topics.FeatureFlagChange, Topics.SegmentChange];
+
+        // Same list the backlog probe reports lag for, so a topic can never be consumed without
+        // being watched.
+        _topics = KafkaConsumerTopics.For(configuration);
     }
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        // Unwrap() is load-bearing. StartNew over an async delegate returns a Task<Task> that
-        // completes as soon as the loop reaches its first suspension point, so without it the host
-        // observes neither the loop's lifetime nor any exception escaping it: a crashed consumer
-        // looks healthy forever, and shutdown does not wait for the loop to drain.
-        return Task.Factory.StartNew(
-            () => StartConsumerLoop(stoppingToken),
-            CancellationToken.None,
-            TaskCreationOptions.LongRunning,
-            TaskScheduler.Default
-        ).Unwrap();
+        // WorkerLoop.Run is load-bearing: it unwraps the inner loop task so the host observes the
+        // loop's real lifetime and any exception escaping it. See WorkerLoop for what breaks
+        // silently without it.
+        return WorkerLoop.Run(() => StartConsumerLoop(stoppingToken));
     }
 
     private async Task StartConsumerLoop(CancellationToken cancellationToken)
@@ -87,9 +82,13 @@ public partial class KafkaMessageConsumer : BackgroundService
 
                     message = consumeResult.Message == null ? string.Empty : consumeResult.Message.Value;
 
-                    // Root activity for this message: a consumed message has no ambient activity, so
-                    // without one nothing logged while handling it can be correlated.
-                    using var activity = IngressActivity.StartConsume(consumeResult.Topic, MessagingSystems.Kafka);
+                    // Root activity for this message. When the producer carried trace context on
+                    // headers this continues that trace across the queue hop; when it did not, the
+                    // context is default and the message starts its own trace as before.
+                    using var activity = IngressActivity.StartConsume(
+                        consumeResult.Topic,
+                        MessagingSystems.Kafka,
+                        KafkaTraceContext.Extract(consumeResult.Message?.Headers));
 
                     // M2: measures handling only, not the blocking Consume() call above — otherwise an
                     // idle topic would report enormous "consume durations". The scope defaults to

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Net;
 using System.Text.Json;
 using Confluent.Kafka;
@@ -41,9 +42,14 @@ public partial class KafkaMessageProducer : IMessageProducer
 
             // for high throughput processing, we use Produce method, which is also asynchronous, in that it never blocks.
             // https://docs.confluent.io/kafka-clients/dotnet/current/overview.html#producer
+            //
+            // Trace context rides on Kafka headers so the consuming service continues this trace
+            // instead of starting an unrelated one. Inject returns null when there is nothing to
+            // propagate, which leaves the message identical to what an older producer wrote.
             _producer.Produce(topic, new Message<Null, string>
             {
-                Value = value
+                Value = value,
+                Headers = KafkaTraceContext.Inject(Activity.Current)
             }, DeliveryHandler);
 
             publish.Enqueued();
