@@ -1,6 +1,7 @@
 using System.Globalization;
 using Application;
 using Application.ControlPlane;
+using Domain.Observability;
 using Infrastructure.Caches.Redis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -36,6 +37,7 @@ public sealed class StagedFlagGcWorker : BackgroundService
     private readonly bool _enabled;
     private readonly TimeSpan _interval;
     private readonly ILogger<StagedFlagGcWorker> _logger;
+    private readonly WorkerObservability _observability = ServiceMeter.ForWorker(WorkerNames.StagedFlagGc);
 
     public StagedFlagGcWorker(
         IRedisClient redis,
@@ -62,26 +64,44 @@ public sealed class StagedFlagGcWorker : BackgroundService
         }
 
         using var timer = new PeriodicTimer(_interval);
-        while (await timer.WaitForNextTickAsync(stoppingToken))
+
+        _observability.Started();
+
+        try
         {
-            try
+            while (await timer.WaitForNextTickAsync(stoppingToken))
             {
-                var deleted = await RunGcOnceAsync(stoppingToken);
-                if (deleted > 0)
+                _observability.Heartbeat();
+
+                try
                 {
-                    _logger.LogInformation(
-                        "Staged flag GC swept {DeletedCount} superseded versioned flag key(s).",
-                        deleted);
+                    var deleted = await RunGcOnceAsync(stoppingToken);
+
+                    // A sweep that deletes nothing is still a success: it proves the worker reached
+                    // Redis and found nothing to collect, which is the healthy steady state.
+                    _observability.Success();
+
+                    if (deleted > 0)
+                    {
+                        _logger.LogInformation(
+                            "Staged flag GC swept {DeletedCount} superseded versioned flag key(s).",
+                            deleted);
+                    }
+                }
+                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                {
+                    // ignore cancellation from the timer loop itself
+                }
+                catch (Exception ex)
+                {
+                    _observability.LoopFailed(ex);
+                    _logger.LogError(ex, "Error occurred while sweeping staged flag versions.");
                 }
             }
-            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
-            {
-                // ignore cancellation from the timer loop itself
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while sweeping staged flag versions.");
-            }
+        }
+        finally
+        {
+            _observability.Stopped();
         }
     }
 

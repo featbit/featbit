@@ -6,12 +6,14 @@ on:
       - main
     paths:
       - 'modules/evaluation-server/**'
+      - 'modules/shared/**'
       - '.github/build-and-test-els.yml'
   pull_request:
     branches:
       - main
     paths:
       - 'modules/evaluation-server/**'
+      - 'modules/shared/**'
       - '.github/build-and-test-els.yml'
 
 jobs:

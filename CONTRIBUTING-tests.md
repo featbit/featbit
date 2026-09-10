@@ -30,6 +30,34 @@ modules/<module>/
 - All other tests are **unit tests** and live in `<Project>.UnitTests/`.
 - **Single-project modules** (control-plane ships one `src/Api` project with `Application`/`Domain`/`Infrastructure` as folders) get one `Api.UnitTests` peer and one `Api.IntegrationTests` project that plays the `Infrastructure.IntegrationTests` role (Testcontainers, `Category=Integration`, local-only — all of §12 applies to it verbatim). Folder mirroring (§2) still applies inside both.
 
+### Cross-module shared projects (`modules/shared/`)
+
+**This is a deliberate, documented exception to the one-test-project-per-module rule above.**
+
+Some production code is shared by all three .NET modules and lives outside any of them:
+
+```
+modules/shared/
+  Observability/              # primitives referenced by all three modules
+  Observability.AspNetCore/
+  Observability.TestKit/      # test helpers (MetricCollector) used by all three modules
+  Observability.Tests/        # the single test suite for the above
+```
+
+The rule above ("each production project gets a matching test project under `tests/`") has no answer
+for a production project that three modules depend on. Placing its tests inside one module's
+`tests/` would leave the other two modules' workflows blind to code they depend on; copying them
+into all three would restore the duplication that pulling the code into `modules/shared/` existed to
+remove. So:
+
+- **A project under `modules/shared/` gets exactly one test project, also under `modules/shared/`**, named `<Project>.Tests`.
+- **That test project is listed in all three module solutions.** It runs three times per full-repo build, which costs a second or two and means every module's `build-and-test-*.yml` fails when a shared primitive breaks. Test counts reported per module therefore overlap — subtract the shared suite twice when computing a distinct total.
+- **Shared *helper* libraries** (`*.TestKit`) also live here rather than in each module's `TestBase`, for the same reason. They are subject to the same constraint as `TestBase`: module-agnostic only, no Domain/Application types.
+- **Everything else in this document still applies** — §3 class conventions, §4 method naming, §5 libraries, §8 unit-vs-integration, §9 timing, and §10's requirement that `coverlet.collector` be referenced directly.
+
+This exception is scoped to `modules/shared/`. It is **not** licence to put a module's own tests
+anywhere other than that module's `tests/` directory.
+
 ## 2. Folder mirroring
 
 **Test folders mirror the source folder tree under the matching test project.**
@@ -184,7 +212,9 @@ Coverage reports are uploaded as CI artifacts (`coverage-back-end`, `coverage-ev
 
 ## 11. Required cleanups (tracked separately)
 
-These items violate the rules above and will be migrated as work touches them. _(None currently outstanding — the initial cleanup list was completed in the PR that introduced this document.)_
+These items violate the rules above and will be migrated as work touches them.
+
+**None currently outstanding.**
 
 ## 12. Backend-integration tests (Testcontainers)
 
@@ -201,6 +231,17 @@ Every test outside the plain `*.UnitTests` projects carries a `Category` trait s
 | `Category=Integration` | `Infrastructure.IntegrationTests` projects | Real backing store via Testcontainers — Docker required. | **Skipped** via `--filter "Category!=Integration"` so the projects still **build** in CI but no container starts on a GitHub runner. |
 
 Add the trait at the class level (`[Trait("Category", "Host")]` for Application.IntegrationTests classes; `IntegrationTestBase` applies `Category=Integration` automatically). Do **not** sprinkle per-method traits.
+
+Two mis-taggings are easy to introduce and neither one reports itself — the suite stays green either way, so only the CI filter reveals them:
+
+- **Never put `Category=Integration` on an `Application.IntegrationTests` class.** The effect is not "run this only locally", it is **"never run this in CI"**: `--filter "Category!=Integration"` drops the whole class, silently. If a class in that project genuinely needs a container, it belongs in `Infrastructure.IntegrationTests` instead.
+- **In `Infrastructure.IntegrationTests`, inherit `IntegrationTestBase`** rather than hand-rolling the fixture wiring. A class that only declares `[Collection(...)]` and takes the fixture through its constructor gets the fixture but **not** the trait — so its container-backed tests get selected by CI, where they pass only because `[DockerTheory]` / `[DockerFact]` skip without a Docker daemon.
+
+To check either one, run the CI filter locally and confirm the counts are what you expect:
+
+```sh
+dotnet test -c Release --no-build --filter "Category!=Integration"
+```
 
 ### Local-only — never in CI
 

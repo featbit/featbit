@@ -21,11 +21,11 @@ Validate the evaluation-server self-fence (#22): under `ConsistencyMode=GatedCom
 ### Phase 1: Baseline (Healthy)
 1. **Action:** Hit `/health/readiness` on the target east eval-server pod; confirm 200 Healthy with a "Heartbeat fresh" message naming the DcId.
 2. **Action:** Confirm `/health/liveness` is 200 (liveness must NOT be affected by this fence).
-3. **Action:** Record the `evaluation_server.consistency.heartbeat_staleness_seconds` gauge — it should be 0.
+3. **Action:** Record the `featbit.evaluation_server.consistency.heartbeat_staleness` gauge — it should be 0.
 
 ### Phase 2: Stop Heartbeats and Observe the Fence
 1. **Action:** Apply the disruption so the target pod can no longer publish heartbeats (but the process stays up).
-2. **Action:** Observe `heartbeat_staleness_seconds` climb on each health evaluation.
+2. **Action:** Observe `heartbeat_staleness` climb on each health evaluation.
 3. **Action:** Before the threshold elapses, confirm `/health/readiness` is still Healthy (within staleness threshold) and the pod stays in rotation.
 4. **Action:** After staleness exceeds `HeartbeatStalenessThresholdSeconds`, confirm `/health/readiness` flips to **503 Unhealthy** with a "Heartbeat stale … Failing readiness (pulled from rotation)" message naming the DcId and staleness seconds.
 5. **Action:** Confirm a single WARNING is logged on the transition into the fenced state (not repeated every poll).
@@ -33,20 +33,20 @@ Validate the evaluation-server self-fence (#22): under `ConsistencyMode=GatedCom
 
 ### Phase 3: Restore Heartbeats and Observe Recovery
 1. **Action:** Remove the disruption so heartbeats resume.
-2. **Action:** Confirm `heartbeat_staleness_seconds` returns toward 0 and `/health/readiness` returns to 200 Healthy.
+2. **Action:** Confirm `heartbeat_staleness` returns toward 0 and `/health/readiness` returns to 200 Healthy.
 3. **Action:** Confirm the pod returns to load-balancer rotation and resumes serving evaluations.
 
 ### Phase 4: BestEffort No-Op Check
 1. **Action:** Set `ConsistencyMode=BestEffort` on the target eval server and restart it.
 2. **Action:** Repeat the heartbeat disruption from Phase 2.
-3. **Action:** Confirm `/health/readiness` stays **Healthy** ("Heartbeat freshness not gating (BestEffort)") and `heartbeat_staleness_seconds` stays 0 — the fence is a no-op under BestEffort.
+3. **Action:** Confirm `/health/readiness` stays **Healthy** ("Heartbeat freshness not gating (BestEffort)") and `heartbeat_staleness` stays 0 — the fence is a no-op under BestEffort.
 4. **Action:** Restore `ConsistencyMode=GatedCommit` and restart.
 
 ## Expected Results
 - Under GatedCommit, `/health/readiness` is Healthy while heartbeat staleness is within `HeartbeatStalenessThresholdSeconds`.
 - Once staleness exceeds the threshold, `/health/readiness` returns 503 Unhealthy and the pod is removed from LB rotation; `/health/liveness` stays 200 (no restart).
 - A single warning is logged on the transition into the fenced state.
-- `evaluation_server.consistency.heartbeat_staleness_seconds` tracks seconds since last successful publish (0 when healthy).
+- `featbit.evaluation_server.consistency.heartbeat_staleness` tracks seconds since last successful publish (0 when healthy).
 - When heartbeats resume, readiness returns to Healthy and the pod rejoins rotation.
 - Under BestEffort, the check is always Healthy and the gauge stays 0 regardless of heartbeat state.
 

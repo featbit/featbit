@@ -18,6 +18,11 @@ COPY back-end/src/Application/Application.csproj ./back-end/src/Application/
 COPY back-end/src/Domain/Domain.csproj ./back-end/src/Domain/
 COPY back-end/src/Infrastructure/Infrastructure.csproj ./back-end/src/Infrastructure/
 
+COPY shared/Observability/Observability.csproj ./shared/Observability/
+COPY shared/Observability.AspNetCore/Observability.AspNetCore.csproj ./shared/Observability.AspNetCore/
+COPY shared/Observability.TestKit/Observability.TestKit.csproj ./shared/Observability.TestKit/
+COPY shared/Observability.Tests/Observability.Tests.csproj ./shared/Observability.Tests/
+
 # Restore using the forced NuGet config
 RUN dotnet restore ./control-plane/ControlPlane.slnx -a $TARGETARCH
 
@@ -28,6 +33,8 @@ COPY control-plane/. ./control-plane/
 COPY back-end/src/Application/. ./back-end/src/Application/
 COPY back-end/src/Domain/. ./back-end/src/Domain/
 COPY back-end/src/Infrastructure/. ./back-end/src/Infrastructure/
+
+COPY shared/. ./shared/
 
 # publish stage
 FROM build AS publish

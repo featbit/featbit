@@ -1,7 +1,9 @@
+using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Domain.EndUsers;
 using Domain.Evaluation;
+using Domain.Observability;
 using Domain.Shared;
 using Microsoft.Extensions.Logging;
 using Streaming.Connections;
@@ -32,17 +34,116 @@ public class DataSyncService(
             timestamp = FullSyncTimestamp;
         }
 
-        object payload = connectionContext.Type switch
-        {
-            ConnectionType.Client => await GetClientSdkPayloadAsync(connection.EnvId, connection.User!, timestamp),
-            ConnectionType.Server => await GetServerSdkPayloadAsync(connection.EnvId, timestamp),
-            ConnectionType.RelayProxy => await GetRelayProxyPayloadAsync(connectionContext, timestamp, request),
-            _ => throw new ArgumentOutOfRangeException(
-                nameof(connection.Type), $"unsupported connection type {connection.Type}"
-            )
-        };
+        var isFullSync = timestamp == FullSyncTimestamp;
+        var connectionType = StreamingMetrics.Normalize(connectionContext.Type);
+        var operation = connectionContext.Type == ConnectionType.RelayProxy
+            ? isFullSync ? DataSyncEventTypes.RpFull : DataSyncEventTypes.RpPatch
+            : isFullSync
+                ? DataSyncEventTypes.Full
+                : DataSyncEventTypes.Patch;
 
-        return payload;
+        var start = Stopwatch.GetTimestamp();
+
+        // T3 — streaming.sync. Tail-sampled: a sync that failed or took over a second is always
+        // retained, everything else is subject to the configured ratio.
+        using var trace = TailSampledTrace.Start(
+            TraceCategories.Sync, "streaming.sync", ActivityKind.Server, SlowSyncThresholdMs);
+
+        trace.SetTag(ObservabilityTags.Operation, operation);
+        trace.SetTag(ObservabilityTags.ConnectionType, connectionType);
+
+        try
+        {
+            object payload = connectionContext.Type switch
+            {
+                ConnectionType.Client => await GetClientSdkPayloadAsync(connection.EnvId, connection.User!, timestamp),
+                ConnectionType.Server => await GetServerSdkPayloadAsync(connection.EnvId, timestamp),
+                ConnectionType.RelayProxy => await GetRelayProxyPayloadAsync(connectionContext, timestamp, request),
+                _ => throw new ArgumentOutOfRangeException(
+                    nameof(connection.Type), $"unsupported connection type {connection.Type}"
+                )
+            };
+
+            var itemCount = CountItems(payload);
+
+            SyncMetrics.Current.RecordPayload(
+                operation,
+                connectionType,
+                Outcomes.Success,
+                Stopwatch.GetElapsedTime(start),
+                itemCount
+            );
+
+            if (itemCount.HasValue)
+            {
+                trace.SetTag("sync.items", itemCount.Value);
+            }
+
+            trace.Success();
+
+            return payload;
+        }
+        catch (Exception ex)
+        {
+            SyncMetrics.Current.RecordPayload(
+                operation, connectionType, Outcomes.Failure, Stopwatch.GetElapsedTime(start), itemCount: null
+            );
+            trace.Failed(ex);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Duration at or above which a data-sync span is always retained. A bootstrap reads the store
+    /// and evaluates every flag for the user, so a second is slow enough to be worth a look but far
+    /// enough above normal that it does not retain healthy traffic.
+    /// </summary>
+    private const double SlowSyncThresholdMs = 1_000d;
+
+    /// <summary>
+    /// Counts the flags and segments in a built payload for
+    /// <see cref="SyncMetrics.PayloadItems"/>, returning <c>null</c> when the count is not
+    /// available cheaply.
+    /// </summary>
+    /// <remarks>
+    /// The payload collections are declared as <see cref="IEnumerable{T}"/>, so this uses
+    /// <c>TryGetNonEnumeratedCount</c> and gives up rather than enumerating. Counting by
+    /// enumeration would re-run a lazy sequence, and instrumentation must never change what the
+    /// caller observes.
+    /// </remarks>
+    private static int? CountItems(object payload)
+    {
+        switch (payload)
+        {
+            case ClientSdkPayload clientSdkPayload:
+                return clientSdkPayload.FeatureFlags.TryGetNonEnumeratedCount(out var clientFlags)
+                    ? clientFlags
+                    : null;
+
+            case ServerSdkPayload serverSdkPayload:
+                return serverSdkPayload.FeatureFlags.TryGetNonEnumeratedCount(out var serverFlags) &&
+                       serverSdkPayload.Segments.TryGetNonEnumeratedCount(out var serverSegments)
+                    ? serverFlags + serverSegments
+                    : null;
+
+            case RpPayload rpPayload:
+                var total = 0;
+                foreach (var item in rpPayload.Items)
+                {
+                    if (!item.FeatureFlags.TryGetNonEnumeratedCount(out var itemFlags) ||
+                        !item.Segments.TryGetNonEnumeratedCount(out var itemSegments))
+                    {
+                        return null;
+                    }
+
+                    total += itemFlags + itemSegments;
+                }
+
+                return total;
+
+            default:
+                return null;
+        }
     }
 
     public async Task<ClientSdkPayload> GetClientSdkPayloadAsync(Guid envId, EndUser user, long timestamp)
@@ -277,6 +378,8 @@ public class DataSyncService(
             EvaluationEntityType.Segment => "segment",
             _ => "unknown"
         };
+
+        EvaluationMetrics.Current.RecordMalformedEntity(entityType);
 
         logger.LogError(
             exception,

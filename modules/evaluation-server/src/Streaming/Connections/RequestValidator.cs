@@ -1,3 +1,4 @@
+using Domain.Observability;
 using Domain.Shared;
 using Domain.Shared.Authentication;
 using Microsoft.AspNetCore.Http;
@@ -72,7 +73,7 @@ public sealed class RequestValidator(
             {
                 var serverSecrets = await rpService.GetServerSecretsAsync(tokenString);
                 return serverSecrets.Length == 0
-                    ? ValidationResult.Invalid($"Invalid relay proxy token: {tokenString}")
+                    ? ValidationResult.Invalid($"Invalid relay proxy token: {Redaction.Token(tokenString)}")
                     : ValidationResult.Valid(serverSecrets);
             }
             catch (Exception ex)
@@ -95,7 +96,7 @@ public sealed class RequestValidator(
 
                 if (!token.IsValid)
                 {
-                    return ValidationResult.Invalid($"Invalid token: {tokenString}");
+                    return ValidationResult.Invalid($"Invalid token: {Redaction.Token(tokenString)}");
                 }
 
                 // v1: structural-only validation of the parsed secret string
@@ -105,7 +106,7 @@ public sealed class RequestValidator(
             {
                 logger.FailedToParseToken(tokenString, ex);
 
-                return ValidationResult.Invalid($"Invalid token: {tokenString}");
+                return ValidationResult.Invalid($"Invalid token: {Redaction.Token(tokenString)}");
             }
 
             if (structuralValidation.Status == TokenValidationStatus.Invalid)
@@ -116,7 +117,7 @@ public sealed class RequestValidator(
             var current = systemClock.UtcNow.ToUnixTimeMilliseconds();
             if (Math.Abs(current - token.Timestamp) > options.TokenExpirySeconds * 1000)
             {
-                return ValidationResult.Invalid($"Token is expired: {tokenString}");
+                return ValidationResult.Invalid($"Token is expired: {Redaction.Token(tokenString)}");
             }
 
             // Store lookup with fallback handling (wrap in try/catch)
@@ -125,7 +126,7 @@ public sealed class RequestValidator(
                 var secret = await store.GetSecretAsync(token.SecretString);
                 if (secret is null)
                 {
-                    return ValidationResult.Invalid($"Secret is not found: {token.SecretString}");
+                    return ValidationResult.Invalid($"Secret is not found: {Redaction.Token(token.SecretString)}");
                 }
 
                 if (secret.Type != type)

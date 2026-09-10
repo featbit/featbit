@@ -9,7 +9,7 @@ namespace Api.UnitTests.Application.ControlPlane;
 /// #71 leader election is opt-in (default off): <see cref="AlwaysLeaderElection"/> is the
 /// <see cref="ILeaderElection"/> served while it is disabled. Verifies it always reports
 /// leadership, logs a discoverability hint on startup, and still emits the shared
-/// <see cref="RedisLeaderElector.IsLeaderGaugeName"/> gauge (same name/tag as
+/// <see cref="RedisLeaderElector.IsLeaderGaugeName"/> gauge (same name as
 /// <see cref="RedisLeaderElector"/>) pinned at 1.
 /// </summary>
 public sealed class AlwaysLeaderElectionTests
@@ -56,49 +56,53 @@ public sealed class AlwaysLeaderElectionTests
     }
 
     [Fact]
-    public void IsLeaderGauge_ReportsConstantOne_WithSameNameAndTagAsRedisLeaderElector()
+    public void IsLeaderGauge_ReportsConstantOne_WithSameNameAsRedisLeaderElector()
     {
-        using var sut = new AlwaysLeaderElection(_logger);
-
-        var values = new List<(int Value, string? InstanceId)>();
+        Instrument? sutGauge = null;
+        var capturing = false;
 
         using var listener = new MeterListener
         {
             InstrumentPublished = (instrument, l) =>
             {
+                // Other AlwaysLeaderElection/RedisLeaderElector instances left over from other
+                // tests in the same process publish the SAME meter and gauge name (each owns its
+                // own Meter, per the type doc). The gauge carries no instance_id tag — that is
+                // banned by the cardinality budget — so disambiguate by Meter INSTANCE instead:
+                // only capture the instrument published while constructing this test's sut.
+                if (!capturing)
+                {
+                    return;
+                }
+
                 if (instrument.Meter.Name == CommitCoordinatorWorker.MeterName
                     && instrument.Name == RedisLeaderElector.IsLeaderGaugeName)
                 {
+                    sutGauge = instrument;
                     l.EnableMeasurementEvents(instrument);
                 }
             }
         };
 
+        // Start first so every pre-existing instrument drains while capturing is still false.
+        listener.Start();
+
+        capturing = true;
+        using var sut = new AlwaysLeaderElection(_logger);
+        capturing = false;
+
+        Assert.NotNull(sutGauge);
+
+        var values = new List<int>();
         listener.SetMeasurementEventCallback<int>((_, measurement, tags, _) =>
         {
-            string? instanceId = null;
-            foreach (var tag in tags)
-            {
-                if (tag.Key == "instance_id" && tag.Value is string id)
-                {
-                    instanceId = id;
-                }
-            }
-
-            // Other AlwaysLeaderElection/RedisLeaderElector instances left over from other tests
-            // in the same process (each owns its own Meter, per the type doc) may still be
-            // publishing on the same meter/gauge name — filter down to THIS test's instance.
-            if (instanceId == sut.InstanceId.ToString())
-            {
-                values.Add((measurement, instanceId));
-            }
+            Assert.Empty(tags.ToArray());
+            values.Add(measurement);
         });
 
-        listener.Start();
         listener.RecordObservableInstruments();
 
-        var reading = Assert.Single(values);
-        Assert.Equal(1, reading.Value);
-        Assert.Equal(sut.InstanceId.ToString(), reading.InstanceId);
+        Assert.Equal(1, Assert.Single(values));
+        Assert.True(sut.IsLeader);
     }
 }

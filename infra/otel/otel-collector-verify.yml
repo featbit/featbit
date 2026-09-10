@@ -1,0 +1,58 @@
+# Minimal collector used to verify that FeatBit's signals actually leave the process.
+#
+# It has no downstream dependencies on purpose: `debug` prints every received record to the
+# collector's own stdout, so `docker logs otel-collector` is enough to answer "did my metric,
+# trace, or log arrive, and what attributes did it carry?". That is the question this file exists
+# to answer, and it can be answered without standing up Jaeger, Seq, or a metrics backend.
+#
+# `otel-collector-config.yml` alongside this file is the fuller example, wired to Jaeger, Seq, and
+# Prometheus with tail sampling and filtering. Use that one as the starting point for a real
+# deployment; use this one to prove the emitting side works before blaming the backend.
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+    # Deliberately short. The default 10s batch makes a manual "toggle a flag and watch" check feel
+    # broken when it is merely buffered.
+    timeout: 2s
+
+exporters:
+  debug:
+    verbosity: detailed
+
+  # Scraped by the prometheus service; also browsable directly at http://localhost:8889/metrics,
+  # which is the quickest way to confirm a FeatBit instrument exists and carries the right labels.
+  prometheus:
+    endpoint: 0.0.0.0:8889
+    resource_to_telemetry_conversion:
+      enabled: true
+
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+
+service:
+  telemetry:
+    logs:
+      level: info
+  extensions: [health_check]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [debug]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [debug, prometheus]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [debug]

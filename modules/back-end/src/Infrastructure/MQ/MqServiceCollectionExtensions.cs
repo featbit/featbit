@@ -53,12 +53,8 @@ public static class MqServiceCollectionExtensions
                 var redisClient = sp.GetRequiredService<IRedisClient>();
                 var logger = sp.GetRequiredService<ILogger<RedisMessageConsumer>>();
 
-                var topics = new[]
-                {
-                    Topics.EndUser, Topics.Insights, Topics.Usage, ControlPlaneTopics.ControlPlaneWebHooks
-                };
-
-                return new RedisMessageConsumer(redisClient, sp, logger, topics);
+                // Same list the producer routes on, so the two cannot drift apart.
+                return new RedisMessageConsumer(redisClient, sp, logger, RedisConsumerTopics.All);
             });
         }
 
@@ -81,12 +77,7 @@ public static class MqServiceCollectionExtensions
                 var logger = sp.GetRequiredService<ILogger<KafkaMessageConsumer>>();
                 var provider = sp.GetRequiredService<IServiceProvider>();
 
-                var topics = new[]
-                {
-                    Topics.EndUser, Topics.Usage, ControlPlaneTopics.ControlPlaneWebHooks
-                };
-
-                return new KafkaMessageConsumer(cfg, provider, logger, topics);
+                return new KafkaMessageConsumer(cfg, provider, logger, KafkaConsumerTopics.All);
             });
         }
 

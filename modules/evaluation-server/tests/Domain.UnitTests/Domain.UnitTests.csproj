@@ -23,6 +23,7 @@
     <ItemGroup>
         <ProjectReference Include="..\TestBase\TestBase.csproj" />
         <ProjectReference Include="..\..\src\Domain\Domain.csproj" />
+        <ProjectReference Include="..\..\..\shared\Observability.TestKit\Observability.TestKit.csproj" />
     </ItemGroup>
 
 </Project>

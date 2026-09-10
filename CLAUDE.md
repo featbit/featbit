@@ -169,3 +169,11 @@ PowerShell scripts in `e2e/control-plane/` use approved PowerShell verbs in thei
   run that verification and report the results, including failures, skipped steps,
   and partial outcomes. "Done" means *verified*, not "should work" — if you can't
   verify, say so explicitly and explain why.
+- **Tests follow `CONTRIBUTING-tests.md`.** Read it before writing or modifying any
+  test in `modules/back-end`, `modules/evaluation-server`, or `modules/control-plane`.
+  It governs test project layout, folder mirroring, class and method naming, setup
+  patterns, allowed libraries, unit-vs-integration boundaries, and `Category` traits.
+  Do not infer conventions from neighboring test files — the repo has pre-existing
+  inconsistencies, so copying a nearby file can reproduce a violation rather than
+  avoid one. If a change genuinely cannot follow the standard, record the deviation
+  in that file rather than leaving it undocumented.

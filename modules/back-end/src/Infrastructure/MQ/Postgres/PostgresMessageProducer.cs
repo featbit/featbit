@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Dapper;
 using Domain.Messages;
+using Domain.Observability;
 using Domain.Utils;
 using Microsoft.Extensions.Logging;
 using Npgsql;
@@ -16,6 +17,10 @@ public partial class PostgresMessageProducer(NpgsqlDataSource dataSource, ILogge
     public async Task PublishAsync<TMessage>(string topic, TMessage message) where TMessage : class
     {
         var isNotificationTopic = topic is Topics.FeatureFlagChange or Topics.SegmentChange;
+
+        // M2: instrumented at the adapter. The exception below is swallowed (unchanged behavior),
+        // so counting the failure here is the only way it becomes visible.
+        using var publish = MessagingMetrics.Current.BeginPublish(MessagingSystems.Postgres, topic);
 
         try
         {
@@ -52,10 +57,12 @@ public partial class PostgresMessageProducer(NpgsqlDataSource dataSource, ILogge
                 }
             }
 
+            publish.Enqueued();
             Log.MessagePublished(logger, topic, messageId!, jsonMessage);
         }
         catch (Exception ex)
         {
+            publish.Failed(ex);
             Log.ErrorPublishMessage(logger, ex);
         }
 

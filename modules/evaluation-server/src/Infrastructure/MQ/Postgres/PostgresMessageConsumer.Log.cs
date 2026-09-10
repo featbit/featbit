@@ -1,3 +1,4 @@
+using Domain.Observability;
 using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.MQ.Postgres;
@@ -20,7 +21,15 @@ public partial class PostgresMessageConsumer
 
         [LoggerMessage(4, LogLevel.Debug, "Notification received from {Channel}(PID={PID}): {Payload}",
             EventName = "ReceiveNotification")]
-        public static partial void NotificationReceived(ILogger logger, string channel, int pid, string payload);
+        private static partial void NotificationReceivedCore(ILogger logger, string channel, int pid, string payload);
+
+        /// <summary>
+        /// Logs a received notification. The payload carries flag rules, end-user attributes, and SDK
+        /// secrets, so it is logged in full with any embedded credential hashed (<c>docs/observability/index.md</c> §7). The channel
+        /// is what actually localizes a problem.
+        /// </summary>
+        public static void NotificationReceived(ILogger logger, string channel, int pid, string payload)
+            => NotificationReceivedCore(logger, channel, pid, Redaction.HideCredentials(payload));
 
         [LoggerMessage(5, LogLevel.Error, "Exception occurred while waiting for channel notification.",
             EventName = "ErrorWaitNotification")]
@@ -45,7 +54,11 @@ public partial class PostgresMessageConsumer
 
         [LoggerMessage(10, LogLevel.Error, "Exception occurred while consuming message: {Message}.",
             EventName = "ErrorConsumeMessage")]
-        public static partial void ErrorConsumeMessage(ILogger logger, string message, Exception exception);
+        private static partial void ErrorConsumeMessageCore(ILogger logger, string message, Exception exception);
+
+        /// <summary>Logs a failed message consume, with the body logged in full apart from any embedded credential.</summary>
+        public static void ErrorConsumeMessage(ILogger logger, string message, Exception exception)
+            => ErrorConsumeMessageCore(logger, Redaction.HideCredentials(message), exception);
 
         [LoggerMessage(11, LogLevel.Information, "Listening stopped.", EventName = "ListeningStopped")]
         public static partial void ListeningStopped(ILogger logger);
@@ -69,6 +82,10 @@ public partial class PostgresMessageConsumer
 
         [LoggerMessage(16, LogLevel.Warning, "Received invalid message: {Message}",
             EventName = "InvalidMessageReceived")]
-        public static partial void InvalidMessageReceived(ILogger logger, string message);
+        private static partial void InvalidMessageReceivedCore(ILogger logger, string message);
+
+        /// <summary>Logs an unparseable message, with the body logged in full apart from any embedded credential.</summary>
+        public static void InvalidMessageReceived(ILogger logger, string message)
+            => InvalidMessageReceivedCore(logger, Redaction.HideCredentials(message));
     }
 }

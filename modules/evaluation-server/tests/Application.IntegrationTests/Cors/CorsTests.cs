@@ -4,7 +4,6 @@ namespace Application.IntegrationTests.Cors;
 
 [Trait("Category", "Host")]
 [Collection(nameof(TestApp))]
-[Trait("Category", "Integration")]
 public class CorsTests
 {
     private readonly TestApp _app;

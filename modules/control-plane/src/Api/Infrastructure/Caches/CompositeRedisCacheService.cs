@@ -1,3 +1,4 @@
+using Api.Application.ControlPlane;
 using Application.Caches;
 using Domain.ControlPlane;
 using Domain.Environments;
@@ -346,7 +347,7 @@ public class CompositeRedisCacheService(
 
     /// <summary>
     /// #105: bool-returning counterpart of <see cref="TargetedAsync(string,Func{ICacheService,Task},string)"/>
-    /// for the accept-signalling targeted writes (Stage/Commit/UpsertIfNewer). A no-matching-DC
+    /// for the accept-signaling targeted writes (Stage/Commit/UpsertIfNewer). A no-matching-DC
     /// no-op returns <c>false</c> (same as a guard-rejected or swallowed-failure write) — callers
     /// cannot distinguish "no DC configured" from "guard rejected" from this return value alone,
     /// but both are correctly excluded from an "accepted" count either way.
@@ -398,9 +399,15 @@ public class CompositeRedisCacheService(
         Func<ICacheService, Task> action,
         string operationName)
     {
+        // The failure below is swallowed so one DC's outage does not fail the others — which means
+        // a permanently unreachable DC produces no error anywhere. This scope is what makes that
+        // visible, per DC.
+        using var broadcast = ControlPlaneMetrics.Current.BeginBroadcast(dc.DcId, operationName);
+
         try
         {
             await action(dc.Service);
+            broadcast.Succeeded();
             return true;
         }
         catch (OperationCanceledException)
@@ -421,7 +428,7 @@ public class CompositeRedisCacheService(
 
     /// <summary>
     /// #105: bool-returning counterpart of <see cref="ExecuteSafelyAsync(DcCacheService,Func{ICacheService,Task},string)"/>
-    /// for the accept-signalling targeted writes — returns the underlying call's own accept result
+    /// for the accept-signaling targeted writes — returns the underlying call's own accept result
     /// instead of a fixed "did not throw" <c>true</c>, and <c>false</c> (not merely swallowed) on a
     /// thrown exception, so a genuine failure is never counted as accepted.
     /// </summary>
@@ -430,9 +437,20 @@ public class CompositeRedisCacheService(
         Func<ICacheService, Task<bool>> action,
         string operationName)
     {
+        using var broadcast = ControlPlaneMetrics.Current.BeginBroadcast(dc.DcId, operationName);
+
         try
         {
-            return await action(dc.Service);
+            var accepted = await action(dc.Service);
+
+            // The call's own accept result, not merely "did not throw" — a rejected write is a
+            // failed fan-out for this DC even though no exception was raised.
+            if (accepted)
+            {
+                broadcast.Succeeded();
+            }
+
+            return accepted;
         }
         catch (OperationCanceledException)
         {

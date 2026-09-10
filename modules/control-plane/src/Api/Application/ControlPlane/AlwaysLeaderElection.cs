@@ -24,10 +24,10 @@ namespace Api.Application.ControlPlane;
 /// <see cref="StartAsync"/> can log one discoverability hint at startup pointing operators at the
 /// config knob if they are actually running multiple replicas.
 ///
-/// Still emits the <see cref="RedisLeaderElector.IsLeaderGaugeName"/> gauge (same name and
-/// <c>instance_id</c> tag as <see cref="RedisLeaderElector"/>), pinned at a constant 1, so
-/// dashboards built against that metric keep reporting a "leader" reading per instance instead of
-/// the series disappearing when election is disabled.
+/// Still emits the <see cref="RedisLeaderElector.IsLeaderGaugeName"/> gauge (same name as
+/// <see cref="RedisLeaderElector"/>), pinned at a constant 1, so dashboards built against that
+/// metric keep reporting a "leader" reading per instance instead of the series disappearing when
+/// election is disabled.
 /// </summary>
 public sealed class AlwaysLeaderElection : ILeaderElection, IHostedService, IDisposable
 {
@@ -56,8 +56,7 @@ public sealed class AlwaysLeaderElection : ILeaderElection, IHostedService, IDis
             description: "1 if this control-plane instance currently holds the leader lock, else 0.");
     }
 
-    private Measurement<int> ObserveIsLeader() =>
-        new(1, new KeyValuePair<string, object?>("instance_id", InstanceId.ToString()));
+    private Measurement<int> ObserveIsLeader() => new(1);
 
     /// <summary>
     /// Logs a single discoverability hint, then completes immediately — there is no election loop

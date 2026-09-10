@@ -2,6 +2,7 @@ using Api.Infrastructure.Caches;
 using Application;
 using Application.ControlPlane;
 using Domain.Messages;
+using Domain.Observability;
 
 namespace Api.Application.ControlPlane;
 
@@ -66,6 +67,9 @@ public sealed class RecoveryWorker : BackgroundService
     private readonly ILeaderElection _leaderElection;
     private readonly bool _enabled;
     private readonly TimeSpan _interval;
+
+    private readonly WorkerObservability _worker =
+        ServiceMeter.ForWorker(ControlPlaneWorkerNames.RecoveryWorker);
     private readonly ILogger<RecoveryWorker> _logger;
 
     // DcIds seen live on the previous tick. A DcId present now but absent here is "newly present"
@@ -102,26 +106,39 @@ public sealed class RecoveryWorker : BackgroundService
         }
 
         using var timer = new PeriodicTimer(_interval);
-        while (await timer.WaitForNextTickAsync(stoppingToken))
+        _worker.Started();
+
+        try
         {
-            try
+            while (await timer.WaitForNextTickAsync(stoppingToken))
             {
-                var backfilled = await RunOnceAsync(stoppingToken);
-                if (backfilled > 0)
+                _worker.Heartbeat();
+
+                try
                 {
-                    _logger.LogInformation(
-                        "Recovery worker backfilled {BackfilledCount} returning DC(s).",
-                        backfilled);
+                    var backfilled = await RunOnceAsync(stoppingToken);
+                    if (backfilled > 0)
+                    {
+                        _worker.Success();
+                        _logger.LogInformation(
+                            "Recovery worker backfilled {BackfilledCount} returning DC(s).",
+                            backfilled);
+                    }
+                }
+                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                {
+                    // ignore cancellation from the timer loop itself
+                }
+                catch (Exception ex)
+                {
+                    _worker.LoopFailed(ex);
+                    _logger.LogError(ex, "Error occurred while running the recovery worker tick.");
                 }
             }
-            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
-            {
-                // ignore cancellation from the timer loop itself
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while running the recovery worker tick.");
-            }
+        }
+        finally
+        {
+            _worker.Stopped();
         }
     }
 
@@ -224,6 +241,7 @@ public sealed class RecoveryWorker : BackgroundService
             var result = await _backfiller.BackfillDcAsync(dcId, ConsistencyMode.GatedCommit, snapshot, cancellationToken);
             if (result == IDcBackfiller.Skipped)
             {
+                ControlPlaneMetrics.Current.RecordDcBackfill(dcId, BackfillOutcomes.Coalesced);
                 _logger.LogDebug(
                     "Recovery worker: backfill for returned DC {DcId} was skipped this tick " +
                     "(coalesced with a concurrent backfill already in flight for that DC).",
@@ -231,10 +249,12 @@ public sealed class RecoveryWorker : BackgroundService
             }
             else if (result > 0)
             {
+                ControlPlaneMetrics.Current.RecordDcBackfill(dcId, BackfillOutcomes.Repaired);
                 backfilled++;
             }
             else
             {
+                ControlPlaneMetrics.Current.RecordDcBackfill(dcId, BackfillOutcomes.NoChange);
                 _logger.LogDebug(
                     "Recovery worker: backfill for returned DC {DcId} ran but the only-advance guard " +
                     "accepted zero flag writes (its Redis already matched the source of truth); not " +

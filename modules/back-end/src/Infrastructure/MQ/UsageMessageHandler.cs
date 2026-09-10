@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Application.Usages;
 using Domain.Messages;
+using Domain.Observability;
 using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.MQ;
@@ -24,7 +25,9 @@ public class UsageMessageHandler(UsageTracker usageTracker, ILogger<UsageMessage
             !rootElement.TryGetProperty("envId", out var envIdProp) ||
             !envIdProp.TryGetGuid(out var envId))
         {
-            logger.LogWarning("Received invalid usage message: {Message}", message);
+            // Logged in full: the end-user identifiers it carries are exactly what makes an
+            // invalid usage message diagnosable (docs/observability/index.md §7).
+            logger.LogWarning("Received invalid usage message: {Message}", Redaction.HideCredentials(message));
             return Task.CompletedTask;
         }
 

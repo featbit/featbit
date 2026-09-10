@@ -50,7 +50,7 @@ Validate that under `ConsistencyMode=GatedCommit` a flag change does **not** go 
 - While east is **live but missing** the staged version, the commit is gated: the pointer does not advance in any DC, the change is not served in west, and `pending_backlog` stays > 0.
 - The downstream evaluation-server publish is withheld during the gated window.
 - After east's lease expires (no heartbeats > `LeaseTtlSeconds`), east is evicted from the live set and the change commits on west.
-- `control_plane.consistency.evicted_commits{dc_id=east}` increments and a log entry records the commit proceeding without the evicted DC.
+- `featbit.control_plane.consistency.evicted_commits{dc_id=east}` increments and a log entry records the commit proceeding without the evicted DC.
 - After east returns it is reconciled to the committed value; no permanent west/east divergence remains.
 
 ## Post-conditions

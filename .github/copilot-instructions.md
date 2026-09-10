@@ -6,6 +6,14 @@ FeatBit is an open-source feature flag management platform. It is a polyglot mon
 
 Before you start any work, state how you would verify it. After you finish, run the verification and report the results.
 
+**Before writing or modifying any test, read [`CONTRIBUTING-tests.md`](../CONTRIBUTING-tests.md) and follow it.**
+It is the authoritative standard for the three .NET modules and governs test project layout, folder
+mirroring, class and method naming, setup patterns, allowed libraries, unit-vs-integration
+boundaries, and `Category` traits. Inferring conventions from neighboring files is not sufficient —
+the repo contains pre-existing inconsistencies, so matching a nearby file can reproduce a violation
+rather than avoid one. If a change genuinely cannot follow the standard, record the deviation in
+that file rather than leaving it undocumented.
+
 ## Architecture
 
 ```

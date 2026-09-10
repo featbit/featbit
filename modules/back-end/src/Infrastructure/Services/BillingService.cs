@@ -13,6 +13,13 @@ public class BillingService(
     ILogger<BillingService> logger)
     : IBillingService
 {
+    /// <summary>
+    /// The named <see cref="HttpClient"/> registration that carries
+    /// <see cref="DependencyMetricsHandler"/>. Named rather than default so that only billing
+    /// traffic is counted as a billing dependency.
+    /// </summary>
+    public const string HttpClientName = "billing";
+
     private readonly string _serviceHost = configuration["Billing:ServiceHost"] ?? string.Empty;
     private readonly string _serviceApiKey = configuration["Billing:ApiKey"] ?? string.Empty;
 
@@ -254,7 +261,7 @@ public class BillingService(
 
     private HttpClient CreateBillingServiceClient()
     {
-        var client = httpClientFactory.CreateClient();
+        var client = httpClientFactory.CreateClient(HttpClientName);
 
         if (string.IsNullOrEmpty(_serviceHost) || string.IsNullOrEmpty(_serviceApiKey))
         {

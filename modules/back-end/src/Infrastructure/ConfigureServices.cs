@@ -80,6 +80,12 @@ public static class ConfigureServices
                 return policy.GetHandler();
             });
 
+        // Named billing client. The metrics handler is attached here rather than globally so that
+        // only genuine billing traffic is attributed to the billing dependency.
+        services.AddTransient(_ => new Services.DependencyMetricsHandler(Domain.Observability.DependencyNames.Billing));
+        services.AddHttpClient(Services.BillingService.HttpClientName)
+            .AddHttpMessageHandler<Services.DependencyMetricsHandler>();
+
         // custom services
         services.AddDbSpecificServices(configuration);
         services.AddTransient<IEnvironmentAppService, AppServices.EnvironmentAppService>();

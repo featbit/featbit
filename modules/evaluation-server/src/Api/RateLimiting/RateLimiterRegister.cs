@@ -1,8 +1,10 @@
 using System.Threading.RateLimiting;
+using Domain.Observability;
 using Domain.Shared;
 using Infrastructure;
 using Infrastructure.Caches;
 using Infrastructure.Caches.Redis;
+using Microsoft.AspNetCore.RateLimiting;
 using Serilog;
 using Streaming;
 
@@ -37,6 +39,16 @@ public static class RateLimiterRegister
 
             limiterOptions.OnRejected = async (context, cancellationToken) =>
             {
+                // M6: the distributed limiter records its own decisions (allow, reject, and
+                // fail_open) from inside RedisRateLimiter. The in-process limiters cannot — ASP.NET
+                // Core exposes no "accepted" hook — so for that mode this records rejections only.
+                // Guarded on useDistributed so the two paths can never double-count.
+                if (!useDistributed)
+                {
+                    RateLimitMetrics.Current.RecordDecision(
+                        ResolvePolicyName(context.HttpContext), Outcomes.Rejected, TimeSpan.Zero);
+                }
+
                 // Log the rejection with EnvId and request path for monitoring and troubleshooting.
                 var logger = context.HttpContext.RequestServices
                     .GetRequiredService<ILoggerFactory>()
@@ -131,6 +143,26 @@ public static class RateLimiterRegister
         };
 
         return partition;
+    }
+
+    /// <summary>
+    /// Resolves the policy that rejected a request, for instrumentation only. Falls back to
+    /// <see cref="StreamingReasons.Unknown"/> rather than guessing, because a wrong policy label on
+    /// a rejection metric is worse than an honest "unknown".
+    /// </summary>
+    private static string ResolvePolicyName(HttpContext httpContext)
+    {
+        if (StreamingHelper.IsStreamingRequest(httpContext))
+        {
+            return RateLimitingPolicies.Streaming;
+        }
+
+        var policy = httpContext.GetEndpoint()?
+            .Metadata
+            .GetMetadata<EnableRateLimitingAttribute>()?
+            .PolicyName;
+
+        return string.IsNullOrEmpty(policy) ? StreamingReasons.Unknown : policy;
     }
 
     /// <summary>

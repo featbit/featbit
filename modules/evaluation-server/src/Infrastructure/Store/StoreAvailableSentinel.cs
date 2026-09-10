@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using Domain.Observability;
 using Domain.Shared;
 using Infrastructure.Utils;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,8 +31,22 @@ public class StoreAvailableSentinel : IHostedService
         // we assume that the first store (the highest priority store) is available by default
         StoreAvailabilityListener.Instance.SetAvailable(_dbStores[0].Name);
 
+        // M4: failover was previously invisible — a successful switch was not logged at all, so a
+        // pod silently serving from its fallback looked identical to a healthy one.
+        StoreMetrics.Current.SetAvailableStoreProvider(
+            () => StoreAvailabilityListener.Instance.AvailableStore);
+
+        // The listener is a process-wide singleton and its event is never unsubscribed, so a
+        // plain += would accumulate one handler per constructed sentinel and multiply the failover
+        // count. Removing first makes the subscription idempotent.
+        StoreAvailabilityListener.Instance.OnStoreAvailabilityChanged -= OnStoreAvailabilityChanged;
+        StoreAvailabilityListener.Instance.OnStoreAvailabilityChanged += OnStoreAvailabilityChanged;
+
         _logger = logger;
     }
+
+    private static void OnStoreAvailabilityChanged(string previous, string current)
+        => StoreMetrics.Current.RecordFailover(current);
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
@@ -75,6 +91,8 @@ public class StoreAvailableSentinel : IHostedService
     {
         foreach (var store in _dbStores)
         {
+            var startedAt = Stopwatch.GetTimestamp();
+
             var checkAvailableTask = store.IsAvailableAsync();
             var checkAvailableTimeoutTask = Task.Delay(timeout, cancellationToken);
 
@@ -82,6 +100,12 @@ public class StoreAvailableSentinel : IHostedService
             if (completedTask == checkAvailableTask)
             {
                 var isAvailable = await checkAvailableTask;
+
+                StoreMetrics.Current.RecordAvailabilityCheck(
+                    store.Name,
+                    isAvailable ? Outcomes.Success : Outcomes.Failure,
+                    Stopwatch.GetElapsedTime(startedAt));
+
                 if (isAvailable)
                 {
                     StoreAvailabilityListener.Instance.SetAvailable(store.Name);
@@ -90,10 +114,15 @@ public class StoreAvailableSentinel : IHostedService
             }
             else
             {
+                StoreMetrics.Current.RecordAvailabilityCheck(
+                    store.Name, Outcomes.Timeout, Stopwatch.GetElapsedTime(startedAt));
+
                 _logger.LogDebug("Store availability check timed out for {Store}.", store.Name);
                 checkAvailableTask.Ignore();
             }
         }
+
+        StoreMetrics.Current.RecordNoStoreAvailable();
 
         _logger.LogError("No available store can be used.");
     }

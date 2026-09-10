@@ -1,6 +1,7 @@
 using Api.Infrastructure.Caches;
 using Application;
 using Application.ControlPlane;
+using Domain.Observability;
 
 namespace Api.Application.ControlPlane;
 
@@ -69,6 +70,9 @@ public sealed class CacheReconciler : BackgroundService
     private readonly ConsistencyMode _mode;
     private readonly bool _enabled;
     private readonly TimeSpan _interval;
+
+    private readonly WorkerObservability _worker =
+        ServiceMeter.ForWorker(ControlPlaneWorkerNames.CacheReconciler);
     private readonly TimeSpan _minBackfillInterval;
     private readonly ILogger<CacheReconciler> _logger;
 
@@ -121,20 +125,33 @@ public sealed class CacheReconciler : BackgroundService
         }
 
         using var timer = new PeriodicTimer(_interval);
-        while (await timer.WaitForNextTickAsync(stoppingToken))
+        _worker.Started();
+
+        try
         {
-            try
+            while (await timer.WaitForNextTickAsync(stoppingToken))
             {
-                await RunOnceAsync(stoppingToken);
+                _worker.Heartbeat();
+
+                try
+                {
+                    await RunOnceAsync(stoppingToken);
+                    _worker.Success();
+                }
+                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                {
+                    // ignore cancellation from the timer loop itself
+                }
+                catch (Exception ex)
+                {
+                    _worker.LoopFailed(ex);
+                    _logger.LogError(ex, "Error occurred while running the cache reconciler tick.");
+                }
             }
-            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
-            {
-                // ignore cancellation from the timer loop itself
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while running the cache reconciler tick.");
-            }
+        }
+        finally
+        {
+            _worker.Stopped();
         }
     }
 

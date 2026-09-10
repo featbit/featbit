@@ -2,6 +2,7 @@ using System.Diagnostics.Metrics;
 using Api.Infrastructure.Caches;
 using Application;
 using Application.ControlPlane;
+using Domain.Observability;
 
 namespace Api.Application.ControlPlane;
 
@@ -48,7 +49,7 @@ public sealed class DcIdConsistencyChecker : BackgroundService
     /// lease's DcId matches no configured Redis instance). Emitted on the shared consistency meter
     /// (<see cref="CommitCoordinatorWorker.MeterName"/>).
     /// </summary>
-    public const string UnmatchedDcCountGaugeName = "control_plane.consistency.unmatched_dc_count";
+    public const string UnmatchedDcCountGaugeName = "featbit.control_plane.consistency.unmatched_dc_count";
 
     private static readonly Meter Meter = new(CommitCoordinatorWorker.MeterName);
 
@@ -74,6 +75,9 @@ public sealed class DcIdConsistencyChecker : BackgroundService
     private readonly ILeaderElection _leaderElection;
     private readonly bool _enabled;
     private readonly TimeSpan _interval;
+
+    private readonly WorkerObservability _worker =
+        ServiceMeter.ForWorker(ControlPlaneWorkerNames.DcIdConsistencyChecker);
     private readonly ILogger<DcIdConsistencyChecker> _logger;
 
     public DcIdConsistencyChecker(
@@ -156,20 +160,33 @@ public sealed class DcIdConsistencyChecker : BackgroundService
         }
 
         using var timer = new PeriodicTimer(_interval);
-        while (await timer.WaitForNextTickAsync(stoppingToken))
+        _worker.Started();
+
+        try
         {
-            try
+            while (await timer.WaitForNextTickAsync(stoppingToken))
             {
-                await RunOnceAsync(stoppingToken);
+                _worker.Heartbeat();
+
+                try
+                {
+                    await RunOnceAsync(stoppingToken);
+                    _worker.Success();
+                }
+                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                {
+                    // ignore cancellation from the timer loop itself
+                }
+                catch (Exception ex)
+                {
+                    _worker.LoopFailed(ex);
+                    _logger.LogError(ex, "Error occurred while running the DcId consistency check tick.");
+                }
             }
-            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
-            {
-                // ignore cancellation from the timer loop itself
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while running the DcId consistency check tick.");
-            }
+        }
+        finally
+        {
+            _worker.Stopped();
         }
     }
 

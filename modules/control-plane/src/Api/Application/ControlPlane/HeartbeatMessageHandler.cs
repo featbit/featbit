@@ -39,6 +39,10 @@ public class HeartbeatMessageHandler(
 
             if (!TryValidate(heartBeatMessage, message))
             {
+                // Caught and not rethrown, so the consumer records this message as successfully
+                // consumed. Without this counter the failure is invisible at every layer.
+                ControlPlaneMetrics.Current.RecordSuppressedFailure(
+                    HandlerNames.Heartbeat, SuppressedFailureReasons.ValidationFailed);
                 return;
             }
 
@@ -54,6 +58,10 @@ public class HeartbeatMessageHandler(
         }
         catch (Exception e)
         {
+            // Swallowed by design (follow-up F7). The consumer therefore acknowledges the message
+            // as handled, so this counter is the only record that anything went wrong.
+            ControlPlaneMetrics.Current.RecordSuppressedFailure(
+                HandlerNames.Heartbeat, SuppressedFailureReasons.Unhandled);
             logger.LogError(e, "Failed to process heartbeat message: {Message}", message);
         }
     }

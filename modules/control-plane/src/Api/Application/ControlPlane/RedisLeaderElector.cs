@@ -1,4 +1,5 @@
 using System.Diagnostics.Metrics;
+using Domain.Observability;
 using Infrastructure.Caches.Redis;
 using StackExchange.Redis;
 
@@ -43,11 +44,12 @@ namespace Api.Application.ControlPlane;
 /// #71b-gated workers will consult <see cref="IsLeader"/>.
 ///
 /// Metric: <see cref="IsLeaderGaugeName"/> (0/1) on the shared
-/// <see cref="CommitCoordinatorWorker.MeterName"/> meter, tagged <c>instance_id</c>. Unlike the
-/// workers' static gauges, this one is registered on a Meter instance OWNED by this object (not
-/// static): multiple electors can exist in the same process (e.g. integration tests exercising two
-/// competing instances), and each must report its OWN leadership state rather than clobbering a
-/// shared static flag.
+/// <see cref="CommitCoordinatorWorker.MeterName"/> meter. Unlike the workers' static gauges, this
+/// one is registered on a Meter instance OWNED by this object (not static): multiple electors can
+/// exist in the same process (e.g. integration tests exercising two competing instances), and each
+/// must report its OWN leadership state rather than clobbering a shared static flag. That
+/// instance-owned Meter is also how a caller distinguishes two electors now that the gauge carries
+/// no <c>instance_id</c> tag — listen per Meter instance, not per tag.
 /// </summary>
 public sealed class RedisLeaderElector : BackgroundService, ILeaderElection
 {
@@ -69,10 +71,12 @@ public sealed class RedisLeaderElector : BackgroundService, ILeaderElection
     public const string LockKey = "featbit:control-plane:leader";
 
     /// <summary>
-    /// Observable gauge reporting 1 while this instance holds leadership, 0 otherwise. Tagged
-    /// <c>instance_id</c>.
+    /// Observable gauge reporting 1 while this instance holds leadership, 0 otherwise.
+    /// Carries no attributes: <c>instance_id</c> is banned by the cardinality budget
+    /// (docs/observability/index.md §4) and is redundant with the OTel resource attribute
+    /// <c>service.instance.id</c>, which already identifies the pod.
     /// </summary>
-    public const string IsLeaderGaugeName = "control_plane.consistency.is_leader";
+    public const string IsLeaderGaugeName = "featbit.control_plane.consistency.is_leader";
 
     private readonly IRedisClient _redisClient;
     private readonly TimeSpan _ttl;
@@ -81,6 +85,9 @@ public sealed class RedisLeaderElector : BackgroundService, ILeaderElection
     private readonly Meter _meter;
     private readonly ObservableGauge<int> _isLeaderGauge;
     private readonly string _lockValue;
+
+    private readonly WorkerObservability _worker =
+        ServiceMeter.ForWorker(ControlPlaneWorkerNames.LeaderElector);
 
     private volatile bool _isLeader;
 
@@ -118,21 +125,30 @@ public sealed class RedisLeaderElector : BackgroundService, ILeaderElection
             description: "1 if this control-plane instance currently holds the leader lock, else 0.");
     }
 
-    private Measurement<int> ObserveIsLeader() =>
-        new(_isLeader ? 1 : 0, new KeyValuePair<string, object?>("instance_id", InstanceId.ToString()));
+    private Measurement<int> ObserveIsLeader() => new(_isLeader ? 1 : 0);
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var redis = _redisClient.GetDatabase();
 
-        // Attempt immediately on start so a single instance becomes leader without waiting a full
-        // renew interval.
-        await TryAcquireOrRenewAsync(redis);
+        _worker.Started();
 
-        using var timer = new PeriodicTimer(_renewInterval);
-        while (await timer.WaitForNextTickAsync(stoppingToken))
+        try
         {
+            // Attempt immediately on start so a single instance becomes leader without waiting a full
+            // renew interval.
             await TryAcquireOrRenewAsync(redis);
+
+            using var timer = new PeriodicTimer(_renewInterval);
+            while (await timer.WaitForNextTickAsync(stoppingToken))
+            {
+                _worker.Heartbeat();
+                await TryAcquireOrRenewAsync(redis);
+            }
+        }
+        finally
+        {
+            _worker.Stopped();
         }
     }
 
@@ -146,6 +162,8 @@ public sealed class RedisLeaderElector : BackgroundService, ILeaderElection
                 if (acquired)
                 {
                     _isLeader = true;
+                    ControlPlaneMetrics.Current.RecordLeaderTransition(LeaderTransitionKinds.Acquired);
+                    _worker.Success();
                     _logger.LogInformation(
                         "Leader election: instance {InstanceId} acquired leadership.", InstanceId);
                 }
@@ -162,12 +180,14 @@ public sealed class RedisLeaderElector : BackgroundService, ILeaderElection
                 var extended = await redis.LockExtendAsync(LockKey, _lockValue, _ttl);
                 if (extended)
                 {
+                    _worker.Success();
                     _logger.LogDebug(
                         "Leader election: instance {InstanceId} renewed leadership.", InstanceId);
                 }
                 else
                 {
                     _isLeader = false;
+                    ControlPlaneMetrics.Current.RecordLeaderTransition(LeaderTransitionKinds.Lost);
                     _logger.LogWarning(
                         "Leader election: instance {InstanceId} lost leadership (failed to extend the lock).",
                         InstanceId);
@@ -179,6 +199,14 @@ public sealed class RedisLeaderElector : BackgroundService, ILeaderElection
             var wasLeader = _isLeader;
             _isLeader = false;
 
+            // Recorded only when leadership was actually surrendered. A Redis error while merely
+            // *attempting* to acquire changes nothing, so counting it would drown the real signal.
+            if (wasLeader)
+            {
+                ControlPlaneMetrics.Current.RecordLeaderTransition(LeaderTransitionKinds.ErrorDemoted);
+            }
+
+            _worker.LoopFailed(ex);
             _logger.LogWarning(
                 ex,
                 "Leader election: instance {InstanceId} hit a Redis error while {Action}; " +
@@ -207,6 +235,7 @@ public sealed class RedisLeaderElector : BackgroundService, ILeaderElection
             var redis = _redisClient.GetDatabase();
             await redis.LockReleaseAsync(LockKey, _lockValue);
             _isLeader = false;
+            ControlPlaneMetrics.Current.RecordLeaderTransition(LeaderTransitionKinds.Released);
             _logger.LogInformation(
                 "Leader election: instance {InstanceId} released leadership on shutdown.", InstanceId);
         }

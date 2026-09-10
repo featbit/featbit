@@ -41,4 +41,7 @@
         <InternalsVisibleTo Include="Api.UnitTests" />
     </ItemGroup>
 
+    <ItemGroup>
+        <ProjectReference Include="..\..\..\shared\Observability.AspNetCore\Observability.AspNetCore.csproj" />
+    </ItemGroup>
 </Project>

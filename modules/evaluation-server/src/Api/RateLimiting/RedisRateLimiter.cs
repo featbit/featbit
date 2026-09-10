@@ -1,4 +1,6 @@
+using System.Diagnostics;
 using System.Threading.RateLimiting;
+using Domain.Observability;
 using Infrastructure.Caches.Redis;
 using StackExchange.Redis;
 
@@ -14,6 +16,7 @@ public sealed class RedisRateLimiter : RateLimiter
 {
     private readonly IRedisClient _redisClient;
     private readonly string _partitionKey;
+    private readonly string _policyName;
     private readonly RateLimiterType _type;
     private readonly int _permitLimit;
     private readonly TimeSpan _window;
@@ -160,6 +163,7 @@ public sealed class RedisRateLimiter : RateLimiter
 
         _redisClient = redisClient;
         _partitionKey = partitionKey;
+        _policyName = options.PolicyName;
         _type = options.Type;
         _permitLimit = options.PermitLimit;
         _window = TimeSpan.FromSeconds(options.WindowSeconds);
@@ -185,6 +189,10 @@ public sealed class RedisRateLimiter : RateLimiter
     {
         Volatile.Write(ref _lastActivity, Environment.TickCount64);
 
+        // M6: one record per acquisition. The policy name is used rather than _partitionKey,
+        // which embeds an environment id and would make cardinality unbounded.
+        var startedAt = Stopwatch.GetTimestamp();
+
         try
         {
             var db = _redisClient.GetDatabase();
@@ -203,8 +211,11 @@ public sealed class RedisRateLimiter : RateLimiter
             // Positive = remaining permits/tokens. Negative = retry-after in seconds.
             if (result >= 0)
             {
+                RecordDecision(Outcomes.Success, startedAt);
                 return new RedisRateLimitLease(true);
             }
+
+            RecordDecision(Outcomes.Rejected, startedAt);
 
             var retryAfter = TimeSpan.FromSeconds(Math.Max(1, Math.Abs(result)));
             return new RedisRateLimitLease(false, retryAfter);
@@ -212,16 +223,23 @@ public sealed class RedisRateLimiter : RateLimiter
         catch (RedisException ex)
         {
             // Fail open – if Redis is unreachable, allow the request through.
+            // Recorded as fail_open, not success: the request was allowed because the limiter was
+            // broken, which is the state an operator needs to be able to alert on.
+            RecordDecision(Outcomes.FailOpen, startedAt);
             _logger.LogWarning(ex, "Redis rate-limit evaluation failed for {PartitionKey}; failing open", _partitionKey);
             return new RedisRateLimitLease(true);
         }
         catch (RedisTimeoutException ex)
         {
             // Fail open – if Redis times out, allow the request through.
+            RecordDecision(Outcomes.FailOpen, startedAt);
             _logger.LogWarning(ex, "Redis rate-limit evaluation timed out for {PartitionKey}; failing open", _partitionKey);
             return new RedisRateLimitLease(true);
         }
     }
+
+    private void RecordDecision(string outcome, long startedAt)
+        => RateLimitMetrics.Current.RecordDecision(_policyName, outcome, Stopwatch.GetElapsedTime(startedAt));
 
     private async Task<long> EvalFixedWindowAsync(IDatabase db, int permitCount)
     {

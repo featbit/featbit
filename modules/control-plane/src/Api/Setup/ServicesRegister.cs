@@ -8,6 +8,8 @@ using Api.Setup.OpenApi;
 using Application.Bases.Behaviours;
 using Application.Segments;
 using Application.Services;
+using Domain.Observability;
+using FeatBit.Observability.AspNetCore;
 using Infrastructure;
 using Infrastructure.AppService;
 using MediatR;
@@ -21,6 +23,22 @@ public static class ServicesRegister
 {
     public static WebApplicationBuilder RegisterServices(this WebApplicationBuilder builder)
     {
+        // Observability: apply configured settings before anything can create a span or hash a
+        // credential, then register the propagation-only activity listener before anything can log,
+        // so that every record carries a trace id even with no exporter configured, and name the
+        // ingress activity source after this service (docs/observability/index.md §11).
+        ObservabilityConfiguration.Apply(builder.Configuration);
+        ActivityCorrelation.EnsureListener();
+        FeatBitActivitySources.ConfigureIngress(FeatBitActivitySources.ControlPlane);
+
+        // The control plane reuses the back-end's Domain/Infrastructure, whose messaging metrics
+        // default to the API meter. Without this the control plane would publish its MQ metrics
+        // under featbit.api.*, which is exactly the kind of misattribution that wastes an incident.
+        ServiceMeter.Configure(FeatBitMeters.ControlPlane, FeatBitInstruments.ControlPlanePrefix);
+        MessagingMetrics.Configure(FeatBitMeters.ControlPlane, FeatBitInstruments.ControlPlanePrefix);
+        PropagationMetrics.Configure(FeatBitMeters.ControlPlane, FeatBitInstruments.ControlPlanePrefix);
+        RequestMetrics.Configure(FeatBitMeters.ControlPlane, FeatBitInstruments.ControlPlanePrefix);
+
         builder.Services.AddSerilog((_, lc) => ConfigureSerilog.Configure(lc, builder.Configuration));
         builder.Services.AddOpenApi("v1", options =>
         {
@@ -43,10 +61,21 @@ public static class ServicesRegister
         builder.Services.AddMq(builder.Configuration);
         builder.Services.AddTransient<ISegmentMessageService, SegmentMessageService>();
 
-        builder.Services.AddHealthChecks().AddReadinessChecks(builder.Configuration);
+        builder.Services.AddHealthChecks()
+            .AddReadinessChecks(builder.Configuration)
+            .AddDiagnosticChecks(builder.Configuration)
+            // Control-plane-specific: cross-DC Redis reachability and leader state, neither of
+            // which any existing check surfaces. Diagnostics-tagged, so an unreachable peer DC
+            // cannot fail this pod's readiness.
+            .AddCheck<ControlPlaneDiagnosticHealthCheck>(
+                "Control Plane Cross-DC",
+                tags: new[] { HealthCheckBuilderExtensions.DiagnosticsTag });
         
         builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
-        builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));    
+        builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
+        // Registered after ValidationBehaviour so validation rejections are recorded as
+        // validation_failed rather than timed as handler work. Closes F15.
+        builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ObservabilityBehaviour<,>));
         builder.Services.AddAuthentication("ApiKey")
             .AddScheme<AuthenticationSchemeOptions, ApiKeyAuthenticationHandler>("ApiKey", options => { });
 

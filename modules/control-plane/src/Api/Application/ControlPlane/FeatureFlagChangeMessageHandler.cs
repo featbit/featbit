@@ -5,6 +5,7 @@ using Application.ControlPlane;
 using Application.FeatureFlags;
 using Application.Services;
 using Domain.Messages;
+using Domain.Observability;
 using Domain.Utils;
 
 namespace Api.Application.ControlPlane;
@@ -41,6 +42,18 @@ public class FeatureFlagChangeMessageHandler(
                 {
                     var flag = deserializedFlagNotification.Flag;
 
+                    // Same identifier the API derived when it published this change, recomputed from
+                    // the deserialized flag so this hop joins the same logical change
+                    // (docs/observability/index.md §7).
+                    ActivityCorrelation.SetChangeId(
+                        ChangeId.For(ChangeId.FlagResource, flag.EnvId, flag.Key, flag.UpdatedAt));
+
+                    // The relay stage: replicate to every DC's Redis and republish. Timed here
+                    // rather than around the whole handler so a slow fan-out is not conflated with
+                    // JSON parsing or the webhook publish below.
+                    using var relay = PropagationMetrics.Current.BeginStage(
+                        ChangeId.FlagResource, PropagationStages.Relay);
+
                     if (configuration.GetConsistencyMode() == ConsistencyMode.GatedCommit)
                     {
                         // GatedCommit (C2): stage the new value to every DC's Redis and record the
@@ -56,6 +69,8 @@ public class FeatureFlagChangeMessageHandler(
                         await cacheService.UpsertFlagAsync(flag);
                         await messageProducer.PublishAsync(Topics.FeatureFlagChange, flag);
                     }
+
+                    relay.Succeeded();
                 }
 
                 var webHooksMessage = new

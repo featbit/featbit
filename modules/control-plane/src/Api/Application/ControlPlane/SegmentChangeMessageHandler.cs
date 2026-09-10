@@ -5,6 +5,7 @@ using Application.ControlPlane;
 using Application.Segments;
 using Application.Services;
 using Domain.Messages;
+using Domain.Observability;
 using Domain.Segments;
 using Domain.Utils;
 
@@ -46,46 +47,66 @@ public class SegmentChangeMessageHandler(
                 deserializedNotificationNode is not null && deserializedRegionNode is not null &&
                 deserializedRegionNode == configuration.GetRegion())
             {
-                if (configuration.GetConsistencyMode() == ConsistencyMode.GatedCommit)
-                {
-                    // GatedCommit (S2): stage the new segment value to every DC's Redis and record
-                    // the Mongo pending change, but do NOT publish the affected-flags / segment
-                    // change to the evaluation-server topics yet. The commit/publish is the
-                    // coordinator's responsibility (S3).
-                    var ts = new DateTimeOffset(deserializedSegmentNonEnvironmentSpecificNode.UpdatedAt)
-                        .ToUnixTimeMilliseconds();
-                    await cacheService.StageSegmentAsync(deserializedSegmentNonEnvironmentSpecificNode, ts);
-                    await segmentService.SetPendingAsync(
-                        deserializedSegmentNonEnvironmentSpecificNode.Id,
-                        deserializedSegmentNonEnvironmentSpecificNode,
-                        ts,
-                        deserializedNotificationNode.OperatorId,
-                        deserializedNotificationNode.Operation,
-                        deserializedNotificationNode.IsTargetingChange);
-                }
-                else
-                {
-                    // BestEffort: unchanged upsert + affected-flags propagation.
-                    await cacheService
-                        .UpsertSegmentAsync(deserializedEnvIdsNode, deserializedSegmentNonEnvironmentSpecificNode);
+                // Same identifier the API derived when it published this change, recomputed from the
+                // deserialized segment so this hop joins the same logical change
+                // (docs/observability/index.md §7).
+                var segmentValue = deserializedSegmentNonEnvironmentSpecificNode;
+                ActivityCorrelation.SetChangeId(
+                    ChangeId.For(
+                        ChangeId.SegmentResource,
+                        segmentValue.EnvId,
+                        segmentValue.Key,
+                        segmentValue.UpdatedAt));
 
-                    foreach (var envId in deserializedEnvIdsNode)
+                // The relay stage: replicate to every DC's Redis and republish. Timed here rather
+                // than around the whole handler so a slow fan-out is not conflated with JSON
+                // parsing or the webhook publish below.
+                using (var relay = PropagationMetrics.Current.BeginStage(
+                           ChangeId.SegmentResource, PropagationStages.Relay))
+                {
+                    if (configuration.GetConsistencyMode() == ConsistencyMode.GatedCommit)
                     {
-                        var affectedFlags =
-                            await segmentMessageService.GetAffectedFlagsAsync(envId, deserializedNotificationNode);
-
-                        // update affected flags
-                        if (affectedFlags.Count > 0)
-                        {
-                            await featureFlagAppService.OnSegmentUpdatedAsync(
-                                deserializedSegmentNonEnvironmentSpecificNode,
-                                deserializedNotificationNode.OperatorId, affectedFlags);
-                        }
-
-                        // publish segment change message
-                        await segmentMessageService.PublishChangeMessage(envId, affectedFlags,
-                            deserializedSegmentNonEnvironmentSpecificNode);
+                        // GatedCommit (S2): stage the new segment value to every DC's Redis and record
+                        // the Mongo pending change, but do NOT publish the affected-flags / segment
+                        // change to the evaluation-server topics yet. The commit/publish is the
+                        // coordinator's responsibility (S3).
+                        var ts = new DateTimeOffset(deserializedSegmentNonEnvironmentSpecificNode.UpdatedAt)
+                            .ToUnixTimeMilliseconds();
+                        await cacheService.StageSegmentAsync(deserializedSegmentNonEnvironmentSpecificNode, ts);
+                        await segmentService.SetPendingAsync(
+                            deserializedSegmentNonEnvironmentSpecificNode.Id,
+                            deserializedSegmentNonEnvironmentSpecificNode,
+                            ts,
+                            deserializedNotificationNode.OperatorId,
+                            deserializedNotificationNode.Operation,
+                            deserializedNotificationNode.IsTargetingChange);
                     }
+                    else
+                    {
+                        // BestEffort: unchanged upsert + affected-flags propagation.
+                        await cacheService
+                            .UpsertSegmentAsync(deserializedEnvIdsNode, deserializedSegmentNonEnvironmentSpecificNode);
+
+                        foreach (var envId in deserializedEnvIdsNode)
+                        {
+                            var affectedFlags =
+                                await segmentMessageService.GetAffectedFlagsAsync(envId, deserializedNotificationNode);
+
+                            // update affected flags
+                            if (affectedFlags.Count > 0)
+                            {
+                                await featureFlagAppService.OnSegmentUpdatedAsync(
+                                    deserializedSegmentNonEnvironmentSpecificNode,
+                                    deserializedNotificationNode.OperatorId, affectedFlags);
+                            }
+
+                            // publish segment change message
+                            await segmentMessageService.PublishChangeMessage(envId, affectedFlags,
+                                deserializedSegmentNonEnvironmentSpecificNode);
+                        }
+                    }
+
+                    relay.Succeeded();
                 }
 
                 var webHooksMessage = new

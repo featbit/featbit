@@ -11,7 +11,6 @@ namespace Application.IntegrationTests.WebSockets;
 
 [Trait("Category", "Host")]
 [Collection(nameof(TestApp))]
-[Trait("Category", "Integration")]
 public class AuthenticationTests
 {
     private readonly TestApp _app;

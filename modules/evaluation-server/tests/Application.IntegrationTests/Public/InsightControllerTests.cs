@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Domain.EndUsers;
@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace Application.IntegrationTests.Controllers;
+namespace Application.IntegrationTests.Public;
 
 [Collection(nameof(TestApp))]
 public class InsightControllerTests(TestApp app)
