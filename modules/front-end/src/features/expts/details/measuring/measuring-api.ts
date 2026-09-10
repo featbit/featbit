@@ -1,5 +1,6 @@
 import { fetchApi } from "@/lib/api/authenticated-api"
 import type { ExperimentDetail } from "../experiment-details-types"
+import type { MinimumSampleUpdate } from "./minimum-sample"
 import type {
   NewRunSetup,
   ObservationWindowUpdate,
@@ -53,6 +54,19 @@ export function analyzeExperimentRun(
       body: JSON.stringify({ forceFresh: true }),
     }
   )
+}
+
+export function updateExperimentRunMinimumSample(
+  envId: string,
+  experimentId: string,
+  runId: string,
+  update: MinimumSampleUpdate
+) {
+  return fetchApi<ExperimentDetail>(runPath(envId, experimentId, runId), {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(update),
+  })
 }
 
 export function updateExperimentRunAssignment(

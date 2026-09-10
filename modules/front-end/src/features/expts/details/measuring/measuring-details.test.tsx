@@ -85,6 +85,16 @@ describe("creating an experiment run", () => {
     expect(dialog.getByText("Control & Treatments")).toBeInTheDocument()
 
     fireEvent.click(dialog.getByRole("radio", { name: "Updated" }))
+    const minimum = dialog.getByRole("spinbutton", {
+      name: "Minimum sample per variant",
+    })
+    fireEvent.change(minimum, { target: { value: "-1" } })
+    fireEvent.click(dialog.getByRole("button", { name: "Create run" }))
+    expect(await dialog.findByRole("alert")).toHaveTextContent(
+      "Enter a whole number"
+    )
+    expect(fetchApi).not.toHaveBeenCalled()
+    fireEvent.change(minimum, { target: { value: "500" } })
     fireEvent.click(dialog.getByRole("button", { name: "Create run" }))
 
     await waitFor(() => expect(fetchApi).toHaveBeenCalledTimes(3))
@@ -95,6 +105,7 @@ describe("creating an experiment run", () => {
       method: "bayesian_ab",
       controlVariant: "treatment-id",
       treatmentVariant: "control-id",
+      minimumSample: 500,
     })
     await waitFor(() =>
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument()

@@ -6,6 +6,7 @@ export type NewRunSetup = {
   method: AnalysisMethod
   controlVariant: string
   treatmentVariant: string
+  minimumSample: number
 }
 
 export type ObservationWindowUpdate = {

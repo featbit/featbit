@@ -1,3 +1,4 @@
+import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   AlertTriangle,
@@ -11,6 +12,7 @@ import {
   Trash2,
 } from "lucide-react"
 import { useMemo, useState } from "react"
+import { useForm } from "react-hook-form"
 import { Trans, useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import {
@@ -58,11 +60,13 @@ import type { ExperimentDetail } from "../experiment-details-types"
 import { AnalysisMetricHeader } from "./analysis-metric-header"
 import { AnalysisValueHeader } from "./analysis-value-header"
 import { EditAssignmentSheet } from "./edit-assignment-sheet"
+import { EditMinimumSampleDialog } from "./edit-minimum-sample-dialog"
 import {
   analyzeExperimentRun,
   createExperimentRun,
   deleteExperimentRun,
   updateExperimentRunAssignment,
+  updateExperimentRunMinimumSample,
   updateExperimentRunObservationWindow,
   updateExperimentRunSetup,
 } from "./measuring-api"
@@ -91,6 +95,12 @@ import {
 import { ObservationWindowFields } from "./observation-window-fields"
 import { PosteriorCharts } from "./posterior-charts"
 import { SampleCheck } from "./sample-check"
+import {
+  minimumSampleSchema,
+  type MinimumSampleFormValues,
+  type MinimumSampleUpdate,
+} from "./minimum-sample"
+import { MinimumSampleField } from "./minimum-sample-field"
 import { RecommendationPanel } from "./recommendation-panel"
 import { analysisBlocker, analysisWindowChanged } from "./analysis-readiness"
 import {
@@ -304,9 +314,11 @@ function AnalysisTable({
 export function FullAnalysis({
   run,
   variantNames,
+  onEditMinimumSample,
 }: {
   run: MeasuringRun
   variantNames: Record<string, string>
+  onEditMinimumSample?: () => void
 }) {
   const { t, i18n } = useTranslation()
   const analysis = useMemo(
@@ -454,7 +466,11 @@ export function FullAnalysis({
         </section>
       ) : null}
 
-      <SampleCheck analysis={analysis} />
+      <SampleCheck
+        analysis={analysis}
+        minimumSample={run.minimumSample}
+        onEdit={onEditMinimumSample}
+      />
 
       {analysis.guardrails.map((section, index) => (
         <section
@@ -705,6 +721,14 @@ export function MeasuringDetails({
     runs.at(-1)?.id ?? ""
   )
   const [newRunOpen, setNewRunOpen] = useState(false)
+  const newRunSampleForm = useForm<
+    MinimumSampleFormValues,
+    unknown,
+    MinimumSampleUpdate
+  >({
+    resolver: zodResolver(minimumSampleSchema),
+    defaultValues: { minimumSample: "" },
+  })
   const [newRunMethod, setNewRunMethod] =
     useState<AnalysisMethod>("bayesian_ab")
   const [newRunControlVariant, setNewRunControlVariant] = useState("")
@@ -718,6 +742,9 @@ export function MeasuringDetails({
     useState<ObservationWindowError | null>(null)
   const [deleteRun, setDeleteRun] = useState<MeasuringRun | null>(null)
   const [assignmentOpen, setAssignmentOpen] = useState(false)
+  const [minimumSampleRun, setMinimumSampleRun] = useState<MeasuringRun | null>(
+    null
+  )
   const [runSettingsOpen, setRunSettingsOpen] = useState(false)
   const [runSettingsWindow, setRunSettingsWindow] =
     useState<ObservationWindowDraft>(() => createObservationWindowDraft())
@@ -815,6 +842,24 @@ export function MeasuringDetails({
       )
     },
   })
+  const minimumSampleMutation = useMutation({
+    mutationFn: ({
+      runId,
+      update,
+    }: {
+      runId: string
+      update: MinimumSampleUpdate
+    }) => updateExperimentRunMinimumSample(envId, experiment.id, runId, update),
+    onSuccess: (updated) => {
+      updateCache(updated)
+      setMinimumSampleRun(null)
+      toast.success(
+        t(
+          "releaseDecision.experiments.detailsPage.measuring.minimumSampleSaved"
+        )
+      )
+    },
+  })
   const runSettingsMutation = useMutation({
     mutationFn: ({
       runId,
@@ -846,6 +891,10 @@ export function MeasuringDetails({
     setNewRunTreatmentVariants(normalized.treatments)
     setNewRunWindow(createObservationWindowDraft())
     setNewRunWindowError(null)
+    const previousMinimum = runs.at(-1)?.minimumSample
+    newRunSampleForm.reset({
+      minimumSample: previousMinimum == null ? "" : String(previousMinimum),
+    })
     setNewRunOpen(true)
   }
 
@@ -857,6 +906,7 @@ export function MeasuringDetails({
     Boolean(selected) &&
     !blockedAnalysis &&
     !analyzeMutation.isPending &&
+    !minimumSampleMutation.isPending &&
     !runSettingsMutation.isPending &&
     !assignmentMutation.isPending
 
@@ -874,7 +924,18 @@ export function MeasuringDetails({
     setRunSettingsOpen(true)
   }
 
-  const submitNewRun = () => {
+  const openMinimumSampleDialog = () => {
+    if (
+      !selected ||
+      analyzeMutation.isPending ||
+      minimumSampleMutation.isPending
+    )
+      return
+    minimumSampleMutation.reset()
+    setMinimumSampleRun(selected)
+  }
+
+  const submitNewRun = newRunSampleForm.handleSubmit(({ minimumSample }) => {
     const resolved = resolveObservationWindow(newRunWindow)
     if (resolved.error) {
       setNewRunWindowError(resolved.error)
@@ -886,10 +947,11 @@ export function MeasuringDetails({
         method: newRunMethod,
         controlVariant: newRunControlVariant,
         treatmentVariant: newRunTreatmentVariants.join("|"),
+        minimumSample,
       },
       observationWindow: resolved.value,
     })
-  }
+  })
 
   const saveRunSettings = () => {
     if (!selected || !canEditWindow) return
@@ -1008,6 +1070,35 @@ export function MeasuringDetails({
                 )}
               </TooltipContent>
             </Tooltip>
+            <Button
+              type="button"
+              variant="outline"
+              size="xs"
+              className="h-5 rounded-full px-2 font-normal"
+              aria-label={t(
+                "releaseDecision.experiments.detailsPage.measuring.editMinimumSample"
+              )}
+              disabled={
+                analyzeMutation.isPending || minimumSampleMutation.isPending
+              }
+              onClick={openMinimumSampleDialog}
+            >
+              {t(
+                "releaseDecision.experiments.detailsPage.measuring.minimumSample"
+              )}
+              {" · "}
+              {(selected.minimumSample ?? 0) > 0
+                ? t(
+                    "releaseDecision.experiments.detailsPage.measuring.minimumPerVariant",
+                    {
+                      count: selected.minimumSample!,
+                    }
+                  )
+                : t(
+                    "releaseDecision.experiments.detailsPage.measuring.noMinimumSet"
+                  )}
+              <Pencil className="size-3" />
+            </Button>
             <div className="ml-auto flex items-center gap-2">
               <Button
                 type="button"
@@ -1091,7 +1182,15 @@ export function MeasuringDetails({
               </div>
               <div className="space-y-5 p-4">
                 <RecommendationPanel key={selected.id} run={selected} />
-                <FullAnalysis run={selected} variantNames={variantNames} />
+                <FullAnalysis
+                  run={selected}
+                  variantNames={variantNames}
+                  onEditMinimumSample={
+                    analyzeMutation.isPending || minimumSampleMutation.isPending
+                      ? undefined
+                      : openMinimumSampleDialog
+                  }
+                />
               </div>
             </div>
             <div className="min-w-0 border-t p-4 xl:border-t-0">
@@ -1105,6 +1204,21 @@ export function MeasuringDetails({
           </div>
         </>
       )}
+
+      {minimumSampleRun ? (
+        <EditMinimumSampleDialog
+          key={minimumSampleRun.id}
+          run={minimumSampleRun}
+          saving={minimumSampleMutation.isPending}
+          saveError={minimumSampleMutation.isError}
+          onClose={() => setMinimumSampleRun(null)}
+          onSave={(update) =>
+            minimumSampleMutation
+              .mutateAsync({ runId: minimumSampleRun.id, update })
+              .then(() => undefined)
+          }
+        />
+      ) : null}
 
       {selected && assignmentOpen ? (
         <EditAssignmentSheet
@@ -1397,6 +1511,17 @@ export function MeasuringDetails({
                   setNewRunWindow(value)
                   setNewRunWindowError(null)
                 }}
+              />
+            </section>
+
+            <section className="border-t pt-5">
+              <MinimumSampleField
+                id="new-run-minimum-sample"
+                register={newRunSampleForm.register}
+                invalid={Boolean(
+                  newRunSampleForm.formState.errors.minimumSample
+                )}
+                disabled={createMutation.isPending}
               />
             </section>
 

@@ -275,4 +275,35 @@ describe("Bayesian full analysis", () => {
     ).toBeInTheDocument()
     expect(screen.queryByText(/P\(harm\) \d/)).not.toBeInTheDocument()
   })
+
+  it("marks a sample check as stale until analysis uses the new minimum", () => {
+    const run = { ...bayesianRun(200), minimumSample: 500 }
+    const { rerender } = render(
+      <FullAnalysis run={run} variantNames={variantNames} />
+    )
+    expect(screen.getByText("Needs analysis")).toBeInTheDocument()
+    expect(screen.queryByText("Passed")).not.toBeInTheDocument()
+    expect(screen.getByText("minimum 500 / variant")).toBeInTheDocument()
+
+    const analysis = JSON.parse(run.analysisResult!)
+    analysis.sample_check.minimum_per_variant = 500
+    analysis.sample_check.ok = false
+    rerender(
+      <FullAnalysis
+        run={{ ...run, analysisResult: JSON.stringify(analysis) }}
+        variantNames={variantNames}
+      />
+    )
+    expect(screen.getByText("Below minimum")).toBeInTheDocument()
+    expect(screen.queryByText("Needs analysis")).not.toBeInTheDocument()
+
+    rerender(
+      <FullAnalysis
+        run={{ ...run, minimumSample: 0 }}
+        variantNames={variantNames}
+      />
+    )
+    expect(screen.getByText("Needs analysis")).toBeInTheDocument()
+    expect(screen.queryByText("Passed")).not.toBeInTheDocument()
+  })
 })

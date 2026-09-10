@@ -311,6 +311,19 @@ export const enExperiments = {
       belowMinimum: "Below minimum",
       sampleCheckNoData: "No data",
       noMinimumSet: "No minimum set",
+      minimumSample: "Minimum sample",
+      minimumSamplePerVariant: "Minimum sample per variant",
+      editMinimumSample: "Edit minimum sample",
+      minimumSampleDescription: "Set the sample requirement for {{run}}.",
+      minimumSampleHelp:
+        "Minimum number of samples required in each variant. Leave empty or enter 0 for no minimum.",
+      minimumSampleInvalid: "Enter a whole number between 0 and 2,147,483,647.",
+      minimumSampleSaved: "Minimum sample saved",
+      minimumSampleSaveFailed:
+        "The minimum sample could not be saved. Try again.",
+      sampleCheckNeedsAnalysis: "Needs analysis",
+      minimumSampleChanged:
+        "The minimum sample has changed since the last analysis. Analyze latest data to refresh this check.",
       minimumPerVariant: "minimum {{count}} / variant",
       trafficAssignment: "Experiment traffic assignment",
       copyVariationId: "Copy variation ID",
@@ -830,6 +843,18 @@ export const zhExperiments = {
       belowMinimum: "样本量不足",
       sampleCheckNoData: "无可评估样本",
       noMinimumSet: "未设置最低样本量",
+      minimumSample: "最低样本量",
+      minimumSamplePerVariant: "每个变体的最低样本量",
+      editMinimumSample: "编辑最低样本量",
+      minimumSampleDescription: "设置 {{run}} 的样本量要求。",
+      minimumSampleHelp:
+        "每个变体需要达到的最低样本数。留空或输入 0 表示不设最低样本量。",
+      minimumSampleInvalid: "请输入 0 到 2,147,483,647 之间的整数。",
+      minimumSampleSaved: "最低样本量已保存",
+      minimumSampleSaveFailed: "最低样本量保存失败，请重试。",
+      sampleCheckNeedsAnalysis: "需要重新分析",
+      minimumSampleChanged:
+        "最低样本量已在上次分析后更改。请点击“分析最新数据”以刷新此检查。",
       minimumPerVariant: "每个变体至少 {{count}}",
       trafficAssignment: "实验流量分配",
       copyVariationId: "复制 ID",
