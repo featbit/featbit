@@ -230,11 +230,12 @@ test.describe("workspace billing", () => {
   test("reports failed refresh and allows recovery without claiming payment succeeded", async ({
     page,
   }) => {
-    await setupBillingPage(page, {
+    const subscription: Partial<BillingSubscription> = {
       status: "payment_failed",
       retryPaymentState: "available",
       retryPaymentUrl: paymentUrl,
-    })
+    }
+    await setupBillingPage(page, subscription)
     await page.goto("/en/workspace/billing")
     const refresh = page.getByRole("button", {
       name: "Refresh status",
@@ -259,6 +260,10 @@ test.describe("workspace billing", () => {
         exact: true,
       })
     ).toBeVisible({ timeout: 15000 })
+    const subscriptionError = page.getByRole("alert").filter({
+      hasText: "Failed to load subscription",
+    })
+    await expect(subscriptionError).toBeVisible()
     await expect(
       page.getByText("Payment confirmed.", { exact: true })
     ).toHaveCount(0)
@@ -268,13 +273,23 @@ test.describe("workspace billing", () => {
     await expect(refresh).toBeEnabled()
 
     fail = false
+    const refreshedPaymentUrl = `${paymentUrl}-refreshed`
+    subscription.retryPaymentUrl = refreshedPaymentUrl
+    const successfulRefresh = page.waitForResponse(
+      (response) =>
+        new URL(response.url()).pathname === "/api/v1/billing/subscription" &&
+        response.request().method() === "GET" &&
+        response.status() === 200
+    )
     await refresh.click()
+    await successfulRefresh
+    await expect(subscriptionError).toHaveCount(0)
     await expect(
       page.getByRole("heading", { name: "Growth", exact: true })
     ).toBeVisible()
     await expect(page.getByRole("link", { name: "Pay now" })).toHaveAttribute(
       "href",
-      paymentUrl
+      refreshedPaymentUrl
     )
   })
 
