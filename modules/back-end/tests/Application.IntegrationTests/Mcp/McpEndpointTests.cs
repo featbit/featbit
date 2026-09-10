@@ -119,6 +119,10 @@ public class McpEndpointTests
             "Expected an MCP error for an unknown tool.");
     }
 
+    /// <summary>
+    /// Builds and sends a JSON-RPC request to the MCP endpoint, accepting either
+    /// response shape the Streamable HTTP transport may choose.
+    /// </summary>
     private static Task<HttpResponseMessage> SendRpcAsync(
         HttpClient client,
         string method,
@@ -151,6 +155,10 @@ public class McpEndpointTests
         return client.SendAsync(request);
     }
 
+    /// <summary>
+    /// Reads a successful JSON-RPC response and returns its <c>result</c> payload,
+    /// failing with the JSON-RPC error when the call did not succeed.
+    /// </summary>
     private static async Task<JsonElement> ReadRpcResultAsync(HttpResponseMessage response)
     {
         var message = await ReadRpcMessageAsync(response);
@@ -162,6 +170,10 @@ public class McpEndpointTests
         return message.GetProperty("result");
     }
 
+    /// <summary>
+    /// Parses the JSON-RPC envelope from a response body, unwrapping the SSE framing first
+    /// when the transport answered with an event stream rather than plain JSON.
+    /// </summary>
     private static async Task<JsonElement> ReadRpcMessageAsync(HttpResponseMessage response)
     {
         var body = await response.Content.ReadAsStringAsync();
@@ -172,17 +184,25 @@ public class McpEndpointTests
             string.IsNullOrWhiteSpace(json),
             $"Expected a JSON-RPC message from {McpEndpoint}, got '{body}'.");
 
-        return JsonDocument.Parse(json).RootElement.Clone();
+        using var document = JsonDocument.Parse(json);
+        return document.RootElement.Clone();
     }
 
+    /// <summary>
+    /// Extracts the payload of the first SSE event in the body. Scoped to a single event
+    /// because concatenating the data lines of several events would yield invalid JSON;
+    /// multi-line data within that one event is rejoined with newlines per the SSE spec.
+    /// </summary>
     private static string ExtractSseData(string body)
     {
         var data = body
             .Split('\n')
             .Select(line => line.TrimEnd('\r'))
+            .SkipWhile(line => !line.StartsWith("data:", StringComparison.Ordinal))
+            .TakeWhile(line => line.Length > 0)
             .Where(line => line.StartsWith("data:", StringComparison.Ordinal))
             .Select(line => line["data:".Length..].TrimStart());
 
-        return string.Concat(data);
+        return string.Join('\n', data);
     }
 }
