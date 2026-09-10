@@ -25,7 +25,6 @@ public class ExperimentService(
 {
     private const double GuardrailHealthyHarmProbability = 0.01;
     private const double GuardrailAlarmHarmProbability = 0.95;
-    private const int BanditMinUnitsPerArm = 100;
 
     public async Task<ExperimentVm> CreateAsync(Experiment experiment)
     {
@@ -388,7 +387,7 @@ public class ExperimentService(
         run.LayerTrafficPercent = Math.Clamp(sliceEnd - sliceStart, 0d, 100d);
         run.AnalysisSamplingPlan = Normalize(update.AnalysisSamplingPlan);
         run.AudienceFilters = Normalize(update.AudienceFilters);
-        run.Method = update.Method == "bandit" ? "bandit" : "bayesian_ab";
+        run.Method = Normalize(update.Method, run.Method);
         await NormalizeAndValidateLayerAssignmentAsync(envId, run);
         run.UpdatedAt = DateTime.UtcNow;
 
@@ -552,9 +551,9 @@ public class ExperimentService(
             primaryMetricData,
             control,
             treatments);
-        var analysisResult = run.Method == "bandit"
-            ? BuildBanditAnalysisJson(run, primaryMetricEvent, metrics, guardrails, analysisControl, analysisTreatments)
-            : BuildBayesianAnalysisJson(run, experiment.Name ?? id.ToString(), primaryMetricEvent, metricAgg, metrics, guardrails, analysisControl, analysisTreatments);
+        var analysisResult = BuildBayesianAnalysisJson(
+            run, experiment.Name ?? id.ToString(), primaryMetricEvent, metricAgg,
+            metrics, guardrails, analysisControl, analysisTreatments);
 
         run.InputData = inputData;
         run.AnalysisResult = analysisResult;
@@ -731,24 +730,8 @@ public class ExperimentService(
         };
     }
 
-    private static string BuildRunMethodSummary(IEnumerable<string> methods)
-    {
-        var normalized = methods.ToArray();
-        if (normalized.Length == 0)
-        {
-            return "No runs";
-        }
-
-        var hasBandit = normalized.Any(method => method == "bandit");
-        var hasBayesian = normalized.Any(method => method != "bandit");
-
-        return (hasBayesian, hasBandit) switch
-        {
-            (true, true) => "Bayesian + Bandit arms",
-            (false, true) => "Bandit arms",
-            _ => "Bayesian"
-        };
-    }
+    private static string BuildRunMethodSummary(IEnumerable<string> methods) =>
+        methods.Any() ? "Bayesian" : "No runs";
 
     private async Task LoadExperimentChildrenAsync(Experiment experiment)
     {
@@ -1781,135 +1764,6 @@ public class ExperimentService(
         return sections;
     }
 
-    private static string BuildBanditAnalysisJson(
-        ExperimentRun run,
-        string metricEvent,
-        Dictionary<string, Dictionary<string, object>> metrics,
-        IReadOnlyCollection<GuardrailDefinition> guardrails,
-        string control,
-        string[] treatments)
-    {
-        var prior = new GaussianPrior(
-            run.PriorMean ?? 0,
-            Math.Pow(run.PriorStddev ?? 0.3, 2),
-            run.PriorProper);
-        var arms = new[] { control }.Concat(treatments).ToArray();
-        var metricData = metrics.GetValueOrDefault(metricEvent) ?? [];
-        var isBinary = NormalizeMetricType(run.PrimaryMetricType) == "binary";
-        var stats = arms.Select(arm =>
-        {
-            var raw = GetVariantData(metricData, arm);
-            var (mean, variance, n) = MetricMoments(raw);
-            var conversions = raw != null && TryGetDouble(raw, "k", out var k) ? (long)Math.Floor(k) : 0L;
-            var rate = raw != null && raw.ContainsKey("k") ? n > 0 ? conversions / (double)n : 0 : mean;
-            return new BanditArmStat(arm, mean, variance, n, conversions, rate);
-        }).ToArray();
-
-        var observed = stats.ToDictionary(x => x.Arm, x => x.N);
-        var srmPValue = SrmCheck(stats.Select(x => x.N).ToArray());
-        var inverse = TryGetBool(metricData, "inverse");
-        var bandit = ComputeBanditWeights(arms, stats, prior, inverse);
-        var bestProbs = bandit.BestArmProbabilities ?? new Dictionary<string, double>();
-        var weights = bandit.BanditWeights ?? new Dictionary<string, double>();
-        var bestArm = arms.OrderByDescending(arm => bestProbs.GetValueOrDefault(arm)).FirstOrDefault() ?? control;
-        var bestP = bestProbs.GetValueOrDefault(bestArm);
-        const double threshold = 0.95;
-        var stopMet = bandit.EnoughUnits && bestP >= threshold;
-
-        var payload = new Dictionary<string, object?>
-        {
-            ["type"] = "bandit",
-            ["experiment"] = run.Slug,
-            ["computed_at"] = DateTime.UtcNow,
-            ["window"] = new Dictionary<string, object?>
-            {
-                ["start"] = run.ObservationStart,
-                ["end"] = run.ObservationEnd
-            },
-            ["metric"] = metricEvent,
-            ["metric_type"] = isBinary ? "proportion" : "numeric",
-            ["metric_agg"] = NormalizeMetricAgg(run.PrimaryMetricAgg),
-            ["inverse"] = inverse,
-            ["algorithm"] = "thompson_sampling_top_two",
-            ["srm"] = new Dictionary<string, object>
-            {
-                ["chi2_p_value"] = Round(srmPValue, 4),
-                ["ok"] = srmPValue >= 0.01,
-                ["observed"] = observed
-            },
-            ["arms"] = stats.Select(x =>
-            {
-                var row = new Dictionary<string, object>
-                {
-                    ["arm"] = x.Arm,
-                    ["n"] = x.N
-                };
-                if (isBinary)
-                {
-                    row["conversions"] = x.Conversions;
-                    row["rate"] = x.Rate;
-                }
-                else
-                {
-                    row["mean"] = x.Mean;
-                }
-                return row;
-            }).ToArray(),
-            ["guardrails"] = BuildBanditGuardrailSections(metrics, guardrails, control, treatments),
-            ["thompson_sampling"] = new Dictionary<string, object?>
-            {
-                ["results"] = arms.Select(arm => new Dictionary<string, object?>
-                {
-                    ["arm"] = arm,
-                    ["p_best"] = bandit.EnoughUnits ? bestProbs.GetValueOrDefault(arm) : null,
-                    ["recommended_weight"] = bandit.EnoughUnits ? weights.GetValueOrDefault(arm) : null
-                }).ToArray(),
-                ["enough_units"] = bandit.EnoughUnits,
-                ["minimum_units_per_arm"] = BanditMinUnitsPerArm,
-                ["update_message"] = bandit.UpdateMessage,
-                ["seed"] = bandit.Seed
-            },
-            ["stopping"] = new Dictionary<string, object?>
-            {
-                ["met"] = stopMet,
-                ["best_arm"] = bandit.EnoughUnits ? bestArm : null,
-                ["p_best"] = bandit.EnoughUnits ? bestP : null,
-                ["threshold"] = threshold,
-                ["message"] = stopMet
-                    ? $"{bestArm} reached P(best)={bestP:0.0000} >= {threshold:0.00}"
-                    : bandit.EnoughUnits
-                        ? $"best arm {bestArm} currently at P(best)={bestP:0.0000}, threshold={threshold:0.00}"
-                        : bandit.UpdateMessage
-            }
-        };
-
-        return JsonSerializer.Serialize(payload);
-    }
-
-    // Bandit carries declared types through empty queries; Bayesian A/B keeps its
-    // existing result builder and comparison behavior.
-    private static List<Dictionary<string, object?>> BuildBanditGuardrailSections(
-        Dictionary<string, Dictionary<string, object>> metrics,
-        IReadOnlyCollection<GuardrailDefinition> guardrails,
-        string control,
-        string[] treatments)
-    {
-        var sections = new List<Dictionary<string, object?>>();
-        foreach (var guardrail in guardrails)
-        {
-            var data = new Dictionary<string, object>(metrics.GetValueOrDefault(guardrail.Event) ?? []);
-            data["inverse"] = guardrail.Inverse;
-            var section = ComputeMetricSection(
-                guardrail.Event, data, control, treatments, true, null,
-                guardrail.MetricAgg, guardrail.MetricType);
-            if (section != null)
-            {
-                sections.Add(section);
-            }
-        }
-        return sections;
-    }
-
     private static Dictionary<string, object?>? ComputeMetricSection(
         string label,
         Dictionary<string, object> metricData,
@@ -1917,13 +1771,10 @@ public class ExperimentService(
         string[] treatments,
         bool isGuardrail,
         GaussianPrior? prior,
-        string? metricAgg,
-        string? declaredMetricType = null)
+        string? metricAgg)
     {
         var inverse = TryGetBool(metricData, "inverse");
-        var isProp = declaredMetricType == null
-            ? IsBinaryMetricData(metricData)
-            : NormalizeMetricType(declaredMetricType) == "binary";
+        var isProp = IsBinaryMetricData(metricData);
         var ctrlRaw = GetVariantData(metricData, control) ?? EmptyVariantData(isProp);
         var (meanA, varA, nA) = MetricMoments(ctrlRaw);
         var rows = new List<Dictionary<string, object?>>();
@@ -2349,121 +2200,6 @@ public class ExperimentService(
         return ((1 - pCtrlBetter) * meanPositive, -pCtrlBetter * meanNegative);
     }
 
-    private static BanditWeightResult ComputeBanditWeights(
-        string[] arms,
-        BanditArmStat[] stats,
-        GaussianPrior prior,
-        bool inverse)
-    {
-        const double minArmWeight = 0.01;
-        const int sampleCount = 10_000;
-
-        var counts = stats.Select(x => x.N).ToArray();
-        if (counts.Any(x => x < BanditMinUnitsPerArm))
-        {
-            var minN = counts.Length == 0 ? 0 : counts.Min();
-            return new BanditWeightResult(
-                false,
-                $"burn-in: need >= {BanditMinUnitsPerArm} users per arm before dynamic weighting (current minimum: {minN})",
-                null,
-                null,
-                null);
-        }
-
-        var posteriors = stats.Select(x => ArmPosterior(x.Mean, x.Variance, x.N, prior)).ToArray();
-        var postMeans = posteriors.Select(x => x.Mean).ToArray();
-        var postStddevs = posteriors.Select(x => Math.Sqrt(Math.Max(x.Variance, 1e-12))).ToArray();
-        var seed = Random.Shared.Next(0, 1_000_000);
-        var rng = new Mulberry32(seed);
-        var bestCounts = new int[arms.Length];
-        var topTwoCounts = new int[arms.Length];
-
-        for (var i = 0; i < sampleCount; i++)
-        {
-            var order = arms
-                .Select((_, idx) => new
-                {
-                    Index = idx,
-                    Value = postMeans[idx] + postStddevs[idx] * Normal01(rng)
-                })
-                .OrderBy(x => inverse ? x.Value : -x.Value)
-                .ToArray();
-
-            bestCounts[order[0].Index]++;
-            if (arms.Length > 1)
-            {
-                topTwoCounts[order[0].Index]++;
-                topTwoCounts[order[1].Index]++;
-            }
-        }
-
-        var bestProbabilities = new Dictionary<string, double>();
-        for (var i = 0; i < arms.Length; i++)
-        {
-            bestProbabilities[arms[i]] = bestCounts[i] / (double)sampleCount;
-        }
-
-        var weights = new double[arms.Length];
-        if (arms.Length > 1)
-        {
-            var denominator = topTwoCounts.Sum();
-            for (var i = 0; i < arms.Length; i++)
-            {
-                weights[i] = denominator > 0 ? topTwoCounts[i] / (double)denominator : 1 / (double)arms.Length;
-            }
-        }
-        else
-        {
-            weights[0] = 1;
-        }
-
-        for (var i = 0; i < weights.Length; i++)
-        {
-            weights[i] = Math.Max(weights[i], minArmWeight);
-        }
-
-        var sumWeights = weights.Sum();
-        var banditWeights = new Dictionary<string, double>();
-        for (var i = 0; i < arms.Length; i++)
-        {
-            banditWeights[arms[i]] = weights[i] / sumWeights;
-        }
-
-        return new BanditWeightResult(true, "successfully updated", bestProbabilities, banditWeights, seed);
-    }
-
-    private static (double Mean, double Variance) ArmPosterior(
-        double mean,
-        double variance,
-        long n,
-        GaussianPrior prior)
-    {
-        if (n == 0)
-        {
-            return (prior.Mean, prior.Variance);
-        }
-
-        // Constant observations still carry their observed mean. A small floor
-        // keeps precision arithmetic finite without resetting the arm to its prior.
-        var dataVariance = Math.Max(variance / n, 1e-12);
-        if (!prior.Proper)
-        {
-            return (mean, dataVariance);
-        }
-
-        var dataPrecision = 1 / dataVariance;
-        var priorPrecision = 1 / prior.Variance;
-        var postPrecision = dataPrecision + priorPrecision;
-        return ((mean * dataPrecision + prior.Mean * priorPrecision) / postPrecision, 1 / postPrecision);
-    }
-
-    private static double Normal01(Mulberry32 rng)
-    {
-        var u1 = Math.Max(rng.NextDouble(), 1e-12);
-        var u2 = rng.NextDouble();
-        return Math.Sqrt(-2 * Math.Log(u1)) * Math.Cos(2 * Math.PI * u2);
-    }
-
     private static double SrmCheck(long[] observed)
     {
         var total = observed.Sum();
@@ -2758,43 +2494,6 @@ public class ExperimentService(
         public static BayesianComparison Failed(string error)
         {
             return new BayesianComparison(error, 0, 0, 0, 0, 0, 0, 0, false);
-        }
-    }
-
-    private sealed record BanditArmStat(
-        string Arm,
-        double Mean,
-        double Variance,
-        long N,
-        long Conversions,
-        double Rate);
-
-    private sealed record BanditWeightResult(
-        bool EnoughUnits,
-        string UpdateMessage,
-        Dictionary<string, double>? BestArmProbabilities,
-        Dictionary<string, double>? BanditWeights,
-        int? Seed);
-
-    private sealed class Mulberry32
-    {
-        private uint _state;
-
-        public Mulberry32(int seed)
-        {
-            _state = (uint)seed;
-        }
-
-        public double NextDouble()
-        {
-            unchecked
-            {
-                _state += 0x6D2B79F5u;
-                var x = _state;
-                x = (x ^ (x >> 15)) * (1u | x);
-                x ^= x + (x ^ (x >> 7)) * (61u | x);
-                return (x ^ (x >> 14)) / 4294967296.0;
-            }
         }
     }
 

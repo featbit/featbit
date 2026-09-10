@@ -100,7 +100,7 @@ public class ExperimentMcpTools(
     }
 
     [McpServerTool(Name = "featbit_experiment_update_run")]
-    [Description("Patch a experiment experiment run, including method, metrics, variants, observations, input data, analysis result, decision, or learning fields.")]
+    [Description("Patch an experiment run, including method, metrics, variants, observations, input data, analysis result, decision, or learning fields.")]
     public async Task<ExperimentDetailVm> UpdateRun(
         [Description("Experiment experiment id.")]
         Guid experimentId,
@@ -195,9 +195,9 @@ public class ExperimentMcpTools(
         }
 
         var method = Normalize(request.Method) ?? "bayesian_ab";
-        if (method is not ("bayesian_ab" or "bandit"))
+        if (method != "bayesian_ab")
         {
-            throw new ArgumentException("method must be bayesian_ab or bandit.");
+            throw new ArgumentException("method must be bayesian_ab.");
         }
 
         if (string.IsNullOrWhiteSpace(request.ControlVariant))
@@ -380,10 +380,10 @@ public class ExperimentMcpTools(
 
 public class ExperimentMcpRunTrafficRequest
 {
-    [Description("Run method. Use bayesian_ab for fixed control/treatment analysis or bandit for adaptive arms.")]
+    [Description("Run analysis method. Use bayesian_ab for Bayesian A/B/n analysis.")]
     public string Method { get; set; } = string.Empty;
 
-    [Description("Control or baseline variation value exactly as served by FeatBit exposure events.")]
+    [Description("Control variation value exactly as served by FeatBit exposure events.")]
     public string ControlVariant { get; set; } = string.Empty;
 
     [Description("One or more treatment variation values exactly as served by FeatBit exposure events. Separate multiple values with commas.")]
