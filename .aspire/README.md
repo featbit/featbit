@@ -14,12 +14,17 @@ disables the distributed cache. Redis and the Evaluation Server are not needed
 for ordinary management-UI testing.
 
 The PostgreSQL resource applies the released schema scripts, the backend's
-development-only `vNext.sql` fixture, and an AppHost-only overlay for the
-current experiment and MCP entity model. Its separate
+development-only `vNext.sql` fixture, and the consolidated
+[`10-current-head-schema.sql`](postgres-init/10-current-head-schema.sql)
+for the experiment and MCP entity model. Its separate
 `featbit-aspire-postgres-vnext` volume keeps this development schema isolated
-from older Aspire data volumes. The overlay replaces legacy experiment tables
-only when they are empty and otherwise stops initialization rather than
-discarding data.
+from older Aspire data volumes.
+
+The consolidated script contains the current table and index definitions.
+The test fixture prepares the empty legacy tables created by the released
+scripts before applying those definitions. Keep the table and index definitions
+in `Fixtures/vNext.sql` in sync with the consolidated script. PostgreSQL runs
+the initialization directory only on an empty data volume.
 
 ## Start or restart the UI comparison stack
 

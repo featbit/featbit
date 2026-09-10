@@ -29,11 +29,10 @@ ALTER TABLE segments
     ADD COLUMN committed_version bigint NOT NULL DEFAULT 0,
     ADD COLUMN pending jsonb NULL;
 
--- Current experimentation and MCP schema (10-current-head-schema.sql).
 BEGIN;
 
--- The released migrations still contain the legacy experiment tables. Current
--- HEAD maps new shapes to the same names, so only replace empty legacy tables.
+-- Prepare the empty legacy tables created by the released test fixtures before
+-- applying the current schema. This setup is specific to replaying those fixtures.
 DO $guard$
 DECLARE
     has_rows boolean;
@@ -66,6 +65,8 @@ BEGIN
 END
 $guard$;
 
+-- Keep the table and index definitions below in sync with
+-- .aspire/postgres-init/10-current-head-schema.sql.
 CREATE TABLE IF NOT EXISTS public.experiment_activities (
     id uuid NOT NULL,
     type character varying(128) NOT NULL,
@@ -228,6 +229,7 @@ CREATE TABLE IF NOT EXISTS public.experiments (
     intent text,
     last_action text,
     last_learning text,
+    last_run_number bigint,
     open_questions text,
     primary_metric text,
     sandbox_id text,
@@ -338,43 +340,3 @@ CREATE UNIQUE INDEX IF NOT EXISTS ix_mcp_refresh_authorizations_token_hash
     ON public.mcp_refresh_authorizations (token_hash);
 
 COMMIT;
-
--- Run layer compatibility (20-fix-experiment-run-layer-id.sql).
-BEGIN;
-
-DO $migration$
-DECLARE
-    layer_type text;
-BEGIN
-    SELECT udt_name
-      INTO layer_type
-      FROM information_schema.columns
-     WHERE table_schema = 'public'
-       AND table_name = 'experiment_runs'
-       AND column_name = 'layer_id';
-
-    IF layer_type IS NULL THEN
-        RAISE EXCEPTION 'public.experiment_runs.layer_id does not exist';
-    END IF;
-
-    IF layer_type <> 'uuid' THEN
-        EXECUTE
-            'ALTER TABLE public.experiment_runs
-             ALTER COLUMN layer_id TYPE uuid
-             USING layer_id::uuid';
-    END IF;
-END
-$migration$;
-
-ALTER TABLE public.experiment_runs
-    ALTER COLUMN layer_id DROP NOT NULL,
-    DROP COLUMN IF EXISTS run_id,
-    DROP COLUMN IF EXISTS status;
-
-COMMIT;
-
--- Run numbering (30-experiment-run-number.sql).
--- Keep the last allocated run number independently of run deletion.
--- Null marks legacy experiments; the service initializes their counters from run history.
-ALTER TABLE experiments
-    ADD COLUMN IF NOT EXISTS last_run_number bigint NULL;

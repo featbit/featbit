@@ -1,41 +1,9 @@
 \set ON_ERROR_STOP on
 \connect featbit
 
+-- Experimentation and MCP schema for v6.0.0.
+-- New Aspire volumes apply this after the released migrations and vNext.sql.
 BEGIN;
-
--- The released migrations still contain the legacy experiment tables. Current
--- HEAD maps new shapes to the same names, so only replace empty legacy tables.
-DO $guard$
-DECLARE
-    has_rows boolean;
-BEGIN
-    IF to_regclass('public.experiments') IS NOT NULL
-       AND EXISTS (
-           SELECT 1 FROM information_schema.columns
-           WHERE table_schema = 'public' AND table_name = 'experiments'
-             AND column_name IN ('env_id', 'metric_id', 'feature_flag_id'))
-    THEN
-        EXECUTE 'SELECT EXISTS (SELECT 1 FROM public.experiments)' INTO has_rows;
-        IF has_rows THEN
-            RAISE EXCEPTION 'Refusing to replace non-empty legacy public.experiments';
-        END IF;
-        EXECUTE 'DROP TABLE public.experiments';
-    END IF;
-
-    IF to_regclass('public.experiment_metrics') IS NOT NULL
-       AND EXISTS (
-           SELECT 1 FROM information_schema.columns
-           WHERE table_schema = 'public' AND table_name = 'experiment_metrics'
-             AND column_name IN ('env_id', 'maintainer_user_id', 'event_name'))
-    THEN
-        EXECUTE 'SELECT EXISTS (SELECT 1 FROM public.experiment_metrics)' INTO has_rows;
-        IF has_rows THEN
-            RAISE EXCEPTION 'Refusing to replace non-empty legacy public.experiment_metrics';
-        END IF;
-        EXECUTE 'DROP TABLE public.experiment_metrics';
-    END IF;
-END
-$guard$;
 
 CREATE TABLE IF NOT EXISTS public.experiment_activities (
     id uuid NOT NULL,
@@ -199,6 +167,7 @@ CREATE TABLE IF NOT EXISTS public.experiments (
     intent text,
     last_action text,
     last_learning text,
+    last_run_number bigint,
     open_questions text,
     primary_metric text,
     sandbox_id text,
