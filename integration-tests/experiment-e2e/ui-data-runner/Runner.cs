@@ -92,7 +92,7 @@ public sealed class Runner(Cli cli, Settings settings, Scenario[] catalog)
         {
             if (!plan.Diagnostic && plan.Phase != "b")
             {
-                var desired = c.Bandit ? new[] { .7, .15, .15 } : new[] { .5, .5 };
+                var desired = c.ExpectedWeights ?? (c.Bandit ? new[] { .7, .15, .15 } : Enumerable.Repeat(1d / c.Values.Length, c.Values.Length).ToArray());
                 if (c.Values.Where((v, i) => Math.Abs(t.Weights[t.VariationIds[v]] - desired[i]) > 1e-8).Any())
                     throw new Stop("Initial default split must be " + string.Join("/", desired.Select(v => v * 100)) + ".");
             }

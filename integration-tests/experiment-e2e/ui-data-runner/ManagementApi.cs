@@ -124,8 +124,8 @@ public sealed class ManagementApi : IDisposable
         var primary = Json.ParseField(experiment["primaryMetric"]);
         var guards = Json.Array(Json.ParseField(run["guardrailEvents"]));
         var exposureGuards = Json.Array(Json.ParseField(experiment["guardrails"]));
-        check.Add("Guardrail count", guards.Count == 2);
-        check.Add("Exposure guardrail count", exposureGuards.Count == 2);
+        check.Add("Guardrail count", guards.Count == c.Metrics.Length - 1);
+        check.Add("Exposure guardrail count", exposureGuards.Count == c.Metrics.Length - 1);
         foreach (var (m, i) in c.Metrics.Select((m, i) => (m, i)))
         {
             var definition = i == 0 ? primary : guards.FirstOrDefault(g => Json.Text(g?["event"]) == m.Key);

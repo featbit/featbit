@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace UiExperimentData;
 
@@ -12,7 +13,8 @@ public sealed record MetricSpec(string Key, string Type, string Agg, string Dire
 }
 
 public sealed record Scenario(string Id, string ExperimentName, string FlagKey, string ValueType, string[] Values,
-    int MainUsers, int PhaseAUsers, int PhaseBUsers, bool Checkpoint600, string? LayerKey, double SliceStart, double SliceEnd, MetricSpec[] Metrics)
+    int MainUsers, int PhaseAUsers, int PhaseBUsers, bool Checkpoint600, string? LayerKey, double SliceStart, double SliceEnd, MetricSpec[] Metrics,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] double[]? ExpectedWeights = null)
 {
     public bool Bandit => PhaseAUsers > 0;
     public bool Eligible(string userKey) => string.IsNullOrEmpty(LayerKey) || LayerBucket(LayerKey, userKey) is var b && b >= SliceStart && b < SliceEnd;
@@ -35,8 +37,10 @@ public static class Catalog
         foreach (var c in cases)
         {
             Cli.SafeId(c.Id);
-            if (c.Values.Length is < 2 or > 3 || c.Values.Distinct().Count() != c.Values.Length || c.ValueType is not ("boolean" or "string") || c.Metrics.Length != 3 || c.Metrics.Select(m => m.Key).Distinct().Count() != 3)
+            if (c.Values.Length is < 2 or > 3 || c.Values.Distinct().Count() != c.Values.Length || c.ValueType is not ("boolean" or "string") || c.Metrics.Length == 0 || c.Metrics.Select(m => m.Key).Distinct().Count() != c.Metrics.Length)
                 throw new Stop("Invalid scenario roles/metrics: " + c.Id);
+            if (c.ExpectedWeights is { } weights && (weights.Length != c.Values.Length || weights.Any(w => !double.IsFinite(w) || w <= 0 || w > 1) || Math.Abs(weights.Sum() - 1) > 1e-8))
+                throw new Stop("Expected weights must cover every variation and total 1: " + c.Id);
             if (c.MainUsers < 0 || c.PhaseAUsers < 0 || c.PhaseBUsers < 0 || (c.Bandit ? c.MainUsers != 0 || c.PhaseAUsers < 150 || c.PhaseBUsers == 0 : c.MainUsers == 0 || c.PhaseBUsers != 0) || (c.Checkpoint600 && c.PhaseAUsers < 600))
                 throw new Stop("Invalid batch sizes: " + c.Id);
             if (c.SliceStart < 0 || c.SliceEnd > 100 || c.SliceEnd <= c.SliceStart) throw new Stop("Invalid layer slice.");
