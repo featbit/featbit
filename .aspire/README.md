@@ -15,7 +15,7 @@ for ordinary management-UI testing.
 
 The PostgreSQL resource applies the released schema scripts, the backend's
 development-only `vNext.sql` fixture, and the consolidated
-[`10-current-head-schema.sql`](postgres-init/10-current-head-schema.sql)
+[`v6.0.0-experimentation-schema.sql`](postgres-init/v6.0.0-experimentation-schema.sql)
 for the experiment and MCP entity model. Its separate
 `featbit-aspire-postgres-vnext` volume keeps this development schema isolated
 from older Aspire data volumes.

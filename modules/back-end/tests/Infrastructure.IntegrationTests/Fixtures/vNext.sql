@@ -66,7 +66,7 @@ END
 $guard$;
 
 -- Keep the table and index definitions below in sync with
--- .aspire/postgres-init/10-current-head-schema.sql.
+-- .aspire/postgres-init/v6.0.0-experimentation-schema.sql.
 CREATE TABLE IF NOT EXISTS public.experiment_activities (
     id uuid NOT NULL,
     type character varying(128) NOT NULL,
