@@ -1,12 +1,109 @@
-import { AlertCircle, CheckCircle2, Info, Loader2 } from "lucide-react"
+import {
+  AlertCircle,
+  CheckCircle2,
+  ExternalLink,
+  Info,
+  Loader2,
+  RefreshCw,
+} from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import type { BillingSubscription } from "../billing-api"
 
 export type CheckoutState =
   "verifying" | "confirmed" | "timeout" | "cancelled" | null
+
+export function PaymentFailedAlert({
+  retryPaymentUrl,
+  retryPaymentState,
+  isRefreshing,
+  onRefresh,
+}: {
+  retryPaymentUrl?: string | null
+  retryPaymentState?: BillingSubscription["retryPaymentState"]
+  isRefreshing: boolean
+  onRefresh: () => void
+}) {
+  const { t } = useTranslation()
+  const isSyncing = retryPaymentState === "no_open_invoice"
+  const canPay =
+    Boolean(retryPaymentUrl) &&
+    (retryPaymentState === "available" || retryPaymentState === undefined)
+
+  return (
+    <Alert
+      className={cn(
+        "flex flex-wrap items-center gap-4 rounded-md px-5 py-4 text-foreground",
+        isSyncing ? "bg-muted/30" : "border-destructive/30 bg-destructive/5"
+      )}
+    >
+      <span className={cn("shrink-0", !isSyncing && "text-destructive")}>
+        {isSyncing ? (
+          <Info className="h-5 w-5" />
+        ) : (
+          <AlertCircle className="h-5 w-5" />
+        )}
+      </span>
+      <div className="min-w-0 flex-1 basis-96">
+        <AlertTitle className="mb-1 text-sm font-semibold">
+          {t(
+            isSyncing
+              ? "workspace.billing.paymentFailed.syncingTitle"
+              : "workspace.billing.paymentFailed.title"
+          )}
+        </AlertTitle>
+        <AlertDescription className="text-sm text-muted-foreground">
+          {t(
+            isSyncing
+              ? "workspace.billing.paymentFailed.syncingDescription"
+              : "workspace.billing.paymentFailed.description"
+          )}
+        </AlertDescription>
+        {!isSyncing && (
+          <p className="mt-1 text-xs text-muted-foreground">
+            {t(
+              canPay
+                ? "workspace.billing.paymentFailed.returnHint"
+                : "workspace.billing.paymentFailed.linkUnavailable"
+            )}
+          </p>
+        )}
+      </div>
+      <div className="flex shrink-0 flex-wrap gap-2">
+        {canPay && retryPaymentUrl ? (
+          <a
+            className={buttonVariants()}
+            href={retryPaymentUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {t("workspace.billing.paymentFailed.payNow")}
+            <ExternalLink className="h-4 w-4" />
+          </a>
+        ) : null}
+        <Button
+          variant={canPay || isSyncing ? "outline" : "default"}
+          disabled={isRefreshing}
+          onClick={onRefresh}
+        >
+          <RefreshCw
+            className={cn("h-4 w-4", isRefreshing && "animate-spin")}
+          />
+          {t(
+            isRefreshing
+              ? "workspace.billing.paymentFailed.refreshing"
+              : canPay || isSyncing
+                ? "workspace.billing.paymentFailed.refreshStatus"
+                : "workspace.billing.paymentFailed.retryLink"
+          )}
+        </Button>
+      </div>
+    </Alert>
+  )
+}
 
 export function CheckoutAlert({
   state,

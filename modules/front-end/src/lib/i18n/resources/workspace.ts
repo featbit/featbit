@@ -162,6 +162,25 @@ export const enWorkspace = {
     },
   },
   billing: {
+    paymentFailed: {
+      title: "Payment failed",
+      syncingTitle: "Syncing subscription status",
+      syncingDescription:
+        "No outstanding invoice was found. Subscription status is awaiting confirmation. Please refresh shortly.",
+      description:
+        "We couldn’t collect your latest payment. Please complete payment to settle your invoice.",
+      returnHint: "After paying, return here to refresh your payment status.",
+      linkUnavailable:
+        "The payment link is temporarily unavailable. Please try again.",
+      payNow: "Pay now",
+      refreshStatus: "Refresh status",
+      refreshing: "Refreshing…",
+      retryLink: "Retry payment link",
+      refreshError: "Unable to refresh payment status. Please try again.",
+      confirmed: "Payment confirmed.",
+      stillPending:
+        "Payment has not been confirmed yet. If you have paid, refresh again shortly.",
+    },
     errors: {
       subscriptionTitle: "Failed to load subscription",
       subscriptionDescription:
@@ -251,6 +270,7 @@ export const enWorkspace = {
       amount: "Amount",
       empty: "No invoices yet",
       paid: "Paid",
+      open: "Open",
       pending: "Pending",
       overdue: "Overdue",
       unknown: "Unknown",
@@ -637,6 +657,21 @@ export const zhWorkspace = {
     },
   },
   billing: {
+    paymentFailed: {
+      title: "支付失败",
+      syncingTitle: "订阅状态同步中",
+      syncingDescription: "当前没有待支付账单，订阅状态仍待确认，请稍后刷新。",
+      description: "本期账单未能完成扣款，请前往支付页面完成支付。",
+      returnHint: "支付完成后返回此页面刷新支付状态。",
+      linkUnavailable: "暂时无法获取支付链接，请重试。",
+      payNow: "立即支付",
+      refreshStatus: "刷新支付状态",
+      refreshing: "正在刷新…",
+      retryLink: "重试获取链接",
+      refreshError: "无法刷新支付状态，请重试。",
+      confirmed: "已确认支付成功。",
+      stillPending: "暂未确认支付成功。如果你已支付，请稍后再次刷新。",
+    },
     errors: {
       subscriptionTitle: "加载订阅失败",
       subscriptionDescription:
@@ -724,6 +759,7 @@ export const zhWorkspace = {
       amount: "金额",
       empty: "暂无发票",
       paid: "已支付",
+      open: "待支付",
       pending: "待支付",
       overdue: "已逾期",
       unknown: "未知",
