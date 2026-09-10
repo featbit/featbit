@@ -42,7 +42,7 @@ export type ExperimentRunDetail = {
 }
 
 export type ExperimentMetricsUpdate = {
-  metricId: string
+  metricId?: string
   metricKey: string
   expectedDirection: "increase_good" | "decrease_good"
   guardrails: string

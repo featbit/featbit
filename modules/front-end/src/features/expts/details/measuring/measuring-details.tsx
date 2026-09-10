@@ -196,12 +196,10 @@ function formatNumber(value: number | undefined, percent = false) {
 function AnalysisTable({
   section,
   run,
-  bandit,
   variantNames,
 }: {
   section: AnalysisSection
   run: MeasuringRun
-  bandit: boolean
   variantNames: Record<string, string>
 }) {
   const { t } = useTranslation()
@@ -209,41 +207,17 @@ function AnalysisTable({
   const control = variants[0]
   const valueColumn = analysisValueColumn(section)
   const binary = valueColumn === "rate"
-  const banditRun = normalizedMethod(run.method) === "bandit"
-  const role = (row: AnalysisRow, index: number) => {
-    if (normalizedMethod(run.method) === "bandit")
-      return index === 0
-        ? t("releaseDecision.experiments.detailsPage.measuring.baseline")
-        : t("releaseDecision.experiments.detailsPage.measuring.arm")
-    return row.variant === control
+  const role = (row: AnalysisRow) =>
+    row.variant === control
       ? t("releaseDecision.experiments.detailsPage.measuring.control")
       : t("releaseDecision.experiments.detailsPage.measuring.treatment", {
           number: Math.max(1, variants.indexOf(row.variant)),
         })
-  }
 
   return (
     <div className="overflow-hidden rounded-lg border">
       <Table>
         <TableHeader>
-          {bandit ? (
-            <TableRow className="hover:bg-transparent">
-              <TableHead />
-              <TableHead
-                colSpan={binary ? 3 : 2}
-                className="text-center text-xs"
-              >
-                {t(
-                  "releaseDecision.experiments.detailsPage.measuring.observedPerformance"
-                )}
-              </TableHead>
-              <TableHead colSpan={2} className="text-center text-xs">
-                {t(
-                  "releaseDecision.experiments.detailsPage.measuring.banditRecommendation"
-                )}
-              </TableHead>
-            </TableRow>
-          ) : null}
           <TableRow className="hover:bg-transparent">
             <TableHead>
               {t("releaseDecision.experiments.detailsPage.measuring.variant")}
@@ -257,58 +231,30 @@ function AnalysisTable({
               </TableHead>
             ) : null}
             <TableHead className="text-right">
-              <AnalysisValueHeader
-                column={valueColumn}
-                context={
-                  normalizedMethod(run.method) === "bandit"
-                    ? bandit
-                      ? "banditPrimary"
-                      : "banditGuardrail"
-                    : "bayesian"
-                }
-              />
+              <AnalysisValueHeader column={valueColumn} />
             </TableHead>
-            {bandit ? (
-              <>
-                <TableHead className="text-right">
-                  {t("releaseDecision.experiments.detailsPage.measuring.pBest")}
-                </TableHead>
-                <TableHead className="text-right">
-                  {t(
-                    "releaseDecision.experiments.detailsPage.measuring.recommendedWeight"
-                  )}
-                </TableHead>
-              </>
-            ) : (
-              <>
-                <TableHead className="text-right">
-                  {t(
-                    "releaseDecision.experiments.detailsPage.measuring.relativeLift"
-                  )}
-                </TableHead>
-                <TableHead className="text-right">
-                  {t(
-                    "releaseDecision.experiments.detailsPage.measuring.interval"
-                  )}
-                </TableHead>
-                <TableHead className="text-right">
-                  {t(
-                    "releaseDecision.experiments.detailsPage.measuring.signal"
-                  )}
-                </TableHead>
-              </>
-            )}
+            <TableHead className="text-right">
+              {t(
+                "releaseDecision.experiments.detailsPage.measuring.relativeLift"
+              )}
+            </TableHead>
+            <TableHead className="text-right">
+              {t("releaseDecision.experiments.detailsPage.measuring.interval")}
+            </TableHead>
+            <TableHead className="text-right">
+              {t("releaseDecision.experiments.detailsPage.measuring.signal")}
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {section.rows.map((row, index) => (
+          {section.rows.map((row) => (
             <TableRow key={`${section.label}-${row.variant}`}>
               <TableCell>
                 <span className="font-medium">
                   {variantNames[row.variant] ?? row.variant}
                 </span>
                 <span className="ml-1.5 text-xs text-muted-foreground">
-                  ({role(row, index)})
+                  ({role(row)})
                 </span>
               </TableCell>
               <TableCell className="text-right tabular-nums">{row.n}</TableCell>
@@ -318,50 +264,30 @@ function AnalysisTable({
                 </TableCell>
               ) : null}
               <TableCell className="text-right tabular-nums">
-                {formatNumber(
-                  banditRun && row.n === 0
-                    ? undefined
-                    : binary
-                      ? row.rate
-                      : row.mean,
-                  binary
-                )}
+                {formatNumber(binary ? row.rate : row.mean, binary)}
               </TableCell>
-              {bandit ? (
-                <>
-                  <TableCell className="text-right tabular-nums">
-                    {formatProbability(row.pBest)}
-                  </TableCell>
-                  <TableCell className="text-right tabular-nums">
-                    {formatPercent(row.recommendedWeight)}
-                  </TableCell>
-                </>
-              ) : (
-                <>
-                  <TableCell className="text-right tabular-nums">
-                    {row.variant === control
-                      ? t(
-                          "releaseDecision.experiments.detailsPage.measuring.baselineValue"
-                        )
-                      : formatPercent(row.relDelta)}
-                  </TableCell>
-                  <TableCell className="text-right tabular-nums">
-                    {row.ciLower === undefined || row.ciUpper === undefined
-                      ? "—"
-                      : `${formatPercent(row.ciLower)} – ${formatPercent(row.ciUpper)}`}
-                  </TableCell>
-                  <TableCell
-                    className={cn(
-                      "text-right tabular-nums",
-                      row.variant !== control && analysisSignalClassName(row)
-                    )}
-                  >
-                    {row.signalLabel && row.signal !== undefined
-                      ? `${t(`releaseDecision.experiments.detailsPage.measuring.${row.signalLabel}`)} ${formatProbability(row.signal)}`
-                      : "—"}
-                  </TableCell>
-                </>
-              )}
+              <TableCell className="text-right tabular-nums">
+                {row.variant === control
+                  ? t(
+                      "releaseDecision.experiments.detailsPage.measuring.baselineValue"
+                    )
+                  : formatPercent(row.relDelta)}
+              </TableCell>
+              <TableCell className="text-right tabular-nums">
+                {row.ciLower === undefined || row.ciUpper === undefined
+                  ? "—"
+                  : `${formatPercent(row.ciLower)} – ${formatPercent(row.ciUpper)}`}
+              </TableCell>
+              <TableCell
+                className={cn(
+                  "text-right tabular-nums",
+                  row.variant !== control && analysisSignalClassName(row)
+                )}
+              >
+                {row.signalLabel && row.signal !== undefined
+                  ? `${t(`releaseDecision.experiments.detailsPage.measuring.${row.signalLabel}`)} ${formatProbability(row.signal)}`
+                  : "—"}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -384,21 +310,8 @@ export function FullAnalysis({
 }) {
   const { t, i18n } = useTranslation()
   const analysis = useMemo(
-    () =>
-      parseAnalysis(run.analysisResult, run.inputData, {
-        primaryMetricEvent: run.primaryMetricEvent,
-        primaryMetricType: run.primaryMetricType,
-        primaryMetricAgg: run.primaryMetricAgg,
-        guardrailEvents: run.guardrailEvents,
-      }),
-    [
-      run.analysisResult,
-      run.inputData,
-      run.primaryMetricEvent,
-      run.primaryMetricType,
-      run.primaryMetricAgg,
-      run.guardrailEvents,
-    ]
+    () => parseAnalysis(run.analysisResult),
+    [run.analysisResult]
   )
   const observed = analysis.srm
     ? Object.values(analysis.srm.observed).reduce(
@@ -410,7 +323,6 @@ export function FullAnalysis({
     analysis.primary?.rows.length ||
     analysis.guardrails.some((section) => section.rows.length)
   )
-  const bandit = normalizedMethod(run.method) === "bandit"
 
   return (
     <section className="space-y-3">
@@ -435,31 +347,17 @@ export function FullAnalysis({
             t("releaseDecision.experiments.detailsPage.measuring.notRecorded")
           )}
         </span>
-        {bandit ? (
-          <span>
-            <strong className="font-medium text-foreground">
-              {t("releaseDecision.experiments.detailsPage.measuring.algorithm")}
-              :
-            </strong>{" "}
-            {analysis.algorithm === "thompson_sampling_top_two"
-              ? t(
-                  "releaseDecision.experiments.detailsPage.measuring.algorithms.thompson_sampling_top_two"
-                )
-              : (analysis.algorithm ?? "—")}
-          </span>
-        ) : (
-          <span>
-            <strong className="font-medium text-foreground">
-              {t("releaseDecision.experiments.detailsPage.measuring.prior")}:
-            </strong>{" "}
-            {analysis.prior ??
-              (run.priorProper
-                ? `${run.priorMean ?? 0}, ${run.priorStddev ?? 0.3}`
-                : t(
-                    "releaseDecision.experiments.detailsPage.measuring.flatPrior"
-                  ))}
-          </span>
-        )}
+        <span>
+          <strong className="font-medium text-foreground">
+            {t("releaseDecision.experiments.detailsPage.measuring.prior")}:
+          </strong>{" "}
+          {analysis.prior ??
+            (run.priorProper
+              ? `${run.priorMean ?? 0}, ${run.priorStddev ?? 0.3}`
+              : t(
+                  "releaseDecision.experiments.detailsPage.measuring.flatPrior"
+                ))}
+        </span>
         <span>
           <strong className="font-medium text-foreground">
             {t("releaseDecision.experiments.detailsPage.measuring.dataAsOf")}:
@@ -498,23 +396,14 @@ export function FullAnalysis({
         <div className="flex flex-wrap items-center gap-2 border-b pb-2 text-xs text-muted-foreground">
           <span className="font-medium text-foreground">SRM</span>
           <span>·</span>
-          <span>
-            p=
-            {bandit && observed === 0
-              ? "—"
-              : (analysis.srm.pValue?.toFixed(4) ?? "—")}
-          </span>
+          <span>p={analysis.srm.pValue?.toFixed(4) ?? "—"}</span>
           <span>·</span>
           <span>
-            {bandit && observed === 0
-              ? t(
-                  "releaseDecision.experiments.detailsPage.measuring.notEvaluable"
-                )
-              : analysis.srm.ok
-                ? "ok"
-                : t(
-                    "releaseDecision.experiments.detailsPage.measuring.checkFailed"
-                  )}
+            {analysis.srm.ok
+              ? "ok"
+              : t(
+                  "releaseDecision.experiments.detailsPage.measuring.checkFailed"
+                )}
           </span>
           <span>·</span>
           <span>
@@ -554,65 +443,18 @@ export function FullAnalysis({
             <AnalysisTable
               section={analysis.primary}
               run={run}
-              bandit={bandit}
               variantNames={variantNames}
             />
           ) : null}
-          {!bandit ? (
-            <PosteriorCharts
-              section={analysis.primary}
-              controlVariant={runVariants(run)[0]}
-              variantNames={variantNames}
-            />
-          ) : null}
-          {bandit ? (
-            <div className="flex flex-wrap gap-x-8 gap-y-2 text-xs text-muted-foreground">
-              <span>
-                <strong className="font-medium text-foreground">
-                  {t(
-                    "releaseDecision.experiments.detailsPage.measuring.burnIn"
-                  )}
-                </strong>{" "}
-                ·{" "}
-                {analysis.enoughUnits
-                  ? t("releaseDecision.experiments.detailsPage.measuring.ready")
-                  : t(
-                      "releaseDecision.experiments.detailsPage.measuring.notReady"
-                    )}{" "}
-                {analysis.minimumUnitsPerArm !== undefined ? (
-                  <>
-                    ·{" "}
-                    {t(
-                      "releaseDecision.experiments.detailsPage.measuring.minimumUsers",
-                      { count: analysis.minimumUnitsPerArm }
-                    )}
-                  </>
-                ) : null}
-              </span>
-              <span>
-                <strong className="font-medium text-foreground">
-                  {t(
-                    "releaseDecision.experiments.detailsPage.measuring.stopping"
-                  )}
-                </strong>{" "}
-                ·{" "}
-                {analysis.stopping?.met
-                  ? t("releaseDecision.experiments.detailsPage.measuring.met")
-                  : t(
-                      "releaseDecision.experiments.detailsPage.measuring.notYet"
-                    )}{" "}
-                ·{" "}
-                {t(
-                  "releaseDecision.experiments.detailsPage.measuring.threshold",
-                  { value: formatPercent(analysis.stopping?.threshold) }
-                )}
-              </span>
-            </div>
-          ) : null}
+          <PosteriorCharts
+            section={analysis.primary}
+            controlVariant={runVariants(run)[0]}
+            variantNames={variantNames}
+          />
         </section>
       ) : null}
 
-      {!bandit ? <SampleCheck analysis={analysis} /> : null}
+      <SampleCheck analysis={analysis} />
 
       {analysis.guardrails.map((section, index) => (
         <section
@@ -628,7 +470,6 @@ export function FullAnalysis({
             <AnalysisTable
               section={section}
               run={run}
-              bandit={false}
               variantNames={variantNames}
             />
           ) : (
@@ -664,7 +505,6 @@ function AssignmentSummary({
   )
   const sampling = parseSamplingPlan(run)
   const audienceFilters = parseAudienceFilters(run.audienceFilters)
-  const bandit = normalizedMethod(run.method) === "bandit"
   const start = run.sliceStart ?? 0
   const end = run.sliceEnd ?? 100
   const selectedLayer = layers.find((layer) => layer.key === run.layerKey)
@@ -699,7 +539,7 @@ function AssignmentSummary({
         <section className="space-y-2 py-4">
           <h4 className="text-sm font-medium">
             {t(
-              `releaseDecision.experiments.detailsPage.measuring.${bandit ? "baselineArms" : "controlTreatments"}`
+              "releaseDecision.experiments.detailsPage.measuring.controlTreatments"
             )}
           </h4>
           {ids.length ? (
@@ -711,16 +551,12 @@ function AssignmentSummary({
                 <span className="text-muted-foreground">
                   {index === 0
                     ? t(
-                        `releaseDecision.experiments.detailsPage.measuring.${bandit ? "baseline" : "control"}`
+                        "releaseDecision.experiments.detailsPage.measuring.control"
                       )
-                    : bandit
-                      ? t(
-                          "releaseDecision.experiments.detailsPage.measuring.arm"
-                        )
-                      : t(
-                          "releaseDecision.experiments.detailsPage.measuring.treatment",
-                          { number: index }
-                        )}
+                    : t(
+                        "releaseDecision.experiments.detailsPage.measuring.treatment",
+                        { number: index }
+                      )}
                 </span>
                 <span className="flex min-w-0 items-center gap-2">
                   <span className="min-w-0 break-words">{label(id)}</span>
@@ -790,16 +626,12 @@ function AssignmentSummary({
                 >
                   {index === 0
                     ? t(
-                        `releaseDecision.experiments.detailsPage.measuring.${bandit ? "baseline" : "control"}`
+                        "releaseDecision.experiments.detailsPage.measuring.control"
                       )
-                    : bandit
-                      ? t(
-                          "releaseDecision.experiments.detailsPage.measuring.arm"
-                        )
-                      : t(
-                          "releaseDecision.experiments.detailsPage.measuring.treatment",
-                          { number: index }
-                        )}
+                    : t(
+                        "releaseDecision.experiments.detailsPage.measuring.treatment",
+                        { number: index }
+                      )}
                 </Badge>
               </span>
               <span className="tabular-nums">{sampling[id] ?? 100}%</span>
@@ -1392,12 +1224,12 @@ export function MeasuringDetails({
               </Label>
               <RadioGroup
                 value={newRunMethod}
-                className="grid gap-3 sm:grid-cols-2"
+                className="grid gap-3"
                 onValueChange={(value) =>
                   setNewRunMethod(value as AnalysisMethod)
                 }
               >
-                {(["bayesian_ab", "bandit"] as const).map((method) => (
+                {(["bayesian_ab"] as const).map((method) => (
                   <Label
                     key={method}
                     htmlFor={`new-run-method-${method}`}
@@ -1438,7 +1270,7 @@ export function MeasuringDetails({
               <div className="space-y-1">
                 <h3 className="font-medium">
                   {t(
-                    `releaseDecision.experiments.detailsPage.measuring.${newRunMethod === "bandit" ? "baselineArms" : "controlTreatments"}`
+                    "releaseDecision.experiments.detailsPage.measuring.controlTreatments"
                   )}
                 </h3>
                 <p className="text-xs leading-5 text-muted-foreground">
@@ -1462,7 +1294,7 @@ export function MeasuringDetails({
                   <div className="space-y-3">
                     <Label className="font-normal text-muted-foreground">
                       {t(
-                        `releaseDecision.experiments.detailsPage.measuring.${newRunMethod === "bandit" ? "baseline" : "control"}`
+                        "releaseDecision.experiments.detailsPage.measuring.control"
                       )}
                     </Label>
                     <RadioGroup
@@ -1498,7 +1330,7 @@ export function MeasuringDetails({
                   <div className="space-y-3">
                     <Label className="font-normal text-muted-foreground">
                       {t(
-                        `releaseDecision.experiments.detailsPage.measuring.${newRunMethod === "bandit" ? "arms" : "treatments"}`
+                        "releaseDecision.experiments.detailsPage.measuring.treatments"
                       )}
                     </Label>
                     <div className="max-h-40 space-y-1 overflow-y-auto pr-1">

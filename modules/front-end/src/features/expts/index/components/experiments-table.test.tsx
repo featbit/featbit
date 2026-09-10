@@ -15,7 +15,7 @@ const experiment: ExperimentListRow = {
   featBitProjectKey: "ecommerce",
   featBitEnvId: "env-1",
   runCount: 3,
-  runMethodSummary: "Bayesian + Bandit arms",
+  runMethodSummary: "Bayesian",
   createdAt: "2026-08-20T08:00:00Z",
   updatedAt: "2026-08-29T08:42:00Z",
 }
@@ -43,7 +43,7 @@ describe("ExperimentsTable", () => {
       "/en/experiments/experiment-1"
     )
     expect(screen.getByText("3 runs")).toBeInTheDocument()
-    expect(screen.getByText("Bayesian A/B/n · Bandit")).toBeInTheDocument()
+    expect(screen.getByText("Bayesian A/B/n")).toBeInTheDocument()
     expect(screen.getByText("Measuring")).toBeInTheDocument()
     expect(screen.getByRole("link", { name: "Details" })).toHaveAttribute(
       "href",

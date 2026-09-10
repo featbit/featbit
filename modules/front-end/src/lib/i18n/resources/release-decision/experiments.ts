@@ -36,7 +36,6 @@ export const enExperiments = {
   },
   methods: {
     bayesian: "Bayesian A/B/n",
-    bandit: "Bandit",
   },
   runCount_one: "{{count}} run",
   runCount_other: "{{count}} runs",
@@ -261,10 +260,6 @@ export const enExperiments = {
       showFullRationale: "Show full rationale",
       fullAnalysis: "Full analysis",
       window: "Window",
-      algorithm: "Algorithm",
-      algorithms: {
-        thompson_sampling_top_two: "Posterior sampling (top-two allocation)",
-      },
       prior: "Prior",
       flatPrior: "flat (improper)",
       dataAsOf: "Data as of",
@@ -272,14 +267,11 @@ export const enExperiments = {
       noEvaluableDataHelp:
         "The current analysis does not contain enough valid samples to evaluate a rollout decision.",
       noSamples: "No samples — not evaluable",
-      notEvaluable: "Not evaluable",
       checkFailed: "check failed",
       primaryMetric: "Primary metric",
       guardrail: "Guardrail",
       directionNotRecorded: "Direction not recorded",
       noData: "No data",
-      observedPerformance: "Observed performance",
-      banditRecommendation: "Bandit recommendation",
       variant: "Variant",
       samples: "Samples (n)",
       events: "Events",
@@ -299,22 +291,6 @@ export const enExperiments = {
           "Mean per-user mean = <code>Σ x / n</code>, where each user's <code>x</code> = mean of their event values (AOV-style). You picked “Average values per user”.",
         mean: "Per-user mean = <code>Σ x / n</code>. The Bayesian test compares treatment's mean against control's.",
       },
-      banditValueColumnTooltips: {
-        rate: "Conversion rate = <code>k / n</code>, where <code>k</code> is the number of users who converted and <code>n</code> is the number of analyzed users.",
-        eventsPerUser:
-          "Mean events per user = <code>Σ x / n</code>, where each user's <code>x</code> is the number of events they fired. You picked “Count all” aggregation. This is an event count per user, not a conversion percentage.",
-        valuePerUserSum:
-          "Mean per-user total = <code>Σ x / n</code>, where each user's <code>x</code> is the sum of their event values. You picked “Sum values”.",
-        valuePerUserAverage:
-          "Mean per-user mean = <code>Σ x / n</code>, where each user's <code>x</code> is the mean of their event values. You picked “Average values per user”.",
-        mean: "Per-user mean = <code>Σ x / n</code>, where <code>x</code> is each user's metric value and <code>n</code> is the number of analyzed users.",
-      },
-      banditPrimaryComparisonHelp:
-        "P(best) estimates each arm's chance of having the best primary metric. Recommended weights split allocation between the two strongest arms in each posterior draw, so they can differ from P(best).",
-      banditGuardrailComparisonHelp:
-        "Bandit guardrail check: compare each arm with the baseline. P(harm) estimates the probability of a change in the configured harmful direction; the 95% credible interval describes relative lift. This check does not change the traffic weights recommended from the primary metric.",
-      pBest: "P(best)",
-      recommendedWeight: "Recommended weight",
       relativeLift: "Relative lift",
       posteriorTitle: "Posterior Distribution of Relative Effect (δ)",
       posteriorApproximation:
@@ -330,14 +306,6 @@ export const enExperiments = {
       pHarm: "P(harm)",
       baselineValue: "baseline",
       verdict: "Verdict",
-      burnIn: "Burn-in",
-      ready: "Ready",
-      notReady: "Not ready",
-      minimumUsers: "need ≥{{count}} users per arm",
-      stopping: "Stopping",
-      met: "Met",
-      notYet: "Not yet met",
-      threshold: "threshold {{value}}",
       sampleCheck: "Sample check",
       passed: "Passed",
       belowMinimum: "Below minimum",
@@ -350,12 +318,8 @@ export const enExperiments = {
       editAssignment: "Edit assignment",
       assignmentSubtitle:
         "Configure analysis roles, layer eligibility, and sampling for {{run}}.",
-      baselineArms: "Baseline & Arms",
       controlTreatments: "Control & Treatments",
-      baseline: "Baseline",
       control: "Control",
-      arm: "Arm",
-      arms: "Arms",
       treatment: "Treatment {{number}}",
       treatments: "Treatments",
       rolesHelp:
@@ -403,18 +367,14 @@ export const enExperiments = {
       runDeleted: "Experiment run deleted",
       deleteFailed: "The experiment run could not be deleted.",
       methods: {
-        bandit: "Bandit",
         bayesian_ab: "Bayesian A/B/n",
       },
       methodAllocationTypes: {
         bayesian_ab: "Fixed allocation",
-        bandit: "Dynamic allocation",
       },
       methodDescriptions: {
         bayesian_ab:
           "Use fixed traffic allocation to compare one control against multiple treatment variants.",
-        bandit:
-          "Use multiple arms and reweight traffic toward stronger variants as reward evidence changes.",
       },
 
       decisions: {
@@ -615,7 +575,6 @@ export const zhExperiments = {
   },
   methods: {
     bayesian: "贝叶斯 A/B/n",
-    bandit: "Bandit",
   },
   runCount: "{{count}} 次运行",
   noRuns: "暂无运行",
@@ -823,24 +782,17 @@ export const zhExperiments = {
       showFullRationale: "显示完整说明",
       fullAnalysis: "完整分析",
       window: "窗口",
-      algorithm: "算法",
-      algorithms: {
-        thompson_sampling_top_two: "后验采样（前两名分配）",
-      },
       prior: "先验",
       flatPrior: "平坦（非正规）",
       dataAsOf: "数据截至",
       noEvaluableData: "无可评估数据",
       noEvaluableDataHelp: "当前分析没有足够的有效样本来评估发布决策。",
       noSamples: "无样本 — 不可评估",
-      notEvaluable: "不可评估",
       checkFailed: "检查失败",
       primaryMetric: "主要指标",
       guardrail: "护栏指标",
       directionNotRecorded: "未记录指标方向",
       noData: "无数据",
-      observedPerformance: "观测表现",
-      banditRecommendation: "Bandit 建议",
       variant: "变体",
       samples: "样本数 (n)",
       events: "事件数",
@@ -860,22 +812,6 @@ export const zhExperiments = {
           "用户均值的平均值 = <code>Σ x / n</code>，其中每个用户的 <code>x</code> 为其事件值的平均值（类似 AOV）。你选择了“数值平均”聚合方式。",
         mean: "每用户均值 = <code>Σ x / n</code>。贝叶斯检验比较实验组与对照组的均值。",
       },
-      banditValueColumnTooltips: {
-        rate: "转化率 = <code>k / n</code>，其中 <code>k</code> 是发生转化的用户数，<code>n</code> 是纳入分析的用户数。",
-        eventsPerUser:
-          "每用户平均事件数 = <code>Σ x / n</code>，其中每个用户的 <code>x</code> 为其触发的事件次数。你选择了“统计全部次数”聚合方式。此值表示人均事件次数，不是转化百分比。",
-        valuePerUserSum:
-          "用户总值的平均值 = <code>Σ x / n</code>，其中每个用户的 <code>x</code> 为其所有事件值之和。你选择了“数值求和”聚合方式。",
-        valuePerUserAverage:
-          "用户均值的平均值 = <code>Σ x / n</code>，其中每个用户的 <code>x</code> 为其事件值的平均值。你选择了“数值平均”聚合方式。",
-        mean: "每用户均值 = <code>Σ x / n</code>，其中 <code>x</code> 为每个用户的指标值，<code>n</code> 为纳入分析的用户数。",
-      },
-      banditPrimaryComparisonHelp:
-        "P(最佳) 估计各方案在主指标上最优的概率。建议权重按每次后验抽样中表现最好的两个方案分配，因此可能与 P(最佳) 不同。",
-      banditGuardrailComparisonHelp:
-        "Bandit 护栏检查：比较各候选方案与基线。P(恶化) 表示指标朝所配置的不利方向变化的估计概率；95% 可信区间描述相对提升的范围。护栏检查不会改变根据主指标计算的建议流量权重。",
-      pBest: "P(最佳)",
-      recommendedWeight: "建议权重",
       relativeLift: "相对提升",
       posteriorTitle: "相对效应（δ）的后验分布",
       posteriorApproximation: "正态近似 · 阴影：95% 可信区间",
@@ -889,14 +825,6 @@ export const zhExperiments = {
       pHarm: "P(有害)",
       baselineValue: "基准",
       verdict: "结论",
-      burnIn: "预热",
-      ready: "已就绪",
-      notReady: "未就绪",
-      minimumUsers: "每个分支至少需要 {{count}} 位用户",
-      stopping: "停止条件",
-      met: "已满足",
-      notYet: "尚未满足",
-      threshold: "阈值 {{value}}",
       sampleCheck: "样本检查",
       passed: "通过",
       belowMinimum: "样本量不足",
@@ -908,12 +836,8 @@ export const zhExperiments = {
       copyVariationIdFailed: "无法复制 ID。",
       editAssignment: "编辑分配",
       assignmentSubtitle: "为 {{run}} 配置分析角色、层资格和抽样。",
-      baselineArms: "基准与分支",
       controlTreatments: "对照与处理组",
-      baseline: "基准",
       control: "对照组",
-      arm: "分支",
-      arms: "分支",
       treatment: "处理组 {{number}}",
       treatments: "处理组",
       rolesHelp: "对照组和处理组定义了如何在分析中比较变体。",
@@ -952,15 +876,12 @@ export const zhExperiments = {
       deleting: "正在删除…",
       runDeleted: "实验运行已删除",
       deleteFailed: "无法删除实验运行。",
-      methods: { bandit: "Bandit", bayesian_ab: "贝叶斯 A/B/n" },
+      methods: { bayesian_ab: "贝叶斯 A/B/n" },
       methodAllocationTypes: {
         bayesian_ab: "固定流量分配",
-        bandit: "动态流量分配",
       },
       methodDescriptions: {
         bayesian_ab: "使用固定流量分配，将一个对照变体与多个处理变体进行比较。",
-        bandit:
-          "使用多个分支，并随着奖励依据变化，将流量重新分配给表现更好的变体。",
       },
 
       decisions: {

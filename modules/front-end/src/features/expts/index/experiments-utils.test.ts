@@ -4,11 +4,9 @@ import { experimentMethodKeys, experimentStageDot } from "./experiments-utils"
 describe("experiment list presentation", () => {
   it("normalizes the supported backend run summaries", () => {
     expect(experimentMethodKeys("Bayesian")).toEqual(["bayesian"])
-    expect(experimentMethodKeys("Bandit arms")).toEqual(["bandit"])
-    expect(experimentMethodKeys("Bayesian + Bandit arms")).toEqual([
-      "bayesian",
-      "bandit",
-    ])
+    expect(experimentMethodKeys("BAYESIAN")).toEqual(["bayesian"])
+    expect(experimentMethodKeys(null)).toEqual([])
+    expect(experimentMethodKeys("No runs")).toEqual([])
     expect(experimentMethodKeys("Frequentist")).toEqual([])
   })
 

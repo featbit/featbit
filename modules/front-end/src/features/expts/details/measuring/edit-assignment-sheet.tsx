@@ -41,7 +41,6 @@ import type {
   MeasuringRun,
 } from "./measuring-types"
 import {
-  normalizedMethod,
   parseAudienceFilters,
   parseSamplingPlan,
   runVariants,
@@ -219,10 +218,12 @@ export function EditAssignmentSheet({
       ),
     [variations]
   )
-  const [baseline, setBaseline] = useState(
+  const [control, setControl] = useState(
     configuredVariants[0] ?? available[0] ?? ""
   )
-  const [arms, setArms] = useState<string[]>(configuredVariants.slice(1))
+  const [treatments, setTreatments] = useState<string[]>(
+    configuredVariants.slice(1)
+  )
   const [layerKey, setLayerKey] = useState(run.layerKey ?? "")
   const [assignmentUnit, setAssignmentUnit] = useState(
     run.assignmentUnitSelector ?? "user.keyId"
@@ -242,10 +243,10 @@ export function EditAssignmentSheet({
     parseAudienceFilters(run.audienceFilters)
   )
 
-  const included = [baseline, ...arms].filter(Boolean)
+  const included = [control, ...treatments].filter(Boolean)
   const valid = Boolean(
-    baseline &&
-    arms.length > 0 &&
+    control &&
+    treatments.length > 0 &&
     assignmentUnit.trim() &&
     sliceStart >= 0 &&
     sliceEnd <= 100 &&
@@ -255,10 +256,6 @@ export function EditAssignmentSheet({
         (sampling[variant] ?? 100) >= 0 && (sampling[variant] ?? 100) <= 100
     )
   )
-  const isBandit = normalizedMethod(run.method) === "bandit"
-  const roleTitle = isBandit ? "baselineArms" : "controlTreatments"
-  const primaryRole = isBandit ? "baseline" : "control"
-  const comparisonRoles = isBandit ? "arms" : "treatments"
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -288,7 +285,7 @@ export function EditAssignmentSheet({
               <div className="space-y-1">
                 <h3 className="font-medium">
                   {t(
-                    `releaseDecision.experiments.detailsPage.measuring.${roleTitle}`
+                    "releaseDecision.experiments.detailsPage.measuring.controlTreatments"
                   )}
                 </h3>
                 <p className="text-xs leading-5 text-muted-foreground">
@@ -300,14 +297,14 @@ export function EditAssignmentSheet({
               <div className="space-y-3">
                 <Label className="font-normal text-muted-foreground">
                   {t(
-                    `releaseDecision.experiments.detailsPage.measuring.${primaryRole}`
+                    "releaseDecision.experiments.detailsPage.measuring.control"
                   )}
                 </Label>
                 <RadioGroup
-                  value={baseline}
+                  value={control}
                   onValueChange={(value) => {
-                    setBaseline(value)
-                    setArms((current) =>
+                    setControl(value)
+                    setTreatments((current) =>
                       current.filter((item) => item !== value)
                     )
                   }}
@@ -326,20 +323,20 @@ export function EditAssignmentSheet({
               <div className="space-y-3">
                 <Label className="font-normal text-muted-foreground">
                   {t(
-                    `releaseDecision.experiments.detailsPage.measuring.${comparisonRoles}`
+                    "releaseDecision.experiments.detailsPage.measuring.treatments"
                   )}
                 </Label>
                 {available
-                  .filter((id) => id !== baseline)
+                  .filter((id) => id !== control)
                   .map((id) => (
                     <label
                       key={id}
                       className="flex cursor-pointer items-center gap-2 text-sm"
                     >
                       <Checkbox
-                        checked={arms.includes(id)}
+                        checked={treatments.includes(id)}
                         onCheckedChange={(checked) =>
-                          setArms((current) =>
+                          setTreatments((current) =>
                             checked
                               ? [...new Set([...current, id])]
                               : current.filter((item) => item !== id)
@@ -667,15 +664,15 @@ export function EditAssignmentSheet({
             onClick={() =>
               void onSave({
                 method: run.method,
-                controlVariant: baseline,
-                treatmentVariant: arms.join("|"),
+                controlVariant: control,
+                treatmentVariant: treatments.join("|"),
                 layerKey: layerKey.trim() || null,
                 assignmentUnitSelector: assignmentUnit.trim(),
                 sliceStart,
                 sliceEnd,
                 analysisSamplingPlan: serializeSamplingPlan(
-                  baseline,
-                  arms,
+                  control,
+                  treatments,
                   sampling,
                   Object.fromEntries(
                     variations.map((variation) => [

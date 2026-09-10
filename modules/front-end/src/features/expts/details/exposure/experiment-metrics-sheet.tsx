@@ -56,7 +56,7 @@ type GuardrailRow = {
   direction: GuardrailDirection
 }
 
-type MetricOption = Pick<Metric, "id" | "key" | "name">
+type MetricOption = Pick<SelectedMetric, "id" | "key" | "name">
 
 const METRICS_PAGE_SIZE = 10
 
@@ -66,7 +66,8 @@ function selectedMetricOptions(
 ) {
   const options: Record<string, MetricOption> = {}
   for (const metric of [primary, ...guardrails]) {
-    if (metric?.id) {
+    // Saved experiment metrics can have only a key and fall outside the catalog page.
+    if (metric) {
       options[metric.key] = {
         id: metric.id,
         key: metric.key,

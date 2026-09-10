@@ -18,7 +18,7 @@ export function analysisBlocker(
       run.primaryMetricEvent?.trim() ||
       parsePrimaryMetric(experiment.primaryMetric)?.key
     ) ||
-    (method !== "bayesian_ab" && method !== "bandit") ||
+    method !== "bayesian_ab" ||
     !control ||
     !treatments.length ||
     treatments.includes(control) ||

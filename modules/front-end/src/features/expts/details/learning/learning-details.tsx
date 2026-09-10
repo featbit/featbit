@@ -11,6 +11,7 @@ import type {
   ExperimentRunDetail,
 } from "../experiment-details-types"
 import { EditLearningDialog } from "./edit-learning-dialog"
+import { normalizedMethod } from "../measuring/measuring-utils"
 import {
   hasCapturedLearning,
   LEARNING_FIELDS,
@@ -114,9 +115,9 @@ function RunLearning({ run }: { run: LearningRun }) {
       <div className="flex min-h-13 flex-wrap items-center gap-2 px-4 py-3">
         <h4 className="mr-1 font-mono text-lg font-semibold">{run.slug}</h4>
         <Badge variant="outline" className="font-normal">
-          {run.method === "bandit"
-            ? t("releaseDecision.experiments.methods.bandit")
-            : t("releaseDecision.experiments.methods.bayesian")}
+          {t(
+            `releaseDecision.experiments.detailsPage.measuring.methods.${normalizedMethod(run.method)}`
+          )}
         </Badge>
         <Badge variant="outline" className="gap-2 font-normal">
           <CalendarDays />

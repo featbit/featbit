@@ -66,7 +66,7 @@ describe("LearningDetails", () => {
               id: "run-2",
               slug: "checkout-v2-run-2",
               createdAt: "2026-08-31T11:00:00Z",
-              method: "bandit",
+              method: "bayesian_ab",
               decision: "INCONCLUSIVE",
               whatHappened: "The sample was too small.",
             }),

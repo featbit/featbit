@@ -86,7 +86,7 @@ function numberMap(value: unknown) {
 
 function analysisRow(value: unknown): AnalysisRow | null {
   const row = objectValue(value)
-  const variant = stringValue(row?.variant ?? row?.arm)
+  const variant = stringValue(row?.variant)
   if (!row || !variant) return null
   const pWin = numberValue(row.p_win)
   const pHarm = numberValue(row.p_harm)
@@ -147,77 +147,15 @@ export function analysisValueColumn(section: AnalysisSection) {
 }
 
 export function parseAnalysis(
-  value: string | null | undefined,
-  inputData?: string | null,
-  runMetric?: Pick<
-    MeasuringRun,
-    | "primaryMetricEvent"
-    | "primaryMetricType"
-    | "primaryMetricAgg"
-    | "guardrailEvents"
-  >
+  value: string | null | undefined
 ): ParsedAnalysis {
   const source = parseObject(value)
   if (!source) return { type: "unknown", guardrails: [] }
   const rawType = stringValue(source.type)
+  if (rawType !== "bayesian") return { type: "unknown", guardrails: [] }
   const window = objectValue(source.window)
   const srm = objectValue(source.srm)
   const sample = objectValue(source.sample_check)
-  const thompson = objectValue(source.thompson_sampling)
-  const stopping = objectValue(source.stopping)
-  const banditEvent = stringValue(source.metric)
-  const inputMetrics = objectValue(parseObject(inputData)?.metrics)
-  const banditMetric = objectValue(inputMetrics?.[banditEvent ?? ""])
-  const matchingRunMetric =
-    banditEvent && banditEvent === runMetric?.primaryMetricEvent
-      ? runMetric
-      : undefined
-  // Older Bandit results put numeric means in `rate` and always emit conversions=0.
-  // Prefer the analyzed metric's metadata/input over those ambiguous row fields.
-  const inputRows = Object.values(banditMetric ?? {}).map(objectValue)
-  const banditMetricType =
-    stringValue(source.metric_type) ??
-    (inputRows.some((row) => row && "sum" in row)
-      ? "numeric"
-      : inputRows.some((row) => row && "k" in row)
-        ? "proportion"
-        : matchingRunMetric?.primaryMetricType === "binary"
-          ? "proportion"
-          : (matchingRunMetric?.primaryMetricType ?? undefined))
-  const banditRows = Array.isArray(source.arms)
-    ? source.arms
-        .map(analysisRow)
-        .filter((row): row is AnalysisRow => Boolean(row))
-    : []
-  const recommendations = Array.isArray(thompson?.results)
-    ? new Map(
-        thompson.results.flatMap((item) => {
-          const result = objectValue(item)
-          const arm = stringValue(result?.arm)
-          return arm ? [[arm, result] as const] : []
-        })
-      )
-    : new Map<string, Record<string, unknown>>()
-
-  banditRows.forEach((row) => {
-    if (banditMetricType === "numeric" || banditMetricType === "continuous") {
-      const inputRow = objectValue(banditMetric?.[row.variant])
-      const sum = numberValue(inputRow?.sum)
-      row.mean ??= sum !== undefined ? (row.n > 0 ? sum / row.n : 0) : row.rate
-      row.conversions = undefined
-      row.rate = undefined
-    }
-    const recommendation = recommendations.get(row.variant)
-    // Older results used zero placeholders before burn-in completed.
-    row.pBest =
-      thompson?.enough_units === false
-        ? undefined
-        : numberValue(recommendation?.p_best)
-    row.recommendedWeight =
-      thompson?.enough_units === false
-        ? undefined
-        : numberValue(recommendation?.recommended_weight)
-  })
 
   const guardrails = Array.isArray(source.guardrails)
     ? source.guardrails
@@ -225,40 +163,8 @@ export function parseAnalysis(
         .filter((item): item is AnalysisSection => Boolean(item))
     : []
 
-  if (rawType === "bandit") {
-    let definitions: unknown[] = []
-    try {
-      const parsed: unknown = JSON.parse(runMetric?.guardrailEvents ?? "[]")
-      if (Array.isArray(parsed)) definitions = parsed
-    } catch {
-      /* Missing legacy configuration cannot identify a metric type. */
-    }
-    for (const guardrail of guardrails) {
-      const definition = definitions
-        .map(objectValue)
-        .find(
-          (item) =>
-            item?.event === guardrail.event &&
-            item?.metricAgg === guardrail.metricAgg
-        )
-      // Empty legacy results guessed "numeric". Repair only from the matching
-      // run's declared binary guardrail; aggregation alone does not identify type.
-      if (
-        definition?.metricType === "binary" &&
-        guardrail.rows.every((row) => row.n === 0)
-      ) {
-        guardrail.metricType = "proportion"
-        for (const row of guardrail.rows) {
-          row.conversions = 0
-          row.rate = undefined
-          row.mean = undefined
-        }
-      }
-    }
-  }
-
   return {
-    type: rawType === "bandit" || rawType === "bayesian" ? rawType : "unknown",
+    type: rawType,
     computedAt: stringValue(source.computed_at),
     window: window
       ? {
@@ -266,7 +172,6 @@ export function parseAnalysis(
           end: stringValue(window.end) ?? null,
         }
       : undefined,
-    algorithm: stringValue(source.algorithm),
     prior: stringValue(source.prior),
     srm: srm
       ? {
@@ -282,42 +187,8 @@ export function parseAnalysis(
           variants: numberMap(sample.variants),
         }
       : undefined,
-    primary:
-      rawType === "bandit"
-        ? {
-            label: banditEvent ?? "",
-            event: banditEvent,
-            metricType: banditMetricType,
-            metricAgg:
-              stringValue(source.metric_agg) ??
-              matchingRunMetric?.primaryMetricAgg ??
-              undefined,
-            inverse:
-              typeof source.inverse === "boolean"
-                ? source.inverse
-                : banditMetric
-                  ? banditMetric.inverse === true
-                  : undefined,
-            rows: banditRows,
-          }
-        : section(source.primary_metric),
+    primary: section(source.primary_metric),
     guardrails,
-    enoughUnits:
-      typeof thompson?.enough_units === "boolean"
-        ? thompson.enough_units
-        : undefined,
-    minimumUnitsPerArm:
-      rawType === "bandit"
-        ? (numberValue(thompson?.minimum_units_per_arm) ??
-          (source.algorithm === "thompson_sampling_top_two" ? 100 : undefined))
-        : undefined,
-    stopping: stopping
-      ? {
-          met: typeof stopping.met === "boolean" ? stopping.met : undefined,
-          threshold: numberValue(stopping.threshold),
-          message: stringValue(stopping.message),
-        }
-      : undefined,
   }
 }
 
@@ -365,13 +236,13 @@ export function parseSamplingPlan(run: MeasuringRun) {
 }
 
 export function serializeSamplingPlan(
-  baseline: string,
-  arms: string[],
+  control: string,
+  treatments: string[],
   rates: Record<string, number>,
   labels: Record<string, string>
 ) {
   return JSON.stringify(
-    [baseline, ...arms].filter(Boolean).map((variation, index) => ({
+    [control, ...treatments].filter(Boolean).map((variation, index) => ({
       variation,
       role: index === 0 ? "control" : "treatment",
       includeRate: Math.min(100, Math.max(0, rates[variation] ?? 100)),
@@ -431,7 +302,7 @@ export function serializeAudienceFilters(filters: AudienceFilter[]) {
 }
 
 export function normalizedMethod(method: string | null | undefined) {
-  return method?.trim().toLowerCase() === "bandit" ? "bandit" : "bayesian_ab"
+  return method?.trim().toLowerCase() || "bayesian_ab"
 }
 
 export function normalizedDecision(decision: string | null | undefined) {

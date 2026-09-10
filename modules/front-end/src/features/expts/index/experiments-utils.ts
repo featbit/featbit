@@ -15,9 +15,8 @@ export function formatExperimentDate(value: string, lang: Lang) {
 export function experimentMethodKeys(summary: string | null) {
   if (!summary) return []
   const normalized = summary.toLowerCase()
-  const keys: Array<"bayesian" | "bandit"> = []
+  const keys: Array<"bayesian"> = []
   if (normalized.includes("bayesian")) keys.push("bayesian")
-  if (normalized.includes("bandit")) keys.push("bandit")
   return keys
 }
 

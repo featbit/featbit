@@ -1,6 +1,6 @@
 import type { ExperimentRunDetail } from "../experiment-details-types"
 
-export type AnalysisMethod = "bayesian_ab" | "bandit"
+export type AnalysisMethod = "bayesian_ab"
 
 export type NewRunSetup = {
   method: AnalysisMethod
@@ -70,8 +70,6 @@ export type AnalysisRow = {
   ciUpper?: number
   signalLabel?: "pWin" | "pHarm"
   signal?: number
-  pBest?: number
-  recommendedWeight?: number
 }
 
 export type AnalysisSection = {
@@ -85,10 +83,9 @@ export type AnalysisSection = {
 }
 
 export type ParsedAnalysis = {
-  type: "bandit" | "bayesian" | "unknown"
+  type: "bayesian" | "unknown"
   computedAt?: string
   window?: { start: string | null; end: string | null }
-  algorithm?: string
   prior?: string
   srm?: {
     pValue?: number
@@ -102,9 +99,6 @@ export type ParsedAnalysis = {
   }
   primary?: AnalysisSection
   guardrails: AnalysisSection[]
-  enoughUnits?: boolean
-  minimumUnitsPerArm?: number
-  stopping?: { met?: boolean; threshold?: number; message?: string }
 }
 
 export type AudienceFilter = {

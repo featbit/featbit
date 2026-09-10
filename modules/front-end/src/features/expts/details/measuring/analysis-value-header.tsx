@@ -10,10 +10,8 @@ import type { analysisValueColumn } from "./measuring-utils"
 
 export function AnalysisValueHeader({
   column,
-  context = "bayesian",
 }: {
   column: ReturnType<typeof analysisValueColumn>
-  context?: "bayesian" | "banditPrimary" | "banditGuardrail"
 }) {
   const { t } = useTranslation()
   const helpId = useId()
@@ -37,17 +35,9 @@ export function AnalysisValueHeader({
         <TooltipContent id={helpId} role="tooltip">
           <span className="text-left leading-snug whitespace-normal">
             <Trans
-              i18nKey={`releaseDecision.experiments.detailsPage.measuring.${context === "bayesian" ? "valueColumnTooltips" : "banditValueColumnTooltips"}.${column}`}
+              i18nKey={`releaseDecision.experiments.detailsPage.measuring.valueColumnTooltips.${column}`}
               components={{ code: <code className="font-mono" /> }}
             />
-            {context !== "bayesian" ? (
-              <>
-                {" "}
-                {t(
-                  `releaseDecision.experiments.detailsPage.measuring.${context}ComparisonHelp`
-                )}
-              </>
-            ) : null}
           </span>
         </TooltipContent>
       </Tooltip>

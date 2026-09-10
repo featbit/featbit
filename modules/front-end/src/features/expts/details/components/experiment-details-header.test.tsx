@@ -8,7 +8,7 @@ import { ExperimentDetailsHeader } from "./experiment-details-header"
 const run = (id: string) => ({
   id,
   slug: id,
-  method: "bandit",
+  method: "bayesian_ab",
   decision: "INCONCLUSIVE",
   decisionSummary: null,
   decisionReason: null,

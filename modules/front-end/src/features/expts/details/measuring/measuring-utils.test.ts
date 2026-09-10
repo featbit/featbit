@@ -47,43 +47,6 @@ describe("measuring utils", () => {
     )
   })
 
-  it("limits empty-guardrail compatibility to Bandit and an explicitly binary metric", () => {
-    const guardrail = {
-      event: "purchase",
-      metric_type: "numeric",
-      metric_agg: "once",
-      rows: [{ variant: "control", n: 0, mean: 0 }],
-    }
-    const metadata = {
-      guardrailEvents: JSON.stringify([
-        { event: "purchase", metricType: "binary", metricAgg: "once" },
-      ]),
-    }
-    const bandit = parseAnalysis(
-      JSON.stringify({ type: "bandit", guardrails: [guardrail] }),
-      null,
-      metadata
-    )
-    expect(analysisValueColumn(bandit.guardrails[0])).toBe("rate")
-    const bayesian = parseAnalysis(
-      JSON.stringify({ type: "bayesian", guardrails: [guardrail] }),
-      null,
-      metadata
-    )
-    expect(analysisValueColumn(bayesian.guardrails[0])).toBe("mean")
-    expect(bayesian.guardrails[0].rows[0].mean).toBe(0)
-    const numeric = parseAnalysis(
-      JSON.stringify({ type: "bandit", guardrails: [guardrail] }),
-      null,
-      {
-        guardrailEvents: JSON.stringify([
-          { event: "purchase", metricType: "numeric", metricAgg: "once" },
-        ]),
-      }
-    )
-    expect(analysisValueColumn(numeric.guardrails[0])).toBe("mean")
-  })
-
   it("parses Bayesian evidence without inventing missing values", () => {
     const analysis = parseAnalysis(
       JSON.stringify({
@@ -110,45 +73,21 @@ describe("measuring utils", () => {
     expect(analysis.srm?.observed).toEqual({ easy: 0, hard: 0 })
   })
 
-  it("merges Bandit recommendations into observed arm rows", () => {
-    const analysis = parseAnalysis(
-      JSON.stringify({
-        type: "bandit",
-        metric: "conversion",
-        arms: [{ arm: "easy", n: 12, conversions: 3, rate: 0.25 }],
-        thompson_sampling: {
-          enough_units: true,
-          results: [{ arm: "easy", p_best: 0.8, recommended_weight: 0.7 }],
-        },
-      })
-    )
-
-    expect(analysis.primary?.rows[0]).toMatchObject({
-      variant: "easy",
-      n: 12,
-      pBest: 0.8,
-      recommendedWeight: 0.7,
-    })
-  })
-
   it.each([
     ["count", "eventsPerUser"],
     ["sum", "valuePerUserSum"],
     ["average", "valuePerUserAverage"],
   ])(
-    "preserves a numeric Bandit primary with %s aggregation",
+    "preserves a numeric primary with %s aggregation",
     (aggregation, column) => {
       const analysis = parseAnalysis(
         JSON.stringify({
-          type: "bandit",
-          metric: "engagement",
-          metric_type: "numeric",
-          metric_agg: aggregation,
-          arms: [{ arm: "control", n: 1019, mean: 3182 / 1019 }],
-          thompson_sampling: {
-            results: [
-              { arm: "control", p_best: 0.002, recommended_weight: 0.438 },
-            ],
+          type: "bayesian",
+          primary_metric: {
+            event: "engagement",
+            metric_type: "numeric",
+            metric_agg: aggregation,
+            rows: [{ variant: "control", n: 1019, mean: 3182 / 1019 }],
           },
         })
       )
@@ -157,59 +96,16 @@ describe("measuring utils", () => {
         mean: 3182 / 1019,
         rate: undefined,
         conversions: undefined,
-        pBest: 0.002,
-        recommendedWeight: 0.438,
       })
     }
   )
 
-  it("recovers numeric means from saved Bandit results with binary-shaped rows", () => {
-    const analysis = parseAnalysis(
-      JSON.stringify({
-        type: "bandit",
-        metric: "engagement",
-        arms: [{ arm: "control", n: 1019, conversions: 0, rate: 3182 / 1019 }],
-      }),
-      JSON.stringify({
-        metrics: {
-          engagement: { control: { n: 1019, sum: 3182, sum_squares: 13048 } },
-        },
-      }),
-      {
-        primaryMetricEvent: "engagement",
-        primaryMetricType: "numeric",
-        primaryMetricAgg: "count",
-      }
-    )
-    expect(analysisValueColumn(analysis.primary!)).toBe("eventsPerUser")
-    expect(analysis.primary?.rows[0]).toMatchObject({
-      n: 1019,
-      mean: 3182 / 1019,
-      conversions: undefined,
-      rate: undefined,
-    })
-  })
-
-  it("does not retype a saved analysis using a different newly selected primary metric", () => {
-    const analysis = parseAnalysis(
-      JSON.stringify({
-        type: "bandit",
-        metric: "purchase",
-        arms: [{ arm: "control", n: 200, conversions: 100, rate: 0.5 }],
-      }),
-      undefined,
-      {
-        primaryMetricEvent: "engagement",
-        primaryMetricType: "numeric",
-        primaryMetricAgg: "count",
-      }
-    )
-    expect(analysisValueColumn(analysis.primary!)).toBe("rate")
-    expect(analysis.primary?.rows[0]).toMatchObject({
-      conversions: 100,
-      rate: 0.5,
-    })
-  })
+  it.each([null, "", "invalid", "[]", '{"type":"unknown"}'])(
+    "does not interpret invalid or unsupported analysis: %s",
+    (value) => {
+      expect(parseAnalysis(value)).toEqual({ type: "unknown", guardrails: [] })
+    }
+  )
 
   it("keeps stable run order and assignment fallbacks", () => {
     const older = run({
@@ -229,7 +125,8 @@ describe("measuring utils", () => {
       normal: 100,
       hard: 100,
     })
-    expect(normalizedMethod("bandit")).toBe("bandit")
+    expect(normalizedMethod(" BAYESIAN_AB ")).toBe("bayesian_ab")
+    expect(normalizedMethod(null)).toBe("bayesian_ab")
   })
 
   it("round-trips sampling roles and audience filters using backend shapes", () => {
