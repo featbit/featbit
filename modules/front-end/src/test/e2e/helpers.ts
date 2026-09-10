@@ -238,6 +238,40 @@ async function mockContextEndpointResponses(page: Page) {
 }
 
 async function mockOrganizationAndProjectResponses(page: Page) {
+  // The authenticated SaaS layout loads billing data on every app page.
+  // Feature-specific fixtures can override these defaults after setup.
+  await page.route("**/api/v1/billing/subscription", async (route) => {
+    await route.fulfill({
+      json: {
+        success: true,
+        data: {
+          plan: "Growth",
+          status: "active",
+          retryPaymentState: "not_required",
+          retryPaymentUrl: null,
+          billingCycle: "monthly",
+          mau: 60000,
+          baseMau: 40000,
+          usage: { mau: 18000 },
+          currentPeriodStart: "2026-07-01T00:00:00.000Z",
+          currentPeriodEnd: "2026-08-01T00:00:00.000Z",
+        },
+      },
+    })
+  })
+  await page.route("**/api/v1/billing/current-cycle", async (route) => {
+    await route.fulfill({
+      json: {
+        success: true,
+        data: {
+          mau: 18000,
+          start: "2026-07-01T00:00:00.000Z",
+          end: "2026-08-01T00:00:00.000Z",
+        },
+      },
+    })
+  })
+
   await page.route("**/api/v1/organizations**", async (route) => {
     await route.fulfill({
       json: {
