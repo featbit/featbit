@@ -905,10 +905,18 @@ first look. They are listed so that a missing name is not mistaken for a missing
 
 ### Related work that is out of scope here
 
-Signal **export** is wired and verified, but three deployment-specific pieces are deliberately not
-shipped and are tracked in [`exporting.md` §7](./exporting.md): dashboards, alert rules, and the
-`kubernetes/` manifest wiring for the probe endpoints and OTel environment variables. These are
-choices that depend on the operator's backend, not on FeatBit.
+Signal **export** is wired and verified. Two deployment-specific pieces are deliberately not
+shipped, because they are choices that depend on the operator's backend rather than on FeatBit:
+**dashboards** and **alert rules**. [`exporting.md` §7](./exporting.md) tracks both.
+
+The `kubernetes/` manifests are **not** in that category — they are wired, and the detail is in
+[`exporting.md` §7](./exporting.md). All five service deployments under
+`kubernetes/standard/application/` and `kubernetes/pro/application/` carry `ENABLE_OPENTELEMETRY`,
+`OTEL_SERVICE_NAME`, `OTEL_EXPORTER_OTLP_ENDPOINT`, and `OTEL_EXPORTER_OTLP_PROTOCOL`, with the gate
+set to `"false"` so that applying them changes nothing until an operator deploys a collector and
+flips it. `livenessProbe` and `readinessProbe` are wired against `health/liveness` and
+`health/readiness`. What remains unwired there is narrower than "the manifests": no probe references
+`health/startup` or `health/diagnostics`.
 
 ## Migration: pre-standard → standard
 

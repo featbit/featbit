@@ -114,13 +114,25 @@ The audit above was re-verified against the codebase. Two entries needed amendme
    occupancy is the wrong primary signal, and **blocked writers** is the right one. Changing the
    full-mode is a behavior and capacity decision, not instrumentation.
 
-2. **A Redis transport gap the audit did not cover.** The audit's description of the two Redis
-   paths is correct — API → ELS is Pub/Sub, and ELS → API is a durable list — but a third path
-   exists and is broken. The control plane publishes `featbit-control-plane-web-hooks` through the
-   back-end's Redis producer, which uses `PublishAsync` (Pub/Sub), while the back-end's Redis
-   consumer reads that topic with `ListLeftPopAsync` (list). Under `MqProvider=Redis` those
-   messages are therefore never received. This is a genuine defect rather than an observability
-   gap, and is tracked separately.
+2. **A Redis routing defect the audit did not cover — since fixed.** The audit's description of the
+   two Redis paths is correct — API → ELS is Pub/Sub, and ELS → API is a durable list — but it
+   missed that routing was being chosen by publishing service rather than by destination, which had
+   broken two paths outright. The control plane published `featbit-control-plane-web-hooks` through
+   the back-end's Redis producer, which used `PublishAsync` (Pub/Sub), while the back-end's Redis
+   consumer read that topic with `ListLeftPopAsync` (list), so webhooks never fired under
+   `MqProvider=Redis`. The same mistake then applied to every topic in `ControlPlaneTopics.Consumed`,
+   where it was worse: the control plane received nothing at all, so flag changes never propagated
+   under `MqProvider=Redis` either.
+
+   These were genuine defects rather than observability gaps, and both are fixed in the change that
+   superseded this proposal.
+   [`RedisMessageProducer`](../../../modules/back-end/src/Infrastructure/MQ/Redis/RedisMessageProducer.cs)
+   now routes on `RedisConsumerTopics.IsQueue(topic)` — `RPUSH` for a topic its consumer drains as a
+   list, `PUBLISH` otherwise — and
+   [`RedisConsumerTopics.All`](../../../modules/back-end/src/Infrastructure/MQ/Redis/RedisConsumerTopics.cs)
+   is composed from the same declarations the consumer registrations read, so the routing table
+   cannot drift from them again. Getting this wrong drops messages silently rather than failing, which
+   is why it recurred.
 
 ## 5. Defer for Now
 
