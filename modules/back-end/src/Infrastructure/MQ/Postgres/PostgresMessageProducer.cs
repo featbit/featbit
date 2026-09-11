@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.Json;
 using Dapper;
 using Domain.Messages;
@@ -25,18 +26,21 @@ public partial class PostgresMessageProducer(NpgsqlDataSource dataSource, ILogge
         try
         {
             var jsonMessage = JsonSerializer.Serialize(message, ReusableJsonSerializerOptions.Web);
+            TraceContextPropagation.TryInject(Activity.Current, out var traceParent, out var traceState);
 
             await using var connection = await dataSource.OpenConnectionAsync();
 
             var messageId = await connection.ExecuteScalarAsync<string>(
-                "insert into queue_messages (topic, status, payload) values (@Topic, @Status, @Message) returning id",
+                "insert into queue_messages (topic, status, payload, trace_parent, trace_state) values (@Topic, @Status, @Message, @TraceParent, @TraceState) returning id",
                 new
                 {
                     Topic = topic,
                     Status = isNotificationTopic
                         ? QueueMessageStatus.Notified
                         : QueueMessageStatus.Pending,
-                    Message = jsonMessage
+                    Message = jsonMessage,
+                    TraceParent = traceParent.Length == 0 ? null : traceParent,
+                    TraceState = traceState
                 }
             );
 

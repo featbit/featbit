@@ -192,11 +192,6 @@ alongside the `Microsoft.AspNetCore` and `MongoDB.Driver` scopes.
 
 ## 7. What is not wired up here
 
-- **Cross-service trace context beyond Kafka.** Under `MqProvider=Kafka` a `traceparent` header
-  joins the two halves of a message-queue hop into one trace. Under Redis or Postgres it does not,
-  so a trace still stops at the service boundary — each service's stages stitch together
-  internally, which localizes a stall to a service. See
-  [Known gaps](instruments.md#known-gaps-what-is-deliberately-not-measured).
 - **Dashboards and alerts.** No dashboard JSON or alert rules ship with FeatBit.
   [`instruments.md`](instruments.md) is the source list to build them from.
 - **Kubernetes manifests ship these variables, but disabled.** The five service deployments under

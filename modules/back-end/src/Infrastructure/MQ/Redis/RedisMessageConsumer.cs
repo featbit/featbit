@@ -52,9 +52,12 @@ public partial class RedisMessageConsumer(
 
                     var message = rawMessage.ToString();
 
-                    // Root activity for this message: a consumed message has no ambient activity, so
-                    // without one nothing logged while handling it can be correlated.
-                    using var activity = IngressActivity.StartConsume(topic, MessagingSystems.Redis);
+                    // Root activity for this message. When the payload carries trace context this
+                    // continues the producer's trace; otherwise it starts a new trace as before.
+                    using var activity = IngressActivity.StartConsume(
+                        topic,
+                        MessagingSystems.Redis,
+                        JsonTraceContext.Extract(message));
 
                     using var scope = serviceProvider.CreateScope();
                     var sp = scope.ServiceProvider;

@@ -37,10 +37,35 @@ public class RedisConsumerTopicsTests
     [InlineData(Topics.Insights)]
     [InlineData(Topics.Usage)]
     [InlineData(ControlPlaneTopics.ControlPlaneWebHooks)]
+    [InlineData(ControlPlaneTopics.ControlPlaneFeatureFlagChange)]
+    [InlineData(ControlPlaneTopics.ControlPlaneSegmentChange)]
+    [InlineData(ControlPlaneTopics.ControlPlaneSecretChange)]
+    [InlineData(ControlPlaneTopics.ControlPlaneLicenseChange)]
+    [InlineData(ControlPlaneTopics.ConnectionMade)]
+    [InlineData(ControlPlaneTopics.ConnectionClosed)]
+    [InlineData(ControlPlaneTopics.PodHeartbeat)]
     public void IsQueue_ForEveryListConsumedTopic_ReturnsTrue(string topic)
     {
         Assert.Contains(topic, RedisConsumerTopics.All);
         Assert.True(RedisConsumerTopics.IsQueue(topic));
+    }
+
+    /// <summary>
+    /// The second occurrence of the defect, and the more severe one: the control plane registers
+    /// the back-end's list-based consumer for all seven of these, but they were absent from the
+    /// routing table, so the producer published them to channels nobody subscribed to. The control
+    /// plane received nothing at all and flag changes never propagated under
+    /// <c>MqProvider=Redis</c>.
+    /// </summary>
+    [Fact]
+    public void All_ForEveryTopicTheControlPlaneConsumes_ContainsIt()
+    {
+        Assert.All(
+            ControlPlaneTopics.Consumed,
+            topic => Assert.True(
+                RedisConsumerTopics.IsQueue(topic),
+                $"'{topic}' is drained as a list by the control plane but is produced with PUBLISH, " +
+                "so the message is silently discarded."));
     }
 
     /// <summary>
@@ -52,28 +77,50 @@ public class RedisConsumerTopicsTests
     [InlineData(Topics.FeatureFlagChange)]
     [InlineData(Topics.SegmentChange)]
     [InlineData(ControlPlaneTopics.ControlPlaneCommand)]
-    [InlineData(ControlPlaneTopics.ControlPlaneFeatureFlagChange)]
-    [InlineData(ControlPlaneTopics.ControlPlaneSegmentChange)]
-    [InlineData(ControlPlaneTopics.ControlPlaneSecretChange)]
-    [InlineData(ControlPlaneTopics.ControlPlaneLicenseChange)]
     public void IsQueue_ForAPubSubConsumedTopic_ReturnsFalse(string topic)
     {
         Assert.False(RedisConsumerTopics.IsQueue(topic));
     }
 
     /// <summary>
-    /// The evaluation server subscribes to the pattern <c>featbit-*-change</c>. Any topic routed to
-    /// a list must not match it, or the message would be pushed to a list while a subscriber sat
-    /// waiting on a channel of the same name.
+    /// The evaluation server subscribes to the pattern <c>featbit-*-change</c>, but only
+    /// <i>handles</i> three topics. A topic it handles must never be routed to a list, or the
+    /// message would be pushed somewhere nothing drains while a subscriber sat waiting on a
+    /// channel of the same name.
     /// </summary>
+    /// <remarks>
+    /// This is deliberately phrased against the topics the evaluation server handles rather than
+    /// against the pattern itself. The four <c>featbit-control-plane-*-change</c> topics do match
+    /// the pattern, but the evaluation server has no handler for them — it logs
+    /// <c>No message handler for topic</c> and discards them — so routing them to a list loses
+    /// nothing and removes a spurious delivery. Asserting on the pattern would forbid the correct
+    /// routing for those four, which is how they came to be misrouted in the first place.
+    /// </remarks>
     [Fact]
-    public void All_ForEveryQueueTopic_DoesNotMatchTheEvaluationServerChangePattern()
+    public void All_ForEveryQueueTopic_DoesNotCollideWithATopicTheEvaluationServerHandles()
     {
+        string[] handledByEvaluationServer =
+        [
+            Topics.FeatureFlagChange,
+            Topics.SegmentChange,
+            ControlPlaneTopics.ControlPlaneCommand
+        ];
+
         Assert.All(
             RedisConsumerTopics.All,
-            topic => Assert.False(
-                topic.StartsWith("featbit-", StringComparison.Ordinal) &&
-                topic.EndsWith("-change", StringComparison.Ordinal),
-                $"'{topic}' is drained as a list but also matches the pub/sub pattern featbit-*-change."));
+            topic => Assert.DoesNotContain(topic, handledByEvaluationServer));
+    }
+
+    /// <summary>
+    /// The back-end's own consumer must subscribe to its own topics, not to the union. Handing it
+    /// <see cref="RedisConsumerTopics.All"/> would make it race the control plane for every
+    /// control-plane message and pop messages it has no handler for.
+    /// </summary>
+    [Fact]
+    public void BackEnd_ForEveryTopicTheControlPlaneConsumes_DoesNotContainIt()
+    {
+        Assert.All(
+            ControlPlaneTopics.Consumed,
+            topic => Assert.DoesNotContain(topic, RedisConsumerTopics.BackEnd));
     }
 }

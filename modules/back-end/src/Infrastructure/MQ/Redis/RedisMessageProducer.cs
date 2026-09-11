@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.Json;
 using Domain.Messages;
 using Domain.Observability;
@@ -20,6 +21,7 @@ public partial class RedisMessageProducer(IRedisClient redisClient, ILogger<Redi
         try
         {
             var jsonMessage = JsonSerializer.Serialize(message, ReusableJsonSerializerOptions.Web);
+            jsonMessage = JsonTraceContext.Inject(jsonMessage, Activity.Current);
 
             // Route by how the topic is consumed, not by a single house style. Topics this service
             // drains with LPOP have to be reached with RPUSH; publishing them to a pub/sub channel

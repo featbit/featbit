@@ -19,15 +19,19 @@ namespace Domain.Observability;
 /// broker's header type. <c>shared/Observability</c> is referenced by every module's
 /// <c>Domain</c> project, so taking a dependency on Confluent.Kafka here would push a broker client
 /// into projects that must not have one. Each transport owns the few lines that convert between its
-/// own header representation and these strings.
+/// own representation and these strings — Kafka message headers, two <c>queue_messages</c> columns
+/// under Postgres, and for Redis a pair of payload properties written by
+/// <see cref="JsonTraceContext"/>.
 /// </para>
 /// <para>
 /// <b>Compatible in both directions, which is what makes this safe to roll out.</b> A new producer
-/// against an old consumer is fine — Kafka headers the consumer never reads are ignored. An old
-/// producer against a new consumer is fine too — <see cref="Extract"/> returns
-/// <see langword="default"/> when the header is absent, and a default
+/// against an old consumer is fine — an unread Kafka header, an unselected column, and an unknown
+/// JSON property are all simply ignored. An old producer against a new consumer is fine too —
+/// <see cref="Extract"/> returns <see langword="default"/> when the value is absent, and a default
 /// <see cref="ActivityContext"/> parent means "start a new trace", which is exactly the previous
-/// behavior. There is therefore no ordering requirement on a rolling upgrade.
+/// behavior. There is therefore no ordering requirement on a rolling upgrade. The one genuine
+/// ordering requirement is not in this code: the Postgres columns must exist before a producer that
+/// names them starts writing.
 /// </para>
 /// </remarks>
 public static class TraceContextPropagation

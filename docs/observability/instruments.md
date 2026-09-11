@@ -173,12 +173,11 @@ the loop catches per-connection exceptions and continues.
 `stages{outcome=partial}` is distinct from both success and failure: a fan-out that reached most
 connections is neither, and collapsing it into either hides the only interesting case.
 
-There is deliberately **no end-to-end propagation latency instrument**, even under Kafka where trace
-context now does cross the queue. A metric spanning services would have to be recorded by whichever
-service happens to be last, attributing another service's time to itself; and it would be absent
-under Redis and Postgres, so a dashboard built on it would be right on one transport and empty on
-two. Per-stage timings localize a stall to a service on every deployment, and under Kafka the joined
-trace supplies the end-to-end number for the individual change you are actually looking at.
+There is deliberately **no end-to-end propagation latency instrument**, even though trace context
+now crosses the queue on every transport. A metric spanning services would have to be recorded by
+whichever service happens to be last, attributing another service's time to itself. Per-stage
+timings localize a stall to a service, and the joined trace supplies the end-to-end number for the
+individual change you are actually looking at.
 
 ### Workers and buffers (`WorkerObservability`, `BufferObservability`)
 
@@ -691,9 +690,10 @@ Three rules this section exists to pin:
   counts do not.
 - **A scope disposed without an explicit outcome records `failure`.** Fail-closed, so a missing
   `Succeeded()` call cannot inflate the success rate.
-- **These are separate traces per service, not one end-to-end trace.** The MQ hop carries no trace
-  context, so `change_id` — derived identically on both sides — is what stitches the
-  stages together. This still localizes a stall to a service, which is most of the diagnostic value.
+- **The stages of one change form a single trace across services.** Every transport carries W3C
+  trace context with the message, so the API, control-plane, and ELS stages are genuinely parented
+  rather than merely correlated. `change_id` — derived identically on both sides — then identifies
+  *which* change a stage belongs to when one trace carries several.
 
 The control plane's `relay` stage currently rides the `flag_change` category rather than having one
 of its own. That is deliberate: an operator debugging a stalled flag change wants the API,
@@ -865,7 +865,7 @@ done.**
 | `buffer.bytes` on `UsageTracker` and the ELS Postgres channel | Not built | Shipped for `InsightsTracker` only. The other two are not alike: ELS's `PostgresMessageConsumer` holds `ChannelMessage(string, long)` — a channel name and a row id, **no payload** — so bytes would be a constant multiple of `buffer.items` and carry no information beyond it. `UsageTracker`'s `Channel<UsageRecord>` has no caller holding a serialized form, so measuring it would mean serializing purely for telemetry on the ingest path. For both, `buffer.items` and `buffer.capacity` already answer the question |
 | `oldest_message.age` — MQ backlog | Not built | `messaging.backlog` ships (see [Backlog depth and the background sampler](#backlog-depth-and-the-background-sampler)), so *depth* is answered. Age is not: Redis lists expose no enqueue timestamp without reading the head element, Kafka's committed-offset arithmetic yields a message count rather than a time, and only the Postgres transport has an `enqueued_at` column to read. One transport out of three would give a series absent for reasons an operator cannot see from the metric, which is worse than a consistently absent one |
 | `messaging.redelivered` under Kafka and Redis | Not built | Shipped for Postgres only, where the consumer's poll already increments `deliver_count` on every delivery and the count is readable with no behavior change. Under Kafka and Redis there is genuinely nothing to count — no retry or dead-letter path exists, both Kafka consumers `StoreOffset` in a `finally` regardless of outcome, and the Redis consumer pops before processing — so a message is delivered exactly once or not at all. The absent series means "not applicable to this provider", not zero |
-| A single end-to-end trace across the message queue | Partially built | **Kafka carries trace context**; Redis and Postgres do not. Under `MqProvider=Kafka` a `traceparent` header is written by the producer and adopted by the consumer, so change propagation and data sync join into one trace across the boundary. Under Redis or Postgres the spans still stitch together **within** a service and stop at the queue — Redis has no header concept and would need a payload envelope, where a new producer against an old consumer would silently stop flag propagation, and Postgres would need a nullable column and a migration. `insights.ingest` and `insights.flush` remain **two traces, not a parent/child pair**, under every transport: they are separated by a buffer and a flush cycle, not just by the queue. `change_id` correlates the halves where the trace cannot, which still localizes a stall to a service |
+| A single end-to-end trace across the message queue | **Built**, with one residual | All three transports carry W3C trace context, so change propagation and data sync join into one trace across every service boundary — Kafka in message headers, Postgres in the `queue_messages.trace_parent`/`.trace_state` columns, Redis as sibling properties on the JSON payload. The control plane inherits this automatically, since it registers the back-end's producers and consumers rather than having its own. **The residual is `insights.ingest` and `insights.flush`**, which remain *two traces, not a parent/child pair*, under every transport: they are separated by a buffer and a flush cycle, not just by the queue, so no wire-level propagation can join them. Note also that the Postgres carrier requires `v6.0.0.sql` to have been applied — until it is, the producer's insert fails and is swallowed |
 | Evaluation batch size | Not applicable | `/api/public/featureflag/evaluate` evaluates the flags of one environment for one end user; there is no caller-supplied batch to size. `sync.payload_items` already carries the count where a count exists |
 
 ### Instruments you might expect but will not find

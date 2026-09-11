@@ -3,6 +3,7 @@ using System.Text;
 using Confluent.Kafka;
 using Domain.Observability;
 using Infrastructure.MQ.Kafka;
+using Infrastructure.UnitTests;
 
 namespace Infrastructure.UnitTests.MQ.Kafka;
 
@@ -23,6 +24,7 @@ namespace Infrastructure.UnitTests.MQ.Kafka;
 /// one of them would break flag propagation in a way nothing logs.
 /// </para>
 /// </remarks>
+[Collection(ActivityCorrelationCollection.Name)]
 public class KafkaTraceContextTests
 {
     private const string TestSource = "FeatBit.Tests.KafkaPropagation";

@@ -7,8 +7,9 @@
 > It supersedes [`../proposals/otel-custom-metrics/`](../proposals/otel-custom-metrics/README.md).
 > Everything that proposal called for is implemented, apart from a small number of deliberate
 > exclusions — most notably that **insights ingest and flush are two separate traces rather than
-> one**, because the message queue between their two halves carries no trace context. Each exclusion
-> is listed with its reason in
+> one**. That one is not a propagation gap: the queue carries trace context on every transport, but
+> ingest and flush are separated by a buffer and a batch flush cycle, so one flush span covers many
+> ingests and no single parent exists to attach it to. Each exclusion is listed with its reason in
 > [Known gaps](./instruments.md#known-gaps-what-is-deliberately-not-measured). See also
 > [§8](#8-traces) and [`instruments.md`](./instruments.md#spans).
 >
@@ -261,6 +262,15 @@ Because the two module copies of `ChangeId` must agree byte-for-byte, both asser
 golden value (`2cf611a893f3049b`) for a fixed input. If either copy's hashing, field order, or
 separator drifts, that test fails rather than correlation silently breaking in production.
 
+**What it is for now that trace context crosses the queue.** `change_id` used to be described as the
+join that worked where tracing did not. That is no longer its job, and it never really was a
+wider-coverage fallback: `ActivityCorrelation.SetChangeId` is a no-op when `Activity.Current` is
+null, so it has exactly the same availability constraint as trace propagation. Its real value is the
+one `trace_id` cannot supply — **which** logical change a span or log line belongs to when a single
+trace carries several, as with a bulk flag update or a shared segment fanning out to one message per
+environment. Join on `trace_id` to follow the request; filter on `change_id` to isolate one change
+within it.
+
 ### Trace ID response header
 
 API responses carry the trace ID in an `x-trace-id` header, so a user reporting a problem can quote
@@ -271,29 +281,56 @@ registered by the first middleware in the pipeline, so failed responses carry it
 
 ### Trace context across the message queue
 
-**Kafka carries it; Redis and Postgres do not.** Under `MqProvider=Kafka`, the producer writes the
-W3C `traceparent` (and `tracestate`) into the message headers and the consumer adopts it as the
-ingress activity's parent, so a flag change is **one trace end to end** across services.
+**Every transport carries it.** The producer writes the W3C `traceparent` (and `tracestate`) with
+the message, and the consumer adopts it as the ingress activity's parent, so a flag change is **one
+trace end to end** across services under `MqProvider=Kafka`, `Redis`, or `Postgres` alike. Only the
+carrier differs:
 
-Three properties made this safe to add without a rollout plan:
+| Transport | Carrier |
+|---|---|
+| Kafka | Message headers |
+| Postgres | `queue_messages.trace_parent` / `.trace_state` columns |
+| Redis | Two sibling properties on the JSON payload, written by `JsonTraceContext` |
 
-- **Headers are ignorable in both directions.** An old consumer skips a header it does not know; a
-  new consumer treats an absent header as "no parent" and starts a root span, exactly as before. So
-  producers and consumers can be upgraded in any order.
-- **The message body is untouched.** No envelope, no schema change, nothing for a non-FeatBit
-  consumer of the same topic to trip over.
-- **A malformed header degrades to a root span**, never to an exception on the consume path.
+Three properties make this safe, and they hold for all three carriers:
+
+- **Ignorable in both directions.** An old consumer skips a header, column, or JSON property it does
+  not know; a new consumer treats an absent value as "no parent" and starts a root span, exactly as
+  before. So producers and consumers can be upgraded in any order.
+- **The message stays readable by anything that read it before.** Redis gets *sibling properties*,
+  never an envelope — every handler in the estate reads the payload by property name and
+  `System.Text.Json` ignores unknown properties, so nothing that parses these messages trips over
+  them. Postgres adds columns nothing else selects.
+- **A malformed value degrades to a root span**, never to an exception on the consume path.
   Instrumentation must not be able to stop message delivery.
 
-The other two transports are not comparable in cost. Redis has no header concept at either the list
-or pub/sub layer, so carrying context means an envelope around the payload — and a new producer
-against an old consumer would silently stop flag propagation, which is the worst failure this
-codebase has. Postgres would need a nullable column and a migration in two modules. Both are
-deferred deliberately rather than pending.
+**The control plane is included automatically**, on all three transports: it has no MQ
+implementations of its own and registers the back-end's producers and consumers, so the
+API → control plane → evaluation server chain joins as one trace tree.
 
-Under Redis or Postgres, correlation is **in-process only**: a flag change produces one trace per
-service. `change_id` still joins them, so join on `change_id` first if you want a method that works
-on every deployment — see [`investigating.md` §4](./investigating.md).
+> **One deployment ordering requirement, and it is not in the code.** The Postgres columns must
+> exist before a producer that names them starts writing. Apply
+> `infra/postgresql/docker-entrypoint-initdb.d/v6.0.0.sql` **before** rolling out the new image —
+> scripts there only run automatically on an empty data directory, so an existing database needs it
+> applied by hand. Getting the order wrong was tested rather than reasoned about, and the symptom is
+> deceptive: the API still returns **HTTP 200** and still persists the change, because a publish
+> failure is swallowed and logged, so the caller is told it worked while nothing is enqueued. The
+> producer emits one line; the *consumer* is far louder, retrying in a loop with
+> `42703: column qm.trace_parent does not exist`, which is what you will actually notice first.
+
+**When the control plane is in the path, the evaluation server's span parents to the *control
+plane's* publish span rather than the API's.** This is true on **all three transports** — confirmed
+live on each — and it is the correct shape rather than a limitation: the control plane consumes the
+API's message and republishes a *new* one, so it genuinely is the publisher of the message the
+evaluation server received. The result is still a single tree rooted at the original HTTP request,
+`API → control plane → evaluation server`.
+
+One Redis-only exception runs in the opposite direction. Because the carrier there is a property
+*inside* the payload rather than a header or a column, a control-plane handler that forwards the
+payload verbatim leaves the API's original `traceparent` in place — `JsonTraceContext.Inject` returns
+the string unchanged when it already contains one — so the evaluation server parents straight to the
+API. Handlers that deserialize into typed objects and re-serialize, which the flag-change path does,
+do not preserve it.
 
 ## 6. Logging
 

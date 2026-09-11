@@ -89,9 +89,12 @@ public partial class RedisMessageConsumer : BackgroundService
 
                 message = value.ToString();
 
-                // Root activity for this message: a consumed message has no ambient activity, so
-                // without one nothing logged while handling it can be correlated.
-                using var activity = IngressActivity.StartConsume(topic, MessagingSystems.Redis);
+                // Continue the producer's trace when the payload carried one; otherwise start the
+                // root activity that lets logs from this handler be correlated.
+                using var activity = IngressActivity.StartConsume(
+                    topic,
+                    MessagingSystems.Redis,
+                    JsonTraceContext.Extract(message));
 
                 // M2: defaults to failure, so an exception escaping HandleAsync is recorded even
                 // though it is caught below.

@@ -1,4 +1,5 @@
 using System.Data;
+using System.Runtime.ExceptionServices;
 using System.Threading.Channels;
 using Dapper;
 using Domain.Messages;
@@ -204,10 +205,34 @@ public partial class PostgresMessageConsumer : BackgroundService
                 _observability.Heartbeat();
 
                 var (channel, messageId) = message;
+                _handlers.TryGetValue(channel, out var handler);
 
-                // Root activity for this message: a consumed message has no ambient activity, so
-                // without one nothing logged while handling it can be correlated.
-                using var activity = IngressActivity.StartConsume(channel, MessagingSystems.Postgres);
+                string? payload = null;
+                string? traceParent = null;
+                string? traceState = null;
+                ExceptionDispatchInfo? readFailure = null;
+
+                if (handler is not null)
+                {
+                    try
+                    {
+                        (payload, traceParent, traceState) = await ReadRowAsync(messageId);
+                    }
+                    catch (Exception ex)
+                    {
+                        readFailure = ExceptionDispatchInfo.Capture(ex);
+                    }
+                }
+
+                // The producer's trace context is stored on the queue row, and an activity's
+                // parent is fixed at creation, so the row must be read before the ingress activity
+                // starts. Read failures are carried forward so they are still recorded against the
+                // consume metric and logged under the activity, as they were when the read happened
+                // inline.
+                using var activity = IngressActivity.StartConsume(
+                    channel,
+                    MessagingSystems.Postgres,
+                    TraceContextPropagation.Extract(traceParent, traceState));
 
                 // M2: defaults to failure, so an exception escaping the handler is recorded even though
                 // it is caught below.
@@ -215,7 +240,18 @@ public partial class PostgresMessageConsumer : BackgroundService
 
                 try
                 {
-                    await ConsumeCoreAsync(channel, messageId);
+                    readFailure?.Throw();
+
+                    if (handler is null)
+                    {
+                        MessagingMetrics.Current.RecordUnroutable(MessagingSystems.Postgres, channel);
+                        Log.NoHandlerForChannel(_logger, channel);
+                    }
+                    else if (!string.IsNullOrWhiteSpace(payload))
+                    {
+                        await handler.HandleAsync(payload, stoppingToken);
+                    }
+
                     consume.Succeeded();
                     _observability.Success();
                     Log.MessageHandled(_logger, messageId);
@@ -237,34 +273,15 @@ public partial class PostgresMessageConsumer : BackgroundService
 
         return;
 
-        async Task ConsumeCoreAsync(string channel, long messageId)
+        // ensure the connection is disposed after the payload is retrieved
+        async Task<(string? payload, string? trace_parent, string? trace_state)> ReadRowAsync(long messageId)
         {
-            if (!_handlers.TryGetValue(channel, out var handler))
-            {
-                MessagingMetrics.Current.RecordUnroutable(MessagingSystems.Postgres, channel);
-                Log.NoHandlerForChannel(_logger, channel);
-                return;
-            }
+            await using var connection = await _dataSource.OpenConnectionAsync(stoppingToken);
 
-            var payload = await GetPayloadAsync();
-            if (string.IsNullOrWhiteSpace(payload))
-            {
-                return;
-            }
-
-            await handler.HandleAsync(payload, stoppingToken);
-
-            return;
-
-            // ensure the connection is disposed after the payload is retrieved
-            async Task<string?> GetPayloadAsync()
-            {
-                await using var connection = await _dataSource.OpenConnectionAsync(stoppingToken);
-
-                return await connection.QueryFirstOrDefaultAsync<string>(
-                    "select payload from queue_messages where id = @Id", new { Id = messageId }
-                );
-            }
+            return await connection.QueryFirstOrDefaultAsync<(string? payload, string? trace_parent, string? trace_state)>(
+                "select payload, trace_parent, trace_state from queue_messages where id = @Id",
+                new { Id = messageId }
+            );
         }
     }
 

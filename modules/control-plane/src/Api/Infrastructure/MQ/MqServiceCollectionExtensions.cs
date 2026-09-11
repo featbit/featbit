@@ -89,13 +89,12 @@ public static class MqServiceCollectionExtensions
     public static void AddMq(this IServiceCollection services, IConfiguration configuration)
     {
         var mqProvider = configuration.GetMqProvider();
-        
-        var topics = new[]
-        {
-            ControlPlaneTopics.ControlPlaneFeatureFlagChange, ControlPlaneTopics.ControlPlaneLicenseChange,
-            ControlPlaneTopics.ControlPlaneSecretChange, ControlPlaneTopics.ControlPlaneSegmentChange,
-            ControlPlaneTopics.ConnectionMade, ControlPlaneTopics.ConnectionClosed, ControlPlaneTopics.PodHeartbeat,
-        };
+
+        // Transport-agnostic, and deliberately not a local array: under MqProvider=Redis this same
+        // list is what tells the producer to reach these topics with RPUSH rather than PUBLISH.
+        // A local copy here would drain topics the producer publishes to pub/sub, which delivers
+        // nothing. See RedisConsumerTopics.
+        var topics = ControlPlaneTopics.Consumed;
         
         services.AddKeyedTransient<IMessageHandler, FeatureFlagChangeMessageHandler>(
             ControlPlaneTopics.ControlPlaneFeatureFlagChange);

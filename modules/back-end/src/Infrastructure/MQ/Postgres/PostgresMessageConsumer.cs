@@ -41,7 +41,7 @@ public partial class PostgresMessageConsumer(
              last_deliver_at = now()
          from available_messages am
          where qm.id = am.id
-         returning qm.id, qm.payload, qm.deliver_count
+         returning qm.id, qm.payload, qm.deliver_count, qm.trace_parent, qm.trace_state
          """;
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -103,7 +103,7 @@ public partial class PostgresMessageConsumer(
         }
     }
 
-    private async Task<List<(long id, string payload, int deliver_count)>> PollAsync(
+    private async Task<List<(long id, string payload, int deliver_count, string? trace_parent, string? trace_state)>> PollAsync(
         string topic,
         CancellationToken stoppingToken)
     {
@@ -112,7 +112,7 @@ public partial class PostgresMessageConsumer(
         await using var transaction =
             await connection.BeginTransactionAsync(IsolationLevel.ReadCommitted, stoppingToken);
 
-        var messages = await connection.QueryAsync<(long id, string payload, int deliver_count)>(
+        var messages = await connection.QueryAsync<(long id, string payload, int deliver_count, string? trace_parent, string? trace_state)>(
             FetchSql, new { Topic = topic, BatchSize = PollBatchSize }
         );
 
@@ -131,23 +131,26 @@ public partial class PostgresMessageConsumer(
 
     private async Task HandleMessagesAsync(
         string topic,
-        List<(long id, string payload, int deliver_count)> messages,
+        List<(long id, string payload, int deliver_count, string? trace_parent, string? trace_state)> messages,
         CancellationToken stoppingToken)
     {
         await using var connection = await dataSource.OpenConnectionAsync(stoppingToken);
-        foreach (var (id, payload, _) in messages)
+        foreach (var (id, payload, _, traceParent, traceState) in messages)
         {
-            var error = await HandleAsync(payload);
+            var error = await HandleAsync(payload, traceParent, traceState);
             await MarkAsProcessed(connection, id, error);
         }
 
         return;
 
-        async Task<string> HandleAsync(string payload)
+        async Task<string> HandleAsync(string payload, string? traceParent, string? traceState)
         {
-            // Root activity for this message: a consumed message has no ambient activity, so
-            // without one nothing logged while handling it can be correlated.
-            using var activity = IngressActivity.StartConsume(topic, MessagingSystems.Postgres);
+            // Root activity for this message. When the row carried trace context this continues the
+            // producer's trace across the queue hop; otherwise the message starts its own trace as before.
+            using var activity = IngressActivity.StartConsume(
+                topic,
+                MessagingSystems.Postgres,
+                TraceContextPropagation.Extract(traceParent, traceState));
 
             var handler = scopeFactory.CreateScope()
                 .ServiceProvider

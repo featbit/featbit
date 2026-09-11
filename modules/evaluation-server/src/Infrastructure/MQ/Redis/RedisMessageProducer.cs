@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.Json;
 using Domain.Messages;
 using Domain.Observability;
@@ -19,6 +20,7 @@ public partial class RedisMessageProducer(IRedisClient redisClient, ILogger<Redi
         try
         {
             var jsonMessage = JsonSerializer.Serialize(message, ReusableJsonSerializerOptions.Web);
+            jsonMessage = JsonTraceContext.Inject(jsonMessage, Activity.Current);
 
             // RPush json message to topic list
             await redisClient.GetDatabase().ListRightPushAsync(topic, jsonMessage);

@@ -56,7 +56,7 @@ public static class MqServiceCollectionExtensions
                 var logger = sp.GetRequiredService<ILogger<RedisMessageConsumer>>();
 
                 // Same list the producer routes on, so the two cannot drift apart.
-                return new RedisMessageConsumer(redisClient, sp, logger, RedisConsumerTopics.All);
+                return new RedisMessageConsumer(redisClient, sp, logger, RedisConsumerTopics.BackEnd);
             });
 
             AddBacklogSampler(sp => new RedisBacklogProbe(sp.GetRequiredService<IRedisClient>()));

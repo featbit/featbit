@@ -24,9 +24,19 @@ namespace Domain.Observability;
 /// upgraded for in lockstep. A derived identifier needs no such coordination.
 /// </para>
 /// <para>
-/// It is <b>not</b> a substitute for real trace propagation. It correlates the stages handling one
-/// change; it does not establish parent/child relationships between spans, so the services' traces
-/// remain separate until trace context is carried on the wire.
+/// <b>Its remaining job is to identify a change, not to join services.</b> Trace context is now
+/// carried on the wire by every transport, so spans from the producing and consuming services are
+/// genuinely parented and share a <c>trace_id</c> — that is what joins them. What a
+/// <c>trace_id</c> cannot answer is <i>which</i> logical change a span belongs to when one trace
+/// carries several: a bulk flag update, or a shared segment that fans out to one message per
+/// environment. That is this identifier's purpose.
+/// </para>
+/// <para>
+/// It is not a broader-coverage fallback, and should not be described as one.
+/// <see cref="ActivityCorrelation.SetChangeId"/> is a no-op when <c>Activity.Current</c> is null,
+/// and <see cref="ActivityCorrelation.CurrentChangeId"/> reads it back off that same ambient
+/// activity — so it has exactly the same availability constraint as trace propagation, not a wider
+/// one.
 /// </para>
 /// <para>
 /// The hash is unkeyed by design, since a shared secret would defeat independent derivation. It

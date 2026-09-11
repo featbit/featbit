@@ -16,9 +16,9 @@ a hop from metric to trace to log possible.
 
 | Field | Where it appears | What it joins |
 |---|---|---|
-| `trace_id` | every log record, every span, the `x-trace-id` response header | **one request or message, end to end within a service** |
+| `trace_id` | every log record, every span, the `x-trace-id` response header | **one request or message, end to end across every service it touches** |
 | `span_id` | every log record, every span | one *stage* of that request |
-| `change_id` | flag-change logs and `flag.*` spans | every stage of one flag/segment change |
+| `change_id` | flag-change logs and `flag.*` spans | **which** flag/segment change, when one trace carries several |
 | `connection.id` | every ELS streaming log for one WebSocket | one client connection over its whole lifetime |
 | `service.name` | resource attribute on all three signals | which service emitted it |
 
@@ -28,9 +28,12 @@ Two properties are worth knowing because they change how you search:
   records are always correlatable. Turning custom spans on adds detail; it is not what makes
   correlation work.
 - **`change_id` is derived, not generated.** It is a hash of the change's identity, so the producer
-  and consumer compute the same value independently without the message carrying it. That is what
-  lets you follow a flag change across a service boundary today, since `trace_id` does **not** yet
-  cross the message queue.
+  and consumer compute the same value independently without the message carrying it. It is **not** a
+  fallback for when trace context is missing — `SetChangeId` is a no-op when there is no ambient
+  activity, so it has the same availability constraint as trace propagation. Its job is the one
+  `trace_id` cannot do: telling you **which** logical change a line belongs to when one trace carries
+  several, as with a bulk update or a shared segment fanning out per environment. Join on `trace_id`
+  to follow the request; filter on `change_id` to isolate one change within it.
 
 ---
 
@@ -156,10 +159,15 @@ all the same token hash.
 The same method, across more than one service. Flag propagation is instrumented as **stages**, so
 the question is always *which stage is the last one that succeeded*.
 
-Join on **`change_id`**. Under `MqProvider=Kafka` the two halves also share a `trace_id`, because
-the producer writes a `traceparent` header the consumer adopts — so there the whole change is one
-trace. Under Redis or Postgres no trace context crosses the queue, and `change_id` is the only join
-that works. Using `change_id` first is therefore the method that works on every deployment.
+Join on **`trace_id`**. The producer writes W3C trace context alongside every message and the
+consumer adopts it, on all three transports — Kafka headers, Postgres columns, Redis payload
+properties — so the whole change is **one trace** on every deployment, including through the control
+plane. Then filter on **`change_id`** to isolate a single logical change within that trace, which
+matters when one trace carries several: a bulk update, or a shared segment fanning out per
+environment.
+
+> If the trace stops at a service boundary, that is a finding in itself — see the troubleshooting
+> table in §9. The most likely cause under Postgres is that `v6.0.0.sql` has not been applied.
 
 **Before you start: which delivery path, and was the change scheduled?** Two things change which
 signals are relevant, and both are cheap to check first.
@@ -227,9 +235,10 @@ fanout.failed   = <connections the push failed for>
 `targeted = 0` means ELS believed no client was subscribed — a subscription problem, not a delivery
 problem. `failed > 0` names it as a push problem.
 
-**3. Join the logs across services.** Search every service for the `change_id` from the span. This
-is the step that reaches across the queue hop, and it returns the API-side and ELS-side records for
-the *same* change even under a transport where the two are in different traces.
+**3. Join the logs across services.** Search on the `trace_id` from the span, which now reaches
+across the queue hop on every transport, and filter to one change with `change_id`. If the trace
+genuinely stops at the boundary, see the troubleshooting table in §9 before concluding the message
+was never delivered.
 
 > A shared segment fans out to one message per environment, so the consumer derives a
 > per-environment `change_id` that differs from the producer's. This is intentional and documented
@@ -477,7 +486,8 @@ checker that it has no rule for, which is a FeatBit bug rather than a customer m
 |---|---|---|
 | Log records have empty `Trace ID` / `Span ID` | The record was emitted outside any request — startup, or a background worker loop with no ingress activity | Expected. Correlate background work by `service.name` and worker name instead |
 | No logs at all for a trace on `/health/*` | Health-endpoint request logging is deliberately at `Debug`, so orchestrator polling does not flood the log | Expected. Lower the level, or investigate using the span alone |
-| `trace_id` present but stops at a service boundary | Trace context crosses the queue only under `MqProvider=Kafka`; Redis and Postgres carry none | Join on `change_id` instead — §4 |
+| `trace_id` present but stops at a service boundary | The message flowed but carried no trace context — almost always a **mixed-version fleet**, where a producer predating this change writes none and a new consumer finds none. Absent context is treated as "no parent", so the consumer starts a fresh root trace | Expected during a rolling upgrade; it resolves once producers are upgraded. Meanwhile `change_id` **does** still join the two traces, because both sides derive it independently from the change itself — §4 |
+| A flag toggle returns **HTTP 200** and persists, but never reaches any client, under `MqProvider=Postgres` | Almost certainly `v6.0.0.sql` not applied before the image rolled out. The publish fails, is swallowed, and the caller is told it succeeded. Confirm with `select count(*) from queue_messages` (nothing new) and by grepping the consumer log for `42703: column qm.trace_parent does not exist`, which repeats on a retry loop | Apply `v6.0.0.sql`; it is idempotent. Propagation resumes on the next change — the swallowed ones are lost and must be re-toggled |
 | Hashed tokens do not match across pods | `Observability__RedactionSalt` differs, or is unset (random per process) | Set the same salt everywhere — [`exporting.md` §5](exporting.md) |
 | `featbit_*` metrics absent, others present | `OTEL_DOTNET_AUTO_*_ADDITIONAL_SOURCES` misconfigured | [`exporting.md` §2](exporting.md) |
 | `flag.*` spans absent | Custom traces are off by default | Set `Observability__Traces__Categories` |

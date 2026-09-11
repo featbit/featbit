@@ -43,10 +43,12 @@ public static class IngressActivity
     /// <c>using var</c> at the call site is enough, and a null result makes that a no-op.
     /// </returns>
     /// <remarks>
-    /// Each message gets its own trace. Use the overload taking an
-    /// <see cref="ActivityContext"/> on transports that carry trace context on the wire; the Redis
-    /// and Postgres transports do not, so they call this one and rely on the derived
-    /// <see cref="ChangeId"/> to tie the producing and consuming services together.
+    /// Each message gets its own trace. Every FeatBit transport now carries trace context on the
+    /// wire — Kafka in headers, Postgres in columns, Redis as payload properties — so production
+    /// consume paths call the overload taking an <see cref="ActivityContext"/>. This one remains
+    /// for callers that genuinely have no parent to offer, and is what the other overload degrades
+    /// to when a message carries no context, which is the case for anything produced before trace
+    /// context existed.
     /// </remarks>
     public static Activity? StartConsume(string topic, string system)
         => StartConsume(topic, system, default);
