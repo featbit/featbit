@@ -207,6 +207,11 @@ public partial class PostgresMessageConsumer : BackgroundService
                 var (channel, messageId) = message;
                 _handlers.TryGetValue(channel, out var handler);
 
+                // Telemetry reports the canonical topic, not the physical LISTEN/NOTIFY channel, so
+                // that a consumer's destination reconciles against the producer's. The channel name
+                // is still what the handler lookup and the LISTEN-specific log events use.
+                var destination = Topics.FromChannel(channel);
+
                 string? payload = null;
                 string? traceParent = null;
                 string? traceState = null;
@@ -230,13 +235,13 @@ public partial class PostgresMessageConsumer : BackgroundService
                 // consume metric and logged under the activity, as they were when the read happened
                 // inline.
                 using var activity = IngressActivity.StartConsume(
-                    channel,
+                    destination,
                     MessagingSystems.Postgres,
                     TraceContextPropagation.Extract(traceParent, traceState));
 
                 // M2: defaults to failure, so an exception escaping the handler is recorded even though
                 // it is caught below.
-                using var consume = MessagingMetrics.Current.BeginConsume(MessagingSystems.Postgres, channel);
+                using var consume = MessagingMetrics.Current.BeginConsume(MessagingSystems.Postgres, destination);
 
                 try
                 {
@@ -244,7 +249,7 @@ public partial class PostgresMessageConsumer : BackgroundService
 
                     if (handler is null)
                     {
-                        MessagingMetrics.Current.RecordUnroutable(MessagingSystems.Postgres, channel);
+                        MessagingMetrics.Current.RecordUnroutable(MessagingSystems.Postgres, destination);
                         Log.NoHandlerForChannel(_logger, channel);
                     }
                     else if (!string.IsNullOrWhiteSpace(payload))

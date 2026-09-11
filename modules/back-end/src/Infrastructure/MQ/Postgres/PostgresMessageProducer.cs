@@ -17,7 +17,15 @@ public partial class PostgresMessageProducer(NpgsqlDataSource dataSource, ILogge
 
     public async Task PublishAsync<TMessage>(string topic, TMessage message) where TMessage : class
     {
-        var isNotificationTopic = topic is Topics.FeatureFlagChange or Topics.SegmentChange;
+        // Pub/sub topics must be delivered by pg_notify; anything else is left Pending for the
+        // polling consumer to pick up. The control plane publishes ControlPlaneCommand and the
+        // evaluation server subscribes to it over LISTEN, so omitting it here meant the row was
+        // written as Pending, no notification was ever issued, and — because the consumer's
+        // catch-up sweep only runs on reconnect — the command was never delivered under Postgres
+        // at all, while working normally on Redis and Kafka.
+        var isNotificationTopic = topic is Topics.FeatureFlagChange
+            or Topics.SegmentChange
+            or ControlPlaneTopics.ControlPlaneCommand;
 
         // M2: instrumented at the adapter. The exception below is swallowed (unchanged behavior),
         // so counting the failure here is the only way it becomes visible.

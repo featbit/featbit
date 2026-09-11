@@ -332,6 +332,16 @@ the string unchanged when it already contains one — so the evaluation server p
 API. Handlers that deserialize into typed objects and re-serialize, which the flag-change path does,
 do not preserve it.
 
+**On Kafka, the client library adds spans of its own.** `Confluent.Kafka`'s built-in instrumentation
+emits an extra `<topic> receive` span per consumed message which is a **root** — no parent — and
+carries a **span link** back to the producer, sitting alongside FeatBit's own `mq.consume` span.
+Confirmed live: one control-plane round trip produced 52 link-bearing spans under Kafka and **zero**
+under Redis or Postgres. These are *additional* spans, not replacements — FeatBit's `mq.consume`
+still parents directly to the producing span, and the API → control plane → evaluation server chain
+joins normally. Two consequences when reading a Kafka trace: expect **several roots sharing one
+trace id**, and do **not** read the presence of links as evidence that propagation degraded to
+linkage. On Redis and Postgres a link is genuinely anomalous; on Kafka it is routine.
+
 ## 6. Logging
 
 - **Use source-generated logging.** Every log event in `back-end`, `evaluation-server`, and

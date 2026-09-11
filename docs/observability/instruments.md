@@ -98,6 +98,31 @@ double-count the message.
 `consume_duration` measures **handling only** and never the blocking `Consume()` call — an idle
 topic would otherwise report enormous durations that look identical to a stall.
 
+> **`destination` is the canonical topic on every transport, including Postgres.** The Postgres
+> transport addresses `LISTEN`/`NOTIFY` channels, so `Topics.ToChannel` maps each logical topic onto
+> a channel name — `featbit-feature-flag-change` becomes `featbit_feature_flag_change_channel`. The
+> evaluation server's consumer is driven by channel notifications, so it maps back through
+> `Topics.FromChannel` before tagging telemetry; the channel name is still what the handler lookup
+> and the `LISTEN`-specific log events use. Without that mapping the producer would tag the topic
+> while the consumer tagged the channel, and reconciling `published` against `consumed` on
+> `destination` would yield two one-sided series instead of one matched pair. `FromChannel`
+> deliberately returns an unrecognised channel unchanged rather than throwing the way `ToChannel`
+> does, so an unroutable notification is still recorded — instrumentation must never be able to stop
+> message delivery.
+
+> **The Postgres pub/sub list is a silent-failure trap.** A topic reaches the evaluation server over
+> `LISTEN`/`NOTIFY` only if `PostgresMessageProducer` treats it as a notification topic *and*
+> `Topics.ToChannel` maps it. Miss either and the row is written as `Pending`, no notification is
+> issued, and nothing consumes it — the consumer's catch-up sweep only runs on reconnect, and the
+> polling consumer drains a different topic list entirely. The publish still succeeds and is counted
+> as `enqueued`, so the failure is invisible from the producer's side: a message written, counted,
+> and never delivered. This is exactly how `featbit-control-plane-command` was lost under Postgres
+> while working normally on Redis and Kafka, and it was found by reconciling `published` against
+> `consumed` per destination rather than by any test. The channel names are a hand-maintained
+> cross-module contract — the back end calls `pg_notify` on them, the evaluation server issues
+> `LISTEN` on them, and neither module can reference the other — so both sides pin the literals in
+> `TopicsTests`.
+
 `redelivered` is **Postgres-only, by construction**. The back-end's poll query already increments
 `deliver_count` on every delivery for crash recovery, so the counter reads existing data and costs
 one extra column in the `returning` clause. Kafka and Redis have nothing equivalent to count: both
