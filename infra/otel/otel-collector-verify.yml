@@ -33,6 +33,11 @@ exporters:
     endpoint: 0.0.0.0:8889
     resource_to_telemetry_conversion:
       enabled: true
+    # Required for exemplars to survive the Prometheus path. FeatBit defaults
+    # OTEL_METRICS_EXEMPLAR_FILTER=trace_based, so metric points arrive carrying a trace/span id,
+    # but plain Prometheus exposition has nowhere to put them and silently drops them. OpenMetrics
+    # does. Without this, the metric-to-trace pivot works over OTLP and mysteriously does not here.
+    enable_open_metrics: true
 
 extensions:
   health_check:

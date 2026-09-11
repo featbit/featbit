@@ -69,6 +69,51 @@ names**, or you will turn the custom instruments off.
 For local (non-container) development, [`infra/otel/utils/otel-env-vars.ps1`](../../infra/otel/utils/otel-env-vars.ps1)
 sets the same variables.
 
+### Exemplars: the metric-to-trace pivot
+
+An **exemplar** is a single concrete `trace_id`/`span_id` attached to a metric data point. It is what
+turns "p99 latency spiked at 14:02" into "here is a trace of a request that was slow", without
+guessing at a time window. All three `start.sh` files default:
+
+```bash
+export OTEL_METRICS_EXEMPLAR_FILTER=${OTEL_METRICS_EXEMPLAR_FILTER:-trace_based}
+```
+
+**The auto-instrumentation does not do this on its own.** Verified by running the same workload with
+and without the variable: **0** exemplars across 215 FeatBit metric data points, against 48 carrying
+one afterwards. Without it, metrics join to nothing — `trace_id` links logs to spans and `change_id`
+links across async hops, but a metric points nowhere.
+
+`trace_based` rather than `always_on` means an exemplar is attached only where a *recorded* span is
+in scope, so there is always something to pivot to.
+
+**This does not require FeatBit's own tracing to be on.** That is worth stating plainly, because the
+opposite is easy to assume. With `Observability:Traces:Categories` unset, a measurement taken during
+a request still lands inside the auto-instrumentation's ASP.NET Core server span — which, as §4
+notes, is never gated — so the pivot resolves to the HTTP request. Verified: with FeatBit tracing
+off, an exemplar on `featbit.api.propagation.stage_duration` resolved to the
+`PUT .../feature-flags/{key}/toggle/{status}` server span. Enabling FeatBit categories only makes
+the target finer-grained — from *"the PUT that did this"* to *"the persist stage of that PUT"*:
+
+```
+-> Name: featbit.api.propagation.stage_duration
+   -> stage: Str(persist)      Sum: 51.940100
+   Exemplars:
+   Exemplar #0
+        -> Trace ID: 680ff7deac28cf99ed730db01f7e7f7b
+        -> Span ID:  45ad97c9b5d14c1b      <-- the flag.persist span in that trace
+        -> Value:    51.940100
+```
+
+The cost is a trace id and a span id on data points recorded inside a live span. Set the variable to
+`always_off` to opt out.
+
+**One export trap.** Exemplars survive OTLP, which is how the evidence above was captured. They are
+**not** carried by a plain Prometheus scrape — that requires OpenMetrics exposition
+(`enable_open_metrics: true` on the collector's Prometheus exporter, and a scraper that requests it).
+If your metrics reach Grafana via Prometheus and the exemplar pivot is missing, that is where it was
+dropped, not at the service.
+
 ---
 
 ## 3. The protocol/port trap

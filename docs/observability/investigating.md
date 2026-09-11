@@ -16,7 +16,7 @@ a hop from metric to trace to log possible.
 
 | Field | Where it appears | What it joins |
 |---|---|---|
-| `trace_id` | every log record, every span, the `x-trace-id` response header | **one request or message, end to end across every service it touches** |
+| `trace_id` | every log record, every span, **metric exemplars**, the `x-trace-id` response header | **one request or message, end to end across every service it touches** |
 | `span_id` | every log record, every span | one *stage* of that request |
 | `change_id` | flag-change logs and `flag.*` spans | **which** flag/segment change, when one trace carries several |
 | `connection.id` | every ELS streaming log for one WebSocket | one client connection over its whole lifetime |
@@ -27,6 +27,11 @@ Two properties are worth knowing because they change how you search:
 - **`trace_id` exists even when tracing is "off".** A propagation-only listener always runs, so log
   records are always correlatable. Turning custom spans on adds detail; it is not what makes
   correlation work.
+- **Metrics carry `trace_id` too, via exemplars.** This is the one join that genuinely did not exist
+  before: a metric data point now points at a specific request that produced it, so the
+  metric-to-trace hop is a click rather than an attribute translation plus a time-window guess. It
+  also does not depend on FeatBit tracing being enabled — see
+  [`exporting.md`](exporting.md#exemplars-the-metric-to-trace-pivot).
 - **`change_id` is derived, not generated.** It is a hash of the change's identity, so the producer
   and consumer compute the same value independently without the message carrying it. It is **not** a
   fallback for when trace context is missing — `SetChangeId` is a no-op when there is no ambient
@@ -45,8 +50,11 @@ Two properties are worth knowing because they change how you search:
 x-trace-id: 3fd1150bf71aaafbf9ed4a5dceaed9dd
 ```
 
-**A metric moved.** Start at §3 step 1 — use the metric's attributes to narrow *which* traces to
-look at, then pivot.
+**A metric moved.** If your backend surfaces exemplars, click the data point and jump straight to a
+trace of a request that produced it — that is the whole point of the `trace_based` exemplar filter
+defaulted in `start.sh` (see [`exporting.md`](exporting.md#exemplars-the-metric-to-trace-pivot)).
+If exemplars are not available to you, start at §3 step 1 and use the metric's attributes to narrow
+*which* traces to look at, then pivot.
 
 **You have a log line.** Read its `trace_id`, then fetch every other record with the same value.
 That is usually the fastest single step in this whole document.
@@ -80,7 +88,14 @@ and the pivot works because the span carries **the same attribute vocabulary**:
 
 ### Step 2 — Find a representative trace
 
-Query your tracing backend for the span, filtering on the attributes the metric just gave you:
+**The direct route: exemplars.** Metric data points carry a `trace_id`/`span_id` pointing at a
+request that produced the measurement, so in Grafana (or any backend that renders exemplars) you
+click the spike and land on a real trace. No attribute translation, no guessing at a time window.
+If that works, skip to step 3 with the trace ID it gives you.
+
+**The fallback, when exemplars are unavailable** — for instance when metrics arrive over a plain
+Prometheus scrape without OpenMetrics, which drops them — query your tracing backend for the span,
+filtering on the attributes the metric just gave you:
 
 ```
 name = "streaming.handshake" AND outcome = "rejected" AND reason = "invalid_request"

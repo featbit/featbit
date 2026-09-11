@@ -219,8 +219,11 @@ Requirements:
   the OTLP sink.
 - An always-on `ActivityListener` sampling at `ActivitySamplingResult.PropagationData` guarantees
   that a valid trace ID exists for logs even when no exporter is attached and no span is recorded.
-- Metrics are recorded inside the active activity so that exemplars link metrics to traces once an
-  exporter is configured.
+- Metrics are recorded inside the active activity, and `OTEL_METRICS_EXEMPLAR_FILTER` is defaulted
+  to `trace_based` in `start.sh`, so metric data points carry an **exemplar** — one concrete
+  `trace_id`/`span_id` pointing at a request that produced the measurement. This is what makes the
+  metric-to-trace pivot real rather than notional; see
+  [`exporting.md`](exporting.md#exemplars-the-metric-to-trace-pivot).
 
 ### The correlation listener
 
