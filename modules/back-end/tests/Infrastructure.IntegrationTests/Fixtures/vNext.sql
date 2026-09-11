@@ -1,5 +1,7 @@
 \connect featbit
 
+-- Section 1: Control plane
+
 -- Control plane data center membership leases (Option A consistency).
 -- One row per data center, keyed by dc_id. Mirrors the Mongo "dc_leases" collection.
 CREATE TABLE IF NOT EXISTS dc_leases
@@ -29,45 +31,13 @@ ALTER TABLE segments
     ADD COLUMN committed_version bigint NOT NULL DEFAULT 0,
     ADD COLUMN pending jsonb NULL;
 
-BEGIN;
+-- Section 2: Experimentation
 
--- Prepare the empty legacy tables created by the released test fixtures before
--- applying the current schema. This setup is specific to replaying those fixtures.
-DO $guard$
-DECLARE
-    has_rows boolean;
-BEGIN
-    IF to_regclass('public.experiments') IS NOT NULL
-       AND EXISTS (
-           SELECT 1 FROM information_schema.columns
-           WHERE table_schema = 'public' AND table_name = 'experiments'
-             AND column_name IN ('env_id', 'metric_id', 'feature_flag_id'))
-    THEN
-        EXECUTE 'SELECT EXISTS (SELECT 1 FROM public.experiments)' INTO has_rows;
-        IF has_rows THEN
-            RAISE EXCEPTION 'Refusing to replace non-empty legacy public.experiments';
-        END IF;
-        EXECUTE 'DROP TABLE public.experiments';
-    END IF;
+-- Drop legacy experiment tables before applying the current schema.
+DROP TABLE IF EXISTS experiments;
+DROP TABLE IF EXISTS experiment_metrics;
 
-    IF to_regclass('public.experiment_metrics') IS NOT NULL
-       AND EXISTS (
-           SELECT 1 FROM information_schema.columns
-           WHERE table_schema = 'public' AND table_name = 'experiment_metrics'
-             AND column_name IN ('env_id', 'maintainer_user_id', 'event_name'))
-    THEN
-        EXECUTE 'SELECT EXISTS (SELECT 1 FROM public.experiment_metrics)' INTO has_rows;
-        IF has_rows THEN
-            RAISE EXCEPTION 'Refusing to replace non-empty legacy public.experiment_metrics';
-        END IF;
-        EXECUTE 'DROP TABLE public.experiment_metrics';
-    END IF;
-END
-$guard$;
-
--- Keep the table and index definitions below in sync with
--- .aspire/postgres-init/v6.0.0-experimentation-schema.sql.
-CREATE TABLE IF NOT EXISTS public.experiment_activities (
+CREATE TABLE IF NOT EXISTS experiment_activities (
     id uuid NOT NULL,
     type character varying(128) NOT NULL,
     title character varying(512) NOT NULL,
@@ -81,7 +51,7 @@ CREATE TABLE IF NOT EXISTS public.experiment_activities (
     CONSTRAINT pk_experiment_activities PRIMARY KEY (id)
 );
 
-CREATE TABLE IF NOT EXISTS public.experiment_exposure_events (
+CREATE TABLE IF NOT EXISTS experiment_exposure_events (
     id uuid NOT NULL,
     env_id uuid NOT NULL,
     flag_key character varying(256) NOT NULL,
@@ -94,7 +64,7 @@ CREATE TABLE IF NOT EXISTS public.experiment_exposure_events (
     CONSTRAINT pk_experiment_exposure_events PRIMARY KEY (id)
 );
 
-CREATE TABLE IF NOT EXISTS public.experiment_layers (
+CREATE TABLE IF NOT EXISTS experiment_layers (
     id uuid NOT NULL,
     featbit_env_id uuid NOT NULL,
     name character varying(256) NOT NULL,
@@ -107,7 +77,7 @@ CREATE TABLE IF NOT EXISTS public.experiment_layers (
     CONSTRAINT pk_experiment_layers PRIMARY KEY (id)
 );
 
-CREATE TABLE IF NOT EXISTS public.experiment_metric_events (
+CREATE TABLE IF NOT EXISTS experiment_metric_events (
     id uuid NOT NULL,
     env_id uuid NOT NULL,
     user_key character varying(512) NOT NULL,
@@ -120,7 +90,7 @@ CREATE TABLE IF NOT EXISTS public.experiment_metric_events (
     CONSTRAINT pk_experiment_metric_events PRIMARY KEY (id)
 );
 
-CREATE TABLE IF NOT EXISTS public.experiment_metrics (
+CREATE TABLE IF NOT EXISTS experiment_metrics (
     id uuid NOT NULL,
     featbit_env_id uuid NOT NULL,
     name character varying(256) NOT NULL,
@@ -135,7 +105,7 @@ CREATE TABLE IF NOT EXISTS public.experiment_metrics (
     CONSTRAINT pk_experiment_metrics PRIMARY KEY (id)
 );
 
-CREATE TABLE IF NOT EXISTS public.experiment_run_assignments (
+CREATE TABLE IF NOT EXISTS experiment_run_assignments (
     id uuid NOT NULL,
     run_id uuid NOT NULL,
     env_id uuid NOT NULL,
@@ -159,7 +129,7 @@ CREATE TABLE IF NOT EXISTS public.experiment_run_assignments (
     CONSTRAINT pk_experiment_run_assignments PRIMARY KEY (id)
 );
 
-CREATE TABLE IF NOT EXISTS public.experiment_runs (
+CREATE TABLE IF NOT EXISTS experiment_runs (
     id uuid NOT NULL,
     experiment_id uuid NOT NULL,
     slug character varying(128) NOT NULL,
@@ -210,7 +180,7 @@ CREATE TABLE IF NOT EXISTS public.experiment_runs (
     CONSTRAINT pk_experiment_runs PRIMARY KEY (id)
 );
 
-CREATE TABLE IF NOT EXISTS public.experiments (
+CREATE TABLE IF NOT EXISTS experiments (
     id uuid NOT NULL,
     name character varying(256) NOT NULL,
     description text,
@@ -242,7 +212,7 @@ CREATE TABLE IF NOT EXISTS public.experiments (
     CONSTRAINT pk_experiments PRIMARY KEY (id)
 );
 
-CREATE TABLE IF NOT EXISTS public.mcp_access_token_sessions (
+CREATE TABLE IF NOT EXISTS mcp_access_token_sessions (
     id uuid NOT NULL,
     token_id character varying(128) NOT NULL,
     client_id character varying(256) NOT NULL,
@@ -256,7 +226,7 @@ CREATE TABLE IF NOT EXISTS public.mcp_access_token_sessions (
     CONSTRAINT pk_mcp_access_token_sessions PRIMARY KEY (id)
 );
 
-CREATE TABLE IF NOT EXISTS public.mcp_device_authorizations (
+CREATE TABLE IF NOT EXISTS mcp_device_authorizations (
     id uuid NOT NULL,
     client_id character varying(256) NOT NULL,
     device_code_hash character varying(64) NOT NULL,
@@ -273,7 +243,7 @@ CREATE TABLE IF NOT EXISTS public.mcp_device_authorizations (
     CONSTRAINT pk_mcp_device_authorizations PRIMARY KEY (id)
 );
 
-CREATE TABLE IF NOT EXISTS public.mcp_refresh_authorizations (
+CREATE TABLE IF NOT EXISTS mcp_refresh_authorizations (
     id uuid NOT NULL,
     token_hash character varying(64) NOT NULL,
     client_id character varying(256) NOT NULL,
@@ -289,54 +259,52 @@ CREATE TABLE IF NOT EXISTS public.mcp_refresh_authorizations (
 );
 
 CREATE INDEX IF NOT EXISTS ix_experiment_activities_experiment_id_created_at
-    ON public.experiment_activities (experiment_id, created_at);
+    ON experiment_activities (experiment_id, created_at);
 CREATE INDEX IF NOT EXISTS ix_experiment_exposure_events_env_id_flag_key_exposed_at
-    ON public.experiment_exposure_events (env_id, flag_key, exposed_at);
+    ON experiment_exposure_events (env_id, flag_key, exposed_at);
 CREATE INDEX IF NOT EXISTS ix_experiment_exposure_events_env_id_user_key_exposed_at
-    ON public.experiment_exposure_events (env_id, user_key, exposed_at);
+    ON experiment_exposure_events (env_id, user_key, exposed_at);
 CREATE UNIQUE INDEX IF NOT EXISTS ix_experiment_layers_feat_bit_env_id_key
-    ON public.experiment_layers (featbit_env_id, key);
+    ON experiment_layers (featbit_env_id, key);
 CREATE INDEX IF NOT EXISTS ix_experiment_layers_feat_bit_env_id_status
-    ON public.experiment_layers (featbit_env_id, status);
+    ON experiment_layers (featbit_env_id, status);
 CREATE INDEX IF NOT EXISTS ix_experiment_metric_events_env_id_event_name_occurred_at
-    ON public.experiment_metric_events (env_id, event_name, occurred_at);
+    ON experiment_metric_events (env_id, event_name, occurred_at);
 CREATE INDEX IF NOT EXISTS ix_experiment_metric_events_env_id_event_name_user_key_occurre
-    ON public.experiment_metric_events (env_id, event_name, user_key, occurred_at);
+    ON experiment_metric_events (env_id, event_name, user_key, occurred_at);
 CREATE UNIQUE INDEX IF NOT EXISTS ix_experiment_metrics_feat_bit_env_id_key
-    ON public.experiment_metrics (featbit_env_id, key);
+    ON experiment_metrics (featbit_env_id, key);
 CREATE INDEX IF NOT EXISTS ix_experiment_metrics_feat_bit_env_id_status
-    ON public.experiment_metrics (featbit_env_id, status);
+    ON experiment_metrics (featbit_env_id, status);
 CREATE UNIQUE INDEX IF NOT EXISTS ix_experiment_run_assignments_run_id_allocation_key
-    ON public.experiment_run_assignments (run_id, allocation_key);
+    ON experiment_run_assignments (run_id, allocation_key);
 CREATE INDEX IF NOT EXISTS ix_experiment_run_assignments_run_id_analysis_role
-    ON public.experiment_run_assignments (run_id, analysis_role);
+    ON experiment_run_assignments (run_id, analysis_role);
 CREATE UNIQUE INDEX IF NOT EXISTS ix_experiment_run_assignments_run_id_assignment_unit
-    ON public.experiment_run_assignments (run_id, assignment_unit);
+    ON experiment_run_assignments (run_id, assignment_unit);
 CREATE INDEX IF NOT EXISTS ix_experiment_run_assignments_run_id_role
-    ON public.experiment_run_assignments (run_id, role);
+    ON experiment_run_assignments (run_id, role);
 CREATE UNIQUE INDEX IF NOT EXISTS ix_experiment_runs_experiment_id_slug
-    ON public.experiment_runs (experiment_id, slug);
+    ON experiment_runs (experiment_id, slug);
 CREATE INDEX IF NOT EXISTS ix_experiments_feat_bit_env_id_updated_at
-    ON public.experiments (featbit_env_id, updated_at);
+    ON experiments (featbit_env_id, updated_at);
 CREATE INDEX IF NOT EXISTS ix_experiments_feat_bit_project_key
-    ON public.experiments (featbit_project_key);
+    ON experiments (featbit_project_key);
 CREATE INDEX IF NOT EXISTS ix_experiments_flag_key
-    ON public.experiments (flag_key);
+    ON experiments (flag_key);
 CREATE INDEX IF NOT EXISTS ix_mcp_access_token_sessions_expires_at
-    ON public.mcp_access_token_sessions (expires_at);
+    ON mcp_access_token_sessions (expires_at);
 CREATE INDEX IF NOT EXISTS ix_mcp_access_token_sessions_revoked_at
-    ON public.mcp_access_token_sessions (revoked_at);
+    ON mcp_access_token_sessions (revoked_at);
 CREATE UNIQUE INDEX IF NOT EXISTS ix_mcp_access_token_sessions_token_id
-    ON public.mcp_access_token_sessions (token_id);
+    ON mcp_access_token_sessions (token_id);
 CREATE UNIQUE INDEX IF NOT EXISTS ix_mcp_device_authorizations_device_code_hash
-    ON public.mcp_device_authorizations (device_code_hash);
+    ON mcp_device_authorizations (device_code_hash);
 CREATE INDEX IF NOT EXISTS ix_mcp_device_authorizations_expires_at
-    ON public.mcp_device_authorizations (expires_at);
+    ON mcp_device_authorizations (expires_at);
 CREATE UNIQUE INDEX IF NOT EXISTS ix_mcp_device_authorizations_user_code
-    ON public.mcp_device_authorizations (user_code);
+    ON mcp_device_authorizations (user_code);
 CREATE INDEX IF NOT EXISTS ix_mcp_refresh_authorizations_expires_at
-    ON public.mcp_refresh_authorizations (expires_at);
+    ON mcp_refresh_authorizations (expires_at);
 CREATE UNIQUE INDEX IF NOT EXISTS ix_mcp_refresh_authorizations_token_hash
-    ON public.mcp_refresh_authorizations (token_hash);
-
-COMMIT;
+    ON mcp_refresh_authorizations (token_hash);
