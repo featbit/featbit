@@ -10,10 +10,10 @@ public class ExperimentMetricConfiguration : IEntityTypeConfiguration<Experiment
     {
         builder.ToTable("experiment_metrics");
 
-        builder.HasIndex(x => new { x.FeatBitEnvId, x.Key }).IsUnique();
-        builder.HasIndex(x => new { x.FeatBitEnvId, x.Status });
+        builder.HasIndex(x => new { x.EnvId, x.Key }).IsUnique();
+        builder.HasIndex(x => new { x.EnvId, x.Status });
 
-        builder.Property(x => x.FeatBitEnvId).HasColumnName("featbit_env_id");
+        builder.Property(x => x.EnvId).HasColumnName("env_id");
         builder.Property(x => x.Name).HasMaxLength(256).IsRequired();
         builder.Property(x => x.Key).HasMaxLength(128).IsRequired();
         builder.Property(x => x.MetricType).HasColumnName("metric_type").HasMaxLength(64).IsRequired();

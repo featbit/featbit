@@ -17,6 +17,39 @@ namespace Api.UnitTests.Mcp;
 
 public class FeatureFlagMcpToolsTests
 {
+    [Theory]
+    [InlineData("CONTINUE")]
+    [InlineData("PAUSE")]
+    [InlineData("ROLLBACK")]
+    [InlineData("INCONCLUSIVE")]
+    public async Task LiveMutations_DecisionDoesNotReplaceConfirmation(string decision)
+    {
+        var experimentId = Guid.NewGuid();
+        var envId = Guid.NewGuid();
+        var experiments = new Mock<IExperimentService>();
+        experiments.Setup(x => x.GetEnvIdAsync(experimentId)).ReturnsAsync(envId);
+        experiments.Setup(x => x.GetAsync(envId, experimentId)).ReturnsAsync(new ExperimentDetailVm
+        {
+            ExperimentRuns = [new ExperimentRunVm { Decision = decision }]
+        });
+        var sender = new Mock<ISender>(MockBehavior.Strict);
+        var tools = new FeatureFlagMcpTools(sender.Object, experiments.Object,
+            new HttpContextAccessor { HttpContext = new DefaultHttpContext() }, Mock.Of<IPermissionChecker>(),
+            Mock.Of<ILicenseService>(), Mock.Of<IRequestPermissions>());
+
+        var targetingError = await Assert.ThrowsAsync<BusinessException>(() => tools.UpdateFeatureFlagTargeting(
+            experimentId, "checkout", new FeatureFlagTargetingUpdateRequest
+            {
+                Revision = Guid.NewGuid(), Targeting = CreateTenPercentTreatmentTargeting("control", "treatment")
+            }));
+        var toggleError = await Assert.ThrowsAsync<BusinessException>(() => tools.ToggleFeatureFlag(
+            experimentId, "checkout", new FeatureFlagToggleRequest { IsEnabled = true }));
+
+        Assert.Equal(ErrorCodes.Required("confirmedByUser"), targetingError.Message);
+        Assert.Equal(ErrorCodes.Required("confirmedByUser"), toggleError.Message);
+        Assert.Empty(sender.Invocations);
+    }
+
     [Fact]
     public async Task CreateFeatureFlag_ValidContext_ResolvesEnvironmentAndChecksPermission()
     {

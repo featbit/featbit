@@ -62,7 +62,7 @@ public sealed class FeatBitPostgresFixture : IAsyncLifetime
         await _container.DisposeAsync();
     }
 
-    private static async Task ApplyInitScriptsAsync(string bootstrapConnStr)
+    internal static async Task ApplyInitScriptsAsync(string bootstrapConnStr)
     {
         var scripts = LoadEmbeddedScripts();
 

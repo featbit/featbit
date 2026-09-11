@@ -3,6 +3,7 @@ using Application.Bases.Exceptions;
 using Application.Bases.Models;
 using Application.ExperimentStats;
 using Application.Experiments;
+using Application.Experiments.ExperimentMetrics;
 using Application.Services;
 using Application.Users;
 using Domain.FeatureFlags;
@@ -10,6 +11,7 @@ using Domain.Experiments;
 using Domain.Users;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using System.Text.RegularExpressions;
 using System.Text.Json;
 
 namespace Infrastructure.Services.MongoDb;
@@ -25,12 +27,6 @@ public class ExperimentService(
 {
     private const double GuardrailHealthyHarmProbability = 0.01;
     private const double GuardrailAlarmHarmProbability = 0.95;
-    private static readonly HashSet<string> ActiveRunStatuses = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "draft",
-        "collecting",
-        "analyzing"
-    };
 
     public async Task<ExperimentVm> CreateAsync(Experiment experiment)
     {
@@ -47,7 +43,7 @@ public class ExperimentService(
     public async Task<ExperimentDetailVm> GetAsync(Guid envId, Guid id)
     {
         var experiment = await mongoDb.CollectionOf<Experiment>()
-            .Find(x => x.Id == id && x.FeatBitEnvId == envId)
+            .Find(x => x.Id == id && x.EnvId == envId)
             .FirstOrDefaultAsync();
 
         if (experiment == null)
@@ -71,7 +67,7 @@ public class ExperimentService(
     {
         var envId = await mongoDb.CollectionOf<Experiment>()
             .Find(x => x.Id == id)
-            .Project(x => x.FeatBitEnvId)
+            .Project(x => x.EnvId)
             .FirstOrDefaultAsync();
 
         if (!envId.HasValue)
@@ -85,7 +81,7 @@ public class ExperimentService(
     public async Task DeleteAsync(Guid envId, Guid id)
     {
         var result = await mongoDb.CollectionOf<Experiment>()
-            .DeleteOneAsync(x => x.Id == id && x.FeatBitEnvId == envId);
+            .DeleteOneAsync(x => x.Id == id && x.EnvId == envId);
 
         if (result.DeletedCount == 0)
         {
@@ -131,7 +127,7 @@ public class ExperimentService(
         SetIfNotNull(updates, x => x.EntryMode, update.EntryMode);
 
         await mongoDb.CollectionOf<Experiment>().UpdateOneAsync(
-            x => x.Id == id && x.FeatBitEnvId == envId,
+            x => x.Id == id && x.EnvId == envId,
             Builders<Experiment>.Update.Combine(updates));
 
         return await GetAsync(envId, id);
@@ -156,12 +152,15 @@ public class ExperimentService(
         var updatedAt = DateTime.UtcNow;
         var primaryMetric = await ResolveMetricAsync(envId, update.MetricId, Normalize(update.MetricKey, update.MetricEvent));
         experiment.PrimaryMetric = BuildPrimaryMetricJson(primaryMetric, update.ExpectedDirection);
-        experiment.Guardrails = await BuildGuardrailsJsonAsync(envId, update.Guardrails);
+        experiment.Guardrails = await BuildGuardrailsJsonAsync(envId, update.Guardrails, primaryMetric);
         experiment.UpdatedAt = updatedAt;
 
-        await mongoDb.CollectionOf<Experiment>().ReplaceOneAsync(
-            x => x.Id == id && x.FeatBitEnvId == envId,
-            experiment);
+        await mongoDb.CollectionOf<Experiment>().UpdateOneAsync(
+            x => x.Id == id && x.EnvId == envId,
+            Builders<Experiment>.Update
+                .Set(x => x.PrimaryMetric, experiment.PrimaryMetric)
+                .Set(x => x.Guardrails, experiment.Guardrails)
+                .Set(x => x.UpdatedAt, updatedAt));
 
         var latestRun = await mongoDb.CollectionOf<ExperimentRun>()
             .Find(x => x.ExperimentId == id)
@@ -195,22 +194,12 @@ public class ExperimentService(
             .ToListAsync();
 
         var previous = existingRuns.LastOrDefault();
-        var usedSlugs = existingRuns.Select(x => x.Slug).ToHashSet(StringComparer.OrdinalIgnoreCase);
-        var number = existingRuns.Count + 1;
-        var slug = $"run-{number}";
-        while (usedSlugs.Contains(slug))
-        {
-            number++;
-            slug = $"run-{number}";
-        }
 
         var now = DateTime.UtcNow;
         var run = new ExperimentRun
         {
             Id = Guid.NewGuid(),
             ExperimentId = id,
-            Slug = slug,
-            Status = "draft",
             Method = previous?.Method ?? "bayesian_ab",
             MethodReason = previous?.MethodReason,
             PrimaryMetricEvent = previous?.PrimaryMetricEvent,
@@ -224,7 +213,7 @@ public class ExperimentService(
             TrafficPercent = previous?.TrafficPercent ?? 100,
             TrafficOffset = previous?.TrafficOffset ?? 0,
             LayerId = previous?.LayerId,
-            LayerKey = previous?.LayerKey ?? previous?.LayerId,
+            LayerKey = previous?.LayerKey,
             AllocationKeySelector = previous?.AllocationKeySelector ?? "user.keyId",
             SliceStart = previous?.SliceStart ?? previous?.TrafficOffset ?? 0,
             SliceEnd = previous?.SliceEnd ?? Math.Min(100, (previous?.TrafficOffset ?? 0) + (previous?.TrafficPercent ?? 100)),
@@ -237,6 +226,7 @@ public class ExperimentService(
             PriorProper = previous?.PriorProper ?? false,
             PriorMean = previous?.PriorMean,
             PriorStddev = previous?.PriorStddev,
+            ObservationStart = now,
             CreatedAt = now,
             UpdatedAt = now
         };
@@ -244,21 +234,67 @@ public class ExperimentService(
         HydrateRunMetricConfig(run, experiment);
         await AlignRunVariantsAsync(envId, experiment, run, inferMissing: true);
 
+        await NormalizeAndValidateLayerAssignmentAsync(envId, run);
+        var number = await AllocateRunNumberAsync(envId, experiment, existingRuns);
+        run.Slug = $"run-{number}";
         await mongoDb.CollectionOf<ExperimentRun>().InsertOneAsync(run);
         await PersistExperimentAsync(envId, experiment);
         await AddActivityAsync(
             id,
             "note",
-            $"New experiment run created: {slug}",
+            $"{ExperimentRunNumber.CreationTitlePrefix}{run.Slug}",
             previous == null ? "Empty template" : $"Copied config from {previous.Slug}",
             now);
 
         return await GetAsync(envId, id);
     }
 
+    private async Task<long> AllocateRunNumberAsync(
+        Guid envId, Experiment experiment, IReadOnlyCollection<ExperimentRun> existingRuns)
+    {
+        await InitializeRunNumberAsync(envId, experiment, existingRuns.Select(x => x.Slug));
+        var experiments = mongoDb.CollectionOf<Experiment>();
+        var filter = Builders<Experiment>.Filter.Where(x => x.Id == experiment.Id && x.EnvId == envId);
+
+        // Reserve on the experiment document, independently of run deletion or insertion.
+        var allocated = await experiments.FindOneAndUpdateAsync(
+            filter,
+            Builders<Experiment>.Update.Inc(x => x.LastRunNumber, 1L),
+            new FindOneAndUpdateOptions<Experiment> { ReturnDocument = ReturnDocument.After });
+
+        return allocated?.LastRunNumber
+            ?? throw new EntityNotFoundException(nameof(Experiment), $"{envId}-{experiment.Id}");
+    }
+
+    private async Task InitializeRunNumberAsync(
+        Guid envId, Experiment experiment, IEnumerable<string>? existingSlugs = null)
+    {
+        if (experiment.LastRunNumber.HasValue)
+        {
+            return;
+        }
+
+        existingSlugs ??= await mongoDb.CollectionOf<ExperimentRun>()
+            .Find(x => x.ExperimentId == experiment.Id)
+            .Project(x => x.Slug)
+            .ToListAsync();
+        var creationTitles = await mongoDb.CollectionOf<ExperimentActivity>()
+            .Find(x => x.ExperimentId == experiment.Id && x.Type == "note" &&
+                       x.Title.StartsWith(ExperimentRunNumber.CreationTitlePrefix))
+            .Project(x => x.Title)
+            .ToListAsync();
+        var lastUsed = ExperimentRunNumber.LastUsed(existingSlugs, creationTitles);
+
+        // Seed before either creation or deletion, even when legacy creation activities are absent.
+        // $max handles null/missing counters without lowering a concurrent allocation.
+        await mongoDb.CollectionOf<Experiment>().UpdateOneAsync(
+            x => x.Id == experiment.Id && x.EnvId == envId,
+            Builders<Experiment>.Update.Max(x => x.LastRunNumber, lastUsed));
+    }
+
     public async Task<ExperimentDetailVm> DeleteRunAsync(Guid envId, Guid id, Guid runId)
     {
-        await EnsureExperimentExistsAsync(envId, id);
+        var experiment = await GetExperimentAsync(envId, id);
 
         var run = await mongoDb.CollectionOf<ExperimentRun>()
             .Find(x => x.Id == runId && x.ExperimentId == id)
@@ -268,6 +304,7 @@ public class ExperimentService(
             throw new EntityNotFoundException(nameof(ExperimentRun), $"{id}-{runId}");
         }
 
+        await InitializeRunNumberAsync(envId, experiment);
         await mongoDb.CollectionOf<ExperimentRun>().DeleteOneAsync(x => x.Id == runId && x.ExperimentId == id);
         await AddActivityAsync(id, "note", $"Experiment run deleted: {run.Slug}");
         return await GetAsync(envId, id);
@@ -320,8 +357,8 @@ public class ExperimentService(
 
         run.TrafficPercent = Math.Clamp(update.TrafficPercent ?? sliceEnd - sliceStart, 1, 100);
         run.TrafficOffset = (int)Math.Clamp(update.TrafficOffset ?? Math.Floor(sliceStart), 0, 99);
-        run.LayerId = Normalize(update.LayerId);
-        run.LayerKey = Normalize(update.LayerKey, Normalize(update.LayerId, run.LayerKey));
+        run.LayerId = update.LayerId;
+        run.LayerKey = Normalize(update.LayerKey, run.LayerKey);
         run.AllocationKeySelector = Normalize(update.AllocationKeySelector, run.AllocationKeySelector) ?? "user.keyId";
         run.SliceStart = sliceStart;
         run.SliceEnd = sliceEnd;
@@ -334,7 +371,7 @@ public class ExperimentService(
         run.LayerTrafficPercent = Math.Clamp(sliceEnd - sliceStart, 0d, 100d);
         run.AnalysisSamplingPlan = Normalize(update.AnalysisSamplingPlan);
         run.AudienceFilters = Normalize(update.AudienceFilters);
-        run.Method = update.Method == "bandit" ? "bandit" : "bayesian_ab";
+        run.Method = Normalize(update.Method, run.Method);
         await NormalizeAndValidateLayerAssignmentAsync(envId, run);
         run.UpdatedAt = DateTime.UtcNow;
 
@@ -352,11 +389,17 @@ public class ExperimentService(
         ExperimentRunObservationWindowUpdate update)
     {
         update ??= new ExperimentRunObservationWindowUpdate();
+        if (!update.ObservationStart.HasValue)
+        {
+            throw new BusinessException(ErrorCodes.Required("observationStart"));
+        }
+
         await EnsureExperimentExistsAsync(envId, id);
 
         var run = await GetRunAsync(id, runId);
         run.ObservationStart = update.ObservationStart;
         run.ObservationEnd = update.ObservationEnd;
+        await NormalizeAndValidateLayerAssignmentAsync(envId, run);
         run.UpdatedAt = DateTime.UtcNow;
 
         await mongoDb.CollectionOf<ExperimentRun>().ReplaceOneAsync(
@@ -397,7 +440,7 @@ public class ExperimentService(
         }
 
         var now = DateTime.UtcNow;
-        var start = run.ObservationStart ?? now.AddDays(-30);
+        var start = ExperimentRunAllocation.ObservationStart(run);
         var end = run.ObservationEnd ?? now;
         var startDate = DateOnly.FromDateTime(start).ToString("yyyy-MM-dd");
         var endDate = DateOnly.FromDateTime(end).ToString("yyyy-MM-dd");
@@ -418,7 +461,7 @@ public class ExperimentService(
             MetricAgg = metricAgg,
             TrafficPercent = run.TrafficPercent,
             TrafficOffset = run.TrafficOffset,
-            LayerId = run.LayerId,
+            LayerId = run.LayerId?.ToString("D"),
             ControlVariant = run.ControlVariant,
             TreatmentVariants = run.TreatmentVariant,
             LayerKey = run.LayerKey,
@@ -461,7 +504,7 @@ public class ExperimentService(
                 MetricAgg = guardrail.MetricAgg,
                 TrafficPercent = run.TrafficPercent,
                 TrafficOffset = run.TrafficOffset,
-                LayerId = run.LayerId,
+                LayerId = run.LayerId?.ToString("D"),
                 ControlVariant = run.ControlVariant,
                 TreatmentVariants = run.TreatmentVariant,
                 LayerKey = run.LayerKey,
@@ -494,15 +537,12 @@ public class ExperimentService(
             primaryMetricData,
             control,
             treatments);
-        var analysisResult = run.Method == "bandit"
-            ? BuildBanditAnalysisJson(run, primaryMetricEvent, metrics, analysisControl, analysisTreatments)
-            : BuildBayesianAnalysisJson(run, experiment.Name ?? id.ToString(), primaryMetricEvent, metricAgg, metrics, guardrails, analysisControl, analysisTreatments);
+        var analysisResult = BuildBayesianAnalysisJson(
+            run, experiment.Name ?? id.ToString(), primaryMetricEvent, metricAgg,
+            metrics, guardrails, analysisControl, analysisTreatments);
 
         run.InputData = inputData;
         run.AnalysisResult = analysisResult;
-        run.Status = variants.Length == 0 || variants.All(x => x.Users == 0)
-            ? "collecting"
-            : "analyzing";
         run.UpdatedAt = DateTime.UtcNow;
 
         await PersistExperimentAsync(envId, experiment);
@@ -519,6 +559,80 @@ public class ExperimentService(
         return await GetAsync(envId, id);
     }
 
+    public async Task<IReadOnlyCollection<ExperimentRunForLayer>> GetExperimentRunsByLayersAsync(
+        Guid envId,
+        IReadOnlyCollection<ExperimentLayer> layers)
+    {
+        ArgumentNullException.ThrowIfNull(layers);
+        if (layers.Count == 0)
+        {
+            return [];
+        }
+
+        var layerIds = layers.Select(x => (Guid?)x.Id).ToArray();
+        var layerKeys = layers.Select(x => x.Key).ToArray();
+        var runBuilder = Builders<ExperimentRun>.Filter;
+        var runs = await mongoDb.CollectionOf<ExperimentRun>()
+            .Find(runBuilder.Or(
+                runBuilder.In(x => x.LayerId, layerIds),
+                runBuilder.In(x => x.LayerKey, layerKeys)))
+            .ToListAsync();
+        if (runs.Count == 0)
+        {
+            return [];
+        }
+
+        var experimentIds = runs.Select(x => x.ExperimentId).Distinct().ToArray();
+        var experiments = await mongoDb.CollectionOf<Experiment>()
+            .Find(x => experimentIds.Contains(x.Id) && x.EnvId == envId)
+            .ToListAsync();
+        var experimentNames = experiments.ToDictionary(x => x.Id, x => x.Name);
+
+        return runs
+            .Where(x => experimentNames.ContainsKey(x.ExperimentId))
+            .Select(run => new ExperimentRunForLayer
+            {
+                Run = run,
+                ExperimentName = experimentNames[run.ExperimentId]
+            })
+            .ToArray();
+    }
+
+    public async Task<IReadOnlyCollection<ExperimentWithRuns>> GetExperimentsWithRunsAsync(
+        Guid envId,
+        string? nameSearchText = null)
+    {
+        var builder = Builders<Experiment>.Filter;
+        var experimentFilter = builder.Eq(x => x.EnvId, envId);
+        if (!string.IsNullOrWhiteSpace(nameSearchText))
+        {
+            var search = new BsonRegularExpression(Regex.Escape(nameSearchText.Trim()), "i");
+            experimentFilter &= builder.Regex(x => x.Name, search);
+        }
+
+        var experiments = await mongoDb.CollectionOf<Experiment>()
+            .Find(experimentFilter)
+            .ToListAsync();
+        if (experiments.Count == 0)
+        {
+            return [];
+        }
+
+        var experimentIds = experiments.Select(x => x.Id).ToArray();
+        var runs = await mongoDb.CollectionOf<ExperimentRun>()
+            .Find(x => experimentIds.Contains(x.ExperimentId))
+            .ToListAsync();
+        var runsByExperiment = runs.ToLookup(x => x.ExperimentId);
+
+        return experiments
+            .Select(experiment => new ExperimentWithRuns
+            {
+                Experiment = experiment,
+                Runs = runsByExperiment[experiment.Id].ToArray()
+            })
+            .ToArray();
+    }
+
     public async Task<PagedResult<ExperimentVm>> GetListAsync(
         Guid envId,
         ExperimentFilter filter)
@@ -528,7 +642,7 @@ public class ExperimentService(
         var builder = Builders<Experiment>.Filter;
         var filters = new List<FilterDefinition<Experiment>>
         {
-            builder.Eq(x => x.FeatBitEnvId, envId)
+            builder.Eq(x => x.EnvId, envId)
         };
 
         if (!string.IsNullOrWhiteSpace(filter.Name))
@@ -567,28 +681,42 @@ public class ExperimentService(
             experiments.Select(experiment => ToVm(experiment, runLookup)).ToArray());
     }
 
-    private async Task<Dictionary<Guid, string[]>> BuildRunLookupAsync(Guid[] experimentIds)
+    private async Task<Dictionary<Guid, ExperimentRun[]>> BuildRunLookupAsync(Guid[] experimentIds)
     {
         if (experimentIds.Length == 0)
         {
-            return new Dictionary<Guid, string[]>();
+            return new Dictionary<Guid, ExperimentRun[]>();
         }
 
         return (await mongoDb.CollectionOf<ExperimentRun>()
                 .Find(x => experimentIds.Contains(x.ExperimentId))
-                .Project(x => new { x.ExperimentId, x.Method })
+                .Project(x => new ExperimentRun
+                {
+                    Id = x.Id,
+                    ExperimentId = x.ExperimentId,
+                    Method = x.Method,
+                    CreatedAt = x.CreatedAt,
+                    ObservationStart = x.ObservationStart,
+                    ObservationEnd = x.ObservationEnd,
+                    Decision = x.Decision,
+                    WhatChanged = x.WhatChanged,
+                    WhatHappened = x.WhatHappened,
+                    ConfirmedOrRefuted = x.ConfirmedOrRefuted,
+                    WhyItHappened = x.WhyItHappened,
+                    NextHypothesis = x.NextHypothesis
+                })
                 .ToListAsync())
             .GroupBy(x => x.ExperimentId)
-            .ToDictionary(x => x.Key, x => x.Select(run => run.Method).ToArray());
+            .ToDictionary(x => x.Key, x => x.ToArray());
     }
 
     private static ExperimentVm ToVm(
         Experiment experiment,
-        IReadOnlyDictionary<Guid, string[]>? runLookup = null)
+        IReadOnlyDictionary<Guid, ExperimentRun[]>? runLookup = null)
     {
-        var methods = runLookup != null && runLookup.TryGetValue(experiment.Id, out var lookupMethods)
-            ? lookupMethods
-            : experiment.ExperimentRuns.Select(x => x.Method).ToArray();
+        var runs = runLookup != null && runLookup.TryGetValue(experiment.Id, out var lookupRuns)
+            ? lookupRuns
+            : experiment.ExperimentRuns.ToArray();
 
         return new ExperimentVm
         {
@@ -597,33 +725,18 @@ public class ExperimentService(
             Description = experiment.Description,
             Stage = experiment.Stage,
             FlagKey = experiment.FlagKey,
-            FeatBitProjectKey = experiment.FeatBitProjectKey,
-            FeatBitEnvId = experiment.FeatBitEnvId,
-            RunCount = methods.Length,
-            RunMethodSummary = BuildRunMethodSummary(methods),
+            FeatBitProjectKey = experiment.ProjectKey,
+            FeatBitEnvId = experiment.EnvId,
+            RunCount = runs.Length,
+            RunMethodSummary = BuildRunMethodSummary(runs.Select(run => run.Method)),
+            StateSummary = ExperimentListStateSummaryVm.From(experiment.LastLearning, runs),
             CreatedAt = experiment.CreatedAt,
             UpdatedAt = experiment.UpdatedAt
         };
     }
 
-    private static string BuildRunMethodSummary(IEnumerable<string> methods)
-    {
-        var normalized = methods.ToArray();
-        if (normalized.Length == 0)
-        {
-            return "No runs";
-        }
-
-        var hasBandit = normalized.Any(method => method == "bandit");
-        var hasBayesian = normalized.Any(method => method != "bandit");
-
-        return (hasBayesian, hasBandit) switch
-        {
-            (true, true) => "Bayesian + Bandit arms",
-            (false, true) => "Bandit arms",
-            _ => "Bayesian"
-        };
-    }
+    private static string BuildRunMethodSummary(IEnumerable<string> methods) =>
+        methods.Any() ? "Bayesian" : "No runs";
 
     private static ExperimentDetailVm ToDetailVm(Experiment experiment)
     {
@@ -634,8 +747,8 @@ public class ExperimentService(
             Description = experiment.Description,
             Stage = experiment.Stage,
             FlagKey = experiment.FlagKey,
-            FeatBitProjectKey = experiment.FeatBitProjectKey,
-            FeatBitEnvId = experiment.FeatBitEnvId,
+            FeatBitProjectKey = experiment.ProjectKey,
+            FeatBitEnvId = experiment.EnvId,
             Hypothesis = experiment.Hypothesis,
             AccessToken = experiment.AccessToken,
             Change = experiment.Change,
@@ -682,7 +795,6 @@ public class ExperimentService(
             Id = run.Id,
             ExperimentId = run.ExperimentId,
             Slug = run.Slug,
-            Status = run.Status,
             Hypothesis = run.Hypothesis,
             Method = run.Method,
             MethodReason = run.MethodReason,
@@ -709,7 +821,6 @@ public class ExperimentService(
             ConfirmedOrRefuted = run.ConfirmedOrRefuted,
             WhyItHappened = run.WhyItHappened,
             NextHypothesis = run.NextHypothesis,
-            RunId = run.RunId,
             PrimaryMetricAgg = run.PrimaryMetricAgg,
             PrimaryMetricType = run.PrimaryMetricType,
             TrafficPercent = run.TrafficPercent,
@@ -811,7 +922,10 @@ public class ExperimentService(
             return;
         }
 
+        // Named defaults must not replace roles explicitly selected for this run.
         if (inferMissing &&
+            string.IsNullOrWhiteSpace(run.ControlVariant) &&
+            string.IsNullOrWhiteSpace(run.TreatmentVariant) &&
             TryResolveNamedControlAndTreatments(variations, out var namedControl, out var namedTreatments))
         {
             run.ControlVariant = namedControl;
@@ -959,7 +1073,6 @@ public class ExperimentService(
     private static void ApplyRunUpdate(ExperimentRun run, ExperimentRunUpdate update)
     {
         run.Slug = Normalize(update.Slug, run.Slug);
-        run.Status = Normalize(update.Status, run.Status);
         run.Hypothesis = Normalize(update.Hypothesis, run.Hypothesis);
         run.Method = Normalize(update.Method, run.Method);
         run.MethodReason = Normalize(update.MethodReason, run.MethodReason);
@@ -980,10 +1093,9 @@ public class ExperimentService(
         run.ConfirmedOrRefuted = Normalize(update.ConfirmedOrRefuted, run.ConfirmedOrRefuted);
         run.WhyItHappened = Normalize(update.WhyItHappened, run.WhyItHappened);
         run.NextHypothesis = Normalize(update.NextHypothesis, run.NextHypothesis);
-        run.RunId = Normalize(update.RunId, run.RunId);
         run.PrimaryMetricAgg = NormalizeMetricAgg(update.PrimaryMetricAgg ?? run.PrimaryMetricAgg);
         run.PrimaryMetricType = NormalizeMetricType(update.PrimaryMetricType ?? run.PrimaryMetricType);
-        run.LayerId = Normalize(update.LayerId, run.LayerId);
+        run.LayerId = update.LayerId ?? run.LayerId;
         run.LayerKey = Normalize(update.LayerKey, run.LayerKey);
         run.AllocationKeySelector = Normalize(update.AllocationKeySelector, run.AllocationKeySelector);
         run.AllocationPlan = Normalize(update.AllocationPlan, run.AllocationPlan);
@@ -1076,9 +1188,10 @@ public class ExperimentService(
 
     private async Task NormalizeAndValidateLayerAssignmentAsync(Guid envId, ExperimentRun run)
     {
-        var layerToken = Normalize(run.LayerId, run.LayerKey);
-        var layerKey = Normalize(run.LayerKey, run.LayerId);
-        if (string.IsNullOrWhiteSpace(layerToken) && string.IsNullOrWhiteSpace(layerKey))
+        ExperimentRunAllocation.NormalizeAndValidateWindow(run);
+        var layerId = run.LayerId;
+        var layerKey = Normalize(run.LayerKey);
+        if (!layerId.HasValue && string.IsNullOrWhiteSpace(layerKey))
         {
             run.AssignmentUnitSelector = Normalize(run.AssignmentUnitSelector, run.AllocationKeySelector) ?? "user.keyId";
             run.AllocationKeySelector = Normalize(run.AllocationKeySelector, run.AssignmentUnitSelector) ?? "user.keyId";
@@ -1086,10 +1199,10 @@ public class ExperimentService(
             return;
         }
 
-        var layer = await FindActiveLayerAsync(envId, layerToken, layerKey);
+        var layer = await FindActiveLayerAsync(envId, layerId, layerKey);
         if (layer != null)
         {
-            run.LayerId = layer.Id.ToString("D");
+            run.LayerId = layer.Id;
             run.LayerKey = layer.Key;
             run.AssignmentUnitSelector = Normalize(layer.AssignmentUnitSelector) ?? "user.keyId";
             run.AllocationKeySelector = run.AssignmentUnitSelector;
@@ -1103,48 +1216,28 @@ public class ExperimentService(
 
         NormalizeRunSlice(run);
 
-        if (!IsActiveRunStatus(run.Status) || string.IsNullOrWhiteSpace(run.LayerKey))
-        {
-            return;
-        }
-
-        var layerAssignmentUnit = Normalize(run.AssignmentUnitSelector, run.AllocationKeySelector) ?? "user.keyId";
-        var (sliceStart, sliceEnd) = GetRunSlice(run);
         var experimentIds = await mongoDb.CollectionOf<Experiment>()
-            .Find(x => x.FeatBitEnvId == envId)
+            .Find(x => x.EnvId == envId)
             .Project(x => x.Id)
             .ToListAsync();
-        var activeRuns = await mongoDb.CollectionOf<ExperimentRun>()
+        var candidates = await mongoDb.CollectionOf<ExperimentRun>()
             .Find(x =>
                 experimentIds.Contains(x.ExperimentId) &&
                 x.Id != run.Id &&
                 x.ExperimentId != run.ExperimentId &&
-                x.LayerKey == run.LayerKey &&
-                ActiveRunStatuses.Contains(x.Status))
+                ((run.LayerId.HasValue && x.LayerId == run.LayerId) ||
+                 (run.LayerKey != null && x.LayerKey == run.LayerKey)))
             .ToListAsync();
 
-        foreach (var candidate in activeRuns)
-        {
-            var candidateAssignmentUnit = Normalize(candidate.AssignmentUnitSelector, candidate.AllocationKeySelector) ?? "user.keyId";
-            if (!string.Equals(candidateAssignmentUnit, layerAssignmentUnit, StringComparison.Ordinal))
-            {
-                throw new BusinessException(ErrorCodes.Conflict);
-            }
-
-            var (candidateStart, candidateEnd) = GetRunSlice(candidate);
-            if (candidateStart < sliceEnd && sliceStart < candidateEnd)
-            {
-                throw new BusinessException(ErrorCodes.Conflict);
-            }
-        }
+        ExperimentRunAllocation.ValidateReservation(run, candidates);
     }
 
-    private async Task<ExperimentLayer?> FindActiveLayerAsync(Guid envId, string? layerToken, string? layerKey)
+    private async Task<ExperimentLayer?> FindActiveLayerAsync(Guid envId, Guid? layerId, string? layerKey)
     {
-        if (Guid.TryParse(layerToken, out var layerId))
+        if (layerId.HasValue)
         {
             var byId = await mongoDb.CollectionOf<ExperimentLayer>()
-                .Find(x => x.Id == layerId && x.FeatBitEnvId == envId && x.Status == "active")
+                .Find(x => x.Id == layerId.Value && x.EnvId == envId && x.Status == "active")
                 .FirstOrDefaultAsync();
             if (byId != null)
             {
@@ -1158,7 +1251,7 @@ public class ExperimentService(
         }
 
         return await mongoDb.CollectionOf<ExperimentLayer>()
-            .Find(x => x.FeatBitEnvId == envId && x.Key == layerKey && x.Status == "active")
+            .Find(x => x.EnvId == envId && x.Key == layerKey && x.Status == "active")
             .FirstOrDefaultAsync();
     }
 
@@ -1195,13 +1288,10 @@ public class ExperimentService(
         return (start, end);
     }
 
-    private static bool IsActiveRunStatus(string? status) =>
-        !string.IsNullOrWhiteSpace(status) && ActiveRunStatuses.Contains(status);
-
     private async Task<Experiment> GetExperimentAsync(Guid envId, Guid id)
     {
         var experiment = await mongoDb.CollectionOf<Experiment>()
-            .Find(x => x.Id == id && x.FeatBitEnvId == envId)
+            .Find(x => x.Id == id && x.EnvId == envId)
             .FirstOrDefaultAsync();
 
         if (experiment == null)
@@ -1215,15 +1305,18 @@ public class ExperimentService(
     private async Task PersistExperimentAsync(Guid envId, Experiment experiment)
     {
         experiment.UpdatedAt = experiment.UpdatedAt == default ? DateTime.UtcNow : experiment.UpdatedAt;
-        await mongoDb.CollectionOf<Experiment>().ReplaceOneAsync(
-            x => x.Id == experiment.Id && x.FeatBitEnvId == envId,
-            experiment);
+        // Run operations only update these fields. Replacing a stale document could reset the counter.
+        await mongoDb.CollectionOf<Experiment>().UpdateOneAsync(
+            x => x.Id == experiment.Id && x.EnvId == envId,
+            Builders<Experiment>.Update
+                .Set(x => x.Variants, experiment.Variants)
+                .Set(x => x.UpdatedAt, experiment.UpdatedAt));
     }
 
     private async Task EnsureExperimentExistsAsync(Guid envId, Guid id)
     {
         var exists = await mongoDb.CollectionOf<Experiment>()
-            .Find(x => x.Id == id && x.FeatBitEnvId == envId)
+            .Find(x => x.Id == id && x.EnvId == envId)
             .AnyAsync();
 
         if (!exists)
@@ -1246,7 +1339,7 @@ public class ExperimentService(
         return run;
     }
 
-    private async Task<ExperimentMetricVm> ResolveMetricAsync(Guid envId, Guid? metricId, string? metricKey)
+    private async Task<ExperimentMetric> ResolveMetricAsync(Guid envId, Guid? metricId, string? metricKey)
     {
         if (!metricId.HasValue && string.IsNullOrWhiteSpace(metricKey))
         {
@@ -1256,7 +1349,10 @@ public class ExperimentService(
         return await metricService.GetBySelectorAsync(envId, metricId, metricKey);
     }
 
-    private async Task<string?> BuildGuardrailsJsonAsync(Guid envId, string? raw)
+    private async Task<string?> BuildGuardrailsJsonAsync(
+        Guid envId,
+        string? raw,
+        ExperimentMetric primaryMetric)
     {
         if (string.IsNullOrWhiteSpace(raw))
         {
@@ -1270,6 +1366,7 @@ public class ExperimentService(
         }
 
         var guardrails = new List<Dictionary<string, object>>();
+        var guardrailMetricIds = new HashSet<Guid>();
         foreach (var item in doc.RootElement.EnumerateArray())
         {
             if (item.ValueKind != JsonValueKind.Object)
@@ -1283,6 +1380,16 @@ public class ExperimentService(
                 GetJsonString(item, "key") ??
                 GetJsonString(item, "event");
             var metric = await ResolveMetricAsync(envId, metricId, metricKey);
+            if (metric.Id == primaryMetric.Id)
+            {
+                throw new ArgumentException("Primary metric cannot also be selected as a guardrail.");
+            }
+
+            if (!guardrailMetricIds.Add(metric.Id))
+            {
+                throw new ArgumentException("A guardrail metric can only be selected once.");
+            }
+
             var direction = GetJsonString(item, "direction");
             if (direction is not ("increase_bad" or "decrease_bad"))
             {
@@ -1310,7 +1417,7 @@ public class ExperimentService(
         return JsonSerializer.Serialize(guardrails);
     }
 
-    private static string BuildPrimaryMetricJson(ExperimentMetricVm metric, string? expectedDirection)
+    private static string BuildPrimaryMetricJson(ExperimentMetric metric, string? expectedDirection)
     {
         var payload = new Dictionary<string, object>
         {
@@ -1517,7 +1624,50 @@ public class ExperimentService(
             }
         }
 
-        var guardrailSections = new List<Dictionary<string, object?>>();
+        var payload = new Dictionary<string, object?>
+        {
+            ["type"] = "bayesian",
+            ["experiment"] = experimentName,
+            ["computed_at"] = DateTime.UtcNow,
+            ["window"] = new Dictionary<string, object?>
+            {
+                ["start"] = run.ObservationStart,
+                ["end"] = run.ObservationEnd
+            },
+            ["control"] = control,
+            ["treatments"] = treatments,
+            ["prior"] = priorLabel,
+            ["srm"] = new Dictionary<string, object>
+            {
+                ["chi2_p_value"] = Round(srmPValue, 4),
+                ["ok"] = srmPValue >= 0.01,
+                ["observed"] = observed
+            },
+            ["primary_metric"] = primaryMetric,
+            ["guardrails"] = BuildGuardrailSections(metrics, guardrails, control, treatments),
+            ["sample_check"] = new Dictionary<string, object>
+            {
+                ["minimum_per_variant"] = minimumSample,
+                ["ok"] = minimumSample == 0 || minN >= minimumSample,
+                ["variants"] = observed
+            }
+        };
+
+        if (warnings.Count > 0)
+        {
+            payload["warnings"] = warnings;
+        }
+
+        return JsonSerializer.Serialize(payload);
+    }
+
+    private static List<Dictionary<string, object?>> BuildGuardrailSections(
+        Dictionary<string, Dictionary<string, object>> metrics,
+        IReadOnlyCollection<GuardrailDefinition> guardrails,
+        string control,
+        string[] treatments)
+    {
+        var sections = new List<Dictionary<string, object?>>();
         foreach (var guardrail in guardrails)
         {
             if (!metrics.TryGetValue(guardrail.Event, out var guardrailData))
@@ -1540,132 +1690,11 @@ public class ExperimentService(
                 guardrail.MetricAgg);
             if (section != null)
             {
-                guardrailSections.Add(section);
+                sections.Add(section);
             }
         }
 
-        var payload = new Dictionary<string, object?>
-        {
-            ["type"] = "bayesian",
-            ["experiment"] = experimentName,
-            ["computed_at"] = DateTime.UtcNow,
-            ["window"] = new Dictionary<string, object?>
-            {
-                ["start"] = run.ObservationStart,
-                ["end"] = run.ObservationEnd
-            },
-            ["control"] = control,
-            ["treatments"] = treatments,
-            ["prior"] = priorLabel,
-            ["srm"] = new Dictionary<string, object>
-            {
-                ["chi2_p_value"] = Round(srmPValue, 4),
-                ["ok"] = srmPValue >= 0.01,
-                ["observed"] = observed
-            },
-            ["primary_metric"] = primaryMetric,
-            ["guardrails"] = guardrailSections,
-            ["sample_check"] = new Dictionary<string, object>
-            {
-                ["minimum_per_variant"] = minimumSample,
-                ["ok"] = minimumSample == 0 || minN >= minimumSample,
-                ["variants"] = observed
-            }
-        };
-
-        if (warnings.Count > 0)
-        {
-            payload["warnings"] = warnings;
-        }
-
-        return JsonSerializer.Serialize(payload);
-    }
-
-    private static string BuildBanditAnalysisJson(
-        ExperimentRun run,
-        string metricEvent,
-        Dictionary<string, Dictionary<string, object>> metrics,
-        string control,
-        string[] treatments)
-    {
-        var prior = new GaussianPrior(
-            run.PriorMean ?? 0,
-            Math.Pow(run.PriorStddev ?? 0.3, 2),
-            run.PriorProper);
-        var arms = new[] { control }.Concat(treatments).ToArray();
-        var metricData = metrics.GetValueOrDefault(metricEvent) ?? [];
-        var stats = arms.Select(arm =>
-        {
-            var raw = GetVariantData(metricData, arm);
-            var (mean, variance, n) = MetricMoments(raw);
-            var conversions = raw != null && TryGetDouble(raw, "k", out var k) ? (long)Math.Floor(k) : 0L;
-            var rate = raw != null && raw.ContainsKey("k") ? n > 0 ? conversions / (double)n : 0 : mean;
-            return new BanditArmStat(arm, mean, variance, n, conversions, rate);
-        }).ToArray();
-
-        var observed = stats.ToDictionary(x => x.Arm, x => x.N);
-        var srmPValue = SrmCheck(stats.Select(x => x.N).ToArray());
-        var inverse = TryGetBool(metricData, "inverse");
-        var bandit = ComputeBanditWeights(arms, stats, prior, inverse);
-        var bestProbs = bandit.BestArmProbabilities ?? new Dictionary<string, double>();
-        var weights = bandit.BanditWeights ?? new Dictionary<string, double>();
-        var bestArm = arms.OrderByDescending(arm => bestProbs.GetValueOrDefault(arm)).FirstOrDefault() ?? control;
-        var bestP = bestProbs.GetValueOrDefault(bestArm);
-        const double threshold = 0.95;
-        var stopMet = bandit.EnoughUnits && bestP >= threshold;
-
-        var payload = new Dictionary<string, object?>
-        {
-            ["type"] = "bandit",
-            ["experiment"] = run.Slug,
-            ["computed_at"] = DateTime.UtcNow,
-            ["window"] = new Dictionary<string, object?>
-            {
-                ["start"] = run.ObservationStart,
-                ["end"] = run.ObservationEnd
-            },
-            ["metric"] = metricEvent,
-            ["algorithm"] = "thompson_sampling_top_two",
-            ["srm"] = new Dictionary<string, object>
-            {
-                ["chi2_p_value"] = Round(srmPValue, 4),
-                ["ok"] = srmPValue >= 0.01,
-                ["observed"] = observed
-            },
-            ["arms"] = stats.Select(x => new Dictionary<string, object>
-            {
-                ["arm"] = x.Arm,
-                ["n"] = x.N,
-                ["conversions"] = x.Conversions,
-                ["rate"] = x.Rate
-            }).ToArray(),
-            ["thompson_sampling"] = new Dictionary<string, object?>
-            {
-                ["results"] = arms.Select(arm => new Dictionary<string, object>
-                {
-                    ["arm"] = arm,
-                    ["p_best"] = bestProbs.GetValueOrDefault(arm),
-                    ["recommended_weight"] = weights.GetValueOrDefault(arm)
-                }).ToArray(),
-                ["enough_units"] = bandit.EnoughUnits,
-                ["update_message"] = bandit.UpdateMessage,
-                ["seed"] = bandit.Seed
-            },
-            ["stopping"] = new Dictionary<string, object>
-            {
-                ["met"] = stopMet,
-                ["best_arm"] = bestArm,
-                ["p_best"] = bestP,
-                ["threshold"] = threshold,
-                ["message"] = stopMet
-                    ? $"{bestArm} reached P(best)={bestP:0.0000} >= {threshold:0.00}"
-                    : bandit.EnoughUnits
-                        ? $"best arm {bestArm} currently at P(best)={bestP:0.0000}, threshold={threshold:0.00}"
-                        : bandit.UpdateMessage
-            }
-        };
-
-        return JsonSerializer.Serialize(payload);
+        return sections;
     }
 
     private static Dictionary<string, object?>? ComputeMetricSection(
@@ -1771,7 +1800,7 @@ public class ExperimentService(
         var section = new Dictionary<string, object?>
         {
             ["event"] = label,
-            ["metric_type"] = isProp ? "proportion" : "continuous",
+            ["metric_type"] = isProp ? "proportion" : "numeric",
             ["rows"] = rows,
             ["verdict"] = verdicts.Count > 0 ? string.Join("; ", verdicts) : "no data"
         };
@@ -2104,120 +2133,6 @@ public class ExperimentService(
         return ((1 - pCtrlBetter) * meanPositive, -pCtrlBetter * meanNegative);
     }
 
-    private static BanditWeightResult ComputeBanditWeights(
-        string[] arms,
-        BanditArmStat[] stats,
-        GaussianPrior prior,
-        bool inverse)
-    {
-        const int minUnitsPerArm = 100;
-        const double minArmWeight = 0.01;
-        const int sampleCount = 10_000;
-
-        var counts = stats.Select(x => x.N).ToArray();
-        if (counts.Any(x => x < minUnitsPerArm))
-        {
-            var minN = counts.Length == 0 ? 0 : counts.Min();
-            return new BanditWeightResult(
-                false,
-                $"burn-in: need >= {minUnitsPerArm} users per arm before dynamic weighting (current minimum: {minN})",
-                null,
-                null,
-                null);
-        }
-
-        var posteriors = stats.Select(x => ArmPosterior(x.Mean, x.Variance, x.N, prior)).ToArray();
-        var postMeans = posteriors.Select(x => x.Mean).ToArray();
-        var postStddevs = posteriors.Select(x => Math.Sqrt(Math.Max(x.Variance, 1e-12))).ToArray();
-        var seed = Random.Shared.Next(0, 1_000_000);
-        var rng = new Mulberry32(seed);
-        var bestCounts = new int[arms.Length];
-        var topTwoCounts = new int[arms.Length];
-
-        for (var i = 0; i < sampleCount; i++)
-        {
-            var order = arms
-                .Select((_, idx) => new
-                {
-                    Index = idx,
-                    Value = postMeans[idx] + postStddevs[idx] * Normal01(rng)
-                })
-                .OrderBy(x => inverse ? x.Value : -x.Value)
-                .ToArray();
-
-            bestCounts[order[0].Index]++;
-            if (arms.Length > 1)
-            {
-                topTwoCounts[order[0].Index]++;
-                topTwoCounts[order[1].Index]++;
-            }
-        }
-
-        var bestProbabilities = new Dictionary<string, double>();
-        for (var i = 0; i < arms.Length; i++)
-        {
-            bestProbabilities[arms[i]] = bestCounts[i] / (double)sampleCount;
-        }
-
-        var weights = new double[arms.Length];
-        if (arms.Length > 1)
-        {
-            var denominator = topTwoCounts.Sum();
-            for (var i = 0; i < arms.Length; i++)
-            {
-                weights[i] = denominator > 0 ? topTwoCounts[i] / (double)denominator : 1 / (double)arms.Length;
-            }
-        }
-        else
-        {
-            weights[0] = 1;
-        }
-
-        for (var i = 0; i < weights.Length; i++)
-        {
-            weights[i] = Math.Max(weights[i], minArmWeight);
-        }
-
-        var sumWeights = weights.Sum();
-        var banditWeights = new Dictionary<string, double>();
-        for (var i = 0; i < arms.Length; i++)
-        {
-            banditWeights[arms[i]] = weights[i] / sumWeights;
-        }
-
-        return new BanditWeightResult(true, "successfully updated", bestProbabilities, banditWeights, seed);
-    }
-
-    private static (double Mean, double Variance) ArmPosterior(
-        double mean,
-        double variance,
-        long n,
-        GaussianPrior prior)
-    {
-        if (n == 0 || variance == 0)
-        {
-            return (prior.Mean, prior.Variance);
-        }
-
-        var dataVariance = variance / n;
-        if (!prior.Proper)
-        {
-            return (mean, dataVariance);
-        }
-
-        var dataPrecision = 1 / dataVariance;
-        var priorPrecision = 1 / prior.Variance;
-        var postPrecision = dataPrecision + priorPrecision;
-        return ((mean * dataPrecision + prior.Mean * priorPrecision) / postPrecision, 1 / postPrecision);
-    }
-
-    private static double Normal01(Mulberry32 rng)
-    {
-        var u1 = Math.Max(rng.NextDouble(), 1e-12);
-        var u2 = rng.NextDouble();
-        return Math.Sqrt(-2 * Math.Log(u1)) * Math.Cos(2 * Math.PI * u2);
-    }
-
     private static double SrmCheck(long[] observed)
     {
         var total = observed.Sum();
@@ -2515,43 +2430,6 @@ public class ExperimentService(
         }
     }
 
-    private sealed record BanditArmStat(
-        string Arm,
-        double Mean,
-        double Variance,
-        long N,
-        long Conversions,
-        double Rate);
-
-    private sealed record BanditWeightResult(
-        bool EnoughUnits,
-        string UpdateMessage,
-        Dictionary<string, double>? BestArmProbabilities,
-        Dictionary<string, double>? BanditWeights,
-        int? Seed);
-
-    private sealed class Mulberry32
-    {
-        private uint _state;
-
-        public Mulberry32(int seed)
-        {
-            _state = (uint)seed;
-        }
-
-        public double NextDouble()
-        {
-            unchecked
-            {
-                _state += 0x6D2B79F5u;
-                var x = _state;
-                x = (x ^ (x >> 15)) * (1u | x);
-                x ^= x + (x ^ (x >> 7)) * (61u | x);
-                return (x ^ (x >> 14)) / 4294967296.0;
-            }
-        }
-    }
-
     private static string? BuildGuardrailEventsJson(string? guardrails)
     {
         if (string.IsNullOrWhiteSpace(guardrails))
@@ -2630,7 +2508,7 @@ public class ExperimentService(
 
     private static string NormalizeMetricType(string? value)
     {
-        return value is "continuous" or "numeric" ? "continuous" : "binary";
+        return value == "numeric" ? "numeric" : "binary";
     }
 
     private static string NormalizeMetricAgg(string? value)

@@ -6,7 +6,7 @@ public class ExperimentRunAudienceUpdate
 
     public int? TrafficOffset { get; set; }
 
-    public string LayerId { get; set; }
+    public Guid? LayerId { get; set; }
 
     public string AudienceFilters { get; set; }
 
@@ -43,8 +43,6 @@ public class ExperimentRunObservationWindowUpdate
 public class ExperimentRunUpdate
 {
     public string Slug { get; set; }
-
-    public string Status { get; set; }
 
     public string Hypothesis { get; set; }
 
@@ -98,15 +96,13 @@ public class ExperimentRunUpdate
 
     public string NextHypothesis { get; set; }
 
-    public string RunId { get; set; }
-
     public string PrimaryMetricAgg { get; set; }
 
     public string PrimaryMetricType { get; set; }
 
     public double? TrafficPercent { get; set; }
 
-    public string LayerId { get; set; }
+    public Guid? LayerId { get; set; }
 
     public string AudienceFilters { get; set; }
 

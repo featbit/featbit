@@ -82,12 +82,14 @@ export function AccessTokensPage() {
   const organizationId = getCurrentOrganization()?.id ?? ""
 
   useEffect(() => {
+    if (search.trim() === debouncedSearch) return
+
     const timeout = window.setTimeout(() => {
       setDebouncedSearch(search.trim())
       setPageIndex(1)
     }, 300)
     return () => window.clearTimeout(timeout)
-  }, [search])
+  }, [search, debouncedSearch])
 
   const permissionsQuery = useQuery({
     ...currentUserPoliciesQueryOptions<UserPolicy>(organizationId),

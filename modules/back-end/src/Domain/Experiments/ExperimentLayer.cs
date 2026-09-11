@@ -2,7 +2,7 @@ namespace Domain.Experiments;
 
 public class ExperimentLayer : AuditedEntity
 {
-    public Guid FeatBitEnvId { get; set; }
+    public Guid EnvId { get; set; }
 
     public string Name { get; set; }
 

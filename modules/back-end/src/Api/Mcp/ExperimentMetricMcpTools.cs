@@ -2,6 +2,7 @@ using System.ComponentModel;
 using Api.Authorization;
 using Application.Bases.Models;
 using Application.Experiments;
+using Application.Experiments.ExperimentMetrics;
 using Application.Services;
 using Domain.Policies;
 using ModelContextProtocol.Server;
@@ -16,7 +17,7 @@ public class ExperimentMetricMcpTools(
     IPermissionChecker permissionChecker)
 {
     [McpServerTool(Name = "featbit_experiment_list_metrics")]
-    [Description("List registered experiment metrics in the environment attached to a experiment experiment. Use this before selecting primary or guardrail metrics.")]
+    [Description("List registered experiment metrics in the environment attached to an experiment. Use this before selecting primary or guardrail metrics.")]
     public async Task<PagedResult<ExperimentMetricVm>> ListMetrics(
         [Description("Experiment experiment id used to resolve the FeatBit environment.")]
         Guid experimentId,
@@ -31,7 +32,7 @@ public class ExperimentMetricMcpTools(
     {
         var envId = await ResolveAuthorizedEnvIdAsync(experimentId);
 
-        return await mediator.Send(new QueryExperimentMetrics
+        return await mediator.Send(new GetExperimentMetricList
         {
             EnvId = envId,
             Filter = new ExperimentMetricFilter
@@ -45,12 +46,12 @@ public class ExperimentMetricMcpTools(
     }
 
     [McpServerTool(Name = "featbit_experiment_create_metric")]
-    [Description("Create a registered experiment metric key in the environment attached to a experiment experiment. Requires confirmedByUser=true after explicit user approval.")]
+    [Description("Create a registered experiment metric key in the environment attached to an experiment. Requires confirmedByUser=true after explicit user approval.")]
     public async Task<ExperimentMetricVm> CreateMetric(
         [Description("Experiment experiment id used to resolve the FeatBit environment.")]
         Guid experimentId,
         [Description("Metric creation payload.")]
-        ExperimentMcpMetricUpdate request)
+        ExperimentMcpMetricCreateRequest request)
     {
         EnsureConfirmed(request);
         var envId = await ResolveAuthorizedEnvIdAsync(experimentId);
@@ -58,7 +59,7 @@ public class ExperimentMetricMcpTools(
         return await mediator.Send(new CreateExperimentMetric
         {
             EnvId = envId,
-            Update = request.ToMetricUpdate()
+            Request = request.ToCreateRequest()
         });
     }
 
@@ -70,7 +71,7 @@ public class ExperimentMetricMcpTools(
         [Description("Experiment metric id.")]
         Guid metricId,
         [Description("Metric update payload.")]
-        ExperimentMcpMetricUpdate request)
+        ExperimentMcpMetricUpdateRequest request)
     {
         EnsureConfirmed(request);
         var envId = await ResolveAuthorizedEnvIdAsync(experimentId);
@@ -79,7 +80,7 @@ public class ExperimentMetricMcpTools(
         {
             EnvId = envId,
             Id = metricId,
-            Update = request.ToMetricUpdate()
+            Request = request.ToUpdateRequest()
         });
     }
 
@@ -100,14 +101,38 @@ public class ExperimentMetricMcpTools(
 
         var envId = await ResolveAuthorizedEnvIdAsync(experimentId);
 
-        return await mediator.Send(new DeleteExperimentMetric
+        return await mediator.Send(new ArchiveExperimentMetric
         {
             EnvId = envId,
             Id = metricId
         });
     }
 
-    private static void EnsureConfirmed(ExperimentMcpMetricUpdate request)
+    [McpServerTool(Name = "featbit_experiment_restore_metric")]
+    [Description("Restore an archived experiment metric key. Requires confirmedByUser=true after explicit user approval.")]
+    public async Task<bool> RestoreMetric(
+        [Description("Experiment experiment id used to resolve the FeatBit environment.")]
+        Guid experimentId,
+        [Description("Experiment metric id.")]
+        Guid metricId,
+        [Description("Must be true only after the user explicitly approves restoring this metric.")]
+        bool confirmedByUser)
+    {
+        if (!confirmedByUser)
+        {
+            throw new ArgumentException("confirmedByUser is required.");
+        }
+
+        var envId = await ResolveAuthorizedEnvIdAsync(experimentId);
+
+        return await mediator.Send(new RestoreExperimentMetric
+        {
+            EnvId = envId,
+            Id = metricId
+        });
+    }
+
+    private static void EnsureConfirmed(IConfirmedExperimentMetricRequest request)
     {
         if (request is null)
         {
@@ -142,9 +167,14 @@ public class ExperimentMetricMcpTools(
     }
 }
 
-public class ExperimentMcpMetricUpdate
+public interface IConfirmedExperimentMetricRequest
 {
-    [Description("Must be true only after the user explicitly approves creating or updating this metric.")]
+    bool ConfirmedByUser { get; }
+}
+
+public class ExperimentMcpMetricCreateRequest : IConfirmedExperimentMetricRequest
+{
+    [Description("Must be true only after the user explicitly approves creating this metric.")]
     public bool ConfirmedByUser { get; set; }
 
     [Description("Metric display name.")]
@@ -156,22 +186,44 @@ public class ExperimentMcpMetricUpdate
     [Description("Metric description.")]
     public string Description { get; set; } = string.Empty;
 
-    [Description("Metric type: binary or continuous.")]
+    [Description("Metric type: binary or numeric.")]
     public string MetricType { get; set; } = "binary";
 
     [Description("Aggregation: once, count, sum, or average. Binary metrics are analyzed as once.")]
     public string MetricAgg { get; set; } = "once";
 
-    [Description("Metric status: active or archived. Defaults to active.")]
-    public string Status { get; set; } = "active";
-
-    public ExperimentMetricUpdate ToMetricUpdate() => new()
+    public CreateExperimentMetricRequest ToCreateRequest() => new()
     {
         Name = Name,
         Key = Key,
         Description = Description,
         MetricType = MetricType,
-        MetricAgg = MetricAgg,
-        Status = Status
+        MetricAgg = MetricAgg
+    };
+}
+
+public class ExperimentMcpMetricUpdateRequest : IConfirmedExperimentMetricRequest
+{
+    [Description("Must be true only after the user explicitly approves updating this metric.")]
+    public bool ConfirmedByUser { get; set; }
+
+    [Description("Metric display name.")]
+    public string Name { get; set; } = string.Empty;
+
+    [Description("Metric description.")]
+    public string Description { get; set; } = string.Empty;
+
+    [Description("Metric type: binary or numeric.")]
+    public string MetricType { get; set; } = "binary";
+
+    [Description("Aggregation: once, count, sum, or average. Binary metrics are analyzed as once.")]
+    public string MetricAgg { get; set; } = "once";
+
+    public UpdateExperimentMetricRequest ToUpdateRequest() => new()
+    {
+        Name = Name,
+        Description = Description,
+        MetricType = MetricType,
+        MetricAgg = MetricAgg
     };
 }

@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using Api.Authorization;
 using Application.Bases.Models;
-using Application.Experiments;
+using Application.Experiments.ExperimentLayers;
 using Application.Services;
 using Domain.Policies;
 using ModelContextProtocol.Server;
@@ -31,7 +31,7 @@ public class ExperimentLayerMcpTools(
     {
         var envId = await ResolveAuthorizedEnvIdAsync(experimentId);
 
-        return await mediator.Send(new QueryExperimentLayers
+        return await mediator.Send(new GetExperimentLayerList
         {
             EnvId = envId,
             Filter = new ExperimentLayerFilter
@@ -50,15 +50,20 @@ public class ExperimentLayerMcpTools(
         [Description("Experiment experiment id used to resolve the FeatBit environment.")]
         Guid experimentId,
         [Description("Layer creation payload.")]
-        ExperimentMcpLayerUpdate request)
+        ExperimentMcpLayerCreateRequest request)
     {
-        EnsureConfirmed(request);
+        if (request is null)
+        {
+            throw new ArgumentException("Layer request is required.");
+        }
+
+        EnsureConfirmed(request.ConfirmedByUser);
         var envId = await ResolveAuthorizedEnvIdAsync(experimentId);
 
         return await mediator.Send(new CreateExperimentLayer
         {
             EnvId = envId,
-            Update = request.ToLayerUpdate()
+            Request = request.ToCreateRequest()
         });
     }
 
@@ -70,16 +75,21 @@ public class ExperimentLayerMcpTools(
         [Description("Experiment layer id.")]
         Guid layerId,
         [Description("Layer update payload.")]
-        ExperimentMcpLayerUpdate request)
+        ExperimentMcpLayerUpdateRequest request)
     {
-        EnsureConfirmed(request);
+        if (request is null)
+        {
+            throw new ArgumentException("Layer request is required.");
+        }
+
+        EnsureConfirmed(request.ConfirmedByUser);
         var envId = await ResolveAuthorizedEnvIdAsync(experimentId);
 
         return await mediator.Send(new UpdateExperimentLayer
         {
             EnvId = envId,
             Id = layerId,
-            Update = request.ToLayerUpdate()
+            Request = request.ToUpdateRequest()
         });
     }
 
@@ -100,21 +110,16 @@ public class ExperimentLayerMcpTools(
 
         var envId = await ResolveAuthorizedEnvIdAsync(experimentId);
 
-        return await mediator.Send(new DeleteExperimentLayer
+        return await mediator.Send(new ArchiveExperimentLayer
         {
             EnvId = envId,
             Id = layerId
         });
     }
 
-    private static void EnsureConfirmed(ExperimentMcpLayerUpdate request)
+    private static void EnsureConfirmed(bool confirmedByUser)
     {
-        if (request is null)
-        {
-            throw new ArgumentException("Layer request is required.");
-        }
-
-        if (!request.ConfirmedByUser)
+        if (!confirmedByUser)
         {
             throw new ArgumentException("confirmedByUser is required.");
         }
@@ -142,9 +147,9 @@ public class ExperimentLayerMcpTools(
     }
 }
 
-public class ExperimentMcpLayerUpdate
+public class ExperimentMcpLayerCreateRequest
 {
-    [Description("Must be true only after the user explicitly approves creating or updating this layer.")]
+    [Description("Must be true only after the user explicitly approves creating this layer.")]
     public bool ConfirmedByUser { get; set; }
 
     [Description("Layer display name.")]
@@ -159,15 +164,33 @@ public class ExperimentMcpLayerUpdate
     [Description("Assignment unit selector shared by runs in this layer. Defaults to user.keyId.")]
     public string AssignmentUnitSelector { get; set; } = "user.keyId";
 
-    [Description("Layer status: active or archived. Defaults to active.")]
-    public string Status { get; set; } = "active";
-
-    public ExperimentLayerUpdate ToLayerUpdate() => new()
+    public CreateExperimentLayerRequest ToCreateRequest() => new()
     {
         Name = Name,
         Key = Key,
         Description = Description,
-        AssignmentUnitSelector = AssignmentUnitSelector,
-        Status = Status
+        AssignmentUnitSelector = AssignmentUnitSelector
+    };
+}
+
+public class ExperimentMcpLayerUpdateRequest
+{
+    [Description("Must be true only after the user explicitly approves updating this layer.")]
+    public bool ConfirmedByUser { get; set; }
+
+    [Description("Layer display name.")]
+    public string Name { get; set; } = string.Empty;
+
+    [Description("Layer description.")]
+    public string Description { get; set; } = string.Empty;
+
+    [Description("Assignment unit selector shared by runs in this layer. Defaults to user.keyId.")]
+    public string AssignmentUnitSelector { get; set; } = "user.keyId";
+
+    public UpdateExperimentLayerRequest ToUpdateRequest() => new()
+    {
+        Name = Name,
+        Description = Description,
+        AssignmentUnitSelector = AssignmentUnitSelector
     };
 }

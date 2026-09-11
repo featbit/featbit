@@ -1,3 +1,4 @@
+using Domain.Experiments;
 using Infrastructure.IntegrationTests.Fixtures;
 using Infrastructure.IntegrationTests.Support;
 using Microsoft.EntityFrameworkCore;
@@ -26,5 +27,9 @@ public class FeatBitPostgresFixtureSmokeTests
         var entityTypes = db.Model.GetEntityTypes().Select(e => e.GetTableName()).ToHashSet();
         Assert.Contains("feature_flags", entityTypes);
         Assert.Contains("segments", entityTypes);
+
+        // Query the physical column added by vNext.sql, beyond checking EF metadata.
+        var runCounters = await db.Set<Experiment>().Select(x => x.LastRunNumber).ToListAsync();
+        Assert.All(runCounters, counter => Assert.Null(counter));
     }
 }
