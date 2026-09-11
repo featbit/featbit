@@ -62,7 +62,9 @@ public static class ConfigureServices
         services.AddScoped<IIdentityService, Services.IdentityService>();
 
         // http clients
-        services.AddHttpClient<IAgentService, Services.AgentService>();
+        services.AddHttpClient<IAgentService, Services.AgentService>()
+            .AddHttpMessageHandler(() =>
+                new Services.DependencyMetricsHandler(Domain.Observability.DependencyNames.Agent));
         services.AddHttpClient<IWebhookSender, Services.WebhookSender>()
             .ConfigurePrimaryHttpMessageHandler(() =>
             {

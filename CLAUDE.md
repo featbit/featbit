@@ -233,10 +233,15 @@ Rules that are easy to get wrong and expensive to fix later:
   structured payload, and no test catches it. Preserve existing `EventId` / `EventName`
   values — log-based alerting keys on them. Full rules in `docs/observability/index.md`
   §6.1.
-- **This rule is build-enforced, not just documented.** The analyzer rule `CA1848` is
-  enabled as an **error** for the `src/` trees (via `.editorconfig` in each module's `src/`
-  and in `modules/shared/`), so a raw `ILogger.Log*` call fails the build rather than merely
-  being discouraged.
+- **Both halves of this rule are enforced, not just documented.** The analyzer rule
+  `CA1848` is enabled as an **error** for the `src/` trees (via `.editorconfig` in each
+  module's `src/` and in `modules/shared/`), so a raw `ILogger.Log*` call fails the build
+  rather than merely being discouraged. The `.ToString()` prohibition is enforced
+  separately, by a test (`LoggerMessagePayloadTests` in each of the three modules, backed
+  by `LoggerMessagePayloadGuard` in `modules/shared/Observability.TestKit`), because no
+  compiler can see it — a coercion compiles cleanly. Genuine exceptions are declared as an
+  explicit allowance list with a reason; the guard also fails on an allowance that has
+  stopped being used, so stale exemptions cannot accumulate.
 - **Credentials are hashed, never logged raw** — SDK secrets, streaming and relay-proxy
   tokens, JWTs. Everything else (message payloads, client IPs, webhook URLs) is logged
   raw on purpose, because that is what makes an incident diagnosable. New

@@ -109,6 +109,18 @@ public static class DependencyNames
 {
     /// <summary>The external billing and licensing service.</summary>
     public const string Billing = "billing";
+
+    /// <summary>A relay proxy agent, called for availability checks and bootstrap/sync pushes.</summary>
+    public const string Agent = "agent";
+
+    /// <summary>An OIDC identity provider, called during single sign-on.</summary>
+    public const string Oidc = "oidc";
+
+    /// <summary>An OAuth identity provider, called during single sign-on.</summary>
+    public const string OAuth = "oauth";
+
+    /// <summary>The ClickHouse OLAP endpoint, called over HTTP for analytics queries.</summary>
+    public const string ClickHouse = "clickhouse";
 }
 
 /// <summary>The fixed <c>reason</c> vocabulary for <see cref="DependencyMetrics"/>.</summary>

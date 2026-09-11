@@ -401,8 +401,14 @@ further stages can be added without a new instrument.
 | `featbit.api.dependency.requests` | Outbound HTTP requests to a named dependency, by outcome | Counter\<long\> | `{request}` | `destination`, `operation`, `outcome`, `reason` | `DependencyMetricsHandler` |
 | `featbit.api.dependency.duration` | Duration of one outbound request | Histogram\<double\> | `ms` | `destination`, `operation`, `outcome`, `reason` | `DependencyMetricsHandler` |
 
-`destination` is a logical dependency name (`billing`), never a host or URL. `operation` is the HTTP
-method.
+`destination` is a logical dependency name, never a host or URL, drawn from a closed vocabulary
+(`DependencyNames`): `billing`, `agent` (relay proxy agents), `oidc` and `oauth` (the two SSO
+clients), and `clickhouse`. `operation` is the HTTP method.
+
+**Webhook deliveries are deliberately absent from this family.** They have their own instruments
+with their own retry semantics, so routing them through here as well would double-count them. If
+you add a new `HttpClient`, attach the handler with a new `DependencyNames` constant unless the
+component already measures itself.
 
 **`reason` is the status *class*, not the status code** — `http_3xx`, `http_4xx`, `http_5xx`, plus
 `ok`, `timeout`, and `transport_error`. `404` and `422` are the same operational problem, and one

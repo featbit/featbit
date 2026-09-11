@@ -28,6 +28,26 @@ Kubernetes probe manifests. Export setup is documented separately in
 [`exporting.md`](./exporting.md), and the incident workflow built on top of it in
 [`investigating.md`](./investigating.md).
 
+> **The Control Plane is optional, and nothing here requires it.** FeatBit runs fully without one —
+> it is opt-in via `UseControlPlane` in the API and `ControlPlane:Enabled` in the Evaluation Server,
+> both of which default to *off*. Where this document says "all three services", read it as *each
+> service that is deployed*. Two consequences are worth stating plainly, because both look like
+> faults and are not:
+>
+> - **No `featbit.control_plane.*` series will exist** in a deployment without a control plane. The
+>   instruments are declared by the control-plane module, so a process that is not running cannot
+>   emit them. Absence is the expected reading, not a broken exporter.
+> - **The `messaging.backlog` gauge still lists the control-plane webhook topic** in the API. The
+>   API subscribes to that topic unconditionally — long-standing behaviour that predates this work —
+>   so the topic is watched whether or not a control plane fills it. The probe reports an empty or
+>   unknown depth for it and neither errors nor logs. Under Kafka specifically, a topic that does not
+>   exist is filtered out by error code and reported as `-1` (unknown); the reader sets
+>   `AllowAutoCreateTopics = false`, so observing a topic never creates one.
+>
+> The Evaluation Server goes further and varies its *subscription* by configuration:
+> `KafkaConsumerTopics.For(configuration)` adds the control-plane command topic only when
+> `UseControlPlane()` is true, so the backlog gauge and the consumer always watch the same set.
+
 Five principles, in priority order:
 
 1. **Telemetry must never change application behavior.** Instrumentation is side-effect-free. If
@@ -408,11 +428,29 @@ deliberately left alone so they can keep using `FakeLogger` and direct logging. 
 therefore fails the module's build with a `CA1848` error rather than merely being frowned upon.
 
 CA1848 checks exactly one thing: that logging goes through a `[LoggerMessage]` method instead of a
-raw `ILogger.Log*` extension call. The rest of this section is **not** machine-checked. Nothing
-fails the build if you inline the `Log` class instead of using a sibling file (rule 1), switch to
-named attribute arguments (rule 2), skip or duplicate an event id (rules 3–4), or coerce an
-argument with `.ToString()` (rule 5). Those remain convention, caught only in review — do not read
-the CA1848 gate as enforcing them.
+raw `ILogger.Log*` extension call.
+
+**Enforced by test — the payload-coercion rule.** Rule 5 is the other machine-checked rule, and it
+is checked by a test rather than by the compiler, because no compiler can see it: adding
+`.ToString()` compiles cleanly and renders identically. `LoggerMessagePayloadGuard`, in
+`modules/shared/Observability.TestKit`, parses a module's `src/` tree, locates `Log.*(...)`
+invocations, and fails when any argument contains a `.ToString()` call. One test per module runs it,
+so all three are covered: `LoggerMessagePayloadTests` in the back-end's and the evaluation server's
+`Application.IntegrationTests/Observability/`, and in the control plane's
+`Api.UnitTests/Observability/`.
+
+Deliberate exceptions are declared as an explicit `LoggerMessageToStringAllowance` list — file,
+method, argument, and reason — rather than being matched by a heuristic, so every exemption is
+reviewable. The guard **also fails when a declared allowance stops being used**, which means
+removing a coercion cannot leave a stale exemption behind that would silently permit the next one.
+The control plane's list is empty; the back-end allows six (four billing request DTOs and two
+`Confluent.Kafka.Error` values); the evaluation server allows two `RedisChannel` channel-name
+conversions.
+
+**Not machine-checked.** Nothing fails if you inline the `Log` class instead of using a sibling file
+(rule 1), switch to named attribute arguments (rule 2), or skip or duplicate an event id
+(rules 3–4). Those remain convention, caught only in review — do not read the gates above as
+enforcing them.
 
 **Secondary check.** As a quick manual sweep, this grep should still return zero hits under each
 module's `src/`:

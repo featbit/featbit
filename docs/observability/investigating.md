@@ -161,6 +161,38 @@ the producer writes a `traceparent` header the consumer adopts — so there the 
 trace. Under Redis or Postgres no trace context crosses the queue, and `change_id` is the only join
 that works. Using `change_id` first is therefore the method that works on every deployment.
 
+**Before you start: which delivery path, and was the change scheduled?** Two things change which
+signals are relevant, and both are cheap to check first.
+
+*How does this client receive updates?* The stage chain below ends in **fan-out**, which is the
+**streaming push** path. An SDK that polls `sdk/server/latest-all` or `sdk/client/latest-all` never
+appears in `flag.fanout` at all — so reading `fanout.targeted = 0` as "nothing was subscribed" is
+the wrong conclusion for a polling client. Tell the two apart before going further:
+
+```
+featbit_evaluation_server_streaming_active_sockets                     # streaming clients
+featbit_evaluation_server_sync_payloads_total{operation="http_full"}   # polling clients
+featbit_evaluation_server_sync_payloads_total{operation="http_patch"}
+```
+
+For a polling client the change is never *pushed*. It arrives on the client's next poll, so the
+questions are whether the store was updated (stages `persist` → `consume` below) and whether the
+client is still polling at all. The span to read is `sdk.sync`, not `flag.fanout`. An `operation` of
+`rp_full` or `rp_patch` means the request arrived through a relay proxy, which adds a hop of its own.
+
+*Was the change scheduled rather than immediate?* If so, nothing happens until the schedule fires,
+and every stage below starts only from that moment:
+
+```
+featbit_api_schedule_applied_total{outcome="success"}
+featbit_api_schedule_lag_milliseconds
+```
+
+`schedule.applied{outcome="failure"}` means the change was never applied — stop there, because
+nothing retries a failed schedule. A high `schedule.lag` means it was applied late rather than lost.
+Lag can never be below the worker's 45-second poll interval, so judge it against a multiple of that
+rather than against zero.
+
 **1. Find where the stage counts diverge.** Every stage increments the same counter with a
 different `stage` attribute:
 
@@ -204,9 +236,14 @@ the *same* change even under a transport where the two are in different traces.
 > in [`index.md` §5](index.md) — expect one producer-side id to correlate with several
 > consumer-side ids.
 
-**4. Check the change was not silently swallowed.** Three control-plane handlers catch and discard
-failures, so they look successful at every other layer. They are the exception that this counter
-exists for:
+**4. Check the change was not silently swallowed.** *This step applies only where the deployment
+runs the control plane.* The control plane is **opt-in** — FeatBit runs fully without it — and on a
+deployment that does not run it the series below simply does not exist. **Absent is not the same as
+zero**, so confirm the control plane is actually deployed before reading anything into a missing
+series.
+
+Where it is deployed, three of its handlers catch and discard failures, so they look successful at
+every other layer. They are the exception this counter exists for:
 
 ```
 featbit_control_plane_handler_suppressed_failures_total{operation="…", reason="…"}
@@ -375,9 +412,23 @@ featbit_api_dependency_requests_total{destination="…", outcome="…"}
 featbit_api_dependency_duration_milliseconds{destination="…"}
 ```
 
-`destination` is a logical name, never a URL. This is the first thing to check when the API is slow
-but its own database looks healthy — an unresponsive license or billing endpoint presents as generic
-API latency at every other layer.
+`destination` is a logical name, never a URL, and comes from a closed set: `billing`, `agent`,
+`oidc`, `oauth`, and `clickhouse`. This is the first thing to check when the API is slow but its own
+database looks healthy — an unresponsive dependency presents as generic API latency at every other
+layer.
+
+Three of those destinations answer questions that used to be unanswerable from telemetry alone:
+
+- **`oidc` / `oauth`** — "SSO is broken" almost always means the *provider* is timing out or
+  returning 4xx, but the user-visible symptom is a failed login. Read this next to
+  `featbit_api_auth_logins_total{outcome="rejected"}`: if the dependency is failing, the login
+  failures are not FeatBit's.
+- **`agent`** — relay proxy availability checks and bootstrap pushes. A relay proxy that never
+  syncs shows up here as `outcome="failure"` or `timeout` before anyone notices stale flags at the
+  edge. Note that `SyncToAgent` converts a failure into a returned result object rather than
+  throwing, so this counter is the signal that the sync attempt failed at all.
+- **`clickhouse`** — analytics queries. Slow dashboards with a healthy operational database point
+  here.
 
 For webhooks, `featbit_api_webhook_attempts_total` counts *attempts* while
 `featbit_api_webhook_deliveries_total` counts deliveries, so a widening gap between them is retry

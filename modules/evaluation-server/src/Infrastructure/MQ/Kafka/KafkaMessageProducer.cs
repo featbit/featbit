@@ -59,7 +59,7 @@ public partial class KafkaMessageProducer : IMessageProducer
                 if (report.Error.IsError)
                 {
                     MessagingMetrics.Current.RecordDeliveryFailure(MessagingSystems.Kafka, topic);
-                    Log.ErrorDeliveryMessage(_logger, topic, value, report.Error.ToString());
+                    Log.ErrorDeliveryMessage(_logger, topic, value, report.Error);
                 }
             }
         }
@@ -69,7 +69,7 @@ public partial class KafkaMessageProducer : IMessageProducer
 
             publish.Failed(ex);
             MessagingMetrics.Current.RecordDeliveryFailure(MessagingSystems.Kafka, deliveryResult.Topic);
-            Log.ErrorDeliveryMessage(_logger, deliveryResult.Topic, deliveryResult.Value, ex.Error.ToString());
+            Log.ErrorDeliveryMessage(_logger, deliveryResult.Topic, deliveryResult.Value, ex.Error);
         }
         catch (Exception ex)
         {

@@ -199,8 +199,16 @@ alongside the `Microsoft.AspNetCore` and `MongoDB.Driver` scopes.
   [Known gaps](instruments.md#known-gaps-what-is-deliberately-not-measured).
 - **Dashboards and alerts.** No dashboard JSON or alert rules ship with FeatBit.
   [`instruments.md`](instruments.md) is the source list to build them from.
-- **Kubernetes manifests.** The `kubernetes/` manifests do not set these variables; add them to
-  your own deployment.
+- **Kubernetes manifests ship these variables, but disabled.** The five service deployments under
+  `kubernetes/standard/application/` and `kubernetes/pro/application/` now carry
+  `ENABLE_OPENTELEMETRY`, `OTEL_SERVICE_NAME`, `OTEL_EXPORTER_OTLP_ENDPOINT`, and
+  `OTEL_EXPORTER_OTLP_PROTOCOL`, with the gate set to `"false"`. Applying them changes nothing until
+  you deploy an OTLP collector, point `OTEL_EXPORTER_OTLP_ENDPOINT` at it, and flip
+  `ENABLE_OPENTELEMETRY` to `"true"`. It is off by default on purpose: enabling it starts exporting
+  roughly eighty custom instruments, which is an ingest-volume and cost decision for the deployment's
+  owner rather than a default someone should inherit silently. The manifests wire `livenessProbe`
+  and `readinessProbe` against `health/liveness` and `health/readiness`; no probe references
+  `health/startup` or `health/diagnostics`, so wiring those is still yours to do.
 - **Message age in the queue.** `featbit.<svc>.messaging.backlog` reports queue *depth* from a
   background sampler, but how long the oldest waiting message has been there is not measured. See
   [Backlog depth and the background sampler](instruments.md#backlog-depth-and-the-background-sampler).

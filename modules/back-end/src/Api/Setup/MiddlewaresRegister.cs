@@ -30,10 +30,11 @@ public static class MiddlewaresRegister
             Predicate = registration => registration.Tags.Contains(HealthCheckBuilderExtensions.ReadinessTag)
         });
 
-        // Startup probe. Additive and inert until a manifest references it (kubernetes/ manifests
-        // are deliberately not modified here — see follow-up F10). It reports the same dependency
-        // checks as readiness: startup and readiness ask the same question, and differ only in how
-        // long an orchestrator waits for the answer, which is a probe-manifest concern.
+        // Startup probe. It reports the same dependency checks as readiness: startup and readiness
+        // ask the same question, and differ only in how long an orchestrator is willing to wait for
+        // the answer, which is a probe-manifest concern rather than a code one. The kubernetes/
+        // manifests wire liveness and readiness only, so this endpoint stays inert until a
+        // deployment references it.
         app.MapHealthChecks("health/startup", new HealthCheckOptions
         {
             Predicate = registration => registration.Tags.Contains(HealthCheckBuilderExtensions.StartupTag)

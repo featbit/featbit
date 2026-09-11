@@ -170,8 +170,10 @@ public static class ServicesRegister
         });
 
         // add OIDC & OAuth client
-        builder.Services.AddHttpClient<OidcClient>();
-        builder.Services.AddHttpClient<OAuthClient>();
+        builder.Services.AddHttpClient<OidcClient>()
+            .AddHttpMessageHandler(() => new DependencyMetricsHandler(DependencyNames.Oidc));
+        builder.Services.AddHttpClient<OAuthClient>()
+            .AddHttpMessageHandler(() => new DependencyMetricsHandler(DependencyNames.OAuth));
 
         // replace default authorization result handler
         var authorizationResultHandler =

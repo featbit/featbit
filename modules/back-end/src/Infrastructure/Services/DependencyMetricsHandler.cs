@@ -11,9 +11,11 @@ namespace Infrastructure.Services;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Attached to the named billing client rather than applied globally, so it cannot double-count
-/// outbound calls that other components already measure for themselves — webhook deliveries in
-/// particular have their own instrumentation with its own retry semantics.
+/// Attached per client rather than applied globally, so it cannot double-count outbound calls that
+/// other components already measure for themselves — webhook deliveries in particular have their
+/// own instrumentation with its own retry semantics, and are deliberately not routed through here.
+/// Each client supplies its own <c>destination</c> from the closed
+/// <see cref="DependencyNames"/> vocabulary, which is what keeps the dimension bounded.
 /// </para>
 /// <para>
 /// <b>Instrumentation must never change what the caller sees.</b> The response is returned and any
