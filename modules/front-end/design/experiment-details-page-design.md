@@ -1,8 +1,8 @@
-# Release Decision Experiment Details Page Design
+# Experiment Details Page Design
 
 ## Scope
 
-This document defines the approved React design for the **Experiment details** main page under **Release Decision** in `front-end`.
+This document defines the approved React design for the **Experiment details** main page in `front-end`.
 
 The approved visual scope currently includes:
 
@@ -26,23 +26,21 @@ Explicitly excluded:
 - Audit log UI;
 - React, route, API, backend, test, configuration, package, or i18n implementation.
 
-`front-end-rda-tempo` remains the functional and semantic reference. It is not the visual reference. The current React application, especially the migrated Release Decision lists, is the visual and interaction reference.
-
 ## Approved Design Asset
 
-![Release Decision Experiment details — Intent & Hypothesis](release-decision-experiment-details-intent-hypothesis-with-stage-subtitles.png)
+![Experiment details — Intent & Hypothesis](experiment-details-intent-hypothesis-with-stage-subtitles.png)
 
 ### Exposure stage
 
-![Release Decision Experiment details — Exposure](release-decision-experiment-details-exposure-light.png)
+![Experiment details — Exposure](experiment-details-exposure-light.png)
 
 #### Empty configuration state
 
-![Release Decision Experiment details — Exposure without Feature Flag or metrics](release-decision-experiment-details-exposure-empty-light.png)
+![Experiment details — Exposure without Feature Flag or metrics](experiment-details-exposure-empty-light.png)
 
 ##### Select Feature Flag Sheet
 
-![Release Decision Experiment details — Select Feature Flag](release-decision-experiment-details-exposure-select-flag-light.png)
+![Experiment details — Select Feature Flag](experiment-details-exposure-select-flag-light.png)
 
 `Select flag` opens a right-side Sheet over the unchanged Exposure page. Use the current React **Attach policies** Sheet and its shared `CommandInput` / `SelectableCommandList` composition as the primary visual and interaction reference, adapted to a single Flag selection:
 
@@ -64,7 +62,7 @@ Explicitly excluded:
 
 ##### Add Experiment Metrics Sheet
 
-![Release Decision Experiment details — Add Experiment Metrics](release-decision-experiment-details-exposure-add-metrics-light.png)
+![Experiment details — Add Experiment Metrics](experiment-details-exposure-add-metrics-light.png)
 
 `Add metrics` opens a right-side Sheet over the unchanged Exposure page:
 
@@ -118,7 +116,7 @@ The `Experiment metrics` table must reuse the same metric-role Badge treatment a
 
 ### Measuring stage — Bandit Run
 
-![Release Decision Experiment details — Bandit Measuring](release-decision-experiment-details-measuring-expt-1-baseline-arms-light.png)
+![Experiment details — Bandit Measuring](experiment-details-measuring-expt-1-baseline-arms-light.png)
 
 This asset is the approved light-theme, large-desktop design for a selected Run whose persisted method is `bandit`. It must not be reused as the complete specification for Bayesian A/B or Frequentist Runs.
 
@@ -187,7 +185,7 @@ The summary does not display a `Method` row. Method and algorithm already appear
 
 #### Edit assignment Sheet
 
-![Release Decision Experiment details — Edit Bandit assignment](release-decision-experiment-details-measuring-expt-1-edit-assignment-light.png)
+![Experiment details — Edit Bandit assignment](experiment-details-measuring-expt-1-edit-assignment-light.png)
 
 `Edit assignment` opens a full-height right-side Sheet over the unchanged Measuring page. The Sheet edits the same four assignment groups shown in the read-only summary and preserves their order.
 
@@ -205,7 +203,7 @@ The Run method is persisted before this view is opened. `Edit assignment` may ch
 
 ### Measuring stage — Bayesian A/B/n Run
 
-![Release Decision Experiment details — Bayesian run-3](release-decision-experiment-details-measuring-expt-1-bayesian-run-3-light.png)
+![Experiment details — Bayesian run-3](experiment-details-measuring-expt-1-bayesian-run-3-light.png)
 
 This asset is the approved light-theme, large-desktop design for a selected Run whose persisted method is `bayesian_ab`. It uses the real `run-3` state from Experiment `93feed84-68f5-4536-b192-2e71e6c2f734`: Easy is Control, Normal and Hard are Treatments, the Run is decided as `INCONCLUSIVE`, and every Variation has zero valid samples in the completed observation window.
 
@@ -279,11 +277,11 @@ This design covers the persisted `bayesian_ab` result schema. It does not author
 
 ### Learning stage
 
-![Release Decision Experiment details — Learning](release-decision-experiment-details-learning-light.png)
+![Experiment details — Learning](experiment-details-learning-light.png)
 
 The Learning body uses one continuous bordered workspace. It does not repeat the active-stage title from the stage navigation and does not import Measuring charts or analysis controls.
 
-The workspace preserves the existing `front-end-rda-tempo` learning contract while making the result easier to scan:
+The Learning workspace presents results using the following structure:
 
 - the workspace header is `Outcome & learning`, with one outline `Edit learning` action;
 - the experiment-level summary presents `Hypothesis` and `Key learning` side by side, separated by one thin divider;
@@ -309,17 +307,17 @@ Long learning text wraps inside its value region. Labels stay fixed and scannabl
 
 ### Coding Agent Mode Dialog
 
-![Release Decision Experiment Coding Agent Mode](release-decision-experiment-agent-setup-light.png)
+![Experiment Coding Agent Mode](experiment-agent-setup-light.png)
 
 ### Settings page
 
-![Release Decision Experiment Settings](release-decision-experiment-settings-danger-zone-row-light.png)
+![Experiment Settings](experiment-settings-danger-zone-row-light.png)
 
-The asset above supersedes `release-decision-experiment-settings-light.png` and `release-decision-experiment-settings-polished-light.png`. It preserves the compact information layout and adopts a GitHub-style single-row Danger zone treatment without copying repository-specific actions or terminology.
+The asset above supersedes `experiment-settings-light.png` and `experiment-settings-polished-light.png`. It preserves the compact information layout and adopts a GitHub-style single-row Danger zone treatment without copying repository-specific actions or terminology.
 
 This image is the approved large-desktop, light-theme direction.
 
-It supersedes `release-decision-experiment-details-intent-hypothesis-light.png`, which did not include stage subtitles. The approved Bandit assets in this document supersede all earlier Measuring drafts; earlier drafts must not be treated as implementation guidance.
+It supersedes `experiment-details-intent-hypothesis-light.png`, which did not include stage subtitles. The approved Bandit assets in this document supersede all earlier Measuring drafts; earlier drafts must not be treated as implementation guidance.
 
 ## Design Direction
 
@@ -409,11 +407,11 @@ Clicking the header `Coding Agent Mode` action opens a large centered Dialog ove
 
 Begin the first setup step directly below the Dialog description. Do not add an Experiment/environment context row: the Dialog is already opened from the current Experiment and the environment is already owned by the application context bar. Do not show the sidebar or context bar inside the Dialog, and do not duplicate project/environment selectors.
 
-### Step 1: Install release-decision skill
+### Step 1: Install experimentation skill
 
 Show:
 
-- title: `1. Install release-decision skill`;
+- title: `1. Install experimentation skill`;
 - helper: `Install the FeatBit experimentation skill once at the user or project level.`;
 - one copyable command:
 
@@ -630,7 +628,7 @@ While Settings is active:
 
 - preserve the Experiment header and its identity metadata;
 - give the Settings icon a subtle active neutral treatment;
-- hide the four-stage navigation because Settings is not a release-decision stage;
+- hide the four-stage navigation because Settings is not a experiment stage;
 - replace stage content with the Settings page;
 - provide `Back to Intent & Hypothesis` so the user can return to the previously active stage;
 - keep Coding Agent Mode available in the header without duplicating it in Settings.
@@ -764,7 +762,7 @@ Mobile-specific redesign is outside scope.
 
 Future implementation should separate detail-page orchestration, identity header, stage navigation, Details view, edit Dialog, conflict feedback, settings, and stage transition behavior by responsibility.
 
-Use existing shared shadcn/Base UI components without modifying their generated source. All visible copy belongs in the existing global Release Decision i18n resource. Preserve the public Experiment detail route unless a route change is explicitly requested.
+Use existing shared shadcn/Base UI components without modifying their generated source. All visible copy belongs in the existing global i18n resource. Preserve the public Experiment detail route unless a route change is explicitly requested.
 
 This document is design guidance only. It does not authorize React, API, backend, route, sidebar, context-bar, Header, test, package, configuration, or i18n changes.
 

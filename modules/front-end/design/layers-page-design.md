@@ -1,8 +1,8 @@
-# Release Decision Layers Page Design
+# Layers Page Design
 
 ## Scope
 
-This document defines the React design for the **Layers** workflow under **Release Decision** in `front-end`.
+This document defines the React design for the **Layers** workflow in `front-end`.
 
 Included:
 
@@ -22,17 +22,17 @@ Explicitly excluded:
 - changes to the sidebar, context bar, environment switcher, Header, or authenticated application shell;
 - implementation changes to React, routes, APIs, backend services, tests, configuration, or i18n.
 
-`front-end-rda-tempo` is the functional and semantic reference for Layers. It is not the visual reference. The current React Feature Flags and Segments list pages are the visual and interaction references.
+The current React Feature Flags and Segments list pages are the visual and interaction references.
 
 ## Design Assets
 
 ### Layers list
 
-![Release Decision Layers list](release-decision-layers-list-light.png)
+![Layers list](layers-list-light.png)
 
 ### New layer Sheet
 
-![Release Decision New layer Sheet](release-decision-layers-new-sheet-light.png)
+![New layer Sheet](layers-new-sheet-light.png)
 
 The images show the large desktop light-theme design at 1536 x 1024. They define the approved information hierarchy, density, alignment, color usage, toolbar, pagination, and Sheet composition.
 
@@ -497,7 +497,7 @@ The response must be computed from one consistent backend view of the Layer and 
 - If the backend response does not contain a usable summary, show `Allocation unavailable`; never turn missing data into `No allocation` or `No conflicts`.
 - Loading, unavailable, and genuinely empty allocation are three different states.
 
-This contract makes the same paged backend response the source of truth for `front-end`, `front-end-rda-tempo`, and future clients.
+This contract makes the same paged backend response the source of truth for `front-end` and future clients.
 
 ### Known gaps affecting this design
 

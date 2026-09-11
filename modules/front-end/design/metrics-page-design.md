@@ -1,8 +1,8 @@
-# Release Decision Metrics Page Design
+# Metrics Page Design
 
 ## Scope
 
-This document defines the React design for the **Metrics** list page under **Release Decision** in `front-end`.
+This document defines the React design for the **Metrics** list page in `front-end`.
 
 Included:
 
@@ -23,25 +23,25 @@ Explicitly excluded:
 - changes to the sidebar, context bar, environment switcher, Header, or authenticated application shell;
 - implementation changes to React, routes, APIs, backend services, tests, configuration, packages, or i18n.
 
-`front-end-rda-tempo` is the functional and semantic reference for Metrics. It is not the visual reference. The implemented React Layers page is the primary visual and interaction reference. Feature Flags and Segments remain supporting references for list density and shared controls.
+The implemented React Layers page is the primary visual and interaction reference. Feature Flags and Segments remain supporting references for list density and shared controls.
 
 ## Design Assets
 
 ### Metrics list
 
-![Release Decision Metrics list](release-decision-metrics-list-light.png)
+![Metrics list](metrics-list-light.png)
 
 ### New metric Sheet
 
-![Release Decision New metric Sheet](release-decision-metrics-new-sheet-light.png)
+![New metric Sheet](metrics-new-sheet-light.png)
 
 ### Edit metric Sheet
 
-![Release Decision Edit metric Sheet](release-decision-metrics-edit-sheet-light.png)
+![Edit metric Sheet](metrics-edit-sheet-light.png)
 
 ### Archive metric confirmation
 
-![Release Decision Archive metric confirmation](release-decision-metrics-archive-dialog-light.png)
+![Archive metric confirmation](metrics-archive-dialog-light.png)
 
 The images show the approved large-desktop light-theme designs. They define the information hierarchy, toolbar, table columns, status treatment, direct Experiment-run presentation, row actions, pagination, Sheet composition, form density, and Archive confirmation.
 
@@ -300,7 +300,7 @@ Follow the project Select composition rule: `SelectContent > SelectGroup > Selec
 
 ## New Metric Sheet
 
-`New metric` opens a right-side Sheet and preserves the Metrics list behind the standard translucent overlay. Do not use the centered Dialog from `front-end-rda-tempo`.
+`New metric` opens a right-side Sheet and preserves the Metrics list behind the standard translucent overlay.
 
 ### Frame
 
@@ -588,7 +588,7 @@ type UpdateMetricPayload = {
 
 Future implementation should split page/query orchestration, toolbar, table, Metric cell, Experiment runs cell, pagination, mutation confirmations, and creation/editing surfaces by responsibility.
 
-Use existing shared shadcn/Base UI components without modifying their generated source. All user-visible copy belongs in the existing global Release Decision i18n resource.
+Use existing shared shadcn/Base UI components without modifying their generated source. All user-visible copy belongs in the existing global i18n resource.
 
 This document is design guidance only. It does not authorize React, API, backend, route, sidebar, context-bar, test, package, configuration, or i18n changes.
 

@@ -1,8 +1,8 @@
-# Release Decision Experiments Page Design
+# Experiments Page Design
 
 ## Scope
 
-This document defines the React design for **Experiments** under **Release Decision** in `front-end`.
+This document defines the React design for **Experiments** in `front-end`.
 
 Included:
 
@@ -22,23 +22,23 @@ Explicitly excluded:
 - sidebar, context bar, Header, environment switcher, or authenticated-shell changes;
 - React, route, API, backend, test, configuration, package, or i18n implementation.
 
-`front-end-rda-tempo` is the functional and semantic reference. It is not the visual reference. The implemented React Layers, Metrics, and Feature Flags lists are the visual and interaction references.
+The implemented React Layers, Metrics, and Feature Flags lists are the visual and interaction references.
 
 ## Design Assets
 
 ### Experiments list
 
-![Release Decision Experiments list](release-decision-experiments-list-light.png)
+![Experiments list](experiments-list-light.png)
 
 ### New experiment Sheet
 
-![Release Decision New experiment Sheet](release-decision-experiments-new-sheet-light.png)
+![New experiment Sheet](experiments-new-sheet-light.png)
 
 The images show the approved large-desktop light-theme direction. They define the information hierarchy, density, toolbar, table, pagination, Sheet composition, and neutral status treatment.
 
 ## Product Model
 
-An Experiment is an environment-scoped release-decision workspace. It moves through four stages:
+An Experiment is an environment-scoped experimentation workspace. It moves through four stages:
 
 1. `hypothesis` — **Intent & Hypothesis**;
 2. `implementing` — **Exposure**;
@@ -73,7 +73,7 @@ Use the established React release workbench:
 ### Header
 
 - Title: `Experiments`
-- Subtitle: `Run controlled experiments and turn evidence into release decisions.`
+- Subtitle: `Run controlled experiments and turn evidence into informed decisions.`
 - Keep the title block aligned with Layers and Metrics.
 - Do not repeat organization, project, or environment context in the page body.
 - Do not add summary cards, totals, charts, or attention counters above the table.
@@ -260,7 +260,7 @@ The backend already returns a paged result. Future React implementation must use
 ### Header
 
 - Title: `New experiment`
-- Description: `Create an experiment to move from intent and hypothesis to an evidence-based release decision.`
+- Description: `Create an experiment to move from intent and hypothesis to an evidence-based decision.`
 - Standard close button in the top-right.
 
 ### Fields
@@ -398,7 +398,7 @@ Mobile-specific redesign is outside scope.
 
 Future implementation should split page/query orchestration, toolbar, table, pagination, Run summary, stage presentation, and New experiment Sheet by responsibility.
 
-Use existing shared shadcn/Base UI components without modifying their generated source. All visible copy belongs in the existing global Release Decision i18n resource. The public `/experiments` route remains unchanged.
+Use existing shared shadcn/Base UI components without modifying their generated source. All visible copy belongs in the existing global i18n resource. The public `/experiments` route remains unchanged.
 
 This document is design guidance only. It does not authorize React, API, backend, route, sidebar, context-bar, Header, test, package, configuration, or i18n changes.
 
