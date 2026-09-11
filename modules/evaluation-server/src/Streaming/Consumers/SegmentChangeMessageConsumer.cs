@@ -8,7 +8,7 @@ using Streaming.Services;
 
 namespace Streaming.Consumers;
 
-public class SegmentChangeMessageConsumer(
+public partial class SegmentChangeMessageConsumer(
     IConnectionManager connectionManager,
     IDataSyncService dataSyncService,
     ILogger<SegmentChangeMessageConsumer> logger)
@@ -66,12 +66,7 @@ public class SegmentChangeMessageConsumer(
             {
                 failed++;
                 PropagationMetrics.Current.RecordDelivery(ChangeId.SegmentResource, Outcomes.Failure);
-                logger.LogError(
-                    ex,
-                    "Exception occurred while processing segment change message for connection {ConnectionId} in env {EnvId}.",
-                    connection.Id,
-                    envId
-                );
+                Log.ProcessingFailed(logger, connection.Id, envId, ex);
             }
         }
 

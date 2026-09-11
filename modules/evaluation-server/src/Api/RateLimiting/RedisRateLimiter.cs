@@ -12,7 +12,7 @@ namespace Api.RateLimiting;
 /// and <see cref="RateLimiterType.TokenBucket"/> algorithms.
 /// When Redis is unreachable the limiter fails open (allows the request).
 /// </summary>
-public sealed class RedisRateLimiter : RateLimiter
+public sealed partial class RedisRateLimiter : RateLimiter
 {
     private readonly IRedisClient _redisClient;
     private readonly string _partitionKey;
@@ -226,14 +226,14 @@ public sealed class RedisRateLimiter : RateLimiter
             // Recorded as fail_open, not success: the request was allowed because the limiter was
             // broken, which is the state an operator needs to be able to alert on.
             RecordDecision(Outcomes.FailOpen, startedAt);
-            _logger.LogWarning(ex, "Redis rate-limit evaluation failed for {PartitionKey}; failing open", _partitionKey);
+            Log.EvaluationFailed(_logger, _partitionKey, ex);
             return new RedisRateLimitLease(true);
         }
         catch (RedisTimeoutException ex)
         {
             // Fail open – if Redis times out, allow the request through.
             RecordDecision(Outcomes.FailOpen, startedAt);
-            _logger.LogWarning(ex, "Redis rate-limit evaluation timed out for {PartitionKey}; failing open", _partitionKey);
+            Log.EvaluationTimedOut(_logger, _partitionKey, ex);
             return new RedisRateLimitLease(true);
         }
     }

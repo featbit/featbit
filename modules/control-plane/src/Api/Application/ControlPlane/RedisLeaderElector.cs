@@ -51,7 +51,7 @@ namespace Api.Application.ControlPlane;
 /// instance-owned Meter is also how a caller distinguishes two electors now that the gauge carries
 /// no <c>instance_id</c> tag — listen per Meter instance, not per tag.
 /// </summary>
-public sealed class RedisLeaderElector : BackgroundService, ILeaderElection
+public sealed partial class RedisLeaderElector : BackgroundService, ILeaderElection
 {
     /// <summary>
     /// Default lock TTL when not overridden via <c>ControlPlane:LeaderElection:TtlSeconds</c>.
@@ -164,15 +164,11 @@ public sealed class RedisLeaderElector : BackgroundService, ILeaderElection
                     _isLeader = true;
                     ControlPlaneMetrics.Current.RecordLeaderTransition(LeaderTransitionKinds.Acquired);
                     _worker.Success();
-                    _logger.LogInformation(
-                        "Leader election: instance {InstanceId} acquired leadership.", InstanceId);
+                    Log.LeadershipAcquired(_logger, InstanceId);
                 }
                 else
                 {
-                    _logger.LogDebug(
-                        "Leader election: instance {InstanceId} did not acquire leadership " +
-                        "(another instance holds the lock).",
-                        InstanceId);
+                    Log.LeadershipNotAcquired(_logger, InstanceId);
                 }
             }
             else
@@ -181,16 +177,13 @@ public sealed class RedisLeaderElector : BackgroundService, ILeaderElection
                 if (extended)
                 {
                     _worker.Success();
-                    _logger.LogDebug(
-                        "Leader election: instance {InstanceId} renewed leadership.", InstanceId);
+                    Log.LeadershipRenewed(_logger, InstanceId);
                 }
                 else
                 {
                     _isLeader = false;
                     ControlPlaneMetrics.Current.RecordLeaderTransition(LeaderTransitionKinds.Lost);
-                    _logger.LogWarning(
-                        "Leader election: instance {InstanceId} lost leadership (failed to extend the lock).",
-                        InstanceId);
+                    Log.LeadershipLost(_logger, InstanceId);
                 }
             }
         }
@@ -207,12 +200,11 @@ public sealed class RedisLeaderElector : BackgroundService, ILeaderElection
             }
 
             _worker.LoopFailed(ex);
-            _logger.LogWarning(
-                ex,
-                "Leader election: instance {InstanceId} hit a Redis error while {Action}; " +
-                "treating as not-leader and retrying next tick.",
+            Log.RedisError(
+                _logger,
                 InstanceId,
-                wasLeader ? "renewing leadership" : "attempting to acquire leadership");
+                wasLeader ? "renewing leadership" : "attempting to acquire leadership",
+                ex);
         }
     }
 
@@ -236,16 +228,11 @@ public sealed class RedisLeaderElector : BackgroundService, ILeaderElection
             await redis.LockReleaseAsync(LockKey, _lockValue);
             _isLeader = false;
             ControlPlaneMetrics.Current.RecordLeaderTransition(LeaderTransitionKinds.Released);
-            _logger.LogInformation(
-                "Leader election: instance {InstanceId} released leadership on shutdown.", InstanceId);
+            Log.LeadershipReleased(_logger, InstanceId);
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(
-                ex,
-                "Leader election: instance {InstanceId} failed to release the lock on shutdown; " +
-                "it will expire via TTL instead.",
-                InstanceId);
+            Log.ErrorReleaseLock(_logger, InstanceId, ex);
         }
     }
 

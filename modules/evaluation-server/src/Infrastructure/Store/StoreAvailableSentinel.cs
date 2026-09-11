@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Store;
 
-public class StoreAvailableSentinel : IHostedService
+public partial class StoreAvailableSentinel : IHostedService
 {
     private readonly PeriodicTimer _periodicTimer = new(TimeSpan.FromSeconds(6));
     private readonly TimeSpan _checkAvailableTimeout = TimeSpan.FromSeconds(2);
@@ -57,10 +57,7 @@ public class StoreAvailableSentinel : IHostedService
         // start checking store availability loop
         _ = StartCheckLoop(cancellationToken);
 
-        _logger.LogInformation(
-            "Store availability sentinel started. Default available store: {Store}.",
-            StoreAvailabilityListener.Instance.AvailableStore
-        );
+        Log.SentinelStarted(_logger, StoreAvailabilityListener.Instance.AvailableStore);
 
         return Task.CompletedTask;
     }
@@ -80,7 +77,7 @@ public class StoreAvailableSentinel : IHostedService
             catch (Exception ex)
             {
                 // log exception
-                _logger.LogError(ex, "Error occurred while checking store availability");
+                Log.AvailabilityCheckFailed(_logger, ex);
             }
 
             await _periodicTimer.WaitForNextTickAsync(cancellationToken);
@@ -117,21 +114,21 @@ public class StoreAvailableSentinel : IHostedService
                 StoreMetrics.Current.RecordAvailabilityCheck(
                     store.Name, Outcomes.Timeout, Stopwatch.GetElapsedTime(startedAt));
 
-                _logger.LogDebug("Store availability check timed out for {Store}.", store.Name);
+                Log.AvailabilityCheckTimedOut(_logger, store.Name);
                 checkAvailableTask.Ignore();
             }
         }
 
         StoreMetrics.Current.RecordNoStoreAvailable();
 
-        _logger.LogError("No available store can be used.");
+        Log.NoStoreAvailable(_logger);
     }
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
         _periodicTimer.Dispose();
 
-        _logger.LogInformation("Store availability sentinel stopped.");
+        Log.SentinelStopped(_logger);
 
         return Task.CompletedTask;
     }

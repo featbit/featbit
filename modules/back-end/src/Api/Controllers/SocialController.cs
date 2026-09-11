@@ -9,7 +9,7 @@ namespace Api.Controllers;
 
 [AllowAnonymous]
 [Route("api/v{version:apiVersion}/social")]
-public class SocialController : ApiControllerBase
+public partial class SocialController : ApiControllerBase
 {
     private readonly OAuthClient _oauthClient;
     private readonly OAuthProviders _oauthProviders;
@@ -80,7 +80,7 @@ public class SocialController : ApiControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Exception occurred when performing OAuth login.");
+            Log.ErrorOAuthLogin(_logger, ex);
 
             metrics.RecordLogin(AuthMethods.OAuth, Outcomes.Failure, AuthReasons.Error);
 

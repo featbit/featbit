@@ -5,7 +5,7 @@ using Domain.Resources;
 
 namespace Api.Authorization;
 
-public class DefaultPermissionChecker(
+public partial class DefaultPermissionChecker(
     IResourceService resourceService,
     IRequestPermissions requestPermissions,
     ILogger<DefaultPermissionChecker> logger)
@@ -20,7 +20,7 @@ public class DefaultPermissionChecker(
 
         if (!resources.TryGetValue(permission, out var resourceType))
         {
-            logger.LogWarning("The permission '{Permission}' has no corresponding resourceType.", permission);
+            Log.UnmappedPermission(logger, permission);
             metrics.RecordAuthorization(
                 AuthMethods.Unknown, Outcomes.Rejected, AuthReasons.UnmappedPermission);
             return false;
@@ -83,7 +83,7 @@ public class DefaultPermissionChecker(
             if (!Guid.TryParse(projectIdString, out var projectId))
             {
                 // invalid project id, return empty
-                logger.LogWarning("Invalid projectId '{ProjectId}' in route values.", projectIdString);
+                Log.InvalidProjectId(logger, projectIdString);
                 return string.Empty;
             }
 
@@ -106,7 +106,7 @@ public class DefaultPermissionChecker(
             if (!Guid.TryParse(envIdString, out var envId))
             {
                 // invalid env id, return empty
-                logger.LogWarning("Invalid envId '{EnvId}' in route values.", envIdString);
+                Log.InvalidEnvId(logger, envIdString);
                 return string.Empty;
             }
 
@@ -155,7 +155,7 @@ public class DefaultPermissionChecker(
             if (!Guid.TryParse(segmentIdRouteValue?.ToString(), out var segmentId))
             {
                 // invalid segment id, return empty
-                logger.LogWarning("Invalid segmentId '{SegmentId}' in route values.", segmentIdRouteValue);
+                Log.InvalidSegmentId(logger, segmentIdRouteValue);
                 return string.Empty;
             }
 

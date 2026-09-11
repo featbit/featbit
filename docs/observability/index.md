@@ -277,14 +277,11 @@ on every deployment — see [`investigating.md` §4](./investigating.md).
 
 ## 6. Logging
 
-- **Use source-generated logging.** Every log event is declared with `[LoggerMessage]`. Do not call
-  `ILogger.Log*` with an interpolated string. *(Existing call sites are being migrated
-  incrementally; every event carrying a credential has already been migrated because it needed the
-  redaction wrapper in §7. New code must comply.)*
-- **Preserve `EventId` and `EventName` when migrating an existing event.** Log-based alerting may
-  key on them.
-- **Event IDs are allocated per logging class**, sequential from 1, and are never reused or
-  renumbered once shipped.
+- **Use source-generated logging.** Every log event in `back-end`, `evaluation-server`, and
+  `control-plane` production code is declared with `[LoggerMessage]`. **There are no raw
+  `logger.LogInformation(...)` / `LogWarning` / `LogError` / `LogDebug` / `LogTrace` /
+  `LogCritical` calls left in any of the three `src/` trees, and none may be added.** The exact
+  shape is specified in §6.1 below.
 - **Log levels:**
 
   | Level | Use for |
@@ -305,6 +302,128 @@ on every deployment — see [`investigating.md` §4](./investigating.md).
   failures (validation, not-found, conflict, forbidden, business rule) log at `Warning`; anything
   else logs at `Error`. Validation failures log error **codes** only, never the offending values,
   which are user input.
+
+### 6.1 The `[LoggerMessage]` standard
+
+This is the whole convention. It is mechanical on purpose — there is no judgment call to make, so
+no two files can diverge.
+
+**1. One sibling `<ClassName>.Log.cs` file per class that logs.** Never inline the `Log` class into
+the type's own file, even for a single call site. The sibling lives next to the class, in the same
+namespace, and re-declares the type as `partial`:
+
+```csharp
+// DcIdConsistencyChecker.Log.cs
+using Domain.Observability;
+
+namespace Api.Application.ControlPlane;
+
+public sealed partial class DcIdConsistencyChecker
+{
+    public static partial class Log
+    {
+        [LoggerMessage(1, LogLevel.Information,
+            "DcId consistency checker disabled (consistency mode is not GatedCommit).",
+            EventName = "DcIdConsistencyCheckerDisabled")]
+        public static partial void Disabled(ILogger logger);
+    }
+}
+```
+
+Call it as `Log.Disabled(_logger);`. A uniform rule beats a size threshold: inlining means editing
+class bodies that variously use primary constructors, tabs, records, and static classes, which is
+where mistakes happen.
+
+**1b. The one sanctioned exception: a cross-cutting logging class gets its own file, named for
+itself.** When a set of log events is called from *many* unrelated types rather than owned by one,
+it is declared as a standalone `static partial class` of `ILogger` extension methods in its own
+file. There is exactly one of these —
+`evaluation-server/src/Streaming/StreamingLoggingExtensions.cs` — and it is also the reference
+implementation for the redaction wrapper in §7. It obeys the point of rule 1 (logging declarations
+live in a dedicated file, never inlined into a type that does other work) while not being the
+sibling of any single class, because it has no single owner. Do not create more of these without a
+genuine cross-cutting caller set; the sibling file is the default.
+
+**2. Positional attribute arguments, with a named `EventName`.**
+`[LoggerMessage(<id>, LogLevel.<Level>, "<template>", EventName = "<Name>")]`. Positional is the
+repo-wide standard by a wide margin — 237 declarations to 9. Do **not** write
+`[LoggerMessage(EventId = 1, Level = ..., Message = ...)]`.
+
+The 9 named-form declarations are all in
+`evaluation-server/src/Streaming/Messages/MessageDispatcher.Log.cs`, which pairs named form with
+`[TagProvider]` parameter attributes. They are **left alone deliberately**: they are the oldest
+`[LoggerMessage]` declarations in the estate, and rule 4 means their `EventId` and `EventName`
+values must not move. Treat that file as frozen rather than as a precedent.
+
+**3. Event IDs start at `1` within each owning class and are contiguous.** Each class has its own
+independent sequence — ids are *not* unique across the assembly and are not meant to be. If a class
+already has a `.Log.cs`, append from the highest existing id plus one.
+
+**4. Preserve `EventId` and `EventName` on an event that already exists.** Log-based alerting keys
+on them, so changing one silently breaks an alert. Renaming a *method* is free; renaming its
+`EventName` is a breaking change and belongs in the breaking-change register.
+
+**5. Parameter types must match the original argument expression exactly. Never add `.ToString()`
+to make a call compile.** This is the single rule most likely to be broken, because breaking it
+compiles, renders identically, and is invisible in console output:
+
+```csharp
+// Guid Id — correct: the structured payload stays a Guid
+public static partial void Applied(ILogger logger, Guid flagId);
+
+// WRONG: compiles, renders the same, and silently degrades the payload to a string
+// Log.Applied(logger, flag.Id.ToString());
+```
+
+The old `ILogger.Log*` API took `params object?[]`, so anything compiled; the source generator is
+strongly typed and will reject a mismatch. Widen the parameter to the real type — `Guid`, `long`,
+`double`, `DateTimeOffset`, `ErrorCode`, `object?` — rather than coercing the argument. Structured
+log consumers query on these types, and no test asserts the payload type, so a coercion will not be
+caught.
+
+**6. Credential-bearing events use the private-`Core` + public-wrapper shape** described in §7. The
+wrapper is the only public entry point, so logging the raw value is impossible rather than merely
+discouraged.
+
+**7. A static class may still log.** A nested `static partial class Log` inside a
+`static partial class` compiles fine; just add `partial` to the outer declaration.
+
+**8. Do not reword an existing message template without checking the tests.** Several tests assert
+rendered log text or, in one case, the exact structured property set with
+`Assert.Equivalent(strict: true)`. Migration is meant to be behavior-preserving down to the
+rendered string.
+
+**Enforced at build time — the raw-call rule only.** One part of this standard is checkable by a
+compiler — *that no raw `ILogger.Log*` call survives* — and that part is not a convention you have
+to remember; it is a build failure. The .NET analyzer rule **CA1848 ("Use the LoggerMessage
+delegates")** is turned on as an **error** for production code, so a raw `ILogger.Log*` call does
+not compile. CA1848 ships with the SDK analyzers but is disabled by default; it is switched on,
+scoped to `src/` only, by
+`.editorconfig` files that set `dotnet_diagnostic.CA1848.severity = error`. One lives at each
+module's `src/` root — `modules/back-end/src/.editorconfig`,
+`modules/evaluation-server/src/.editorconfig`, `modules/control-plane/src/.editorconfig` — and a
+fourth at `modules/shared/.editorconfig` covers the shared production libraries
+(`Observability`, `Observability.AspNetCore`). Test projects live outside `src/` and are
+deliberately left alone so they can keep using `FakeLogger` and direct logging. A violation
+therefore fails the module's build with a `CA1848` error rather than merely being frowned upon.
+
+CA1848 checks exactly one thing: that logging goes through a `[LoggerMessage]` method instead of a
+raw `ILogger.Log*` extension call. The rest of this section is **not** machine-checked. Nothing
+fails the build if you inline the `Log` class instead of using a sibling file (rule 1), switch to
+named attribute arguments (rule 2), skip or duplicate an event id (rules 3–4), or coerce an
+argument with `.ToString()` (rule 5). Those remain convention, caught only in review — do not read
+the CA1848 gate as enforcing them.
+
+**Secondary check.** As a quick manual sweep, this grep should still return zero hits under each
+module's `src/`:
+
+```sh
+rg '\.(LogTrace|LogDebug|LogInformation|LogWarning|LogError|LogCritical)\s*\(' \
+   modules/back-end/src modules/evaluation-server/src modules/control-plane/src modules/shared
+```
+
+Deliberately look-behind free, so it runs on a stock ripgrep without `--pcre2`. It matches any
+raw `.LogXxx(` call; the generated methods are invoked as `Log.<Name>(...)` and so do not match.
 
 ## 7. Sensitive data
 
@@ -332,7 +451,8 @@ Every log event that would otherwise carry a credential is declared as a **priva
 source-generated method behind a **public wrapper that redacts first**:
 
 ```csharp
-[LoggerMessage(4, LogLevel.Error, "… {Token}.", EventName = "ErrorLookupSecretToken")]
+[LoggerMessage(5, LogLevel.Error, "Exception occurred while looking up secret token: {Token}.",
+    EventName = "ErrorLookupSecretToken")]
 private static partial void ErrorLookupSecretTokenCore(ILogger logger, string? token, Exception ex);
 
 public static void ErrorLookupSecretToken(this ILogger logger, string? token, Exception ex)

@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.AppService;
 
-public class FlagScheduleWorker(IServiceProvider serviceProvider, ILogger<FlagScheduleWorker> logger)
+public partial class FlagScheduleWorker(IServiceProvider serviceProvider, ILogger<FlagScheduleWorker> logger)
     : BackgroundService
 {
     private readonly PeriodicTimer _timer = new(TimeSpan.FromSeconds(45));
@@ -41,7 +41,7 @@ public class FlagScheduleWorker(IServiceProvider serviceProvider, ILogger<FlagSc
 
     public override Task StopAsync(CancellationToken cancellationToken)
     {
-        logger.LogInformation("Stopping flag schedule worker...");
+        Log.StoppingWorker(logger);
 
         // This will cause any active call to WaitForNextTickAsync() to return false immediately.
         _timer.Dispose();
@@ -93,10 +93,7 @@ public class FlagScheduleWorker(IServiceProvider serviceProvider, ILogger<FlagSc
 
                     trace.Success();
 
-                    logger.LogInformation(
-                        "{ScheduleId}:{ScheduleTitle}: Flag schedule has been applied.", schedule.Id,
-                        schedule.Title
-                    );
+                    Log.ScheduleApplied(logger, schedule.Id, schedule.Title);
                 }
                 catch (Exception ex)
                 {
@@ -105,10 +102,7 @@ public class FlagScheduleWorker(IServiceProvider serviceProvider, ILogger<FlagSc
                     metrics.RecordApplied(Outcomes.Failure, Stopwatch.GetElapsedTime(start));
                     trace.Failed(ex);
 
-                    logger.LogError(ex,
-                        "{ScheduleId}:{ScheduleTitle}: Error occurred while applying flag schedule.",
-                        schedule.Id, schedule.Title
-                    );
+                    Log.ErrorApplySchedule(logger, schedule.Id, schedule.Title, ex);
                 }
             }
 
@@ -121,7 +115,7 @@ public class FlagScheduleWorker(IServiceProvider serviceProvider, ILogger<FlagSc
         catch (Exception ex)
         {
             _observability.LoopFailed(ex);
-            logger.LogError(ex, "Error occurred while processing flag schedule.");
+            Log.ErrorProcessSchedule(logger, ex);
         }
 
         return;

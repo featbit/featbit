@@ -54,7 +54,7 @@ namespace Api.Application.ControlPlane;
 /// scopes who acts. If, in some MQ topologies, control-plane commands are delivered only locally,
 /// remote-DC targeting would additionally need a per-DC command publish — a follow-up, NOT built here.
 /// </summary>
-public sealed class RecoveryWorker : BackgroundService
+public sealed partial class RecoveryWorker : BackgroundService
 {
     /// <summary>
     /// Default interval between recovery ticks when not overridden via
@@ -100,8 +100,7 @@ public sealed class RecoveryWorker : BackgroundService
     {
         if (!_enabled)
         {
-            _logger.LogInformation(
-                "Recovery worker disabled (consistency mode is not GatedCommit).");
+            Log.WorkerDisabled(_logger);
             return;
         }
 
@@ -120,9 +119,7 @@ public sealed class RecoveryWorker : BackgroundService
                     if (backfilled > 0)
                     {
                         _worker.Success();
-                        _logger.LogInformation(
-                            "Recovery worker backfilled {BackfilledCount} returning DC(s).",
-                            backfilled);
+                        Log.Backfilled(_logger, backfilled);
                     }
                 }
                 catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
@@ -132,7 +129,7 @@ public sealed class RecoveryWorker : BackgroundService
                 catch (Exception ex)
                 {
                     _worker.LoopFailed(ex);
-                    _logger.LogError(ex, "Error occurred while running the recovery worker tick.");
+                    Log.ErrorTick(_logger, ex);
                 }
             }
         }
@@ -197,12 +194,7 @@ public sealed class RecoveryWorker : BackgroundService
         // the NEXT tick treats them as newly-returned again once the guard clears.
         if (!_backfiller.IsCompositeCacheAvailable)
         {
-            _logger.LogWarning(
-                "Recovery worker: composite Redis cache is unavailable; skipping backfill for " +
-                "{Count} returned DC(s) this tick ({DcIds}). Will retry once they are re-detected " +
-                "as returned.",
-                returned.Count,
-                string.Join(", ", returned));
+            Log.CompositeCacheUnavailable(_logger, returned.Count, string.Join(", ", returned));
             // Force a retry: forget these DCs from the watermark so next tick treats them as
             // newly-returned again once the guard clears.
             foreach (var dcId in returned)
@@ -242,10 +234,7 @@ public sealed class RecoveryWorker : BackgroundService
             if (result == IDcBackfiller.Skipped)
             {
                 ControlPlaneMetrics.Current.RecordDcBackfill(dcId, BackfillOutcomes.Coalesced);
-                _logger.LogDebug(
-                    "Recovery worker: backfill for returned DC {DcId} was skipped this tick " +
-                    "(coalesced with a concurrent backfill already in flight for that DC).",
-                    dcId);
+                Log.BackfillCoalesced(_logger, dcId);
             }
             else if (result > 0)
             {
@@ -255,11 +244,7 @@ public sealed class RecoveryWorker : BackgroundService
             else
             {
                 ControlPlaneMetrics.Current.RecordDcBackfill(dcId, BackfillOutcomes.NoChange);
-                _logger.LogDebug(
-                    "Recovery worker: backfill for returned DC {DcId} ran but the only-advance guard " +
-                    "accepted zero flag writes (its Redis already matched the source of truth); not " +
-                    "counted as a repair.",
-                    dcId);
+                Log.BackfillNoWrites(_logger, dcId);
             }
         }
 

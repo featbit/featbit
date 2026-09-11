@@ -7,7 +7,7 @@ using Domain.Users;
 
 namespace Api.Authorization;
 
-public class RequestPermissions(IMemberService memberService, ILogger<RequestPermissions> logger) : IRequestPermissions
+public partial class RequestPermissions(IMemberService memberService, ILogger<RequestPermissions> logger) : IRequestPermissions
 {
     // this class is intended to be registered as a scoped service
     // so it's safe to cache permissions in a private field for the duration of the request
@@ -40,14 +40,14 @@ public class RequestPermissions(IMemberService memberService, ILogger<RequestPer
                 var userIdClaim = context.User.Claims.FirstOrDefault(x => x.Type == UserClaims.Id);
                 if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
                 {
-                    logger.LogWarning("Malformed user id claim in JWT token.");
+                    Log.MalformedUserIdClaim(logger);
                     return [];
                 }
 
                 var organizationId = context.Request.OrganizationId();
                 if (organizationId == Guid.Empty)
                 {
-                    logger.LogWarning("Malformed or missing organization id in request headers.");
+                    Log.MalformedOrganizationId(logger);
                     return [];
                 }
 
@@ -58,7 +58,7 @@ public class RequestPermissions(IMemberService memberService, ILogger<RequestPer
             {
                 if (context.Items[ApplicationConsts.AccessTokenItem] is not AccessToken accessToken)
                 {
-                    logger.LogWarning("Access token not found in HttpContext.Items.");
+                    Log.AccessTokenNotFound(logger);
                     return [];
                 }
 

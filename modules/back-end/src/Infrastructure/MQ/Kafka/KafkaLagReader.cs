@@ -46,7 +46,7 @@ public sealed record KafkaLagSnapshot(
 /// disagreement that costs an hour during an incident.
 /// </para>
 /// </remarks>
-public sealed class KafkaLagReader : IDisposable
+public sealed partial class KafkaLagReader : IDisposable
 {
     private static readonly TimeSpan MetadataTimeout = TimeSpan.FromSeconds(5);
     private static readonly TimeSpan OffsetTimeout = TimeSpan.FromSeconds(3);
@@ -165,7 +165,7 @@ public sealed class KafkaLagReader : IDisposable
                 // librdkafka reports transient connectivity through the error handler; without one
                 // it writes to stderr, which bypasses Serilog entirely.
                 .SetErrorHandler((_, error) =>
-                    _logger.LogDebug("Kafka lag reader reported {ErrorCode}.", error.Code))
+                    Log.ReaderError(_logger, error.Code))
                 .Build();
         }
     }

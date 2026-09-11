@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Services;
 
-public class BillingService(
+public partial class BillingService(
     IHttpClientFactory httpClientFactory,
     IConfiguration configuration,
     ILogger<BillingService> logger)
@@ -35,11 +35,7 @@ public class BillingService(
         }
         catch (Exception ex)
         {
-            logger.LogError(
-                ex,
-                "Exception occurred while retrieving subscription for workspace {WorkspaceId}.",
-                workspaceId
-            );
+            Log.ErrorGetSubscription(logger, workspaceId, ex);
 
             return null;
         }
@@ -56,11 +52,7 @@ public class BillingService(
         }
         catch (Exception ex)
         {
-            logger.LogError(
-                ex,
-                "Exception occurred while retrieving current billing cycle for workspace {WorkspaceId}.",
-                workspaceId
-            );
+            Log.ErrorGetCurrentBillingCycle(logger, workspaceId, ex);
 
             return null;
         }
@@ -80,7 +72,7 @@ public class BillingService(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Exception occurred while creating subscription for {Request}.", request.ToString());
+            Log.ErrorCreateSubscription(logger, request.ToString(), ex);
             return null;
         }
     }
@@ -100,7 +92,7 @@ public class BillingService(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Exception occurred while getting proration preview for {Request}.", request.ToString());
+            Log.ErrorGetProrationPreview(logger, request.ToString(), ex);
             return null;
         }
     }
@@ -120,7 +112,7 @@ public class BillingService(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Exception occurred while upgrading subscription for {Request}.", request.ToString());
+            Log.ErrorUpgradeSubscription(logger, request.ToString(), ex);
             return null;
         }
     }
@@ -140,7 +132,7 @@ public class BillingService(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Exception occurred while downgrading subscription for {Request}.", request.ToString());
+            Log.ErrorDowngradeSubscription(logger, request.ToString(), ex);
 
             return null;
         }
@@ -158,11 +150,7 @@ public class BillingService(
         }
         catch (Exception ex)
         {
-            logger.LogError(
-                ex,
-                "Exception occurred while retrieving license for workspace {WorkspaceId}.",
-                workspaceId
-            );
+            Log.ErrorGetLicense(logger, workspaceId, ex);
 
             return null;
         }
@@ -183,11 +171,7 @@ public class BillingService(
         }
         catch (Exception ex)
         {
-            logger.LogError(
-                ex,
-                "Exception occurred while creating free license for workspace {WorkspaceId} with email {Email}.",
-                workspaceId, email
-            );
+            Log.ErrorCreateFreeLicense(logger, workspaceId, email, ex);
 
             return false;
         }
@@ -204,10 +188,7 @@ public class BillingService(
         }
         catch (Exception ex)
         {
-            logger.LogError(
-                ex,
-                "Exception occurred while retrieving billing information for workspace {WorkspaceId}.", workspaceId
-            );
+            Log.ErrorGetBillingInformation(logger, workspaceId, ex);
 
             return null;
         }
@@ -228,11 +209,7 @@ public class BillingService(
         }
         catch (Exception ex)
         {
-            logger.LogError(
-                ex,
-                "Exception occurred while updating billing information for workspace {WorkspaceId}. Payload: {Payload}",
-                workspaceId, payload
-            );
+            Log.ErrorUpdateBillingInformation(logger, workspaceId, payload, ex);
 
             return false;
         }
@@ -250,10 +227,7 @@ public class BillingService(
         }
         catch (Exception ex)
         {
-            logger.LogError(
-                ex,
-                "Exception occurred while retrieving invoices for workspace {WorkspaceId}.", workspaceId
-            );
+            Log.ErrorGetInvoices(logger, workspaceId, ex);
 
             return null;
         }

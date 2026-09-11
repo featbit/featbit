@@ -13,7 +13,7 @@ using Microsoft.Security.AntiSSRF;
 
 namespace Infrastructure.Services;
 
-public class WebhookSender : IWebhookSender
+public partial class WebhookSender : IWebhookSender
 {
     /// <summary>
     /// Duration at or above which a webhook attempt span is always retained. The client timeout is
@@ -137,8 +137,7 @@ public class WebhookSender : IWebhookSender
         }
         catch (AntiSSRFException ex)
         {
-            _logger.LogWarning("Blocked webhook request to '{Url}' due to AntiSSRF policy: {Message}",
-                request.Url, ex.Message);
+            Log.BlockedByAntiSsrf(_logger, request.Url, ex.Message);
 
             var error = new
             {
@@ -150,7 +149,7 @@ public class WebhookSender : IWebhookSender
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Exception occurred while sending webhook '{Name}'", request.Name);
+            Log.ErrorSendWebhook(_logger, request.Name, ex);
 
             var error = new
             {
@@ -239,7 +238,7 @@ public class WebhookSender : IWebhookSender
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to add webhook delivery log");
+            Log.ErrorAddDeliveryLog(_logger, ex);
         }
     }
 }

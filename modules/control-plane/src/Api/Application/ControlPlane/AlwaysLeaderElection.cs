@@ -29,7 +29,7 @@ namespace Api.Application.ControlPlane;
 /// metric keep reporting a "leader" reading per instance instead of the series disappearing when
 /// election is disabled.
 /// </summary>
-public sealed class AlwaysLeaderElection : ILeaderElection, IHostedService, IDisposable
+public sealed partial class AlwaysLeaderElection : ILeaderElection, IHostedService, IDisposable
 {
     private readonly ILogger<AlwaysLeaderElection> _logger;
     private readonly Meter _meter;
@@ -64,9 +64,7 @@ public sealed class AlwaysLeaderElection : ILeaderElection, IHostedService, IDis
     /// </summary>
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation(
-            "Leader election disabled (ControlPlane:LeaderElection:Enabled=false); if running " +
-            "multiple control-plane replicas, enable it to avoid redundant work.");
+        Log.LeaderElectionDisabled(_logger);
         return Task.CompletedTask;
     }
 

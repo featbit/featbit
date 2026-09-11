@@ -16,7 +16,7 @@ namespace Api.Infrastructure.Caches;
 /// </summary>
 public record DcCacheService(string DcId, ICacheService Service);
 
-public class CompositeRedisCacheService(
+public partial class CompositeRedisCacheService(
     IEnumerable<DcCacheService> cacheServices,
     ILogger<CompositeRedisCacheService> logger) : ICacheService
 {
@@ -128,12 +128,12 @@ public class CompositeRedisCacheService(
             }
             catch (Exception ex)
             {
-                logger.LogError(
-                    ex,
-                    "Redis cache operation '{Operation}' failed for DC {DcId} (implementation {CacheService}). Trying next instance.",
+                Log.ErrorCacheOperationTryingNext(
+                    logger,
                     nameof(GetOrSetLicenseAsync),
                     dc.DcId,
-                    dc.Service.GetType().FullName);
+                    dc.Service.GetType().FullName,
+                    ex);
             }
         }
 
@@ -335,10 +335,7 @@ public class CompositeRedisCacheService(
         var dc = cacheServices.FirstOrDefault(c => c.DcId == dcId);
         if (dc == null)
         {
-            logger.LogWarning(
-                "Targeted cache operation '{Operation}' requested for unknown DC {DcId}; no matching cache instance. No-op.",
-                operationName,
-                dcId);
+            Log.UnknownDcForTargetedOperation(logger, operationName, dcId);
             return;
         }
 
@@ -357,10 +354,7 @@ public class CompositeRedisCacheService(
         var dc = cacheServices.FirstOrDefault(c => c.DcId == dcId);
         if (dc == null)
         {
-            logger.LogWarning(
-                "Targeted cache operation '{Operation}' requested for unknown DC {DcId}; no matching cache instance. No-op.",
-                operationName,
-                dcId);
+            Log.UnknownDcForTargetedOperation(logger, operationName, dcId);
             return false;
         }
 
@@ -384,12 +378,7 @@ public class CompositeRedisCacheService(
         }
         catch (Exception ex)
         {
-            logger.LogError(
-                ex,
-                "{ProbeName} probe failed for DC {DcId} (implementation {CacheService}). Reporting not-staged.",
-                probeName,
-                dc.DcId,
-                dc.Service.GetType().FullName);
+            Log.ErrorProbe(logger, probeName, dc.DcId, dc.Service.GetType().FullName, ex);
             return false;
         }
     }
@@ -416,12 +405,7 @@ public class CompositeRedisCacheService(
         }
         catch (Exception ex)
         {
-            logger.LogError(
-                ex,
-                "Redis cache broadcast operation '{Operation}' failed for DC {DcId} (implementation {CacheService}). Continuing.",
-                operationName,
-                dc.DcId,
-                dc.Service.GetType().FullName);
+            Log.ErrorBroadcastOperation(logger, operationName, dc.DcId, dc.Service.GetType().FullName, ex);
             return false;
         }
     }
@@ -458,12 +442,7 @@ public class CompositeRedisCacheService(
         }
         catch (Exception ex)
         {
-            logger.LogError(
-                ex,
-                "Redis cache targeted operation '{Operation}' failed for DC {DcId} (implementation {CacheService}).",
-                operationName,
-                dc.DcId,
-                dc.Service.GetType().FullName);
+            Log.ErrorTargetedOperation(logger, operationName, dc.DcId, dc.Service.GetType().FullName, ex);
             return false;
         }
     }

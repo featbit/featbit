@@ -31,5 +31,9 @@ public partial class RedisMessageConsumer
         [LoggerMessage(4, LogLevel.Error, "Exception occurred while consuming topic: {Topic}.",
             EventName = "ErrorConsumeTopic")]
         public static partial void ErrorConsumeTopic(ILogger logger, string topic, Exception ex);
+
+        [LoggerMessage(5, LogLevel.Information, "Start consuming {Topic} messages...",
+            EventName = "StartConsuming")]
+        public static partial void StartConsuming(ILogger logger, string topic);
     }
 }

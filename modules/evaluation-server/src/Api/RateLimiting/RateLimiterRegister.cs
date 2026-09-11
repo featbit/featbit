@@ -5,12 +5,11 @@ using Infrastructure;
 using Infrastructure.Caches;
 using Infrastructure.Caches.Redis;
 using Microsoft.AspNetCore.RateLimiting;
-using Serilog;
 using Streaming;
 
 namespace Api.RateLimiting;
 
-public static class RateLimiterRegister
+public static partial class RateLimiterRegister
 {
     /// <summary>
     /// Registers rate limiting services and policies when <see cref="RateLimitingOptions.Enabled"/> is <c>true</c>.
@@ -29,7 +28,7 @@ public static class RateLimiterRegister
         configuration.GetSection(RateLimitingOptions.SectionName).Bind(options);
 
         // Log the rate limiting configuration on startup for visibility
-        Log.Information("Rate limiting is enabled with the following configuration: {RateLimitingOptions}", options);
+        Serilog.Log.Information("Rate limiting is enabled with the following configuration: {RateLimitingOptions}", options);
 
         var useDistributed = options.Distributed && configuration.GetCacheProvider() == CacheProvider.Redis;
 
@@ -55,11 +54,7 @@ public static class RateLimiterRegister
                     .CreateLogger("Api.RateLimiting");
 
                 var envId = ResolveEnvId(context.HttpContext);
-                logger.LogWarning(
-                    "Rate limit exceeded for EnvId {EnvId} on {Path}",
-                    envId,
-                    context.HttpContext.Request.Path
-                );
+                Log.RateLimitExceeded(logger, envId, context.HttpContext.Request.Path);
 
                 var response = context.HttpContext.Response;
 

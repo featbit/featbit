@@ -5,7 +5,7 @@ using Streaming.ControlPlane;
 
 namespace Api.ControlPlane;
 
-public class HeartbeatService(
+public partial class HeartbeatService(
     IMessageProducer messageProducer,
     ILogger<HeartbeatService> logger,
     IConfiguration configuration,
@@ -28,7 +28,7 @@ public class HeartbeatService(
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        logger.LogInformation("HeartbeatService started with PodId: {PodId}", _podId);
+        Log.Started(logger, _podId);
 
         var heartbeatTimeSpan = TimeSpan.FromSeconds(ResolveHeartbeatIntervalSeconds(configuration));
 
@@ -60,7 +60,7 @@ public class HeartbeatService(
                     // last successful publish, which is exactly what should grow while publishing fails.
                     publishStatus.MarkFailure(DateTimeOffset.UtcNow);
                     _observability.LoopFailed(ex);
-                    logger.LogWarning(ex, "HeartbeatService failed to publish heartbeat for PodId: {PodId}", _podId);
+                    Log.PublishFailed(logger, _podId, ex);
                 }
 
                 await Task.Delay(heartbeatTimeSpan, stoppingToken);
@@ -71,7 +71,7 @@ public class HeartbeatService(
             _observability.Stopped();
         }
 
-        logger.LogInformation("HeartbeatService stopping with PodId: {PodId}", _podId);
+        Log.Stopping(logger, _podId);
     }
 
     /// <summary>

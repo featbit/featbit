@@ -32,7 +32,7 @@ namespace Infrastructure.MQ.Backlog;
 /// misleading zero.
 /// </para>
 /// </remarks>
-public sealed class MessagingBacklogSampler : BackgroundService
+public sealed partial class MessagingBacklogSampler : BackgroundService
 {
     /// <summary>Reported when a topic's depth could not be determined this cycle.</summary>
     public const long Unknown = -1;
@@ -151,10 +151,7 @@ public sealed class MessagingBacklogSampler : BackgroundService
                     _depths[(probe.Provider, topic)] = Unknown;
                 }
 
-                _logger.LogWarning(
-                    ex,
-                    "Backlog sampling failed for provider {Provider}; depth reported as unknown.",
-                    probe.Provider);
+                Log.SamplingFailed(_logger, probe.Provider, ex);
             }
         }
     }

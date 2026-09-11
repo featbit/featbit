@@ -50,10 +50,7 @@ public partial class KafkaMessageConsumer : BackgroundService
         try
         {
             _consumer.Subscribe(_topics);
-            _logger.LogInformation(
-                "Start consuming messages through topics: {Topics}.",
-                string.Join(',', _topics)
-            );
+            Log.StartConsumingTopics(_logger, string.Join(',', _topics));
 
             while (!cancellationToken.IsCancellationRequested)
             {

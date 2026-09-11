@@ -11,7 +11,7 @@ public static class UsageTypes
     public const string Insight = "insight";
 }
 
-public class UsageMessageHandler(UsageTracker usageTracker, ILogger<UsageMessageHandler> logger) : IMessageHandler
+public partial class UsageMessageHandler(UsageTracker usageTracker, ILogger<UsageMessageHandler> logger) : IMessageHandler
 {
     public string Topic => Topics.Usage;
 
@@ -27,7 +27,7 @@ public class UsageMessageHandler(UsageTracker usageTracker, ILogger<UsageMessage
         {
             // Logged in full: the end-user identifiers it carries are exactly what makes an
             // invalid usage message diagnosable (docs/observability/index.md §7).
-            logger.LogWarning("Received invalid usage message: {Message}", Redaction.HideCredentials(message));
+            Log.InvalidUsageMessage(logger, message);
             return Task.CompletedTask;
         }
 

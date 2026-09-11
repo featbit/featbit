@@ -10,7 +10,7 @@ using Domain.Utils;
 
 namespace Api.Application.ControlPlane;
 
-public class FeatureFlagChangeMessageHandler(
+public partial class FeatureFlagChangeMessageHandler(
     [FromKeyedServices("compositeCache")] ICacheService cacheService,
     IMessageProducer messageProducer,
     IFeatureFlagService featureFlagService,
@@ -83,7 +83,7 @@ public class FeatureFlagChangeMessageHandler(
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Error handling feature flag change message");
+            Log.ErrorHandleFlagChange(logger, e);
             throw;
         }
     }

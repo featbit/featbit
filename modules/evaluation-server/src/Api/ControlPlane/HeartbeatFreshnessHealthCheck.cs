@@ -33,7 +33,7 @@ namespace Api.ControlPlane;
 /// the unhealthy/fenced state.
 /// </para>
 /// </remarks>
-public sealed class HeartbeatFreshnessHealthCheck : IHealthCheck
+public sealed partial class HeartbeatFreshnessHealthCheck : IHealthCheck
 {
     /// <summary>
     /// Stable meter name for evaluation-server consistency observability. Mirrors the control
@@ -170,11 +170,7 @@ public sealed class HeartbeatFreshnessHealthCheck : IHealthCheck
         // Log a warning only on the transition into the fenced state to avoid log spam.
         if (Interlocked.Exchange(ref _wasDegraded, 1) == 0)
         {
-            _logger.LogWarning(
-                "Heartbeat freshness unhealthy: DcId={DcId}, StalenessSeconds={StalenessSeconds}, " +
-                "ThresholdSeconds={ThresholdSeconds}. Pod likely evicted/partitioned from the " +
-                "control plane; failing readiness to pull it from rotation.",
-                dcId, ageSeconds, thresholdSeconds);
+            Log.HeartbeatFreshnessUnhealthy(_logger, dcId, ageSeconds, thresholdSeconds);
         }
 
         return Task.FromResult(HealthCheckResult.Unhealthy(message));

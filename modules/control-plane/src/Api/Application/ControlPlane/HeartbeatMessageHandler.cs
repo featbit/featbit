@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Text.Json;
 using Application;
 using Application.Caches;
@@ -8,7 +8,7 @@ using Domain.Messages;
 
 namespace Api.Application.ControlPlane;
 
-public class HeartbeatMessageHandler(
+public partial class HeartbeatMessageHandler(
     [FromKeyedServices("compositeCache")] ICacheService cacheService,
     ILogger<HeartbeatMessageHandler> logger,
     ILeaseStore leaseStore,
@@ -31,7 +31,7 @@ public class HeartbeatMessageHandler(
 
     public async Task HandleAsync(string message)
     {
-        logger.LogInformation("Received heartbeat message: {Message}", message);
+        Log.ReceivedHeartbeat(logger, message);
 
         try
         {
@@ -62,7 +62,7 @@ public class HeartbeatMessageHandler(
             // as handled, so this counter is the only record that anything went wrong.
             ControlPlaneMetrics.Current.RecordSuppressedFailure(
                 HandlerNames.Heartbeat, SuppressedFailureReasons.Unhandled);
-            logger.LogError(e, "Failed to process heartbeat message: {Message}", message);
+            Log.ErrorProcessHeartbeat(logger, message, e);
         }
     }
 
@@ -109,13 +109,7 @@ public class HeartbeatMessageHandler(
             var gap = timestamp - previousTimestamp;
             if (gap > leaseTtl && DcIdsWarnedForSlowCadence.TryAdd(dcId, 0))
             {
-                logger.LogWarning(
-                    "Heartbeat cadence for DcId {DcId} exceeds the lease TTL: observed gap between " +
-                    "heartbeats was {GapSeconds:F1}s but ControlPlane:LeaseTtlSeconds is {LeaseTtlSeconds}s. " +
-                    "The DC's lease is expiring between heartbeats, causing the live set to flap. " +
-                    "Lower ControlPlane:HeartbeatIntervalSeconds on that DC's evaluation servers to " +
-                    "<= LeaseTtlSeconds/3.",
-                    dcId, gap.TotalSeconds, leaseTtl.TotalSeconds);
+                Log.CadenceExceedsLeaseTtl(logger, dcId, gap.TotalSeconds, leaseTtl.TotalSeconds);
             }
         }
 
@@ -126,17 +120,17 @@ public class HeartbeatMessageHandler(
     {
         if (heartBeatMessage is null)
         {
-            logger.LogError("Heartbeat message is null after deserialization: {Message}", rawMessage);
+            Log.HeartbeatNull(logger, rawMessage);
             return false;
         }
         if (string.IsNullOrWhiteSpace(heartBeatMessage.PodId))
         {
-            logger.LogError("Pod id is null or empty: {Message}", rawMessage);
+            Log.PodIdMissing(logger, rawMessage);
             return false;
         }
         if (heartBeatMessage.Timestamp == default)
         {
-            logger.LogError("Timestamp is default value: {Message}", rawMessage);
+            Log.TimestampDefault(logger, rawMessage);
             return false;
         }
         return true;

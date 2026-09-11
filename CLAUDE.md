@@ -220,10 +220,30 @@ Rules that are easy to get wrong and expensive to fix later:
   evaluation path; nothing that blocks; gauge callbacks read cached or atomic state
   only. If measuring something would require new runtime behavior, say so and record it
   rather than doing it quietly.
+- **All logging is source-generated `[LoggerMessage]`.** There are zero raw
+  `logger.LogInformation` / `LogWarning` / `LogError` / `LogDebug` / `LogTrace` /
+  `LogCritical` calls left in the three `src/` trees, and none may be added. Declare the
+  event in a **sibling `<ClassName>.Log.cs`** file holding a nested
+  `public static partial class Log`; use **positional** attribute arguments
+  (`[LoggerMessage(1, LogLevel.Error, "…", EventName = "…")]`, not `EventId =`/`Level =`);
+  number event ids from **1 within each owning class**, appending from the highest if the
+  file already exists. **Never add `.ToString()` to make a call compile** — widen the
+  parameter to the argument's real type (`Guid`, `long`, `double`, `DateTimeOffset`,
+  `object?`) instead. A coercion compiles, renders identically, and silently degrades the
+  structured payload, and no test catches it. Preserve existing `EventId` / `EventName`
+  values — log-based alerting keys on them. Full rules in `docs/observability/index.md`
+  §6.1.
+- **This rule is build-enforced, not just documented.** The analyzer rule `CA1848` is
+  enabled as an **error** for the `src/` trees (via `.editorconfig` in each module's `src/`
+  and in `modules/shared/`), so a raw `ILogger.Log*` call fails the build rather than merely
+  being discouraged.
 - **Credentials are hashed, never logged raw** — SDK secrets, streaming and relay-proxy
   tokens, JWTs. Everything else (message payloads, client IPs, webhook URLs) is logged
   raw on purpose, because that is what makes an incident diagnosable. New
-  credential-bearing field names must be added to `Redaction.CredentialNames`.
+  credential-bearing field names must be added to `Redaction.CredentialNames`. A
+  credential-bearing event is declared as a private `…Core` method behind a public
+  wrapper that redacts first, so logging the raw value is impossible rather than merely
+  discouraged.
 - **Shared primitives live in `modules/shared/Observability` and are deliberately
   BCL-only.** Do not add a package dependency to that project; keep transport- or
   framework-specific glue in the module that needs it.

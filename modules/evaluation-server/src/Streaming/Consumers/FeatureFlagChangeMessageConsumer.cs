@@ -8,7 +8,7 @@ using Streaming.Services;
 
 namespace Streaming.Consumers;
 
-public class FeatureFlagChangeMessageConsumer(
+public partial class FeatureFlagChangeMessageConsumer(
     IConnectionManager connectionManager,
     IDataSyncService dataSyncService,
     ILogger<FeatureFlagChangeMessageConsumer> logger)
@@ -56,12 +56,7 @@ public class FeatureFlagChangeMessageConsumer(
             {
                 failed++;
                 PropagationMetrics.Current.RecordDelivery(ChangeId.FlagResource, Outcomes.Failure);
-                logger.LogError(
-                    ex,
-                    "Exception occurred while processing feature flag change message for connection {ConnectionId} in env {EnvId}.",
-                    connection.Id,
-                    envId
-                );
+                Log.ProcessingFailed(logger, connection.Id, envId, ex);
             }
         }
 

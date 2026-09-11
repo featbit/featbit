@@ -8,7 +8,7 @@ using Microsoft.Extensions.Options;
 
 namespace Infrastructure.AppService;
 
-public sealed class InsightsFlushWorker(
+public sealed partial class InsightsFlushWorker(
     InsightsTracker tracker,
     IServiceScopeFactory scopeFactory,
     IOptions<InsightsTrackingOptions> options,
@@ -22,7 +22,7 @@ public sealed class InsightsFlushWorker(
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        logger.LogInformation("Start flushing insight loop...");
+        Log.StartFlushLoop(logger);
 
         _observability.Started();
 
@@ -54,7 +54,7 @@ public sealed class InsightsFlushWorker(
         {
             _observability.Stopped();
             await FlushRemainingAsync();
-            logger.LogInformation("Insights flush worker stopped...");
+            Log.WorkerStopped(logger);
         }
     }
 
@@ -133,7 +133,7 @@ public sealed class InsightsFlushWorker(
 
             if (logger.IsEnabled(LogLevel.Debug))
             {
-                logger.LogDebug("{Count} insight events have been handled.", batch.Length);
+                Log.EventsHandled(logger, batch.Length);
             }
         }
         catch (Exception ex)
@@ -146,7 +146,7 @@ public sealed class InsightsFlushWorker(
                 Outcomes.Failure, batch.Length, Stopwatch.GetElapsedTime(start));
             trace.Failed(ex);
 
-            logger.LogError(ex, "Failed to flush {Count} insight events.", batch.Length);
+            Log.ErrorFlushEvents(logger, batch.Length, ex);
         }
     }
 

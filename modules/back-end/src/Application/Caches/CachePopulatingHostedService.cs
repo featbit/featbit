@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Application.Caches;
 
-public class CachePopulatingHostedService : IHostedService
+public partial class CachePopulatingHostedService : IHostedService
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<CachePopulatingHostedService> _logger;
@@ -46,7 +46,7 @@ public class CachePopulatingHostedService : IHostedService
 
             // Re-throw so the host fails to start and let the orchestrator (Kubernetes,
             // systemd, Docker, etc.) drive recovery via its restart policy.
-            _logger.LogCritical(ex, "Exception occurred when populating cache. Host will not start.");
+            Log.ErrorPopulateCache(_logger, ex);
             throw;
         }
     }

@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace Infrastructure.AppService;
 
-public class UsageFlushWorker(
+public partial class UsageFlushWorker(
     UsageTracker usageTracker,
     IOptions<UsageTrackingOptions> options,
     IServiceProvider serviceProvider,
@@ -55,7 +55,7 @@ public class UsageFlushWorker(
                 catch (Exception ex)
                 {
                     _observability.LoopFailed(ex);
-                    logger.LogError(ex, "Exception occurred while flushing usage records.");
+                    Log.ErrorFlushUsageRecords(logger, ex);
                 }
             }
         }

@@ -9,7 +9,7 @@ namespace Api.Public;
 
 [AllowAnonymous]
 [EnableRateLimiting(RateLimitingPolicies.Agent)]
-public class AgentController(IRelayProxyAppService rpService, ILogger<AgentController> logger) : PublicApiControllerBase
+public partial class AgentController(IRelayProxyAppService rpService, ILogger<AgentController> logger) : PublicApiControllerBase
 {
     [HttpPost]
     [Route("register")]
@@ -45,7 +45,7 @@ public class AgentController(IRelayProxyAppService rpService, ILogger<AgentContr
         {
             metrics.RecordRegistration(Outcomes.Failure, AgentReasons.Error);
 
-            logger.LogError(ex, "Exception occurred while registering agent.");
+            Log.RegisterFailed(logger, ex);
             return StatusCode(500);
         }
     }

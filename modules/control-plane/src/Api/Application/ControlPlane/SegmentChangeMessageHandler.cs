@@ -11,7 +11,7 @@ using Domain.Utils;
 
 namespace Api.Application.ControlPlane;
 
-public class SegmentChangeMessageHandler(
+public partial class SegmentChangeMessageHandler(
     [FromKeyedServices("compositeCache")] ICacheService cacheService,
     IFeatureFlagAppService featureFlagAppService,
     ISegmentMessageService segmentMessageService,
@@ -119,7 +119,7 @@ public class SegmentChangeMessageHandler(
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Error processing segment change message");
+            Log.ErrorHandleSegmentChange(logger, e);
             throw;
         }
     }

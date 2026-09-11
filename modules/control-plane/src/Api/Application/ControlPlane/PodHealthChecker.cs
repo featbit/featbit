@@ -1,10 +1,10 @@
-﻿using Application.Caches;
+using Application.Caches;
 using Domain.Observability;
 using Microsoft.Extensions.Options;
 
 namespace Api.Application.ControlPlane;
 
-public class PodHealthChecker(
+public partial class PodHealthChecker(
     [FromKeyedServices("compositeCache")] ICacheService cacheService,
     ILogger<PodHealthChecker> logger,
     IOptionsMonitor<PodHealthOptions> options) : BackgroundService
@@ -28,9 +28,7 @@ public class PodHealthChecker(
 
                 if (lastEnabled != current.Enabled)
                 {
-                    logger.LogInformation(
-                        "PodHealthChecker is now {State}",
-                        current.Enabled ? "enabled" : "disabled");
+                    Log.EnabledStateChanged(logger, current.Enabled ? "enabled" : "disabled");
                     lastEnabled = current.Enabled;
                 }
 
@@ -56,15 +54,11 @@ public class PodHealthChecker(
                                 // way to notice.
                                 ControlPlaneMetrics.Current.RecordPodEviction(
                                     PodEvictionReasons.InvalidPodId, Outcomes.Failure);
-                                logger.LogWarning(
-                                    "Skipping unhealthy pod with invalid PodId {PodId} (last heartbeat at {Timestamp})",
-                                    healthMessage.PodId, healthMessage.Timestamp);
+                                Log.InvalidPodId(logger, healthMessage.PodId, healthMessage.Timestamp);
                                 continue;
                             }
 
-                            logger.LogWarning(
-                                "Pod {PodId} is considered unhealthy. Last heartbeat at {Timestamp}",
-                                healthMessage.PodId, healthMessage.Timestamp);
+                            Log.PodUnhealthy(logger, healthMessage.PodId, healthMessage.Timestamp);
                             await cacheService.DeletePodConnection(podId);
                             ControlPlaneMetrics.Current.RecordPodEviction(
                                 PodEvictionReasons.HeartbeatTimeout, Outcomes.Success);
@@ -81,7 +75,7 @@ public class PodHealthChecker(
                     catch (Exception ex)
                     {
                         _worker.LoopFailed(ex);
-                        logger.LogError(ex, "Pod health check iteration failed; will retry next interval");
+                        Log.ErrorHealthCheckIteration(logger, ex);
                     }
                 }
 

@@ -26,5 +26,15 @@ public partial class RedisMessageConsumer
         /// <summary>Logs a failed message consume, with the body logged in full apart from any embedded credential.</summary>
         public static void ErrorConsumeMessage(ILogger logger, string message, Exception exception)
             => ErrorConsumeMessageCore(logger, Redaction.HideCredentials(message), exception);
+
+        [LoggerMessage(4, LogLevel.Information,
+            "Start consuming flag & segment change messages through channel {Channel}.",
+            EventName = "StartConsumingDataChange")]
+        public static partial void StartConsumingDataChange(ILogger logger, string channel);
+
+        [LoggerMessage(5, LogLevel.Information,
+            "Start consuming control plane command messages through channel {ControlPlaneChannel}.",
+            EventName = "StartConsumingControlPlaneCommand")]
+        public static partial void StartConsumingControlPlaneCommand(ILogger logger, string controlPlaneChannel);
     }
 }

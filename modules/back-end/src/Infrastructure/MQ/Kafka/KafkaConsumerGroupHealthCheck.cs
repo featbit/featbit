@@ -25,7 +25,7 @@ namespace Infrastructure.MQ.Kafka;
 /// consumer group. Nothing on a request, streaming, or evaluation path touches this type.
 /// </para>
 /// </remarks>
-public sealed class KafkaConsumerGroupHealthCheck(
+public sealed partial class KafkaConsumerGroupHealthCheck(
     KafkaLagReader lagReader,
     ILogger<KafkaConsumerGroupHealthCheck> logger) : IHealthCheck
 {
@@ -54,7 +54,7 @@ public sealed class KafkaConsumerGroupHealthCheck(
             // The exception TYPE is reported, never its message: broker error strings routinely
             // embed the bootstrap server list and SASL principal, and this endpoint's whole
             // purpose is to be readable by an operator.
-            logger.LogWarning(ex, "Kafka consumer-group diagnostic check failed.");
+            Log.DiagnosticCheckFailed(logger, ex);
 
             return HealthCheckResult.Unhealthy(
                 $"Could not read consumer-group progress ({ex.GetType().Name}).");

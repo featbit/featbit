@@ -50,10 +50,25 @@ Rules that are easy to get wrong and expensive to fix later:
 - **Telemetry must never change behavior.** No I/O on a request, streaming, or evaluation path; no
   blocking; gauge callbacks read cached or atomic state only. If measuring something would require
   new runtime behavior, say so and record it rather than doing it quietly.
+- **All logging is source-generated `[LoggerMessage]`.** There are zero raw `logger.LogInformation` /
+  `LogWarning` / `LogError` / `LogDebug` / `LogTrace` / `LogCritical` calls in the three `src/`
+  trees, and none may be added. Declare the event in a sibling `<ClassName>.Log.cs` holding a nested
+  `public static partial class Log`, use positional attribute arguments
+  (`[LoggerMessage(1, LogLevel.Error, "…", EventName = "…")]`), number event ids from 1 within each
+  owning class, and **never add `.ToString()` to make a call compile** — widen the parameter to the
+  argument's real type instead, or the structured payload is silently degraded. Preserve existing
+  `EventId` / `EventName` values; alerting keys on them. Full rules in
+  [`index.md` §6.1](../docs/observability/index.md).
+- **This rule is build-enforced, not just documented.** The analyzer rule `CA1848` is turned on
+  as an **error** for the `src/` trees (via `.editorconfig` in each module's `src/` and in
+  `modules/shared/`), so a raw `ILogger.Log*` call fails the build — a violation is a compile
+  error, not merely frowned upon.
 - **Credentials are hashed, never logged raw** — SDK secrets, streaming and relay-proxy tokens, and
   JWTs. Everything else (payloads, IPs, webhook URLs) is logged raw on purpose, because that is what
   makes an incident diagnosable. New credential-bearing field names must be added to
-  `Redaction.CredentialNames`.
+  `Redaction.CredentialNames`. A credential-bearing event is declared as a private `…Core` method
+  behind a public wrapper that redacts first, so logging the raw value is impossible rather than
+  discouraged.
 - **Shared primitives live in `modules/shared/Observability`** and are deliberately BCL-only. Do not
   add a package dependency to that project; put transport- or framework-specific glue in the module
   that needs it.

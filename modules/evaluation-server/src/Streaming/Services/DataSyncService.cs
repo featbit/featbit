@@ -11,7 +11,7 @@ using Streaming.Protocol;
 
 namespace Streaming.Services;
 
-public class DataSyncService(
+public partial class DataSyncService(
     IStore store,
     IEvaluator evaluator,
     IRelayProxyService rpService,
@@ -381,18 +381,15 @@ public class DataSyncService(
 
         EvaluationMetrics.Current.RecordMalformedEntity(entityType);
 
-        logger.LogError(
-            exception,
-            "Failed to evaluate feature flag {FlagKey} ({FlagId}) in environment {EnvId}. " +
-            "Malformed entity: {EntityType} ({EntityId}), property: {PropertyPath}. " +
-            "The malformed entity was skipped without failing the client data-sync.",
+        Log.EvaluationFailed(
+            logger,
             flagKey,
             flagId,
             envId,
             entityType,
             exception.EntityId ?? flagId,
-            exception.PropertyPath
-        );
+            exception.PropertyPath,
+            exception);
     }
 
     #endregion

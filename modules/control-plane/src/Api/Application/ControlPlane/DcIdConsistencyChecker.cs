@@ -35,7 +35,7 @@ namespace Api.Application.ControlPlane;
 /// is advisory and idempotent, so this is purely to avoid redundant work across replicas, not a
 /// correctness requirement.
 /// </summary>
-public sealed class DcIdConsistencyChecker : BackgroundService
+public sealed partial class DcIdConsistencyChecker : BackgroundService
 {
     /// <summary>
     /// Default interval between checks when not overridden via
@@ -154,8 +154,7 @@ public sealed class DcIdConsistencyChecker : BackgroundService
     {
         if (!_enabled)
         {
-            _logger.LogInformation(
-                "DcId consistency checker disabled (consistency mode is not GatedCommit).");
+            Log.Disabled(_logger);
             return;
         }
 
@@ -180,7 +179,7 @@ public sealed class DcIdConsistencyChecker : BackgroundService
                 catch (Exception ex)
                 {
                     _worker.LoopFailed(ex);
-                    _logger.LogError(ex, "Error occurred while running the DcId consistency check tick.");
+                    Log.TickFailed(_logger, ex);
                 }
             }
         }
@@ -244,20 +243,12 @@ public sealed class DcIdConsistencyChecker : BackgroundService
 
         if (result.MissingLeases.Count > 0)
         {
-            _logger.LogWarning(
-                "DcId consistency: configured Redis DC(s) {MissingDcs} have no reporting ELS lease " +
-                "(the DC is down OR its configured DcId does not match the ELS ControlPlane:DcId). " +
-                "Commits will stall for these DC(s) until a matching lease is reported.",
-                string.Join(", ", result.MissingLeases));
+            Log.MissingLeases(_logger, string.Join(", ", result.MissingLeases));
         }
 
         if (result.UnknownDcs.Count > 0)
         {
-            _logger.LogWarning(
-                "DcId consistency: ELS pod(s) report lease DC(s) {UnknownDcs} that match no " +
-                "configured Redis instance (an unknown DC the control plane cannot stage to). " +
-                "Add a Redis:Instances entry with a matching DcId, or fix the ELS ControlPlane:DcId.",
-                string.Join(", ", result.UnknownDcs));
+            Log.UnknownDcs(_logger, string.Join(", ", result.UnknownDcs));
         }
 
         return result;

@@ -5,7 +5,7 @@ using Domain.Observability;
 
 namespace Api.Application.ControlPlane;
 
-public class ClientConnectionMadeHandler(ICacheService cacheService, ILogger<ClientConnectionMadeHandler> logger) : IMessageHandler
+public partial class ClientConnectionMadeHandler(ICacheService cacheService, ILogger<ClientConnectionMadeHandler> logger) : IMessageHandler
 {
     private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
 
@@ -16,7 +16,7 @@ public class ClientConnectionMadeHandler(ICacheService cacheService, ILogger<Cli
         // Logged in full apart from the client's SDK secret, which Redaction.HideCredentials
         // hashes in place (docs/observability/index.md §7). Without that this handler would be
         // the back door through which every credential protected elsewhere still reached the log.
-        logger.LogInformation("Handling connection made message: {Message}", Redaction.HideCredentials(message));
+        Log.HandlingConnectionMade(logger, message);
 
         ConnectionMessage? connectionInfo;
         try
@@ -29,7 +29,7 @@ public class ClientConnectionMadeHandler(ICacheService cacheService, ILogger<Cli
             // consumed. Without this counter the failure is invisible at every layer.
             ControlPlaneMetrics.Current.RecordSuppressedFailure(
                 HandlerNames.ClientConnectionMade, SuppressedFailureReasons.DeserializationFailed);
-            logger.LogError(ex, "Failed to deserialize connection message: {Message}", Redaction.HideCredentials(message));
+            Log.ErrorDeserializeConnection(logger, message, ex);
             return;
         }
 
@@ -47,26 +47,25 @@ public class ClientConnectionMadeHandler(ICacheService cacheService, ILogger<Cli
     {
         if (connectionInfo is null)
         {
-            logger.LogError("Connection message is null after deserialization: {Message}",
-                Redaction.HideCredentials(rawMessage));
+            Log.ConnectionNull(logger, rawMessage);
             return false;
         }
         
         if (string.IsNullOrWhiteSpace(connectionInfo.Id))
         {
-            logger.LogError("Connection id is null or empty: {Message}", Redaction.HideCredentials(rawMessage));
+            Log.ConnectionIdMissing(logger, rawMessage);
             return false;
         }
 
         if (string.IsNullOrWhiteSpace(connectionInfo.Secret))
         {
-            logger.LogError("Connection secret is null or empty. Connection: {ConnectionId}", connectionInfo.Id);
+            Log.ConnectionSecretMissing(logger, connectionInfo.Id);
             return false;
         }
 
         if (connectionInfo.EnvId == Guid.Empty)
         {
-            logger.LogError("Connection env id is empty. Connection: {ConnectionId}", connectionInfo.Id);
+            Log.ConnectionEnvIdMissing(logger, connectionInfo.Id);
             return false;
         }
         

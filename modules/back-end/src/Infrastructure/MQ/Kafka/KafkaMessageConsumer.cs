@@ -45,7 +45,7 @@ public partial class KafkaMessageConsumer : BackgroundService
         try
         {
             _consumer.Subscribe(_topics);
-            _logger.LogInformation("Start consuming messages for {Topics}...", string.Join(", ", _topics));
+            Log.StartConsuming(_logger, string.Join(", ", _topics));
 
             while (!cancellationToken.IsCancellationRequested)
             {

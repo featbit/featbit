@@ -32,5 +32,9 @@ partial class KafkaMessageConsumer
 
         [LoggerMessage(4, LogLevel.Error, "Exception occurred when store offset.", EventName = "ErrorStoreOffset")]
         public static partial void ErrorStoreOffset(ILogger logger, Exception ex);
+
+        [LoggerMessage(5, LogLevel.Information, "Start consuming messages through topics: {Topics}.",
+            EventName = "StartConsumingTopics")]
+        public static partial void StartConsumingTopics(ILogger logger, string topics);
     }
 }

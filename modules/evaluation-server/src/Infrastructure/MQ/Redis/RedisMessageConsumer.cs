@@ -37,10 +37,7 @@ public partial class RedisMessageConsumer : BackgroundService
         var queue = await subscriber.SubscribeAsync(channel);
 
         // process messages sequentially. ref: https://stackexchange.github.io/StackExchange.Redis/PubSubOrder.html
-        _logger.LogInformation(
-            "Start consuming flag & segment change messages through channel {Channel}.",
-            channel.ToString()
-        );
+        Log.StartConsumingDataChange(_logger, channel.ToString());
         queue.OnMessage(HandleMessageAsync);
 
         if (_useControlPlane)
@@ -48,10 +45,7 @@ public partial class RedisMessageConsumer : BackgroundService
             var controlPlaneCommandChannel = RedisChannel.Literal(Topics.ControlPlaneCommand);
             var controlPlaneCommandQueue = await subscriber.SubscribeAsync(controlPlaneCommandChannel);
 
-            _logger.LogInformation(
-                "Start consuming control plane command messages through channel {ControlPlaneChannel}.",
-                controlPlaneCommandChannel.ToString()
-            );
+            Log.StartConsumingControlPlaneCommand(_logger, controlPlaneCommandChannel.ToString());
             controlPlaneCommandQueue.OnMessage(HandleMessageAsync);
         }
 

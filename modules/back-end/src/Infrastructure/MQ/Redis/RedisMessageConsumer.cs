@@ -27,7 +27,7 @@ public partial class RedisMessageConsumer(
     {
         var redis = redisClient.GetDatabase();
 
-        logger.LogInformation("Start consuming {Topic} messages...", topic);
+        Log.StartConsuming(logger, topic);
 
         _observability.Started();
 

@@ -54,7 +54,7 @@ namespace Api.Application.ControlPlane;
 /// control-plane startup, which is the documented intent, see the class summary above) is never
 /// throttled, since there is no prior timestamp to compare against.
 /// </summary>
-public sealed class CacheReconciler : BackgroundService
+public sealed partial class CacheReconciler : BackgroundService
 {
     /// <summary>Default poll interval when not overridden via config.</summary>
     public static readonly TimeSpan DefaultInterval = TimeSpan.FromSeconds(10);
@@ -112,15 +112,13 @@ public sealed class CacheReconciler : BackgroundService
     {
         if (!_enabled)
         {
-            _logger.LogInformation(
-                "Cache reconciler disabled (ControlPlane:CacheReconcile:Enabled=false).");
+            Log.ReconcilerDisabled(_logger);
             return;
         }
 
         if (_dcs.Count == 0)
         {
-            _logger.LogInformation(
-                "Cache reconciler has no DCs configured (cache provider is not Redis); nothing to reconcile.");
+            Log.NoDcsConfigured(_logger);
             return;
         }
 
@@ -145,7 +143,7 @@ public sealed class CacheReconciler : BackgroundService
                 catch (Exception ex)
                 {
                     _worker.LoopFailed(ex);
-                    _logger.LogError(ex, "Error occurred while running the cache reconciler tick.");
+                    Log.ErrorReconcileTick(_logger, ex);
                 }
             }
         }
@@ -183,10 +181,7 @@ public sealed class CacheReconciler : BackgroundService
             }
             catch (Exception ex)
             {
-                _logger.LogDebug(
-                    ex,
-                    "Cache reconciler: could not read connection state for DC {DcId}; will retry next tick.",
-                    dc.DcId);
+                Log.ErrorReadConnectionState(_logger, dc.DcId, ex);
                 continue;
             }
 
@@ -211,11 +206,8 @@ public sealed class CacheReconciler : BackgroundService
         // discard it.
         if (!_backfiller.IsCompositeCacheAvailable)
         {
-            _logger.LogWarning(
-                "Cache reconciler: composite Redis cache is unavailable; skipping backfill for " +
-                "{Count} newly reachable DC(s) this tick ({DcIds}). Will retry next tick.",
-                newlyReachable.Count,
-                string.Join(", ", newlyReachable.Select(dc => dc.DcId)));
+            Log.CompositeCacheUnavailable(
+                _logger, newlyReachable.Count, string.Join(", ", newlyReachable.Select(dc => dc.DcId)));
             foreach (var (dcId, _) in newlyReachable)
             {
                 _lastConnected.Remove(dcId);
@@ -234,11 +226,7 @@ public sealed class CacheReconciler : BackgroundService
         }
         catch (Exception ex)
         {
-            _logger.LogError(
-                ex,
-                "Cache reconciler: failed to fetch the shared committed snapshot for {Count} newly " +
-                "reachable DC(s); all will retry on a later tick.",
-                newlyReachable.Count);
+            Log.ErrorFetchSnapshot(_logger, newlyReachable.Count, ex);
             // Force a retry next tick for every DC that would have been reconciled this tick.
             foreach (var (dcId, _) in newlyReachable)
             {
@@ -274,10 +262,8 @@ public sealed class CacheReconciler : BackgroundService
             var elapsed = DateTimeOffset.UtcNow - lastBackfillAt;
             if (elapsed < _minBackfillInterval)
             {
-                _logger.LogInformation(
-                    "Cache reconciler: {Scope} DC {DcId} is reachable but was successfully backfilled " +
-                    "{ElapsedSeconds}s ago (< the {CooldownSeconds}s min-backfill-interval cooldown); " +
-                    "skipping this tick.",
+                Log.BackfillCooldown(
+                    _logger,
                     isLocal ? "local" : "peer",
                     dcId,
                     (int)elapsed.TotalSeconds,
@@ -288,11 +274,7 @@ public sealed class CacheReconciler : BackgroundService
 
         try
         {
-            _logger.LogInformation(
-                "Cache reconciler: {Scope} DC {DcId} is reachable; backfilling its cache from the source of truth ({Mode}).",
-                isLocal ? "local" : "peer",
-                dcId,
-                _mode);
+            Log.BackfillStarting(_logger, isLocal ? "local" : "peer", dcId, _mode);
             var result = await _backfiller.BackfillDcAsync(dcId, _mode, snapshot, cancellationToken);
             if (result != IDcBackfiller.Skipped)
             {
@@ -327,10 +309,7 @@ public sealed class CacheReconciler : BackgroundService
         }
         catch (Exception ex)
         {
-            _logger.LogError(
-                ex,
-                "Cache reconciler: backfill failed for DC {DcId}; will retry on a later tick.",
-                dcId);
+            Log.ErrorBackfill(_logger, dcId, ex);
             // Force a retry next tick by forgetting the watermark for this DC.
             _lastConnected.Remove(dcId);
         }

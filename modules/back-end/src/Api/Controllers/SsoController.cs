@@ -9,7 +9,7 @@ namespace Api.Controllers;
 
 [AllowAnonymous]
 [Route("api/v{version:apiVersion}/sso")]
-public class SsoController : ApiControllerBase
+public partial class SsoController : ApiControllerBase
 {
     private readonly bool _isEnabled;
 
@@ -109,7 +109,7 @@ public class SsoController : ApiControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Exception occurred when login by oidc code");
+            Log.ErrorOidcLogin(_logger, ex);
 
             metrics.RecordLogin(AuthMethods.Oidc, Outcomes.Failure, AuthReasons.Error);
 

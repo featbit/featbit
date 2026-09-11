@@ -23,7 +23,7 @@ namespace Infrastructure.AppService;
 ///
 /// The worker only runs under <see cref="ConsistencyMode.GatedCommit"/>; otherwise it no-ops.
 /// </summary>
-public sealed class StagedFlagGcWorker : BackgroundService
+public sealed partial class StagedFlagGcWorker : BackgroundService
 {
     /// <summary>
     /// Default interval between GC sweeps when not overridden via
@@ -58,8 +58,7 @@ public sealed class StagedFlagGcWorker : BackgroundService
     {
         if (!_enabled)
         {
-            _logger.LogInformation(
-                "Staged flag GC worker disabled (consistency mode is not GatedCommit).");
+            Log.WorkerDisabled(_logger);
             return;
         }
 
@@ -83,9 +82,7 @@ public sealed class StagedFlagGcWorker : BackgroundService
 
                     if (deleted > 0)
                     {
-                        _logger.LogInformation(
-                            "Staged flag GC swept {DeletedCount} superseded versioned flag key(s).",
-                            deleted);
+                        Log.SweptKeys(_logger, deleted);
                     }
                 }
                 catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
@@ -95,7 +92,7 @@ public sealed class StagedFlagGcWorker : BackgroundService
                 catch (Exception ex)
                 {
                     _observability.LoopFailed(ex);
-                    _logger.LogError(ex, "Error occurred while sweeping staged flag versions.");
+                    Log.ErrorSweep(_logger, ex);
                 }
             }
         }

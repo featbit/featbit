@@ -55,7 +55,7 @@ namespace Api.Application.ControlPlane;
 /// <see cref="EvictedCommitCounterName"/>, and (#84) <see cref="AppliedWatermarkLagGaugeName"/> —
 /// each live DC's worst-case lag behind the most-advanced live DC's applied watermark.
 /// </summary>
-public sealed class CommitCoordinatorWorker : BackgroundService
+public sealed partial class CommitCoordinatorWorker : BackgroundService
 {
     /// <summary>
     /// Default interval between coordinator ticks when not overridden via
@@ -285,8 +285,7 @@ public sealed class CommitCoordinatorWorker : BackgroundService
     {
         if (!_enabled)
         {
-            _logger.LogInformation(
-                "Commit coordinator disabled (consistency mode is not GatedCommit).");
+            Log.WorkerDisabled(_logger);
             return;
         }
 
@@ -307,9 +306,7 @@ public sealed class CommitCoordinatorWorker : BackgroundService
                         // Success means useful work, not merely "the tick ran" — a coordinator that
                         // ticks forever without committing anything is the failure being watched for.
                         _worker.Success();
-                        _logger.LogInformation(
-                            "Commit coordinator committed {CommittedCount} pending flag/segment change(s).",
-                            committed);
+                        Log.Committed(_logger, committed);
                     }
                 }
                 catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
@@ -319,7 +316,7 @@ public sealed class CommitCoordinatorWorker : BackgroundService
                 catch (Exception ex)
                 {
                     _worker.LoopFailed(ex);
-                    _logger.LogError(ex, "Error occurred while running the commit coordinator tick.");
+                    Log.ErrorTick(_logger, ex);
                 }
             }
         }
@@ -412,9 +409,7 @@ public sealed class CommitCoordinatorWorker : BackgroundService
         // cache) degrades to a clear log instead of a crash loop.
         if (_compositeCache is not CompositeRedisCacheService composite)
         {
-            _logger.LogWarning(
-                "Commit coordinator requires the composite Redis cache (got {CacheType}); skipping tick.",
-                _compositeCache.GetType().FullName);
+            Log.CompositeCacheRequired(_logger, _compositeCache.GetType().FullName);
             return 0;
         }
 
@@ -489,11 +484,7 @@ public sealed class CommitCoordinatorWorker : BackgroundService
                     EvictedCommitCounter.Add(1, new KeyValuePair<string, object?>("dc_id", dc));
                 }
 
-                _logger.LogWarning(
-                    "Committed flag {FlagId} v{Version} without DC(s) {EvictedDcs} — proceeding on live set.",
-                    flag.Id,
-                    version,
-                    string.Join(", ", evictedDcs));
+                Log.FlagCommittedWithEvictedDcs(_logger, flag.Id, version, string.Join(", ", evictedDcs));
             }
         }
 
@@ -616,11 +607,8 @@ public sealed class CommitCoordinatorWorker : BackgroundService
                         EvictedCommitCounter.Add(1, new KeyValuePair<string, object?>("dc_id", dc));
                     }
 
-                    _logger.LogWarning(
-                        "Committed segment {SegmentId} v{Version} without DC(s) {EvictedDcs} — proceeding on live set.",
-                        segment.Id,
-                        version,
-                        string.Join(", ", evictedDcs));
+                    Log.SegmentCommittedWithEvictedDcs(
+                        _logger, segment.Id, version, string.Join(", ", evictedDcs));
                 }
             }
         }

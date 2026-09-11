@@ -31,5 +31,9 @@ public partial class KafkaMessageConsumer
 
         [LoggerMessage(4, LogLevel.Warning, "No message handler for topic: {Topic}", EventName = "NoHandlerForTopic")]
         public static partial void NoHandlerForTopic(ILogger logger, string topic);
+
+        [LoggerMessage(5, LogLevel.Information, "Start consuming messages for {Topics}...",
+            EventName = "StartConsuming")]
+        public static partial void StartConsuming(ILogger logger, string topics);
     }
 }
