@@ -43,7 +43,7 @@ public class ExperimentService(
     public async Task<ExperimentDetailVm> GetAsync(Guid envId, Guid id)
     {
         var experiment = await mongoDb.CollectionOf<Experiment>()
-            .Find(x => x.Id == id && x.FeatBitEnvId == envId)
+            .Find(x => x.Id == id && x.EnvId == envId)
             .FirstOrDefaultAsync();
 
         if (experiment == null)
@@ -67,7 +67,7 @@ public class ExperimentService(
     {
         var envId = await mongoDb.CollectionOf<Experiment>()
             .Find(x => x.Id == id)
-            .Project(x => x.FeatBitEnvId)
+            .Project(x => x.EnvId)
             .FirstOrDefaultAsync();
 
         if (!envId.HasValue)
@@ -81,7 +81,7 @@ public class ExperimentService(
     public async Task DeleteAsync(Guid envId, Guid id)
     {
         var result = await mongoDb.CollectionOf<Experiment>()
-            .DeleteOneAsync(x => x.Id == id && x.FeatBitEnvId == envId);
+            .DeleteOneAsync(x => x.Id == id && x.EnvId == envId);
 
         if (result.DeletedCount == 0)
         {
@@ -127,7 +127,7 @@ public class ExperimentService(
         SetIfNotNull(updates, x => x.EntryMode, update.EntryMode);
 
         await mongoDb.CollectionOf<Experiment>().UpdateOneAsync(
-            x => x.Id == id && x.FeatBitEnvId == envId,
+            x => x.Id == id && x.EnvId == envId,
             Builders<Experiment>.Update.Combine(updates));
 
         return await GetAsync(envId, id);
@@ -156,7 +156,7 @@ public class ExperimentService(
         experiment.UpdatedAt = updatedAt;
 
         await mongoDb.CollectionOf<Experiment>().UpdateOneAsync(
-            x => x.Id == id && x.FeatBitEnvId == envId,
+            x => x.Id == id && x.EnvId == envId,
             Builders<Experiment>.Update
                 .Set(x => x.PrimaryMetric, experiment.PrimaryMetric)
                 .Set(x => x.Guardrails, experiment.Guardrails)
@@ -254,7 +254,7 @@ public class ExperimentService(
     {
         await InitializeRunNumberAsync(envId, experiment, existingRuns.Select(x => x.Slug));
         var experiments = mongoDb.CollectionOf<Experiment>();
-        var filter = Builders<Experiment>.Filter.Where(x => x.Id == experiment.Id && x.FeatBitEnvId == envId);
+        var filter = Builders<Experiment>.Filter.Where(x => x.Id == experiment.Id && x.EnvId == envId);
 
         // Reserve on the experiment document, independently of run deletion or insertion.
         var allocated = await experiments.FindOneAndUpdateAsync(
@@ -288,7 +288,7 @@ public class ExperimentService(
         // Seed before either creation or deletion, even when legacy creation activities are absent.
         // $max handles null/missing counters without lowering a concurrent allocation.
         await mongoDb.CollectionOf<Experiment>().UpdateOneAsync(
-            x => x.Id == experiment.Id && x.FeatBitEnvId == envId,
+            x => x.Id == experiment.Id && x.EnvId == envId,
             Builders<Experiment>.Update.Max(x => x.LastRunNumber, lastUsed));
     }
 
@@ -584,7 +584,7 @@ public class ExperimentService(
 
         var experimentIds = runs.Select(x => x.ExperimentId).Distinct().ToArray();
         var experiments = await mongoDb.CollectionOf<Experiment>()
-            .Find(x => experimentIds.Contains(x.Id) && x.FeatBitEnvId == envId)
+            .Find(x => experimentIds.Contains(x.Id) && x.EnvId == envId)
             .ToListAsync();
         var experimentNames = experiments.ToDictionary(x => x.Id, x => x.Name);
 
@@ -603,7 +603,7 @@ public class ExperimentService(
         string? nameSearchText = null)
     {
         var builder = Builders<Experiment>.Filter;
-        var experimentFilter = builder.Eq(x => x.FeatBitEnvId, envId);
+        var experimentFilter = builder.Eq(x => x.EnvId, envId);
         if (!string.IsNullOrWhiteSpace(nameSearchText))
         {
             var search = new BsonRegularExpression(Regex.Escape(nameSearchText.Trim()), "i");
@@ -642,7 +642,7 @@ public class ExperimentService(
         var builder = Builders<Experiment>.Filter;
         var filters = new List<FilterDefinition<Experiment>>
         {
-            builder.Eq(x => x.FeatBitEnvId, envId)
+            builder.Eq(x => x.EnvId, envId)
         };
 
         if (!string.IsNullOrWhiteSpace(filter.Name))
@@ -725,8 +725,8 @@ public class ExperimentService(
             Description = experiment.Description,
             Stage = experiment.Stage,
             FlagKey = experiment.FlagKey,
-            FeatBitProjectKey = experiment.FeatBitProjectKey,
-            FeatBitEnvId = experiment.FeatBitEnvId,
+            FeatBitProjectKey = experiment.ProjectKey,
+            FeatBitEnvId = experiment.EnvId,
             RunCount = runs.Length,
             RunMethodSummary = BuildRunMethodSummary(runs.Select(run => run.Method)),
             StateSummary = ExperimentListStateSummaryVm.From(experiment.LastLearning, runs),
@@ -747,8 +747,8 @@ public class ExperimentService(
             Description = experiment.Description,
             Stage = experiment.Stage,
             FlagKey = experiment.FlagKey,
-            FeatBitProjectKey = experiment.FeatBitProjectKey,
-            FeatBitEnvId = experiment.FeatBitEnvId,
+            FeatBitProjectKey = experiment.ProjectKey,
+            FeatBitEnvId = experiment.EnvId,
             Hypothesis = experiment.Hypothesis,
             AccessToken = experiment.AccessToken,
             Change = experiment.Change,
@@ -1217,7 +1217,7 @@ public class ExperimentService(
         NormalizeRunSlice(run);
 
         var experimentIds = await mongoDb.CollectionOf<Experiment>()
-            .Find(x => x.FeatBitEnvId == envId)
+            .Find(x => x.EnvId == envId)
             .Project(x => x.Id)
             .ToListAsync();
         var candidates = await mongoDb.CollectionOf<ExperimentRun>()
@@ -1237,7 +1237,7 @@ public class ExperimentService(
         if (layerId.HasValue)
         {
             var byId = await mongoDb.CollectionOf<ExperimentLayer>()
-                .Find(x => x.Id == layerId.Value && x.FeatBitEnvId == envId && x.Status == "active")
+                .Find(x => x.Id == layerId.Value && x.EnvId == envId && x.Status == "active")
                 .FirstOrDefaultAsync();
             if (byId != null)
             {
@@ -1251,7 +1251,7 @@ public class ExperimentService(
         }
 
         return await mongoDb.CollectionOf<ExperimentLayer>()
-            .Find(x => x.FeatBitEnvId == envId && x.Key == layerKey && x.Status == "active")
+            .Find(x => x.EnvId == envId && x.Key == layerKey && x.Status == "active")
             .FirstOrDefaultAsync();
     }
 
@@ -1291,7 +1291,7 @@ public class ExperimentService(
     private async Task<Experiment> GetExperimentAsync(Guid envId, Guid id)
     {
         var experiment = await mongoDb.CollectionOf<Experiment>()
-            .Find(x => x.Id == id && x.FeatBitEnvId == envId)
+            .Find(x => x.Id == id && x.EnvId == envId)
             .FirstOrDefaultAsync();
 
         if (experiment == null)
@@ -1307,7 +1307,7 @@ public class ExperimentService(
         experiment.UpdatedAt = experiment.UpdatedAt == default ? DateTime.UtcNow : experiment.UpdatedAt;
         // Run operations only update these fields. Replacing a stale document could reset the counter.
         await mongoDb.CollectionOf<Experiment>().UpdateOneAsync(
-            x => x.Id == experiment.Id && x.FeatBitEnvId == envId,
+            x => x.Id == experiment.Id && x.EnvId == envId,
             Builders<Experiment>.Update
                 .Set(x => x.Variants, experiment.Variants)
                 .Set(x => x.UpdatedAt, experiment.UpdatedAt));
@@ -1316,7 +1316,7 @@ public class ExperimentService(
     private async Task EnsureExperimentExistsAsync(Guid envId, Guid id)
     {
         var exists = await mongoDb.CollectionOf<Experiment>()
-            .Find(x => x.Id == id && x.FeatBitEnvId == envId)
+            .Find(x => x.Id == id && x.EnvId == envId)
             .AnyAsync();
 
         if (!exists)

@@ -17,7 +17,7 @@ public class ExperimentLayerService(AppDbContext dbContext) : IExperimentLayerSe
 
         var query = dbContext.Set<ExperimentLayer>()
             .AsNoTracking()
-            .Where(x => x.FeatBitEnvId == envId);
+            .Where(x => x.EnvId == envId);
 
         if (!string.IsNullOrWhiteSpace(filter.SearchText))
         {
@@ -62,7 +62,7 @@ public class ExperimentLayerService(AppDbContext dbContext) : IExperimentLayerSe
         var layer = new ExperimentLayer
         {
             Id = Guid.NewGuid(),
-            FeatBitEnvId = envId,
+            EnvId = envId,
             Name = Normalize(request.Name)!,
             Key = Normalize(request.Key)!,
             Description = Normalize(request.Description),
@@ -117,7 +117,7 @@ public class ExperimentLayerService(AppDbContext dbContext) : IExperimentLayerSe
     {
         var layer = await dbContext.Set<ExperimentLayer>()
             .AsTracking()
-            .FirstOrDefaultAsync(x => x.Id == id && x.FeatBitEnvId == envId);
+            .FirstOrDefaultAsync(x => x.Id == id && x.EnvId == envId);
 
         if (layer == null)
         {

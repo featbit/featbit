@@ -20,7 +20,7 @@ public class ExperimentMetricService(AppDbContext dbContext) : IExperimentMetric
 
         var query = dbContext.Set<ExperimentMetric>()
             .AsNoTracking()
-            .Where(x => x.FeatBitEnvId == envId);
+            .Where(x => x.EnvId == envId);
 
         if (!string.IsNullOrWhiteSpace(filter.SearchText))
         {
@@ -67,7 +67,7 @@ public class ExperimentMetricService(AppDbContext dbContext) : IExperimentMetric
         var metric = new ExperimentMetric
         {
             Id = Guid.NewGuid(),
-            FeatBitEnvId = envId,
+            EnvId = envId,
             Name = Normalize(request.Name)!,
             Key = Normalize(request.Key)!,
             Description = Normalize(request.Description),
@@ -129,7 +129,7 @@ public class ExperimentMetricService(AppDbContext dbContext) : IExperimentMetric
         var metric = await dbContext.Set<ExperimentMetric>()
             .AsNoTracking()
             .FirstOrDefaultAsync(x =>
-                x.FeatBitEnvId == envId &&
+                x.EnvId == envId &&
                 x.Status == "active" &&
                 ((id.HasValue && x.Id == id.Value) ||
                  (!string.IsNullOrWhiteSpace(normalizedKey) && x.Key == normalizedKey)));
@@ -146,7 +146,7 @@ public class ExperimentMetricService(AppDbContext dbContext) : IExperimentMetric
     {
         var metric = await dbContext.Set<ExperimentMetric>()
             .AsTracking()
-            .FirstOrDefaultAsync(x => x.Id == id && x.FeatBitEnvId == envId);
+            .FirstOrDefaultAsync(x => x.Id == id && x.EnvId == envId);
 
         if (metric == null)
         {

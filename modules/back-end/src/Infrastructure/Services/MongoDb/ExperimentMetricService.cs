@@ -22,7 +22,7 @@ public class ExperimentMetricService(MongoDbClient mongoDb) : IExperimentMetricS
         var builder = Builders<ExperimentMetric>.Filter;
         var filters = new List<FilterDefinition<ExperimentMetric>>
         {
-            builder.Eq(x => x.FeatBitEnvId, envId)
+            builder.Eq(x => x.EnvId, envId)
         };
 
         if (!string.IsNullOrWhiteSpace(filter.SearchText))
@@ -80,7 +80,7 @@ public class ExperimentMetricService(MongoDbClient mongoDb) : IExperimentMetricS
         var metric = new ExperimentMetric
         {
             Id = Guid.NewGuid(),
-            FeatBitEnvId = envId,
+            EnvId = envId,
             Name = Normalize(request.Name)!,
             Key = Normalize(request.Key)!,
             Description = Normalize(request.Description),
@@ -109,7 +109,7 @@ public class ExperimentMetricService(MongoDbClient mongoDb) : IExperimentMetricS
         metric.UpdatedAt = DateTime.UtcNow;
 
         await mongoDb.CollectionOf<ExperimentMetric>()
-            .ReplaceOneAsync(x => x.Id == id && x.FeatBitEnvId == envId, metric);
+            .ReplaceOneAsync(x => x.Id == id && x.EnvId == envId, metric);
 
         return metric;
     }
@@ -121,7 +121,7 @@ public class ExperimentMetricService(MongoDbClient mongoDb) : IExperimentMetricS
         metric.UpdatedAt = DateTime.UtcNow;
 
         await mongoDb.CollectionOf<ExperimentMetric>()
-            .ReplaceOneAsync(x => x.Id == id && x.FeatBitEnvId == envId, metric);
+            .ReplaceOneAsync(x => x.Id == id && x.EnvId == envId, metric);
     }
 
     public async Task RestoreAsync(Guid envId, Guid id)
@@ -131,7 +131,7 @@ public class ExperimentMetricService(MongoDbClient mongoDb) : IExperimentMetricS
         metric.UpdatedAt = DateTime.UtcNow;
 
         await mongoDb.CollectionOf<ExperimentMetric>()
-            .ReplaceOneAsync(x => x.Id == id && x.FeatBitEnvId == envId, metric);
+            .ReplaceOneAsync(x => x.Id == id && x.EnvId == envId, metric);
     }
 
     public async Task<ExperimentMetric> GetBySelectorAsync(
@@ -142,7 +142,7 @@ public class ExperimentMetricService(MongoDbClient mongoDb) : IExperimentMetricS
         var normalizedKey = Normalize(key);
         var metric = await mongoDb.CollectionOf<ExperimentMetric>()
             .Find(x =>
-                x.FeatBitEnvId == envId &&
+                x.EnvId == envId &&
                 x.Status == "active" &&
                 ((id.HasValue && x.Id == id.Value) ||
                  (!string.IsNullOrWhiteSpace(normalizedKey) && x.Key == normalizedKey)))
@@ -159,7 +159,7 @@ public class ExperimentMetricService(MongoDbClient mongoDb) : IExperimentMetricS
     private async Task<ExperimentMetric> GetMetricAsync(Guid envId, Guid id)
     {
         var metric = await mongoDb.CollectionOf<ExperimentMetric>()
-            .Find(x => x.Id == id && x.FeatBitEnvId == envId)
+            .Find(x => x.Id == id && x.EnvId == envId)
             .FirstOrDefaultAsync();
 
         if (metric == null)

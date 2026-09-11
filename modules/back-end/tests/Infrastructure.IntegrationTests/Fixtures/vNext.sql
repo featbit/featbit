@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS experiment_exposure_events (
 
 CREATE TABLE IF NOT EXISTS experiment_layers (
     id uuid NOT NULL,
-    featbit_env_id uuid NOT NULL,
+    env_id uuid NOT NULL,
     name character varying(256) NOT NULL,
     key character varying(128) NOT NULL,
     description text,
@@ -92,7 +92,7 @@ CREATE TABLE IF NOT EXISTS experiment_metric_events (
 
 CREATE TABLE IF NOT EXISTS experiment_metrics (
     id uuid NOT NULL,
-    featbit_env_id uuid NOT NULL,
+    env_id uuid NOT NULL,
     name character varying(256) NOT NULL,
     key character varying(128) NOT NULL,
     description text,
@@ -186,8 +186,8 @@ CREATE TABLE IF NOT EXISTS experiments (
     description text,
     stage character varying(64) NOT NULL,
     flag_key character varying(256),
-    featbit_project_key character varying(256),
-    featbit_env_id uuid,
+    project_key character varying(256),
+    env_id uuid,
     hypothesis text,
     access_token text,
     change text,
@@ -264,18 +264,18 @@ CREATE INDEX IF NOT EXISTS ix_experiment_exposure_events_env_id_flag_key_exposed
     ON experiment_exposure_events (env_id, flag_key, exposed_at);
 CREATE INDEX IF NOT EXISTS ix_experiment_exposure_events_env_id_user_key_exposed_at
     ON experiment_exposure_events (env_id, user_key, exposed_at);
-CREATE UNIQUE INDEX IF NOT EXISTS ix_experiment_layers_feat_bit_env_id_key
-    ON experiment_layers (featbit_env_id, key);
-CREATE INDEX IF NOT EXISTS ix_experiment_layers_feat_bit_env_id_status
-    ON experiment_layers (featbit_env_id, status);
+CREATE UNIQUE INDEX IF NOT EXISTS ix_experiment_layers_env_id_key
+    ON experiment_layers (env_id, key);
+CREATE INDEX IF NOT EXISTS ix_experiment_layers_env_id_status
+    ON experiment_layers (env_id, status);
 CREATE INDEX IF NOT EXISTS ix_experiment_metric_events_env_id_event_name_occurred_at
     ON experiment_metric_events (env_id, event_name, occurred_at);
 CREATE INDEX IF NOT EXISTS ix_experiment_metric_events_env_id_event_name_user_key_occurre
     ON experiment_metric_events (env_id, event_name, user_key, occurred_at);
-CREATE UNIQUE INDEX IF NOT EXISTS ix_experiment_metrics_feat_bit_env_id_key
-    ON experiment_metrics (featbit_env_id, key);
-CREATE INDEX IF NOT EXISTS ix_experiment_metrics_feat_bit_env_id_status
-    ON experiment_metrics (featbit_env_id, status);
+CREATE UNIQUE INDEX IF NOT EXISTS ix_experiment_metrics_env_id_key
+    ON experiment_metrics (env_id, key);
+CREATE INDEX IF NOT EXISTS ix_experiment_metrics_env_id_status
+    ON experiment_metrics (env_id, status);
 CREATE UNIQUE INDEX IF NOT EXISTS ix_experiment_run_assignments_run_id_allocation_key
     ON experiment_run_assignments (run_id, allocation_key);
 CREATE INDEX IF NOT EXISTS ix_experiment_run_assignments_run_id_analysis_role
@@ -286,10 +286,10 @@ CREATE INDEX IF NOT EXISTS ix_experiment_run_assignments_run_id_role
     ON experiment_run_assignments (run_id, role);
 CREATE UNIQUE INDEX IF NOT EXISTS ix_experiment_runs_experiment_id_slug
     ON experiment_runs (experiment_id, slug);
-CREATE INDEX IF NOT EXISTS ix_experiments_feat_bit_env_id_updated_at
-    ON experiments (featbit_env_id, updated_at);
-CREATE INDEX IF NOT EXISTS ix_experiments_feat_bit_project_key
-    ON experiments (featbit_project_key);
+CREATE INDEX IF NOT EXISTS ix_experiments_env_id_updated_at
+    ON experiments (env_id, updated_at);
+CREATE INDEX IF NOT EXISTS ix_experiments_project_key
+    ON experiments (project_key);
 CREATE INDEX IF NOT EXISTS ix_experiments_flag_key
     ON experiments (flag_key);
 CREATE INDEX IF NOT EXISTS ix_mcp_access_token_sessions_expires_at

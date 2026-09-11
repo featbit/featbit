@@ -44,7 +44,7 @@ public class ExperimentService(
     {
         var experiment = await dbContext.Set<Experiment>()
             .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.Id == id && x.FeatBitEnvId == envId);
+            .FirstOrDefaultAsync(x => x.Id == id && x.EnvId == envId);
 
         if (experiment == null)
         {
@@ -61,7 +61,7 @@ public class ExperimentService(
         var envId = await dbContext.Set<Experiment>()
             .AsNoTracking()
             .Where(x => x.Id == id)
-            .Select(x => x.FeatBitEnvId)
+            .Select(x => x.EnvId)
             .FirstOrDefaultAsync();
 
         if (!envId.HasValue)
@@ -76,7 +76,7 @@ public class ExperimentService(
     {
         var experiment = await dbContext.Set<Experiment>()
             .AsTracking()
-            .FirstOrDefaultAsync(x => x.Id == id && x.FeatBitEnvId == envId);
+            .FirstOrDefaultAsync(x => x.Id == id && x.EnvId == envId);
 
         if (experiment == null)
         {
@@ -103,7 +103,7 @@ public class ExperimentService(
 
         var experiment = await dbContext.Set<Experiment>()
             .AsTracking()
-            .FirstOrDefaultAsync(x => x.Id == id && x.FeatBitEnvId == envId);
+            .FirstOrDefaultAsync(x => x.Id == id && x.EnvId == envId);
 
         if (experiment == null)
         {
@@ -135,7 +135,7 @@ public class ExperimentService(
     {
         var experiment = await dbContext.Set<Experiment>()
             .AsTracking()
-            .FirstOrDefaultAsync(x => x.Id == id && x.FeatBitEnvId == envId);
+            .FirstOrDefaultAsync(x => x.Id == id && x.EnvId == envId);
 
         if (experiment == null)
         {
@@ -267,7 +267,7 @@ public class ExperimentService(
         {
             await using var transaction = await dbContext.Database.BeginTransactionAsync();
             var experiments = dbContext.Set<Experiment>()
-                .Where(x => x.Id == experiment.Id && x.FeatBitEnvId == envId);
+                .Where(x => x.Id == experiment.Id && x.EnvId == envId);
 
             // Keep the row lock until this caller has read its reserved number.
             // A failed run insertion may leave a gap; reserved numbers are never reused.
@@ -303,7 +303,7 @@ public class ExperimentService(
         // Seed before either creation or deletion, even when legacy creation activities are absent.
         // Never lower a value initialized or incremented by a concurrent request.
         await dbContext.Set<Experiment>()
-            .Where(x => x.Id == experiment.Id && x.FeatBitEnvId == envId)
+            .Where(x => x.Id == experiment.Id && x.EnvId == envId)
             .ExecuteUpdateAsync(setters => setters
                 .SetProperty(x => x.LastRunNumber, x => Math.Max(x.LastRunNumber ?? 0, lastUsed)));
     }
@@ -587,7 +587,7 @@ public class ExperimentService(
             from run in dbContext.Set<ExperimentRun>().AsNoTracking()
             join experiment in dbContext.Set<Experiment>().AsNoTracking()
                 on run.ExperimentId equals experiment.Id
-            where experiment.FeatBitEnvId == envId &&
+            where experiment.EnvId == envId &&
                   ((run.LayerId.HasValue && layerIds.Contains(run.LayerId.Value)) ||
                    layerKeys.Contains(run.LayerKey))
             select new ExperimentRunForLayer
@@ -603,7 +603,7 @@ public class ExperimentService(
     {
         var experimentQuery = dbContext.Set<Experiment>()
             .AsNoTracking()
-            .Where(x => x.FeatBitEnvId == envId);
+            .Where(x => x.EnvId == envId);
         if (!string.IsNullOrWhiteSpace(nameSearchText))
         {
             var normalizedSearchText = nameSearchText.Trim().ToLower();
@@ -641,7 +641,7 @@ public class ExperimentService(
 
         var query = dbContext.Set<Experiment>()
             .AsNoTracking()
-            .Where(x => x.FeatBitEnvId == envId);
+            .Where(x => x.EnvId == envId);
 
         if (!string.IsNullOrWhiteSpace(filter.Name))
         {
@@ -720,8 +720,8 @@ public class ExperimentService(
             Description = experiment.Description,
             Stage = experiment.Stage,
             FlagKey = experiment.FlagKey,
-            FeatBitProjectKey = experiment.FeatBitProjectKey,
-            FeatBitEnvId = experiment.FeatBitEnvId,
+            FeatBitProjectKey = experiment.ProjectKey,
+            FeatBitEnvId = experiment.EnvId,
             RunCount = runs.Length,
             RunMethodSummary = BuildRunMethodSummary(runs.Select(run => run.Method)),
             StateSummary = ExperimentListStateSummaryVm.From(experiment.LastLearning, runs),
@@ -967,8 +967,8 @@ public class ExperimentService(
             Description = experiment.Description,
             Stage = experiment.Stage,
             FlagKey = experiment.FlagKey,
-            FeatBitProjectKey = experiment.FeatBitProjectKey,
-            FeatBitEnvId = experiment.FeatBitEnvId,
+            FeatBitProjectKey = experiment.ProjectKey,
+            FeatBitEnvId = experiment.EnvId,
             Hypothesis = experiment.Hypothesis,
             AccessToken = experiment.AccessToken,
             Change = experiment.Change,
@@ -1253,7 +1253,7 @@ public class ExperimentService(
             from candidate in dbContext.Set<ExperimentRun>().AsNoTracking()
             join experiment in dbContext.Set<Experiment>()
                 on candidate.ExperimentId equals experiment.Id
-            where experiment.FeatBitEnvId == envId &&
+            where experiment.EnvId == envId &&
                   candidate.Id != run.Id &&
                   candidate.ExperimentId != run.ExperimentId &&
                   ((run.LayerId.HasValue && candidate.LayerId == run.LayerId) ||
@@ -1268,7 +1268,7 @@ public class ExperimentService(
         if (layerId.HasValue)
         {
             var byId = await dbContext.Set<ExperimentLayer>()
-                .FirstOrDefaultAsync(x => x.Id == layerId.Value && x.FeatBitEnvId == envId && x.Status == "active");
+                .FirstOrDefaultAsync(x => x.Id == layerId.Value && x.EnvId == envId && x.Status == "active");
             if (byId != null)
             {
                 return byId;
@@ -1281,7 +1281,7 @@ public class ExperimentService(
         }
 
         return await dbContext.Set<ExperimentLayer>()
-            .FirstOrDefaultAsync(x => x.FeatBitEnvId == envId && x.Key == layerKey && x.Status == "active");
+            .FirstOrDefaultAsync(x => x.EnvId == envId && x.Key == layerKey && x.Status == "active");
     }
 
     private static void NormalizeRunSlice(ExperimentRun run)
@@ -1321,7 +1321,7 @@ public class ExperimentService(
     {
         var experiment = await dbContext.Set<Experiment>()
             .AsTracking()
-            .FirstOrDefaultAsync(x => x.Id == id && x.FeatBitEnvId == envId);
+            .FirstOrDefaultAsync(x => x.Id == id && x.EnvId == envId);
 
         if (experiment == null)
         {
@@ -1334,7 +1334,7 @@ public class ExperimentService(
     private async Task EnsureExperimentExistsAsync(Guid envId, Guid id)
     {
         var exists = await dbContext.Set<Experiment>()
-            .AnyAsync(x => x.Id == id && x.FeatBitEnvId == envId);
+            .AnyAsync(x => x.Id == id && x.EnvId == envId);
 
         if (!exists)
         {

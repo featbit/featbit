@@ -87,7 +87,7 @@ public class GetExperimentLayersHandlerTests
     private static ExperimentLayer NewLayer(Guid envId) => new()
     {
         Id = Guid.NewGuid(),
-        FeatBitEnvId = envId,
+        EnvId = envId,
         Name = "Checkout",
         Key = "checkout",
         Description = "Checkout experiments",

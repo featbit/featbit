@@ -105,7 +105,7 @@ public abstract class ExperimentLayerReservationTests(ExperimentProviderParityFi
     {
         var experiment = new Experiment
         {
-            Id = Guid.NewGuid(), Name = "Layer reservation test", Stage = "measuring", FeatBitEnvId = EnvId
+            Id = Guid.NewGuid(), Name = "Layer reservation test", Stage = "measuring", EnvId = EnvId
         };
         await Service().CreateAsync(experiment);
         var created = await Service().CreateRunAsync(EnvId, experiment.Id);

@@ -24,7 +24,7 @@ public class GetExperimentMetricsHandlerTests
             Experiment = new Experiment
             {
                 Id = Guid.NewGuid(),
-                FeatBitEnvId = envId,
+                EnvId = envId,
                 Name = "Pricing experiment",
                 PrimaryMetric = $"{{\"event\":\"{metric.Key}\"}}"
             },
@@ -100,7 +100,7 @@ public class GetExperimentMetricsHandlerTests
     private static ExperimentMetric NewMetric(Guid envId) => new()
     {
         Id = Guid.NewGuid(),
-        FeatBitEnvId = envId,
+        EnvId = envId,
         Name = "Checkout conversion",
         Key = "checkout_completed",
         MetricType = "binary",

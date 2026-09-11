@@ -19,7 +19,7 @@ public class ExperimentLayerService(MongoDbClient mongoDb) : IExperimentLayerSer
         var builder = Builders<ExperimentLayer>.Filter;
         var filters = new List<FilterDefinition<ExperimentLayer>>
         {
-            builder.Eq(x => x.FeatBitEnvId, envId)
+            builder.Eq(x => x.EnvId, envId)
         };
 
         if (!string.IsNullOrWhiteSpace(filter.SearchText))
@@ -69,7 +69,7 @@ public class ExperimentLayerService(MongoDbClient mongoDb) : IExperimentLayerSer
         var layer = new ExperimentLayer
         {
             Id = Guid.NewGuid(),
-            FeatBitEnvId = envId,
+            EnvId = envId,
             Name = Normalize(request.Name)!,
             Key = Normalize(request.Key)!,
             Description = Normalize(request.Description),
@@ -96,7 +96,7 @@ public class ExperimentLayerService(MongoDbClient mongoDb) : IExperimentLayerSer
         layer.UpdatedAt = DateTime.UtcNow;
 
         await mongoDb.CollectionOf<ExperimentLayer>()
-            .ReplaceOneAsync(x => x.Id == id && x.FeatBitEnvId == envId, layer);
+            .ReplaceOneAsync(x => x.Id == id && x.EnvId == envId, layer);
 
         return layer;
     }
@@ -108,7 +108,7 @@ public class ExperimentLayerService(MongoDbClient mongoDb) : IExperimentLayerSer
         layer.UpdatedAt = DateTime.UtcNow;
 
         await mongoDb.CollectionOf<ExperimentLayer>()
-            .ReplaceOneAsync(x => x.Id == id && x.FeatBitEnvId == envId, layer);
+            .ReplaceOneAsync(x => x.Id == id && x.EnvId == envId, layer);
     }
 
     public async Task RestoreAsync(Guid envId, Guid id)
@@ -118,13 +118,13 @@ public class ExperimentLayerService(MongoDbClient mongoDb) : IExperimentLayerSer
         layer.UpdatedAt = DateTime.UtcNow;
 
         await mongoDb.CollectionOf<ExperimentLayer>()
-            .ReplaceOneAsync(x => x.Id == id && x.FeatBitEnvId == envId, layer);
+            .ReplaceOneAsync(x => x.Id == id && x.EnvId == envId, layer);
     }
 
     private async Task<ExperimentLayer> GetLayerAsync(Guid envId, Guid id)
     {
         var layer = await mongoDb.CollectionOf<ExperimentLayer>()
-            .Find(x => x.Id == id && x.FeatBitEnvId == envId)
+            .Find(x => x.Id == id && x.EnvId == envId)
             .FirstOrDefaultAsync();
 
         if (layer == null)
