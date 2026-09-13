@@ -1,8 +1,76 @@
+using System.Diagnostics;
+using Domain.Observability;
+
 namespace Domain.Evaluation;
 
 public class Evaluator(IRuleMatcher ruleMatcher) : IEvaluator
 {
+    /// <summary>
+    /// The match reason the default (fallthrough) rule records. It is the one
+    /// <see cref="UserVariation.MatchReason"/> value that is not user-authored, which is what lets
+    /// <see cref="ReasonOf"/> tell a fallthrough apart from a real rule match without tagging a
+    /// metric with a customer-defined rule name.
+    /// </summary>
+    internal const string DefaultRuleMatchReason = "default";
+
+    /// <summary>
+    /// Evaluates <paramref name="scope"/> and records the M9 evaluation metrics around it.
+    /// </summary>
+    /// <remarks>
+    /// This is the hottest path in the service — one call per flag per connected client per change —
+    /// so when nothing is listening it delegates straight to <see cref="EvaluateCoreAsync"/> without
+    /// even reading a timestamp. The evaluation logic itself lives in <see cref="EvaluateCoreAsync"/>
+    /// and is unchanged; this wrapper is pure instrumentation and never alters the result or the
+    /// exception that propagates.
+    /// </remarks>
     public async ValueTask<UserVariation> EvaluateAsync(EvaluationScope scope)
+    {
+        var metrics = EvaluationMetrics.Current;
+        if (!metrics.Enabled)
+        {
+            return await EvaluateCoreAsync(scope);
+        }
+
+        var start = Stopwatch.GetTimestamp();
+        try
+        {
+            var userVariation = await EvaluateCoreAsync(scope);
+            metrics.RecordEvaluation(
+                ReasonOf(userVariation), Outcomes.Success, Stopwatch.GetElapsedTime(start));
+
+            return userVariation;
+        }
+        catch (MalformedDataException)
+        {
+            metrics.RecordEvaluation(
+                EvaluationReasons.MalformedData, Outcomes.Failure, Stopwatch.GetElapsedTime(start));
+            throw;
+        }
+        catch (Exception)
+        {
+            metrics.RecordEvaluation(
+                EvaluationReasons.Error, Outcomes.Failure, Stopwatch.GetElapsedTime(start));
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Maps a variation onto the bounded <c>reason</c> vocabulary using its <i>type</i>.
+    /// <see cref="UserVariation.MatchReason"/> is deliberately not used as a tag value: for a
+    /// rollout it is the user-authored rule name.
+    /// </summary>
+    private static string ReasonOf(UserVariation userVariation) => userVariation switch
+    {
+        NullUserVariation => EvaluationReasons.Archived,
+        FeatureFlagDisabledUserVariation => EvaluationReasons.Disabled,
+        TargetedUserVariation => EvaluationReasons.Targeted,
+        RolloutUserVariation rollout => rollout.MatchReason == DefaultRuleMatchReason
+            ? EvaluationReasons.Fallthrough
+            : EvaluationReasons.RuleMatch,
+        _ => EvaluationReasons.Error
+    };
+
+    private async ValueTask<UserVariation> EvaluateCoreAsync(EvaluationScope scope)
     {
         var flag = scope.Flag;
         var user = scope.User;
@@ -86,7 +154,7 @@ public class Evaluator(IRuleMatcher ruleMatcher) : IEvaluator
             scope.Variations,
             exptIncludeAllTargets,
             reader.GetRequiredBoolean(fallthrough, "includedInExpt"),
-            "default"
+            DefaultRuleMatchReason
         );
     }
 }

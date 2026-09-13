@@ -79,7 +79,7 @@ replica at a time, elected via a Redis lock. Election is **opt-in**:
   operation the gated workers perform is idempotent/version-guarded — see "dual leadership is
   harmless" below) but redundant under multiple replicas: N replicas each running the same tick
   do N× the work for the same effect. `AlwaysLeaderElection` still emits the
-  `control_plane.consistency.is_leader` gauge (pinned at a constant `1`) so dashboards built
+  `featbit.control_plane.consistency.is_leader` gauge (pinned at a constant `1`) so dashboards built
   against that metric keep working instead of the series disappearing.
 - **Enabled semantics — lock location:** a single key (`featbit:control-plane:leader`) in
   `Redis:Instances[0]` (the control plane's "home"/local DC Redis — the same singleton connection
@@ -278,13 +278,20 @@ OpenTelemetry/`MeterListener`):
 
 | Instrument | Type | Tags | Meaning |
 |---|---|---|---|
-| `control_plane.consistency.commits` | counter | `resource_type`, `env_id` | successful commits |
-| `control_plane.consistency.time_to_commit_ms` | histogram | `resource_type` | stage→commit latency |
-| `control_plane.consistency.pending_backlog` | gauge | `resource_type` | currently-pending items |
-| `control_plane.consistency.evicted_commits` | counter | `dc_id` | commits that proceeded without an evicted DC |
-| `control_plane.consistency.unmatched_dc_count` | gauge | `direction` | DcId config/lease mismatches |
-| `control_plane.consistency.applied_watermark_lag_ms` | gauge | `dc_id`, `env_id` | live DC's lag (ms) behind the most-advanced live DC's applied watermark, per env (`#69`/`#84`) |
-| `control_plane.consistency.is_leader` | gauge | `instance_id` | 1 if this replica currently holds the leader lock, else 0; when election is disabled (default) always reports 1 for every replica (`#71`, see §1a) |
+| `featbit.control_plane.consistency.commits` | counter | `resource_type` | successful commits |
+| `featbit.control_plane.consistency.time_to_commit` | histogram (`ms`) | `resource_type` | stage→commit latency |
+| `featbit.control_plane.consistency.pending_backlog` | gauge | `resource_type` | currently-pending items |
+| `featbit.control_plane.consistency.evicted_commits` | counter | `dc_id` | commits that proceeded without an evicted DC |
+| `featbit.control_plane.consistency.unmatched_dc_count` | gauge | `direction` | DcId config/lease mismatches |
+| `featbit.control_plane.consistency.applied_watermark_lag` | gauge (`ms`) | `dc_id` | live DC's **worst-case** lag (ms) behind the most-advanced live DC's applied watermark, taken as the maximum across that DC's environments (`#69`/`#84`) |
+| `featbit.control_plane.consistency.is_leader` | gauge | *(none)* | 1 if this replica currently holds the leader lock, else 0; when election is disabled (default) always reports 1 for every replica (`#71`, see §1a). Identify the replica via the OTel resource attribute `service.instance.id` |
+
+> **Renamed.** These instruments were renamed to the `featbit.*` prefix, and `env_id` /
+> `instance_id` were dropped, to conform to the observability standard
+> ([`docs/observability/index.md`](../../../docs/observability/index.md)). The full old → new
+> mapping is in [`docs/observability/instruments.md`](../../../docs/observability/instruments.md).
+> Note that `applied_watermark_lag` changed **meaning**, not just name: it is now the maximum lag
+> across a DC's environments rather than one series per environment.
 
 **Alert on:** sustained `pending_backlog > 0` (commits stuck — a live DC not staging, or a DcId
 mismatch), rising `evicted_commits` (a DC repeatedly dropping out), and any non-zero
@@ -399,15 +406,15 @@ configured, so a run on a BestEffort cluster, or without Chaos Mesh, degrades gr
   full-sync (a per-DC client-refresh push is not yet implemented).
 - **Eval-server applied watermark** (`#46`/`#69`): the heartbeat watermark (now covering flags AND
   segments, `#83`) is persisted per-DC in `DcLease.AppliedWatermarks` and consumed by the
-  `applied_watermark_lag_ms` gauge (`#84`) — it is **not** used for commit gating (the gate remains
-  staged-everywhere), only for the per-DC/per-env lag metric above.
+  `applied_watermark_lag` gauge (`#84`) — it is **not** used for commit gating (the gate remains
+  staged-everywhere), only for the per-DC lag metric above.
 - **Self-fence (D5, `#22`):** implemented as a hard readiness fence — `HeartbeatFreshnessHealthCheck`
   fails `/health/readiness` (HTTP 503) once a pod has been unable to publish a heartbeat for longer
   than `ControlPlane:HeartbeatStalenessThresholdSeconds` (default 15s), pulling a
   partitioned/evicted DC's eval servers out of load-balancer rotation rather than letting them keep
   serving last-committed (consistent-but-stale) values. Liveness is unaffected (the pod is not
   restarted); it rejoins rotation once heartbeats resume. See CP-13 above.
-- **EF residual window:** the optimistic guards on `SetPending`/`PromotePending` are atomic on
+- **EF residual window:** the optimiztic guards on `SetPending`/`PromotePending` are atomic on
   Mongo but load-check-save on EF/Postgres (no rowversion) — a documented narrow window.
 - **EF `SetPendingAsync` retry-exhaustion edge (`#107`):** on Postgres, `SetPendingAsync`
   (`FeatureFlagService`/`SegmentService`, EF) retries `DbUpdateConcurrencyException` (the xmin

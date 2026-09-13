@@ -2,6 +2,7 @@ using Api.Infrastructure.Caches;
 using Application;
 using Application.ControlPlane;
 using Domain.Messages;
+using Domain.Observability;
 
 namespace Api.Application.ControlPlane;
 
@@ -53,7 +54,7 @@ namespace Api.Application.ControlPlane;
 /// scopes who acts. If, in some MQ topologies, control-plane commands are delivered only locally,
 /// remote-DC targeting would additionally need a per-DC command publish — a follow-up, NOT built here.
 /// </summary>
-public sealed class RecoveryWorker : BackgroundService
+public sealed partial class RecoveryWorker : BackgroundService
 {
     /// <summary>
     /// Default interval between recovery ticks when not overridden via
@@ -66,6 +67,9 @@ public sealed class RecoveryWorker : BackgroundService
     private readonly ILeaderElection _leaderElection;
     private readonly bool _enabled;
     private readonly TimeSpan _interval;
+
+    private readonly WorkerObservability _worker =
+        ServiceMeter.ForWorker(ControlPlaneWorkerNames.RecoveryWorker);
     private readonly ILogger<RecoveryWorker> _logger;
 
     // DcIds seen live on the previous tick. A DcId present now but absent here is "newly present"
@@ -96,32 +100,42 @@ public sealed class RecoveryWorker : BackgroundService
     {
         if (!_enabled)
         {
-            _logger.LogInformation(
-                "Recovery worker disabled (consistency mode is not GatedCommit).");
+            Log.WorkerDisabled(_logger);
             return;
         }
 
         using var timer = new PeriodicTimer(_interval);
-        while (await timer.WaitForNextTickAsync(stoppingToken))
+        _worker.Started();
+
+        try
         {
-            try
+            while (await timer.WaitForNextTickAsync(stoppingToken))
             {
-                var backfilled = await RunOnceAsync(stoppingToken);
-                if (backfilled > 0)
+                _worker.Heartbeat();
+
+                try
                 {
-                    _logger.LogInformation(
-                        "Recovery worker backfilled {BackfilledCount} returning DC(s).",
-                        backfilled);
+                    var backfilled = await RunOnceAsync(stoppingToken);
+                    if (backfilled > 0)
+                    {
+                        _worker.Success();
+                        Log.Backfilled(_logger, backfilled);
+                    }
+                }
+                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                {
+                    // ignore cancellation from the timer loop itself
+                }
+                catch (Exception ex)
+                {
+                    _worker.LoopFailed(ex);
+                    Log.ErrorTick(_logger, ex);
                 }
             }
-            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
-            {
-                // ignore cancellation from the timer loop itself
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while running the recovery worker tick.");
-            }
+        }
+        finally
+        {
+            _worker.Stopped();
         }
     }
 
@@ -180,12 +194,7 @@ public sealed class RecoveryWorker : BackgroundService
         // the NEXT tick treats them as newly-returned again once the guard clears.
         if (!_backfiller.IsCompositeCacheAvailable)
         {
-            _logger.LogWarning(
-                "Recovery worker: composite Redis cache is unavailable; skipping backfill for " +
-                "{Count} returned DC(s) this tick ({DcIds}). Will retry once they are re-detected " +
-                "as returned.",
-                returned.Count,
-                string.Join(", ", returned));
+            Log.CompositeCacheUnavailable(_logger, returned.Count, string.Join(", ", returned));
             // Force a retry: forget these DCs from the watermark so next tick treats them as
             // newly-returned again once the guard clears.
             foreach (var dcId in returned)
@@ -224,22 +233,18 @@ public sealed class RecoveryWorker : BackgroundService
             var result = await _backfiller.BackfillDcAsync(dcId, ConsistencyMode.GatedCommit, snapshot, cancellationToken);
             if (result == IDcBackfiller.Skipped)
             {
-                _logger.LogDebug(
-                    "Recovery worker: backfill for returned DC {DcId} was skipped this tick " +
-                    "(coalesced with a concurrent backfill already in flight for that DC).",
-                    dcId);
+                ControlPlaneMetrics.Current.RecordDcBackfill(dcId, BackfillOutcomes.Coalesced);
+                Log.BackfillCoalesced(_logger, dcId);
             }
             else if (result > 0)
             {
+                ControlPlaneMetrics.Current.RecordDcBackfill(dcId, BackfillOutcomes.Repaired);
                 backfilled++;
             }
             else
             {
-                _logger.LogDebug(
-                    "Recovery worker: backfill for returned DC {DcId} ran but the only-advance guard " +
-                    "accepted zero flag writes (its Redis already matched the source of truth); not " +
-                    "counted as a repair.",
-                    dcId);
+                ControlPlaneMetrics.Current.RecordDcBackfill(dcId, BackfillOutcomes.NoChange);
+                Log.BackfillNoWrites(_logger, dcId);
             }
         }
 

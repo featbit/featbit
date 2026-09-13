@@ -1,3 +1,4 @@
+using Domain.Observability;
 using Domain.Shared;
 using Microsoft.Extensions.Logging.Testing;
 using Streaming.Connections;
@@ -25,7 +26,11 @@ public class ConnectionLogTests
             ["{OriginalFormat}"] = "Connection added",
 
             ["connection.type"] = context.Type,
-            ["connection.token"] = context.Token,
+            // The SDK token is a credential and is logged only in hashed form
+            // (docs/observability/index.md §7). Asserting against Redaction rather than a literal
+            // means reinstating a raw value fails here. The client IP is deliberately raw: it is
+            // operator-facing diagnostic data, not a credential.
+            ["connection.token"] = Redaction.Token(context.Token),
             ["connection.version"] = context.Version,
 
             ["connection.connect.at"] = context.ConnectAt.ToString(),
@@ -34,6 +39,7 @@ public class ConnectionLogTests
             ["connection.client.ip"] = context.Client?.IpAddress,
             ["connection.client.host"] = context.Client?.Host,
 
+            ["connection.id"] = context.Connection.Id,
             ["connection.project.key"] = context.Connection.ProjectKey,
             ["connection.env.id"] = context.Connection.EnvId.ToString(),
             ["connection.env.key"] = context.Connection.EnvKey
@@ -70,7 +76,7 @@ public class ConnectionLogTests
             ["{OriginalFormat}"] = "Connection added",
 
             ["connection.type"] = context.Type,
-            ["connection.token"] = context.Token,
+            ["connection.token"] = Redaction.Token(context.Token),
             ["connection.version"] = context.Version,
 
             ["connection.connect.at"] = context.ConnectAt,

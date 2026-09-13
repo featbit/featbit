@@ -1,8 +1,14 @@
 # FeatBit OpenTelemetry Priorities for Operational Stability
 
-> **Status: Draft proposal.** Nothing here is a ratified specification; instrument names,
-> attributes, and phasing are all open to change until the tracking issue is closed.
-> Discussion and contributions welcome — see the tracking issue.
+> **Status: Superseded.** This proposal has been ratified, revised, and replaced by the
+> [FeatBit Observability Standard](../../observability/index.md), which is the current source of
+> truth for instrument naming, attributes, cardinality, logging, redaction, health checks, and
+> traces. The instrument registry lives in [instruments.md](../../observability/instruments.md).
+>
+> This document is retained for its rationale and for the code audit in §4, which was re-verified
+> against the codebase and found accurate apart from the two corrections noted inline below.
+> Its metric priorities (M1–M6) and trace priorities (T1–T2) were carried forward; its naming
+> proposals were **not** adopted verbatim.
 >
 > Implementation detail lives in the companion document, [implementation.md](./implementation.md).
 >
@@ -88,12 +94,45 @@ Keep P0 metrics enabled: let metrics trigger the alert, then temporarily enable 
 | The API → ELS Redis transport is Pub/Sub, not a queue | An evaluation server that restarts misses every change published while it was down, and then looks idle rather than stale | M2, M3 |
 | The ELS PostgreSQL notification channel uses `DropOldest` and ignores `TryWrite` results | Old notifications can be overwritten without crashing the service. The back-end PostgreSQL consumer differs: it polls `queue_messages` with a visibility timeout and does not drop | M2, M5 |
 | Producers are fire-and-forget: Kafka uses `Produce()`, and all providers catch exceptions and return `Task.CompletedTask` | The caller cannot distinguish delivery from failure, so a publish `outcome` can only mean `enqueued` until the producers are changed | M2, T1 |
-| `InsightsWriter` buffers into an unbounded `List<object>` | It cannot drop, so backpressure appears as memory growth rather than a drop counter | M5 |
+| ~~`InsightsWriter` buffers into an unbounded `List<object>`~~ **(corrected — see below)** | ~~It cannot drop, so backpressure appears as memory growth rather than a drop counter~~ | M5 |
 | A worker can stop without producing further errors | Failure counters alone cannot detect the stopped worker | M2, M5 |
 | One FeatBit Agent `relay-proxy` socket maps to multiple environments | Physical socket counts understate subscriptions and failure impact | M1 |
 | Fanout sends sequentially | One slow connection extends the entire propagation | M3, M7, T1 |
 
-Telemetry only exposes these risks; acknowledgement, retry, and persistence semantics still require separate fixes.
+Telemetry only exposes these risks; acknowledgment, retry, and persistence semantics still require separate fixes.
+
+### Corrections applied when superseding
+
+The audit above was re-verified against the codebase. Two entries needed amendment:
+
+1. **`InsightsWriter` no longer exists, and its successor is bounded.** The insight buffer is now
+   [`InsightsTracker`](../../../modules/back-end/src/Application/Insights/InsightsTracker.cs), a
+   `Channel<object>` created with `Channel.CreateBounded` at a default capacity of 10,000
+   (`InsightsTrackingOptions.ChannelCapacity`) and `BoundedChannelFullMode.Wait`. It therefore
+   **cannot** grow without bound, and it never drops. Because the full-mode is `Wait`, a full
+   channel applies backpressure to the *calling request thread* instead. This inverts the guidance:
+   occupancy is the wrong primary signal, and **blocked writers** is the right one. Changing the
+   full-mode is a behavior and capacity decision, not instrumentation.
+
+2. **A Redis routing defect the audit did not cover — since fixed.** The audit's description of the
+   two Redis paths is correct — API → ELS is Pub/Sub, and ELS → API is a durable list — but it
+   missed that routing was being chosen by publishing service rather than by destination, which had
+   broken two paths outright. The control plane published `featbit-control-plane-web-hooks` through
+   the back-end's Redis producer, which used `PublishAsync` (Pub/Sub), while the back-end's Redis
+   consumer read that topic with `ListLeftPopAsync` (list), so webhooks never fired under
+   `MqProvider=Redis`. The same mistake then applied to every topic in `ControlPlaneTopics.Consumed`,
+   where it was worse: the control plane received nothing at all, so flag changes never propagated
+   under `MqProvider=Redis` either.
+
+   These were genuine defects rather than observability gaps, and both are fixed in the change that
+   superseded this proposal.
+   [`RedisMessageProducer`](../../../modules/back-end/src/Infrastructure/MQ/Redis/RedisMessageProducer.cs)
+   now routes on `RedisConsumerTopics.IsQueue(topic)` — `RPUSH` for a topic its consumer drains as a
+   list, `PUBLISH` otherwise — and
+   [`RedisConsumerTopics.All`](../../../modules/back-end/src/Infrastructure/MQ/Redis/RedisConsumerTopics.cs)
+   is composed from the same declarations the consumer registrations read, so the routing table
+   cannot drift from them again. Getting this wrong drops messages silently rather than failing, which
+   is why it recurred.
 
 ## 5. Defer for Now
 
@@ -135,7 +174,7 @@ Add T1 only if capacity remains. Let actual alerts and failure modes drive the r
 - [back-end Redis consumer](../../../modules/back-end/src/Infrastructure/MQ/Redis/RedisMessageConsumer.cs)
 - [UsageTracker](../../../modules/back-end/src/Application/Usages/UsageTracker.cs)
 - [UsageFlushWorker](../../../modules/back-end/src/Infrastructure/AppService/UsageFlushWorker.cs)
-- [InsightsWriter](../../../modules/back-end/src/Infrastructure/AppService/InsightsWriter.cs)
+- [InsightsTracker](../../../modules/back-end/src/Application/Insights/InsightsTracker.cs) *(was `InsightsWriter`, which no longer exists)*
 - [OnFeatureFlagChanged](../../../modules/back-end/src/Application/FeatureFlags/OnFeatureFlagChanged.cs)
 - [SyncToAgent](../../../modules/back-end/src/Application/RelayProxies/SyncToAgent.cs)
 - [AgentService](../../../modules/back-end/src/Infrastructure/Services/AgentService.cs)

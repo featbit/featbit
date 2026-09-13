@@ -1,4 +1,6 @@
-﻿using System.Net.WebSockets;
+﻿using System.Diagnostics;
+using System.Net.WebSockets;
+using Domain.Observability;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -35,10 +37,21 @@ public class StreamingMiddleware(
             return;
         }
 
+        // Read before validation so a rejection can still be attributed to a connection type.
+        // Unrecognized values are normalized away inside StreamingMetrics.
+        var connectionType = httpContext.Request.Query["type"].ToString();
+
+        // T2. Ends at the handshake, deliberately not at disconnect — see HandshakeTrace.
+        using var handshake = HandshakeTrace.Start(connectionType);
+
         // Validate request PRE-accept (before accepting WebSocket)
         var validationResult = await requestValidator.ValidateAsync(httpContext);
         if (validationResult.Status == ValidationResultStatus.Invalid)
         {
+            StreamingMetrics.Current.RecordUpgrade(
+                connectionType, Outcomes.Rejected, StreamingReasons.InvalidRequest);
+            handshake.Rejected(StreamingReasons.InvalidRequest);
+
             logger.RequestRejected(httpContext.Request.QueryString.Value, validationResult.Reason);
 
             // Protocol requirement: accept first, then close with 4003 so SDKs stop reconnecting.
@@ -54,6 +67,10 @@ public class StreamingMiddleware(
 
         if (validationResult.Status == ValidationResultStatus.Unavailable)
         {
+            StreamingMetrics.Current.RecordUpgrade(
+                connectionType, Outcomes.Rejected, StreamingReasons.Unavailable);
+            handshake.Rejected(StreamingReasons.Unavailable);
+
             logger.RequestValidationUnavailable(httpContext.Request.QueryString.Value, validationResult.Reason);
             
             // Transient server error (e.g. store unavailable). Protocol requirement: accept first, then
@@ -71,22 +88,57 @@ public class StreamingMiddleware(
         // Validation passed; now accept the WebSocket
         using var websocket = await httpContext.WebSockets.AcceptWebSocketAsync();
 
-        var connectionContext = new DefaultConnectionContext(websocket, httpContext);
-        await connectionContext.PrepareForProcessingAsync(validationResult.Secrets);
+        StreamingMetrics.Current.RecordUpgrade(
+            connectionType, Outcomes.Success, StreamingReasons.Accepted);
+        StreamingMetrics.Current.SocketOpened();
 
-        await connectionManager.Add(connectionContext);
+        // The handshake is over the moment the socket is accepted; the connection that follows is
+        // covered by streaming.connection_duration, not by this span.
+        handshake.Accepted();
+        handshake.Dispose();
 
-        using var cts = CancellationTokenSource.CreateLinkedTokenSource(
-            httpContext.RequestAborted,
-            applicationLifetime.ApplicationStopping
-        );
+        var startedAt = Stopwatch.GetTimestamp();
+        var closeReason = StreamingReasons.ClientClosed;
 
-        // dispatch connection messages
-        await dispatcher.DispatchAsync(connectionContext, cts.Token);
+        try
+        {
+            var connectionContext = new DefaultConnectionContext(websocket, httpContext);
+            await connectionContext.PrepareForProcessingAsync(validationResult.Secrets);
 
-        // dispatch end means the connection was closed
-        await connectionContext.CloseAsync();
+            await connectionManager.Add(connectionContext);
 
-        await connectionManager.Remove(connectionContext);
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(
+                httpContext.RequestAborted,
+                applicationLifetime.ApplicationStopping
+            );
+
+            // dispatch connection messages
+            await dispatcher.DispatchAsync(connectionContext, cts.Token);
+
+            // A connection ending during shutdown is a rolling restart, not a client disconnect.
+            // Conflating the two would make every deployment look like a client-side incident.
+            closeReason = applicationLifetime.ApplicationStopping.IsCancellationRequested
+                ? StreamingReasons.ServerShutdown
+                : httpContext.RequestAborted.IsCancellationRequested
+                    ? StreamingReasons.ClientAborted
+                    : StreamingReasons.ClientClosed;
+
+            // dispatch end means the connection was closed
+            await connectionContext.CloseAsync();
+
+            await connectionManager.Remove(connectionContext);
+        }
+        catch (Exception)
+        {
+            closeReason = StreamingReasons.Error;
+            throw;
+        }
+        finally
+        {
+            // In a finally so an exception on the connection cannot leak the active-socket gauge
+            // upwards for the lifetime of the process.
+            StreamingMetrics.Current.SocketClosed(
+                connectionType, closeReason, Stopwatch.GetElapsedTime(startedAt));
+        }
     }
 }

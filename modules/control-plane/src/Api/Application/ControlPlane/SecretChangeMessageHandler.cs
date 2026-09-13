@@ -6,7 +6,7 @@ using Domain.Utils;
 
 namespace Api.Application.ControlPlane;
 
-public class SecretChangeMessageHandler(
+public partial class SecretChangeMessageHandler(
     [FromKeyedServices("compositeCache")] ICacheService cacheService,
     ILogger<SecretChangeMessageHandler> logger)
     : IMessageHandler
@@ -43,7 +43,7 @@ public class SecretChangeMessageHandler(
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Error handling secret change message");
+            Log.ErrorHandleSecretChange(logger, e);
             throw;
         }
     }
@@ -61,13 +61,13 @@ public class SecretChangeMessageHandler(
         var deserializedSecret = secret.Deserialize<Secret>(ReusableJsonSerializerOptions.Web);
         if (deserializedResourceDescriptor is null)
         {
-            logger.LogError("Invalid secret change data: {Field} is null", nameof(deserializedResourceDescriptor));
+            Log.InvalidSecretChangeData(logger, nameof(deserializedResourceDescriptor));
             throw new ArgumentNullException(nameof(deserializedResourceDescriptor), "Invalid secret change data.");
         }
 
         if (deserializedSecret is null)
         {
-            logger.LogError("Invalid secret change data: {Field} is null", nameof(deserializedSecret));
+            Log.InvalidSecretChangeData(logger, nameof(deserializedSecret));
             throw new ArgumentNullException(nameof(deserializedSecret), "Invalid secret change data.");
         }
 

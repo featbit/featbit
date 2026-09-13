@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Streaming.Services
 {
-    public class AdminService(
+    public partial class AdminService(
         IConnectionManager connectionManager,
         IDataSyncService dataSyncService,
         StreamingOptions options,
@@ -44,7 +44,7 @@ namespace Streaming.Services
                 catch (Exception ex)
                 {
                     // One env failing must not stop the refresh of other envs.
-                    logger.LogError(ex, "Push full sync failed for env {EnvId}; continuing with remaining envs", envId);
+                    Log.PushFullSyncEnvFailed(logger, envId, ex);
                 }
             }
         }
@@ -73,9 +73,7 @@ namespace Streaming.Services
             {
                 if (skippedUnidentifiedClientCount > 0)
                 {
-                    logger.LogInformation(
-                        "Env {EnvId}: skipped {UnidentifiedClientCount} unidentified client connections; no eligible connections to push to",
-                        envId, skippedUnidentifiedClientCount);
+                    Log.NoEligibleConnections(logger, envId, skippedUnidentifiedClientCount);
                 }
                 return;
             }
@@ -93,10 +91,7 @@ namespace Streaming.Services
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(
-                        ex,
-                        "Failed to build server SDK payload for env {EnvId}; skipping {ServerCount} server connections in this env",
-                        envId, serverConnections.Count);
+                    Log.ServerPayloadBuildFailed(logger, envId, serverConnections.Count, ex);
                 }
 
                 if (serverPayload != null)
@@ -121,8 +116,8 @@ namespace Streaming.Services
                 await Task.WhenAll(clientTasks);
             }
 
-            logger.LogInformation(
-                "Env {EnvId}: pushed full sync to {ServerCount} server and {ClientCount} client connections (skipped {UnidentifiedClientCount} unidentified client)",
+            Log.PushedFullSync(
+                logger,
                 envId,
                 serverConnections.Count,
                 clientConnections.Count,
@@ -130,7 +125,7 @@ namespace Streaming.Services
 
             foreach (var (connectionId, ex) in failures)
             {
-                logger.LogError(ex, "Push full sync send failed for connection {ConnectionId} in env {EnvId}", connectionId, envId);
+                Log.PushFullSyncSendFailed(logger, connectionId, envId, ex);
             }
         }
 

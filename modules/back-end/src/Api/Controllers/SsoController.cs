@@ -1,6 +1,7 @@
 using Api.Authentication.OpenIdConnect;
 using Application.Identity;
 using Application.Services;
+using Domain.Observability;
 using Domain.Users;
 using Domain.Workspaces;
 
@@ -8,7 +9,7 @@ namespace Api.Controllers;
 
 [AllowAnonymous]
 [Route("api/v{version:apiVersion}/sso")]
-public class SsoController : ApiControllerBase
+public partial class SsoController : ApiControllerBase
 {
     private readonly bool _isEnabled;
 
@@ -40,9 +41,12 @@ public class SsoController : ApiControllerBase
         [FromQuery(Name = "redirect_uri")] string redirectUri,
         [FromQuery(Name = "workspace_key")] string workspaceKey)
     {
-        var (error, workspace) = await ValidateOidcAsync(workspaceKey);
+        var (error, reason, workspace) = await ValidateOidcAsync(workspaceKey);
         if (!string.IsNullOrWhiteSpace(error))
         {
+            // Counted as a rejected login: the user has clicked "sign in with SSO" and will never
+            // reach the login endpoint, so this is where a misconfigured deployment surfaces.
+            AuthMetrics.Current.RecordLogin(AuthMethods.Oidc, Outcomes.Rejected, reason);
             return BadRequest(error);
         }
 
@@ -54,9 +58,12 @@ public class SsoController : ApiControllerBase
     [HttpPost("oidc/login")]
     public async Task<ApiResponse<LoginToken>> OidcLoginByCode(LoginByOidcCode request)
     {
-        var (error, workspace) = await ValidateOidcAsync(request.WorkspaceKey);
+        var metrics = AuthMetrics.Current;
+
+        var (error, reason, workspace) = await ValidateOidcAsync(request.WorkspaceKey);
         if (!string.IsNullOrWhiteSpace(error))
         {
+            metrics.RecordLogin(AuthMethods.Oidc, Outcomes.Rejected, reason);
             return Error<LoginToken>(error);
         }
 
@@ -67,6 +74,8 @@ public class SsoController : ApiControllerBase
             var email = await _client.GetEmailAsync(request, oidcConfig);
             if (string.IsNullOrWhiteSpace(email))
             {
+                metrics.RecordLogin(AuthMethods.Oidc, Outcomes.Rejected, AuthReasons.NoEmail);
+
                 return Error<LoginToken>(
                     $"Can not get email from id_token by using claim ${oidcConfig.UserEmailClaim}. Please check your 'UserEmailClaim' configuration"
                 );
@@ -94,11 +103,15 @@ public class SsoController : ApiControllerBase
                 await _identityService.IssueTokensAsync(user, Request.ClientIpAddress());
             Response.SetRefreshTokenCookie(refreshToken);
 
+            metrics.RecordLogin(AuthMethods.Oidc, Outcomes.Success, AuthReasons.Granted);
+
             return Ok(new LoginToken(isSsoFirstLogin, accessToken));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Exception occurred when login by oidc code");
+            Log.ErrorOidcLogin(_logger, ex);
+
+            metrics.RecordLogin(AuthMethods.Oidc, Outcomes.Failure, AuthReasons.Error);
 
             return Error<LoginToken>(ex.Message);
         }
@@ -113,17 +126,25 @@ public class SsoController : ApiControllerBase
         return Ok(preCheck);
     }
 
-    private async Task<(string error, Workspace? workspace)> ValidateOidcAsync(string workspaceKey)
+    /// <summary>
+    /// Validates that OIDC is usable for <paramref name="workspaceKey"/>.
+    /// </summary>
+    /// <returns>
+    /// The user-facing error message (empty when valid), a bounded <see cref="AuthReasons"/> value
+    /// for metrics, and the workspace. The reason is returned alongside the message rather than
+    /// derived from it, because the message is prose and must never become a metric tag.
+    /// </returns>
+    private async Task<(string error, string reason, Workspace? workspace)> ValidateOidcAsync(string workspaceKey)
     {
         if (!_isEnabled)
         {
-            return ("SSO is not enabled", null);
+            return ("SSO is not enabled", AuthReasons.NotEnabled, null);
         }
 
         var workspace = await _workspaceService.FindOneAsync(x => x.Key == workspaceKey);
         if (workspace == null)
         {
-            return ("Workspace not found", null);
+            return ("Workspace not found", AuthReasons.WorkspaceNotFound, null);
         }
 
         var isSsoGranted = workspace.IsFeatureGranted(LicenseFeatures.Sso);
@@ -131,6 +152,7 @@ public class SsoController : ApiControllerBase
         {
             return (
                 "You don't have a license or your current license doesn't grant the SSO feature, please contact FeatBit team to get a license.",
+                AuthReasons.NotLicensed,
                 workspace
             );
         }
@@ -138,9 +160,9 @@ public class SsoController : ApiControllerBase
         var oidcConfig = workspace.Sso?.Oidc;
         if (oidcConfig is null)
         {
-            return ("SSO (OIDC) is not configured", workspace);
+            return ("SSO (OIDC) is not configured", AuthReasons.NotConfigured, workspace);
         }
 
-        return (string.Empty, workspace);
+        return (string.Empty, AuthReasons.Granted, workspace);
     }
 }
