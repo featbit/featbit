@@ -1,0 +1,7 @@
+{
+  "expectedDirection": "increase_good",
+  "guardrails": "[{\"name\":\"bandit arms metric 2\",\"event\":\"bandit_arms_metric_2\",\"metricType\":\"numeric\",\"metricAgg\":\"count\",\"direction\":\"decrease_bad\",\"inverse\":false},{\"name\":\"Checkout Latency\",\"event\":\"e2e_checkout_latency_ms_ui_e2e_20260904_1417\",\"metricType\":\"numeric\",\"metricAgg\":\"average\",\"direction\":\"increase_bad\",\"inverse\":true,\"description\":\"Checkout latency should not increase.\"}]",
+  "metricType": "binary",
+  "metricEvent": "bandit_arms_metric_1",
+  "metricAgg": "once"
+}

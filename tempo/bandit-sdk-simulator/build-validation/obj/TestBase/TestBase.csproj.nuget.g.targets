@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
+    <Import Project="$(NuGetPackageRoot)xunit.core\2.9.3\build\xunit.core.targets" Condition="Exists('$(NuGetPackageRoot)xunit.core\2.9.3\build\xunit.core.targets')" />
+    <Import Project="$(NuGetPackageRoot)emptyfiles\8.17.1\buildTransitive\EmptyFiles.targets" Condition="Exists('$(NuGetPackageRoot)emptyfiles\8.17.1\buildTransitive\EmptyFiles.targets')" />
+    <Import Project="$(NuGetPackageRoot)verify\31.9.4\buildTransitive\Verify.targets" Condition="Exists('$(NuGetPackageRoot)verify\31.9.4\buildTransitive\Verify.targets')" />
+    <Import Project="$(NuGetPackageRoot)microsoft.extensions.options\10.0.8\buildTransitive\net8.0\Microsoft.Extensions.Options.targets" Condition="Exists('$(NuGetPackageRoot)microsoft.extensions.options\10.0.8\buildTransitive\net8.0\Microsoft.Extensions.Options.targets')" />
+    <Import Project="$(NuGetPackageRoot)microsoft.extensions.configuration.binder\10.0.0\buildTransitive\netstandard2.0\Microsoft.Extensions.Configuration.Binder.targets" Condition="Exists('$(NuGetPackageRoot)microsoft.extensions.configuration.binder\10.0.0\buildTransitive\netstandard2.0\Microsoft.Extensions.Configuration.Binder.targets')" />
+    <Import Project="$(NuGetPackageRoot)microsoft.extensions.logging.abstractions\10.0.8\buildTransitive\net8.0\Microsoft.Extensions.Logging.Abstractions.targets" Condition="Exists('$(NuGetPackageRoot)microsoft.extensions.logging.abstractions\10.0.8\buildTransitive\net8.0\Microsoft.Extensions.Logging.Abstractions.targets')" />
+  </ImportGroup>
+</Project>

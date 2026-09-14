@@ -1,0 +1,48 @@
+{
+  "key": "rd-onboarding-flow-ui-e2e-20260904-1417",
+  "revision": "1520209f-98b7-47ba-9d55-d64669ffaedd",
+  "isEnabled": true,
+  "disabledVariationId": "1e2bded9-a870-cb37-8e9a-ff93b82edcee",
+  "targetUsers": [],
+  "rules": [
+    {
+      "id": "9ab68bf4-072e-4662-89b2-ab5b3af98ba5",
+      "name": "E2E real segment rule",
+      "dispatchKey": "",
+      "includedInExpt": true,
+      "conditions": [
+        {
+          "id": "571767d8-374a-40f5-8fa8-f57da85703ac",
+          "property": "User is in segment",
+          "op": "IsOneOf",
+          "value": "[\"01a06b10-2621-7600-9a01-790b6933941b\"]"
+        }
+      ],
+      "variations": [
+        {
+          "id": "1e2bded9-a870-cb37-8e9a-ff93b82edcee",
+          "rollout": [
+            0,
+            1
+          ],
+          "exptRollout": 1
+        }
+      ]
+    }
+  ],
+  "fallthrough": {
+    "dispatchKey": "",
+    "includedInExpt": true,
+    "variations": [
+      {
+        "id": "1e2bded9-a870-cb37-8e9a-ff93b82edcee",
+        "rollout": [
+          0,
+          1
+        ],
+        "exptRollout": 1
+      }
+    ]
+  },
+  "exptIncludeAllTargets": true
+}

@@ -1,0 +1,14 @@
+{
+  "apiUrl": "http://localhost:5000",
+  "eventUrl": "http://localhost:5100",
+  "streamingUrl": "ws://localhost:5100",
+  "projectKey": "e2e-api-ui-e2e-20260904-1417",
+  "projectName": "E2E API Project ui-e2e-20260904-1417",
+  "environmentName": "auto-test-001",
+  "organizationName": "FeatBit",
+  "authMode": "bearer",
+  "allowRemote": false,
+  "chunkSize": 100,
+  "ingestionTimeoutSeconds": 60,
+  "seed": 20260909
+}

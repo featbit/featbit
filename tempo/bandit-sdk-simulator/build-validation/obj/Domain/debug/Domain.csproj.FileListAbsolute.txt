@@ -1,0 +1,14 @@
+C:\Code\featbit\featbit\tempo\bandit-sdk-simulator\build-validation\bin\Domain\debug\Domain.deps.json
+C:\Code\featbit\featbit\tempo\bandit-sdk-simulator\build-validation\bin\Domain\debug\Domain.dll
+C:\Code\featbit\featbit\tempo\bandit-sdk-simulator\build-validation\bin\Domain\debug\Domain.pdb
+C:\Code\featbit\featbit\tempo\bandit-sdk-simulator\build-validation\bin\Domain\debug\Domain.xml
+C:\Code\featbit\featbit\tempo\bandit-sdk-simulator\build-validation\obj\Domain\debug\Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Code\featbit\featbit\tempo\bandit-sdk-simulator\build-validation\obj\Domain\debug\Domain.AssemblyInfoInputs.cache
+C:\Code\featbit\featbit\tempo\bandit-sdk-simulator\build-validation\obj\Domain\debug\Domain.AssemblyInfo.cs
+C:\Code\featbit\featbit\tempo\bandit-sdk-simulator\build-validation\obj\Domain\debug\Domain.csproj.CoreCompileInputs.cache
+C:\Code\featbit\featbit\tempo\bandit-sdk-simulator\build-validation\obj\Domain\debug\Domain.sourcelink.json
+C:\Code\featbit\featbit\tempo\bandit-sdk-simulator\build-validation\obj\Domain\debug\Domain.dll
+C:\Code\featbit\featbit\tempo\bandit-sdk-simulator\build-validation\obj\Domain\debug\refint\Domain.dll
+C:\Code\featbit\featbit\tempo\bandit-sdk-simulator\build-validation\obj\Domain\debug\Domain.xml
+C:\Code\featbit\featbit\tempo\bandit-sdk-simulator\build-validation\obj\Domain\debug\Domain.pdb
+C:\Code\featbit\featbit\tempo\bandit-sdk-simulator\build-validation\obj\Domain\debug\ref\Domain.dll

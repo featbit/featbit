@@ -1,0 +1,413 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Domain</name>
+    </assembly>
+    <members>
+        <member name="T:Domain.ControlPlane.DcLease">
+            <summary>
+            Represents a data center (DC) membership lease record used by the control plane
+            to track which DCs are currently live and what flag/segment versions they have applied.
+            </summary>
+        </member>
+        <member name="P:Domain.ControlPlane.DcLease.DcId">
+            <summary>
+            Unique identifier of the data center holding this lease.
+            </summary>
+        </member>
+        <member name="P:Domain.ControlPlane.DcLease.Region">
+            <summary>
+            Region the data center belongs to (for example, a geographic or cloud region).
+            </summary>
+        </member>
+        <member name="P:Domain.ControlPlane.DcLease.LastHeartbeatAt">
+            <summary>
+            Timestamp of the most recent heartbeat received from this data center.
+            </summary>
+        </member>
+        <member name="P:Domain.ControlPlane.DcLease.LeaseExpiresAt">
+            <summary>
+            Timestamp at which this lease expires. A data center is considered live only
+            while <see cref="P:Domain.ControlPlane.DcLease.LeaseExpiresAt"/> is in the future.
+            </summary>
+        </member>
+        <member name="P:Domain.ControlPlane.DcLease.AppliedWatermarks">
+            <summary>
+            The highest applied watermark (version) per environment for this data center,
+            keyed by environment id.
+            </summary>
+        </member>
+        <member name="P:Domain.ControlPlane.HealthMessage.Region">
+            <summary>
+            The region the pod is running in. Nullable so heartbeats produced before
+            this field existed still deserialize.
+            </summary>
+        </member>
+        <member name="P:Domain.ControlPlane.HealthMessage.DcId">
+            <summary>
+            The data center identifier the pod is running in. Nullable so heartbeats
+            produced before this field existed still deserialize.
+            </summary>
+        </member>
+        <member name="P:Domain.ControlPlane.HealthMessage.AppliedWatermarks">
+            <summary>
+            The highest committed flag version (watermark) this pod has applied per
+            environment, keyed by environment id. Nullable so heartbeats produced before
+            this field existed still deserialize.
+            </summary>
+        </member>
+        <member name="P:Domain.EndUsers.ImportUserResult.IsAcknowledged">
+            <summary>
+            Gets a value indicating whether the operation was acknowledged.
+            </summary>
+        </member>
+        <member name="P:Domain.EndUsers.ImportUserResult.InsertedCount">
+            <summary>
+            Gets the number of users that were inserted.
+            </summary>
+        </member>
+        <member name="P:Domain.EndUsers.ImportUserResult.ModifiedCount">
+            <summary>
+            Gets the number of users that were actually modified during an update.
+            </summary>
+        </member>
+        <member name="P:Domain.Environments.EnvironmentSettings.RequireChangeComment">
+            <summary>
+            Whether to require users to provide a comment when changing a flag value in the environment.
+            This is used for audit and change tracking purposes.
+            </summary>
+        </member>
+        <member name="P:Domain.FeatureFlags.Fallthrough.DispatchKey">
+            <summary>
+            The dispatch key of the default rule.
+            </summary>
+        </member>
+        <member name="P:Domain.FeatureFlags.Fallthrough.IncludedInExpt">
+            <summary>
+            Whether the default rule is included in experiments.
+            </summary>
+        </member>
+        <member name="P:Domain.FeatureFlags.Fallthrough.Variations">
+            <summary>
+            The served variations.
+            </summary>
+        </member>
+        <member name="P:Domain.FeatureFlags.FeatureFlag.CommittedVersion">
+            <summary>
+            Monotonic version of the last COMMITTED change to this flag. The committed
+            value is the authoritative value that may be safely served to evaluators.
+            </summary>
+        </member>
+        <member name="P:Domain.FeatureFlags.FeatureFlag.Pending">
+            <summary>
+            A staged-but-not-committed change. Null when there is no pending change
+            (the default). When set, the committed read must continue to return the
+            committed value and ignore this pending change until it is promoted.
+            </summary>
+        </member>
+        <member name="P:Domain.FeatureFlags.FeatureFlag.Xmin">
+            <summary>
+            Postgres <c>xmin</c> system column, used as the optimistic concurrency token. It is a real
+            property rather than an EF shadow property because the DbContext queries with no tracking,
+            and shadow values only live on a tracking entry - they would be lost before the update.
+            Unused by the Mongo provider.
+            </summary>
+        </member>
+        <member name="M:Domain.FeatureFlags.FeatureFlag.Clone">
+            <summary>
+            Creates a deep copy of this feature flag.
+            </summary>
+        </member>
+        <member name="M:Domain.FeatureFlags.FeatureFlag.ReferencedSegmentTargetingUpdated(System.Guid)">
+            <summary>
+            Mark the feature flag as updated when a referenced segment's targeting is updated.
+            </summary>
+            <param name="operatorId">The ID of the operator making the change to the segment.</param>
+        </member>
+        <member name="M:Domain.FeatureFlags.FeatureFlag.SetPending(Domain.FeatureFlags.FeatureFlag,System.Int64)">
+            <summary>
+            Stage <paramref name="pendingValue"/> as a pending (not-yet-committed) change.
+            The committed value is left untouched, so a committed read still returns the
+            old value until <see cref="M:Domain.FeatureFlags.FeatureFlag.PromotePending"/> is called.
+            </summary>
+        </member>
+        <member name="M:Domain.FeatureFlags.FeatureFlag.PromotePending">
+            <summary>
+            Promote the staged pending change to committed: the pending value becomes the
+            committed value, <see cref="P:Domain.FeatureFlags.FeatureFlag.CommittedVersion"/> advances to the pending version,
+            and the pending slot is cleared. No-op when there is no pending change.
+            </summary>
+        </member>
+        <member name="P:Domain.FeatureFlags.FlagTargeting.DisabledVariationId">
+            <summary>
+            The variation served when the feature flag is disabled.
+            </summary>
+        </member>
+        <member name="P:Domain.FeatureFlags.FlagTargeting.TargetUsers">
+            <summary>
+            The list of user keys explicitly targeted by the feature flag
+            </summary>
+        </member>
+        <member name="P:Domain.FeatureFlags.FlagTargeting.Rules">
+            <summary>
+            The targeting rules for the feature flag
+            </summary>
+        </member>
+        <member name="P:Domain.FeatureFlags.FlagTargeting.Fallthrough">
+            <summary>
+            The default rule for the feature flag, which applies to users who do not match any of the target users or rules above.
+            </summary>
+        </member>
+        <member name="P:Domain.FeatureFlags.FlagTargeting.ExptIncludeAllTargets">
+            <summary>
+            Whether all targets should be included in experiments related to this feature flag. Defaults to `true`.
+            </summary>
+        </member>
+        <member name="T:Domain.FeatureFlags.PendingFlagChange">
+            <summary>
+            A staged-but-not-committed change to a <see cref="T:Domain.FeatureFlags.FeatureFlag"/>. Held alongside the
+            committed value so the authoritative (committed) read can ignore it until promotion.
+            </summary>
+        </member>
+        <member name="P:Domain.FeatureFlags.PendingFlagChange.Version">
+            <summary>
+            Monotonic version this pending change will carry once it is promoted to committed.
+            </summary>
+        </member>
+        <member name="P:Domain.FeatureFlags.PendingFlagChange.Value">
+            <summary>
+            The staged flag value. This is NOT the authoritative value and must not be served
+            until <see cref="M:Domain.FeatureFlags.FeatureFlag.PromotePending"/> makes it committed.
+            </summary>
+        </member>
+        <member name="P:Domain.FeatureFlags.RolloutVariation.Id">
+            <summary>
+            The ID of the served variation.
+            </summary>
+        </member>
+        <member name="P:Domain.FeatureFlags.RolloutVariation.Rollout">
+            <summary>
+            The rollout range for the variation.
+            </summary>
+        </member>
+        <member name="P:Domain.FeatureFlags.RolloutVariation.ExptRollout">
+            <summary>
+            The rollout percentage for experiments.
+            </summary>
+        </member>
+        <member name="P:Domain.FeatureFlags.Variation.Id">
+            <summary>
+            The unique identifier for the variation. Usually a GUID.
+            </summary>
+        </member>
+        <member name="P:Domain.FeatureFlags.Variation.Name">
+            <summary>
+            The name of the variation.
+            </summary>
+        </member>
+        <member name="P:Domain.FeatureFlags.Variation.Value">
+            <summary>
+            The value associated with the variation.
+            </summary>
+        </member>
+        <member name="P:Domain.Messages.ControlPlaneCommand.TargetDcId">
+            <summary>
+            Optional data center filter. When non-null, only eval servers whose own DcId
+            (config "ControlPlane:DcId") equals this value act on the command; all others ignore it.
+            When null (the default) every DC acts on it — the original broadcast behavior.
+            </summary>
+        </member>
+        <member name="P:Domain.Policies.PolicyStatement.Id">
+            <summary>
+            The ID of the statement. Usually a UUID.
+            </summary>
+        </member>
+        <member name="P:Domain.Policies.PolicyStatement.ResourceType">
+            <summary>
+            The resource type of the statement.
+            </summary>
+        </member>
+        <member name="P:Domain.Policies.PolicyStatement.Effect">
+            <summary>
+            The effect of the statement, e.g., "allow" or "deny".
+            </summary>
+        </member>
+        <member name="P:Domain.Policies.PolicyStatement.Actions">
+            <summary>
+            The List of the actions.
+            </summary>
+        </member>
+        <member name="P:Domain.Policies.PolicyStatement.Resources">
+            <summary>
+            The List of the resources.
+            </summary>
+        </member>
+        <member name="M:Domain.Resources.RNMatcher.MatchesWildcard(System.ReadOnlySpan{System.Char},System.ReadOnlySpan{System.Char})">
+            <summary>
+            Returns true if <paramref name="value"/> matches the wildcard <paramref name="pattern"/>.
+            Uses a zero-allocation span comparison fast-path when the pattern contains no wildcards,
+            otherwise falls back to a compiled, cached <see cref="T:System.Text.RegularExpressions.Regex"/>.
+            </summary>
+        </member>
+        <member name="T:Domain.Segments.PendingSegmentChange">
+            <summary>
+            A staged-but-not-committed change to a <see cref="T:Domain.Segments.Segment"/>. Held alongside the
+            committed value so the authoritative (committed) read can ignore it until promotion.
+            </summary>
+        </member>
+        <member name="P:Domain.Segments.PendingSegmentChange.Version">
+            <summary>
+            Monotonic version this pending change will carry once it is promoted to committed.
+            </summary>
+        </member>
+        <member name="P:Domain.Segments.PendingSegmentChange.Value">
+            <summary>
+            The staged segment value. This is NOT the authoritative value and must not be served
+            until <see cref="M:Domain.Segments.Segment.PromotePending"/> makes it committed.
+            </summary>
+        </member>
+        <member name="P:Domain.Segments.Segment.CommittedVersion">
+            <summary>
+            Monotonic version of the last COMMITTED change to this segment. The committed
+            value is the authoritative value that may be safely served to evaluators.
+            </summary>
+        </member>
+        <member name="P:Domain.Segments.Segment.Pending">
+            <summary>
+            A staged-but-not-committed change. Null when there is no pending change
+            (the default). When set, the committed read must continue to return the
+            committed value and ignore this pending change until it is promoted.
+            </summary>
+        </member>
+        <member name="P:Domain.Segments.Segment.Xmin">
+            <summary>
+            Postgres <c>xmin</c> system column, used as the optimistic concurrency token. It is a real
+            property rather than an EF shadow property because the DbContext queries with no tracking,
+            and shadow values only live on a tracking entry - they would be lost before the update.
+            Unused by the Mongo provider.
+            </summary>
+        </member>
+        <member name="M:Domain.Segments.Segment.SetPending(Domain.Segments.Segment,System.Int64,System.Guid,System.String,System.Boolean)">
+            <summary>
+            Stage <paramref name="pendingValue"/> as a pending (not-yet-committed) change.
+            The committed value is left untouched, so a committed read still returns the
+            old value until <see cref="M:Domain.Segments.Segment.PromotePending"/> is called.
+            </summary>
+        </member>
+        <member name="M:Domain.Segments.Segment.PromotePending">
+            <summary>
+            Promote the staged pending change to committed: the pending value becomes the
+            committed value, <see cref="P:Domain.Segments.Segment.CommittedVersion"/> advances to the pending version,
+            and the pending slot is cleared. No-op when there is no pending change.
+            </summary>
+        </member>
+        <member name="P:Domain.Targeting.Condition.Id">
+            <summary>
+            The condition ID. Usually a UUID.
+            </summary>
+        </member>
+        <member name="P:Domain.Targeting.Condition.Property">
+            <summary>
+            The property to evaluate.
+            </summary>
+        </member>
+        <member name="P:Domain.Targeting.Condition.Op">
+            <summary>
+            The operator to use for evaluation.
+            </summary>
+        </member>
+        <member name="P:Domain.Targeting.Condition.Value">
+            <summary>
+            The value to compare against.
+            </summary>
+        </member>
+        <member name="P:Domain.Targeting.MatchRule.Id">
+            <summary>
+            The unique identifier for the match rule. Usually a GUID.
+            </summary>
+        </member>
+        <member name="P:Domain.Targeting.MatchRule.Name">
+            <summary>
+            The name of the match rule.
+            </summary>
+        </member>
+        <member name="P:Domain.Targeting.MatchRule.Conditions">
+            <summary>
+            The collection of conditions that make up the match rule.
+            </summary>
+        </member>
+        <member name="P:Domain.Targeting.TargetRule.Id">
+            <summary>
+            The rule ID. Usually a UUID.
+            </summary>
+        </member>
+        <member name="P:Domain.Targeting.TargetRule.Name">
+            <summary>
+            The name of the rule.
+            </summary>
+        </member>
+        <member name="P:Domain.Targeting.TargetRule.DispatchKey">
+            <summary>
+            The dispatch key for the rule.
+            </summary>
+        </member>
+        <member name="P:Domain.Targeting.TargetRule.IncludedInExpt">
+            <summary>
+            Whether the rule is included in experiments.
+            </summary>
+        </member>
+        <member name="P:Domain.Targeting.TargetRule.Conditions">
+            <summary>
+            The conditions for the rule.
+            </summary>
+        </member>
+        <member name="P:Domain.Targeting.TargetRule.Variations">
+            <summary>
+            The served variations.
+            </summary>
+        </member>
+        <member name="P:Domain.Targeting.TargetUser.KeyIds">
+            <summary>
+            The list of user keys explicitly targeted by the feature flag.
+            </summary>
+        </member>
+        <member name="P:Domain.Targeting.TargetUser.VariationId">
+            <summary>
+            The variation ID associated with the targeted users.
+            </summary>
+        </member>
+        <member name="M:Domain.Users.User.#ctor(System.Guid,System.String,System.String,System.String,System.String,System.String)">
+            <summary>
+            for test project use only
+            </summary>
+        </member>
+        <member name="M:Domain.Utils.StringHelper.EscapeRegex(System.String)">
+            <summary>
+            Escapes a set of characters (. * + ? ^ = ! : $ { } ( ) | [ ] / \) by replacing them with their escape codes.
+            This converts a string so that it can be used as a constant within a regular expression safely.
+            </summary>
+            <param name="s"></param>
+            <returns>The replaced string</returns>
+        </member>
+        <member name="F:Domain.Webhooks.WebhookHeaders.Delivery">
+            <summary>
+            A globally unique identifier (GUID) to identify the delivery
+            </summary>
+        </member>
+        <member name="F:Domain.Webhooks.WebhookHeaders.Event">
+            <summary>
+            The name of the event(s) that triggered the delivery. 
+            </summary>
+        </member>
+        <member name="F:Domain.Webhooks.WebhookHeaders.HookId">
+            <summary>
+            The unique identifier of the webhook.
+            </summary>
+        </member>
+        <member name="F:Domain.Webhooks.WebhookHeaders.Signature">
+            <summary>
+            This header is sent if the webhook is configured with a secret. This is the HMAC hex digest of the request body, and is generated using the SHA-256 hash function and the secret as the HMAC key.
+            </summary>
+        </member>
+    </members>
+</doc>

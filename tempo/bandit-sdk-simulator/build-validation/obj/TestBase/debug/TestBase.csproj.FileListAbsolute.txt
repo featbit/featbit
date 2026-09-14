@@ -1,0 +1,17 @@
+C:\Code\featbit\featbit\tempo\bandit-sdk-simulator\build-validation\bin\TestBase\debug\TestBase.deps.json
+C:\Code\featbit\featbit\tempo\bandit-sdk-simulator\build-validation\bin\TestBase\debug\TestBase.runtimeconfig.json
+C:\Code\featbit\featbit\tempo\bandit-sdk-simulator\build-validation\bin\TestBase\debug\TestBase.dll
+C:\Code\featbit\featbit\tempo\bandit-sdk-simulator\build-validation\bin\TestBase\debug\TestBase.pdb
+C:\Code\featbit\featbit\tempo\bandit-sdk-simulator\build-validation\obj\TestBase\debug\TestBase.csproj.AssemblyReference.cache
+C:\Code\featbit\featbit\tempo\bandit-sdk-simulator\build-validation\obj\TestBase\debug\Verify.Attributes.cs
+C:\Code\featbit\featbit\tempo\bandit-sdk-simulator\build-validation\obj\TestBase\debug\VerifyXunit.Attributes.cs
+C:\Code\featbit\featbit\tempo\bandit-sdk-simulator\build-validation\obj\TestBase\debug\TestBase.GeneratedMSBuildEditorConfig.editorconfig
+C:\Code\featbit\featbit\tempo\bandit-sdk-simulator\build-validation\obj\TestBase\debug\TestBase.AssemblyInfoInputs.cache
+C:\Code\featbit\featbit\tempo\bandit-sdk-simulator\build-validation\obj\TestBase\debug\TestBase.AssemblyInfo.cs
+C:\Code\featbit\featbit\tempo\bandit-sdk-simulator\build-validation\obj\TestBase\debug\TestBase.csproj.CoreCompileInputs.cache
+C:\Code\featbit\featbit\tempo\bandit-sdk-simulator\build-validation\obj\TestBase\debug\TestBase.sourcelink.json
+C:\Code\featbit\featbit\tempo\bandit-sdk-simulator\build-validation\obj\TestBase\debug\TestBase.dll
+C:\Code\featbit\featbit\tempo\bandit-sdk-simulator\build-validation\obj\TestBase\debug\refint\TestBase.dll
+C:\Code\featbit\featbit\tempo\bandit-sdk-simulator\build-validation\obj\TestBase\debug\TestBase.pdb
+C:\Code\featbit\featbit\tempo\bandit-sdk-simulator\build-validation\obj\TestBase\debug\TestBase.genruntimeconfig.cache
+C:\Code\featbit\featbit\tempo\bandit-sdk-simulator\build-validation\obj\TestBase\debug\ref\TestBase.dll

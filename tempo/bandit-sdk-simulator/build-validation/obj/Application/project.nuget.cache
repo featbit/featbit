@@ -1,0 +1,31 @@
+{
+  "version": 2,
+  "dgSpecHash": "TPCyE2P/gyc=",
+  "success": true,
+  "projectFilePath": "C:\\Code\\featbit\\featbit\\modules\\back-end\\src\\Application\\Application.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\hu-be\\.nuget\\packages\\automapper\\14.0.0\\automapper.14.0.0.nupkg.sha512",
+    "C:\\Users\\hu-be\\.nuget\\packages\\fluentvalidation\\12.1.1\\fluentvalidation.12.1.1.nupkg.sha512",
+    "C:\\Users\\hu-be\\.nuget\\packages\\fluentvalidation.dependencyinjectionextensions\\12.1.1\\fluentvalidation.dependencyinjectionextensions.12.1.1.nupkg.sha512",
+    "C:\\Users\\hu-be\\.nuget\\packages\\mediatr\\12.5.0\\mediatr.12.5.0.nupkg.sha512",
+    "C:\\Users\\hu-be\\.nuget\\packages\\mediatr.contracts\\2.0.1\\mediatr.contracts.2.0.1.nupkg.sha512",
+    "C:\\Users\\hu-be\\.nuget\\packages\\microsoft.aspnetcore.jsonpatch.systemtextjson\\10.0.8\\microsoft.aspnetcore.jsonpatch.systemtextjson.10.0.8.nupkg.sha512",
+    "C:\\Users\\hu-be\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\8.0.0\\microsoft.extensions.dependencyinjection.abstractions.8.0.0.nupkg.sha512",
+    "C:\\Users\\hu-be\\.nuget\\packages\\microsoft.extensions.options\\8.0.0\\microsoft.extensions.options.8.0.0.nupkg.sha512",
+    "C:\\Users\\hu-be\\.nuget\\packages\\microsoft.extensions.primitives\\8.0.0\\microsoft.extensions.primitives.8.0.0.nupkg.sha512"
+  ],
+  "logs": [
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "message": "包 \"AutoMapper\" 14.0.0 具有已知的 高 严重性漏洞，https://github.com/advisories/GHSA-rvv3-g6hj-g44x",
+      "projectPath": "C:\\Code\\featbit\\featbit\\modules\\back-end\\src\\Application\\Application.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Code\\featbit\\featbit\\modules\\back-end\\src\\Application\\Application.csproj",
+      "libraryId": "AutoMapper",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    }
+  ]
+}

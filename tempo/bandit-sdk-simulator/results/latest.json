@@ -1,0 +1,61 @@
+{
+  "status": "completed",
+  "error": null,
+  "batchId": "20260907T125757437Z-98c49a41b90b46c593bf93ec7583778c",
+  "synthetic": true,
+  "startedAtUtc": "2026-09-07T12:57:57.4430815+00:00",
+  "completedAtUtc": "2026-09-07T12:58:06.2392895+00:00",
+  "flagKey": "rd-onboarding-flow-ui-e2e-20260904-1417",
+  "primaryMetric": "bandit_arms_metric_1",
+  "guardrailMetric": "bandit_arms_metric_2",
+  "requestedUsers": 4000,
+  "completedUsers": 4000,
+  "seed": 20260907,
+  "arms": [
+    {
+      "name": "control-updated",
+      "value": "classic",
+      "variationId": "1e2bded9-a870-cb37-8e9a-ff93b82edcee",
+      "evaluations": 1019,
+      "outcomeUsers": 1019,
+      "conversions": 122,
+      "guardrailEvents": 3182,
+      "rate": 0.1197252208047105,
+      "guardrailMean": 3.122669283611384
+    },
+    {
+      "name": "candidate-1-updated",
+      "value": "guided",
+      "variationId": "121efaee-b1ef-5631-9cee-f24137a8e6bc",
+      "evaluations": 1021,
+      "outcomeUsers": 1021,
+      "conversions": 252,
+      "guardrailEvents": 3423,
+      "rate": 0.24681684622918706,
+      "guardrailMean": 3.3525954946131242
+    },
+    {
+      "name": "candidate-2-updated",
+      "value": "compact",
+      "variationId": "82da7db8-3a02-9d37-8631-a766bf2dc76a",
+      "evaluations": 962,
+      "outcomeUsers": 962,
+      "conversions": 165,
+      "guardrailEvents": 2914,
+      "rate": 0.17151767151767153,
+      "guardrailMean": 3.029106029106029
+    },
+    {
+      "name": "candidate-updated",
+      "value": "candidate",
+      "variationId": "7a669773-368c-ff34-a40c-4081efe5e5e0",
+      "evaluations": 998,
+      "outcomeUsers": 998,
+      "conversions": 105,
+      "guardrailEvents": 2136,
+      "rate": 0.10521042084168336,
+      "guardrailMean": 2.1402805611222444
+    }
+  ],
+  "note": "SDK-side totals. Confirm ingestion/attribution with run-local.ps1; flushing alone is not analysis verification."
+}

@@ -1,0 +1,181 @@
+{
+  "experimentId": "ae156aa0-01d1-4b29-85e1-1cf85fded728",
+  "checks": [
+    {
+      "arm": "control-updated",
+      "users": 1019,
+      "conversions": 122,
+      "guardrailEvents": 3182,
+      "expectedUsers": 1019,
+      "expectedConversions": 122,
+      "expectedGuardrailEvents": 3182,
+      "matches": true
+    },
+    {
+      "arm": "candidate-1-updated",
+      "users": 1021,
+      "conversions": 252,
+      "guardrailEvents": 3423,
+      "expectedUsers": 1021,
+      "expectedConversions": 252,
+      "expectedGuardrailEvents": 3423,
+      "matches": true
+    },
+    {
+      "arm": "candidate-2-updated",
+      "users": 962,
+      "conversions": 165,
+      "guardrailEvents": 2914,
+      "expectedUsers": 962,
+      "expectedConversions": 165,
+      "expectedGuardrailEvents": 2914,
+      "matches": true
+    },
+    {
+      "arm": "candidate-updated",
+      "users": 998,
+      "conversions": 105,
+      "guardrailEvents": 2136,
+      "expectedUsers": 998,
+      "expectedConversions": 105,
+      "expectedGuardrailEvents": 2136,
+      "matches": true
+    }
+  ],
+  "analysis": {
+    "type": "bandit",
+    "experiment": "run-1",
+    "computed_at": "2026-09-07T12:58:23.9059646Z",
+    "window": {
+      "start": "2026-09-07T08:15:00Z",
+      "end": null
+    },
+    "metric": "bandit_arms_metric_1",
+    "algorithm": "thompson_sampling_top_two",
+    "srm": {
+      "chi2_p_value": 0.5222,
+      "ok": true,
+      "observed": {
+        "1e2bded9-a870-cb37-8e9a-ff93b82edcee": 1019,
+        "121efaee-b1ef-5631-9cee-f24137a8e6bc": 1021,
+        "82da7db8-3a02-9d37-8631-a766bf2dc76a": 962,
+        "7a669773-368c-ff34-a40c-4081efe5e5e0": 998
+      }
+    },
+    "arms": [
+      {
+        "arm": "1e2bded9-a870-cb37-8e9a-ff93b82edcee",
+        "n": 1019,
+        "conversions": 122,
+        "rate": 0.1197252208047105
+      },
+      {
+        "arm": "121efaee-b1ef-5631-9cee-f24137a8e6bc",
+        "n": 1021,
+        "conversions": 252,
+        "rate": 0.24681684622918706
+      },
+      {
+        "arm": "82da7db8-3a02-9d37-8631-a766bf2dc76a",
+        "n": 962,
+        "conversions": 165,
+        "rate": 0.17151767151767153
+      },
+      {
+        "arm": "7a669773-368c-ff34-a40c-4081efe5e5e0",
+        "n": 998,
+        "conversions": 105,
+        "rate": 0.10521042084168336
+      }
+    ],
+    "guardrails": [
+      {
+        "event": "bandit_arms_metric_2",
+        "metric_type": "numeric",
+        "rows": [
+          {
+            "variant": "1e2bded9-a870-cb37-8e9a-ff93b82edcee",
+            "n": 1019,
+            "is_control": true,
+            "mean": 3.1227
+          },
+          {
+            "variant": "121efaee-b1ef-5631-9cee-f24137a8e6bc",
+            "n": 1021,
+            "is_control": false,
+            "mean": 3.3526,
+            "rel_delta": 0.073631,
+            "ci_lower": 0.022698,
+            "ci_upper": 0.124565,
+            "p_harm": 0.0023,
+            "risk_ctrl": 0.073649,
+            "risk_trt": 1.8E-05
+          },
+          {
+            "variant": "82da7db8-3a02-9d37-8631-a766bf2dc76a",
+            "n": 962,
+            "is_control": false,
+            "mean": 3.0291,
+            "rel_delta": -0.029963,
+            "ci_lower": -0.078175,
+            "ci_upper": 0.018249,
+            "p_harm": 0.8884,
+            "risk_ctrl": 0.00133,
+            "risk_trt": 0.031292
+          },
+          {
+            "variant": "7a669773-368c-ff34-a40c-4081efe5e5e0",
+            "n": 998,
+            "is_control": false,
+            "mean": 2.1403,
+            "rel_delta": -0.314599,
+            "ci_lower": -0.352092,
+            "ci_upper": -0.277106,
+            "p_harm": 1,
+            "risk_ctrl": 0,
+            "risk_trt": 0.314599
+          }
+        ],
+        "verdict": "121efaee-b1ef-5631-9cee-f24137a8e6bc: guardrail clear; 82da7db8-3a02-9d37-8631-a766bf2dc76a: guardrail inconclusive - monitor; 7a669773-368c-ff34-a40c-4081efe5e5e0: guardrail ALARM - likely regression",
+        "metric_agg": "count"
+      }
+    ],
+    "thompson_sampling": {
+      "results": [
+        {
+          "arm": "1e2bded9-a870-cb37-8e9a-ff93b82edcee",
+          "p_best": 0,
+          "recommended_weight": 0.009805363533853017
+        },
+        {
+          "arm": "121efaee-b1ef-5631-9cee-f24137a8e6bc",
+          "p_best": 0.9999,
+          "recommended_weight": 0.4902681766926508
+        },
+        {
+          "arm": "82da7db8-3a02-9d37-8631-a766bf2dc76a",
+          "p_best": 0.0001,
+          "recommended_weight": 0.490121096239643
+        },
+        {
+          "arm": "7a669773-368c-ff34-a40c-4081efe5e5e0",
+          "p_best": 0,
+          "recommended_weight": 0.009805363533853017
+        }
+      ],
+      "enough_units": true,
+      "update_message": "successfully updated",
+      "seed": 201957
+    },
+    "stopping": {
+      "met": true,
+      "best_arm": "121efaee-b1ef-5631-9cee-f24137a8e6bc",
+      "p_best": 0.9999,
+      "threshold": 0.95,
+      "message": "121efaee-b1ef-5631-9cee-f24137a8e6bc reached P(best)=0.9999 >= 0.95"
+    }
+  },
+  "batchId": "20260907T125757437Z-98c49a41b90b46c593bf93ec7583778c",
+  "runId": "3d63eed8-2b49-4c6a-a29a-0086f44c3b9e",
+  "verifiedAtUtc": "2026-09-07T12:58:23.9273456+00:00"
+}

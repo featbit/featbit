@@ -1,0 +1,1117 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Application</name>
+    </assembly>
+    <members>
+        <member name="P:Application.AuditLogs.AuditLogFilter.Query">
+            <summary>
+            The part of the keyword/comment of an audit log
+            </summary>
+        </member>
+        <member name="P:Application.AuditLogs.AuditLogFilter.CreatorId">
+            <summary>
+            The creator id
+            </summary>
+        </member>
+        <member name="P:Application.AuditLogs.AuditLogFilter.RefId">
+            <summary>
+            The referenced resource id, such as feature flag id or segment id
+            </summary>
+        </member>
+        <member name="P:Application.AuditLogs.AuditLogFilter.RefType">
+            <summary>
+            The referenced resource type. Can be one of the following: "FeatureFlag" or "Segment"
+            </summary>
+        </member>
+        <member name="P:Application.AuditLogs.AuditLogFilter.From">
+            <summary>
+            The start time of the audit log creation time range, in unix milliseconds
+            </summary>
+        </member>
+        <member name="P:Application.AuditLogs.AuditLogFilter.To">
+            <summary>
+            The end time of the audit log creation time range, in unix milliseconds
+            </summary>
+        </member>
+        <member name="P:Application.AuditLogs.AuditLogFilter.CrossEnvironment">
+            <summary>
+            Whether to query logs across environments. By default, we only query logs in the specified environment (the current environment).
+            Only set this to true if you want to query logs for a shared-segment.
+            </summary>
+        </member>
+        <member name="T:Application.AuditLogs.ResourceChangeRequest">
+            <summary>
+            Optional payload carrying a user-supplied comment for operations that do not have a dedicated request body.
+            This allows users to provide context for their actions, which can be valuable for auditing and understanding the
+            history of changes.
+            </summary>
+        </member>
+        <member name="P:Application.AuditLogs.ResourceChangeRequest.Comment">
+            <summary>
+            Optional comment describing why the change was made.
+            </summary>
+        </member>
+        <member name="P:Application.Bases.Models.CursorPagedRequest.Cursor">
+            <summary>
+            The cursor to be used for pagination. Default is null.
+            </summary>
+        </member>
+        <member name="P:Application.Bases.Models.CursorPagedRequest.PageSize">
+            <summary>
+            The size of the page to be returned. Default is 10.
+            </summary>
+        </member>
+        <member name="P:Application.Bases.Models.CursorPagedResult`1.Items">
+            <summary>
+            The list of items in the current page.
+            </summary>
+        </member>
+        <member name="P:Application.Bases.Models.CursorPagedResult`1.PreviousCursor">
+            <summary>
+            The cursor for the previous page. Null if there are no previous pages.
+            </summary>
+        </member>
+        <member name="P:Application.Bases.Models.CursorPagedResult`1.NextCursor">
+            <summary>
+            The cursor for the next page. Null if there are no more pages.
+            </summary>
+        </member>
+        <member name="P:Application.Bases.Models.PagedRequest.PageIndex">
+            <summary>
+            The index of the page to be returned. Default is 0.
+            </summary>
+        </member>
+        <member name="P:Application.Bases.Models.PagedRequest.PageSize">
+            <summary>
+            The size of the page to be returned. Default is 10.
+            </summary>
+        </member>
+        <member name="T:Application.Bases.Models.PagedResult`1">
+            <summary>
+            Represents a paged result of items.
+            </summary>
+            <typeparam name="TValue">The type of the items.</typeparam>
+        </member>
+        <member name="P:Application.Bases.Models.PagedResult`1.TotalCount">
+            <summary>
+            The total count of items.
+            </summary>
+        </member>
+        <member name="P:Application.Bases.Models.PagedResult`1.Items">
+            <summary>
+            The items in the current page.
+            </summary>
+        </member>
+        <member name="M:Application.Bases.Models.PagedResult`1.#ctor(System.Int64,System.Collections.Generic.IReadOnlyList{`0})">
+            <summary>
+            Initializes a new instance of the <see cref="T:Application.Bases.Models.PagedResult`1"/> class.
+            </summary>
+            <param name="totalCount">The total count of items.</param>
+            <param name="items">The items in the current page.</param>
+        </member>
+        <member name="M:Application.Caches.ICacheService.UpsertFlagIfNewerAsync(Domain.FeatureFlags.FeatureFlag)">
+            <summary>
+            Only-advance targeted upsert (#89): behaves like <see cref="M:Application.Caches.ICacheService.UpsertFlagAsync(Domain.FeatureFlags.FeatureFlag)"/> but guarded by
+            the env flag index score (the UpdatedAt-unix-ms version register every normal upsert/commit
+            already maintains), so a write for a stale/older flag value can never revert a fresher one.
+            Intended ONLY for the backfiller's targeted per-DC writes (a returning/lagging DC's Redis can
+            race a concurrent normal write); the normal broadcast <see cref="M:Application.Caches.ICacheService.UpsertFlagAsync(Domain.FeatureFlags.FeatureFlag)"/> is left
+            unconditional.
+            <para>
+            #105: returns <c>true</c> iff the write was ACCEPTED by the only-advance guard (i.e. it
+            actually landed), <c>false</c> if a fresher/equal value already at this key rejected it.
+            Callers that need an honest "did this write take effect" signal (e.g. the DC backfiller)
+            must observe this return value instead of assuming every call succeeded.
+            </para>
+            </summary>
+        </member>
+        <member name="M:Application.Caches.ICacheService.StageFlagAsync(Domain.FeatureFlags.FeatureFlag,System.Int64)">
+            <summary>
+            Stages a new flag version (B1 stage/commit storage) without moving the committed
+            pointer or touching the env flag index, so the previously committed value stays
+            readable until <see cref="M:Application.Caches.ICacheService.CommitFlagAsync(System.Guid,System.String,System.Int64)"/> is called.
+            <para>
+            #105: returns <c>true</c> on a successful write. Staging is unconditional (nothing to guard
+            against a version register here), so this is <c>true</c> in practice unless the underlying
+            write throws.
+            </para>
+            </summary>
+        </member>
+        <member name="M:Application.Caches.ICacheService.CommitFlagAsync(System.Guid,System.String,System.Int64)">
+            <summary>
+            Commits a previously staged flag version (B1 stage/commit storage): moves the
+            committed pointer and advances the env flag index to <paramref name="ts"/>.
+            <para>
+            #105: returns <c>true</c> iff the committed pointer actually ADVANCED (the only-advance
+            guard accepted <paramref name="ts"/>), <c>false</c> if an equal/fresher version was already
+            committed and this call was a guard-rejected no-op.
+            </para>
+            </summary>
+        </member>
+        <member name="M:Application.Caches.ICacheService.HasStagedFlagAsync(System.Guid,System.Int64)">
+            <summary>
+            Probes whether THIS cache holds the staged version key <c>flag:{id}:v{ts}</c>
+            (written by <see cref="M:Application.Caches.ICacheService.StageFlagAsync(Domain.FeatureFlags.FeatureFlag,System.Int64)"/>). Used by the commit coordinator to
+            confirm a staged version is present in a given DC's Redis before committing.
+            </summary>
+        </member>
+        <member name="M:Application.Caches.ICacheService.UpsertSegmentIfNewerAsync(System.Collections.Generic.ICollection{System.Guid},Domain.Segments.Segment)">
+            <summary>
+            Only-advance targeted upsert (#89, segment counterpart of <see cref="M:Application.Caches.ICacheService.UpsertFlagIfNewerAsync(Domain.FeatureFlags.FeatureFlag)"/>):
+            behaves like <see cref="M:Application.Caches.ICacheService.UpsertSegmentAsync(System.Collections.Generic.ICollection{System.Guid},Domain.Segments.Segment)"/> but guarded by a segment index score as the
+            version register, so a write for a stale/older segment value can never revert a fresher one.
+            Intended ONLY for the backfiller's targeted per-DC writes; the normal broadcast
+            <see cref="M:Application.Caches.ICacheService.UpsertSegmentAsync(System.Collections.Generic.ICollection{System.Guid},Domain.Segments.Segment)"/> is left unconditional.
+            <para>
+            #105: returns <c>true</c> iff the write was ACCEPTED by the only-advance guard, mirroring
+            <see cref="M:Application.Caches.ICacheService.UpsertFlagIfNewerAsync(Domain.FeatureFlags.FeatureFlag)"/>.
+            </para>
+            </summary>
+        </member>
+        <member name="M:Application.Caches.ICacheService.StageSegmentAsync(Domain.Segments.Segment,System.Int64)">
+            <summary>
+            Stages a new segment version (B2 stage/commit storage) without moving the committed
+            pointer or touching any env segment index, so the previously committed value stays
+            readable until <see cref="M:Application.Caches.ICacheService.CommitSegmentAsync(System.Collections.Generic.ICollection{System.Guid},System.String,System.Int64)"/> is called. Mirrors <see cref="M:Application.Caches.ICacheService.StageFlagAsync(Domain.FeatureFlags.FeatureFlag,System.Int64)"/>,
+            including its #105 return-value semantics.
+            </summary>
+        </member>
+        <member name="M:Application.Caches.ICacheService.CommitSegmentAsync(System.Collections.Generic.ICollection{System.Guid},System.String,System.Int64)">
+            <summary>
+            Commits a previously staged segment version (B2 stage/commit storage): moves the
+            committed pointer and advances the segment index to <paramref name="ts"/> for each env
+            in <paramref name="envIds"/> (segments can belong to multiple envs). Mirrors
+            <see cref="M:Application.Caches.ICacheService.CommitFlagAsync(System.Guid,System.String,System.Int64)"/>, including its #105 return-value semantics (accepted iff the
+            committed pointer advanced).
+            </summary>
+        </member>
+        <member name="M:Application.Caches.ICacheService.HasStagedSegmentAsync(System.Guid,System.Int64)">
+            <summary>
+            Probes whether THIS cache holds the staged version key <c>segment:{id}:v{ts}</c>
+            (written by <see cref="M:Application.Caches.ICacheService.StageSegmentAsync(Domain.Segments.Segment,System.Int64)"/>). Used by the commit coordinator to
+            confirm a staged version is present in a given DC's Redis before committing.
+            Mirrors <see cref="M:Application.Caches.ICacheService.HasStagedFlagAsync(System.Guid,System.Int64)"/>.
+            </summary>
+        </member>
+        <member name="P:Application.ChangeRequests.ChangeRequestFilter.Id">
+            <summary>
+            Return a specific change request.
+            </summary>
+        </member>
+        <member name="P:Application.ChangeRequests.ChangeRequestFilter.Query">
+            <summary>
+            The comment or part of the comment of a change request.
+            </summary>
+        </member>
+        <member name="P:Application.ChangeRequests.ChangeRequestFilter.CreatorId">
+            <summary>
+            Return only change requests created by this member.
+            </summary>
+        </member>
+        <member name="P:Application.ChangeRequests.ChangeRequestFilter.ReviewerId">
+            <summary>
+            Return only change requests assigned to this reviewer.
+            </summary>
+        </member>
+        <member name="P:Application.ChangeRequests.ChangeRequestFilter.Status">
+            <summary>
+            Return only change requests with this status.
+            </summary>
+        </member>
+        <member name="M:Application.ConfigurationExtensions.GetConsistencyMode(Microsoft.Extensions.Configuration.IConfiguration)">
+            <inheritdoc cref="M:Application.ConfigurationExtensions.&lt;G&gt;$395080CD86B40C7637108ABB18E39E9E.GetConsistencyMode"/>
+        </member>
+        <member name="M:Application.ConfigurationExtensions.&lt;G&gt;$395080CD86B40C7637108ABB18E39E9E.GetConsistencyMode">
+            <summary>
+            Reads the control plane consistency mode from configuration key
+            "ControlPlane:ConsistencyMode". Returns <see cref="F:Application.ControlPlane.ConsistencyMode.BestEffort"/>
+            when the key is unset or cannot be parsed. Never throws.
+            </summary>
+        </member>
+        <member name="T:Application.ControlPlane.ConsistencyMode">
+            <summary>
+            Controls how the control plane propagates changes across data centers.
+            </summary>
+        </member>
+        <member name="F:Application.ControlPlane.ConsistencyMode.BestEffort">
+            <summary>
+            Today's behavior: changes are propagated without cross-DC gating (fire-and-forget).
+            </summary>
+        </member>
+        <member name="F:Application.ControlPlane.ConsistencyMode.GatedCommit">
+            <summary>
+            Changes are gated on cross-DC commit before being applied. Opt-in per deployment.
+            </summary>
+        </member>
+        <member name="T:Application.ControlPlane.ILeaseStore">
+            <summary>
+            Storage abstraction for data center (DC) membership leases used by the control plane.
+            Implementations back the live-set / eviction mechanism with a queryable membership record.
+            </summary>
+        </member>
+        <member name="M:Application.ControlPlane.ILeaseStore.UpsertLeaseAsync(Domain.ControlPlane.DcLease)">
+            <summary>
+            Inserts or updates the lease for a data center.
+            </summary>
+            <param name="lease">The lease to persist.</param>
+        </member>
+        <member name="M:Application.ControlPlane.ILeaseStore.GetLiveSetAsync(System.DateTimeOffset)">
+            <summary>
+            Returns the current live set of data center leases, that is, all members
+            whose <see cref="P:Domain.ControlPlane.DcLease.LeaseExpiresAt"/> is greater than <paramref name="now"/>.
+            </summary>
+            <param name="now">The reference time used to determine which leases are still live.</param>
+            <returns>The members with <c>LeaseExpiresAt &gt; now</c>.</returns>
+        </member>
+        <member name="M:Application.ControlPlane.ILeaseStore.UpdateAppliedWatermarkAsync(System.String,System.Guid,System.Int64)">
+            <summary>
+            Updates the applied watermark (version) for a specific environment within a data center's lease.
+            </summary>
+            <param name="dcId">The data center id whose lease should be updated.</param>
+            <param name="envId">The environment id whose watermark should be updated.</param>
+            <param name="version">The applied version (watermark) to record.</param>
+        </member>
+        <member name="P:Application.Environments.CreateEnvironment.ProjectId">
+            <summary>
+            The ID of the project the environment belongs to. Retrieved from the URL path.
+            </summary>
+        </member>
+        <member name="P:Application.Environments.CreateEnvironment.Name">
+            <summary>
+            The name of the environment.
+            </summary>
+        </member>
+        <member name="P:Application.Environments.CreateEnvironment.Key">
+            <summary>
+            The unique key of the environment.
+            </summary>
+        </member>
+        <member name="P:Application.Environments.CreateEnvironment.Description">
+            <summary>
+            The description of the environment.
+            </summary>
+        </member>
+        <member name="P:Application.Environments.CreateEnvironment.Settings">
+            <summary>
+            The settings of the environment. This is an optional field and can be used to set the initial settings for the environment.
+            If not provided, the environment will be created with default settings.
+            </summary>
+        </member>
+        <member name="P:Application.Environments.UpdateEnvironment.Id">
+            <summary>
+            The ID of the environment to update. Retrieved from the URL path.
+            </summary>
+        </member>
+        <member name="P:Application.Environments.UpdateEnvironment.Name">
+            <summary>
+            The new name for the environment.
+            </summary>
+        </member>
+        <member name="P:Application.Environments.UpdateEnvironment.Description">
+            <summary>
+            The new description for the environment.
+            </summary>
+        </member>
+        <member name="P:Application.Environments.UpdateEnvironment.Settings">
+            <summary>
+            The new settings for the environment. This is an optional field and if not provided,
+            the environment settings will remain unchanged.
+            </summary>
+        </member>
+        <member name="T:Application.Experiments.ExperimentRunAllocation">
+            <summary>Layer reservations use observation time and buckets; decisions do not change reservations.</summary>
+        </member>
+        <member name="P:Application.FeatureFlags.CloneFlag.EnvId">
+            <summary>
+            The ID of the environment the feature flag belongs to. Retrieved from the URL path.
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.CloneFlag.OriginFlagKey">
+            <summary>
+            The unique key of the feature flag to clone from. Retrieved from the URL path.
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.CloneFlag.Name">
+            <summary>
+            The name for the cloned feature flag
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.CloneFlag.Key">
+            <summary>
+            The unique key for the cloned feature flag
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.CloneFlag.Description">
+            <summary>
+            The description for the cloned feature flag
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.CloneFlag.Tags">
+            <summary>
+            The tags to assign to the cloned feature flag
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.CreateFeatureFlag.EnvId">
+            <summary>
+            The ID of the environment the feature flag belongs to. Retrieved from the URL path.
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.CreateFeatureFlag.Name">
+            <summary>
+            The name of the feature flag.
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.CreateFeatureFlag.Key">
+            <summary>
+            The unique key of the feature flag.
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.CreateFeatureFlag.IsEnabled">
+            <summary>
+            The status of the feature flag.
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.CreateFeatureFlag.Description">
+            <summary>
+            The description of the feature flag.
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.CreateFeatureFlag.VariationType">
+            <summary>
+            The variation type of the feature flag.
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.CreateFeatureFlag.Variations">
+            <summary>
+            The collection of variations (different values the feature flag can return).
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.CreateFeatureFlag.EnabledVariationId">
+            <summary>
+            The ID of the variation to serve when the flag is enabled.
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.CreateFeatureFlag.DisabledVariationId">
+            <summary>
+            The ID of the variation to serve when the flag is disabled.
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.CreateFeatureFlag.Tags">
+            <summary>
+            The list of tags associated with the feature flag.
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.FeatureFlagFilter.Name">
+            <summary>
+            The name/key or part of the name/key of a feature flag
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.FeatureFlagFilter.Tags">
+            <summary>
+            The list of tags, you must use the complete name of tags
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.FeatureFlagFilter.IsEnabled">
+            <summary>
+            Return only enabled feature flags if true, and return only disabled feature flags if false.
+            If you don't provide any value, both enabled and disabled feature flags would be returned.
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.FeatureFlagFilter.IsArchived">
+            <summary>
+            Return only archived feature flags if true, the default value is false
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.FeatureFlagFilter.SortBy">
+            <summary>
+            The field to sort by, the default is createdAt
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.FeatureFlagVm.Serves">
+            <summary>
+            The possible variation value(s) that would be returned. 
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.SetTags.EnvId">
+            <summary>
+            The ID of the environment the feature flag belongs to. Retrieved from the URL path.
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.SetTags.Key">
+            <summary>
+            The unique key of the feature flag. Retrieved from the URL path.
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.SetTags.Tags">
+            <summary>
+            The collection of tags to set for the feature flag. Tags are used for categorization and filtering of feature flags.
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.UpdateDescription.EnvId">
+            <summary>
+            The ID of the environment the feature flag belongs to. Retrieved from the URL path.
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.UpdateDescription.Key">
+            <summary>
+            The unique key of the feature flag. Retrieved from the URL path.
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.UpdateDescription.Description">
+            <summary>
+            The new description for the feature flag
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.UpdateGeneralPayload.Name">
+            <summary>
+            The new name for the feature flag.
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.UpdateGeneralPayload.Description">
+            <summary>
+            The new description for the feature flag.
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.UpdateGeneralPayload.Tags">
+            <summary>
+            The collection of tags to set for the feature flag.
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.UpdateName.EnvId">
+            <summary>
+            The ID of the environment the feature flag belongs to. Retrieved from the URL path.
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.UpdateName.Key">
+            <summary>
+            The unique key of the feature flag. Retrieved from the URL path.
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.UpdateName.Name">
+            <summary>
+            The new name for the feature flag
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.UpdateOffVariation.EnvId">
+            <summary>
+            The ID of the environment the feature flag belongs to. Retrieved from the URL path.
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.UpdateOffVariation.Key">
+            <summary>
+            The unique key of the feature flag. Retrieved from the URL path.
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.UpdateOffVariation.Revision">
+            <summary>
+            The revision ID of the feature flag for optimistic concurrency control
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.UpdateOffVariation.OffVariationId">
+            <summary>
+            The ID of the variation to serve when the feature flag is disabled
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.UpdateTargetingPayload.Revision">
+            <summary>
+            Current revision of the feature flag, used for optimistic concurrency control.
+            The update will be rejected if the revision does not match the latest revision of the flag, indicating that the flag has been modified since it was last retrieved.
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.UpdateTargetingPayload.Targeting">
+            <summary>
+            The new flag targeting
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.UpdateVariations.EnvId">
+            <summary>
+            The ID of the environment the feature flag belongs to. Retrieved from the URL path.
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.UpdateVariations.Key">
+            <summary>
+            The unique key of the feature flag. Retrieved from the URL path.
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.UpdateVariations.Revision">
+            <summary>
+            The revision ID of the feature flag for optimistic concurrency control
+            </summary>
+        </member>
+        <member name="P:Application.FeatureFlags.UpdateVariations.Variations">
+            <summary>
+            The collection of variations (different values the feature flag can return)
+            </summary>
+        </member>
+        <member name="P:Application.Groups.CreateGroup.OrganizationId">
+            <summary>
+            The ID of the organization the group belongs to. Retrieved from the request header.
+            </summary>
+        </member>
+        <member name="P:Application.Groups.CreateGroup.Name">
+            <summary>
+            The name of the group.
+            </summary>
+        </member>
+        <member name="P:Application.Groups.CreateGroup.Description">
+            <summary>
+            The description of the group.
+            </summary>
+        </member>
+        <member name="P:Application.Groups.GroupFilter.Name">
+            <summary>
+            The name or part of the name of a group
+            </summary>
+        </member>
+        <member name="P:Application.Groups.GroupMemberFilter.SearchText">
+            <summary>
+            The email or part of the email of a user
+            </summary>
+        </member>
+        <member name="P:Application.Groups.GroupMemberFilter.GetAllMembers">
+            <summary>
+            Whether to filter on all member users of the current organization
+            </summary>
+            <remarks>
+            True if you want to filter on all member users of the current organization,
+            False if you want to filter only on the member users of the current group.
+            </remarks>
+        </member>
+        <member name="P:Application.Groups.GroupPolicyFilter.Name">
+            <summary>
+            The name or part of the name of a policy
+            </summary>
+        </member>
+        <member name="P:Application.Groups.GroupPolicyFilter.GetAllPolicies">
+            <summary>
+            Whether to filter on all policies of the current organization
+            </summary>
+            <remarks>
+            True if you want to filter on all policies of the current organization,
+            False if you want to filter only on the policies of the current group.
+            </remarks>
+        </member>
+        <member name="P:Application.Groups.UpdateGroup.Id">
+            <summary>
+            The ID of the group to update. Retrieved from the URL path.
+            </summary>
+        </member>
+        <member name="P:Application.Groups.UpdateGroup.Name">
+            <summary>
+            The new name for the group
+            </summary>
+        </member>
+        <member name="P:Application.Groups.UpdateGroup.Description">
+            <summary>
+            The new description for the group
+            </summary>
+        </member>
+        <member name="P:Application.Members.AddMember.WorkspaceId">
+            <summary>
+            The ID of the workspace to which the user belongs. Retrieved from the request header.
+            </summary>
+        </member>
+        <member name="P:Application.Members.AddMember.OrganizationId">
+            <summary>
+            The ID of the organization to which the user will be added. Retrieved from the request header.
+            </summary>
+        </member>
+        <member name="P:Application.Members.AddMember.Email">
+            <summary>
+            The email of the user to be added to the organization.
+            </summary>
+        </member>
+        <member name="P:Application.Members.AddMember.PolicyIds">
+            <summary>
+            The IDs of the initial policies to assign to the user.
+            </summary>
+        </member>
+        <member name="P:Application.Members.AddMember.GroupIds">
+            <summary>
+            The IDs of the initial groups to assign to the user.
+            </summary>
+        </member>
+        <member name="P:Application.Members.InheritedMemberPolicyFilter.Name">
+            <summary>
+            The name or part of the name of a policy
+            </summary>
+        </member>
+        <member name="P:Application.Members.MemberFilter.SearchText">
+            <summary>
+            The email or part of the email of a user
+            </summary>
+        </member>
+        <member name="P:Application.Members.MemberGroupFilter.Name">
+            <summary>
+            The name or part of the name of a group
+            </summary>
+        </member>
+        <member name="P:Application.Members.MemberGroupFilter.GetAllGroups">
+            <summary>
+            Whether to filter on all groups of the current organization
+            </summary>
+            <remarks>
+            True if you want to filter on all groups of the current organization,
+            False if you want to filter only on the groups of the current member user.
+            </remarks>
+        </member>
+        <member name="P:Application.Members.MemberPolicyFilter.Name">
+            <summary>
+            The name or part of the name of a policy
+            </summary>
+        </member>
+        <member name="P:Application.Members.MemberPolicyFilter.GetAllPolicies">
+            <summary>
+            Whether to filter on all policies of the current organization
+            </summary>
+            <remarks>
+            True if you want to filter on all policies of the current organization,
+            False if you want to filter only on the policies of the current member user.
+            </remarks>
+        </member>
+        <member name="P:Application.Policies.ClonePolicy.OrgId">
+            <summary>
+            The ID of the organization the policy belongs to. Retrieved from the request header.
+            </summary>
+        </member>
+        <member name="P:Application.Policies.ClonePolicy.OriginPolicyKey">
+            <summary>
+            The key of the policy from which the policy is cloned. Retrieved from the URL path.
+            </summary>
+        </member>
+        <member name="P:Application.Policies.ClonePolicy.OriginPolicyType">
+            <summary>
+            The type of the policy from which the policy is cloned. Should be either "CustomerManaged" or "SysManaged".
+            </summary>
+        </member>
+        <member name="P:Application.Policies.ClonePolicy.Name">
+            <summary>
+            The name of the cloned policy.
+            </summary>
+        </member>
+        <member name="P:Application.Policies.ClonePolicy.Key">
+            <summary>
+            The unique key of the cloned policy.
+            </summary>
+        </member>
+        <member name="P:Application.Policies.ClonePolicy.Description">
+            <summary>
+            The description of the cloned policy.
+            </summary>
+        </member>
+        <member name="P:Application.Policies.CreatePolicy.OrganizationId">
+            <summary>
+            The ID of the organization the policy belongs to. Retrieved from the request header.
+            </summary>
+        </member>
+        <member name="P:Application.Policies.CreatePolicy.Name">
+            <summary>
+            The name of the policy.
+            </summary>
+        </member>
+        <member name="P:Application.Policies.CreatePolicy.Key">
+            <summary>
+            The unique key of the policy.
+            </summary>
+        </member>
+        <member name="P:Application.Policies.CreatePolicy.Description">
+            <summary>
+            The description of the policy.
+            </summary>
+        </member>
+        <member name="P:Application.Policies.PolicyFilter.Name">
+            <summary>
+            The name or part of the name of a policy
+            </summary>
+        </member>
+        <member name="P:Application.Policies.PolicyGroupFilter.Name">
+            <summary>
+            The name or part of the name of a group
+            </summary>
+        </member>
+        <member name="P:Application.Policies.PolicyGroupFilter.GetAllGroups">
+            <summary>
+            Whether to filter on all groups of the current organization
+            </summary>
+            <remarks>
+            True if you want to filter on all groups of the current organization,
+            False if you want to filter only on the groups containing the current policy.
+            </remarks>
+        </member>
+        <member name="P:Application.Policies.PolicyMemberFilter.SearchText">
+            <summary>
+            The email or part of the email of a user
+            </summary>
+        </member>
+        <member name="P:Application.Policies.PolicyMemberFilter.GetAllMembers">
+            <summary>
+            Whether to filter on all member users of the current organization
+            </summary>
+            <remarks>
+            True if you want to filter on all member users of the current organization,
+            False if you want to filter only on the member users that the current policy is assigned to.
+            </remarks>
+        </member>
+        <member name="P:Application.Policies.UpdatePolicySetting.PolicyId">
+            <summary>
+            The ID of the policy to update. Retrieved from the URL path.
+            </summary>
+        </member>
+        <member name="P:Application.Policies.UpdatePolicySetting.Name">
+            <summary>
+            The new name for the policy.
+            </summary>
+        </member>
+        <member name="P:Application.Policies.UpdatePolicySetting.Description">
+            <summary>
+            The new description for the policy.
+            </summary>
+        </member>
+        <member name="P:Application.Projects.CreateProject.OrganizationId">
+            <summary>
+            The ID of the organization the project belongs to. Retrieved from the request header.
+            </summary>
+        </member>
+        <member name="P:Application.Projects.CreateProject.Name">
+            <summary>
+            The name of the project
+            </summary>
+        </member>
+        <member name="P:Application.Projects.CreateProject.Key">
+            <summary>
+            The unique key of the project
+            </summary>
+        </member>
+        <member name="P:Application.Projects.DeleteProject.Id">
+            <summary>
+            The ID of the project to delete
+            </summary>
+        </member>
+        <member name="P:Application.Projects.GetProject.Id">
+            <summary>
+            The ID of the project to retrieve. Retrieved from the route parameter.
+            </summary>
+        </member>
+        <member name="P:Application.Projects.GetProject.Permissions">
+            <summary>
+            Current request permissions
+            </summary>
+        </member>
+        <member name="P:Application.Projects.GetProjectList.OrganizationId">
+            <summary>
+            The ID of the organization the projects belong to. Retrieved from the request header.
+            </summary>
+        </member>
+        <member name="P:Application.Projects.GetProjectList.Permissions">
+            <summary>
+            Current request permissions
+            </summary>
+        </member>
+        <member name="P:Application.Projects.UpdateProject.Id">
+            <summary>
+            The ID of the project to update. Retrieved from the URL path.
+            </summary>
+        </member>
+        <member name="P:Application.Projects.UpdateProject.Name">
+            <summary>
+            The new name for the project
+            </summary>
+        </member>
+        <member name="P:Application.Segments.CreateSegment.WorkspaceId">
+            <summary>
+            The ID of the workspace the segment belongs to. Retrieved from the request header.
+            </summary>
+        </member>
+        <member name="P:Application.Segments.CreateSegment.EnvId">
+            <summary>
+            The ID of the environment the segment belongs to. Retrieved from URL path.
+            </summary>
+        </member>
+        <member name="P:Application.Segments.CreateSegment.Type">
+            <summary>
+            The type of the segment. Can be "environment-specific" or "shared".
+            </summary>
+        </member>
+        <member name="P:Application.Segments.CreateSegment.Name">
+            <summary>
+            The name of the segment.
+            </summary>
+        </member>
+        <member name="P:Application.Segments.CreateSegment.Key">
+            <summary>
+            The unique key of the segment.
+            </summary>
+        </member>
+        <member name="P:Application.Segments.CreateSegment.Description">
+            <summary>
+            The description of the segment.
+            </summary>
+        </member>
+        <member name="P:Application.Segments.CreateSegment.Scopes">
+            <summary>
+            The scopes where the segment is applicable.
+            </summary>
+        </member>
+        <member name="P:Application.Segments.SegmentFilter.Name">
+            <summary>
+            The name or part of the name of a segment
+            </summary>
+        </member>
+        <member name="P:Application.Segments.SegmentFilter.IsArchived">
+            <summary>
+            Return only archived segments if true, the default value is false
+            </summary>
+        </member>
+        <member name="P:Application.Segments.SetTags.Id">
+            <summary>
+            The ID of the segment to set tags for. Retrieved from the URL path.
+            </summary>
+        </member>
+        <member name="P:Application.Segments.SetTags.Tags">
+            <summary>
+            The collection of tags to set for the segment. Tags are used for categorization and filtering of segments.
+            </summary>
+        </member>
+        <member name="P:Application.Segments.UpdateDescription.Id">
+            <summary>
+            The ID of the segment to update. Retrieved from the URL path.
+            </summary>
+        </member>
+        <member name="P:Application.Segments.UpdateDescription.Description">
+            <summary>
+            The new description for the segment.
+            </summary>
+        </member>
+        <member name="P:Application.Segments.UpdateGeneralPayload.Name">
+            <summary>
+            The new name for the segment.
+            </summary>
+        </member>
+        <member name="P:Application.Segments.UpdateGeneralPayload.Description">
+            <summary>
+            The new description for the segment.
+            </summary>
+        </member>
+        <member name="P:Application.Segments.UpdateGeneralPayload.Tags">
+            <summary>
+            The collection of tags to set for the segment.
+            </summary>
+        </member>
+        <member name="P:Application.Segments.UpdateName.Id">
+            <summary>
+            The ID of the segment to update. Retrieved from the URL path.
+            </summary>
+        </member>
+        <member name="P:Application.Segments.UpdateName.Name">
+            <summary>
+            The new name for the segment.
+            </summary>
+        </member>
+        <member name="P:Application.Segments.UpdateTargetingPayload.Included">
+            <summary>
+            The list of user keys explicitly included in the segment
+            </summary>
+        </member>
+        <member name="P:Application.Segments.UpdateTargetingPayload.Excluded">
+            <summary>
+            The list of user keys explicitly excluded from the segment
+            </summary>
+        </member>
+        <member name="P:Application.Segments.UpdateTargetingPayload.Rules">
+            <summary>
+            The collection of match rules for targeting users in the segment
+            </summary>
+        </member>
+        <member name="M:Application.Services.IFeatureFlagService.GetCommittedAsync(System.Guid,System.String)">
+            <summary>
+            Authoritative read: returns the COMMITTED flag value, never a pending
+            (staged-but-not-committed) change. The returned flag has its <c>Pending</c>
+            slot cleared so callers cannot accidentally serve staged data.
+            </summary>
+        </member>
+        <member name="M:Application.Services.IFeatureFlagService.SetPendingAsync(System.Guid,System.String,Domain.FeatureFlags.FeatureFlag,System.Int64)">
+            <summary>
+            Stage <paramref name="pendingValue"/> as a pending change on the flag identified
+            by <paramref name="envId"/>/<paramref name="key"/>. The committed value is left
+            untouched, so <see cref="M:Application.Services.IFeatureFlagService.GetCommittedAsync(System.Guid,System.String)"/> still returns the old value.
+            <para>
+            Monotonicity guard (#34): the stage is applied ONLY when <paramref name="version"/> is
+            strictly greater than both the already-staged pending version (if any) and the committed
+            version; otherwise it is a no-op. This prevents an out-of-order/stale stage from clobbering
+            a newer pending change (which the coordinator could then commit).
+            </para>
+            </summary>
+        </member>
+        <member name="M:Application.Services.IFeatureFlagService.PromotePendingAsync(System.Guid,System.String,System.Int64)">
+            <summary>
+            Optimistically promote the staged pending change to committed for the flag identified by
+            <paramref name="envId"/>/<paramref name="key"/>, so <see cref="M:Application.Services.IFeatureFlagService.GetCommittedAsync(System.Guid,System.String)"/>
+            returns the new value. The promotion happens ONLY if the stored
+            <see cref="P:Domain.FeatureFlags.PendingFlagChange.Version"/> still equals <paramref name="expectedVersion"/>;
+            otherwise it is a no-op. This version guard prevents a lost update when a racing
+            <see cref="M:Application.Services.IFeatureFlagService.SetPendingAsync(System.Guid,System.String,Domain.FeatureFlags.FeatureFlag,System.Int64)"/> replaces the pending change between the coordinator reading it
+            and committing it (#33), and lets the coordinator skip stale promotions (#34).
+            </summary>
+            <returns><c>true</c> if the pending change was promoted; <c>false</c> if there was no
+            pending change or its version no longer matched <paramref name="expectedVersion"/>.</returns>
+        </member>
+        <member name="M:Application.Services.IFeatureFlagService.GetPendingAsync">
+            <summary>
+            Enumerate every flag (across all envs) that currently has a staged-but-not-committed
+            change, i.e. <see cref="P:Domain.FeatureFlags.FeatureFlag.Pending"/> is not null. Used by the commit
+            coordinator to discover the set of pending changes it must reconcile.
+            </summary>
+        </member>
+        <member name="M:Application.Services.IFeatureFlagService.GetAllCommittedAsync">
+            <summary>
+            Enumerate the COMMITTED value of every flag (across all envs). Each returned flag has its
+            <c>Pending</c> slot cleared (mirroring <see cref="M:Application.Services.IFeatureFlagService.GetCommittedAsync(System.Guid,System.String)"/>) so callers never see
+            staged data. Used by the returning-DC recovery worker to backfill a DC's Redis with the
+            authoritative committed state of all flags.
+            </summary>
+        </member>
+        <member name="M:Application.Services.ILicenseService.IsFeatureGrantedAsync(System.Guid,System.String)">
+            <summary>
+            Check if the feature is granted for the workspace
+            </summary>
+        </member>
+        <member name="M:Application.Services.IPermissionGuard.EnsureFlagChangeAllowedAsync(Domain.FeatureFlags.FeatureFlag,Domain.AuditLogs.DataChange,Domain.Policies.PolicyStatement[])">
+            <summary>
+            Throws <see cref="T:Application.Bases.Exceptions.ForbiddenException"/> if the given policy statements do not grant every
+            permission required by the semantic instructions derived from the feature flag change.
+            </summary>
+        </member>
+        <member name="M:Application.Services.IPermissionGuard.EnsureSegmentChangeAllowedAsync(Domain.Segments.Segment,Domain.AuditLogs.DataChange,Domain.Policies.PolicyStatement[])">
+            <summary>
+            Throws <see cref="T:Application.Bases.Exceptions.ForbiddenException"/> if the given policy statements do not grant every
+            permission required by the semantic instructions derived from the segment change.
+            </summary>
+        </member>
+        <member name="M:Application.Services.ISegmentService.GetCommittedAsync(System.Guid)">
+            <summary>
+            Authoritative read: returns the COMMITTED segment value, never a pending
+            (staged-but-not-committed) change. The returned segment has its <c>Pending</c>
+            slot cleared so callers cannot accidentally serve staged data. Keyed by segment
+            <paramref name="id"/> since a segment is a single entity (possibly shared across envs).
+            </summary>
+        </member>
+        <member name="M:Application.Services.ISegmentService.SetPendingAsync(System.Guid,Domain.Segments.Segment,System.Int64,System.Guid,System.String,System.Boolean)">
+            <summary>
+            Stage <paramref name="pendingValue"/> as a pending change on the segment identified by
+            <paramref name="id"/>. The committed value is left untouched, so
+            <see cref="M:Application.Services.ISegmentService.GetCommittedAsync(System.Guid)"/> still returns the old value.
+            <para>
+            Monotonicity guard (#34): the stage is applied ONLY when <paramref name="version"/> is
+            strictly greater than both the already-staged pending version (if any) and the committed
+            version; otherwise it is a no-op. This prevents an out-of-order/stale stage from clobbering
+            a newer pending change (which the coordinator could then commit).
+            </para>
+            <para>
+            <paramref name="operatorId"/>, <paramref name="operation"/> and
+            <paramref name="isTargetingChange"/> are the attribution context of the original change
+            notification (#73), persisted alongside the pending value so the coordinator can later
+            reconstruct the notification with the real operator instead of inventing one at commit time.
+            </para>
+            </summary>
+        </member>
+        <member name="M:Application.Services.ISegmentService.PromotePendingAsync(System.Guid,System.Int64)">
+            <summary>
+            Optimistically promote the staged pending change to committed for the segment identified by
+            <paramref name="id"/>, so <see cref="M:Application.Services.ISegmentService.GetCommittedAsync(System.Guid)"/> returns the new value. The
+            promotion happens ONLY if the stored <see cref="P:Domain.Segments.PendingSegmentChange.Version"/> still equals
+            <paramref name="expectedVersion"/>; otherwise it is a no-op. This version guard prevents a
+            lost update when a racing <see cref="M:Application.Services.ISegmentService.SetPendingAsync(System.Guid,Domain.Segments.Segment,System.Int64,System.Guid,System.String,System.Boolean)"/> replaces the pending change between
+            the coordinator reading it and committing it (#33), and lets the coordinator skip stale
+            promotions (#34).
+            </summary>
+            <returns><c>true</c> if the pending change was promoted; <c>false</c> if there was no
+            pending change or its version no longer matched <paramref name="expectedVersion"/>.</returns>
+        </member>
+        <member name="M:Application.Services.ISegmentService.GetPendingAsync">
+            <summary>
+            Enumerate every segment that currently has a staged-but-not-committed change, i.e.
+            <see cref="P:Domain.Segments.Segment.Pending"/> is not null. Used by the commit coordinator to discover
+            the set of pending changes it must reconcile.
+            </summary>
+        </member>
+        <member name="M:Application.Services.ISegmentService.GetAllCommittedAsync">
+            <summary>
+            Enumerate the COMMITTED value of every segment. Each returned segment has its <c>Pending</c>
+            slot cleared (mirroring <see cref="M:Application.Services.ISegmentService.GetCommittedAsync(System.Guid)"/>) so callers never see staged data.
+            Used by the returning-DC recovery worker to backfill a DC's Redis with the authoritative
+            committed state of all segments.
+            </summary>
+        </member>
+        <member name="P:Application.Workspaces.GetWorkspace.Permissions">
+            <summary>
+            Current request permissions
+            </summary>
+        </member>
+        <member name="P:Application.Workspaces.UpdateLicense.Id">
+            <summary>
+            The ID of the workspace. Retrieved from the request header.
+            </summary>
+        </member>
+        <member name="P:Application.Workspaces.UpdateLicense.License">
+            <summary>
+            The license key to apply to the workspace
+            </summary>
+        </member>
+        <member name="P:Application.Workspaces.UpdateOidc.Id">
+            <summary>
+            The ID of the workspace. Retrieved from the request header.
+            </summary>
+        </member>
+        <member name="P:Application.Workspaces.UpdateOidc.ClientId">
+            <summary>
+            The OAuth 2.0 client ID
+            </summary>
+        </member>
+        <member name="P:Application.Workspaces.UpdateOidc.ClientSecret">
+            <summary>
+            The OAuth 2.0 client secret
+            </summary>
+        </member>
+        <member name="P:Application.Workspaces.UpdateOidc.TokenEndpoint">
+            <summary>
+            The token endpoint URL for obtaining access tokens
+            </summary>
+        </member>
+        <member name="P:Application.Workspaces.UpdateOidc.ClientAuthenticationMethod">
+            <summary>
+            The client authentication method (e.g., client_secret_post, client_secret_basic)
+            </summary>
+        </member>
+        <member name="P:Application.Workspaces.UpdateOidc.AuthorizationEndpoint">
+            <summary>
+            The authorization endpoint URL for initiating authentication
+            </summary>
+        </member>
+        <member name="P:Application.Workspaces.UpdateOidc.Scope">
+            <summary>
+            The OAuth 2.0 scope to request (space-separated values)
+            </summary>
+        </member>
+        <member name="P:Application.Workspaces.UpdateOidc.UserEmailClaim">
+            <summary>
+            The claim name in the ID token that contains the user's email address
+            </summary>
+        </member>
+        <member name="P:Application.Workspaces.UpdateWorkspace.Id">
+            <summary>
+            The ID of the workspace to update. Retrieved from the request header.
+            </summary>
+        </member>
+        <member name="P:Application.Workspaces.UpdateWorkspace.Name">
+            <summary>
+            The new name for the workspace
+            </summary>
+        </member>
+        <member name="P:Application.Workspaces.UpdateWorkspace.Key">
+            <summary>
+            The new key for the workspace
+            </summary>
+        </member>
+    </members>
+</doc>
