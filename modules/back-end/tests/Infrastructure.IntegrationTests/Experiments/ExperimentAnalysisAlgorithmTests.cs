@@ -406,7 +406,7 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
             Id = ExperimentId,
             Name = "Checkout flow",
             Stage = "experiment",
-            FlagKey = "checkout-flow",
+            FlagId = Guid.Parse("44444444-4444-4444-4444-444444444444"),
             EnvId = EnvId,
             PrimaryMetric = """{"event":"purchase","metricType":"binary","metricAgg":"once","expectedDirection":"increase"}""",
             Guardrails = "[]",
@@ -497,19 +497,19 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
         }
 
         var service = new Mock<IFeatureFlagService>();
-        service
-            .Setup(x => x.GetAsync(It.IsAny<Guid>(), It.IsAny<string>()))
-            .ReturnsAsync((Guid envId, string key) => new FeatureFlag
-            {
-                Id = Guid.Parse("44444444-4444-4444-4444-444444444444"),
-                EnvId = envId,
-                Key = key,
-                Name = "Checkout flow",
-                VariationType = "string",
-                DisabledVariationId = "control-id",
-                Variations = [.. variations],
-                Tags = []
-            });
+        var flag = new FeatureFlag
+        {
+            Id = Guid.Parse("44444444-4444-4444-4444-444444444444"),
+            EnvId = EnvId,
+            Key = "checkout-flow",
+            Name = "Checkout flow",
+            VariationType = "string",
+            DisabledVariationId = "control-id",
+            Variations = [.. variations],
+            Tags = []
+        };
+        service.Setup(x => x.FindOneAsync(It.IsAny<Expression<Func<FeatureFlag, bool>>>()))
+            .ReturnsAsync((Expression<Func<FeatureFlag, bool>> predicate) => predicate.Compile()(flag) ? flag : null);
         return service.Object;
     }
 

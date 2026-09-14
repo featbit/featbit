@@ -185,7 +185,7 @@ CREATE TABLE IF NOT EXISTS experiments (
     name character varying(256) NOT NULL,
     description text,
     stage character varying(64) NOT NULL,
-    flag_key character varying(256),
+    flag_id uuid,
     env_id uuid,
     hypothesis text,
     access_token text,
@@ -261,6 +261,9 @@ CREATE INDEX IF NOT EXISTS ix_experiment_exposure_events_env_id_flag_key_exposed
     ON experiment_exposure_events (env_id, flag_key, exposed_at);
 CREATE INDEX IF NOT EXISTS ix_experiment_metric_events_env_id_event_name_occurred_at
     ON experiment_metric_events (env_id, event_name, occurred_at);
+
+CREATE INDEX IF NOT EXISTS ix_experiments_env_id_flag_id
+    ON experiments (env_id, flag_id);
 
 CREATE INDEX IF NOT EXISTS ix_experiments_env_id_updated_at
     ON experiments (env_id, updated_at);

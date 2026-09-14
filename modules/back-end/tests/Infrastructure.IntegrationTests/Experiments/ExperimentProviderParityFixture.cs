@@ -32,6 +32,7 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
     public const string GuardrailEvent = "checkout_error";
 
     private readonly ConcurrentDictionary<string, Lazy<Task>> _seedTasks = new();
+    private NpgsqlDataSource _experimentDataSource = null!;
 
     private readonly IContainer _postgres = new ContainerBuilder("postgres:15.10")
         .WithEnvironment("POSTGRES_USER", "postgres")
@@ -64,11 +65,16 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
         );
 
         await InitializePostgresAsync();
+        _experimentDataSource = new NpgsqlDataSourceBuilder(PostgresConnectionString)
+            .EnableDynamicJson()
+            .ConfigureJsonOptions(Domain.Utils.ReusableJsonSerializerOptions.Web)
+            .Build();
         await InitializeClickHouseAsync();
     }
 
     public async Task DisposeAsync()
     {
+        if (_experimentDataSource is not null) await _experimentDataSource.DisposeAsync();
         await Task.WhenAll(
             _postgres.DisposeAsync().AsTask(),
             _mongo.DisposeAsync().AsTask(),
@@ -315,10 +321,18 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
             metricService);
     }
 
+    internal IFeatureFlagService CreateFeatureFlagService(string provider) => provider switch
+    {
+        "Postgres" => new global::Infrastructure.Services.EntityFrameworkCore.FeatureFlagService(
+            CreateDbContext(), NullLogger<FeatureFlagService>.Instance),
+        "MongoDb" => new global::Infrastructure.Services.MongoDb.FeatureFlagService(CreateMongoDbClient()),
+        _ => throw new ArgumentOutOfRangeException(nameof(provider), provider, null)
+    };
+
     internal AppDbContext CreateDbContext()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseNpgsql(PostgresConnectionString, options => options.EnableRetryOnFailure())
+            .UseNpgsql(_experimentDataSource, options => options.EnableRetryOnFailure())
             .UseSnakeCaseNamingConvention()
             .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
             .Options;

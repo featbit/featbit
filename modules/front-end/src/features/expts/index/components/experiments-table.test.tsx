@@ -11,7 +11,9 @@ const experiment: ExperimentListRow = {
   description: "Reduce friction from cart to completed order",
   stage: "hypothesis",
   listState: { key: "measuring" },
+  flagId: "flag-1",
   flagKey: "checkout-redesign",
+  flagName: null,
   envId: "env-1",
   runCount: 3,
   runMethodSummary: "Bayesian",
@@ -52,7 +54,7 @@ describe("ExperimentsTable", () => {
     expect(screen.queryByText("Archive")).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByRole("button", { name: "checkout-redesign" }))
-    expect(onFlagFilter).toHaveBeenCalledWith("checkout-redesign")
+    expect(onFlagFilter).toHaveBeenCalledWith("flag-1")
   })
 
   it("shows unbound and no-run states without inventing a method", () => {
@@ -62,7 +64,9 @@ describe("ExperimentsTable", () => {
           items={[
             {
               ...experiment,
+              flagId: null,
               flagKey: null,
+              flagName: null,
               runCount: 0,
               runMethodSummary: null,
               stage: "hypothesis",

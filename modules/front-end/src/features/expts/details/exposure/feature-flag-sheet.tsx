@@ -67,7 +67,7 @@ function ProgressiveLoadMore({
 export function FeatureFlagSheet({
   open,
   envId,
-  currentFlagKey,
+  currentFlagId,
   saving,
   saveError,
   onOpenChange,
@@ -75,7 +75,7 @@ export function FeatureFlagSheet({
 }: {
   open: boolean
   envId: string
-  currentFlagKey: string | null
+  currentFlagId: string | null
   saving: boolean
   saveError: boolean
   onOpenChange: (open: boolean) => void
@@ -84,7 +84,7 @@ export function FeatureFlagSheet({
   const { t } = useTranslation()
   const [query, setQuery] = useState("")
   const deferredQuery = useDeferredValue(query.trim())
-  const [selectedKey, setSelectedKey] = useState<string | null>(currentFlagKey)
+  const [selectedId, setSelectedId] = useState<string | null>(currentFlagId)
 
   const flagsQuery = useInfiniteQuery({
     queryKey: ["experiment-flag-options", envId, deferredQuery],
@@ -109,7 +109,7 @@ export function FeatureFlagSheet({
     () => flagsQuery.data?.pages.flatMap((page) => page.items) ?? [],
     [flagsQuery.data]
   )
-  const selectedFlag = flags.find((flag) => flag.key === selectedKey)
+  const selectedFlag = flags.find((flag) => flag.id === selectedId)
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -117,7 +117,7 @@ export function FeatureFlagSheet({
         <SheetHeader className="border-b px-6 py-5 pr-12">
           <SheetTitle className="text-lg font-semibold">
             {t(
-              `releaseDecision.experiments.detailsPage.exposure.flagSheet.${currentFlagKey ? "changeTitle" : "title"}`
+              `releaseDecision.experiments.detailsPage.exposure.flagSheet.${currentFlagId ? "changeTitle" : "title"}`
             )}
           </SheetTitle>
           <SheetDescription className="mt-1.5 leading-5">
@@ -144,8 +144,8 @@ export function FeatureFlagSheet({
             items={flags}
             getKey={(flag) => flag.id}
             getValue={(flag) => `${flag.name} ${flag.key}`}
-            isSelected={(flag) => flag.key === selectedKey}
-            onSelect={(flag) => setSelectedKey(flag.key)}
+            isSelected={(flag) => flag.id === selectedId}
+            onSelect={(flag) => setSelectedId(flag.id)}
             listClassName="max-h-none flex-1 px-5 pb-4 [&_[data-slot=command-item]]:py-1"
             loading={flagsQuery.isLoading}
             loadingContent={

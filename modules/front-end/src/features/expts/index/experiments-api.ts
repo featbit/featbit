@@ -17,7 +17,7 @@ export function fetchExperiments(
   envId: string,
   input: {
     name: string
-    flagKey: string
+    flagId: string
     pageIndex: number
     pageSize: number
   },
@@ -28,7 +28,7 @@ export function fetchExperiments(
     pageSize: String(input.pageSize),
   })
   if (input.name) params.set("name", input.name)
-  if (input.flagKey) params.set("flagKey", input.flagKey)
+  if (input.flagId) params.set("flagId", input.flagId)
   return fetchApi<PagedExperiments>(`${experimentsPath(envId)}?${params}`, {
     signal,
   })

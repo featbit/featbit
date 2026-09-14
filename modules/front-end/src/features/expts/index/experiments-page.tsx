@@ -63,7 +63,7 @@ export function ExperimentsPage() {
   const [debouncedName, setDebouncedName] = useState(name.trim())
   const [sheetOpen, setSheetOpen] = useState(false)
   const [now, setNow] = useState(() => Date.now())
-  const flagKey = searchParams.get("flagKey") ?? ""
+  const flagId = searchParams.get("flagId") ?? ""
   const stage = stageFromParam(searchParams.get("stage"))
   const pageIndex = positiveInt(searchParams.get("page"), 1)
   const pageSize = positiveInt(searchParams.get("pageSize"), 10, [10, 20, 30])
@@ -116,7 +116,7 @@ export function ExperimentsPage() {
       "experiments",
       envId,
       debouncedName,
-      flagKey,
+      flagId,
       scope,
       requestPage,
       requestPageSize,
@@ -126,7 +126,7 @@ export function ExperimentsPage() {
         envId,
         {
           name: debouncedName,
-          flagKey,
+          flagId,
           scope,
           pageIndex: requestPage,
           pageSize: requestPageSize,
@@ -169,12 +169,12 @@ export function ExperimentsPage() {
     },
   })
 
-  const filtered = Boolean(debouncedName || flagKey || stage !== "all")
+  const filtered = Boolean(debouncedName || flagId || stage !== "all")
 
   function clearFilters() {
     setName("")
     setDebouncedName("")
-    updateParams({ name: null, flagKey: null, stage: null }, true)
+    updateParams({ name: null, flagId: null, stage: null }, true)
   }
 
   return (
@@ -201,8 +201,8 @@ export function ExperimentsPage() {
           </div>
           <FlagKeyFilter
             envId={envId}
-            value={flagKey}
-            onChange={(key) => updateParams({ flagKey: key || null }, true)}
+            value={flagId}
+            onChange={(id) => updateParams({ flagId: id || null }, true)}
           />
           <Select
             value={stage}
@@ -271,8 +271,8 @@ export function ExperimentsPage() {
             detailsHref={(id) =>
               localizedPath(lang, `/experiments/${encodeURIComponent(id)}`)
             }
-            onFlagFilter={(key) => {
-              updateParams({ flagKey: key }, true)
+            onFlagFilter={(id) => {
+              updateParams({ flagId: id }, true)
             }}
             onClearFilters={clearFilters}
             onCreate={() => setSheetOpen(true)}

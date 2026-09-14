@@ -60,6 +60,18 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(flag);
     }
 
+    /// <summary>
+    /// Get a feature flag by id within an environment
+    /// </summary>
+    [OpenApi]
+    [HttpGet("by-id/{id:guid}")]
+    [Authorize(Permissions.CanAccessEnv)]
+    public async Task<ApiResponse<FeatureFlag>> GetByIdAsync(Guid envId, Guid id)
+    {
+        var flag = await Mediator.Send(new GetFeatureFlagById { EnvId = envId, Id = id });
+        return Ok(flag);
+    }
+
     [HttpGet("is-key-used")]
     public async Task<ApiResponse<bool>> IsKeyUsedAsync(Guid envId, string key)
     {

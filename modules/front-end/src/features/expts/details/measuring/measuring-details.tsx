@@ -50,7 +50,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { fetchFeatureFlag } from "@/features/flags/flags-api"
+import { fetchFeatureFlagById } from "@/features/flags/flags-api"
 import type { FlagVariation } from "@/features/flags/flags-types"
 import { fetchLayers } from "@/features/expt-layers/layers-api"
 import type { Layer } from "@/features/expt-layers/layers-types"
@@ -758,9 +758,10 @@ export function MeasuringDetails({
   const selected =
     runs.find((run) => run.id === effectiveSelectedRunId) ?? runs.at(-1) ?? null
   const flagQuery = useQuery({
-    queryKey: ["experiment-feature-flag", envId, experiment.flagKey],
-    queryFn: () => fetchFeatureFlag(envId, experiment.flagKey!),
-    enabled: Boolean(envId && experiment.flagKey),
+    queryKey: ["experiment-feature-flag", envId, experiment.flagId],
+    queryFn: ({ signal }) =>
+      fetchFeatureFlagById(envId, experiment.flagId!, signal),
+    enabled: Boolean(envId && experiment.flagId),
   })
   const layersQuery = useQuery({
     queryKey: ["experiment-layers", envId, "active", "measuring-assignment"],

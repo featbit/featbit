@@ -13,6 +13,7 @@ export function analysisBlocker(
     .filter(Boolean)
   const method = run.method?.trim().toLowerCase()
   if (
+    !experiment.flagId ||
     !experiment.flagKey?.trim() ||
     !(
       run.primaryMetricEvent?.trim() ||

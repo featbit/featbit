@@ -10,7 +10,7 @@ public class ExperimentUpdate
 
     public string Stage { get; set; }
 
-    public string FlagKey { get; set; }
+    public Guid? FlagId { get; set; }
 
     public string Hypothesis { get; set; }
 

@@ -28,7 +28,7 @@ type Props = {
   filtered: boolean
   lang: Lang
   detailsHref: (id: string) => string
-  onFlagFilter: (key: string) => void
+  onFlagFilter: (id: string) => void
   onClearFilters: () => void
   onCreate: () => void
 }
@@ -167,12 +167,12 @@ export function ExperimentsTable({
                   </div>
                 </TableCell>
                 <TableCell className="px-5 py-4">
-                  {experiment.flagKey ? (
+                  {experiment.flagId && experiment.flagKey ? (
                     <button
                       type="button"
                       className="inline-block max-w-full truncate rounded bg-muted px-2 py-0.5 align-middle font-mono text-xs text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                       title={experiment.flagKey}
-                      onClick={() => onFlagFilter(experiment.flagKey!)}
+                      onClick={() => onFlagFilter(experiment.flagId!)}
                     >
                       {experiment.flagKey}
                     </button>

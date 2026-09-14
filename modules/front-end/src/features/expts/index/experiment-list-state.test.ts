@@ -20,7 +20,9 @@ const experiment: ExperimentListDataItem = {
   name: "Checkout",
   description: null,
   stage: "hypothesis",
+  flagId: "flag-1",
   flagKey: "checkout",
+  flagName: null,
   envId: "env-1",
   runCount: 1,
   runMethodSummary: "Bayesian",
@@ -217,11 +219,11 @@ describe("experiment list state", () => {
     ).toEqual({ key: "implementing" })
     expect(
       experimentListState(
-        { ...experiment, experimentRuns: [], flagKey: " " },
+        { ...experiment, experimentRuns: [], flagId: null },
         now
       )
     ).toEqual({ key: "hypothesis" })
-    expect(experimentListState({ ...experiment, flagKey: null }, now)).toEqual({
+    expect(experimentListState({ ...experiment, flagId: null }, now)).toEqual({
       key: "measuring",
     })
   })
