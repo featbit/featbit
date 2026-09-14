@@ -64,7 +64,6 @@ export function LayerSheet({
   onSubmit: (payload: LayerPayload) => Promise<void>
 }) {
   const { t } = useTranslation()
-  const [keyManuallyEdited, setKeyManuallyEdited] = useState(Boolean(layer))
   const [nameInteracted, setNameInteracted] = useState(false)
   const [discardOpen, setDiscardOpen] = useState(false)
   const form = useForm<FormValues>({
@@ -79,13 +78,13 @@ export function LayerSheet({
   const name = useWatch({ control: form.control, name: "name" })
 
   useEffect(() => {
-    if (!keyManuallyEdited) {
+    if (!layer) {
       form.setValue("key", slugify(name), {
         shouldDirty: nameInteracted,
         shouldValidate: nameInteracted,
       })
     }
-  }, [form, keyManuallyEdited, name, nameInteracted])
+  }, [form, layer, name, nameInteracted])
 
   function requestClose() {
     if (saving) return
@@ -168,9 +167,7 @@ export function LayerSheet({
                     maxLength={128}
                     readOnly={Boolean(layer)}
                     aria-invalid={Boolean(form.formState.errors.key)}
-                    {...form.register("key", {
-                      onChange: () => setKeyManuallyEdited(true),
-                    })}
+                    {...form.register("key")}
                   />
                   {layer ? (
                     <Lock className="absolute top-1/2 right-3 size-4 -translate-y-1/2 text-muted-foreground" />

@@ -87,7 +87,6 @@ export function MetricSheet({
   ) => Promise<void>
 }) {
   const { t } = useTranslation()
-  const [keyManuallyEdited, setKeyManuallyEdited] = useState(Boolean(metric))
   const [nameInteracted, setNameInteracted] = useState(false)
   const [discardOpen, setDiscardOpen] = useState(false)
   const form = useForm<FormValues>({
@@ -112,13 +111,13 @@ export function MetricSheet({
   const counts = metric ? usageCounts(metric) : null
 
   useEffect(() => {
-    if (!keyManuallyEdited) {
+    if (!metric) {
       form.setValue("key", slugify(name), {
         shouldDirty: nameInteracted,
         shouldValidate: nameInteracted,
       })
     }
-  }, [form, keyManuallyEdited, name, nameInteracted])
+  }, [form, metric, name, nameInteracted])
 
   useEffect(() => {
     if (metricType === "binary" && metricAgg !== "once") {
@@ -222,9 +221,7 @@ export function MetricSheet({
                     maxLength={128}
                     readOnly={Boolean(metric)}
                     aria-invalid={Boolean(form.formState.errors.key)}
-                    {...form.register("key", {
-                      onChange: () => setKeyManuallyEdited(true),
-                    })}
+                    {...form.register("key")}
                   />
                   {metric ? (
                     <Lock className="absolute top-1/2 right-3 size-4 -translate-y-1/2 text-muted-foreground" />

@@ -35,7 +35,7 @@ function renderSheet() {
 }
 
 describe("SegmentSheet", () => {
-  it("generates the shared slug and preserves a manually entered key", async () => {
+  it("regenerates the key when the name changes after a manual key edit", async () => {
     renderSheet()
 
     const nameInput = screen.getByLabelText("Name")
@@ -45,8 +45,13 @@ describe("SegmentSheet", () => {
     await waitFor(() => expect(keyInput).toHaveValue("checkout-usersv2"))
 
     fireEvent.change(keyInput, { target: { value: "checkout_custom.v2" } })
-    fireEvent.change(nameInput, { target: { value: "Updated checkout" } })
     await waitFor(() => expect(keyInput).toHaveValue("checkout_custom.v2"))
+
+    fireEvent.change(nameInput, { target: { value: "Updated checkout" } })
+    await waitFor(() => expect(keyInput).toHaveValue("updated-checkout"))
+
+    fireEvent.change(nameInput, { target: { value: "" } })
+    await waitFor(() => expect(keyInput).toHaveValue(""))
   })
 
   it("replaces the unavailable Shareable form with a recoverable license gate", () => {

@@ -33,7 +33,7 @@ function renderSheet(currentLayer: Layer | null, onSubmit = vi.fn()) {
 }
 
 describe("LayerSheet key immutability", () => {
-  it("generates the shared slug and preserves a manually entered key", async () => {
+  it("regenerates the key when the name changes after a manual key edit", async () => {
     renderSheet(null)
 
     const nameInput = screen.getByLabelText("Name *")
@@ -46,10 +46,15 @@ describe("LayerSheet key immutability", () => {
     fireEvent.change(keyInput, {
       target: { value: "checkout_custom.v2:layer" },
     })
-    fireEvent.change(nameInput, { target: { value: "Updated checkout" } })
     await waitFor(() =>
       expect(keyInput).toHaveValue("checkout_custom.v2:layer")
     )
+
+    fireEvent.change(nameInput, { target: { value: "Updated checkout" } })
+    await waitFor(() => expect(keyInput).toHaveValue("updated-checkout"))
+
+    fireEvent.change(nameInput, { target: { value: "" } })
+    await waitFor(() => expect(keyInput).toHaveValue(""))
   })
 
   it("keeps the stored key when editing a layer", async () => {
@@ -62,6 +67,11 @@ describe("LayerSheet key immutability", () => {
         "Layer key cannot be changed after creation because experiment runs may reference it."
       )
     ).toBeVisible()
+
+    fireEvent.change(screen.getByLabelText("Name *"), {
+      target: { value: "Updated checkout" },
+    })
+    await waitFor(() => expect(keyInput).toHaveValue("checkout"))
 
     fireEvent.change(keyInput, { target: { value: "tampered-key" } })
     const form = keyInput.closest("form")
