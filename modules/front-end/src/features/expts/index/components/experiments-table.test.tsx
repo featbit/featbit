@@ -12,7 +12,6 @@ const experiment: ExperimentListRow = {
   stage: "hypothesis",
   listState: { key: "measuring" },
   flagKey: "checkout-redesign",
-  projectKey: "ecommerce",
   envId: "env-1",
   runCount: 3,
   runMethodSummary: "Bayesian",

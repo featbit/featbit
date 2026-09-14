@@ -41,8 +41,10 @@ export function FlagConfirmDialog({
   const [comment, setComment] = useState("")
   const [confirmationKey, setConfirmationKey] = useState("")
   if (!target) return null
-  const archiveKeyMatches =
-    target.kind !== "archive" || confirmationKey === target.flag.key
+  const requireConfirmationKey =
+    target.kind === "toggle" || target.kind === "archive"
+  const confirmationKeyMatches =
+    !requireConfirmationKey || confirmationKey === target.flag.key
   const content =
     target.kind === "toggle"
       ? {
@@ -129,23 +131,32 @@ export function FlagConfirmDialog({
           <AlertDialogTitle>{content.title}</AlertDialogTitle>
           <AlertDialogDescription>{content.body}</AlertDialogDescription>
         </AlertDialogHeader>
-        {requireComment ? (
+        {target.kind === "toggle" || requireComment ? (
           <div className="space-y-2">
             <Label htmlFor="flag-change-comment">
               {t("featureFlags.changeComment")}
+              {requireComment ? (
+                <span className="ml-0.5 text-destructive">*</span>
+              ) : (
+                <span className="font-normal text-muted-foreground">
+                  {` ${t("featureFlags.detailsPage.review.optional")}`}
+                </span>
+              )}
             </Label>
             <Textarea
               id="flag-change-comment"
               value={comment}
+              required={requireComment}
+              disabled={saving}
               placeholder={t("featureFlags.changeCommentPlaceholder")}
               onChange={(event) => setComment(event.target.value)}
             />
           </div>
         ) : null}
-        {target.kind === "archive" ? (
+        {requireConfirmationKey ? (
           <div className="space-y-2">
             <p
-              id="flag-archive-key-prompt"
+              id="flag-confirmation-key-prompt"
               className="flex flex-wrap items-center gap-1.5 text-sm font-medium"
             >
               <span>{t("featureFlags.archiveKeyPromptBefore")}</span>
@@ -166,9 +177,10 @@ export function FlagConfirmDialog({
               <span>{t("featureFlags.archiveKeyPromptAfter")}</span>
             </p>
             <Input
-              id="flag-archive-key"
-              aria-labelledby="flag-archive-key-prompt"
+              id="flag-confirmation-key"
+              aria-labelledby="flag-confirmation-key-prompt"
               value={confirmationKey}
+              disabled={saving}
               placeholder={t("featureFlags.archiveKeyPlaceholder")}
               autoComplete="off"
               spellCheck={false}
@@ -185,7 +197,7 @@ export function FlagConfirmDialog({
             variant={target.kind === "remove" ? "destructive" : "default"}
             disabled={
               saving ||
-              !archiveKeyMatches ||
+              !confirmationKeyMatches ||
               (requireComment && !comment.trim())
             }
             onClick={() => onConfirm(comment.trim())}

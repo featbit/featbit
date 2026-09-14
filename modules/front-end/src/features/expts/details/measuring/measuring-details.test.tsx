@@ -23,7 +23,6 @@ describe("creating an experiment run", () => {
       description: null,
       stage: "measuring",
       flagKey: "checkout",
-      projectKey: "project-1",
       envId: "env-1",
       runCount: 0,
       hypothesis: null,

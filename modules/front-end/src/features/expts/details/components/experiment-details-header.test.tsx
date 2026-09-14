@@ -26,7 +26,6 @@ const experiment: ExperimentDetail = {
   description: "Test checkout changes",
   stage: "measuring",
   flagKey: "checkout-flow",
-  projectKey: "project-1",
   envId: "environment-1",
   runCount: 0,
   hypothesis: null,

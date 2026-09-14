@@ -49,7 +49,6 @@ const experiment: ExperimentListDataItem = {
   description: null,
   stage: "hypothesis",
   flagKey: "checkout",
-  projectKey: null,
   envId: "env-1",
   runCount: 1,
   runMethodSummary: "Bayesian",
@@ -233,7 +232,6 @@ describe("experiment list refresh", () => {
     expect(createExperiment).toHaveBeenCalledWith("env-1", {
       name: created.name,
       description: null,
-      projectKey: "project-1",
     })
 
     let finishRefresh!: (data: ExperimentListData) => void

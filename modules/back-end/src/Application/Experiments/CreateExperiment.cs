@@ -12,8 +12,6 @@ public class CreateExperiment : IRequest<ExperimentVm>
     public string Description { get; set; }
 
     public string FlagKey { get; set; }
-
-    public string ProjectKey { get; set; }
 }
 
 public class CreateExperimentValidator : AbstractValidator<CreateExperiment>
@@ -40,7 +38,6 @@ public class CreateExperimentHandler(
             Name = request.Name.Trim(),
             Description = string.IsNullOrWhiteSpace(request.Description) ? null : request.Description.Trim(),
             FlagKey = string.IsNullOrWhiteSpace(request.FlagKey) ? null : request.FlagKey.Trim(),
-            ProjectKey = string.IsNullOrWhiteSpace(request.ProjectKey) ? null : request.ProjectKey.Trim(),
             EnvId = request.EnvId,
             Stage = "hypothesis",
             SandboxStatus = "idle",

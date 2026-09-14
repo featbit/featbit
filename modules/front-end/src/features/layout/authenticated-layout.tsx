@@ -237,9 +237,19 @@ export function AuthenticatedLayout() {
 
           const userId = getStoredUserProfile().id ?? ""
           const organizationId = getCurrentOrganization()?.id ?? ""
-          await queryClient.invalidateQueries({
-            queryKey: authContextQueryKeys.projects(userId, organizationId),
-          })
+          await Promise.all([
+            queryClient.invalidateQueries({
+              queryKey: authContextQueryKeys.projects(userId, organizationId),
+            }),
+            // Invalidate cached flag and segment settings after project changes;
+            // inactive queries will refetch when their pages mount again.
+            queryClient.invalidateQueries({
+              queryKey: ["feature-flag-environment-settings"],
+            }),
+            queryClient.invalidateQueries({
+              queryKey: ["segment-environment-settings"],
+            }),
+          ])
           const loadedProjects = await queryClient.fetchQuery(
             projectsQueryOptions(userId, organizationId)
           )
