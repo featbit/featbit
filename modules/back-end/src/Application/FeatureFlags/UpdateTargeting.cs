@@ -55,12 +55,6 @@ public class UpdateTargetingValidator : AbstractValidator<UpdateTargeting>
     {
         RuleFor(x => x.Targeting)
             .NotNull().WithErrorCode(ErrorCodes.Required("targeting"));
-
-        When(x => x.Targeting is not null, () =>
-        {
-            RuleFor(x => x.Targeting.DisabledVariationId)
-                .NotEmpty().WithErrorCode(ErrorCodes.Required("disabledVariationId"));
-        });
     }
 }
 
@@ -78,6 +72,8 @@ public class UpdateTargetingHandler(
         {
             throw new ConflictException(nameof(FeatureFlag), flag.Id);
         }
+
+        FlagTargetingValidator.EnsureValid(request.Targeting, flag.Variations);
 
         var dataChange = flag.UpdateTargeting(request.Targeting, currentUser.Id);
 
