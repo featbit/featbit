@@ -21,8 +21,30 @@ for (const surface of ["list", "details"] as const) {
         VERSION: "e2e",
       })
       await mockContextEndpoints(page)
+      for (const resource of ["policies", "groups"]) {
+        await page.route(`**/api/v1/${resource}?*`, (route) =>
+          route.fulfill({
+            json: { success: true, data: { items: [], totalCount: 0 } },
+          })
+        )
+      }
+      await page.route("**/api/v1/organizations/default-permissions", (route) =>
+        route.fulfill({
+          json: { success: true, data: { policies: [], groups: [] } },
+        })
+      )
       await setAuthenticatedUser(page)
       await setCurrentContext(page)
+      let currentRequireChangeComment = requireChangeComment
+      let documentRequests = 0
+      page.on("request", (request) => {
+        if (
+          request.isNavigationRequest() &&
+          request.frame() === page.mainFrame()
+        ) {
+          documentRequests += 1
+        }
+      })
       await page.route("**/api/v1/projects", (route) =>
         route.fulfill({
           json: {
@@ -45,13 +67,34 @@ for (const surface of ["list", "details"] as const) {
                     projectId: "project-commerce",
                     name: "Production CN",
                     key: "prod-cn",
-                    settings: { requireChangeComment },
+                    settings: {
+                      requireChangeComment: currentRequireChangeComment,
+                    },
                   },
                 ],
               },
             ],
           },
         })
+      )
+      await page.route(
+        "**/api/v1/projects/project-commerce/envs/env-prod-cn",
+        (route) => {
+          const payload = route.request().postDataJSON()
+          currentRequireChangeComment = payload.settings.requireChangeComment
+          return route.fulfill({
+            json: {
+              success: true,
+              data: {
+                ...payload,
+                id: "env-prod-cn",
+                projectId: "project-commerce",
+                key: "prod-cn",
+                secrets: [],
+              },
+            },
+          })
+        }
       )
 
       const flag = {
@@ -177,7 +220,73 @@ for (const surface of ["list", "details"] as const) {
         await expect(
           nextDialog.getByRole("button", { name: "Confirm", exact: true })
         ).toBeDisabled()
+        await nextDialog
+          .getByRole("button", { name: "Cancel", exact: true })
+          .click()
       }
+
+      // Navigate within the SPA so the already-populated settings cache survives.
+      await page
+        .getByRole("link", { name: "Organization", exact: true })
+        .click()
+      await page.getByRole("tab", { name: "Projects", exact: true }).click()
+      await page
+        .getByRole("row", { name: /Production CN/ })
+        .getByRole("button", { name: "Edit environment", exact: true })
+        .click()
+      const environmentSheet = page.getByRole("dialog", {
+        name: "Edit environment",
+      })
+      await environmentSheet
+        .getByRole("checkbox", { name: /Require change comment/ })
+        .setChecked(!requireChangeComment)
+      const settingsResponse = page.waitForResponse(
+        (response) =>
+          response
+            .url()
+            .endsWith("/projects/project-commerce/envs/env-prod-cn") &&
+          response.request().method() === "PUT" &&
+          response.ok()
+      )
+      await environmentSheet
+        .getByRole("button", { name: "Save environment", exact: true })
+        .click()
+      expect(
+        (await settingsResponse).request().postDataJSON().settings
+      ).toEqual({
+        requireChangeComment: !requireChangeComment,
+      })
+      await expect(environmentSheet).not.toBeVisible()
+      await page
+        .getByRole("link", { name: "Feature Flags", exact: true })
+        .click()
+      if (surface === "details") {
+        await page.getByRole("link", { name: flag.name, exact: true }).click()
+      }
+      await toggle.click()
+      const updatedDialog = page.getByRole("dialog", {
+        name: /Turn feature flag (on|off)\?/,
+      })
+      const updatedComment = updatedDialog.getByRole("textbox", {
+        name: /Change comment/,
+      })
+      await expect(updatedComment).toHaveJSProperty(
+        "required",
+        !requireChangeComment
+      )
+      await updatedDialog.getByPlaceholder("Feature flag key").fill(flag.key)
+      const updatedConfirm = updatedDialog.getByRole("button", {
+        name: "Confirm",
+        exact: true,
+      })
+      if (requireChangeComment) {
+        await expect(updatedConfirm).toBeEnabled()
+      } else {
+        await expect(updatedConfirm).toBeDisabled()
+        await updatedComment.fill("Approved after environment settings update")
+        await expect(updatedConfirm).toBeEnabled()
+      }
+      expect(documentRequests).toBe(1)
     })
   }
 }
