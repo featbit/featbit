@@ -55,7 +55,7 @@ export function ExperimentSheet({
 }) {
   const { t } = useTranslation()
   const [discardOpen, setDiscardOpen] = useState(false)
-  const contextValid = Boolean(projectEnv?.projectKey && projectEnv.envId)
+  const contextValid = Boolean(projectEnv?.envId)
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     mode: "onChange",
@@ -114,11 +114,10 @@ export function ExperimentSheet({
           <form
             className="flex min-h-0 flex-1 flex-col"
             onSubmit={form.handleSubmit(async (values) => {
-              if (!projectEnv?.projectKey) return
+              if (!projectEnv?.envId) return
               await onSubmit({
                 name: values.name.trim(),
                 description: values.description.trim() || null,
-                projectKey: projectEnv.projectKey,
               })
             })}
           >

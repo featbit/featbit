@@ -33,7 +33,6 @@ function experiment(runs: ExperimentRunDetail[]): ExperimentDetail {
     description: "Reduce friction from cart to completed order",
     stage: "learning",
     flagKey: "checkout-redesign",
-    projectKey: "ecommerce",
     envId: "env-1",
     runCount: runs.length,
     hypothesis: "A shorter checkout will improve conversion.",

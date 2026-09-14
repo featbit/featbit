@@ -1013,7 +1013,6 @@ public abstract class WritableExperimentProviderTestsBase(
             Name = name,
             Description = "Provider parity experiment",
             Stage = "hypothesis",
-            ProjectKey = "provider-parity",
             EnvId = ExperimentProviderParityFixture.EnvId,
             SandboxStatus = "idle",
             CreatedAt = now,

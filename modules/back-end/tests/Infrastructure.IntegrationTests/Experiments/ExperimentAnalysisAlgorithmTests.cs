@@ -407,7 +407,6 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
             Name = "Checkout flow",
             Stage = "experiment",
             FlagKey = "checkout-flow",
-            ProjectKey = "web",
             EnvId = EnvId,
             PrimaryMetric = """{"event":"purchase","metricType":"binary","metricAgg":"once","expectedDirection":"increase"}""",
             Guardrails = "[]",
