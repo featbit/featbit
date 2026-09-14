@@ -49,8 +49,8 @@ const experiment: ExperimentListDataItem = {
   description: null,
   stage: "hypothesis",
   flagKey: "checkout",
-  featBitProjectKey: null,
-  featBitEnvId: "env-1",
+  projectKey: null,
+  envId: "env-1",
   runCount: 1,
   runMethodSummary: "Bayesian",
   hasLearning: false,
@@ -233,7 +233,7 @@ describe("experiment list refresh", () => {
     expect(createExperiment).toHaveBeenCalledWith("env-1", {
       name: created.name,
       description: null,
-      featBitProjectKey: "project-1",
+      projectKey: "project-1",
     })
 
     let finishRefresh!: (data: ExperimentListData) => void

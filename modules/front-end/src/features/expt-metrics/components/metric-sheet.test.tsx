@@ -6,7 +6,7 @@ import { MetricSheet } from "./metric-sheet"
 
 const metric: Metric = {
   id: "metric-id",
-  featBitEnvId: "env-id",
+  envId: "env-id",
   name: "Checkout conversion",
   key: "checkout_completed",
   description: "Completed checkout",

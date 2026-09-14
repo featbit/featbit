@@ -80,7 +80,7 @@ public class ExperimentControllerTests
         var service = new Mock<IExperimentService>();
         service
             .Setup(x => x.AnalyzeRunAsync(TestWorkspace.Id, ExperimentId, RunId, It.IsAny<ExperimentRunAnalyzeRequest>()))
-            .ReturnsAsync(new ExperimentDetailVm { Id = ExperimentId, FeatBitEnvId = TestWorkspace.Id });
+            .ReturnsAsync(new ExperimentDetailVm { Id = ExperimentId, EnvId = TestWorkspace.Id });
         using var factory = CreateFactory(service.Object);
         using var client = await _app.CreateAuthenticatedClientAsync(factory);
 

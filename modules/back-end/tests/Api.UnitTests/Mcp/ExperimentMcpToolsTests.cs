@@ -34,7 +34,7 @@ public class ExperimentMcpToolsTests
             .Setup(x => x.Send(It.Is<GetExperiment>(request =>
                 request.EnvId == envId &&
                 request.Id == experimentId), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new ExperimentDetailVm { Id = experimentId, FeatBitEnvId = envId });
+            .ReturnsAsync(new ExperimentDetailVm { Id = experimentId, EnvId = envId });
         var tools = new ExperimentMcpTools(
             sender.Object,
             experimentService.Object,
@@ -178,7 +178,7 @@ public class ExperimentMcpToolsTests
         return new ExperimentDetailVm
         {
             Id = experimentId,
-            FeatBitEnvId = envId,
+            EnvId = envId,
             ExperimentRuns =
             [
                 new ExperimentRunVm

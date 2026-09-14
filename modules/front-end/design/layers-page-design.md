@@ -413,7 +413,7 @@ type PagedLayerResult = {
   totalCount: number
   items: Array<{
     id: string
-    featBitEnvId: string
+    envId: string
     name: string
     key: string
     description: string | null

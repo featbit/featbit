@@ -14,7 +14,7 @@ import { LayersTable } from "./layers-table"
 
 const layer: Layer = {
   id: "layer-id",
-  featBitEnvId: "env-id",
+  envId: "env-id",
   name: "layer12",
   key: "layer1",
   description: "My first layer1",

@@ -4,7 +4,7 @@ public class ExperimentLayerVm
 {
     public Guid Id { get; set; }
 
-    public Guid FeatBitEnvId { get; set; }
+    public Guid EnvId { get; set; }
 
     public string Name { get; set; }
 

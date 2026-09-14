@@ -118,7 +118,7 @@ export function ExperimentSheet({
               await onSubmit({
                 name: values.name.trim(),
                 description: values.description.trim() || null,
-                featBitProjectKey: projectEnv.projectKey,
+                projectKey: projectEnv.projectKey,
               })
             })}
           >

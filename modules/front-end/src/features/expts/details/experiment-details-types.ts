@@ -6,8 +6,8 @@ export type ExperimentDetail = {
   description: string | null
   stage: ExperimentStage
   flagKey: string | null
-  featBitProjectKey: string | null
-  featBitEnvId: string | null
+  projectKey: string | null
+  envId: string | null
   runCount: number
   hypothesis: string | null
   goal: string | null

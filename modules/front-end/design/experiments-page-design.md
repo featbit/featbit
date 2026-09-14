@@ -277,7 +277,7 @@ The backend already returns a paged result. Future React implementation must use
    - Show `Environment: {environment name}` on a muted second line.
    - Include a Lock icon.
    - Helper: `Determined by your current project and environment.`
-   - The selected environment supplies `EnvId`; the current project supplies `FeatBitProjectKey`.
+   - The selected environment supplies `EnvId`; the current project supplies `projectKey`.
    - If either required context value is unavailable, disable creation and explain that the user must select a valid project/environment from the existing context bar. Do not duplicate the switcher inside the Sheet.
 
 3. `Description (optional)`
@@ -330,8 +330,8 @@ type ExperimentListItem = {
   description: string | null
   stage: "hypothesis" | "implementing" | "measuring" | "learning"
   flagKey: string | null
-  featBitProjectKey: string | null
-  featBitEnvId: string | null
+  projectKey: string | null
+  envId: string | null
   runCount: number
   runMethodSummary: string | null
   createdAt: string
@@ -359,7 +359,7 @@ The creation request must remain narrowly scoped:
 type CreateExperimentPayload = {
   name: string
   description: string | null
-  featBitProjectKey: string
+  projectKey: string
 }
 ```
 

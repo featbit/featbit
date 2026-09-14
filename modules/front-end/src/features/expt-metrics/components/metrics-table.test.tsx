@@ -6,7 +6,7 @@ import { MetricsTable } from "./metrics-table"
 
 const metric: Metric = {
   id: "metric-id",
-  featBitEnvId: "env-id",
+  envId: "env-id",
   name: "Checkout conversion",
   key: "checkout_completed",
   description: "Customers who complete checkout",

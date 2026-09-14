@@ -162,7 +162,7 @@ describe("experiments API", () => {
     const payload = {
       name: "Checkout recommendation",
       description: null,
-      featBitProjectKey: "ecommerce",
+      projectKey: "ecommerce",
     }
 
     await createExperiment("env-1", payload)

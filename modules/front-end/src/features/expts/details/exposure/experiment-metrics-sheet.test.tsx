@@ -43,7 +43,7 @@ describe("editing experiment metrics", () => {
         id: `metric-${index}`,
         key: `other-metric-${index}`,
         name: `Other metric ${index}`,
-        featBitEnvId: "env-1",
+        envId: "env-1",
         metricType: "binary",
         metricAgg: "once",
         status: "active",

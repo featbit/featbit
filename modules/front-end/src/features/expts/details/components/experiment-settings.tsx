@@ -47,13 +47,13 @@ export function ExperimentSettings({
       value: experiment.id,
       technical: true,
     },
-    ...(experiment.featBitEnvId
+    ...(experiment.envId
       ? [
           {
             label: t(
               "releaseDecision.experiments.detailsPage.settings.environmentId"
             ),
-            value: experiment.featBitEnvId,
+            value: experiment.envId,
             technical: true,
           },
         ]

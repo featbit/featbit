@@ -7,7 +7,7 @@ import { LayerSheet } from "./layer-sheet"
 
 const layer: Layer = {
   id: "layer-id",
-  featBitEnvId: "env-id",
+  envId: "env-id",
   name: "Checkout",
   key: "checkout",
   description: "Checkout experiments",

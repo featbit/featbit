@@ -7,8 +7,8 @@ export type ExperimentListItem = {
   description: string | null
   stage: ExperimentStage
   flagKey: string | null
-  featBitProjectKey: string | null
-  featBitEnvId: string | null
+  projectKey: string | null
+  envId: string | null
   runCount: number
   runMethodSummary: string | null
   createdAt: string
@@ -39,5 +39,5 @@ export type ExperimentListSummary = ExperimentListItem & {
 export type CreateExperimentPayload = {
   name: string
   description: string | null
-  featBitProjectKey: string
+  projectKey: string
 }

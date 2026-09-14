@@ -214,11 +214,11 @@ function AgentSetupContent({
   }
 
   async function createToken() {
-    if (!experiment.featBitEnvId || !context) return
+    if (!experiment.envId || !context) return
     setCreating(true)
     setError(false)
     try {
-      const response = await createExperimentMcpToken(experiment.featBitEnvId)
+      const response = await createExperimentMcpToken(experiment.envId)
       const createdAt = new Date()
       const stored: StoredMcpToken = {
         ...response,
@@ -357,7 +357,7 @@ function AgentSetupContent({
                     disabled={
                       creating ||
                       revoking ||
-                      !experiment.featBitEnvId ||
+                      !experiment.envId ||
                       !context
                     }
                     onClick={() => void createToken()}
@@ -376,7 +376,7 @@ function AgentSetupContent({
                 </div>
               </div>
 
-              {!experiment.featBitEnvId ? (
+              {!experiment.envId ? (
                 <p className="text-sm text-destructive">
                   {t(
                     "releaseDecision.experiments.detailsPage.agentSetup.bindEnvironment"
@@ -422,7 +422,7 @@ function AgentSetupContent({
                       !tokenReady ||
                       creating ||
                       revoking ||
-                      !experiment.featBitEnvId ||
+                      !experiment.envId ||
                       !context
                     }
                   />

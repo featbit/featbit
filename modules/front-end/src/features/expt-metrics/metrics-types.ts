@@ -20,7 +20,7 @@ export type MetricExperimentUsage = {
 
 export type Metric = {
   id: string
-  featBitEnvId: string
+  envId: string
   name: string
   key: string
   description?: string | null

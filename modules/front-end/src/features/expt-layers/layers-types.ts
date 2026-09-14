@@ -34,7 +34,7 @@ export type LayerAllocationSummary = {
 
 export type Layer = {
   id: string
-  featBitEnvId: string
+  envId: string
   name: string
   key: string
   description?: string | null
