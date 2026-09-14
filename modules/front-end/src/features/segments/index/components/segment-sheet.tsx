@@ -31,6 +31,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { slugify } from "@/lib/slugify"
 import { cn } from "@/lib/utils"
 import type {
   ScopeResource,
@@ -55,14 +56,6 @@ type KeyState = "idle" | "validating" | "valid" | "duplicate" | "error"
 type KeyValidation = {
   signature: string
   state: Exclude<KeyState, "idle" | "validating">
-}
-
-function slugify(value: string) {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9._-]+/g, "-")
-    .replace(/^-+|-+$/g, "")
 }
 
 function normalizeScopes(resources: ScopeResource[], currentRn: string) {

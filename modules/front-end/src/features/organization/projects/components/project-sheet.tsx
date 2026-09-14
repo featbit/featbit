@@ -13,7 +13,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
-import { slugify } from "@/features/organization/organization-utils"
+import { slugify } from "@/lib/slugify"
 import type { OrganizationProject } from "@/features/organization/projects/projects-api"
 import { Field } from "./form-field"
 
@@ -40,7 +40,10 @@ export function ProjectSheet({
   const schema = useMemo(
     () =>
       z.object({
-        name: z.string().trim().min(1, t("organization.validation.nameRequired")),
+        name: z
+          .string()
+          .trim()
+          .min(1, t("organization.validation.nameRequired")),
         key: z.string().trim().min(1, t("organization.validation.keyRequired")),
       }),
     [t]

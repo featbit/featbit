@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react"
+import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
 import { describe, expect, it, vi } from "vitest"
 import "@/lib/i18n/i18n"
@@ -35,6 +35,20 @@ function renderSheet() {
 }
 
 describe("SegmentSheet", () => {
+  it("generates the shared slug and preserves a manually entered key", async () => {
+    renderSheet()
+
+    const nameInput = screen.getByLabelText("Name")
+    const keyInput = screen.getByLabelText("Key")
+
+    fireEvent.change(nameInput, { target: { value: "Checkout__Users.v2:!" } })
+    await waitFor(() => expect(keyInput).toHaveValue("checkout-usersv2"))
+
+    fireEvent.change(keyInput, { target: { value: "checkout_custom.v2" } })
+    fireEvent.change(nameInput, { target: { value: "Updated checkout" } })
+    await waitFor(() => expect(keyInput).toHaveValue("checkout_custom.v2"))
+  })
+
   it("replaces the unavailable Shareable form with a recoverable license gate", () => {
     renderSheet()
 

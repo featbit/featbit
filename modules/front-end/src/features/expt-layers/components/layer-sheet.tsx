@@ -29,8 +29,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { slugify } from "@/lib/slugify"
 import type { Layer, LayerPayload } from "../layers-types"
-import { slugifyLayerKey } from "../layers-utils"
 
 const schema = z.object({
   name: z
@@ -80,7 +80,7 @@ export function LayerSheet({
 
   useEffect(() => {
     if (!keyManuallyEdited) {
-      form.setValue("key", slugifyLayerKey(name), {
+      form.setValue("key", slugify(name), {
         shouldDirty: nameInteracted,
         shouldValidate: nameInteracted,
       })

@@ -32,6 +32,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { Textarea } from "@/components/ui/textarea"
+import { slugify } from "@/lib/slugify"
 import type {
   Metric,
   MetricAggregation,
@@ -39,7 +40,6 @@ import type {
   MetricType,
   MetricUpdatePayload,
 } from "../metrics-types"
-import { normalizeMetricKey } from "../metrics-utils"
 
 const schema = z.object({
   name: z
@@ -113,7 +113,7 @@ export function MetricSheet({
 
   useEffect(() => {
     if (!keyManuallyEdited) {
-      form.setValue("key", normalizeMetricKey(name), {
+      form.setValue("key", slugify(name), {
         shouldDirty: nameInteracted,
         shouldValidate: nameInteracted,
       })

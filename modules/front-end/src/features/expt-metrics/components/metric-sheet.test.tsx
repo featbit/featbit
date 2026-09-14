@@ -51,7 +51,14 @@ describe("MetricSheet", () => {
     expect(keyInput).not.toHaveAttribute("readonly")
 
     fireEvent.change(nameInput, { target: { value: "Revenue / User" } })
-    await waitFor(() => expect(keyInput).toHaveValue("revenue_user"))
+    await waitFor(() => expect(keyInput).toHaveValue("revenue-user"))
+
+    fireEvent.change(nameInput, { target: { value: "Revenue__Per.User:V2!" } })
+    await waitFor(() => expect(keyInput).toHaveValue("revenue-peruserv2"))
+
+    fireEvent.change(keyInput, { target: { value: "revenue_custom.v2:sum" } })
+    fireEvent.change(nameInput, { target: { value: "Updated revenue" } })
+    await waitFor(() => expect(keyInput).toHaveValue("revenue_custom.v2:sum"))
   })
 
   it("keeps the key read-only and omits it from edit submissions", async () => {
