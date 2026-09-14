@@ -7,7 +7,6 @@ export type ExperimentListItem = {
   description: string | null
   stage: ExperimentStage
   flagKey: string | null
-  projectKey: string | null
   envId: string | null
   runCount: number
   runMethodSummary: string | null
@@ -39,5 +38,4 @@ export type ExperimentListSummary = ExperimentListItem & {
 export type CreateExperimentPayload = {
   name: string
   description: string | null
-  projectKey: string
 }

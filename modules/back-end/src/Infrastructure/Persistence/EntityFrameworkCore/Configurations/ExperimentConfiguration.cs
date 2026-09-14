@@ -15,7 +15,6 @@ public class ExperimentConfiguration : IEntityTypeConfiguration<Experiment>
         builder.Property(x => x.Name).HasMaxLength(256).IsRequired();
         builder.Property(x => x.Stage).HasMaxLength(64).IsRequired();
         builder.Property(x => x.FlagKey).HasMaxLength(256);
-        builder.Property(x => x.ProjectKey).HasColumnName("project_key").HasMaxLength(256);
         builder.Property(x => x.EnvId).HasColumnName("env_id");
         builder.Property(x => x.SandboxStatus).HasMaxLength(64);
         builder.Property(x => x.EntryMode).HasMaxLength(64);
