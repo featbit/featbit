@@ -241,15 +241,13 @@ export function AuthenticatedLayout() {
             queryClient.invalidateQueries({
               queryKey: authContextQueryKeys.projects(userId, organizationId),
             }),
-            // Refetch cached flag and segment settings after project changes,
-            // even when their pages are not currently mounted.
+            // Invalidate cached flag and segment settings after project changes;
+            // inactive queries will refetch when their pages mount again.
             queryClient.invalidateQueries({
               queryKey: ["feature-flag-environment-settings"],
-              refetchType: "all",
             }),
             queryClient.invalidateQueries({
               queryKey: ["segment-environment-settings"],
-              refetchType: "all",
             }),
           ])
           const loadedProjects = await queryClient.fetchQuery(
