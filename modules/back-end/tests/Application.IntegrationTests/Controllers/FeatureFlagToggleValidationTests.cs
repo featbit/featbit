@@ -23,6 +23,57 @@ public class FeatureFlagToggleValidationTests(TestApp app)
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
     [Theory]
+    [InlineData(true, null)]
+    [InlineData(false, null)]
+    [InlineData(true, "{}")]
+    [InlineData(false, "{}")]
+    [InlineData(true, "{\"comment\":\" \\t\\n \"}")]
+    [InlineData(false, "{\"comment\":\" \\t\\n \"}")]
+    public async Task Toggle_SameStatusWithoutComment_ReturnsExistingRevisionWithoutSideEffects(
+        bool enabled, string? body)
+    {
+        var environment = new Environment(Guid.NewGuid(), "Production", "production",
+            settings: new EnvironmentSettings { RequireChangeComment = true });
+        var flag = new FeatureFlag
+        {
+            Id = Guid.NewGuid(),
+            EnvId = environment.Id,
+            Key = "checkout",
+            IsEnabled = enabled,
+            Revision = Guid.NewGuid()
+        };
+        var originalRevision = flag.Revision;
+        var flagService = new Mock<IFeatureFlagService>();
+        flagService.Setup(x => x.GetAsync(environment.Id, flag.Key)).ReturnsAsync(flag);
+        var environmentService = new Mock<IEnvironmentService>();
+        environmentService.Setup(x => x.GetAsync(environment.Id)).ReturnsAsync(environment);
+        var publisher = new Mock<IPublisher>();
+
+        using var factory = app.WithServices(services =>
+        {
+            services.Replace(ServiceDescriptor.Singleton(flagService.Object));
+            services.Replace(ServiceDescriptor.Singleton(environmentService.Object));
+            services.Replace(ServiceDescriptor.Singleton(publisher.Object));
+        });
+        using var client = await app.CreateAuthenticatedClientAsync(factory);
+        using var content = body == null ? null : new StringContent(body, Encoding.UTF8, "application/json");
+
+        var response = await client.PutAsync(
+            $"/api/v1/envs/{environment.Id}/feature-flags/{flag.Key}/toggle/{enabled}", content);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var result = await response.Content.ReadFromJsonAsync<ApiResponse<Guid>>(JsonOptions);
+        Assert.NotNull(result);
+        Assert.True(result.Success);
+        Assert.Equal(originalRevision, result.Data);
+        Assert.Equal(originalRevision, flag.Revision);
+        Assert.Equal(enabled, flag.IsEnabled);
+        environmentService.Verify(x => x.GetAsync(It.IsAny<Guid>()), Times.Never);
+        flagService.Verify(x => x.UpdateAsync(It.IsAny<FeatureFlag>()), Times.Never);
+        publisher.Verify(x => x.Publish(It.IsAny<OnFeatureFlagChanged>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Theory]
     [InlineData(true, false, null, false)]
     [InlineData(true, true, null, false)]
     [InlineData(true, false, "{}", false)]

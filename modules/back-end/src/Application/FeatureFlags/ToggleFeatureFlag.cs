@@ -37,6 +37,11 @@ public class ToggleFeatureFlagHandler : IRequestHandler<ToggleFeatureFlag, Guid>
     public async Task<Guid> Handle(ToggleFeatureFlag request, CancellationToken cancellationToken)
     {
         var flag = await _service.GetAsync(request.EnvId, request.Key);
+        if (flag.IsEnabled == request.Status)
+        {
+            return flag.Revision;
+        }
+
         if (string.IsNullOrWhiteSpace(request.Comment))
         {
             var environment = await _environmentService.GetAsync(request.EnvId);
@@ -49,11 +54,6 @@ public class ToggleFeatureFlagHandler : IRequestHandler<ToggleFeatureFlag, Guid>
                     }
                 ]);
             }
-        }
-
-        if (flag.IsEnabled == request.Status)
-        {
-            return flag.Revision;
         }
 
         var dataChange = flag.Toggle(_currentUser.Id, request.Status);
