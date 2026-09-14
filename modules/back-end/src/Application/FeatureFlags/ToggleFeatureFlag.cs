@@ -1,8 +1,6 @@
 using Application.AuditLogs;
-using Application.Bases;
 using Application.Users;
 using Domain.AuditLogs;
-using FluentValidation.Results;
 
 namespace Application.FeatureFlags;
 
@@ -18,18 +16,15 @@ public class ToggleFeatureFlag : ResourceChangeRequest, IRequest<Guid>
 public class ToggleFeatureFlagHandler : IRequestHandler<ToggleFeatureFlag, Guid>
 {
     private readonly IFeatureFlagService _service;
-    private readonly IEnvironmentService _environmentService;
     private readonly ICurrentUser _currentUser;
     private readonly IPublisher _publisher;
 
     public ToggleFeatureFlagHandler(
         IFeatureFlagService service,
-        IEnvironmentService environmentService,
         ICurrentUser currentUser,
         IPublisher publisher)
     {
         _service = service;
-        _environmentService = environmentService;
         _currentUser = currentUser;
         _publisher = publisher;
     }
@@ -40,20 +35,6 @@ public class ToggleFeatureFlagHandler : IRequestHandler<ToggleFeatureFlag, Guid>
         if (flag.IsEnabled == request.Status)
         {
             return flag.Revision;
-        }
-
-        if (string.IsNullOrWhiteSpace(request.Comment))
-        {
-            var environment = await _environmentService.GetAsync(request.EnvId);
-            if (environment.Settings?.RequireChangeComment == true)
-            {
-                throw new ValidationException([
-                    new ValidationFailure(nameof(request.Comment), "A change comment is required.")
-                    {
-                        ErrorCode = ErrorCodes.Required("comment")
-                    }
-                ]);
-            }
         }
 
         var dataChange = flag.Toggle(_currentUser.Id, request.Status);
