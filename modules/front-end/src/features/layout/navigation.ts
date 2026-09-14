@@ -4,6 +4,7 @@ import {
   Building2,
   Flag,
   FlaskConical,
+  GalleryVerticalEnd,
   GitPullRequest,
   KeyRound,
   Layers3,
@@ -65,7 +66,7 @@ export const navigationGroups: NavGroup[] = [
     ],
   },
   {
-    labelKey: "layout.nav.groups.experimentation",
+    labelKey: "layout.nav.groups.releaseDecision",
     items: [
       {
         labelKey: "layout.nav.items.experiments",
@@ -76,6 +77,11 @@ export const navigationGroups: NavGroup[] = [
         labelKey: "layout.nav.items.metrics",
         href: "/metrics",
         icon: BarChart3,
+      },
+      {
+        labelKey: "layout.nav.items.layers",
+        href: "/layers",
+        icon: GalleryVerticalEnd,
       },
     ],
   },

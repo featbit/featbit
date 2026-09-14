@@ -129,13 +129,15 @@ export function FlagsPage() {
   )
 
   useEffect(() => {
+    if (search.trim() === debouncedSearch) return
+
     const timeout = window.setTimeout(() => {
       const value = search.trim()
       setDebouncedSearch(value)
       updateParams({ name: value || null }, true)
     }, 350)
     return () => window.clearTimeout(timeout)
-  }, [search, updateParams])
+  }, [search, debouncedSearch, updateParams])
 
   const listQuery = useQuery({
     queryKey: [

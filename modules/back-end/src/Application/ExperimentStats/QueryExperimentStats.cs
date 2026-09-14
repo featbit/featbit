@@ -31,7 +31,7 @@ public class QueryExperimentStats : IRequest<ExperimentStatsVm>
 
 public class QueryExperimentStatsValidator : AbstractValidator<QueryExperimentStats>
 {
-    private static readonly string[] MetricTypes = ["binary", "continuous"];
+    private static readonly string[] MetricTypes = ["binary", "numeric"];
     private static readonly string[] MetricAggs = ["once", "count", "sum", "average"];
 
     public QueryExperimentStatsValidator()

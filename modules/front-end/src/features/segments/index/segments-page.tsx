@@ -94,12 +94,14 @@ export function SegmentsPage() {
   )
 
   useEffect(() => {
+    if (search.trim() === debouncedSearch) return
+
     const timeout = window.setTimeout(() => {
       setDebouncedSearch(search.trim())
       setPageIndex(1)
     }, 400)
     return () => window.clearTimeout(timeout)
-  }, [search])
+  }, [search, debouncedSearch])
 
   const permissionsQuery = useQuery({
     ...currentUserPoliciesQueryOptions<UserPolicy>(organization?.id ?? ""),

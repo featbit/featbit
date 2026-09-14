@@ -11,7 +11,6 @@ public class ExperimentExposureEventConfiguration : IEntityTypeConfiguration<Exp
         builder.ToTable("experiment_exposure_events");
 
         builder.HasIndex(x => new { x.EnvId, x.FlagKey, x.ExposedAt });
-        builder.HasIndex(x => new { x.EnvId, x.UserKey, x.ExposedAt });
 
         builder.Property(x => x.EnvId).HasColumnName("env_id");
         builder.Property(x => x.FlagKey).HasColumnName("flag_key").HasMaxLength(256).IsRequired();

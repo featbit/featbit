@@ -1,4 +1,3 @@
-import { getCurrentProjectEnv } from "@/features/layout/layout-context"
 import { fetchApi } from "@/lib/api/authenticated-api"
 
 export type CustomizedProperty = {
@@ -16,23 +15,6 @@ export type GlobalUser = {
 export type PagedResult<T> = {
   totalCount: number
   items: T[]
-}
-
-export type EndUserFlag = {
-  name: string
-  key: string
-  variationType: string
-  variations: { id?: string; name?: string; value: string }[]
-  matchVariation: string
-  matchReason: string
-}
-
-export type EndUserSegment = {
-  id: string
-  name: string
-  type: string
-  scopes: string[]
-  updatedAt: string
 }
 
 function queryString(params: Record<string, string | number | undefined>) {
@@ -73,33 +55,4 @@ export async function uploadGlobalUsers(file: File) {
     method: "POST",
     body: formData,
   })
-}
-
-export async function fetchEndUserFlags(
-  userId: string,
-  params: { searchText: string; pageIndex: number; pageSize: number }
-) {
-  const envId = getCurrentProjectEnv()?.envId
-  if (!envId) {
-    return { totalCount: 0, items: [] }
-  }
-
-  return fetchApi<PagedResult<EndUserFlag>>(
-    `/api/v1/envs/${envId}/end-users/${userId}/flags${queryString({
-      name: params.searchText,
-      pageIndex: params.pageIndex,
-      pageSize: params.pageSize,
-    })}`
-  )
-}
-
-export async function fetchEndUserSegments(userId: string) {
-  const envId = getCurrentProjectEnv()?.envId
-  if (!envId) {
-    return []
-  }
-
-  return fetchApi<EndUserSegment[]>(
-    `/api/v1/envs/${envId}/end-users/${userId}/segments`
-  )
 }
