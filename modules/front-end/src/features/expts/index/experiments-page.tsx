@@ -271,9 +271,6 @@ export function ExperimentsPage() {
             detailsHref={(id) =>
               localizedPath(lang, `/experiments/${encodeURIComponent(id)}`)
             }
-            onFlagFilter={(id) => {
-              updateParams({ flagId: id }, true)
-            }}
             onClearFilters={clearFilters}
             onCreate={() => setSheetOpen(true)}
           />

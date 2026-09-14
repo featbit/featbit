@@ -117,7 +117,7 @@ test("flag filtering sends an ID, restores its key after reload, and clears", as
     page.getByText("Second experiment", { exact: true })
   ).toBeVisible()
   await page
-    .getByRole("button", { name: "Feature flag key", exact: true })
+    .getByRole("button", { name: "Feature flag", exact: true })
     .click()
   const filtered = page.waitForResponse((response) => {
     const url = new URL(response.url())

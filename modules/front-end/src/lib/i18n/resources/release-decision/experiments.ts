@@ -3,7 +3,7 @@ export const enExperiments = {
   subtitle:
     "Run controlled experiments and turn evidence into release decisions.",
   nameFilter: "Filter by experiment name",
-  flagFilter: "Feature flag key",
+  flagFilter: "Feature flag",
   flagSearch: "Search by feature flag key",
   flagLoading: "Loading feature flags…",
   flagEmpty: "No feature flag keys found",
@@ -555,7 +555,7 @@ export const zhExperiments = {
   title: "实验",
   subtitle: "运行受控实验，将证据转化为发布决策。",
   nameFilter: "按实验名称筛选",
-  flagFilter: "功能标志键",
+  flagFilter: "功能标志",
   flagSearch: "按功能标志键搜索",
   flagLoading: "正在加载功能标志…",
   flagEmpty: "未找到功能标志键",

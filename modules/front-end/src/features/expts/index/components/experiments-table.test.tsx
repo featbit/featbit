@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react"
+import { render, screen } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
 import { describe, expect, it, vi } from "vitest"
 import "@/lib/i18n/i18n"
@@ -23,7 +23,6 @@ const experiment: ExperimentListRow = {
 
 describe("ExperimentsTable", () => {
   it("shows the approved experiment summary and only a Details action", () => {
-    const onFlagFilter = vi.fn()
     render(
       <MemoryRouter>
         <ExperimentsTable
@@ -32,7 +31,6 @@ describe("ExperimentsTable", () => {
           filtered={false}
           lang="en"
           detailsHref={(id) => `/en/experiments/${id}`}
-          onFlagFilter={onFlagFilter}
           onClearFilters={vi.fn()}
           onCreate={vi.fn()}
         />
@@ -53,12 +51,14 @@ describe("ExperimentsTable", () => {
     expect(screen.queryByText("Delete")).not.toBeInTheDocument()
     expect(screen.queryByText("Archive")).not.toBeInTheDocument()
 
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: /Checkout redesign\s*checkout-redesign/,
-      })
+    const flagLink = screen.getByRole("link", { name: "Checkout redesign" })
+    expect(flagLink).toHaveAttribute(
+      "href",
+      "/en/feature-flags/checkout-redesign/targeting"
     )
-    expect(onFlagFilter).toHaveBeenCalledWith("flag-1")
+    expect(flagLink).toHaveAttribute("target", "_blank")
+    expect(flagLink).toHaveAttribute("rel", "noopener noreferrer")
+    expect(screen.getByText("checkout-redesign").closest("a, button")).toBeNull()
   })
 
   it("shows unbound and no-run states without inventing a method", () => {
@@ -81,7 +81,6 @@ describe("ExperimentsTable", () => {
           filtered={false}
           lang="en"
           detailsHref={(id) => `/en/experiments/${id}`}
-          onFlagFilter={vi.fn()}
           onClearFilters={vi.fn()}
           onCreate={vi.fn()}
         />
@@ -109,7 +108,6 @@ describe("ExperimentsTable", () => {
             filtered={false}
             lang="en"
             detailsHref={(id) => `/en/experiments/${id}`}
-            onFlagFilter={vi.fn()}
             onClearFilters={vi.fn()}
             onCreate={vi.fn()}
           />

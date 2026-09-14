@@ -11,6 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { localizedPath } from "@/features/layout/layout-context"
 import type { Lang } from "@/features/layout/layout-types"
 import type { ExperimentListItem } from "../experiment-types"
 import {
@@ -28,7 +29,6 @@ type Props = {
   filtered: boolean
   lang: Lang
   detailsHref: (id: string) => string
-  onFlagFilter: (id: string) => void
   onClearFilters: () => void
   onCreate: () => void
 }
@@ -68,7 +68,6 @@ export function ExperimentsTable({
   filtered,
   lang,
   detailsHref,
-  onFlagFilter,
   onClearFilters,
   onCreate,
 }: Props) {
@@ -168,24 +167,26 @@ export function ExperimentsTable({
                 </TableCell>
                 <TableCell className="px-5 py-4">
                   {experiment.flagId && experiment.flagKey ? (
-                    <button
-                      type="button"
-                      className="group block max-w-full space-y-1 rounded text-left focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-                      onClick={() => onFlagFilter(experiment.flagId!)}
-                    >
-                      <span
-                        className="block truncate text-foreground underline-offset-4 group-hover:underline"
+                    <div className="min-w-0 space-y-1">
+                      <Link
+                        to={localizedPath(
+                          lang,
+                          `/feature-flags/${encodeURIComponent(experiment.flagKey)}/targeting`
+                        )}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block truncate rounded text-foreground underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                         title={experiment.flagName!}
                       >
                         {experiment.flagName}
-                      </span>
+                      </Link>
                       <span
                         className="block truncate text-muted-foreground"
                         title={experiment.flagKey}
                       >
                         {experiment.flagKey}
                       </span>
-                    </button>
+                    </div>
                   ) : (
                     <span className="text-muted-foreground">
                       {t("releaseDecision.experiments.notBound")}
