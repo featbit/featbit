@@ -11,7 +11,6 @@ public class ExperimentLayerConfiguration : IEntityTypeConfiguration<ExperimentL
         builder.ToTable("experiment_layers");
 
         builder.HasIndex(x => new { x.EnvId, x.Key }).IsUnique();
-        builder.HasIndex(x => new { x.EnvId, x.Status });
 
         builder.Property(x => x.EnvId).HasColumnName("env_id");
         builder.Property(x => x.Name).HasMaxLength(256).IsRequired();

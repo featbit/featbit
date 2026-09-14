@@ -11,8 +11,6 @@ public class ExperimentConfiguration : IEntityTypeConfiguration<Experiment>
         builder.ToTable("experiments");
 
         builder.HasIndex(x => new { x.EnvId, x.UpdatedAt });
-        builder.HasIndex(x => x.ProjectKey);
-        builder.HasIndex(x => x.FlagKey);
 
         builder.Property(x => x.Name).HasMaxLength(256).IsRequired();
         builder.Property(x => x.Stage).HasMaxLength(64).IsRequired();
