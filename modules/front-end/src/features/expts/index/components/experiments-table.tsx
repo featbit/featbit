@@ -170,11 +170,21 @@ export function ExperimentsTable({
                   {experiment.flagId && experiment.flagKey ? (
                     <button
                       type="button"
-                      className="inline-block max-w-full truncate rounded bg-muted px-2 py-0.5 align-middle font-mono text-xs text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-                      title={experiment.flagKey}
+                      className="group block max-w-full space-y-1 rounded text-left focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                       onClick={() => onFlagFilter(experiment.flagId!)}
                     >
-                      {experiment.flagKey}
+                      <span
+                        className="block truncate text-foreground underline-offset-4 group-hover:underline"
+                        title={experiment.flagName!}
+                      >
+                        {experiment.flagName}
+                      </span>
+                      <span
+                        className="block truncate text-muted-foreground"
+                        title={experiment.flagKey}
+                      >
+                        {experiment.flagKey}
+                      </span>
                     </button>
                   ) : (
                     <span className="text-muted-foreground">

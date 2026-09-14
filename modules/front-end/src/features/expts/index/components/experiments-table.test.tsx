@@ -13,7 +13,7 @@ const experiment: ExperimentListRow = {
   listState: { key: "measuring" },
   flagId: "flag-1",
   flagKey: "checkout-redesign",
-  flagName: null,
+  flagName: "Checkout redesign",
   envId: "env-1",
   runCount: 3,
   runMethodSummary: "Bayesian",
@@ -53,7 +53,11 @@ describe("ExperimentsTable", () => {
     expect(screen.queryByText("Delete")).not.toBeInTheDocument()
     expect(screen.queryByText("Archive")).not.toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole("button", { name: "checkout-redesign" }))
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /Checkout redesign\s*checkout-redesign/,
+      })
+    )
     expect(onFlagFilter).toHaveBeenCalledWith("flag-1")
   })
 
