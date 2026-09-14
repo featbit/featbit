@@ -28,8 +28,6 @@ public class ExperimentVm
 
     public string FlagKey { get; set; }
 
-    public string ProjectKey { get; set; }
-
     public Guid? EnvId { get; set; }
 
     public int RunCount { get; set; }

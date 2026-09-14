@@ -47,7 +47,6 @@ const experiment: ExperimentDetail = {
   description: null,
   stage: "measuring",
   flagKey: "checkout",
-  projectKey: "project-1",
   envId: "env-1",
   runCount: 1,
   hypothesis: null,

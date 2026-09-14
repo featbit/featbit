@@ -157,12 +157,11 @@ describe("experiments API", () => {
     ).rejects.toThrow("List unavailable")
   })
 
-  it("keeps creation limited to name, description, and project key", async () => {
+  it("creates in the selected environment with only name and description", async () => {
     vi.mocked(fetchApi).mockResolvedValue({ id: "experiment-1" })
     const payload = {
       name: "Checkout recommendation",
       description: null,
-      projectKey: "ecommerce",
     }
 
     await createExperiment("env-1", payload)
