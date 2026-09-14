@@ -1,6 +1,6 @@
 CREATE DATABASE IF NOT EXISTS featbit;
 
-CREATE TABLE IF NOT EXISTS featbit.release_decision_exposure_events
+CREATE TABLE IF NOT EXISTS featbit.experiment_exposure_events
 (
     id UUID,
     env_id UUID,
@@ -18,7 +18,7 @@ PARTITION BY (env_id, toYYYYMM(exposed_at))
 ORDER BY (env_id, flag_key, exposed_at, cityHash64(user_key))
 SETTINGS index_granularity = 8192;
 
-CREATE TABLE IF NOT EXISTS featbit.release_decision_metric_events
+CREATE TABLE IF NOT EXISTS featbit.experiment_metric_events
 (
     id UUID,
     env_id UUID,
@@ -54,11 +54,11 @@ SETTINGS
     kafka_num_consumers = 1,
     kafka_skip_broken_messages = 100;
 
-DROP VIEW IF EXISTS featbit.release_decision_exposure_events_mv;
-DROP VIEW IF EXISTS featbit.release_decision_metric_events_mv;
+DROP VIEW IF EXISTS featbit.experiment_exposure_events_mv;
+DROP VIEW IF EXISTS featbit.experiment_metric_events_mv;
 
-CREATE MATERIALIZED VIEW IF NOT EXISTS featbit.release_decision_exposure_events_mv
-TO featbit.release_decision_exposure_events
+CREATE MATERIALIZED VIEW IF NOT EXISTS featbit.experiment_exposure_events_mv
+TO featbit.experiment_exposure_events
 AS
 SELECT
     uuid AS id,
@@ -88,8 +88,8 @@ WHERE event = 'FlagValue'
   AND notEmpty(JSONExtractString(properties, 'userKeyId'))
   AND notEmpty(JSONExtractString(properties, 'variationId'));
 
-CREATE MATERIALIZED VIEW IF NOT EXISTS featbit.release_decision_metric_events_mv
-TO featbit.release_decision_metric_events
+CREATE MATERIALIZED VIEW IF NOT EXISTS featbit.experiment_metric_events_mv
+TO featbit.experiment_metric_events
 AS
 SELECT
     uuid AS id,
