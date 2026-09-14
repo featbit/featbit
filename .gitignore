@@ -30,6 +30,10 @@ benchmark/k6-scripts/test-results/
 .logs/
 *.log
 
+# .NET build outputs (including local tools and integration tests)
+[Bb]in/
+[Oo]bj/
+
 #Ignore IntelliJ IDEA files
 .idea/
 
@@ -54,6 +58,10 @@ e2e/control-plane/**/.quickstart-state-*.json
 
 # Temporary local experimentation data generator
 /tempo/expt-data-generation/
+/tempo/bandit-sdk-simulator/
+
+# Local experiment UI data runner configuration
+/integration-tests/experiment-e2e/ui-data-runner/config.local.json
 
 # otel-demo upstream source clone (fetched on demand by Build-OtelDemoImages.ps1)
 e2e/control-plane/01-Infrastructure/otel-demo/build/
