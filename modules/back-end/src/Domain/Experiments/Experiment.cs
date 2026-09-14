@@ -10,9 +10,9 @@ public class Experiment : AuditedEntity
 
     public string FlagKey { get; set; }
 
-    public string FeatBitProjectKey { get; set; }
+    public string ProjectKey { get; set; }
 
-    public Guid? FeatBitEnvId { get; set; }
+    public Guid? EnvId { get; set; }
 
     public string Hypothesis { get; set; }
 
@@ -49,6 +49,10 @@ public class Experiment : AuditedEntity
     public string ConflictAnalysis { get; set; }
 
     public string EntryMode { get; set; }
+
+    // Null marks legacy data whose run history has not been used to seed the counter yet.
+    // Only the database allocator updates this value; deleting a run never resets it.
+    public long? LastRunNumber { get; set; }
 
     public ICollection<ExperimentRun> ExperimentRuns { get; set; } = [];
 

@@ -29,5 +29,8 @@ internal static class PendingOpRetryPolicy
     /// Jittered backoff before the next attempt. <paramref name="attemptNumber"/> is 1-based (the
     /// retry about to be made), so the very first backoff is never a zero-length delay.
     /// </summary>
-    public static Task DelayAsync(int attemptNumber) => Task.Delay(Random.Shared.Next(10, 50) * attemptNumber);
+    public static Task DelayAsync(int attemptNumber) => Task.Delay(GetDelayMilliseconds(attemptNumber));
+
+    internal static int GetDelayMilliseconds(int attemptNumber)
+        => Random.Shared.Next(10, 50) * attemptNumber;
 }

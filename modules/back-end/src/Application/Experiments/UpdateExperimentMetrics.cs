@@ -35,7 +35,7 @@ public class UpdateExperimentMetrics : IRequest<ExperimentDetailVm>
 
 public class UpdateExperimentMetricsValidator : AbstractValidator<UpdateExperimentMetrics>
 {
-    private static readonly string[] MetricTypes = ["binary", "continuous", "numeric"];
+    private static readonly string[] MetricTypes = ["binary", "numeric"];
     private static readonly string[] MetricAggs = ["once", "count", "sum", "average"];
     private static readonly string[] ExpectedDirections = ["increase_good", "decrease_good"];
 

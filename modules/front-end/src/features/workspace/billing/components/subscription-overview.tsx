@@ -96,14 +96,27 @@ export function SubscriptionOverview({
               <h2 className="text-2xl font-semibold tracking-normal">
                 {t(plan.nameKey)}
               </h2>
-              <Badge
-                  variant="default"
-                  className="whitespace-nowrap"
-                >
+              <Badge variant="default" className="whitespace-nowrap">
                 {subscription?.billingCycle === "yearly"
                   ? t("workspace.billing.overview.yearlyBilling")
                   : t("workspace.billing.overview.monthlyBilling")}
               </Badge>
+              {subscription?.status === "payment_failed" ? (
+                <Badge
+                  variant="outline"
+                  className={
+                    subscription.retryPaymentState === "no_open_invoice"
+                      ? "bg-muted/30"
+                      : "border-destructive/30 bg-destructive/5 text-destructive"
+                  }
+                >
+                  {t(
+                    subscription.retryPaymentState === "no_open_invoice"
+                      ? "workspace.billing.paymentFailed.syncingTitle"
+                      : "workspace.billing.paymentFailed.title"
+                  )}
+                </Badge>
+              ) : null}
             </div>
             <div className="mt-2 flex items-end gap-1">
               <span className="text-2xl font-semibold">
@@ -129,7 +142,13 @@ export function SubscriptionOverview({
             ) : null}
           </div>
         </div>
-        <Button className="h-10 px-5" onClick={onManage}>
+        <Button
+          className="h-10 px-5"
+          variant={
+            subscription?.status === "payment_failed" ? "outline" : "default"
+          }
+          onClick={onManage}
+        >
           {t("workspace.billing.actions.manageSubscription")}
         </Button>
       </div>

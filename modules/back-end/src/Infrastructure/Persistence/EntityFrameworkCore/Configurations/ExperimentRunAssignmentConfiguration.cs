@@ -12,8 +12,6 @@ public class ExperimentRunAssignmentConfiguration : IEntityTypeConfiguration<Exp
 
         builder.HasIndex(x => new { x.RunId, x.AssignmentUnit }).IsUnique();
         builder.HasIndex(x => new { x.RunId, x.AllocationKey }).IsUnique();
-        builder.HasIndex(x => new { x.RunId, x.Role });
-        builder.HasIndex(x => new { x.RunId, x.AnalysisRole });
 
         builder.Property(x => x.RunId).HasColumnName("run_id");
         builder.Property(x => x.EnvId).HasColumnName("env_id");
