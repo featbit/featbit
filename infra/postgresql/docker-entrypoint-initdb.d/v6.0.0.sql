@@ -196,7 +196,6 @@ CREATE TABLE IF NOT EXISTS experiments
     description       text,
     stage             character varying(64)    NOT NULL,
     flag_key          character varying(256),
-    project_key       character varying(256),
     env_id            uuid,
     hypothesis        text,
     access_token      text,
