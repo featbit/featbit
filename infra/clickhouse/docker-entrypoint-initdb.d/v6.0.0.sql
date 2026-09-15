@@ -9,9 +9,9 @@ CREATE TABLE IF NOT EXISTS featbit.experiment_exposure_events
     user_name String,
     variation_id LowCardinality(String),
     variation_value String,
-    exposed_at DateTime64(6, 'UTC'),
+    exposed_at DateTime64(3, 'UTC'),
     properties String,
-    created_at DateTime64(6, 'UTC') DEFAULT now64(6)
+    created_at DateTime64(3, 'UTC') DEFAULT now64(3)
 )
 ENGINE = MergeTree
 PARTITION BY (env_id, toYYYYMM(exposed_at))
@@ -27,9 +27,9 @@ CREATE TABLE IF NOT EXISTS featbit.experiment_metric_events
     event_name LowCardinality(String),
     event_type LowCardinality(String),
     numeric_value Float64,
-    occurred_at DateTime64(6, 'UTC'),
+    occurred_at DateTime64(3, 'UTC'),
     properties String,
-    created_at DateTime64(6, 'UTC') DEFAULT now64(6)
+    created_at DateTime64(3, 'UTC') DEFAULT now64(3)
 )
 ENGINE = MergeTree
 PARTITION BY (env_id, toYYYYMM(occurred_at))
@@ -38,8 +38,8 @@ SETTINGS index_granularity = 8192;
 
 CREATE TABLE IF NOT EXISTS featbit.kafka_insight_events_queue
 (
+    schema_version UInt32,
     uuid UUID,
-    distinct_id String,
     env_id String,
     event String,
     properties String,
@@ -68,21 +68,22 @@ SELECT
     JSONExtractString(properties, 'userName') AS user_name,
     JSONExtractString(properties, 'variationId') AS variation_id,
     JSONExtractString(properties, 'variationValue') AS variation_value,
-    fromUnixTimestamp64Micro(timestamp, 'UTC') AS exposed_at,
+    fromUnixTimestamp64Milli(timestamp, 'UTC') AS exposed_at,
     properties,
-    now64(6) AS created_at
+    now64(3) AS created_at
 FROM
 (
     SELECT
         uuid,
-        distinct_id,
         env_id AS raw_env_id,
+        schema_version,
         event,
         properties,
         timestamp
     FROM featbit.kafka_insight_events_queue
 )
-WHERE event = 'FlagValue'
+WHERE schema_version = 2
+  AND event = 'FlagValue'
   AND toUUIDOrNull(raw_env_id) IS NOT NULL
   AND notEmpty(JSONExtractString(properties, 'featureFlagKey'))
   AND notEmpty(JSONExtractString(properties, 'userKeyId'))
@@ -96,24 +97,25 @@ SELECT
     assumeNotNull(toUUIDOrNull(raw_env_id)) AS env_id,
     JSONExtractString(JSONExtractRaw(properties, 'user'), 'keyId') AS user_key,
     JSONExtractString(JSONExtractRaw(properties, 'user'), 'name') AS user_name,
-    if(empty(JSONExtractString(properties, 'eventName')), distinct_id, JSONExtractString(properties, 'eventName')) AS event_name,
+    JSONExtractString(properties, 'eventName') AS event_name,
     event AS event_type,
     if(JSONHas(properties, 'numericValue'), JSONExtractFloat(properties, 'numericValue'), 0.0) AS numeric_value,
-    fromUnixTimestamp64Micro(timestamp, 'UTC') AS occurred_at,
+    fromUnixTimestamp64Milli(timestamp, 'UTC') AS occurred_at,
     properties,
-    now64(6) AS created_at
+    now64(3) AS created_at
 FROM
 (
     SELECT
         uuid,
-        distinct_id,
         env_id AS raw_env_id,
+        schema_version,
         event,
         properties,
         timestamp
     FROM featbit.kafka_insight_events_queue
 )
-WHERE event != 'FlagValue'
+WHERE schema_version = 2
+  AND event != 'FlagValue'
   AND toUUIDOrNull(raw_env_id) IS NOT NULL
   AND notEmpty(JSONExtractString(JSONExtractRaw(properties, 'user'), 'keyId'))
-  AND notEmpty(if(empty(JSONExtractString(properties, 'eventName')), distinct_id, JSONExtractString(properties, 'eventName')));
+  AND notEmpty(JSONExtractString(properties, 'eventName'));
