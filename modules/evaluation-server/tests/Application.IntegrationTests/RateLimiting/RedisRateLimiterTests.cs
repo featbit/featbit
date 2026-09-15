@@ -49,7 +49,7 @@ public class RedisRateLimiterTests
         var redisClient = new Mock<IRedisClient>();
         redisClient
             .Setup(x => x.GetDatabase())
-            .Throws(new RedisTimeoutException("redis timed out", CommandStatus.Unknown));
+            .Throws(new RedisTimeoutException(CommandFlags.None, "redis timed out", CommandStatus.Unknown));
 
         var options = new EffectiveOptions("Sdk", new RateLimitingOptions
         {
