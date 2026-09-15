@@ -24,6 +24,13 @@ public class InsightParser
         using var jsonDocument = JsonDocument.Parse(json);
         var root = jsonDocument.RootElement;
 
+        if (!root.TryGetProperty("schema_version", out var version) ||
+            version.ValueKind != JsonValueKind.Number ||
+            !version.TryGetInt32(out var schemaVersion) || schemaVersion != 2)
+        {
+            return null;
+        }
+
         var id = root.GetProperty("uuid").GetGuid();
         var envId = root.GetProperty("env_id").GetString();
         var eventName = root.GetProperty("event").GetString();
