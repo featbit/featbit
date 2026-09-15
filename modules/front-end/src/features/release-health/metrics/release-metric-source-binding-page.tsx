@@ -4,13 +4,7 @@ import { useNavigate, useParams } from "react-router-dom"
 import { DetailBackLink } from "@/components/detail-back-link"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import {
   fetchProjects,
   getCurrentProjectEnv,
@@ -98,47 +92,28 @@ export function ReleaseMetricSourceBindingPage() {
               </AlertDescription>
             </Alert>
           ) : null}
-          <div className="mb-4 grid gap-4 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardDescription>
+          <Card size="sm" className="mb-4">
+            <CardContent className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+              <div>
+                <p className="mb-1 text-xs text-muted-foreground">
                   {t("releaseHealth.metrics.sourceBinding.metric")}
-                </CardDescription>
-                <CardTitle>
-                  {metric.name}{" "}
+                </p>
+                <p className="flex flex-wrap items-center gap-2 font-medium">
+                  {metric.name}
                   <Badge variant="outline">v{metric.version}</Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="font-mono text-xs">{metric.key}</p>
-                <p className="mt-2 text-sm">
-                  {metricResultProfileLabel(t, metric)} ·{" "}
-                  {t("releaseHealth.resultContract.singleSeries")}
                 </p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardDescription>
-                  {t("releaseHealth.metrics.sourceBinding.environment")}
-                </CardDescription>
-                <CardTitle>{environment.name}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="font-mono text-xs">{environment.key}</p>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  {t(
-                    "releaseHealth.metrics.sourceBinding.environmentIsolation"
-                  )}
-                </p>
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+              <code className="text-xs break-all">{metric.key}</code>
+              <p className="text-xs text-muted-foreground">
+                {metricResultProfileLabel(t, metric)} ·{" "}
+                {t("releaseHealth.resultContract.singleSeries")}
+              </p>
+            </CardContent>
+          </Card>
           <LiveBindingEditor
             key={context.projectId + environment.id + metric.id}
             scope={{ projectId: context.projectId, envId: environment.id }}
             metric={metric}
-            environmentKey={environment.key ?? ""}
             environmentName={environment.name}
             onSaved={() => navigate(detailPath)}
             onCancel={() => navigate(detailPath)}

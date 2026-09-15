@@ -35,7 +35,6 @@ import {
   CardContent,
 } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { SourceConnectionSheet } from "../components/source-connection-sheet"
 import {
   AlertDialog,
   AlertDialogContent,
@@ -58,7 +57,6 @@ export function LiveBindingEditor(props: {
   metric: LiveMetric
   onSaved: () => void
   onCancel?: () => void
-  environmentKey?: string
   environmentName?: string
 }) {
   const { t } = useTranslation()
@@ -113,7 +111,6 @@ function BindingForm({
   connections,
   onSaved,
   onCancel,
-  environmentKey,
   environmentName,
 }: {
   scope: ReleaseHealthScope
@@ -122,14 +119,11 @@ function BindingForm({
   connections: PrometheusConnectionView[]
   onSaved: () => void
   onCancel?: () => void
-  environmentKey?: string
   environmentName?: string
 }) {
   const { t } = useTranslation()
   const [binding] = useState(latestBinding)
   const bindingChanged = binding?.revision !== latestBinding?.revision
-  const queryClient = useQueryClient()
-  const [connectionOpen, setConnectionOpen] = useState(false)
   const [discardOpen, setDiscardOpen] = useState(false)
   const [testing, setTesting] = useState(false)
   const form = useForm<Draft>({
@@ -241,16 +235,12 @@ function BindingForm({
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between gap-4">
-              <Badge variant="outline">Prometheus-compatible · v1</Badge>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setConnectionOpen(true)}
-              >
-                {t("releaseHealth.connections.add")}
-              </Button>
-            </div>
+            <Badge variant="outline">Prometheus-compatible · v1</Badge>
+            {!connections.length && (
+              <p className="text-sm text-muted-foreground">
+                {t("releaseHealth.metrics.sourceBinding.noConnections")}
+              </p>
+            )}
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="live-binding-connection">
@@ -258,6 +248,7 @@ function BindingForm({
                 </Label>
                 <Select
                   value={values.connectionId}
+                  disabled={!connections.length}
                   onValueChange={(value) =>
                     value &&
                     form.setValue("connectionId", value, { shouldDirty: true })
@@ -289,6 +280,7 @@ function BindingForm({
                   variant="outline"
                   disabled={
                     !values.connectionId ||
+                    !connections.length ||
                     testing ||
                     saving ||
                     form.formState.isSubmitting
@@ -457,25 +449,6 @@ function BindingForm({
           </CardContent>
         </Card>
       </form>
-      <SourceConnectionSheet
-        open={connectionOpen}
-        onOpenChange={setConnectionOpen}
-        environmentKey={environmentKey ?? ""}
-        environmentName={environmentName ?? ""}
-        liveScope={scope}
-        onSaved={(connection) => {
-          form.setValue("connectionId", connection.id, { shouldDirty: true })
-          setPreview(undefined)
-          void queryClient.invalidateQueries({
-            queryKey: [
-              "release-health",
-              scope.projectId,
-              scope.envId,
-              "connections",
-            ],
-          })
-        }}
-      />
       <AlertDialog open={discardOpen} onOpenChange={setDiscardOpen}>
         <AlertDialogContent role="alertdialog">
           <AlertDialogHeader>

@@ -497,6 +497,8 @@ export const enReleaseHealth = {
       connection: "Environment connection",
       createConnection: "Create connection",
       chooseConnection: "Choose a connection",
+      noConnections:
+        "No connections in this environment. Create one in Release Health → Connections, then return here.",
       providerStep: "Provider and connection",
       providerStepHelp:
         "Select a reusable connection that belongs to this environment and verify read-only access.",
@@ -1431,6 +1433,8 @@ export const zhReleaseHealth: typeof enReleaseHealth = {
       connection: "环境连接",
       createConnection: "创建 Connection",
       chooseConnection: "选择 Connection",
+      noConnections:
+        "当前环境暂无连接。请先到 Release Health → Connections 创建，再返回此页。",
       providerStep: "Provider 与 Connection",
       providerStepHelp:
         "选择一个属于当前环境的可复用 Connection，并验证只读访问。",

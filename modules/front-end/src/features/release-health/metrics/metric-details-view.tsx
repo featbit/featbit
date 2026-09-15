@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link, useParams } from "react-router-dom"
-import { Cable, Pencil, RefreshCw } from "lucide-react"
+import { Clock3, Pencil, RefreshCw } from "lucide-react"
 import { useQueryClient } from "@tanstack/react-query"
 import { DetailBackLink } from "@/components/detail-back-link"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -9,7 +9,6 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
@@ -30,16 +29,11 @@ import { localizedPath, resolveLang } from "@/features/layout/layout-context"
 import type { ProjectEnv } from "@/features/layout/layout-types"
 import type { LiveMetric } from "../release-health-api"
 import { DataStatusBadge } from "../components/status-badges"
+import { useMetricPermissions, useMetricReadings } from "./live-metric-data"
 import {
-  metricResultProfileLabel,
-  metricUnitLabel,
-  resultContractRange,
-} from "./metric-contract"
-import {
-  metricValue,
-  useMetricPermissions,
-  useMetricReadings,
-} from "./live-metric-data"
+  MetricDetailContract,
+  MetricDetailSource,
+} from "./metric-detail-metadata"
 import { MetricDetailEditor } from "./metric-detail-editor"
 import { MetricDetailTimeline } from "./metric-detail-timeline"
 import { MetricDetailTrend } from "./metric-detail-trend"
@@ -116,9 +110,6 @@ export function MetricDetailsView({
                   : Math.floor(seconds / 3600),
           }
         )
-  const intrinsic = resultContractRange(metric.resultContract.unit)
-  const minimum = metric.resultContract.constraints.minimum ?? intrinsic.minimum
-  const maximum = metric.resultContract.constraints.maximum ?? intrinsic.maximum
   const rangeOptions = [
     { value: "30m", label: "last30" },
     { value: "1h", label: "lastHour" },
@@ -143,327 +134,234 @@ export function MetricDetailsView({
   }
   const editButton = (mode: "basic" | "contract") => (
     <Button
-      variant="outline"
-      size="sm"
+      variant="ghost"
+      size="icon-sm"
+      aria-label={d(mode === "basic" ? "editBasic" : "editContract")}
       disabled={!canEdit}
-      title={!canEdit ? t("releaseHealth.live.createPermission") : undefined}
+      title={
+        !canEdit
+          ? t("releaseHealth.live.createPermission")
+          : d(mode === "basic" ? "editBasic" : "editContract")
+      }
       onClick={() => setEditor(mode)}
     >
       <Pencil />
-      {d(mode === "basic" ? "editBasic" : "editContract")}
     </Button>
   )
   return (
-    <div className="-m-5 min-h-[calc(100vh-3.5rem)] space-y-4 bg-background px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="-m-5 min-h-[calc(100vh-3.5rem)] space-y-5 bg-background px-4 py-5 sm:px-6 lg:px-8">
+      <header aria-label={d("basic")} className="space-y-3">
         <DetailBackLink to={localizedPath(lang, "/release-health/metrics")}>
           {t("releaseHealth.tabs.metrics")}
         </DetailBackLink>
-        <div className="flex items-center gap-2">
-          <Badge variant="outline">{d("shared")}</Badge>
-          <Badge variant="secondary">v{metric.version}</Badge>
-        </div>
-      </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>{d("basic")}</CardTitle>
-          <CardAction>{editButton("basic")}</CardAction>
-        </CardHeader>
-        <CardContent>
-          <dl className="grid gap-x-8 gap-y-4 sm:grid-cols-2 lg:grid-cols-[1.2fr_1fr_1.7fr_0.8fr]">
-            <Fact label={d("name")}>
-              <h1 className="text-lg font-semibold tracking-tight">
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0 space-y-2">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <h1 className="text-2xl font-semibold tracking-tight break-words">
                 {metric.name}
               </h1>
-            </Fact>
-            <Fact label={d("key")}>
-              <code className="text-sm break-all">{metric.key}</code>
-            </Fact>
-            <Fact label={d("description")}>{metric.description || "—"}</Fact>
-            <Fact label={d("category")}>
-              {metric.category
-                ? t(`releaseHealth.category.${metric.category}`)
-                : "—"}
-            </Fact>
-          </dl>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>{d("contract")}</CardTitle>
-          <CardAction>{editButton("contract")}</CardAction>
-        </CardHeader>
-        <CardContent className="space-y-5">
-          <dl className="grid gap-6 lg:grid-cols-[2fr_1fr_1fr]">
-            <Fact label={d("semantics")}>{metric.resultSemantics}</Fact>
-            <Fact label={d("kind")}>
-              {t(
-                `releaseHealth.resultContract.measurementKind.${metric.resultContract.measurementKind}`
-              )}
-            </Fact>
-            <Fact label={d("unit")}>
-              {metricUnitLabel(t, metric.resultContract.unit)}
-            </Fact>
-          </dl>
-          <div className="grid gap-5 border-t pt-4 lg:grid-cols-2">
-            <section>
-              <h3 className="mb-3 text-sm font-medium">{d("shape")}</h3>
-              <dl className="grid grid-cols-3 gap-4">
-                <Fact label={d("resultKind")}>{d("numericSeries")}</Fact>
-                <Fact label={d("cardinality")}>{d("single")}</Fact>
-                <Fact label={d("profile")}>
-                  {metricResultProfileLabel(t, metric)}
-                </Fact>
-              </dl>
-            </section>
-            <section>
-              <h3 className="mb-3 text-sm font-medium">{d("constraints")}</h3>
-              <dl className="grid grid-cols-3 gap-4">
-                <Fact label={d("minimum")}>{minimum}</Fact>
-                <Fact label={d("maximum")}>{maximum ?? "—"}</Fact>
-                <Fact label={d("digits")}>{metric.fractionDigits ?? 2}</Fact>
-              </dl>
-              <p className="mt-3 text-xs text-muted-foreground">
-                {d("constraintsHelp")}
-              </p>
-            </section>
-          </div>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>{d("source")}</CardTitle>
-          <CardDescription>
-            {t("releaseHealth.live.detail.sourceHelp", {
-              environment: context.envName,
-              version: metric.version,
-            })}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="px-0">
-          <MetricDetailTable
-            headings={[
-              t("releaseHealth.metrics.detail.environment"),
-              d("provider"),
-              d("connection"),
-              d("step"),
-              d("source"),
-            ]}
-            alignLast
-            rows={[
-              {
-                id: context.envId,
-                cells: [
-                  <div>
-                    <p className="font-medium">{context.envName}</p>
-                    <p className="font-mono text-xs text-muted-foreground">
-                      {context.envKey}
-                    </p>
-                  </div>,
-                  source?.providerType ?? "—",
-                  source?.connectionName ?? "—",
-                  source ? `${source.step} · ${d("onDemand")}` : "—",
-                  <Button
-                    nativeButton={false}
-                    variant={
-                      connected || reading.isError ? "outline" : "default"
-                    }
-                    size="sm"
-                    disabled={!canConfigure || reading.isPending}
-                    render={
-                      <Link
-                        to={localizedPath(
-                          lang,
-                          `/release-health/metrics/${encodeURIComponent(metric.key)}/source-bindings/${encodeURIComponent(context.envKey)}`
-                        )}
-                      />
-                    }
-                  >
-                    <Cable />
-                    {d(connected || reading.isError ? "manage" : "connect")}
-                  </Button>,
-                ],
-              },
-            ]}
-          />
-        </CardContent>
-      </Card>
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Card size="sm">
-          <CardHeader>
-            <CardDescription>{d("dataStatus")}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {reading.isPending ? (
-              <Badge variant="outline">{d("loading")}</Badge>
-            ) : !status || status === "not_connected" ? (
-              <Badge variant="outline">{d("notConnected")}</Badge>
-            ) : (
-              <DataStatusBadge status={status} />
-            )}
-            <p className="mt-2 text-xs text-muted-foreground">
-              {context.envName}
-            </p>
-          </CardContent>
-        </Card>
-        <Card size="sm">
-          <CardHeader>
-            <CardDescription>{d("latest")}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-semibold tabular-nums">
-              {sample ? metricValue(metric, sample.value) : "—"}
+              <Badge variant="secondary">v{metric.version}</Badge>
+              <Badge variant="outline" aria-label={d("category")}>
+                {metric.category
+                  ? t(`releaseHealth.category.${metric.category}`)
+                  : t("releaseHealth.metrics.uncategorized")}
+              </Badge>
             </div>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {reading.isError || status === "stale"
-                ? t("releaseHealth.live.lastSuccessful")
-                : d("latestSample")}
-            </p>
-          </CardContent>
-        </Card>
-        <Card size="sm">
-          <CardHeader>
-            <CardDescription>{d("freshness")}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div
-              className="text-2xl font-semibold tabular-nums"
-              title={
-                sample ? new Date(sample.timestamp).toLocaleString() : undefined
-              }
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+              <code aria-label={d("key")} className="break-all">
+                {metric.key}
+              </code>
+              <span aria-hidden="true">·</span>
+              <span>{d("shared")}</span>
+            </div>
+            <p
+              aria-label={d("description")}
+              className="max-w-4xl text-sm text-muted-foreground"
             >
-              {freshness}
-            </div>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {sample
-                ? new Date(sample.timestamp).toLocaleString()
-                : d("noSample")}
+              {metric.description || d("noDescription")}
             </p>
-          </CardContent>
-        </Card>
-      </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>{d("trend")}</CardTitle>
-          <CardDescription>
-            {t("releaseHealth.live.detail.trendHelp", {
-              environment: context.envName,
-            })}
-          </CardDescription>
-          <CardAction>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="icon-sm"
-                aria-label={d("refresh")}
-                onClick={() => {
-                  setNow(Date.now())
-                  void client.invalidateQueries({
-                    queryKey: [
-                      "release-health",
-                      context.projectId,
-                      context.envId,
-                    ],
-                  })
-                }}
-              >
-                <RefreshCw />
-              </Button>
-              <Select
-                value={range}
-                onValueChange={(value) => {
-                  if (value) {
-                    setRange(value as Range)
-                    setNow(Date.now())
-                  }
-                }}
-              >
-                <SelectTrigger className="w-44" aria-label={d("trend")}>
-                  <SelectValue>
-                    {d(rangeOptions.find((x) => x.value === range)!.label)}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {rangeOptions.map((x) => (
-                      <SelectItem key={x.value} value={x.value}>
-                        {d(x.label)}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-          </CardAction>
-        </CardHeader>
-        <CardContent className="space-y-5">
-          {range === "custom" && (
-            <div className="rounded-lg border p-4">
-              <div className="flex flex-wrap items-end gap-3">
-                <div className="space-y-1.5">
-                  <Label htmlFor="metric-range-from">{d("from")}</Label>
-                  <Input
-                    id="metric-range-from"
-                    type="datetime-local"
-                    value={draft.from}
-                    onChange={(event) =>
-                      setDraft({ ...draft, from: event.target.value })
-                    }
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="metric-range-to">{d("to")}</Label>
-                  <Input
-                    id="metric-range-to"
-                    type="datetime-local"
-                    value={draft.to}
-                    onChange={(event) =>
-                      setDraft({ ...draft, to: event.target.value })
-                    }
-                  />
-                </div>
-                <Button variant="outline" onClick={applyRange}>
-                  {d("apply")}
-                </Button>
+          </div>
+          {editButton("basic")}
+        </div>
+      </header>
+      <div className="grid items-start gap-5 xl:grid-cols-[320px_minmax(0,1fr)]">
+        <aside className="grid min-w-0 items-start gap-5">
+          <MetricDetailSource
+            metric={metric}
+            context={context}
+            source={source}
+            connected={connected}
+            pending={reading.isPending}
+            failed={reading.isError}
+            canConfigure={canConfigure}
+          />
+          <MetricDetailContract
+            metric={metric}
+            editAction={editButton("contract")}
+          />
+        </aside>
+        <div className="min-w-0 space-y-5">
+          <Card role="region" aria-labelledby="metric-trend-heading">
+            <CardHeader className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <CardTitle>
+                  <h2 id="metric-trend-heading">{d("trend")}</h2>
+                </CardTitle>
+                <Badge variant="secondary">{context.envName}</Badge>
               </div>
-              <p className="mt-2 text-xs text-muted-foreground">
-                {d("rangeHelp")}
-              </p>
-              {rangeError && (
-                <p role="alert" className="mt-2 text-sm text-destructive">
-                  {d("rangeInvalid")}
-                </p>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="icon-sm"
+                  aria-label={d("refresh")}
+                  onClick={() => {
+                    setNow(Date.now())
+                    void client.invalidateQueries({
+                      queryKey: [
+                        "release-health",
+                        context.projectId,
+                        context.envId,
+                      ],
+                    })
+                  }}
+                >
+                  <RefreshCw />
+                </Button>
+                <Select
+                  value={range}
+                  onValueChange={(value) => {
+                    if (value) {
+                      setRange(value as Range)
+                      setNow(Date.now())
+                    }
+                  }}
+                >
+                  <SelectTrigger className="w-44" aria-label={d("trend")}>
+                    <SelectValue>
+                      {d(rangeOptions.find((x) => x.value === range)!.label)}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {rangeOptions.map((x) => (
+                        <SelectItem key={x.value} value={x.value}>
+                          {d(x.label)}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {range === "custom" && (
+                <div className="rounded-lg border p-4">
+                  <div className="flex flex-wrap items-end gap-3">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="metric-range-from">{d("from")}</Label>
+                      <Input
+                        id="metric-range-from"
+                        type="datetime-local"
+                        value={draft.from}
+                        onChange={(event) =>
+                          setDraft({ ...draft, from: event.target.value })
+                        }
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="metric-range-to">{d("to")}</Label>
+                      <Input
+                        id="metric-range-to"
+                        type="datetime-local"
+                        value={draft.to}
+                        onChange={(event) =>
+                          setDraft({ ...draft, to: event.target.value })
+                        }
+                      />
+                    </div>
+                    <Button variant="outline" onClick={applyRange}>
+                      {d("apply")}
+                    </Button>
+                  </div>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    {d("rangeHelp")}
+                  </p>
+                  {rangeError && (
+                    <p role="alert" className="mt-2 text-sm text-destructive">
+                      {d("rangeInvalid")}
+                    </p>
+                  )}
+                </div>
               )}
-            </div>
-          )}
-          <p className="text-xs text-muted-foreground">
-            {t("releaseHealth.live.detail.timezone", {
-              timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-            })}
-          </p>
-          {trend.isPending ? (
-            <div className="flex h-64 items-center justify-center text-muted-foreground">
-              {d("loading")}
-            </div>
-          ) : trend.isError ? (
-            <Alert variant="destructive">
-              <AlertDescription>{d("queryFailed")}</AlertDescription>
-            </Alert>
-          ) : trend.data.status === "not_connected" ? (
-            <div className="flex h-64 items-center justify-center rounded-md bg-muted/25 text-sm text-muted-foreground">
-              {t("releaseHealth.live.detail.emptySource", {
-                version: metric.version,
-                environment: context.envName,
-              })}
-            </div>
-          ) : (
-            <MetricDetailTrend
-              metric={metric}
-              trend={trend.data}
-              from={from}
-              to={to}
-            />
-          )}
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-md bg-muted/40 px-3 py-2.5 text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="text-muted-foreground">
+                    {d("dataStatus")}
+                  </span>
+                  {reading.isPending ? (
+                    <Badge variant="outline">{d("loading")}</Badge>
+                  ) : !status || status === "not_connected" ? (
+                    <Badge variant="outline">{d("notConnected")}</Badge>
+                  ) : (
+                    <DataStatusBadge status={status} />
+                  )}
+                </div>
+                <div
+                  className="flex items-center gap-2"
+                  title={
+                    sample
+                      ? new Date(sample.timestamp).toLocaleString()
+                      : d("noSample")
+                  }
+                >
+                  <Clock3 className="size-3.5 text-muted-foreground" />
+                  <span className="text-muted-foreground">
+                    {d("freshness")}
+                  </span>
+                  <span className="font-medium tabular-nums">
+                    {sample ? freshness : d("noSample")}
+                  </span>
+                </div>
+              </div>
+              {trend.isPending ? (
+                <div className="flex h-64 items-center justify-center text-muted-foreground">
+                  {d("loading")}
+                </div>
+              ) : trend.isError ? (
+                <Alert variant="destructive">
+                  <AlertDescription>{d("queryFailed")}</AlertDescription>
+                </Alert>
+              ) : trend.data.status === "not_connected" ? (
+                <div className="flex h-64 items-center justify-center rounded-md bg-muted/25 text-sm text-muted-foreground">
+                  {t("releaseHealth.live.detail.emptySource", {
+                    version: metric.version,
+                    environment: context.envName,
+                  })}
+                </div>
+              ) : (
+                <MetricDetailTrend
+                  metric={metric}
+                  trend={trend.data}
+                  from={from}
+                  to={to}
+                />
+              )}
+              <div className="flex flex-wrap justify-between gap-2 text-[11px] text-muted-foreground">
+                <span>
+                  {trend.data && !trend.isError
+                    ? t("releaseHealth.live.detail.points", {
+                        count: trend.data.points.length,
+                      })
+                    : ""}
+                </span>
+                <span>
+                  {t("releaseHealth.live.detail.timezone", {
+                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                  })}
+                </span>
+              </div>
+            </CardContent>
+          </Card>
           <MetricDetailTimeline
             events={events}
             from={from}
@@ -471,8 +369,8 @@ export function MetricDetailsView({
             failed={eventsFailed}
             loading={eventsLoading}
           />
-        </CardContent>
-      </Card>
+        </div>
+      </div>
       <Card>
         <CardHeader>
           <CardTitle>{d("monitors")}</CardTitle>
@@ -548,21 +446,6 @@ export function MetricDetailsView({
           }}
         />
       )}
-    </div>
-  )
-}
-
-function Fact({
-  label,
-  children,
-}: {
-  label: string
-  children: React.ReactNode
-}) {
-  return (
-    <div className="min-w-0">
-      <dt className="text-xs text-muted-foreground">{label}</dt>
-      <dd className="mt-1.5 text-sm leading-6 break-words">{children}</dd>
     </div>
   )
 }

@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react"
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { MemoryRouter, Route, Routes } from "react-router-dom"
 import "@/lib/i18n/i18n"
@@ -190,11 +196,26 @@ describe("Release Health design pages", () => {
     expect(
       await screen.findByRole("heading", { name: "API P95 latency" })
     ).toBeVisible()
-    expect(screen.getByText("Basic information")).toBeVisible()
+    expect(
+      screen.getByRole("button", { name: "Edit basic information" })
+    ).toBeVisible()
     expect(screen.getByText("Result contract")).toBeVisible()
     expect(screen.getByText("Environment trend")).toBeVisible()
     expect(screen.getByText("Change timeline")).toBeVisible()
     expect(screen.getByText("Monitor bindings")).toBeVisible()
+    const trend = screen.getByRole("region", { name: "Environment trend" })
+    expect(within(trend).getByText("Data status")).toBeVisible()
+    expect(within(trend).getByText("Freshness")).toBeVisible()
+    expect(trend).not.toContainElement(
+      screen.getByRole("region", { name: "Change timeline" })
+    )
+    expect(
+      within(
+        screen.getByRole("region", { name: "Source binding" })
+      ).queryByRole("table")
+    ).not.toBeInTheDocument()
+    expect(screen.queryByText("Latest value")).not.toBeInTheDocument()
+    expect(screen.queryByText("Last value in range")).not.toBeInTheDocument()
     expect(screen.queryByText("Staging")).not.toBeInTheDocument()
     expect(screen.queryByText("Version history")).not.toBeInTheDocument()
     expect(
