@@ -15,5 +15,5 @@ public class GetFeatureFlagByIdHandler(IFeatureFlagService service)
 {
     public async Task<FeatureFlag> Handle(GetFeatureFlagById request, CancellationToken cancellationToken) =>
         await service.FindOneAsync(flag => flag.EnvId == request.EnvId && flag.Id == request.Id)
-        ?? throw new EntityNotFoundException(nameof(FeatureFlag), $"{request.EnvId}-{request.Id}");
+        ?? throw new EntityNotFoundException(nameof(FeatureFlag), $"{request.Id}");
 }

@@ -262,9 +262,6 @@ CREATE INDEX IF NOT EXISTS ix_experiment_exposure_events_env_id_flag_key_exposed
 CREATE INDEX IF NOT EXISTS ix_experiment_metric_events_env_id_event_name_occurred_at
     ON experiment_metric_events (env_id, event_name, occurred_at);
 
-CREATE INDEX IF NOT EXISTS ix_experiments_env_id_flag_id
-    ON experiments (env_id, flag_id);
-
 CREATE INDEX IF NOT EXISTS ix_experiments_env_id_updated_at
     ON experiments (env_id, updated_at);
 CREATE UNIQUE INDEX IF NOT EXISTS ix_experiment_metrics_env_id_key
