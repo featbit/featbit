@@ -35,7 +35,7 @@ public class ExperimentMcpTools(
     public async Task<ExperimentDetailVm> UpdateExperiment(
         [Description("Experiment experiment id.")]
         Guid experimentId,
-        [Description("Partial experiment update. Bind a feature flag using flagId from a Feature Flag read or create response. The flag must belong to the experiment environment. Leave fields null when they should not change.")]
+        [Description("Partial experiment update. The flag must belong to the experiment environment. Leave fields null when they should not change.")]
         ExperimentUpdate update)
     {
         var envId = await ResolveAuthorizedEnvIdAsync(experimentId);

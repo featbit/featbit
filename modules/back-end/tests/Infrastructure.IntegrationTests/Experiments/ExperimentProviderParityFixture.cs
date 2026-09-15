@@ -9,7 +9,6 @@ using Infrastructure.IntegrationTests.Fixtures;
 using Infrastructure.OLAP.ClickHouse;
 using Infrastructure.Persistence.EntityFrameworkCore;
 using Infrastructure.Persistence.MongoDb;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Npgsql;
 using NpgsqlTypes;
@@ -32,7 +31,6 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
     public const string GuardrailEvent = "checkout_error";
 
     private readonly ConcurrentDictionary<string, Lazy<Task>> _seedTasks = new();
-    private NpgsqlDataSource _experimentDataSource = null!;
 
     private readonly IContainer _postgres = new ContainerBuilder("postgres:15.10")
         .WithEnvironment("POSTGRES_USER", "postgres")
@@ -65,16 +63,11 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
         );
 
         await InitializePostgresAsync();
-        _experimentDataSource = new NpgsqlDataSourceBuilder(PostgresConnectionString)
-            .EnableDynamicJson()
-            .ConfigureJsonOptions(Domain.Utils.ReusableJsonSerializerOptions.Web)
-            .Build();
         await InitializeClickHouseAsync();
     }
 
     public async Task DisposeAsync()
     {
-        if (_experimentDataSource is not null) await _experimentDataSource.DisposeAsync();
         await Task.WhenAll(
             _postgres.DisposeAsync().AsTask(),
             _mongo.DisposeAsync().AsTask(),
@@ -329,16 +322,7 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
         _ => throw new ArgumentOutOfRangeException(nameof(provider), provider, null)
     };
 
-    internal AppDbContext CreateDbContext()
-    {
-        var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseNpgsql(_experimentDataSource, options => options.EnableRetryOnFailure())
-            .UseSnakeCaseNamingConvention()
-            .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
-            .Options;
-
-        return new AppDbContext(options);
-    }
+    internal AppDbContext CreateDbContext() => AppDbContextFactory.Create(PostgresConnectionString);
 
     private MongoDbClient CreateMongoDbClient()
     {
