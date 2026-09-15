@@ -9,7 +9,7 @@ using Environment = Domain.Environments.Environment;
 
 namespace Infrastructure.Services.EntityFrameworkCore;
 
-public class EnvironmentService(AppDbContext dbContext, ILogger<EnvironmentService> logger)
+public partial class EnvironmentService(AppDbContext dbContext, ILogger<EnvironmentService> logger)
     : EntityFrameworkCoreService<Environment>(dbContext), IEnvironmentService
 {
     public async Task<string[]> GetServesAsync(string[] scopes)
@@ -151,10 +151,7 @@ public class EnvironmentService(AppDbContext dbContext, ILogger<EnvironmentServi
             }
             else
             {
-                logger.LogWarning(
-                    "Data inconsistency detected: Resource descriptor not found for environment with ID {EnvId}. Please verify the integrity of the environment data in the database.",
-                    env.Id
-                );
+                Log.ResourceDescriptorNotFound(logger, env.Id);
             }
         }
 

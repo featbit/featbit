@@ -1,3 +1,4 @@
+using System.Text;
 using Application.Insights;
 using Domain.Messages;
 
@@ -11,7 +12,9 @@ public class InsightMessageHandler(InsightsTracker insightsTracker) : IMessageHa
     {
         if (InsightParser.TryParse(message, out var insight))
         {
-            await insightsTracker.RecordAsync(insight!);
+            // The serialized payload is already in hand here, so its size costs a byte count rather
+            // than a second serialization. This is the only insights enqueue path.
+            await insightsTracker.RecordAsync(insight!, Encoding.UTF8.GetByteCount(message));
         }
     }
 }

@@ -6,12 +6,16 @@ on:
       - main
     paths:
       - 'modules/control-plane/**'
+      - 'modules/back-end/**'
+      - 'modules/shared/**'
       - '.github/build-and-test-control-plane.yml'
   pull_request:
     branches:
       - main
     paths:
       - 'modules/control-plane/**'
+      - 'modules/back-end/**'
+      - 'modules/shared/**'
       - '.github/build-and-test-control-plane.yml'
 
 jobs:

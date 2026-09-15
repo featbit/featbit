@@ -58,3 +58,12 @@ e2e/control-plane/01-Infrastructure/otel-demo/build/
 # Automation test artifacts (scenario run outputs, timelines, assertion results)
 e2e/control-plane/artifacts/
 e2e/control-plane/01-Infrastructure/windows-hyperv/.quickstart-state-hyperv.json
+
+# .NET build output anywhere under modules/.
+# Each module also carries its own `dotnet new gitignore` template, but those only cover the
+# directory they sit in — so a NEW directory under modules/ (e.g. modules/shared/) silently has no
+# coverage at all and will happily commit bin/ and obj/. This rule is the safety net for that case.
+# Scoped to modules/ deliberately: an unscoped [Bb]in/ would also match unrelated directories
+# elsewhere in the repo.
+modules/**/[Bb]in/
+modules/**/[Oo]bj/

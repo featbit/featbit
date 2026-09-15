@@ -33,15 +33,17 @@ jobs:
             build-dir: modules/front-end
             file: ./Dockerfile
           - app: featbit-api-server
-            build-dir: modules/back-end
-            file: ./deploy/Dockerfile
+            # Every .NET module depends on the shared projects under modules/shared, so the
+            # build-dir must be modules for all three of them.
+            build-dir: modules/
+            file: ./back-end/deploy/Dockerfile
           - app: featbit-control-plane
             # Because the control-plane has dependencies on the back-end module, the build-dir will need to be modules.
             build-dir: modules/
             file: ./control-plane/deploy/Dockerfile
           - app: featbit-evaluation-server
-            build-dir: modules/evaluation-server
-            file: ./deploy/Dockerfile
+            build-dir: modules/
+            file: ./evaluation-server/deploy/Dockerfile
     steps:
       - name: Dump GitHub context (run if debug is true)
         if: ${{ github.event.inputs.debug == 'true' }}

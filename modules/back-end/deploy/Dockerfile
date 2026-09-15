@@ -6,26 +6,44 @@ FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG TARGETARCH
 WORKDIR /source
 
-# copy sln
-COPY *.slnx .
+# The build context is `modules/`, not `modules/back-end/`, because this module references the
+# shared observability projects under `modules/shared/`. The control-plane image has always built
+# this way for the same reason (it references back-end projects), so the pattern is not new here.
+#
+# Copy only project files first, for better Docker layer caching. Important: don't use wildcards
+# that flatten paths; copy into the actual project folders. The old flattening `mv` loop cannot be
+# used now that the context spans two module directories, because it would collide the shared
+# projects with the module's own.
+COPY back-end/*.slnx ./back-end/
 
-# copy src project files
-COPY src/*/*.csproj ./
-RUN for file in $(ls *.csproj); do mkdir -p src/${file%.*}/ && mv $file src/${file%.*}/; done
+COPY back-end/src/Api/Api.csproj ./back-end/src/Api/
+COPY back-end/src/Application/Application.csproj ./back-end/src/Application/
+COPY back-end/src/Domain/Domain.csproj ./back-end/src/Domain/
+COPY back-end/src/Infrastructure/Infrastructure.csproj ./back-end/src/Infrastructure/
 
-# copy test project files
-COPY tests/*/*.csproj ./
-RUN for file in $(ls *.csproj); do mkdir -p tests/${file%.*}/ && mv $file tests/${file%.*}/; done
+COPY back-end/tests/Api.UnitTests/Api.UnitTests.csproj ./back-end/tests/Api.UnitTests/
+COPY back-end/tests/Application.IntegrationTests/Application.IntegrationTests.csproj ./back-end/tests/Application.IntegrationTests/
+COPY back-end/tests/Application.UnitTests/Application.UnitTests.csproj ./back-end/tests/Application.UnitTests/
+COPY back-end/tests/Domain.UnitTests/Domain.UnitTests.csproj ./back-end/tests/Domain.UnitTests/
+COPY back-end/tests/Infrastructure.IntegrationTests/Infrastructure.IntegrationTests.csproj ./back-end/tests/Infrastructure.IntegrationTests/
+COPY back-end/tests/Infrastructure.UnitTests/Infrastructure.UnitTests.csproj ./back-end/tests/Infrastructure.UnitTests/
+COPY back-end/tests/TestBase/TestBase.csproj ./back-end/tests/TestBase/
 
-RUN dotnet restore -a $TARGETARCH
+COPY shared/Observability/Observability.csproj ./shared/Observability/
+COPY shared/Observability.AspNetCore/Observability.AspNetCore.csproj ./shared/Observability.AspNetCore/
+COPY shared/Observability.TestKit/Observability.TestKit.csproj ./shared/Observability.TestKit/
+COPY shared/Observability.Tests/Observability.Tests.csproj ./shared/Observability.Tests/
+
+RUN dotnet restore ./back-end/Backend.slnx -a $TARGETARCH
 
 # copy everything else
-COPY . .
+COPY back-end/. ./back-end/
+COPY shared/. ./shared/
 
 # publish stage
 FROM build AS publish
 ARG INSTALL_DIR
-WORKDIR /source/src/Api
+WORKDIR /source/back-end/src/Api
 RUN dotnet publish -a $TARGETARCH --no-restore -o $INSTALL_DIR
 
 # final stage/image
@@ -60,7 +78,7 @@ ENV VERSION=$VERSION
 
 WORKDIR $INSTALL_DIR
 COPY --from=publish $INSTALL_DIR ./
-COPY --from=build /source/start.sh ./start.sh
+COPY --from=build /source/back-end/start.sh ./start.sh
 RUN chmod +x ./start.sh
 EXPOSE 5000
 

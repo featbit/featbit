@@ -5,8 +5,10 @@ using Api.Authorization;
 using Api.Mcp;
 using Api.Swagger;
 using Application.Services;
+using Domain.Observability;
 using Domain.Workspaces;
 using Domain.Policies;
+using FeatBit.Observability.AspNetCore;
 using Infrastructure;
 using Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -22,6 +24,22 @@ public static class ServicesRegister
 {
     public static WebApplicationBuilder RegisterServices(this WebApplicationBuilder builder)
     {
+        // Observability: apply configured settings before anything can create a span or hash a
+        // credential, then register the propagation-only activity listener before anything can log,
+        // so that every record carries a trace id even with no exporter configured, and name the
+        // ingress activity source after this service (docs/observability/index.md §11).
+        ObservabilityConfiguration.Apply(builder.Configuration);
+        ActivityCorrelation.EnsureListener();
+        FeatBitActivitySources.ConfigureIngress(FeatBitActivitySources.Api);
+
+        // The API is the default, but configure it explicitly so the three hosts read identically
+        // and a copy/paste into another host cannot silently inherit the wrong prefix.
+        ServiceMeter.Configure(FeatBitMeters.Api, FeatBitInstruments.ApiPrefix);
+        MessagingMetrics.Configure(FeatBitMeters.Api, FeatBitInstruments.ApiPrefix);
+        PropagationMetrics.Configure(FeatBitMeters.Api, FeatBitInstruments.ApiPrefix);
+        InsightsMetrics.Configure(FeatBitMeters.Api, FeatBitInstruments.ApiPrefix);
+        RequestMetrics.Configure(FeatBitMeters.Api, FeatBitInstruments.ApiPrefix);
+
         // serilog
         builder.Services.AddSerilog((_, lc) => ConfigureSerilog.Configure(lc, builder.Configuration));
 
@@ -68,7 +86,9 @@ public static class ServicesRegister
         builder.Services.AddSwaggerExamplesFromAssemblyOf<Program>();
 
         // health check dependencies
-        builder.Services.AddHealthChecks().AddReadinessChecks(builder.Configuration);
+        builder.Services.AddHealthChecks()
+            .AddReadinessChecks(builder.Configuration)
+            .AddDiagnosticChecks(builder.Configuration);
 
         // add infrastructure & application services
         builder.Services.AddInfrastructureServices(builder.Configuration);
@@ -150,8 +170,10 @@ public static class ServicesRegister
         });
 
         // add OIDC & OAuth client
-        builder.Services.AddHttpClient<OidcClient>();
-        builder.Services.AddHttpClient<OAuthClient>();
+        builder.Services.AddHttpClient<OidcClient>()
+            .AddHttpMessageHandler(() => new DependencyMetricsHandler(DependencyNames.Oidc));
+        builder.Services.AddHttpClient<OAuthClient>()
+            .AddHttpMessageHandler(() => new DependencyMetricsHandler(DependencyNames.OAuth));
 
         // replace default authorization result handler
         var authorizationResultHandler =

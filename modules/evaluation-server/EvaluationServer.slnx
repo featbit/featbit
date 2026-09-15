@@ -4,6 +4,12 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
+  <Folder Name="/shared/">
+    <Project Path="../shared/Observability/Observability.csproj" />
+    <Project Path="../shared/Observability.AspNetCore/Observability.AspNetCore.csproj" />
+    <Project Path="../shared/Observability.TestKit/Observability.TestKit.csproj" />
+    <Project Path="../shared/Observability.Tests/Observability.Tests.csproj" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/Api/Api.csproj" />
     <Project Path="src/Domain/Domain.csproj" />

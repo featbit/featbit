@@ -1,12 +1,14 @@
 using Confluent.Kafka;
 using Domain.Messages;
 using Infrastructure.Caches.Redis;
+using Infrastructure.MQ.Backlog;
 using Infrastructure.MQ.Kafka;
 using Infrastructure.MQ.None;
 using Infrastructure.MQ.Postgres;
 using Infrastructure.MQ.Redis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 
@@ -53,13 +55,11 @@ public static class MqServiceCollectionExtensions
                 var redisClient = sp.GetRequiredService<IRedisClient>();
                 var logger = sp.GetRequiredService<ILogger<RedisMessageConsumer>>();
 
-                var topics = new[]
-                {
-                    Topics.EndUser, Topics.Insights, Topics.Usage, ControlPlaneTopics.ControlPlaneWebHooks
-                };
-
-                return new RedisMessageConsumer(redisClient, sp, logger, topics);
+                // Same list the producer routes on, so the two cannot drift apart.
+                return new RedisMessageConsumer(redisClient, sp, logger, RedisConsumerTopics.BackEnd);
             });
+
+            AddBacklogSampler(sp => new RedisBacklogProbe(sp.GetRequiredService<IRedisClient>()));
         }
 
         void AddKafka()
@@ -81,13 +81,14 @@ public static class MqServiceCollectionExtensions
                 var logger = sp.GetRequiredService<ILogger<KafkaMessageConsumer>>();
                 var provider = sp.GetRequiredService<IServiceProvider>();
 
-                var topics = new[]
-                {
-                    Topics.EndUser, Topics.Usage, ControlPlaneTopics.ControlPlaneWebHooks
-                };
-
-                return new KafkaMessageConsumer(cfg, provider, logger, topics);
+                return new KafkaMessageConsumer(cfg, provider, logger, KafkaConsumerTopics.All);
             });
+
+            // Shared with the consumer-group diagnostic health check, which registers the same
+            // singleton, so the endpoint and the backlog gauge read one broker connection.
+            services.TryAddSingleton<KafkaLagReader>();
+
+            AddBacklogSampler(sp => new KafkaBacklogProbe(sp.GetRequiredService<KafkaLagReader>()));
         }
 
         void AddPostgres()
@@ -97,17 +98,35 @@ public static class MqServiceCollectionExtensions
             services.AddSingleton<IMessageProducer, PostgresMessageProducer>();
             services.AddHostedService(sp =>
             {
-                var topics = new[]
-                {
-                    Topics.EndUser, Topics.Insights, Topics.Usage, ControlPlaneTopics.ControlPlaneWebHooks
-                };
-
                 var scopeFactory = sp.GetRequiredService<IServiceScopeFactory>();
                 var dataSource = sp.GetRequiredService<NpgsqlDataSource>();
                 var logger = sp.GetRequiredService<ILogger<PostgresMessageConsumer>>();
 
-                return new PostgresMessageConsumer(scopeFactory, dataSource, logger, topics);
+                // Same list the backlog probe counts, so a topic can never be drained without
+                // being watched.
+                return new PostgresMessageConsumer(
+                    scopeFactory, dataSource, logger, PostgresConsumerTopics.All);
             });
+
+            AddBacklogSampler(sp => new PostgresBacklogProbe(
+                sp.GetRequiredService<NpgsqlDataSource>(), PostgresConsumerTopics.All));
+        }
+
+        void AddBacklogSampler(Func<IServiceProvider, IBacklogProbe> probeFactory)
+        {
+            var interval = BacklogSamplerOptions.Resolve(configuration);
+            if (interval is null)
+            {
+                // Explicitly disabled. The gauges are never registered, so they report nothing
+                // rather than reporting a frozen "unknown" forever.
+                return;
+            }
+
+            services.AddSingleton(probeFactory);
+            services.AddHostedService(sp => new MessagingBacklogSampler(
+                sp.GetServices<IBacklogProbe>(),
+                sp.GetRequiredService<ILogger<MessagingBacklogSampler>>(),
+                interval));
         }
 
         void AddMessageHandlers()
