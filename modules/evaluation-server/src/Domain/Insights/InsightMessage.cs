@@ -8,6 +8,10 @@ namespace Domain.Insights;
 
 public class InsightMessage
 {
+    // Version 2 identifies the v6 insight message contract; legacy messages have no version.
+    [JsonPropertyName("schema_version")]
+    public int SchemaVersion => 2;
+
     [JsonPropertyName("uuid")]
     public string Uuid { get; private set; }
 

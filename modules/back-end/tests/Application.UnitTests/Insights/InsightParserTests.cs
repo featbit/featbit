@@ -42,11 +42,30 @@ public class InsightParserTests
         Assert.Null(actual);
     }
 
+    [Theory]
+    [InlineData(null)]
+    [InlineData("0")]
+    [InlineData("1")]
+    [InlineData("3")]
+    [InlineData("\"2\"")]
+    [InlineData("null")]
+    public void TryParse_UnsupportedSchemaVersion_ReturnsFalse(string? version)
+    {
+        var json = CreateEvent("FlagValue",
+            "{\"featureFlagKey\":\"flag-key\",\"userKeyId\":\"user-key\",\"variationId\":\"variation-id\"}");
+        json = json.Replace("\"schema_version\": 2,",
+            version == null ? "" : $"\"schema_version\": {version},");
+
+        Assert.False(InsightParser.TryParse(json, out var actual));
+        Assert.Null(actual);
+    }
+
     private static string CreateEvent(string eventType, string properties)
     {
         var escapedProperties = properties.Replace("\"", "\\\"");
         return $$"""
                  {
+                   "schema_version": 2,
                    "uuid": "11111111-1111-1111-1111-111111111111",
                    "env_id": "22222222-2222-2222-2222-222222222222",
                    "event": "{{eventType}}",
