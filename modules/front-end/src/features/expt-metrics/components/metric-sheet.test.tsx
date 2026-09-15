@@ -43,7 +43,7 @@ function renderSheet(currentMetric: Metric | null, onSubmit = vi.fn()) {
 }
 
 describe("MetricSheet", () => {
-  it("allows the key during creation and normalizes it from the name", async () => {
+  it("regenerates the key when the name changes after a manual key edit", async () => {
     renderSheet(null)
 
     const nameInput = screen.getByLabelText("Name *")
@@ -51,7 +51,19 @@ describe("MetricSheet", () => {
     expect(keyInput).not.toHaveAttribute("readonly")
 
     fireEvent.change(nameInput, { target: { value: "Revenue / User" } })
-    await waitFor(() => expect(keyInput).toHaveValue("revenue_user"))
+    await waitFor(() => expect(keyInput).toHaveValue("revenue-user"))
+
+    fireEvent.change(nameInput, { target: { value: "Revenue__Per.User:V2!" } })
+    await waitFor(() => expect(keyInput).toHaveValue("revenue-peruserv2"))
+
+    fireEvent.change(keyInput, { target: { value: "revenue_custom.v2:sum" } })
+    await waitFor(() => expect(keyInput).toHaveValue("revenue_custom.v2:sum"))
+
+    fireEvent.change(nameInput, { target: { value: "Updated revenue" } })
+    await waitFor(() => expect(keyInput).toHaveValue("updated-revenue"))
+
+    fireEvent.change(nameInput, { target: { value: "" } })
+    await waitFor(() => expect(keyInput).toHaveValue(""))
   })
 
   it("keeps the key read-only and omits it from edit submissions", async () => {
@@ -66,6 +78,7 @@ describe("MetricSheet", () => {
     fireEvent.change(screen.getByLabelText("Name *"), {
       target: { value: "Checkout completed" },
     })
+    await waitFor(() => expect(keyInput).toHaveValue("checkout_completed"))
     const form = keyInput.closest("form")
     expect(form).not.toBeNull()
     if (!form) throw new Error("Expected the edit form to be rendered")
