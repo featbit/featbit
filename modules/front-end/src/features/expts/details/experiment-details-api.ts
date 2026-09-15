@@ -50,12 +50,12 @@ export function advanceExperimentToExposure(
 export function updateExperimentFlag(
   envId: string,
   experimentId: string,
-  flagKey: string
+  flagId: string
 ) {
   return fetchApi<ExperimentDetail>(experimentPath(envId, experimentId), {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ flagKey }),
+    body: JSON.stringify({ flagId }),
   })
 }
 

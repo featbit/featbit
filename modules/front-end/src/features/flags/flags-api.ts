@@ -20,6 +20,17 @@ export function fetchFeatureFlag(envId: string, key: string) {
   return fetchApi<FeatureFlag>(`${flagsPath(envId)}/${encodeURIComponent(key)}`)
 }
 
+export function fetchFeatureFlagById(
+  envId: string,
+  id: string,
+  signal?: AbortSignal
+) {
+  return fetchApi<FeatureFlag>(
+    `${flagsPath(envId)}/by-id/${encodeURIComponent(id)}`,
+    { signal }
+  )
+}
+
 export function updateFeatureFlagGeneral(
   envId: string,
   key: string,

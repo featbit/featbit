@@ -29,7 +29,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { fetchFeatureFlag } from "@/features/flags/flags-api"
+import { fetchFeatureFlagById } from "@/features/flags/flags-api"
 import { localizedPath } from "@/features/layout/layout-context"
 import type { Lang } from "@/features/layout/layout-types"
 import {
@@ -198,14 +198,15 @@ export function ExposureDetails({
   const guardrails = parseGuardrails(experiment.guardrails)
 
   const flagQuery = useQuery({
-    queryKey: ["experiment-feature-flag", envId, experiment.flagKey],
-    queryFn: () => fetchFeatureFlag(envId, experiment.flagKey!),
-    enabled: Boolean(envId && experiment.flagKey),
+    queryKey: ["experiment-feature-flag", envId, experiment.flagId],
+    queryFn: ({ signal }) =>
+      fetchFeatureFlagById(envId, experiment.flagId!, signal),
+    enabled: Boolean(envId && experiment.flagId),
   })
 
   const flagMutation = useMutation({
-    mutationFn: (flagKey: string) =>
-      updateExperimentFlag(envId, experiment.id, flagKey),
+    mutationFn: (flagId: string) =>
+      updateExperimentFlag(envId, experiment.id, flagId),
     onSuccess: (updated) => {
       queryClient.setQueryData(detailQueryKey, updated)
       setFlagSheetOpen(false)
@@ -238,7 +239,7 @@ export function ExposureDetails({
     },
   })
 
-  const ready = Boolean(experiment.flagKey && primary)
+  const ready = Boolean(experiment.flagId && experiment.flagKey && primary)
   const metrics = primary ? [primary, ...guardrails] : []
 
   return (
@@ -518,12 +519,12 @@ export function ExposureDetails({
         <FeatureFlagSheet
           open
           envId={envId}
-          currentFlagKey={experiment.flagKey}
+          currentFlagId={experiment.flagId}
           saving={flagMutation.isPending}
           saveError={flagMutation.isError}
           onOpenChange={setFlagSheetOpen}
           onConfirm={(flag) =>
-            flagMutation.mutateAsync(flag.key).then(() => undefined)
+            flagMutation.mutateAsync(flag.id).then(() => undefined)
           }
         />
       ) : null}

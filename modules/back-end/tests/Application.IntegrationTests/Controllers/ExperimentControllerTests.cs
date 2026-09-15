@@ -41,6 +41,66 @@ public class ExperimentControllerTests
     }
 
     [Fact]
+    public async Task CreateUpdateAndFilter_UseFlagId_AndReturnResolvedDisplayFields()
+    {
+        var flagId = Guid.NewGuid();
+        var service = new Mock<IExperimentService>();
+        var detail = new ExperimentDetailVm
+        {
+            Id = ExperimentId, EnvId = TestWorkspace.Id, FlagId = flagId,
+            FlagKey = "checkout", FlagName = "Checkout flow"
+        };
+        service.Setup(x => x.CreateAsync(It.Is<Domain.Experiments.Experiment>(experiment =>
+                experiment.EnvId == TestWorkspace.Id && experiment.FlagId == flagId)))
+            .ReturnsAsync(detail);
+        service.Setup(x => x.UpdateAsync(TestWorkspace.Id, ExperimentId,
+                It.Is<ExperimentUpdate>(update => update.FlagId == flagId)))
+            .ReturnsAsync(detail);
+        service.Setup(x => x.GetListAsync(TestWorkspace.Id,
+                It.Is<ExperimentFilter>(filter => filter.FlagId == flagId)))
+            .ReturnsAsync(new PagedResult<ExperimentVm>(1, [detail]));
+        using var factory = CreateFactory(service.Object);
+        using var client = await _app.CreateAuthenticatedClientAsync(factory);
+
+        using var created = await client.PostAsJsonAsync(BasePath, new { name = "Checkout", flagId });
+        Assert.True(created.IsSuccessStatusCode);
+        using var updated = await client.PutAsJsonAsync($"{BasePath}/{ExperimentId}", new { flagId });
+        Assert.True(updated.IsSuccessStatusCode);
+        using var payload = System.Text.Json.JsonDocument.Parse(await updated.Content.ReadAsStringAsync());
+        var data = payload.RootElement.GetProperty("data");
+        Assert.Equal(flagId, data.GetProperty("flagId").GetGuid());
+        Assert.Equal("checkout", data.GetProperty("flagKey").GetString());
+        Assert.Equal("Checkout flow", data.GetProperty("flagName").GetString());
+        using var listed = await client.GetAsync($"{BasePath}?flagId={flagId}");
+        Assert.True(listed.IsSuccessStatusCode);
+        service.VerifyAll();
+    }
+
+    [Fact]
+    public async Task FeatureFlagById_RequiresAuthentication_AndScopesTheLookupToEnvironment()
+    {
+        var flag = new Domain.FeatureFlags.FeatureFlag
+        {
+            Id = Guid.NewGuid(), EnvId = TestWorkspace.Id, Key = "checkout", Name = "Checkout flow"
+        };
+        var service = new Mock<IFeatureFlagService>();
+        service.Setup(x => x.FindOneAsync(It.IsAny<Expression<Func<Domain.FeatureFlags.FeatureFlag, bool>>>()))
+            .ReturnsAsync((Expression<Func<Domain.FeatureFlags.FeatureFlag, bool>> predicate) =>
+                predicate.Compile()(flag) ? flag : null);
+        using var factory = _app.WithServices(services => services.Replace(ServiceDescriptor.Scoped(_ => service.Object)));
+        var path = $"/api/v1/envs/{flag.EnvId}/feature-flags/by-id/{flag.Id}";
+        using var anonymous = factory.CreateClient();
+        Assert.Equal(System.Net.HttpStatusCode.Unauthorized, (await anonymous.GetAsync(path)).StatusCode);
+        using var client = await _app.CreateAuthenticatedClientAsync(factory);
+        using var found = await client.GetAsync(path);
+        Assert.True(found.IsSuccessStatusCode);
+        using var payload = System.Text.Json.JsonDocument.Parse(await found.Content.ReadAsStringAsync());
+        Assert.Equal(flag.Id, payload.RootElement.GetProperty("data").GetProperty("id").GetGuid());
+        using var missing = await client.GetAsync($"/api/v1/envs/{Guid.NewGuid()}/feature-flags/by-id/{flag.Id}");
+        Assert.Equal(System.Net.HttpStatusCode.NotFound, missing.StatusCode);
+    }
+
+    [Fact]
     public async Task Update_RequestValidation()
     {
         using var factory = CreateFactory(Mock.Of<IExperimentService>());
