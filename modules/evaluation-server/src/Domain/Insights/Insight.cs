@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Domain.EndUsers;
 
 namespace Domain.Insights;
@@ -51,30 +50,7 @@ public class Insight
                     continue;
                 }
 
-                var flagId = $"{envId}-{variation.FeatureFlagKey}";
-                var properties = new
-                {
-                    flagId = flagId,
-                    envId = envIdString,
-                    featureFlagKey = variation.FeatureFlagKey,
-                    sendToExperiment = variation.SendToExperiment,
-                    userKeyId = User!.KeyId,
-                    userName = User!.Name,
-                    variationId = variation.Variation.Id,
-                    variationValue = variation.Variation.Value
-                };
-
-                var message = new InsightMessage
-                {
-                    Uuid = Guid.NewGuid().ToString(),
-                    DistinctId = flagId,
-                    EnvId = envIdString,
-                    Event = "FlagValue",
-                    Properties = JsonSerializer.Serialize(properties),
-                    Timestamp = variation.Timestamp * 1000 // milliseconds to microseconds
-                };
-
-                messages.Add(message);
+                messages.Add(InsightMessage.ForFlagValue(envIdString, User, variation));
             }
         }
 
@@ -88,28 +64,7 @@ public class Insight
                     continue;
                 }
 
-                var properties = new
-                {
-                    route = metric.Route,
-                    type = metric.Type,
-                    eventName = metric.EventName,
-                    numericValue = metric.NumericValue,
-                    user = new { keyId = User!.KeyId, name = User!.Name },
-                    applicationType = metric.AppType,
-                    envId = envIdString
-                };
-
-                var message = new InsightMessage
-                {
-                    Uuid = Guid.NewGuid().ToString(),
-                    DistinctId = metric.EventName,
-                    EnvId = envIdString,
-                    Event = metric.Type,
-                    Properties = JsonSerializer.Serialize(properties),
-                    Timestamp = metric.Timestamp * 1000 // milliseconds to microseconds
-                };
-
-                messages.Add(message);
+                messages.Add(InsightMessage.ForMetric(envIdString, User, metric));
             }
         }
 

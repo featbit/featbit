@@ -48,11 +48,10 @@ public class InsightParserTests
         return $$"""
                  {
                    "uuid": "11111111-1111-1111-1111-111111111111",
-                   "distinct_id": "distinct-id",
                    "env_id": "22222222-2222-2222-2222-222222222222",
                    "event": "{{eventType}}",
                    "properties": "{{escapedProperties}}",
-                   "timestamp": 1767225600000000
+                   "timestamp": 1767225600000
                  }
                  """;
     }

@@ -25,16 +25,15 @@ public class InsightParser
         var root = jsonDocument.RootElement;
 
         var id = root.GetProperty("uuid").GetGuid();
-        var distinctId = root.GetProperty("distinct_id").GetString();
         var envId = root.GetProperty("env_id").GetString();
         var eventName = root.GetProperty("event").GetString();
         var properties = root.GetProperty("properties").GetString();
-        var timestampMs = root.GetProperty("timestamp").GetInt64() / 1000;
+        var timestampMs = root.GetProperty("timestamp").GetInt64();
         var timestamp = DateTimeOffset.FromUnixTimeMilliseconds(timestampMs).UtcDateTime;
 
         return eventName == "FlagValue"
             ? TryBuildExposure(id, envId, properties, timestamp)
-            : TryBuildMetric(id, distinctId, envId, eventName, properties, timestamp);
+            : TryBuildMetric(id, envId, eventName, properties, timestamp);
     }
 
     private static ExperimentExposureEvent TryBuildExposure(
@@ -77,7 +76,6 @@ public class InsightParser
 
     private static ExperimentMetricEvent TryBuildMetric(
         Guid id,
-        string distinctId,
         string envId,
         string eventType,
         string properties,
@@ -93,7 +91,7 @@ public class InsightParser
         using var document = JsonDocument.Parse(properties);
         var root = document.RootElement;
         var userKey = GetString(root, "userKeyId") ?? GetNestedString(root, "user", "keyId");
-        var eventName = GetString(root, "eventName") ?? distinctId;
+        var eventName = GetString(root, "eventName");
 
         if (string.IsNullOrWhiteSpace(userKey) || string.IsNullOrWhiteSpace(eventName))
         {
