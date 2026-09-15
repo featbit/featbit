@@ -160,16 +160,89 @@ public class ReleaseHealthTests
 
     private sealed class MemoryStore : IReleaseHealthStore
     {
-        public ReleaseHealthDocument? Document;
-        public Task<IReadOnlyList<ReleaseHealthDocument>> ListAsync(Guid scope, string kind, CancellationToken ct) => Task.FromResult<IReadOnlyList<ReleaseHealthDocument>>(Document is { } doc && doc.ScopeId == scope && doc.Kind == kind ? [doc] : []);
-        public Task<ReleaseHealthDocument?> FindAsync(Guid scope, string kind, Guid id, CancellationToken ct) => Task.FromResult(Document is { } doc && doc.ScopeId == scope && doc.Kind == kind && doc.Id == id ? doc : null);
-        public Task PutAsync(ReleaseHealthDocument document, long? expected, CancellationToken ct)
+        private readonly Dictionary<(Guid Scope, string Kind, Guid Id), ReleaseHealthDocument> documents = [];
+        private ReleaseHealthDocument? document;
+        public ReleaseHealthDocument? Document
         {
-            if (Document?.Version != expected) throw new ConflictException("ReleaseHealth", document.Id);
-            Document = document;
+            get => document;
+            set { document = value; if (value is not null) documents[(value.ScopeId, value.Kind, value.Id)] = value; }
+        }
+        public Task<IReadOnlyList<ReleaseHealthDocument>> ListAsync(Guid scope, string kind, CancellationToken ct) =>
+            Task.FromResult<IReadOnlyList<ReleaseHealthDocument>>(documents.Values.Where(x => x.ScopeId == scope && x.Kind == kind).ToArray());
+        public Task<ReleaseHealthDocument?> FindAsync(Guid scope, string kind, Guid id, CancellationToken ct) =>
+            Task.FromResult(documents.GetValueOrDefault((scope, kind, id)));
+        public Task PutAsync(ReleaseHealthDocument value, long? expected, CancellationToken ct)
+        {
+            if (documents.GetValueOrDefault((value.ScopeId, value.Kind, value.Id))?.Version != expected)
+                throw new ConflictException("ReleaseHealth", value.Id);
+            Document = value;
             return Task.CompletedTask;
         }
     }
+
+    private static MetricUpdateWrite Edit(MetricView metric) => new(metric.Name, metric.ResultSemantics,
+        metric.Description, metric.Category, 0, 80, metric.FractionDigits ?? 2, metric.Revision);
+
+    [Fact]
+    public async Task MetadataAndDisplayEditsKeepVersionAndRecordProjectAudit()
+    {
+        var store = new MemoryStore();
+        var service = Service(store, Configuration(), out _);
+        var project = Guid.NewGuid();
+        var metric = await service.CreateMetric(project, MetricDefinition(), default);
+        var changed = await service.UpdateMetric(project, metric.Id, Edit(metric) with { Name = "New name", FractionDigits = 1 }, Guid.NewGuid(), "UI", default);
+        Assert.Equal(metric.MetricVersionId, changed.MetricVersionId);
+        Assert.Equal(1, changed.Version);
+        Assert.Equal(2, changed.Revision);
+        var events = await service.Changes(project, Guid.NewGuid(), metric.Id, DateTimeOffset.UtcNow.AddHours(-1), DateTimeOffset.UtcNow.AddSeconds(1), default);
+        var audit = Assert.Single(events);
+        Assert.Null(audit.EnvironmentId);
+        Assert.Equal("UI", audit.Source);
+        Assert.Contains(audit.Fields, x => x.Field == "fractionDigits" && x.Before == "3" && x.After == "1");
+        await Assert.ThrowsAsync<ConflictException>(() => service.UpdateMetric(project, metric.Id, Edit(metric), Guid.NewGuid(), "API", default));
+    }
+
+    [Fact]
+    public async Task ContractChangesRequireANewEnvironmentBindingAndPreserveOldContract()
+    {
+        var store = new MemoryStore();
+        var service = Service(store, Configuration(), out var provider);
+        provider.Setup(x => x.ValidateBinding(It.IsAny<JsonElement>())).Returns((JsonElement config) => config);
+        provider.Setup(x => x.QueryAsync(It.IsAny<ProviderConnection>(), It.IsAny<JsonElement>(), It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([new MetricPoint(DateTimeOffset.UtcNow.AddSeconds(-10), 1)]);
+        var project = Guid.NewGuid(); var env = Guid.NewGuid(); var actor = Guid.NewGuid();
+        var metric = await service.CreateMetric(project, MetricDefinition(), default);
+        var connection = (await service.TestOrSave(project, env, null, Write(), actor, true, default))!;
+        var config = Schema.Json(new { promql = "sum(up)", step = "5s", queryMode = "range" });
+        await service.PreviewOrSaveBinding(project, env, metric.Id, new(connection.Id, connection.Revision, connection.ProviderType, 1, config, null), true, actor, default);
+        Assert.NotNull(await service.Binding(project, env, metric.Id, default));
+        var changed = await service.UpdateMetric(project, metric.Id, Edit(metric) with { Maximum = 90 }, actor, "API", default);
+        Assert.Equal(2, changed.Version);
+        Assert.NotEqual(metric.MetricVersionId, changed.MetricVersionId);
+        Assert.Null(await service.Binding(project, env, metric.Id, default));
+        Assert.NotNull(await store.FindAsync(env, "binding", metric.MetricVersionId, default));
+        var old = await store.FindAsync(project, "metric_version", metric.MetricVersionId, default);
+        Assert.Contains("80", old!.Payload);
+        var prodEvents = await service.Changes(project, env, metric.Id, DateTimeOffset.UtcNow.AddHours(-1), DateTimeOffset.UtcNow.AddSeconds(1), default);
+        Assert.Equal(2, prodEvents.Count);
+        Assert.DoesNotContain("sum(up)", JsonSerializer.Serialize(prodEvents));
+        var otherEnv = await service.Changes(project, Guid.NewGuid(), metric.Id, DateTimeOffset.UtcNow.AddHours(-1), DateTimeOffset.UtcNow.AddSeconds(1), default);
+        Assert.Equal("metric", Assert.Single(otherEnv).Kind);
+    }
+
+    [Fact]
+    public async Task ContractBoundsCannotWidenUnitRangeAndNoopDoesNotCreateAnAuditEvent()
+    {
+        var service = Service(new MemoryStore(), Configuration(), out _);
+        var project = Guid.NewGuid();
+        var metric = await service.CreateMetric(project, MetricDefinition(), default);
+        await Assert.ThrowsAsync<BusinessException>(() => service.UpdateMetric(project, metric.Id, Edit(metric) with { Maximum = 101 }, Guid.NewGuid(), "UI", default));
+        var saved = await service.UpdateMetric(project, metric.Id, Edit(metric), Guid.NewGuid(), "UI", default);
+        Assert.Equal(1, saved.Version);
+        Assert.Empty(await service.Changes(project, Guid.NewGuid(), metric.Id, DateTimeOffset.UtcNow.AddHours(-1), DateTimeOffset.UtcNow.AddSeconds(1), default));
+        Assert.Throws<BusinessException>(() => ReleaseHealthService.ValidateRange(DateTimeOffset.UtcNow.AddDays(-8), DateTimeOffset.UtcNow));
+    }
+
     private static ReleaseHealthService Service(MemoryStore store, IConfiguration config, out Mock<IMetricSourceProvider> adapter)
     {
         var real = Provider();

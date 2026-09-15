@@ -1,4 +1,7 @@
+import { enMetricDetail, zhMetricDetail } from "./release-metric-detail"
+
 export const enReleaseHealthLive = {
+  detail: enMetricDetail,
   metricSaved: "Metric definition and version v1 saved.",
   selectUnit: "Choose a unit",
   keyExists: "This key is already used in this project.",
@@ -68,6 +71,7 @@ export const enReleaseHealthLive = {
   },
 }
 export const zhReleaseHealthLive: typeof enReleaseHealthLive = {
+  detail: zhMetricDetail,
   metricSaved: "指标定义和 v1 已保存。",
   selectUnit: "请选择单位",
   keyExists: "当前项目已使用此 Key。",

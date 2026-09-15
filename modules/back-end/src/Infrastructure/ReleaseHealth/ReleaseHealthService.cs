@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.ReleaseHealth;
 
-public sealed class ReleaseHealthService(IReleaseHealthStore store, ICredentialProtector protector,
+public sealed partial class ReleaseHealthService(IReleaseHealthStore store, ICredentialProtector protector,
     IEnumerable<IMetricSourceProvider> providers, IEnvironmentService environments, IProjectService projects,
     ILogger<ReleaseHealthService> logger)
 {
@@ -101,8 +101,8 @@ public sealed class ReleaseHealthService(IReleaseHealthStore store, ICredentialP
         logger.LogInformation("ReleaseHealth saved connection tested. Environment={EnvironmentId} Connection={ConnectionId} Actor={Actor}", envId, id, actor);
     }
 
-    public async Task<IReadOnlyList<MetricView>> Metrics(Guid projectId, CancellationToken ct) => (await store.ListAsync(projectId, "metric", ct)).Select(Read<MetricView>).ToArray();
-    public async Task<MetricView> CreateMetric(Guid projectId, MetricWrite write, CancellationToken ct)
+    public async Task<IReadOnlyList<MetricView>> Metrics(Guid projectId, CancellationToken ct) => (await store.ListAsync(projectId, "metric", ct)).Select(x => Read<MetricView>(x) with { Revision = x.Version }).ToArray();
+    public async Task<MetricView> CreateMetric(Guid projectId, MetricWrite write, CancellationToken ct, Guid? actor = null, string source = "API")
     {
         if (string.IsNullOrWhiteSpace(write.Key) || !Regex.IsMatch(write.Key, "^[a-z][a-z0-9_]{0,99}$") ||
             string.IsNullOrWhiteSpace(write.Name) || write.Name.Length > 120 || string.IsNullOrWhiteSpace(write.ResultSemantics) || write.ResultSemantics.Length > 2000) throw Schema.Invalid("invalid_metric");
@@ -114,6 +114,7 @@ public sealed class ReleaseHealthService(IReleaseHealthStore store, ICredentialP
         var metric = new MetricView(Guid.NewGuid(), projectId, Guid.NewGuid(), 1, write.Key, write.Name.Trim(), write.ResultSemantics.Trim(), write.ResultContract,
             write.Description?.Trim(), write.Category, write.FractionDigits ?? 2);
         await store.PutAsync(new(metric.Id, projectId, projectId, "metric", metric.Key, 1, Serialize(metric), null), null, ct);
+        if (actor is { } creator) await RecordChange(projectId, null, metric, "metric", "created", creator, source, new(), DefinitionFields(metric), ct);
         return metric;
     }
 
@@ -123,7 +124,7 @@ public sealed class ReleaseHealthService(IReleaseHealthStore store, ICredentialP
         var document = await store.FindAsync(envId, "binding", metric.MetricVersionId, ct);
         return document is null ? null : Read<BindingView>(document);
     }
-    public async Task<(QueryView Query, BindingView Binding)> PreviewOrSaveBinding(Guid projectId, Guid envId, Guid metricId, BindingWrite write, bool save, Guid actor, CancellationToken ct)
+    public async Task<(QueryView Query, BindingView Binding)> PreviewOrSaveBinding(Guid projectId, Guid envId, Guid metricId, BindingWrite write, bool save, Guid actor, CancellationToken ct, string source = "API")
     {
         var metric = Read<MetricView>(await Required(projectId, "metric", metricId, ct));
         var previous = await store.FindAsync(envId, "binding", metric.MetricVersionId, ct);
@@ -141,7 +142,9 @@ public sealed class ReleaseHealthService(IReleaseHealthStore store, ICredentialP
             // Recheck after network I/O; a subsequent connection edit will also invalidate future reads.
             var latest = await Required(envId, "connection", connection.Id, ct);
             if (latest.Version != connection.Version) throw Schema.Invalid("connection_changed_revalidate");
+            if (previous is not null) await ArchiveBinding(projectId, Read<BindingView>(previous), ct);
             await store.PutAsync(new(binding.Id, envId, projectId, "binding", binding.Id.ToString(), binding.Revision, Serialize(binding), null), write.ExpectedVersion, ct);
+            await RecordChange(projectId, envId, metric, "source_binding", previous is null ? "connected" : "updated", actor, source, previous is null ? new() : BindingFields(Read<BindingView>(previous)), BindingFields(binding), ct);
             logger.LogInformation("ReleaseHealth binding saved. Environment={EnvironmentId} Metric={MetricId} Revision={Revision} Actor={Actor}", envId, metricId, binding.Revision, actor);
         }
         return (query, binding);

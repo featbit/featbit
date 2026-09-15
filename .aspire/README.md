@@ -3,8 +3,11 @@
 This .NET Aspire AppHost runs the current FeatBit backend core loop with the
 `StandardPostgres` topology:
 
-- `postgresql`: the existing local PostgreSQL service on `localhost:5432`.
-- `redis`: the existing local Redis service on `localhost:6379`.
+- `postgresql`: Aspire starts PostgreSQL 15.10 on `127.0.0.1:5432`, using the
+  retained `featbit-infra_postgres_data` Docker volume for this design branch.
+- `redis`: Aspire starts Redis on `127.0.0.1:6379`, using the separate
+  `featbit-releasehealth-design-redis` volume. On first start, the API populates
+  this cache from the selected PostgreSQL database.
 - `api-server`: `modules/back-end/src/Api/Api.csproj` on ports `5000` and `5001`.
 - `evaluation-server`: `modules/evaluation-server/src/Api/Api.csproj` on ports `5100` and `5101`.
 - `ui`: the Vite app in `modules/front-end`; Aspire runs `npm ci` and then
@@ -20,9 +23,9 @@ The main UI is enabled by default through `FeatBit:IncludeUi`. The separate
 ```powershell
 cd .aspire
 aspire start --non-interactive
-aspire wait api-server
-aspire wait evaluation-server
-aspire wait ui
+aspire wait api-server --non-interactive
+aspire wait evaluation-server --non-interactive
+aspire wait ui --non-interactive
 ```
 
 Open the Aspire Dashboard URL printed by `aspire start`, or use:
@@ -32,13 +35,30 @@ Open the Aspire Dashboard URL printed by `aspire start`, or use:
 - Main UI: use the `ui` endpoint reported by `aspire describe --format Json`
 
 ```powershell
-aspire describe --format Json
+aspire describe --format Json --non-interactive
 aspire stop --non-interactive
 ```
 
-The external infrastructure connection strings are stored in the AppHost user
-secrets under `ConnectionStrings:postgresql` and `ConnectionStrings:redis`.
-Aspire does not create or stop those Docker containers.
+The default volume selection is explicit in `appsettings.json` under
+`FeatBit:PostgresDataVolume`, `FeatBit:PostgresDataDirectory`, and
+`FeatBit:RedisDataVolume`. The retained PostgreSQL volume stores its cluster at
+the volume root, so `PGDATA` must be `/var/lib/postgresql/data`.
+
+This database contains the `Release Health integration 20260902083749` project
+and its saved metrics, connections, and bindings. The separate
+`featbit-aspire-postgres-vnext` volume belongs to the later `review-experiment`
+setup and is not used by this branch. Local backups made before the switch are
+stored in the ignored `.logs/db-switch-*` directories.
+
+Keep the old `featbit-infra-postgresql-1` Compose container stopped while Aspire
+is running: both mount the same PostgreSQL volume, which must have only one
+running database process. Aspire manages the active containers; stopping Aspire
+preserves their named data volumes.
+
+To opt into externally managed services, set `FeatBit:UseExistingInfrastructure`
+to `true` and configure `ConnectionStrings:postgresql` and
+`ConnectionStrings:redis` in the AppHost user secrets. This mode does not manage
+those external Docker containers.
 
 ## OpenTelemetry
 

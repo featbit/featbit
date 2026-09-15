@@ -70,7 +70,10 @@ export function useMetricReadings(
 ) {
   return useQueries({
     queries: metrics.map((metric) => ({
-      queryKey: metricTrendKey(scope, metric.id, minutes),
+      queryKey: [
+        ...metricTrendKey(scope, metric.id, minutes),
+        metric.metricVersionId,
+      ],
       queryFn: () => releaseHealthApi.trend(scope, metric.id, minutes),
       enabled: Boolean(scope.envId),
       refetchInterval: 30000,

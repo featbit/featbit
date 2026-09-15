@@ -92,8 +92,17 @@ public sealed class PrometheusProvider(IConfiguration configuration, IHostEnviro
         ValidateBinding(binding);
         var query = Uri.EscapeDataString(binding.GetProperty("promql").GetString()!);
         var step = Schema.Text(binding, "step");
-        using var json = await Request(connection, $"query_range?query={query}&start={start.ToUnixTimeSeconds()}&end={end.ToUnixTimeSeconds()}&step={step}&timeout=5s", ct);
-        return ParseRange(json.RootElement, start, end);
+        var seconds = step switch { "5s" => 5, "15s" => 15, "1m" => 60, "5m" => 300, _ => 900 };
+        List<MetricPoint> points = [];
+        // Preserve the configured sampling step; each provider request stays below 1,000 points.
+        for (var cursor = start; cursor <= end; cursor = cursor.AddSeconds(1000L * seconds))
+        {
+            var chunkEnd = cursor.AddSeconds(999L * seconds);
+            if (chunkEnd > end) chunkEnd = end;
+            using var json = await Request(connection, $"query_range?query={query}&start={cursor.ToUnixTimeSeconds()}&end={chunkEnd.ToUnixTimeSeconds()}&step={step}&timeout=5s", ct);
+            points.AddRange(ParseRange(json.RootElement, cursor, chunkEnd));
+        }
+        return points;
     }
 
     public static IReadOnlyList<MetricPoint> ParseRange(JsonElement response, DateTimeOffset start, DateTimeOffset end)

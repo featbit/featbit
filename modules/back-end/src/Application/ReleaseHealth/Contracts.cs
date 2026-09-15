@@ -18,7 +18,7 @@ public sealed record MetricWrite(string Key, string Name, string ResultSemantics
     string? Description = null, string? Category = null, int? FractionDigits = null);
 public sealed record MetricView(Guid Id, Guid ProjectId, Guid MetricVersionId, int Version,
     string Key, string Name, string ResultSemantics, JsonElement ResultContract,
-    string? Description = null, string? Category = null, int? FractionDigits = null);
+    string? Description = null, string? Category = null, int? FractionDigits = null, long Revision = 1);
 
 [JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
 public sealed record BindingWrite(Guid ConnectionId, int ConnectionRevision, string ProviderType,
@@ -26,7 +26,7 @@ public sealed record BindingWrite(Guid ConnectionId, int ConnectionRevision, str
 public sealed record BindingView(Guid Id, Guid EnvironmentId, Guid MetricVersionId, Guid ConnectionId,
     int ConnectionRevision, string ProviderType, int ProviderSchemaVersion, JsonElement ProviderConfig,
     long Revision, DateTimeOffset ValidatedAt);
-public sealed record MetricPoint(DateTimeOffset Timestamp, double Value);
+public sealed record MetricPoint(DateTimeOffset Timestamp, double Value, long? SourceBindingRevision = null);
 public sealed record MetricSourceSummary(string ProviderType, string ConnectionName, string Step);
 public sealed record QueryView(string Status, DateTimeOffset QueriedAt, JsonElement ResultContract,
     IReadOnlyList<MetricPoint> Points, double? FreshnessSeconds, MetricSourceSummary? Source = null);

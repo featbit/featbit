@@ -5,9 +5,12 @@ using Microsoft.Extensions.Configuration;
 var builder = DistributedApplication.CreateBuilder(args);
 
 var topology = LocalTopology.StandardPostgres;
-var useExistingInfrastructure = builder.Configuration.GetValue("FeatBit:UseExistingInfrastructure", true);
+var useExistingInfrastructure = builder.Configuration.GetValue("FeatBit:UseExistingInfrastructure", false);
 var includeUi = builder.Configuration.GetValue("FeatBit:IncludeUi", true);
 var includeReleaseDecisionWeb = builder.Configuration.GetValue("FeatBit:IncludeReleaseDecisionWeb", false);
+var postgresDataVolume = builder.Configuration["FeatBit:PostgresDataVolume"] ?? "featbit-infra_postgres_data";
+var postgresDataDirectory = builder.Configuration["FeatBit:PostgresDataDirectory"] ?? "/var/lib/postgresql/data";
+var redisDataVolume = builder.Configuration["FeatBit:RedisDataVolume"] ?? "featbit-releasehealth-design-redis";
 
 var (dbProvider, mqProvider, cacheProvider, olapProvider) = topology switch
 {
@@ -25,9 +28,9 @@ var useClickHouseOlap = IsProvider(olapProvider, "ClickHouse");
 ValidateLocalTopology();
 
 const string postgresConnectionString =
-    "Host=localhost;Port=5432;Username=postgres;Password=please_change_me;Database=featbit";
+    "Host=127.0.0.1;Port=5432;Username=postgres;Password=please_change_me;Database=featbit";
 const string mongoDbConnectionString = "mongodb://admin:password@localhost:27017";
-const string redisConnectionString = "localhost:6379";
+const string redisConnectionString = "127.0.0.1:6379";
 const string kafkaBootstrapServers = "localhost:29092";
 const string clickHouseHttpEndpoint = "http://localhost:8123";
 
@@ -62,10 +65,10 @@ if (!useExistingInfrastructure && IsProvider(dbProvider, "Postgres"))
         .AddContainer("postgresql", "postgres", "15.10")
         .WithEnvironment("POSTGRES_USER", "postgres")
         .WithEnvironment("POSTGRES_PASSWORD", "please_change_me")
-        .WithEnvironment("PGDATA", "/var/lib/postgresql/data/pgdata")
+        .WithEnvironment("PGDATA", postgresDataDirectory)
         .WithBindMount("../infra/postgresql/docker-entrypoint-initdb.d", "/docker-entrypoint-initdb.d", isReadOnly: true)
         .WithEndpoint(port: 5432, targetPort: 5432, name: "tcp", isProxied: false)
-        .WithVolume("featbit-aspire-postgres", "/var/lib/postgresql/data");
+        .WithVolume(postgresDataVolume, "/var/lib/postgresql/data");
 }
 else if (!useExistingInfrastructure && IsProvider(dbProvider, "MongoDb"))
 {
@@ -85,7 +88,7 @@ if (!useExistingInfrastructure && useRedis)
         .AddContainer("redis", "bitnamilegacy/redis", "6.2.10")
         .WithEnvironment("ALLOW_EMPTY_PASSWORD", "yes")
         .WithEndpoint(port: 6379, targetPort: 6379, name: "tcp", isProxied: false)
-        .WithVolume("featbit-aspire-redis", "/bitnami/redis/data");
+        .WithVolume(redisDataVolume, "/bitnami/redis/data");
 }
 
 if (!useExistingInfrastructure && useClickHouseOlap)

@@ -22,6 +22,7 @@ export type PrometheusConnectionView = {
   lastCheckedAt: string
 }
 export type LiveMetric = {
+  revision?: number
   description?: string | null
   category?: ReleaseMetricCategory | null
   fractionDigits?: number | null
@@ -60,8 +61,46 @@ export type LiveTrend = {
   status: "not_connected" | "ready" | "no_data" | "stale"
   queriedAt: string
   resultContract: MetricResultContract
-  points: { timestamp: string; value: number }[]
+  points: { timestamp: string; value: number; sourceBindingRevision?: number }[]
   freshnessSeconds: number | null
+}
+export type MetricUpdateWrite = {
+  name: string
+  description: string | null
+  category: ReleaseMetricCategory | null
+  resultSemantics: string
+  minimum: number | null
+  maximum: number | null
+  fractionDigits: number
+  expectedRevision: number
+}
+export type MetricChange = {
+  id: string
+  metricId: string
+  environmentId: string | null
+  metricVersion: number
+  kind: "metric" | "source_binding" | "flag"
+  operation: string
+  occurredAt: string
+  actorId: string
+  actorName: string
+  source: string
+  fields: { field: string; before: string | null; after: string | null }[]
+}
+export type MetricMonitorBinding = {
+  id: string
+  metricId: string
+  metricVersionId: string
+  metricVersion: number
+  flagId: string
+  flagKey: string
+  monitorName: string
+  status: string
+  use: string
+  window: string
+  rule: string
+  latestCheck?: string
+  checkedAt?: string
 }
 export const releaseHealthRoot = (scope: ReleaseHealthScope) =>
   `/api/v1/projects/${scope.projectId}/envs/${scope.envId}/release-health`
@@ -142,6 +181,37 @@ export const releaseHealthApi = {
     fetchApi<LiveMetric[]>(metricsRoot(projectId)),
   createMetric: (projectId: string, value: unknown) =>
     fetchApi<LiveMetric>(metricsRoot(projectId), body(value)),
+  updateMetric: (
+    projectId: string,
+    metricId: string,
+    value: MetricUpdateWrite
+  ) =>
+    fetchApi<LiveMetric>(
+      `${metricsRoot(projectId)}/${metricId}`,
+      body(value, "PUT")
+    ),
+  range: (
+    scope: ReleaseHealthScope,
+    metricId: string,
+    from: string,
+    to: string
+  ) =>
+    fetchApi<LiveTrend>(
+      `${releaseHealthRoot(scope)}/metrics/${metricId}/range?${new URLSearchParams({ from, to })}`
+    ),
+  changes: (
+    scope: ReleaseHealthScope,
+    metricId: string,
+    from: string,
+    to: string
+  ) =>
+    fetchApi<MetricChange[]>(
+      `${releaseHealthRoot(scope)}/metrics/${metricId}/changes?${new URLSearchParams({ from, to })}`
+    ),
+  monitorBindings: (scope: ReleaseHealthScope, metricId: string) =>
+    fetchApi<MetricMonitorBinding[]>(
+      `${releaseHealthRoot(scope)}/metrics/${metricId}/monitor-bindings`
+    ),
   binding: (scope: ReleaseHealthScope, metricId: string) =>
     fetchApi<LiveBinding | null>(
       `${releaseHealthRoot(scope)}/metrics/${metricId}/binding`

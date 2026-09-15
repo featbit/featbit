@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react"
+import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { MemoryRouter, Route, Routes } from "react-router-dom"
 import "@/lib/i18n/i18n"
@@ -9,6 +9,7 @@ import { FlagReleaseHealthTab } from "./flag/flag-release-health-tab"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { releaseHealthApi } from "./release-health-api"
 import { ReleaseMetricDetailsPage } from "./metrics/release-metric-details-page"
+import { MetricDetailEditor } from "./metrics/metric-detail-editor"
 import { ReleaseMetricSourceBindingPage } from "./metrics/release-metric-source-binding-page"
 import { ReleaseHealthOverviewPage } from "./overview/release-health-overview-page"
 import { HealthSessionDetailsPage } from "./sessions/health-session-details-page"
@@ -20,6 +21,10 @@ vi.mock("./release-health-api", async (original) => ({
     trend: vi.fn(),
     binding: vi.fn(),
     connections: vi.fn(),
+    range: vi.fn(),
+    changes: vi.fn(),
+    monitorBindings: vi.fn(),
+    updateMetric: vi.fn(),
   },
 }))
 vi.mock("@/features/layout/layout-context", async (original) => ({
@@ -126,6 +131,25 @@ describe("Release Health design pages", () => {
       points: [],
       freshnessSeconds: null,
     }))
+    vi.mocked(releaseHealthApi.range).mockResolvedValue({
+      status: "no_data",
+      queriedAt: new Date().toISOString(),
+      resultContract: contract,
+      points: [],
+      freshnessSeconds: null,
+    })
+    vi.mocked(releaseHealthApi.changes).mockResolvedValue([])
+    vi.mocked(releaseHealthApi.monitorBindings).mockResolvedValue([])
+    vi.mocked(releaseHealthApi.updateMetric).mockResolvedValue({
+      id: "metric-error",
+      projectId: "project-commerce",
+      metricVersionId: "v1",
+      version: 1,
+      key: "checkout_error_rate",
+      name: "Checkout error rate",
+      resultSemantics: "Error rate across all requests.",
+      resultContract: contract,
+    })
     vi.mocked(releaseHealthApi.binding).mockResolvedValue(null)
     vi.mocked(releaseHealthApi.connections).mockResolvedValue([])
     await i18n.changeLanguage("en")
@@ -166,16 +190,53 @@ describe("Release Health design pages", () => {
     expect(
       await screen.findByRole("heading", { name: "API P95 latency" })
     ).toBeVisible()
-    expect(
-      screen.getByText(
-        /This page shows value, trend, freshness, and Data status/
-      )
-    ).toBeVisible()
+    expect(screen.getByText("Basic information")).toBeVisible()
+    expect(screen.getByText("Result contract")).toBeVisible()
     expect(screen.getByText("Environment trend")).toBeVisible()
-    expect(screen.getByText("Environment streams")).toBeVisible()
-    expect(await screen.findByText("Not connected")).toBeVisible()
-    expect(screen.getAllByText("No data")[0]).toBeVisible()
+    expect(screen.getByText("Change timeline")).toBeVisible()
     expect(screen.getByText("Monitor bindings")).toBeVisible()
+    expect(screen.queryByText("Staging")).not.toBeInTheDocument()
+    expect(screen.queryByText("Version history")).not.toBeInTheDocument()
+    expect(
+      screen.queryByText("Related session windows")
+    ).not.toBeInTheDocument()
+    expect(
+      vi
+        .mocked(releaseHealthApi.trend)
+        .mock.calls.every(([scope]) => scope.envId === "env-production")
+    ).toBe(true)
+  })
+
+  it("finishes a saved edit without waiting for slow trend refreshes", async () => {
+    const client = new QueryClient()
+    vi.spyOn(client, "invalidateQueries").mockImplementation(
+      () => new Promise(() => {})
+    )
+    const onClose = vi.fn()
+    render(
+      <QueryClientProvider client={client}>
+        <MetricDetailEditor
+          metric={{
+            id: "metric-error",
+            projectId: "project-commerce",
+            metricVersionId: "v1",
+            version: 1,
+            key: "checkout_error_rate",
+            name: "Checkout error rate",
+            resultSemantics: "Error rate across all requests.",
+            resultContract: contract,
+          }}
+          mode="contract"
+          onClose={onClose}
+        />
+      </QueryClientProvider>
+    )
+    fireEvent.change(screen.getByLabelText("Fraction digits"), {
+      target: { value: "3" },
+    })
+    fireEvent.click(screen.getByRole("button", { name: "Save changes" }))
+    await waitFor(() => expect(onClose).toHaveBeenCalledOnce())
+    expect(client.invalidateQueries).toHaveBeenCalled()
   })
 
   it("manages reusable source connections inside the selected environment", () => {
@@ -402,10 +463,8 @@ describe("Release Health design pages", () => {
     ).toBeVisible()
     expect(screen.queryByText("> 2% for 5 min")).toBeNull()
     expect(
-      screen.getAllByText(
-        "Monitor and Session references are not connected to the API yet."
-      ).length
-    ).toBeGreaterThan(0)
+      await screen.findByText("No monitor bindings in this environment")
+    ).toBeVisible()
     expect(screen.queryByText("> 800 ms for 10 min")).not.toBeInTheDocument()
   })
 
