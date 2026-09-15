@@ -32,7 +32,6 @@ for (const resource of ["experiments", "segments"] as const) {
         flagId: null,
         flagKey: null,
         flagName: null,
-        stateSummary: { runs: [], hasLearning: false },
         runCount: 0,
         runMethodSummary: null,
         stateSummary: { runs: [], hasLearning: false },
