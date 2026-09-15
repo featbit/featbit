@@ -1,11 +1,3 @@
-export function slugifyLayerKey(value: string) {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9._:-]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-}
-
 export function runColor(index: number) {
   return [
     "bg-blue-200 dark:bg-blue-800",

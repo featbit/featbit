@@ -102,7 +102,7 @@ export function EditDetailsDialog({
         }}
       >
         <DialogContent
-          className="max-h-[88vh] sm:max-w-3xl"
+          className="max-h-[88vh] grid-rows-[auto_minmax(0,1fr)_auto] sm:max-w-3xl"
           showCloseButton={!saving}
         >
           <DialogHeader>
@@ -131,7 +131,7 @@ export function EditDetailsDialog({
               }
             })}
           >
-            <div className="min-h-0 space-y-4 overflow-y-auto">
+            <div className="-m-1 min-h-0 space-y-4 overflow-y-auto p-1">
               {FIELDS.map((field) => (
                 <div key={field} className="space-y-2">
                   <Label htmlFor={`experiment-${field}`}>

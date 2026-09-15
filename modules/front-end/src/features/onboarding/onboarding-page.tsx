@@ -21,8 +21,8 @@ import {
 } from "@/features/onboarding/onboarding-api"
 import { CreationPreview } from "@/features/onboarding/components/creation-preview"
 import { OnboardingForm } from "@/features/onboarding/components/onboarding-form"
-import { slugify } from "@/features/onboarding/onboarding-utils"
 import { ApiRequestError } from "@/lib/api/authenticated-api"
+import { slugify } from "@/lib/slugify"
 
 const defaultEnvironments = ["Dev", "Prod"]
 

@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/sheet"
 import { Textarea } from "@/components/ui/textarea"
 import { getCurrentProjectEnv } from "@/features/layout/layout-context"
+import { slugify } from "@/lib/slugify"
 import type { FeatureFlag, FlagCreationPayload } from "../../flags-types"
 import { FlagTagPicker } from "./flag-tag-picker"
 import {
@@ -94,15 +95,6 @@ const schema = z
     }
   })
 type Values = z.infer<typeof schema>
-
-function toKey(value: string) {
-  return value
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, "")
-    .replace(/[\s_-]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-}
 
 export function FlagEditorSheet({
   envId,
@@ -168,7 +160,7 @@ export function FlagEditorSheet({
       source
         ? {
             name: cloneName,
-            key: toKey(cloneName),
+            key: slugify(cloneName),
             description: source.description ?? "",
             tags: source.tags.join(", "),
             ...variationSettings,
@@ -248,7 +240,7 @@ export function FlagEditorSheet({
           {...nameField}
           onChange={(event) => {
             nameField.onChange(event)
-            form.setValue("key", toKey(event.target.value), {
+            form.setValue("key", slugify(event.target.value), {
               shouldDirty: true,
               shouldValidate: Boolean(form.formState.errors.key),
             })
