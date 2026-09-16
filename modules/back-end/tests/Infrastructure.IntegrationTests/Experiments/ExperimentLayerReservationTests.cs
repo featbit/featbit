@@ -134,9 +134,16 @@ public abstract class ExperimentLayerReservationTests(ExperimentProviderParityFi
                 new ExperimentVariantStatsVm { Variant = "treatment", Users = 100, Conversions = 20, SumValue = 20, SumSquares = 20 }
             ]
         });
+        var flag = new Domain.FeatureFlags.FeatureFlag
+        {
+            Id = Guid.NewGuid(), EnvId = EnvId, Key = "checkout", Name = "Checkout", Variations = []
+        };
         var flags = new Mock<IFeatureFlagService>();
+        flags.Setup(x => x.FindOneAsync(It.IsAny<System.Linq.Expressions.Expression<Func<Domain.FeatureFlags.FeatureFlag, bool>>>()))
+            .ReturnsAsync((System.Linq.Expressions.Expression<Func<Domain.FeatureFlags.FeatureFlag, bool>> predicate) =>
+                predicate.Compile()(flag) ? flag : null);
         var service = fixture.CreateExperimentServices(provider, stats.Object, flags.Object).ExperimentService;
-        await service.UpdateAsync(EnvId, run.ExperimentId, new ExperimentUpdate { FlagKey = "checkout" });
+        await service.UpdateAsync(EnvId, run.ExperimentId, new ExperimentUpdate { FlagId = flag.Id });
         await service.UpdateRunAsync(EnvId, run.ExperimentId, run.Id, new ExperimentRunUpdate
         {
             PrimaryMetricEvent = "purchase", ControlVariant = "control", TreatmentVariant = "treatment"
@@ -155,7 +162,8 @@ public abstract class ExperimentLayerReservationTests(ExperimentProviderParityFi
             Assert.Equal(before.AllocationSummary.ReservedPercent, (await Allocation()).AllocationSummary.ReservedPercent);
         }
 
-        Assert.All(flags.Invocations, invocation => Assert.Equal(nameof(IFeatureFlagService.GetAsync), invocation.Method.Name));
+        stats.Verify(x => x.QueryAsync(It.Is<QueryExperimentStats>(query => query.FlagKey == flag.Key)), Times.Exactly(2));
+        Assert.All(flags.Invocations, invocation => Assert.Equal(nameof(IFeatureFlagService.FindOneAsync), invocation.Method.Name));
     }
 
     private async Task<ExperimentLayerReadResult> Allocation() => ExperimentLayerReadModel.Build(_layer,

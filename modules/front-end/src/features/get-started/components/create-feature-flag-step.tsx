@@ -55,9 +55,10 @@ import {
   getCurrentWorkspace,
 } from "@/features/layout/layout-context"
 import { isFineGrainedAccessControlGranted } from "@/features/workspace/license/license-utils"
+import { slugify } from "@/lib/slugify"
 import { cn } from "@/lib/utils"
 import type { GetStartedFlag } from "../get-started-types"
-import { createBooleanFlagPayload, toFlagKey } from "../get-started-utils"
+import { createBooleanFlagPayload } from "../get-started-utils"
 
 const KEY_PATTERN = /^[A-Za-z0-9._-]+$/
 const formSchema = z.object({
@@ -269,7 +270,7 @@ export function CreateFeatureFlagStep({
     const nextName = name.trim()
     form.reset({
       name: nextName,
-      key: toFlagKey(nextName),
+      key: slugify(nextName),
       description: "",
     })
     setCandidate(null)
@@ -551,7 +552,7 @@ export function CreateFeatureFlagStep({
                   {...nameField}
                   onChange={(event) => {
                     nameField.onChange(event)
-                    form.setValue("key", toFlagKey(event.target.value), {
+                    form.setValue("key", slugify(event.target.value), {
                       shouldDirty: true,
                       shouldValidate: true,
                     })

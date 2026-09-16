@@ -5,7 +5,9 @@ export type ExperimentDetail = {
   name: string
   description: string | null
   stage: ExperimentStage
+  flagId: string | null
   flagKey: string | null
+  flagName: string | null
   envId: string | null
   runCount: number
   hypothesis: string | null

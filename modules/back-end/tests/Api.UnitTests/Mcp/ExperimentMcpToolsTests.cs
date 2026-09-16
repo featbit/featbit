@@ -10,6 +10,36 @@ namespace Api.UnitTests.Mcp;
 
 public class ExperimentMcpToolsTests
 {
+    [Fact]
+    public async Task UpdateExperiment_ExposesFlagIdInSchema_AndDispatchesIt()
+    {
+        var experimentId = Guid.NewGuid();
+        var envId = Guid.NewGuid();
+        var flagId = Guid.NewGuid();
+        var context = new DefaultHttpContext();
+        var sender = new Mock<ISender>();
+        var service = new Mock<IExperimentService>();
+        var permissions = new Mock<IPermissionChecker>();
+        service.Setup(x => x.GetEnvIdAsync(experimentId)).ReturnsAsync(envId);
+        permissions.Setup(x => x.IsGrantedAsync(context, It.IsAny<PermissionRequirement>())).ReturnsAsync(true);
+        sender.Setup(x => x.Send(It.Is<UpdateExperiment>(request =>
+                request.Id == experimentId && request.EnvId == envId && request.Update.FlagId == flagId),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ExperimentDetailVm { Id = experimentId, FlagId = flagId, FlagKey = "checkout" });
+        var tools = new ExperimentMcpTools(sender.Object, service.Object,
+            new HttpContextAccessor { HttpContext = context }, permissions.Object);
+        var tool = ModelContextProtocol.Server.McpServerTool.Create(tools.UpdateExperiment);
+        var properties = tool.ProtocolTool.InputSchema.GetProperty("properties")
+            .GetProperty("update").GetProperty("properties");
+        Assert.True(properties.TryGetProperty("flagId", out _));
+        Assert.False(properties.TryGetProperty("flagKey", out _));
+
+        var result = await tools.UpdateExperiment(experimentId, new ExperimentUpdate { FlagId = flagId });
+        Assert.Equal(flagId, result.FlagId);
+        Assert.Equal("checkout", result.FlagKey);
+        sender.VerifyAll();
+    }
+
     private const string ValidSamplingPlan =
         """[{"variation":"control","role":"control","includeRate":11.111111},{"variation":"treatment","role":"treatment","includeRate":100}]""";
 

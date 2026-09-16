@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react"
+import { render, screen } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
 import { describe, expect, it, vi } from "vitest"
 import "@/lib/i18n/i18n"
@@ -11,7 +11,9 @@ const experiment: ExperimentListRow = {
   description: "Reduce friction from cart to completed order",
   stage: "hypothesis",
   listState: { key: "measuring" },
+  flagId: "flag-1",
   flagKey: "checkout-redesign",
+  flagName: "Checkout redesign",
   envId: "env-1",
   runCount: 3,
   runMethodSummary: "Bayesian",
@@ -21,7 +23,6 @@ const experiment: ExperimentListRow = {
 
 describe("ExperimentsTable", () => {
   it("shows the approved experiment summary and only a Details action", () => {
-    const onFlagFilter = vi.fn()
     render(
       <MemoryRouter>
         <ExperimentsTable
@@ -30,7 +31,6 @@ describe("ExperimentsTable", () => {
           filtered={false}
           lang="en"
           detailsHref={(id) => `/en/experiments/${id}`}
-          onFlagFilter={onFlagFilter}
           onClearFilters={vi.fn()}
           onCreate={vi.fn()}
         />
@@ -51,8 +51,14 @@ describe("ExperimentsTable", () => {
     expect(screen.queryByText("Delete")).not.toBeInTheDocument()
     expect(screen.queryByText("Archive")).not.toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole("button", { name: "checkout-redesign" }))
-    expect(onFlagFilter).toHaveBeenCalledWith("checkout-redesign")
+    const flagLink = screen.getByRole("link", { name: "Checkout redesign" })
+    expect(flagLink).toHaveAttribute(
+      "href",
+      "/en/feature-flags/checkout-redesign/targeting"
+    )
+    expect(flagLink).toHaveAttribute("target", "_blank")
+    expect(flagLink).toHaveAttribute("rel", "noopener noreferrer")
+    expect(screen.getByText("checkout-redesign").closest("a, button")).toBeNull()
   })
 
   it("shows unbound and no-run states without inventing a method", () => {
@@ -62,7 +68,9 @@ describe("ExperimentsTable", () => {
           items={[
             {
               ...experiment,
+              flagId: null,
               flagKey: null,
+              flagName: null,
               runCount: 0,
               runMethodSummary: null,
               stage: "hypothesis",
@@ -73,7 +81,6 @@ describe("ExperimentsTable", () => {
           filtered={false}
           lang="en"
           detailsHref={(id) => `/en/experiments/${id}`}
-          onFlagFilter={vi.fn()}
           onClearFilters={vi.fn()}
           onCreate={vi.fn()}
         />
@@ -101,7 +108,6 @@ describe("ExperimentsTable", () => {
             filtered={false}
             lang="en"
             detailsHref={(id) => `/en/experiments/${id}`}
-            onFlagFilter={vi.fn()}
             onClearFilters={vi.fn()}
             onCreate={vi.fn()}
           />

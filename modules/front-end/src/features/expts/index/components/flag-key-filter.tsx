@@ -16,7 +16,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { fetchFeatureFlags } from "@/features/flags/flags-api"
+import {
+  fetchFeatureFlagById,
+  fetchFeatureFlags,
+} from "@/features/flags/flags-api"
 import { cn } from "@/lib/utils"
 import { matchesFlagKey } from "./flag-key-filter-utils"
 
@@ -29,7 +32,7 @@ export function FlagKeyFilter({
 }: {
   envId: string
   value: string
-  onChange: (flagKey: string) => void
+  onChange: (flagId: string) => void
 }) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
@@ -56,6 +59,13 @@ export function FlagKeyFilter({
         pageSize: FLAG_OPTION_PAGE_SIZE,
       }),
     enabled: Boolean(open && envId),
+    staleTime: 30_000,
+  })
+
+  const selectedFlagQuery = useQuery({
+    queryKey: ["experiment-feature-flag", envId, value],
+    queryFn: ({ signal }) => fetchFeatureFlagById(envId, value, signal),
+    enabled: Boolean(envId && value),
     staleTime: 30_000,
   })
 
@@ -95,7 +105,14 @@ export function FlagKeyFilter({
               !value && "font-sans text-muted-foreground"
             )}
           >
-            {value || t("releaseDecision.experiments.flagFilter")}
+            {value
+              ? (selectedFlagQuery.data?.key ??
+                t(
+                  selectedFlagQuery.isError
+                    ? "releaseDecision.experiments.flagLoadFailed"
+                    : "releaseDecision.experiments.flagLoading"
+                ))
+              : t("releaseDecision.experiments.flagFilter")}
           </span>
           <ChevronsUpDown className="size-3.5 shrink-0 text-muted-foreground" />
         </PopoverTrigger>
@@ -127,9 +144,9 @@ export function FlagKeyFilter({
                 {options.map((flag) => (
                   <CommandItem
                     key={flag.id}
-                    value={flag.key}
+                    value={flag.id}
                     onSelect={() => {
-                      onChange(flag.key)
+                      onChange(flag.id)
                       setOpen(false)
                     }}
                   >
@@ -142,7 +159,7 @@ export function FlagKeyFilter({
                     <Check
                       className={cn(
                         "size-4 text-primary",
-                        value === flag.key ? "opacity-100" : "opacity-0"
+                        value === flag.id ? "opacity-100" : "opacity-0"
                       )}
                     />
                   </CommandItem>

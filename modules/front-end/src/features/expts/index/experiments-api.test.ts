@@ -20,7 +20,7 @@ describe("experiments API", () => {
 
     await fetchExperiments("env / 1", {
       name: "checkout",
-      flagKey: "checkout-redesign",
+      flagId: "flag-1",
       pageIndex: 1,
       pageSize: 20,
     })
@@ -32,7 +32,7 @@ describe("experiments API", () => {
       pageIndex: "1",
       pageSize: "20",
       name: "checkout",
-      flagKey: "checkout-redesign",
+      flagId: "flag-1",
     })
   })
 
@@ -52,7 +52,9 @@ describe("experiments API", () => {
         name: "Checkout",
         runCount: 1,
         stage: "hypothesis",
+        flagId: "flag-1",
         flagKey: "checkout",
+        flagName: "Checkout",
         stateSummary: { runs: [run], hasLearning: index === 0 },
       })),
       totalCount: 30,
@@ -62,7 +64,7 @@ describe("experiments API", () => {
       "env-1",
       {
         name: "",
-        flagKey: "",
+        flagId: "",
         scope: "page",
         pageIndex: 2,
         pageSize: 10,
@@ -116,7 +118,7 @@ describe("experiments API", () => {
 
     const result = await fetchExperimentList("env-1", {
       name: "checkout",
-      flagKey: "checkout",
+      flagId: "flag-1",
       scope: "all",
       pageIndex: 2,
       pageSize: 10,
@@ -138,7 +140,7 @@ describe("experiments API", () => {
     for (const url of listRequests) {
       expect(url.searchParams.get("stage")).toBeNull()
       expect(url.searchParams.get("name")).toBe("checkout")
-      expect(url.searchParams.get("flagKey")).toBe("checkout")
+      expect(url.searchParams.get("flagId")).toBe("flag-1")
       expect(url.searchParams.get("pageSize")).toBe("100")
     }
   })
@@ -149,7 +151,7 @@ describe("experiments API", () => {
     await expect(
       fetchExperimentList("env-1", {
         name: "",
-        flagKey: "",
+        flagId: "",
         scope: "page",
         pageIndex: 0,
         pageSize: 10,
@@ -185,7 +187,7 @@ describe("experiments API", () => {
 
     const request = fetchExperimentList(
       "env-1",
-      { name: "", flagKey: "", scope: "all", pageIndex: 0, pageSize: 10 },
+      { name: "", flagId: "", scope: "all", pageIndex: 0, pageSize: 10 },
       controller.signal
     )
     const cancelled = expect(request).rejects.toThrow()

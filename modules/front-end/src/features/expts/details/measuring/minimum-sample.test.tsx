@@ -46,7 +46,9 @@ const experiment: ExperimentDetail = {
   name: "Checkout",
   description: null,
   stage: "measuring",
+  flagId: "flag-1",
   flagKey: "checkout",
+  flagName: null,
   envId: "env-1",
   runCount: 1,
   hypothesis: null,
@@ -67,7 +69,7 @@ function renderMeasuring() {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false, staleTime: Infinity } },
   })
-  queryClient.setQueryData(["experiment-feature-flag", "env-1", "checkout"], {
+  queryClient.setQueryData(["experiment-feature-flag", "env-1", "flag-1"], {
     variations: [
       { id: "control", name: "Original", value: "false" },
       { id: "candidate", name: "Updated", value: "true" },

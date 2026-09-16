@@ -8,7 +8,7 @@ public class Experiment : AuditedEntity
 
     public string Stage { get; set; } = "hypothesis";
 
-    public string FlagKey { get; set; }
+    public Guid? FlagId { get; set; }
 
     public Guid? EnvId { get; set; }
 

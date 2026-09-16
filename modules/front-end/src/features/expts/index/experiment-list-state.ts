@@ -48,7 +48,7 @@ function observationWindow(run: ExperimentRunStateSummary) {
 export function experimentListState(
   experiment: Pick<
     ExperimentListDataItem,
-    "flagKey" | "experimentRuns" | "hasLearning"
+    "flagId" | "experimentRuns" | "hasLearning"
   >,
   now: number
 ): ExperimentListState {
@@ -88,7 +88,7 @@ export function experimentListState(
   // Scheduled runs and runs without an observation window are still in exposure.
   return {
     key:
-      runs.length || experiment.flagKey?.trim() ? "implementing" : "hypothesis",
+      runs.length || experiment.flagId?.trim() ? "implementing" : "hypothesis",
   }
 }
 
