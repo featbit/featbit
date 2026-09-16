@@ -113,7 +113,7 @@ public class ExperimentControllerTests
         var response = await client.PutAsJsonAsync($"{BasePath}/{ExperimentId}", new
         {
             primaryMetric = "activation",
-            guardrails = "[]"
+            guardrailMetrics = "[]"
         });
 
         await Verify(response);
