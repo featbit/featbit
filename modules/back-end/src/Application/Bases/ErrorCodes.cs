@@ -34,6 +34,9 @@ public static class ErrorCodes
     // feature flag
     public const string CannotDeleteUnarchivedFeatureFlag = nameof(CannotDeleteUnarchivedFeatureFlag);
 
+    // experiments
+    public const string ExperimentRunPrimaryMetricSnapshotMissing = nameof(ExperimentRunPrimaryMetricSnapshotMissing);
+
     // triggers
     public const string InvalidTriggerToken = nameof(InvalidTriggerToken);
     public const string TriggerTokenNotMatchOrHasExpired = nameof(TriggerTokenNotMatchOrHasExpired);

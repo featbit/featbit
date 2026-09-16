@@ -67,7 +67,7 @@ public class ExperimentMcpTools(
     }
 
     [McpServerTool(Name = "featbit_experiment_update_metrics")]
-    [Description("Select registered primary and guardrail metrics for a experiment experiment. Primary metric must already exist in the metric registry and is selected by metricId, metricKey, or legacy metricEvent-as-key. Guardrails must be a JSON array selecting registered metrics by metricId, metricKey, key, or event.")]
+    [Description("Select registered metrics by metricId as defaults for future experiment runs. Provide primaryMetric with metricId and expectedDirection (increase_good or decrease_good), and guardrailMetrics as an array of metricId and direction (increase_bad or decrease_bad). Existing runs retain their independent metric snapshots. Metric names, SDK event names, types, and aggregations come from the metric registry.")]
     public async Task<ExperimentDetailVm> UpdateMetrics(
         [Description("Experiment experiment id.")]
         Guid experimentId,
@@ -85,7 +85,7 @@ public class ExperimentMcpTools(
     }
 
     [McpServerTool(Name = "featbit_experiment_create_run")]
-    [Description("Create a new experiment experiment run.")]
+    [Description("Create an experiment run with an independent snapshot of the experiment's current primary metric and guardrails. Configure the experiment's primary metric first. The run's metric identity, SDK event name, calculation settings, and directions are fixed at creation.")]
     public async Task<ExperimentDetailVm> CreateRun(
         [Description("Experiment experiment id.")]
         Guid experimentId)
@@ -100,7 +100,7 @@ public class ExperimentMcpTools(
     }
 
     [McpServerTool(Name = "featbit_experiment_update_run")]
-    [Description("Patch an experiment run, including method, metrics, variants, observations, input data, analysis result, decision, or learning fields.")]
+    [Description("Patch an experiment run's method, variants, observations, input data, analysis result, decision, or learning fields. Metric snapshots cannot be edited; update the experiment's metric defaults and create a new run to use different metrics.")]
     public async Task<ExperimentDetailVm> UpdateRun(
         [Description("Experiment experiment id.")]
         Guid experimentId,

@@ -108,7 +108,7 @@ function ExperimentRuns({ usage }: { usage?: MetricExperimentUsage[] }) {
   })
 
   return (
-    <div className="min-w-64">
+    <div className="min-w-0">
       <div className="divide-y">
         {visibleUsage.map((item) => (
           <div key={item.experimentId} className="py-2 first:pt-0 last:pb-0">
@@ -156,19 +156,22 @@ export function MetricsTable({
   const { t } = useTranslation()
 
   return (
-    <Table className="min-w-[1120px] table-fixed">
+    <Table className="min-w-[1040px] table-fixed">
       <TableHeader className="border-b text-left text-foreground">
         <TableRow className="hover:bg-transparent">
-          <TableHead className="w-[34%] px-5 py-4 font-semibold">
+          <TableHead className="w-[24%] px-5 py-4 font-semibold">
             {t("releaseDecision.metrics.columns.metric")}
           </TableHead>
-          <TableHead className="w-[22%] px-5 py-4 font-semibold">
+          <TableHead className="w-[18%] px-5 py-4 font-semibold">
+            {t("releaseDecision.metrics.columns.eventName")}
+          </TableHead>
+          <TableHead className="w-[18%] px-5 py-4 font-semibold">
             {t("releaseDecision.metrics.columns.typeAggregation")}
           </TableHead>
-          <TableHead className="w-[31%] px-5 py-4 font-semibold">
+          <TableHead className="w-[23%] px-5 py-4 font-semibold">
             {t("releaseDecision.metrics.columns.experimentRuns")}
           </TableHead>
-          <TableHead className="w-[13%] px-5 py-4 font-semibold">
+          <TableHead className="w-[17%] px-5 py-4 font-semibold">
             {t("releaseDecision.metrics.columns.actions")}
           </TableHead>
         </TableRow>
@@ -177,7 +180,7 @@ export function MetricsTable({
         {loading ? (
           Array.from({ length: 5 }).map((_, rowIndex) => (
             <TableRow key={rowIndex}>
-              {["metric", "type", "runs", "actions"].map((column) => (
+              {["metric", "event", "type", "runs", "actions"].map((column) => (
                 <TableCell key={column} className="px-5 py-3">
                   <Skeleton
                     className={
@@ -190,7 +193,7 @@ export function MetricsTable({
           ))
         ) : items.length === 0 ? (
           <TableRow>
-            <TableCell colSpan={4} className="p-0">
+            <TableCell colSpan={5} className="p-0">
               <div className="flex min-h-64 flex-col items-center justify-center gap-2 px-6 py-12 text-center">
                 <p className="text-sm font-medium text-foreground">
                   {query
@@ -277,6 +280,14 @@ export function MetricsTable({
                       </p>
                     ) : null}
                   </div>
+                </TableCell>
+                <TableCell className="px-5 py-3 align-middle">
+                  <p
+                    className="truncate font-mono text-xs"
+                    title={metric.eventName}
+                  >
+                    {metric.eventName}
+                  </p>
                 </TableCell>
                 <TableCell className="px-5 py-3 align-middle">
                   <div className="space-y-1">

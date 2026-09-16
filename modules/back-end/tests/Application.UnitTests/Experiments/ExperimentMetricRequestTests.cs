@@ -5,6 +5,34 @@ namespace Application.UnitTests.Experiments;
 
 public class ExperimentMetricRequestTests
 {
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData(" \t\n ")]
+    public void CatalogWriteValidators_RejectMissingEventName(string? eventName)
+    {
+        var create = new CreateExperimentMetricRequest { Name = "Conversion", Key = "conversion", EventName = eventName };
+        var update = new UpdateExperimentMetricRequest { Name = "Conversion", EventName = eventName };
+
+        Assert.Contains(new CreateExperimentMetricRequestValidator().Validate(create).Errors,
+            error => error.PropertyName == nameof(create.EventName));
+        Assert.Contains(new UpdateExperimentMetricRequestValidator().Validate(update).Errors,
+            error => error.PropertyName == nameof(update.EventName));
+    }
+
+    [Theory]
+    [InlineData(256, true)]
+    [InlineData(257, false)]
+    public void CatalogWriteValidators_EnforceEventNameLength(int length, bool valid)
+    {
+        var eventName = new string('e', length);
+        var create = new CreateExperimentMetricRequest { Name = "Conversion", Key = "conversion", EventName = eventName };
+        var update = new UpdateExperimentMetricRequest { Name = "Conversion", EventName = eventName };
+
+        Assert.Equal(valid, new CreateExperimentMetricRequestValidator().Validate(create).IsValid);
+        Assert.Equal(valid, new UpdateExperimentMetricRequestValidator().Validate(update).IsValid);
+    }
+
     [Fact]
     public void UpdateRequest_DoesNotExposeKeyOrStatus()
     {
@@ -24,6 +52,7 @@ public class ExperimentMetricRequestTests
     {
         var createRequest = new CreateExperimentMetricRequest
         {
+            EventName = "purchase",
             Name = "Revenue",
             Key = "revenue",
             MetricType = "numeric",
@@ -31,12 +60,14 @@ public class ExperimentMetricRequestTests
         };
         var updateRequest = new UpdateExperimentMetricRequest
         {
+            EventName = "purchase",
             Name = "Revenue",
             MetricType = "numeric",
             MetricAgg = "sum"
         };
         var continuousCreateRequest = new CreateExperimentMetricRequest
         {
+            EventName = "purchase",
             Name = "Revenue",
             Key = "revenue",
             MetricType = "continuous",
@@ -44,6 +75,7 @@ public class ExperimentMetricRequestTests
         };
         var continuousUpdateRequest = new UpdateExperimentMetricRequest
         {
+            EventName = "purchase",
             Name = "Revenue",
             MetricType = "continuous",
             MetricAgg = "sum"
@@ -69,6 +101,7 @@ public class ExperimentMetricRequestTests
         using var document = JsonDocument.Parse("\"value\"");
         var request = new UpdateExperimentMetricRequest
         {
+            EventName = "purchase",
             Name = "Checkout conversion",
             MetricType = "binary",
             MetricAgg = "once",
@@ -94,6 +127,7 @@ public class ExperimentMetricRequestTests
             Id = Guid.NewGuid(),
             Request = new UpdateExperimentMetricRequest
             {
+                EventName = "purchase",
                 Name = "Checkout conversion",
                 MetricType = "binary",
                 MetricAgg = "once",

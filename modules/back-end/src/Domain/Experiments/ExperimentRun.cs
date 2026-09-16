@@ -12,13 +12,9 @@ public class ExperimentRun : AuditedEntity
 
     public string MethodReason { get; set; }
 
-    public string PrimaryMetricEvent { get; set; }
+    public PrimaryMetricConfig PrimaryMetric { get; set; }
 
-    public string MetricDescription { get; set; }
-
-    public string GuardrailEvents { get; set; }
-
-    public string GuardrailDescriptions { get; set; }
+    public List<GuardrailMetricConfig> GuardrailMetrics { get; set; } = [];
 
     public string ControlVariant { get; set; }
 
@@ -57,10 +53,6 @@ public class ExperimentRun : AuditedEntity
     public string WhyItHappened { get; set; }
 
     public string NextHypothesis { get; set; }
-
-    public string PrimaryMetricAgg { get; set; } = "once";
-
-    public string PrimaryMetricType { get; set; } = "binary";
 
     public double? TrafficPercent { get; set; } = 100;
 

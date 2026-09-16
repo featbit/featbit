@@ -7,6 +7,7 @@ export const enMetrics = {
   new: "New metric",
   columns: {
     metric: "Metric",
+    eventName: "Event name",
     typeAggregation: "Type & aggregation",
     experimentRuns: "Experiment runs",
     actions: "Actions",
@@ -72,9 +73,15 @@ export const enMetrics = {
     name: "Name *",
     key: "Key *",
     keyReadOnly: "Key",
-    keyHelper: "Stable SDK .track event key used by experiment analysis.",
+    keyHelper:
+      "Stable identifier for this metric, separate from its event name.",
     keyReadOnlyHelper:
       "Metric key cannot be changed after creation because experiment runs may reference it.",
+    eventName: "Event name *",
+    eventNameHelper:
+      "Must match the event name sent by SDK .track(). Multiple metrics can use the same event.",
+    eventNameRequired: "Enter an event name.",
+    eventNameTooLong: "Event name must be 256 characters or fewer.",
     type: "Type *",
     aggregation: "Aggregation *",
     description: "Description (optional)",
@@ -107,6 +114,7 @@ export const zhMetrics = {
   new: "新建指标",
   columns: {
     metric: "指标",
+    eventName: "事件名称",
     typeAggregation: "类型与聚合方式",
     experimentRuns: "实验运行",
     actions: "操作",
@@ -172,8 +180,13 @@ export const zhMetrics = {
     name: "名称 *",
     key: "键 *",
     keyReadOnly: "键",
-    keyHelper: "供 SDK .track 事件和实验分析使用的稳定键。",
+    keyHelper: "指标的稳定标识，与事件名称分开。",
     keyReadOnlyHelper: "创建后不能修改指标键，因为实验运行可能正在引用它。",
+    eventName: "事件名称 *",
+    eventNameHelper:
+      "必须与 SDK .track() 上报的事件名称一致。多个指标可以使用同一个事件。",
+    eventNameRequired: "请输入事件名称。",
+    eventNameTooLong: "事件名称不能超过 256 个字符。",
     type: "类型 *",
     aggregation: "聚合方式 *",
     description: "描述（可选）",

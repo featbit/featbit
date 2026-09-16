@@ -57,6 +57,12 @@
         <EmbeddedResource Include="Fixtures\vNext.sql">
             <LogicalName>FeatBitPostgresInitDb.vNext.sql</LogicalName>
         </EmbeddedResource>
+        <EmbeddedResource Include="..\..\..\..\infra\postgresql\migrations\experiment-metric-snapshots.sql">
+            <LogicalName>ExperimentMetricSnapshots.sql</LogicalName>
+        </EmbeddedResource>
+        <EmbeddedResource Include="..\..\..\..\infra\postgresql\migrations\experiment-metric-event-name.sql">
+            <LogicalName>ExperimentMetricEventName.sql</LogicalName>
+        </EmbeddedResource>
     </ItemGroup>
 
 </Project>

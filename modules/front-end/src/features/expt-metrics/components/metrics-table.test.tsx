@@ -9,6 +9,7 @@ const metric: Metric = {
   envId: "env-id",
   name: "Checkout conversion",
   key: "checkout_completed",
+  eventName: "purchase",
   description: "Customers who complete checkout",
   metricType: "binary",
   metricAgg: "once",
@@ -51,6 +52,10 @@ describe("MetricsTable", () => {
     )
 
     expect(screen.getAllByText("Pricing experiment")).toHaveLength(2)
+    expect(
+      screen.getByRole("columnheader", { name: "Event name" })
+    ).toBeVisible()
+    expect(screen.getByText("purchase")).toBeVisible()
     expect(screen.getByText("Primary")).toBeVisible()
     expect(screen.getByText("Guardrail")).toBeVisible()
     expect(screen.getByText("Run 3")).toBeVisible()

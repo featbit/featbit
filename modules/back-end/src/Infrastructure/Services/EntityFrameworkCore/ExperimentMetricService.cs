@@ -12,9 +12,9 @@ public class ExperimentMetricService(AppDbContext dbContext) : IExperimentMetric
     public async Task<PagedResult<ExperimentMetric>> GetListAsync(
         Guid envId,
         ExperimentMetricFilter filter,
-        IReadOnlyCollection<string> referencedKeys)
+        IReadOnlyCollection<Guid> referencedIds)
     {
-        referencedKeys ??= [];
+        referencedIds ??= [];
 
         filter ??= new ExperimentMetricFilter();
 
@@ -28,7 +28,7 @@ public class ExperimentMetricService(AppDbContext dbContext) : IExperimentMetric
             query = query.Where(x =>
                 x.Name.ToLower().Contains(searchText) ||
                 x.Key.ToLower().Contains(searchText) ||
-                referencedKeys.Contains(x.Key));
+                referencedIds.Contains(x.Id));
         }
 
         if (!string.IsNullOrWhiteSpace(filter.Name))
@@ -70,6 +70,8 @@ public class ExperimentMetricService(AppDbContext dbContext) : IExperimentMetric
             EnvId = envId,
             Name = Normalize(request.Name)!,
             Key = Normalize(request.Key)!,
+            EventName = Normalize(request.EventName)
+                ?? throw new ArgumentException("Event name is required.", nameof(request)),
             Description = Normalize(request.Description),
             MetricType = NormalizeMetricType(request.MetricType),
             MetricAgg = NormalizeMetricAgg(request.MetricType, request.MetricAgg),
@@ -92,6 +94,8 @@ public class ExperimentMetricService(AppDbContext dbContext) : IExperimentMetric
         ArgumentNullException.ThrowIfNull(request);
         var metric = await GetTrackedMetricAsync(envId, id);
         metric.Name = Normalize(request.Name, metric.Name)!;
+        metric.EventName = Normalize(request.EventName)
+            ?? throw new ArgumentException("Event name is required.", nameof(request));
         metric.Description = Normalize(request.Description);
         metric.MetricType = NormalizeMetricType(request.MetricType);
         metric.MetricAgg = NormalizeMetricAgg(metric.MetricType, request.MetricAgg);

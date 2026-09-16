@@ -38,7 +38,7 @@ const experiment: ExperimentDetail = {
   conflictAnalysis: null,
   lastLearning: null,
   primaryMetric: null,
-  guardrails: null,
+  guardrailMetrics: null,
   experimentRuns: [run("run-1"), run("run-2")],
   createdAt: "2026-08-29T10:00:00Z",
   updatedAt: "2026-08-31T10:00:00Z",

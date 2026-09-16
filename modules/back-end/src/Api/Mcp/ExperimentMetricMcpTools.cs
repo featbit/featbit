@@ -180,8 +180,11 @@ public class ExperimentMcpMetricCreateRequest : IConfirmedExperimentMetricReques
     [Description("Metric display name.")]
     public string Name { get; set; } = string.Empty;
 
-    [Description("Stable event key used by SDK .track and analysis, for example checkout_completed.")]
+    [Description("Stable identifier for this metric, for example purchase_conversion. Separate from the SDK event name.")]
     public string Key { get; set; } = string.Empty;
+
+    [Description("Required SDK .track event name, for example purchase. Multiple metrics may use the same event.")]
+    public string EventName { get; set; } = string.Empty;
 
     [Description("Metric description.")]
     public string Description { get; set; } = string.Empty;
@@ -196,6 +199,7 @@ public class ExperimentMcpMetricCreateRequest : IConfirmedExperimentMetricReques
     {
         Name = Name,
         Key = Key,
+        EventName = EventName,
         Description = Description,
         MetricType = MetricType,
         MetricAgg = MetricAgg
@@ -210,6 +214,9 @@ public class ExperimentMcpMetricUpdateRequest : IConfirmedExperimentMetricReques
     [Description("Metric display name.")]
     public string Name { get; set; } = string.Empty;
 
+    [Description("Required SDK .track event name, for example purchase. Multiple metrics may use the same event.")]
+    public string EventName { get; set; } = string.Empty;
+
     [Description("Metric description.")]
     public string Description { get; set; } = string.Empty;
 
@@ -222,6 +229,7 @@ public class ExperimentMcpMetricUpdateRequest : IConfirmedExperimentMetricReques
     public UpdateExperimentMetricRequest ToUpdateRequest() => new()
     {
         Name = Name,
+        EventName = EventName,
         Description = Description,
         MetricType = MetricType,
         MetricAgg = MetricAgg

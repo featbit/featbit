@@ -1,5 +1,4 @@
 import type { ExperimentDetail } from "../experiment-details-types"
-import { parsePrimaryMetric } from "../exposure/exposure-utils"
 import type { MeasuringRun, ParsedAnalysis } from "./measuring-types"
 
 export function analysisBlocker(
@@ -14,10 +13,7 @@ export function analysisBlocker(
   const method = run.method?.trim().toLowerCase()
   if (
     !experiment.flagKey?.trim() ||
-    !(
-      run.primaryMetricEvent?.trim() ||
-      parsePrimaryMetric(experiment.primaryMetric)?.key
-    ) ||
+    !run.primaryMetric?.eventName?.trim() ||
     method !== "bayesian_ab" ||
     !control ||
     !treatments.length ||

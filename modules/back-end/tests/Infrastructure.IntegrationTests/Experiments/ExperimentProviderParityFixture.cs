@@ -324,7 +324,7 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
 
     internal AppDbContext CreateDbContext() => AppDbContextFactory.Create(PostgresConnectionString);
 
-    private MongoDbClient CreateMongoDbClient()
+    internal MongoDbClient CreateMongoDbClient()
     {
         return new MongoDbClient(Options.Create(new MongoDbOptions
         {

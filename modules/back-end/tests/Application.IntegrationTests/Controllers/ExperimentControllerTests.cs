@@ -1,6 +1,10 @@
 using System.Linq.Expressions;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using Api.Controllers;
+using Application.Bases;
+using Application.Bases.Exceptions;
 using Application.Bases.Models;
 using Application.Experiments;
 using Application.Services;
@@ -123,15 +127,58 @@ public class ExperimentControllerTests
 
         var response = await client.PutAsJsonAsync($"{BasePath}/{ExperimentId}/metrics", new
         {
-            metricName = "",
-            metricEvent = "checkout activated",
-            metricType = "unsupported",
-            metricAgg = "median",
-            expectedDirection = "flat",
-            guardrails = "[{\"event\":\"latency\",\"metricType\":\"binary\",\"metricAgg\":\"once\"}]"
+            primaryMetric = new { metricId = Guid.Empty, expectedDirection = "flat" },
+            guardrailMetrics = new[] { new { metricId = Guid.Empty, direction = "flat" } }
         });
 
         await Verify(response);
+    }
+
+    [Fact]
+    public async Task UpdateMetrics_IgnoresUnmappedFields()
+    {
+        var metricId = Guid.NewGuid();
+        var service = new Mock<IExperimentService>();
+        service.Setup(x => x.UpdateMetricsAsync(TestWorkspace.Id, ExperimentId,
+                It.Is<ExperimentMetricsUpdate>(update => update.PrimaryMetric.MetricId == metricId &&
+                    update.PrimaryMetric.ExpectedDirection == "increase_good" && update.GuardrailMetrics.Count == 0)))
+            .ReturnsAsync(new ExperimentDetailVm { Id = ExperimentId, EnvId = TestWorkspace.Id });
+        using var factory = CreateFactory(service.Object);
+        using var client = await _app.CreateAuthenticatedClientAsync(factory);
+
+        using var response = await client.PutAsJsonAsync($"{BasePath}/{ExperimentId}/metrics", new
+        {
+            primaryMetric = new { metricId, expectedDirection = "increase_good", eventName = "ignored" },
+            metricEvent = "purchase",
+            guardrailMetrics = Array.Empty<object>()
+        });
+
+        Assert.True(response.IsSuccessStatusCode);
+        service.VerifyAll();
+    }
+
+    [Fact]
+    public async Task UpdateMetrics_MetricIdsAndDirections_ReturnSuccess()
+    {
+        var metricId = Guid.NewGuid();
+        var guardrailId = Guid.NewGuid();
+        var service = new Mock<IExperimentService>();
+        service.Setup(x => x.UpdateMetricsAsync(TestWorkspace.Id, ExperimentId,
+                It.Is<ExperimentMetricsUpdate>(update => update.PrimaryMetric.MetricId == metricId &&
+                    update.PrimaryMetric.ExpectedDirection == "increase_good" && update.GuardrailMetrics.Count == 1 &&
+                    update.GuardrailMetrics[0].MetricId == guardrailId && update.GuardrailMetrics[0].Direction == "decrease_bad")))
+            .ReturnsAsync(new ExperimentDetailVm { Id = ExperimentId, EnvId = TestWorkspace.Id });
+        using var factory = CreateFactory(service.Object);
+        using var client = await _app.CreateAuthenticatedClientAsync(factory);
+
+        using var response = await client.PutAsJsonAsync($"{BasePath}/{ExperimentId}/metrics", new
+        {
+            primaryMetric = new { metricId, expectedDirection = "increase_good" },
+            guardrailMetrics = new[] { new { metricId = guardrailId, direction = "decrease_bad" } }
+        });
+
+        Assert.True(response.IsSuccessStatusCode);
+        service.VerifyAll();
     }
 
     [Fact]
@@ -149,6 +196,28 @@ public class ExperimentControllerTests
             new { forceFresh = true });
 
         Assert.True(response.IsSuccessStatusCode);
+        service.VerifyAll();
+    }
+
+    [Fact]
+    public async Task AnalyzeRun_MissingPrimaryMetricSnapshot_ReturnsUnprocessableEntity()
+    {
+        var service = new Mock<IExperimentService>();
+        service
+            .Setup(x => x.AnalyzeRunAsync(TestWorkspace.Id, ExperimentId, RunId, It.IsAny<ExperimentRunAnalyzeRequest>()))
+            .ThrowsAsync(new BusinessException(ErrorCodes.ExperimentRunPrimaryMetricSnapshotMissing));
+        using var factory = CreateFactory(service.Object);
+        using var client = await _app.CreateAuthenticatedClientAsync(factory);
+
+        using var response = await client.PostAsJsonAsync(
+            $"{BasePath}/{ExperimentId}/runs/{RunId}/analyze",
+            new { forceFresh = true });
+
+        Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
+        var body = await response.Content.ReadFromJsonAsync<ApiResponse<object>>();
+        Assert.NotNull(body);
+        Assert.False(body.Success);
+        Assert.Equal(ErrorCodes.ExperimentRunPrimaryMetricSnapshotMissing, Assert.Single(body.Errors));
         service.VerifyAll();
     }
 

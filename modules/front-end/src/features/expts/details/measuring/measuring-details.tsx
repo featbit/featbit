@@ -441,14 +441,14 @@ export function FullAnalysis({
               kind="primaryMetric"
               eventKey={
                 analysis.primary.event ||
-                run.primaryMetricEvent ||
+                run.primaryMetric?.eventName ||
                 analysis.primary.label ||
                 "—"
               }
               inverse={analysis.primary.inverse}
             />
             <p className="text-xs text-muted-foreground">
-              {run.metricDescription}
+              {run.primaryMetric?.description}
             </p>
           </div>
           {analysis.primary.rows.length ? (
@@ -884,6 +884,8 @@ export function MeasuringDetails({
     },
   })
 
+  const hasPrimaryMetric = Boolean(experiment.primaryMetric?.eventName?.trim())
+
   const openNewRunDialog = () => {
     const normalized = normalizeNewRunVariants("", [], flagVariations)
     createMutation.reset()
@@ -942,6 +944,8 @@ export function MeasuringDetails({
       setNewRunWindowError(resolved.error)
       return
     }
+
+    if (!hasPrimaryMetric) return
 
     createMutation.mutate({
       setup: {
@@ -1331,6 +1335,19 @@ export function MeasuringDetails({
             </DialogDescription>
           </DialogHeader>
           <div className="-mx-1 space-y-5 overflow-y-auto px-1 pt-2">
+            <p className="text-sm text-muted-foreground">
+              {hasPrimaryMetric
+                ? t(
+                    "releaseDecision.experiments.detailsPage.measuring.metricSnapshot",
+                    {
+                      metric: experiment.primaryMetric?.name,
+                      event: experiment.primaryMetric?.eventName,
+                    }
+                  )
+                : t(
+                    "releaseDecision.experiments.detailsPage.measuring.metricsRequired"
+                  )}
+            </p>
             <section className="space-y-3">
               <Label>
                 {t(
@@ -1547,6 +1564,7 @@ export function MeasuringDetails({
               type="button"
               disabled={
                 createMutation.isPending ||
+                !hasPrimaryMetric ||
                 !newRunControlVariant ||
                 newRunTreatmentVariants.length === 0 ||
                 flagVariations.length < 2

@@ -118,6 +118,7 @@ public class ExperimentFlagBindingTests(ExperimentProviderParityFixture fixture)
     private static Experiment Experiment(Guid envId, Guid? flagId = null) => new()
     {
         Id = Guid.NewGuid(), EnvId = envId, FlagId = flagId, Name = "Flag binding test",
+        PrimaryMetric = new PrimaryMetricConfig { MetricId = Guid.NewGuid(), MetricKey = "purchase", EventName = "purchase" },
         CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow
     };
 
