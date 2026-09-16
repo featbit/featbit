@@ -68,7 +68,13 @@ public class FeatureFlagController : ApiControllerBase
     [Authorize(Permissions.CanAccessEnv)]
     public async Task<ApiResponse<FeatureFlag>> GetByIdAsync(Guid envId, Guid id)
     {
-        var flag = await Mediator.Send(new GetFeatureFlagById { EnvId = envId, Id = id });
+        var request = new GetFeatureFlagById
+        {
+            EnvId = envId,
+            Id = id
+        };
+
+        var flag = await Mediator.Send(request);
         return Ok(flag);
     }
 
