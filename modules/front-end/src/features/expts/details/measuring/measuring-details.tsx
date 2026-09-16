@@ -1335,19 +1335,26 @@ export function MeasuringDetails({
             </DialogDescription>
           </DialogHeader>
           <div className="-mx-1 space-y-5 overflow-y-auto px-1 pt-2">
-            <p className="text-sm text-muted-foreground">
-              {hasPrimaryMetric
-                ? t(
-                    "releaseDecision.experiments.detailsPage.measuring.metricSnapshot",
-                    {
-                      metric: experiment.primaryMetric?.name,
-                      event: experiment.primaryMetric?.eventName,
-                    }
-                  )
-                : t(
+            {hasPrimaryMetric ? (
+              <p className="text-sm text-muted-foreground">
+                {t(
+                  "releaseDecision.experiments.detailsPage.measuring.metricSnapshot",
+                  {
+                    metric: experiment.primaryMetric?.name,
+                    event: experiment.primaryMetric?.eventName,
+                  }
+                )}
+              </p>
+            ) : (
+              <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
+                <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+                <span>
+                  {t(
                     "releaseDecision.experiments.detailsPage.measuring.metricsRequired"
                   )}
-            </p>
+                </span>
+              </div>
+            )}
             <section className="space-y-3">
               <Label>
                 {t(
