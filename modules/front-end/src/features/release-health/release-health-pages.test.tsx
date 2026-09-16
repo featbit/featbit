@@ -433,7 +433,7 @@ describe("Release Health design pages", () => {
     expect(screen.getByLabelText("Client secret")).toBeVisible()
   })
 
-  it("configures an environment source through the four-step PromQL flow", async () => {
+  it("configures an environment source with the metric contract beside the PromQL flow", async () => {
     renderLive(
       <MemoryRouter
         initialEntries={[
@@ -450,12 +450,11 @@ describe("Release Health design pages", () => {
     )
 
     expect(
-      await screen.findByRole("heading", { name: "Manage source binding" })
+      await screen.findByRole("heading", { name: "Checkout error rate" })
     ).toBeVisible()
-    expect(await screen.findByText("1. Provider and connection")).toBeVisible()
-    expect(screen.getByText("2. Query and schedule")).toBeVisible()
-    expect(screen.getByText("3. Validate and preview")).toBeVisible()
-    expect(screen.getByText("4. Review and save")).toBeVisible()
+    expect(await screen.findByLabelText("Select connection")).toBeVisible()
+    expect(screen.getByText("Query and schedule")).toBeVisible()
+    expect(screen.getByText("Review and save")).toBeVisible()
     expect(screen.getByLabelText("PromQL")).toBeVisible()
     expect(screen.getByText(/query_range · range/)).toBeVisible()
     expect(screen.queryByLabelText("Feature flag")).not.toBeInTheDocument()

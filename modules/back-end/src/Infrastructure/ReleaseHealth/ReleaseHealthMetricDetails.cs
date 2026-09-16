@@ -125,19 +125,25 @@ public sealed partial class ReleaseHealthService
         var history = (await store.ListAsync(envId, "binding_revision", ct)).Select(Read<BindingView>)
             .Where(x => x.MetricVersionId == metric.MetricVersionId && x.Revision != binding.Revision)
             .Append(binding).OrderBy(x => x.ValidatedAt).ToArray();
+        var step = Schema.Text(binding.ProviderConfig, "step");
         List<MetricPoint> points = [];
         for (var index = 0; index < history.Length; index++)
         {
             var revision = history[index];
             var start = index == 0 || from > revision.ValidatedAt ? from : revision.ValidatedAt;
-            var end = index + 1 < history.Length && history[index + 1].ValidatedAt < to ? history[index + 1].ValidatedAt : to;
-            if (start >= end) continue;
+            var endsAtRevision = index + 1 < history.Length && history[index + 1].ValidatedAt <= to;
+            var end = endsAtRevision ? history[index + 1].ValidatedAt : to;
+            if (start > end || (start == end && endsAtRevision)) continue;
             var connection = await Required(envId, "connection", revision.ConnectionId, ct);
             var state = Read<ConnectionState>(connection);
             if (state.Revision != revision.ConnectionRevision) throw Schema.Invalid("connection_changed_revalidate");
+            // Browsing uses the current sampling interval with each segment's historical query.
+            // Work on a copy: saved revisions and monitoring evidence retain their original step.
+            var config = JsonNode.Parse(revision.ProviderConfig.GetRawText())!;
+            config["step"] = step;
             var values = await Provider(state.ProviderType, state.ProviderSchemaVersion)
-                .QueryAsync(Resolve(connection), revision.ProviderConfig, start, end, ct);
-            points.AddRange(values.Where(x => index + 1 == history.Length || x.Timestamp < end)
+                .QueryAsync(Resolve(connection), JsonSerializer.SerializeToElement(config), start, end, ct);
+            points.AddRange(values.Where(x => !endsAtRevision || x.Timestamp < end)
                 .Select(x => x with { SourceBindingRevision = revision.Revision }));
         }
         var (minimum, maximum) = Schema.ResultContract(metric.ResultContract);

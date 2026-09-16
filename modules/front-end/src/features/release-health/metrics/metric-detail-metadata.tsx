@@ -147,7 +147,6 @@ export function MetricDetailSource({
         <p className="text-xs text-muted-foreground">
           {t("releaseHealth.live.detail.sourceHelp", {
             environment: context.envName,
-            version: metric.version,
           })}
         </p>
         {source ? (

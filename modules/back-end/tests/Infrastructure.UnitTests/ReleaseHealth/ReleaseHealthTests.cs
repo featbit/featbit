@@ -230,6 +230,79 @@ public class ReleaseHealthTests
         Assert.Equal("metric", Assert.Single(otherEnv).Kind);
     }
 
+    [Theory]
+    [InlineData("5s", 5)]
+    [InlineData("15s", 15)]
+    [InlineData("1m", 60)]
+    [InlineData("5m", 300)]
+    [InlineData("15m", 900)]
+    public async Task TrendRangeUsesCurrentStepAcrossHistoricalQueriesWithoutChangingSavedRevisions(string step, int seconds)
+    {
+        var store = new MemoryStore();
+        var service = Service(store, Configuration(), out var provider);
+        var requests = new List<(string Query, string Step, DateTimeOffset Start, DateTimeOffset End)>();
+        provider.Setup(x => x.ValidateBinding(It.IsAny<JsonElement>())).Returns((JsonElement config) => config);
+        provider.Setup(x => x.QueryAsync(It.IsAny<ProviderConnection>(), It.IsAny<JsonElement>(), It.IsAny<DateTimeOffset>(), It.IsAny<DateTimeOffset>(), It.IsAny<CancellationToken>()))
+            .Returns((ProviderConnection _, JsonElement config, DateTimeOffset start, DateTimeOffset end, CancellationToken _) =>
+            {
+                var query = Schema.Text(config, "promql");
+                var interval = Schema.Text(config, "step");
+                requests.Add((query, interval, start, end));
+                var width = int.Parse(interval[..^1]) * (interval.EndsWith('m') ? 60 : 1);
+                IReadOnlyList<MetricPoint> points = Enumerable.Range(0, (int)((end - start).TotalSeconds / width) + 1)
+                    .Select(index => new MetricPoint(start.AddSeconds(index * width), query == "sum(up)" ? 10 : 20)).ToArray();
+                return Task.FromResult(points);
+            });
+        var project = Guid.NewGuid(); var env = Guid.NewGuid(); var actor = Guid.NewGuid();
+        var metric = await service.CreateMetric(project, MetricDefinition(), default);
+        var connection = (await service.TestOrSave(project, env, null, Write(), actor, true, default))!;
+        var to = DateTimeOffset.FromUnixTimeSeconds(DateTimeOffset.UtcNow.AddMinutes(-1).ToUnixTimeSeconds());
+        var from = to.AddHours(-1);
+        var changedAt = from.AddMinutes(30);
+        async Task SaveBinding(string query, string interval, long? expected, DateTimeOffset effectiveAt)
+        {
+            var config = Schema.Json(new { promql = query, step = interval, queryMode = "range" });
+            await service.PreviewOrSaveBinding(project, env, metric.Id,
+                new(connection.Id, connection.Revision, connection.ProviderType, 1, config, expected), true, actor, default);
+            var binding = (await service.Binding(project, env, metric.Id, default))!;
+            var document = (await store.FindAsync(env, "binding", metric.MetricVersionId, default))!;
+            store.Document = document with { Payload = Schema.Json(binding with { ValidatedAt = effectiveAt }).GetRawText() };
+        }
+        await SaveBinding("sum(up)", step == "15m" ? "1m" : "15m", null, from.AddHours(-1));
+        await SaveBinding("sum(errors)", step, 1, changedAt);
+        var savedHistory = Assert.Single(await store.ListAsync(env, "binding_revision", default));
+        var savedCurrent = await store.FindAsync(env, "binding", metric.MetricVersionId, default);
+        var savedAudit = await service.Changes(project, env, metric.Id, from, DateTimeOffset.UtcNow.AddSeconds(1), default);
+        requests.Clear();
+
+        var trend = await service.TrendRange(project, env, metric.Id, from, to, default);
+
+        Assert.Equal(Enumerable.Range(0, 3600 / seconds + 1).Select(index => from.AddSeconds(index * seconds)),
+            trend.Points.Select(point => point.Timestamp));
+        Assert.Collection(requests,
+            request => Assert.Equal(("sum(up)", step, from, changedAt), request),
+            request => Assert.Equal(("sum(errors)", step, changedAt, to), request));
+        Assert.All(trend.Points, point =>
+        {
+            Assert.Equal(point.Timestamp < changedAt ? 10d : 20d, point.Value);
+            Assert.Equal(point.Timestamp < changedAt ? 1L : 2L, point.SourceBindingRevision);
+        });
+
+        // A wholly historical range also uses the current browsing resolution.
+        requests.Clear();
+        var historical = await service.TrendRange(project, env, metric.Id, from, from.AddMinutes(15), default);
+        Assert.Equal(900 / seconds + 1, historical.Points.Count);
+        Assert.Equal(("sum(up)", step, from, from.AddMinutes(15)), Assert.Single(requests));
+        var boundary = await service.TrendRange(project, env, metric.Id, from, changedAt, default);
+        Assert.Equal(1800 / seconds + 1, boundary.Points.Count);
+        Assert.Equal(new MetricPoint(changedAt, 20, 2), boundary.Points.Last());
+        Assert.Equal(savedHistory, Assert.Single(await store.ListAsync(env, "binding_revision", default)));
+        Assert.Equal(savedCurrent, await store.FindAsync(env, "binding", metric.MetricVersionId, default));
+        Assert.Equal(savedAudit.Select(x => Schema.Json(x).GetRawText()),
+            (await service.Changes(project, env, metric.Id, from, DateTimeOffset.UtcNow.AddSeconds(1), default))
+                .Select(x => Schema.Json(x).GetRawText()));
+    }
+
     [Fact]
     public async Task ContractBoundsCannotWidenUnitRangeAndNoopDoesNotCreateAnAuditEvent()
     {

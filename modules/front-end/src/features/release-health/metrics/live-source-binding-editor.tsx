@@ -25,8 +25,7 @@ import {
   type ReleaseHealthScope,
 } from "../release-health-api"
 import { LiveTrendChart } from "./live-metric-panel"
-import { metricResultProfileLabel } from "./metric-contract"
-import { toast } from "sonner"
+import { SourceConnectionSelect } from "./source-connection-select"
 import {
   Card,
   CardHeader,
@@ -34,7 +33,6 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import {
   AlertDialog,
   AlertDialogContent,
@@ -125,7 +123,6 @@ function BindingForm({
   const [binding] = useState(latestBinding)
   const bindingChanged = binding?.revision !== latestBinding?.revision
   const [discardOpen, setDiscardOpen] = useState(false)
-  const [testing, setTesting] = useState(false)
   const form = useForm<Draft>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -156,19 +153,6 @@ function BindingForm({
       binding.connectionRevision ||
     values.promql !== binding.providerConfig.promql ||
     values.step !== binding.providerConfig.step
-  async function testConnection() {
-    if (!values.connectionId) return
-    setTesting(true)
-    setError(false)
-    try {
-      await releaseHealthApi.testSaved(scope, values.connectionId)
-      toast.success(t("releaseHealth.live.testPassed"))
-    } catch {
-      toast.error(t("releaseHealth.live.connectionFailed"))
-    } finally {
-      setTesting(false)
-    }
-  }
   function write(value: Draft) {
     const connection = connections.find(
       (item) => item.id === value.connectionId
@@ -225,78 +209,21 @@ function BindingForm({
   return (
     <>
       <form onSubmit={form.handleSubmit(validate)} className="space-y-4">
-        <Card>
+        <SourceConnectionSelect
+          scope={scope}
+          connections={connections}
+          value={values.connectionId}
+          onValueChange={(value) =>
+            form.setValue("connectionId", value, { shouldDirty: true })
+          }
+          disabled={saving || form.formState.isSubmitting}
+        />
+        <Card role="region" aria-labelledby="binding-query-heading">
           <CardHeader>
             <CardTitle>
-              1. {t("releaseHealth.metrics.sourceBinding.providerStep")}
-            </CardTitle>
-            <CardDescription>
-              {t("releaseHealth.metrics.sourceBinding.providerStepHelp")}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Badge variant="outline">Prometheus-compatible · v1</Badge>
-            {!connections.length && (
-              <p className="text-sm text-muted-foreground">
-                {t("releaseHealth.metrics.sourceBinding.noConnections")}
-              </p>
-            )}
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="live-binding-connection">
-                  {t("releaseHealth.connections.connection")}
-                </Label>
-                <Select
-                  value={values.connectionId}
-                  disabled={!connections.length}
-                  onValueChange={(value) =>
-                    value &&
-                    form.setValue("connectionId", value, { shouldDirty: true })
-                  }
-                >
-                  <SelectTrigger
-                    id="live-binding-connection"
-                    className="w-full"
-                  >
-                    <SelectValue>
-                      {connections.find((x) => x.id === values.connectionId)
-                        ?.name ?? "—"}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      {connections.map((connection) => (
-                        <SelectItem key={connection.id} value={connection.id}>
-                          {connection.name} · r{connection.revision}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex items-end">
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={
-                    !values.connectionId ||
-                    !connections.length ||
-                    testing ||
-                    saving ||
-                    form.formState.isSubmitting
-                  }
-                  onClick={testConnection}
-                >
-                  {t("releaseHealth.connections.test")}
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              2. {t("releaseHealth.metrics.sourceBinding.queryStep")}
+              <h2 id="binding-query-heading">
+                {t("releaseHealth.metrics.sourceBinding.queryStep")}
+              </h2>
             </CardTitle>
             <CardDescription>
               {t("releaseHealth.live.syncUnavailable")}
@@ -341,54 +268,7 @@ function BindingForm({
                 {...form.register("promql")}
               />
             </div>
-            <div className="rounded-md border bg-muted/20 p-4">
-              <p className="text-sm font-medium">
-                {t("releaseHealth.metrics.resultSemantics")}
-              </p>
-              <p className="mt-2 text-sm">{metric.resultSemantics}</p>
-              <p className="mt-2 font-mono text-xs">
-                {metricResultProfileLabel(t, metric)} · numeric_time_series ·
-                single
-              </p>
-              <p className="mt-2 text-xs text-muted-foreground">
-                {t("releaseHealth.metrics.detail.constraints")}:{" "}
-                {metric.resultContract.constraints.minimum ?? 0} –{" "}
-                {metric.resultContract.constraints.maximum ??
-                  (metric.resultContract.unit.kind === "percent"
-                    ? 100
-                    : metric.resultContract.unit.kind === "ratio"
-                      ? 1
-                      : "∞")}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              3. {t("releaseHealth.metrics.sourceBinding.validate")}
-            </CardTitle>
-            <CardDescription>
-              {t("releaseHealth.live.bindingHelp")}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {error ||
-            bindingChanged ||
-            Object.keys(form.formState.errors).length ? (
-              <Alert variant="destructive">
-                <AlertDescription>
-                  {t("releaseHealth.live.queryFailed")}
-                </AlertDescription>
-              </Alert>
-            ) : null}
-            {preview?.fingerprint === fingerprint ? (
-              <LiveTrendChart
-                trend={preview.data}
-                fractionDigits={metric.fractionDigits ?? 2}
-              />
-            ) : null}
-            <div className="flex justify-end gap-2">
+            <div className="flex justify-end">
               <Button
                 type="submit"
                 variant="outline"
@@ -402,17 +282,34 @@ function BindingForm({
                 {t("releaseHealth.metrics.sourceBinding.validate")}
               </Button>
             </div>
+            {error ||
+            bindingChanged ||
+            Object.keys(form.formState.errors).length ? (
+              <Alert variant="destructive">
+                <AlertDescription>
+                  {t("releaseHealth.live.queryFailed")}
+                </AlertDescription>
+              </Alert>
+            ) : null}
+            {preview?.fingerprint === fingerprint ? (
+              <div className="border-t pt-4">
+                <LiveTrendChart
+                  trend={preview.data}
+                  fractionDigits={metric.fractionDigits ?? 2}
+                />
+              </div>
+            ) : null}
           </CardContent>
         </Card>
         <Card>
           <CardHeader>
             <CardTitle>
-              4. {t("releaseHealth.metrics.sourceBinding.reviewStep")}
+              {t("releaseHealth.metrics.sourceBinding.reviewStep")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm">
-              {metric.name} · v{metric.version} · {environmentName} ·{" "}
+              {metric.name} · {environmentName} ·{" "}
               {connections.find((c) => c.id === values.connectionId)?.name ??
                 "—"}{" "}
               · Step {values.step}

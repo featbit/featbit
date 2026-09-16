@@ -497,6 +497,11 @@ export const enReleaseHealth = {
       connection: "Environment connection",
       createConnection: "Create connection",
       chooseConnection: "Choose a connection",
+      selectConnection: "Select connection",
+      testing: "Testing…",
+      testPassed: "Connected",
+      testFailed: "Connection failed",
+      testedAt: "Tested",
       noConnections:
         "No connections in this environment. Create one in Release Health → Connections, then return here.",
       providerStep: "Provider and connection",
@@ -1433,6 +1438,11 @@ export const zhReleaseHealth: typeof enReleaseHealth = {
       connection: "环境连接",
       createConnection: "创建 Connection",
       chooseConnection: "选择 Connection",
+      selectConnection: "选择 Connection",
+      testing: "测试中…",
+      testPassed: "连接成功",
+      testFailed: "连接失败",
+      testedAt: "测试时间",
       noConnections:
         "当前环境暂无连接。请先到 Release Health → Connections 创建，再返回此页。",
       providerStep: "Provider 与 Connection",

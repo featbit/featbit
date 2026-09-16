@@ -3,8 +3,6 @@ import { useTranslation } from "react-i18next"
 import { useNavigate, useParams } from "react-router-dom"
 import { DetailBackLink } from "@/components/detail-back-link"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent } from "@/components/ui/card"
 import {
   fetchProjects,
   getCurrentProjectEnv,
@@ -14,7 +12,7 @@ import {
 } from "@/features/layout/layout-context"
 import { LiveBindingEditor } from "./live-source-binding-editor"
 import { useLiveMetrics, useMetricPermissions } from "./live-metric-data"
-import { metricResultProfileLabel } from "./metric-contract"
+import { SourceBindingContract } from "./source-binding-contract"
 
 export function ReleaseMetricSourceBindingPage() {
   const { t } = useTranslation()
@@ -67,22 +65,17 @@ export function ReleaseMetricSourceBindingPage() {
         </Alert>
       ) : (
         <>
-          <header className="mb-6">
-            <h1 className="text-2xl font-semibold">
+          <header className="mb-5">
+            <p className="mb-1 text-sm text-muted-foreground">
               {t("releaseHealth.live.manageBinding")}
-            </h1>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {t("releaseHealth.metrics.sourceBinding.description", {
-                metric: metric.name,
-                environment: environment.name,
-              })}
             </p>
+            <h1 className="text-2xl font-semibold tracking-tight break-words">
+              {metric.name}
+            </h1>
+            <code className="mt-2 block text-sm break-all text-muted-foreground">
+              {metric.key}
+            </code>
           </header>
-          <Alert className="mb-5">
-            <AlertDescription>
-              {t("releaseHealth.metrics.sourceBinding.boundaryNotice")}
-            </AlertDescription>
-          </Alert>
           {context.envId !== environment.id ? (
             <Alert className="mb-4">
               <AlertDescription>
@@ -92,24 +85,7 @@ export function ReleaseMetricSourceBindingPage() {
               </AlertDescription>
             </Alert>
           ) : null}
-          <Card size="sm" className="mb-4">
-            <CardContent className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
-              <div>
-                <p className="mb-1 text-xs text-muted-foreground">
-                  {t("releaseHealth.metrics.sourceBinding.metric")}
-                </p>
-                <p className="flex flex-wrap items-center gap-2 font-medium">
-                  {metric.name}
-                  <Badge variant="outline">v{metric.version}</Badge>
-                </p>
-              </div>
-              <code className="text-xs break-all">{metric.key}</code>
-              <p className="text-xs text-muted-foreground">
-                {metricResultProfileLabel(t, metric)} ·{" "}
-                {t("releaseHealth.resultContract.singleSeries")}
-              </p>
-            </CardContent>
-          </Card>
+          <SourceBindingContract metric={metric} />
           <LiveBindingEditor
             key={context.projectId + environment.id + metric.id}
             scope={{ projectId: context.projectId, envId: environment.id }}

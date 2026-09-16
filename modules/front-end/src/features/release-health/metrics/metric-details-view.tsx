@@ -160,7 +160,6 @@ export function MetricDetailsView({
               <h1 className="text-2xl font-semibold tracking-tight break-words">
                 {metric.name}
               </h1>
-              <Badge variant="secondary">v{metric.version}</Badge>
               <Badge variant="outline" aria-label={d("category")}>
                 {metric.category
                   ? t(`releaseHealth.category.${metric.category}`)
@@ -334,7 +333,6 @@ export function MetricDetailsView({
               ) : trend.data.status === "not_connected" ? (
                 <div className="flex h-64 items-center justify-center rounded-md bg-muted/25 text-sm text-muted-foreground">
                   {t("releaseHealth.live.detail.emptySource", {
-                    version: metric.version,
                     environment: context.envName,
                   })}
                 </div>
@@ -384,7 +382,6 @@ export function MetricDetailsView({
           <MetricDetailTable
             headings={[
               "monitor",
-              "version",
               "status",
               "use",
               "window",
@@ -407,8 +404,12 @@ export function MetricDetailsView({
                   <p className="font-mono text-xs text-muted-foreground">
                     {binding.flagKey}
                   </p>
+                  {binding.metricVersion !== metric.version && (
+                    <p className="text-xs text-muted-foreground">
+                      {d("earlierContract")}
+                    </p>
+                  )}
                 </div>,
-                `v${binding.metricVersion}`,
                 <Badge variant="outline">
                   {d(binding.status === "paused" ? "paused" : "enabled")}
                 </Badge>,

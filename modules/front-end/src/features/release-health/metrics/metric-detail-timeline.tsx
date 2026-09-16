@@ -173,7 +173,6 @@ export function MetricDetailTimeline({
                       defaultValue: event.operation,
                     })}
                   </span>
-                  <Badge variant="outline">v{event.metricVersion}</Badge>
                 </div>
                 <dl className="grid grid-cols-2 gap-3 text-sm">
                   <div>

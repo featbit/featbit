@@ -264,11 +264,7 @@ export function MetricDetailEditor({
             )}
             {versionChanged ? (
               <Alert>
-                <AlertDescription>
-                  {t("releaseHealth.live.detail.rebind", {
-                    version: metric.version + 1,
-                  })}
-                </AlertDescription>
+                <AlertDescription>{d("rebind")}</AlertDescription>
               </Alert>
             ) : (
               <p className="text-sm text-muted-foreground">
@@ -294,9 +290,7 @@ export function MetricDetailEditor({
               {isSubmitting
                 ? d("saving")
                 : versionChanged
-                  ? t("releaseHealth.live.detail.newVersion", {
-                      version: metric.version + 1,
-                    })
+                  ? d("saveContract")
                   : d("save")}
             </Button>
           </SheetFooter>
