@@ -9,7 +9,6 @@ using Infrastructure.IntegrationTests.Fixtures;
 using Infrastructure.OLAP.ClickHouse;
 using Infrastructure.Persistence.EntityFrameworkCore;
 using Infrastructure.Persistence.MongoDb;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Npgsql;
 using NpgsqlTypes;
@@ -315,16 +314,15 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
             metricService);
     }
 
-    internal AppDbContext CreateDbContext()
+    internal IFeatureFlagService CreateFeatureFlagService(string provider) => provider switch
     {
-        var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseNpgsql(PostgresConnectionString, options => options.EnableRetryOnFailure())
-            .UseSnakeCaseNamingConvention()
-            .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
-            .Options;
+        "Postgres" => new global::Infrastructure.Services.EntityFrameworkCore.FeatureFlagService(
+            CreateDbContext(), NullLogger<FeatureFlagService>.Instance),
+        "MongoDb" => new global::Infrastructure.Services.MongoDb.FeatureFlagService(CreateMongoDbClient()),
+        _ => throw new ArgumentOutOfRangeException(nameof(provider), provider, null)
+    };
 
-        return new AppDbContext(options);
-    }
+    internal AppDbContext CreateDbContext() => AppDbContextFactory.Create(PostgresConnectionString);
 
     private MongoDbClient CreateMongoDbClient()
     {

@@ -22,7 +22,9 @@ describe("creating an experiment run", () => {
       name: "Checkout",
       description: null,
       stage: "measuring",
+      flagId: "flag-1",
       flagKey: "checkout",
+      flagName: null,
       envId: "env-1",
       runCount: 0,
       hypothesis: null,
@@ -59,7 +61,7 @@ describe("creating an experiment run", () => {
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false, staleTime: Infinity } },
     })
-    queryClient.setQueryData(["experiment-feature-flag", "env-1", "checkout"], {
+    queryClient.setQueryData(["experiment-feature-flag", "env-1", "flag-1"], {
       variations: [
         { id: "control-id", name: "Original", value: "false" },
         { id: "treatment-id", name: "Updated", value: "true" },

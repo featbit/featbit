@@ -28,6 +28,7 @@ public class ExperimentService(
 
     public async Task<ExperimentVm> CreateAsync(Experiment experiment)
     {
+        var flag = await ExperimentFlagBinding.ValidateAsync(featureFlagService, experiment.EnvId, experiment.FlagId);
         await dbContext.Set<Experiment>().AddAsync(experiment);
         await AddActivityAsync(
             experiment.Id,
@@ -37,7 +38,7 @@ public class ExperimentService(
             experiment.CreatedAt);
         await dbContext.SaveChangesAsync();
 
-        return ToVm(experiment);
+        return ToVm(experiment, flag);
     }
 
     public async Task<ExperimentDetailVm> GetAsync(Guid envId, Guid id)
@@ -52,8 +53,9 @@ public class ExperimentService(
         }
 
         await LoadExperimentChildrenAsync(experiment);
-        await AlignRunsForReadAsync(envId, experiment);
-        return ToDetailVm(experiment);
+        var flag = await TryGetBoundFeatureFlagAsync(envId, experiment);
+        AlignRunsForRead(experiment, flag);
+        return ToDetailVm(experiment, flag);
     }
 
     public async Task<Guid> GetEnvIdAsync(Guid id)
@@ -110,6 +112,7 @@ public class ExperimentService(
             throw new EntityNotFoundException(nameof(Experiment), $"{envId}-{id}");
         }
 
+        await ExperimentFlagBinding.ValidateAsync(featureFlagService, envId, update.FlagId);
         var originalStage = experiment.Stage;
 
         ApplyUpdate(experiment, update);
@@ -440,13 +443,10 @@ public class ExperimentService(
         var experiment = await GetTrackedExperimentAsync(envId, id);
         var run = await GetTrackedRunAsync(id, runId);
         HydrateRunMetricConfig(run, experiment);
-        await AlignRunVariantsAsync(envId, experiment, run, inferMissing: true);
+        var flag = await ExperimentFlagBinding.RequireAsync(featureFlagService, envId, experiment.FlagId);
+        experiment.Variants = BuildFeatureFlagVariantsJson(flag);
+        AlignRunVariants(run, flag, inferMissing: true);
         var primaryMetricEvent = Normalize(run.PrimaryMetricEvent);
-
-        if (string.IsNullOrWhiteSpace(experiment.FlagKey))
-        {
-            throw new InvalidOperationException("Feature flag key is required before analysis.");
-        }
 
         if (string.IsNullOrWhiteSpace(primaryMetricEvent))
         {
@@ -465,7 +465,7 @@ public class ExperimentService(
         {
             RunId = run.Id,
             EnvId = envId,
-            FlagKey = experiment.FlagKey,
+            FlagKey = flag.Key,
             MetricEvent = primaryMetricEvent,
             StartDate = startDate,
             EndDate = endDate,
@@ -508,7 +508,7 @@ public class ExperimentService(
             {
                 RunId = run.Id,
                 EnvId = envId,
-                FlagKey = experiment.FlagKey,
+                FlagKey = flag.Key,
                 MetricEvent = guardrail.Event,
                 StartDate = startDate,
                 EndDate = endDate,
@@ -563,7 +563,7 @@ public class ExperimentService(
             id,
             "note",
             "Experiment run analyzed from FeatBit stats",
-            $"{experiment.FlagKey} · {primaryMetricEvent} · {startDate} to {endDate}",
+            $"{flag.Key} · {primaryMetricEvent} · {startDate} to {endDate}",
             run.UpdatedAt);
 
         await dbContext.SaveChangesAsync();
@@ -653,9 +653,9 @@ public class ExperimentService(
             query = query.Where(x => x.Stage == filter.Stage);
         }
 
-        if (!string.IsNullOrWhiteSpace(filter.FlagKey))
+        if (filter.FlagId.HasValue)
         {
-            query = query.Where(x => x.FlagKey.Contains(filter.FlagKey));
+            query = query.Where(x => x.FlagId == filter.FlagId);
         }
 
         var totalCount = await query.LongCountAsync();
@@ -670,7 +670,8 @@ public class ExperimentService(
             .ToListAsync();
 
         var runLookup = await BuildRunLookupAsync(experiments.Select(x => x.Id).ToArray());
-        var items = experiments.Select(experiment => ToVm(experiment, runLookup)).ToArray();
+        var flagLookup = await ExperimentFlagBinding.LoadAsync(featureFlagService, envId, experiments);
+        var items = experiments.Select(experiment => ToVm(experiment, flagLookup.GetValueOrDefault(experiment.FlagId.GetValueOrDefault()), runLookup)).ToArray();
 
         return new PagedResult<ExperimentVm>(totalCount, items);
     }
@@ -707,6 +708,7 @@ public class ExperimentService(
 
     private static ExperimentVm ToVm(
         Experiment experiment,
+        FeatureFlag? flag = null,
         IReadOnlyDictionary<Guid, ExperimentRun[]>? runLookup = null)
     {
         var runs = runLookup != null && runLookup.TryGetValue(experiment.Id, out var lookupRuns)
@@ -719,7 +721,9 @@ public class ExperimentService(
             Name = experiment.Name,
             Description = experiment.Description,
             Stage = experiment.Stage,
-            FlagKey = experiment.FlagKey,
+            FlagId = experiment.FlagId,
+            FlagKey = flag?.Key,
+            FlagName = flag?.Name,
             EnvId = experiment.EnvId,
             RunCount = runs.Length,
             RunMethodSummary = BuildRunMethodSummary(runs.Select(run => run.Method)),
@@ -744,9 +748,8 @@ public class ExperimentService(
             .ToListAsync();
     }
 
-    private async Task AlignRunsForReadAsync(Guid envId, Experiment experiment)
+    private static void AlignRunsForRead(Experiment experiment, FeatureFlag? flag)
     {
-        var flag = await TryGetBoundFeatureFlagAsync(envId, experiment);
         if (flag == null)
         {
             return;
@@ -775,25 +778,8 @@ public class ExperimentService(
         AlignRunVariants(run, flag, inferMissing);
     }
 
-    private async Task<FeatureFlag?> TryGetBoundFeatureFlagAsync(
-        Guid envId,
-        Experiment experiment)
-    {
-        var flagKey = Normalize(experiment.FlagKey);
-        if (string.IsNullOrWhiteSpace(flagKey))
-        {
-            return null;
-        }
-
-        try
-        {
-            return await featureFlagService.GetAsync(envId, flagKey);
-        }
-        catch (EntityNotFoundException)
-        {
-            return null;
-        }
-    }
+    private Task<FeatureFlag?> TryGetBoundFeatureFlagAsync(Guid envId, Experiment experiment) =>
+        ExperimentFlagBinding.FindAsync(featureFlagService, envId, experiment.FlagId);
 
     private static void AlignRunVariants(
         ExperimentRun run,
@@ -957,7 +943,7 @@ public class ExperimentService(
         return JsonSerializer.Serialize(rows);
     }
 
-    private static ExperimentDetailVm ToDetailVm(Experiment experiment)
+    private static ExperimentDetailVm ToDetailVm(Experiment experiment, FeatureFlag? flag)
     {
         var vm = new ExperimentDetailVm
         {
@@ -965,7 +951,9 @@ public class ExperimentService(
             Name = experiment.Name,
             Description = experiment.Description,
             Stage = experiment.Stage,
-            FlagKey = experiment.FlagKey,
+            FlagId = experiment.FlagId,
+            FlagKey = flag?.Key,
+            FlagName = flag?.Name,
             EnvId = experiment.EnvId,
             Hypothesis = experiment.Hypothesis,
             AccessToken = experiment.AccessToken,
@@ -1083,7 +1071,7 @@ public class ExperimentService(
         experiment.Name = Normalize(update.Name, experiment.Name);
         experiment.Description = Normalize(update.Description, experiment.Description);
         experiment.Stage = Normalize(update.Stage, experiment.Stage);
-        experiment.FlagKey = Normalize(update.FlagKey, experiment.FlagKey);
+        experiment.FlagId = update.FlagId ?? experiment.FlagId;
         experiment.Hypothesis = Normalize(update.Hypothesis, experiment.Hypothesis);
         experiment.AccessToken = Normalize(update.AccessToken, experiment.AccessToken);
         experiment.Change = Normalize(update.Change, experiment.Change);

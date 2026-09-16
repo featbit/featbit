@@ -9,7 +9,7 @@ public class ExperimentFilter
 
     public string Stage { get; set; }
 
-    public string FlagKey { get; set; }
+    public Guid? FlagId { get; set; }
 
     public int PageIndex { get; set; }
 
@@ -26,7 +26,11 @@ public class ExperimentVm
 
     public string Stage { get; set; }
 
+    public Guid? FlagId { get; set; }
+
     public string FlagKey { get; set; }
+
+    public string FlagName { get; set; }
 
     public Guid? EnvId { get; set; }
 
