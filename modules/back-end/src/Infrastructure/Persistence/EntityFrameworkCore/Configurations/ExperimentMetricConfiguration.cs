@@ -18,7 +18,6 @@ public class ExperimentMetricConfiguration : IEntityTypeConfiguration<Experiment
         builder.Property(x => x.EventName).HasColumnName("event_name").HasMaxLength(256).IsRequired();
         builder.Property(x => x.MetricType).HasColumnName("metric_type").HasMaxLength(64).IsRequired();
         builder.Property(x => x.MetricAgg).HasColumnName("metric_agg").HasMaxLength(64).IsRequired();
-        builder.Property(x => x.ExpectedDirection).HasColumnName("expected_direction").HasMaxLength(64).IsRequired();
         builder.Property(x => x.Status).HasMaxLength(64).IsRequired();
     }
 }

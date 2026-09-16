@@ -16,7 +16,5 @@ public class ExperimentMetric : AuditedEntity
 
     public string MetricAgg { get; set; } = "once";
 
-    public string ExpectedDirection { get; set; } = "increase_good";
-
     public string Status { get; set; } = "active";
 }

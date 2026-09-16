@@ -99,7 +99,6 @@ CREATE TABLE IF NOT EXISTS experiment_metrics (
     description text,
     metric_type character varying(64) NOT NULL,
     metric_agg character varying(64) NOT NULL,
-    expected_direction character varying(64) NOT NULL,
     status character varying(64) NOT NULL,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
