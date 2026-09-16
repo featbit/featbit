@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Archive, Loader2, MousePointerClick, Plus, Search } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { useParams } from "react-router-dom"
 import { toast } from "sonner"
 import {
   AlertDialog,
@@ -15,7 +16,10 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { TooltipProvider } from "@/components/ui/tooltip"
-import { getCurrentProjectEnv } from "@/features/layout/layout-context"
+import {
+  getCurrentProjectEnv,
+  resolveLang,
+} from "@/features/layout/layout-context"
 import { MetricSheet } from "./components/metric-sheet"
 import { MetricsPagination } from "./components/metrics-pagination"
 import { MetricsTable } from "./components/metrics-table"
@@ -34,6 +38,8 @@ import type {
 
 export function MetricsPage() {
   const { t } = useTranslation()
+  const { lang: langParam } = useParams()
+  const lang = resolveLang(langParam)
   const queryClient = useQueryClient()
   const envId = getCurrentProjectEnv()?.envId ?? ""
   const [search, setSearch] = useState("")
@@ -205,6 +211,7 @@ export function MetricsPage() {
             loading={listQuery.isLoading}
             archived={archived}
             query={debouncedSearch}
+            lang={lang}
             mutatingId={mutatingId}
             onCopy={async (key) => {
               try {

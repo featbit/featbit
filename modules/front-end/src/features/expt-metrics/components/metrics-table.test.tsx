@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react"
+import { MemoryRouter } from "react-router-dom"
 import { describe, expect, it, vi } from "vitest"
 import "@/lib/i18n/i18n"
 import type { Metric } from "../metrics-types"
@@ -46,9 +47,11 @@ describe("MetricsTable", () => {
         loading={false}
         archived={false}
         query=""
+        lang="en"
         mutatingId={null}
         {...handlers}
-      />
+      />,
+      { wrapper: MemoryRouter }
     )
 
     expect(screen.getAllByText("Pricing experiment")).toHaveLength(2)
@@ -58,7 +61,12 @@ describe("MetricsTable", () => {
     expect(screen.getByText("purchase")).toBeVisible()
     expect(screen.getByText("Primary")).toBeVisible()
     expect(screen.getByText("Guardrail")).toBeVisible()
-    expect(screen.getByText("Run 3")).toBeVisible()
+    const runLink = screen.getByRole("link", { name: "Run 3" })
+    expect(runLink).toHaveAttribute(
+      "href",
+      "/en/experiments/experiment-id?stage=measuring&runId=run-3"
+    )
+    expect(runLink).toHaveAttribute("target", "_blank")
     expect(screen.queryByText("Running")).not.toBeInTheDocument()
     expect(screen.getByText("Run 2")).toBeVisible()
     expect(screen.queryByText("Completed")).not.toBeInTheDocument()
@@ -69,7 +77,10 @@ describe("MetricsTable", () => {
     expect(showMore).toHaveClass("justify-start", "px-0")
     fireEvent.click(showMore)
 
-    expect(screen.getByText("Run 1")).toBeVisible()
+    expect(screen.getByRole("link", { name: "Run 1" })).toHaveAttribute(
+      "href",
+      "/en/experiments/experiment-id?stage=measuring&runId=run-1"
+    )
     expect(screen.queryByText("Draft")).not.toBeInTheDocument()
     expect(screen.getByRole("button", { name: "Show less" })).toBeVisible()
     expect(screen.getByRole("button", { name: "Edit" })).toBeVisible()
@@ -94,9 +105,11 @@ describe("MetricsTable", () => {
         loading={false}
         archived={false}
         query=""
+        lang="en"
         mutatingId={null}
         {...handlers}
-      />
+      />,
+      { wrapper: MemoryRouter }
     )
 
     expect(screen.getByText("No experiment runs")).toBeVisible()

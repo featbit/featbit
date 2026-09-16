@@ -1,6 +1,7 @@
 import { ChevronDown, ChevronUp, Copy } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
+import { Link } from "react-router-dom"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -12,6 +13,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { localizedPath } from "@/features/layout/layout-context"
+import type { Lang } from "@/features/layout/layout-types"
 import type {
   Metric,
   MetricExperimentUsage,
@@ -24,6 +27,7 @@ type Props = {
   loading: boolean
   archived: boolean
   query: string
+  lang: Lang
   mutatingId: string | null
   onCopy: (key: string) => void
   onEdit: (metric: Metric) => void
@@ -49,17 +53,40 @@ function RoleBadge({ role }: { role: MetricRole }) {
   )
 }
 
-function RunLine({ run }: { run: MetricRun }) {
+function RunLine({
+  run,
+  experimentId,
+  lang,
+}: {
+  run: MetricRun
+  experimentId: string
+  lang: Lang
+}) {
   return (
     <div className="flex min-h-5 items-center gap-2 text-xs">
-      <code className="max-w-36 min-w-0 truncate text-muted-foreground">
-        {run.key}
-      </code>
+      <Link
+        to={localizedPath(
+          lang,
+          `/experiments/${encodeURIComponent(experimentId)}?stage=measuring&runId=${encodeURIComponent(run.id)}`
+        )}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="max-w-36 min-w-0 truncate font-semibold text-foreground underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+        title={run.key}
+      >
+        <code>{run.key}</code>
+      </Link>
     </div>
   )
 }
 
-function UsageGroup({ usage }: { usage: MetricExperimentUsage }) {
+function UsageGroup({
+  usage,
+  lang,
+}: {
+  usage: MetricExperimentUsage
+  lang: Lang
+}) {
   const roleGroups = new Map<MetricRole, MetricRun[]>()
   for (const run of usage.runs ?? []) {
     roleGroups.set(run.role, [...(roleGroups.get(run.role) ?? []), run])
@@ -79,7 +106,12 @@ function UsageGroup({ usage }: { usage: MetricExperimentUsage }) {
             <RoleBadge role={role} />
           </div>
           {runs.map((run) => (
-            <RunLine key={run.id} run={run} />
+            <RunLine
+              key={run.id}
+              run={run}
+              experimentId={usage.experimentId}
+              lang={lang}
+            />
           ))}
         </div>
       ))}
@@ -87,7 +119,13 @@ function UsageGroup({ usage }: { usage: MetricExperimentUsage }) {
   )
 }
 
-function ExperimentRuns({ usage }: { usage?: MetricExperimentUsage[] }) {
+function ExperimentRuns({
+  usage,
+  lang,
+}: {
+  usage?: MetricExperimentUsage[]
+  lang: Lang
+}) {
   const { t } = useTranslation()
   const [expanded, setExpanded] = useState(false)
   const usageWithRuns = usage?.filter((item) => item.runs?.length)
@@ -112,7 +150,7 @@ function ExperimentRuns({ usage }: { usage?: MetricExperimentUsage[] }) {
       <div className="divide-y">
         {visibleUsage.map((item) => (
           <div key={item.experimentId} className="py-2 first:pt-0 last:pb-0">
-            <UsageGroup usage={item} />
+            <UsageGroup usage={item} lang={lang} />
           </div>
         ))}
       </div>
@@ -145,6 +183,7 @@ export function MetricsTable({
   loading,
   archived,
   query,
+  lang,
   mutatingId,
   onCopy,
   onEdit,
@@ -302,7 +341,7 @@ export function MetricsTable({
                   </div>
                 </TableCell>
                 <TableCell className="px-5 py-3 align-middle">
-                  <ExperimentRuns usage={metric.experimentUsage} />
+                  <ExperimentRuns usage={metric.experimentUsage} lang={lang} />
                 </TableCell>
                 <TableCell className="px-5 py-3 align-middle">
                   <div className="flex items-center gap-1 whitespace-nowrap">
