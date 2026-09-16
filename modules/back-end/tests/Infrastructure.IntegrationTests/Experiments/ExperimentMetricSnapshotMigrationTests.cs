@@ -3,37 +3,14 @@ using Npgsql;
 
 namespace Infrastructure.IntegrationTests.Experiments;
 
-public class ExperimentMetricSnapshotMigrationTests(PostgresFixture fixture)
-    : IntegrationTestBase, IClassFixture<PostgresFixture>
+public class ExperimentMetricSnapshotMigrationTests(FeatBitPostgresFixture fixture)
+    : IntegrationTestBase, IClassFixture<FeatBitPostgresFixture>
 {
     [DockerFact]
-    public async Task Migration_UpdatesEmptyTables_AndEnforcesColumnRequirements()
+    public async Task FixtureSchema_UsesTypedMetricColumns_AndEnforcesRequirements()
     {
-        var database = $"snapshot_{Guid.NewGuid():N}";
-        await using var bootstrap = new NpgsqlConnection(fixture.ConnectionString);
-        await bootstrap.OpenAsync();
-        await new NpgsqlCommand($"CREATE DATABASE {database}", bootstrap).ExecuteNonQueryAsync();
-        await using var connection = new NpgsqlConnection(new NpgsqlConnectionStringBuilder(fixture.ConnectionString)
-        {
-            Database = database
-        }.ToString());
+        await using var connection = new NpgsqlConnection(fixture.ConnectionString);
         await connection.OpenAsync();
-        await new NpgsqlCommand("""
-            CREATE TABLE experiment_metrics (id uuid PRIMARY KEY);
-            CREATE TABLE experiments (id uuid PRIMARY KEY, primary_metric text, guardrails text);
-            CREATE TABLE experiment_runs (
-                id uuid PRIMARY KEY, experiment_id uuid, primary_metric_event varchar(256), metric_description text,
-                primary_metric_type varchar(64), primary_metric_agg varchar(64), guardrail_events text,
-                guardrail_descriptions text, analysis_result text
-            );
-            """, connection).ExecuteNonQueryAsync();
-
-        foreach (var resource in new[] { "ExperimentMetricEventName.sql", "ExperimentMetricSnapshots.sql" })
-        {
-            using var migration = new StreamReader(typeof(ExperimentMetricSnapshotMigrationTests).Assembly
-                .GetManifestResourceStream(resource)!);
-            await new NpgsqlCommand(await migration.ReadToEndAsync(), connection).ExecuteNonQueryAsync();
-        }
 
         Assert.Equal(4L, await new NpgsqlCommand("""
             SELECT count(*) FROM information_schema.columns
@@ -47,20 +24,34 @@ public class ExperimentMetricSnapshotMigrationTests(PostgresFixture fixture)
                     'primary_metric_type', 'primary_metric_agg')
             """, connection).ExecuteScalarAsync());
 
-        foreach (var table in new[] { "experiments", "experiment_runs" })
+        var experimentId = Guid.NewGuid();
+        var runId = Guid.NewGuid();
+        Assert.Equal("[]", await new NpgsqlCommand($"""
+            INSERT INTO experiments (id, name, stage, created_at, updated_at)
+            VALUES ('{experimentId}', 'Metric schema test', 'hypothesis', now(), now())
+            RETURNING guardrail_metrics::text
+            """, connection).ExecuteScalarAsync());
+        Assert.Equal("[]", await new NpgsqlCommand($"""
+            INSERT INTO experiment_runs (id, experiment_id, slug, prior_proper, created_at, updated_at)
+            VALUES ('{runId}', '{experimentId}', 'run-1', false, now(), now())
+            RETURNING guardrail_metrics::text
+            """, connection).ExecuteScalarAsync());
+
+        foreach (var (table, id) in new[] { ("experiments", experimentId), ("experiment_runs", runId) })
         {
-            var id = Guid.NewGuid();
-            Assert.Equal("[]", await new NpgsqlCommand(
-                $"INSERT INTO {table} (id) VALUES ('{id}') RETURNING guardrail_metrics::text", connection).ExecuteScalarAsync());
-            await new NpgsqlCommand($"UPDATE {table} SET primary_metric = '{{}}'::jsonb", connection).ExecuteNonQueryAsync();
-            await AssertSqlStateAsync($"UPDATE {table} SET guardrail_metrics = NULL", PostgresErrorCodes.NotNullViolation);
+            await new NpgsqlCommand($"UPDATE {table} SET primary_metric = '{{}}'::jsonb WHERE id = '{id}'", connection).ExecuteNonQueryAsync();
+            await AssertSqlStateAsync($"UPDATE {table} SET guardrail_metrics = NULL WHERE id = '{id}'", PostgresErrorCodes.NotNullViolation);
         }
 
-        await new NpgsqlCommand(
-            $"INSERT INTO experiment_metrics (id, event_name) VALUES ('{Guid.NewGuid()}', repeat('测', 256))",
-            connection).ExecuteNonQueryAsync();
-        await AssertSqlStateAsync("UPDATE experiment_metrics SET event_name = repeat('测', 257)", PostgresErrorCodes.StringDataRightTruncation);
-        await AssertSqlStateAsync("UPDATE experiment_metrics SET event_name = NULL", PostgresErrorCodes.NotNullViolation);
+        var metricId = Guid.NewGuid();
+        await new NpgsqlCommand($"""
+            INSERT INTO experiment_metrics
+                (id, env_id, name, key, event_name, metric_type, metric_agg, status, created_at, updated_at)
+            VALUES ('{metricId}', '{Guid.NewGuid()}', 'Metric schema test', 'schema-test', repeat('测', 256),
+                'binary', 'once', 'active', now(), now())
+            """, connection).ExecuteNonQueryAsync();
+        await AssertSqlStateAsync($"UPDATE experiment_metrics SET event_name = repeat('测', 257) WHERE id = '{metricId}'", PostgresErrorCodes.StringDataRightTruncation);
+        await AssertSqlStateAsync($"UPDATE experiment_metrics SET event_name = NULL WHERE id = '{metricId}'", PostgresErrorCodes.NotNullViolation);
 
         async Task AssertSqlStateAsync(string sql, string sqlState)
         {
