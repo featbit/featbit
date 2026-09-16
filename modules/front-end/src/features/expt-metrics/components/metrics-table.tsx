@@ -13,7 +13,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { localizedPath } from "@/features/layout/layout-context"
+import {
+  getCurrentProjectEnv,
+  localizedPath,
+  localizedProjectEnvPath,
+} from "@/features/layout/layout-context"
 import type { Lang } from "@/features/layout/layout-types"
 import type {
   Metric,
@@ -62,13 +66,17 @@ function RunLine({
   experimentId: string
   lang: Lang
 }) {
+  const projectEnv = getCurrentProjectEnv()
+  const href = `/experiments/${encodeURIComponent(experimentId)}?stage=measuring&runId=${encodeURIComponent(run.id)}`
+
   return (
     <div className="flex min-h-5 items-center gap-2 text-xs">
       <Link
-        to={localizedPath(
-          lang,
-          `/experiments/${encodeURIComponent(experimentId)}?stage=measuring&runId=${encodeURIComponent(run.id)}`
-        )}
+        to={
+          projectEnv
+            ? localizedProjectEnvPath(lang, href, projectEnv)
+            : localizedPath(lang, href)
+        }
         target="_blank"
         rel="noopener noreferrer"
         className="max-w-36 min-w-0 truncate font-semibold text-foreground underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"

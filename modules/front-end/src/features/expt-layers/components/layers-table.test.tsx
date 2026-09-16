@@ -6,11 +6,25 @@ import {
   within,
 } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
-import { describe, expect, it, vi } from "vitest"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import "@/lib/i18n/i18n"
+import {
+  saveCurrentProjectEnv,
+  saveTabProjectEnv,
+} from "@/features/layout/layout-context"
+import type { ProjectEnv } from "@/features/layout/layout-types"
 import type { Layer } from "../layers-types"
 import { LayersTable } from "./layers-table"
+
+const projectEnv: ProjectEnv = {
+  projectId: "project-id",
+  projectName: "Project",
+  projectKey: "project",
+  envId: "env-id",
+  envName: "Production",
+  envKey: "production",
+}
 
 const layer: Layer = {
   id: "layer-id",
@@ -87,6 +101,12 @@ function renderTable(item: Layer) {
 }
 
 describe("LayersTable server allocation summary", () => {
+  beforeEach(() => {
+    localStorage.clear()
+    sessionStorage.clear()
+    saveCurrentProjectEnv(projectEnv)
+  })
+
   it("shows every run and provides complete allocation tooltips", async () => {
     renderTable(layer)
 
@@ -104,7 +124,7 @@ describe("LayersTable server allocation summary", () => {
     expect(screen.queryByText("Draft")).not.toBeInTheDocument()
     expect(screen.getAllByRole("link", { name: "expt 1" })[0]).toHaveAttribute(
       "href",
-      "/en/experiments/experiment-1?stage=measuring&runId=historical-run"
+      "/en/experiments/experiment-1?stage=measuring&runId=historical-run&context=environment&projectId=project-id&envId=env-id"
     )
     expect(
       screen.getByRole("button", { name: "Edit" }).querySelector("svg")
@@ -140,6 +160,33 @@ describe("LayersTable server allocation summary", () => {
     expect(within(tooltip).getByText("expt 2")).toBeVisible()
     expect(within(tooltip).getByText("run-1")).toBeVisible()
     expect(within(tooltip).getByText("80–90%")).toBeVisible()
+  })
+
+  it("carries the tab environment in run links and the experiment list fallback", () => {
+    saveCurrentProjectEnv({
+      ...projectEnv,
+      projectId: "default-project",
+      envId: "default-env",
+    })
+    saveTabProjectEnv(projectEnv)
+    renderTable({
+      ...layer,
+      experimentRuns: [
+        layer.experimentRuns![0]!,
+        { ...layer.experimentRuns![1]!, experimentId: undefined },
+      ],
+    })
+
+    const links = screen.getAllByRole("link", { name: "expt 1" })
+    expect(links[0]).toHaveAttribute(
+      "href",
+      "/en/experiments/experiment-1?stage=measuring&runId=historical-run&context=environment&projectId=project-id&envId=env-id"
+    )
+    expect(links[1]).toHaveAttribute(
+      "href",
+      "/en/experiments?context=environment&projectId=project-id&envId=env-id"
+    )
+    expect(links[0]).not.toHaveAttribute("target")
   })
 
   it("does not turn a missing server summary into an empty allocation", () => {
@@ -193,6 +240,12 @@ describe("LayersTable server allocation summary", () => {
   })
 
   it("shows every allocation run contributing to an overlap", async () => {
+    saveCurrentProjectEnv({
+      ...projectEnv,
+      projectId: "default-project",
+      envId: "default-env",
+    })
+    saveTabProjectEnv(projectEnv)
     renderTable({
       ...layer,
       experimentRuns: [
@@ -248,7 +301,7 @@ describe("LayersTable server allocation summary", () => {
     })
     expect(experimentLink).toHaveAttribute(
       "href",
-      "/en/experiments/experiment-1?stage=measuring&runId=current-run"
+      "/en/experiments/experiment-1?stage=measuring&runId=current-run&context=environment&projectId=project-id&envId=env-id"
     )
     expect(experimentLink).not.toHaveFocus()
 
