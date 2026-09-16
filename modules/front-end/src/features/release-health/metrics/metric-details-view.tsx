@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { Link, useParams } from "react-router-dom"
+import { useParams } from "react-router-dom"
 import { Clock3, Pencil, RefreshCw } from "lucide-react"
 import { useQueryClient } from "@tanstack/react-query"
 import { DetailBackLink } from "@/components/detail-back-link"
@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -24,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { MetricDetailTable } from "./metric-detail-table"
+import { MetricLinkedFlags } from "./metric-linked-flags"
 import { localizedPath, resolveLang } from "@/features/layout/layout-context"
 import type { ProjectEnv } from "@/features/layout/layout-types"
 import type { LiveMetric } from "../release-health-api"
@@ -369,73 +368,7 @@ export function MetricDetailsView({
           />
         </div>
       </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>{d("monitors")}</CardTitle>
-          <CardDescription>
-            {t("releaseHealth.live.detail.monitorsHelp", {
-              environment: context.envName,
-            })}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="px-0">
-          <MetricDetailTable
-            headings={[
-              "monitor",
-              "status",
-              "use",
-              "window",
-              "rule",
-              "latestCheck",
-            ].map(d)}
-            rows={(monitors.data ?? []).map((binding) => ({
-              id: binding.id,
-              cells: [
-                <div>
-                  <Link
-                    className="font-medium hover:underline"
-                    to={localizedPath(
-                      lang,
-                      `/feature-flags/${encodeURIComponent(binding.flagKey)}/release-health`
-                    )}
-                  >
-                    {binding.monitorName}
-                  </Link>
-                  <p className="font-mono text-xs text-muted-foreground">
-                    {binding.flagKey}
-                  </p>
-                  {binding.metricVersion !== metric.version && (
-                    <p className="text-xs text-muted-foreground">
-                      {d("earlierContract")}
-                    </p>
-                  )}
-                </div>,
-                <Badge variant="outline">
-                  {d(binding.status === "paused" ? "paused" : "enabled")}
-                </Badge>,
-                binding.use,
-                binding.window,
-                binding.rule,
-                <div>
-                  {binding.latestCheck ?? d("notChecked")}
-                  {binding.checkedAt && (
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(binding.checkedAt).toLocaleString()}
-                    </p>
-                  )}
-                </div>,
-              ],
-            }))}
-            empty={d(
-              monitors.isPending
-                ? "loading"
-                : monitors.isError
-                  ? "monitorsUnavailable"
-                  : "noMonitors"
-            )}
-          />
-        </CardContent>
-      </Card>
+      <MetricLinkedFlags context={context} bindings={monitors} />
       {editor && (
         <MetricDetailEditor
           key={`${metric.revision}-${editor}`}

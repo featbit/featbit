@@ -1,12 +1,10 @@
 import { Trans, useTranslation } from "react-i18next"
 import { ChangeReviewDialog } from "@/features/change-review/change-review-dialog"
-import { MonitorThisChangeSection } from "@/features/release-health/components/monitor-this-change-section"
 import type { VariationReviewChange } from "./variations-utils"
 
 export function VariationsReviewDialog({
   open,
   flagName,
-  flagKey,
   changes,
   requireComment,
   saving,
@@ -73,9 +71,6 @@ export function VariationsReviewDialog({
           showLess: t("featureFlags.detailsPage.review.showLess"),
         },
       }}
-      supplementalContent={
-        <MonitorThisChangeSection flagKey={flagKey ?? flagName} />
-      }
       onOpenChange={onOpenChange}
       onSave={onSave}
     />

@@ -3,7 +3,6 @@ import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import type {
   DataStatus,
-  GateStatus,
   HealthStatus,
   MetricObservationMode,
   MonitorPurpose,
@@ -22,13 +21,6 @@ const healthDots: Record<HealthStatus, string> = {
   warning: "bg-amber-500",
   critical: "bg-destructive",
   "not-evaluated": "bg-muted-foreground",
-}
-
-const gateDots: Record<GateStatus, string> = {
-  waiting: "bg-blue-500",
-  passing: "bg-emerald-600",
-  breached: "bg-destructive",
-  "approval-required": "bg-amber-500",
 }
 
 function DotBadge({
@@ -60,15 +52,6 @@ export function HealthStatusBadge({ status }: { status: HealthStatus }) {
   return (
     <DotBadge dotClassName={healthDots[status]}>
       {t(`releaseHealth.status.health.${status}`)}
-    </DotBadge>
-  )
-}
-
-export function GateStatusBadge({ status }: { status: GateStatus }) {
-  const { t } = useTranslation()
-  return (
-    <DotBadge dotClassName={gateDots[status]}>
-      {t(`releaseHealth.status.gate.${status}`)}
     </DotBadge>
   )
 }

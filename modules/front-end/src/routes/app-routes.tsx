@@ -202,6 +202,11 @@ const ReleaseMetricsPage = lazy(() =>
     })
   )
 )
+const ReleaseHealthAuditLogsPage = lazy(() =>
+  import("@/features/release-health/audit-logs/release-health-audit-logs-page").then(
+    (module) => ({ default: module.ReleaseHealthAuditLogsPage })
+  )
+)
 const ReleaseMetricDetailsPage = lazy(() =>
   import("@/features/release-health/metrics/release-metric-details-page").then(
     (module) => ({
@@ -220,20 +225,6 @@ const SourceConnectionsPage = lazy(() =>
   import("@/features/release-health/connections/live-source-connections-page").then(
     (module) => ({
       default: module.SourceConnectionsPage,
-    })
-  )
-)
-const HealthSessionsPage = lazy(() =>
-  import("@/features/release-health/sessions/health-sessions-page").then(
-    (module) => ({
-      default: module.HealthSessionsPage,
-    })
-  )
-)
-const HealthSessionDetailsPage = lazy(() =>
-  import("@/features/release-health/sessions/health-session-details-page").then(
-    (module) => ({
-      default: module.HealthSessionDetailsPage,
     })
   )
 )
@@ -474,12 +465,8 @@ export function AppRoutes() {
             element={<SourceConnectionsPage />}
           />
           <Route
-            path="release-health/sessions"
-            element={<HealthSessionsPage />}
-          />
-          <Route
-            path="release-health/sessions/:sessionId"
-            element={<HealthSessionDetailsPage />}
+            path="release-health/audit-logs"
+            element={<ReleaseHealthAuditLogsPage />}
           />
           <Route path="segments" element={<SegmentsPage />} />
           <Route path="segments/:segmentId" element={<SegmentDetailsPage />} />

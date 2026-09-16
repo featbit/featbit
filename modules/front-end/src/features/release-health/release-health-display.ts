@@ -1,14 +1,7 @@
 import type { TFunction } from "i18next"
-import type {
-  HealthAssessment,
-  HealthSession,
-  HealthSessionEvent,
-  ReleaseMetric,
-} from "./release-health-types"
+import type { ReleaseMetric } from "./release-health-types"
 
 type MetricField = "name" | "description" | "changeLabel" | "updatedAt"
-type SessionField =
-  "monitorName" | "flagName" | "triggerLabel" | "changeSummary"
 
 export function metricSampleText(
   t: TFunction,
@@ -22,37 +15,6 @@ export function metricSampleText(
 
   return t(`releaseHealth.samples.metrics.${metric.key}.${field}`, {
     defaultValue: fallback,
-  })
-}
-
-export function sessionSampleText(
-  t: TFunction,
-  session: HealthSession,
-  field: SessionField
-) {
-  return t(`releaseHealth.samples.sessions.${session.id}.${field}`, {
-    defaultValue: session[field],
-  })
-}
-
-export function assessmentSampleText(
-  t: TFunction,
-  assessment: HealthAssessment,
-  field: "reason" | "evidenceWindow"
-) {
-  return t(
-    `releaseHealth.samples.assessments.${assessment.metricId}.${field}`,
-    { defaultValue: assessment[field] }
-  )
-}
-
-export function eventSampleText(
-  t: TFunction,
-  event: HealthSessionEvent,
-  field: "title" | "description"
-) {
-  return t(`releaseHealth.samples.events.${event.id}.${field}`, {
-    defaultValue: event[field],
   })
 }
 
@@ -84,27 +46,4 @@ export function monitorSampleText(t: TFunction, monitor: string) {
   return key
     ? t(`releaseHealth.samples.monitors.${key}`, { defaultValue: monitor })
     : monitor
-}
-
-export function actionSampleText(t: TFunction, action: string) {
-  const keys: Record<string, string> = {
-    "Alert owners": "releaseHealth.monitor.alertOwners",
-    "Rich webhook": "releaseHealth.monitor.richWebhook",
-    "Require approval": "releaseHealth.monitor.requireApproval",
-  }
-  const key = keys[action]
-  return key ? t(key) : action
-}
-
-export function noDataPolicySampleText(t: TFunction, policy: string) {
-  const key =
-    policy === "Wait for required data; notify on Stale or Error"
-      ? "releaseHealth.samples.noDataPolicy.waitAndNotify"
-      : policy === "Notify and block"
-        ? "releaseHealth.samples.noDataPolicy.notifyAndBlock"
-        : policy === "Wait"
-          ? "releaseHealth.samples.noDataPolicy.wait"
-          : null
-
-  return key ? t(key) : policy
 }

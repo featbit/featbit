@@ -33,7 +33,6 @@ import {
 } from "@/components/ui/tooltip"
 import { ChangeLedger } from "@/features/change-review/change-ledger"
 import { ReviewSaveSplitButton } from "@/features/change-review/change-review-dialog"
-import { MonitorThisChangeSection } from "@/features/release-health/components/monitor-this-change-section"
 import { getStoredUserProfile } from "@/features/auth/auth-api"
 import {
   fetchOrganizationMembers,
@@ -215,7 +214,6 @@ function ReviewerPicker({
 export function TargetingSubmissionDialog({
   mode,
   flagName,
-  flagKey,
   changes,
   segmentNames,
   initialReason,
@@ -345,10 +343,6 @@ export function TargetingSubmissionDialog({
               onChange={(event) => setReason(event.target.value)}
             />
           </div>
-          <MonitorThisChangeSection
-            flagKey={flagKey ?? flagName}
-            startsWhen="applied"
-          />
           {schedule ? (
             <div className="flex items-center justify-between rounded-md border p-3">
               <div>

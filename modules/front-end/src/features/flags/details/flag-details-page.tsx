@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { getStoredUserProfile } from "@/features/auth/auth-api"
-import { MonitorThisChangeSection } from "@/features/release-health/components/monitor-this-change-section"
 import { FlagReleaseHealthTab } from "@/features/release-health/flag/flag-release-health-tab"
 import { currentUserPoliciesQueryOptions } from "@/features/iam/current-user-policy-query"
 import {
@@ -836,7 +835,6 @@ export function FlagDetailsPage() {
           target={confirmation}
           saving={toggleMutation.isPending}
           requireComment={settingsQuery.data?.requireChangeComment ?? false}
-          supplementalContent={<MonitorThisChangeSection flagKey={saved.key} />}
           onOpenChange={(open) => !open && setConfirmation(null)}
           onConfirm={(comment) =>
             confirmation?.nextEnabled !== undefined &&

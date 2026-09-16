@@ -7,6 +7,7 @@ import {
 } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { MemoryRouter, Route, Routes } from "react-router-dom"
+import { toast } from "sonner"
 import "@/lib/i18n/i18n"
 import { i18n } from "@/lib/i18n/i18n"
 import type { FeatureFlag } from "@/features/flags/flags-types"
@@ -18,7 +19,6 @@ import { ReleaseMetricDetailsPage } from "./metrics/release-metric-details-page"
 import { MetricDetailEditor } from "./metrics/metric-detail-editor"
 import { ReleaseMetricSourceBindingPage } from "./metrics/release-metric-source-binding-page"
 import { ReleaseHealthOverviewPage } from "./overview/release-health-overview-page"
-import { HealthSessionDetailsPage } from "./sessions/health-session-details-page"
 
 vi.mock("./release-health-api", async (original) => ({
   ...(await original<typeof import("./release-health-api")>()),
@@ -173,7 +173,7 @@ describe("Release Health design pages", () => {
     ).toBeVisible()
     expect(
       screen.getByText(
-        "Metric definitions belong to Commerce. Readings, monitors, and sessions below belong to Production."
+        "Metric definitions belong to Commerce. Readings and monitors below belong to Production."
       )
     ).toBeVisible()
     expect(screen.getByText("Environment metric streams")).toBeVisible()
@@ -202,7 +202,7 @@ describe("Release Health design pages", () => {
     expect(screen.getByText("Result contract")).toBeVisible()
     expect(screen.getByText("Environment trend")).toBeVisible()
     expect(screen.getByText("Change timeline")).toBeVisible()
-    expect(screen.getByText("Monitor bindings")).toBeVisible()
+    expect(screen.getByRole("region", { name: "Feature flags" })).toBeVisible()
     const trend = screen.getByRole("region", { name: "Environment trend" })
     expect(within(trend).getByText("Data status")).toBeVisible()
     expect(within(trend).getByText("Freshness")).toBeVisible()
@@ -483,37 +483,14 @@ describe("Release Health design pages", () => {
     ).toBeVisible()
     expect(screen.queryByText("> 2% for 5 min")).toBeNull()
     expect(
-      await screen.findByText("No monitor bindings in this environment")
+      await screen.findByText(
+        "No linked feature flags to display in Production."
+      )
     ).toBeVisible()
     expect(screen.queryByText("> 800 ms for 10 min")).not.toBeInTheDocument()
   })
 
-  it("uses non-causal language on session evidence", () => {
-    render(
-      <MemoryRouter
-        initialEntries={["/en/release-health/sessions/session-checkout-042"]}
-      >
-        <Routes>
-          <Route
-            path="/:lang/release-health/sessions/:sessionId"
-            element={<HealthSessionDetailsPage />}
-          />
-        </Routes>
-      </MemoryRouter>
-    )
-
-    expect(
-      screen.getByRole("heading", { name: "Observation session HS-042" })
-    ).toBeVisible()
-    expect(
-      screen.getByText(
-        /does not claim that this feature flag caused the anomaly/
-      )
-    ).toBeVisible()
-    expect(screen.getByText("Pinned configuration snapshot")).toBeVisible()
-  })
-
-  it("shows monitor, quick observation, and change-bound entry points on a flag", () => {
+  it("shows ongoing monitoring and configures it without starting an observation session", async () => {
     render(
       <MemoryRouter
         initialEntries={["/en/feature-flags/search-ranking-v3/release-health"]}
@@ -523,37 +500,99 @@ describe("Release Health design pages", () => {
     )
 
     expect(
-      screen.getByRole("button", { name: "Monitor this change" })
-    ).toBeVisible()
+      screen.queryByRole("button", { name: "Monitor this change" })
+    ).not.toBeInTheDocument()
     expect(
-      screen.getByRole("button", { name: "Quick observation" })
-    ).toBeVisible()
+      screen.queryByRole("button", { name: "Quick observation" })
+    ).not.toBeInTheDocument()
     expect(screen.getByText("Monitor metric bindings")).toBeVisible()
-    expect(screen.getByText(/They are not causal attribution/)).toBeVisible()
+    expect(
+      screen.queryByText(/They are not causal attribution/)
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("heading", { name: "Release Health" })
+    ).not.toBeInTheDocument()
+    expect(screen.queryByText("Monitoring triggers")).not.toBeInTheDocument()
     expect(screen.getByText("Design preview")).toBeVisible()
-    expect(screen.getAllByText("Search ranking v3").length).toBeGreaterThan(0)
-    expect(screen.getAllByText("search-ranking-v3").length).toBeGreaterThan(0)
+    expect(screen.getByText("Search ranking v3 · Health Monitor")).toBeVisible()
     expect(screen.queryByText("Checkout redesign")).not.toBeInTheDocument()
     expect(
       screen.queryByText("Checkout safety monitor")
     ).not.toBeInTheDocument()
+
+    expect(screen.queryByText("Current gate")).not.toBeInTheDocument()
+    expect(screen.queryByText("Response")).not.toBeInTheDocument()
+    expect(screen.queryByText("Approval required")).not.toBeInTheDocument()
+    expect(screen.getByText("3 Guard · 1 Observe")).toBeVisible()
+    const table = within(screen.getByRole("table"))
     expect(
-      screen.getByRole("button", { name: /Open evidence/ })
-    ).toHaveAttribute(
-      "href",
-      "/en/release-health/sessions?flagKey=search-ranking-v3&previewSession=session-checkout-042"
+      table.getByRole("columnheader", { name: "Latest rule check" })
+    ).toBeVisible()
+    const errorRate = within(
+      table.getByRole("row", { name: /Checkout error rate/ })
     )
-    screen
-      .getAllByRole("link", { name: "HS-042" })
-      .forEach((link) =>
-        expect(link).toHaveAttribute(
-          "href",
-          "/en/release-health/sessions?flagKey=search-ranking-v3&previewSession=session-checkout-042"
+    expect(errorRate.getByText("Critical")).toBeVisible()
+    expect(errorRate.getByText(/2.6%/)).toBeVisible()
+    const observe = within(
+      table.getByRole("row", { name: /Checkout completion/ })
+    )
+    expect(observe.getByText("Not applicable")).toBeVisible()
+    expect(observe.queryByText("Healthy")).not.toBeInTheDocument()
+    const stale = within(
+      table.getByRole("row", { name: /Service memory saturation/ })
+    )
+    expect(stale.getByText("Not evaluated")).toBeVisible()
+    expect(stale.queryByText("76%")).not.toBeInTheDocument()
+
+    // Editing a paused monitor must not resume it or create a one-off observation.
+    const toggle = screen.getByRole("switch", {
+      name: "Toggle monitoring for all bound metrics",
+    })
+    fireEvent.click(toggle)
+    expect(toggle).toHaveAttribute("aria-checked", "false")
+    fireEvent.click(screen.getByRole("button", { name: "Configure" }))
+    const dialog = within(await screen.findByRole("dialog"))
+    expect(
+      dialog.getByRole("heading", { name: "Configure health monitor" })
+    ).toBeVisible()
+    expect(dialog.getByText("Paused")).toBeVisible()
+    expect(dialog.queryByText("When to observe")).not.toBeInTheDocument()
+    expect(
+      dialog.queryByText(/Starting a session pins/)
+    ).not.toBeInTheDocument()
+    expect(
+      dialog.queryByRole("button", { name: "Start observation" })
+    ).not.toBeInTheDocument()
+    fireEvent.click(dialog.getByRole("button", { name: "Advanced settings" }))
+    expect(dialog.getByText("Evaluate every")).toBeVisible()
+    expect(dialog.queryByText("Gate")).not.toBeInTheDocument()
+    expect(dialog.queryByText("No-data policy")).not.toBeInTheDocument()
+    expect(dialog.queryByText("Actions")).not.toBeInTheDocument()
+    expect(dialog.queryByText("Require approval")).not.toBeInTheDocument()
+    expect(dialog.queryByText("Rich Webhook")).not.toBeInTheDocument()
+    expect(
+      dialog.queryByText("Pause supported workflow")
+    ).not.toBeInTheDocument()
+    const selectedMetrics = dialog.getAllByRole("checkbox", { checked: true })
+    selectedMetrics.forEach((checkbox) => fireEvent.click(checkbox))
+    expect(dialog.getByRole("button", { name: "Save monitor" })).toBeDisabled()
+    fireEvent.click(
+      dialog.getByRole("checkbox", { name: "Checkout error rate" })
+    )
+    const saved = vi.spyOn(toast, "success")
+    try {
+      fireEvent.click(dialog.getByRole("button", { name: "Save monitor" }))
+      await waitFor(() =>
+        expect(saved).toHaveBeenCalledWith(
+          "Monitor configuration saved in this design preview."
         )
       )
-    expect(
-      screen.getAllByText("Search ranking v3: Rollout changed from 10% to 25%")
-        .length
-    ).toBeGreaterThan(0)
+      await waitFor(() =>
+        expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+      )
+      expect(toggle).toHaveAttribute("aria-checked", "false")
+    } finally {
+      saved.mockRestore()
+    }
   })
 })

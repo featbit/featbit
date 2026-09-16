@@ -89,9 +89,6 @@ export type DataStatus = "collecting" | "ready" | "no-data" | "stale" | "error"
 
 export type HealthStatus = "healthy" | "warning" | "critical" | "not-evaluated"
 
-export type GateStatus =
-  "waiting" | "passing" | "breached" | "approval-required"
-
 export type MonitorPurpose = "observe" | "guard"
 
 export type MetricPoint = {
@@ -130,9 +127,12 @@ export type MonitorBinding = {
   observationMode: MetricObservationMode
   purpose: MonitorPurpose
   rule: string
-  noDataPolicy: "wait" | "notify" | "block"
-  healthStatus: HealthStatus
-  gateBlocking: boolean
+  latestCheck?: {
+    healthStatus: HealthStatus
+    dataStatus: DataStatus
+    value: number | null
+    checkedAt: string
+  }
 }
 
 export type HealthMonitor = {
@@ -140,67 +140,10 @@ export type HealthMonitor = {
   name: string
   flagKey: string
   enabled: boolean
-  mode: "continuous" | "change-window"
-  triggers: Array<"manual" | "flag-change" | "schedule" | "api">
   bindings: MonitorBinding[]
   warmup: string
   lookback: string
   evaluationInterval: string
   sustain: string
-  actions: string[]
   updatedAt: string
-}
-
-export type HealthAssessment = {
-  metricId: string
-  observationMode: MetricObservationMode
-  purpose: MonitorPurpose
-  dataStatus: DataStatus
-  healthStatus: HealthStatus
-  observedValue: string
-  rule: string
-  reason: string
-  evidenceWindow: string
-  gateBlocking: boolean
-}
-
-export type HealthSessionEvent = {
-  id: string
-  occurredAt: string
-  kind: "session" | "assessment" | "alert" | "action" | "audit"
-  title: string
-  description: string
-  result?: "success" | "warning" | "pending"
-}
-
-export type HealthSession = {
-  id: string
-  displayId: string
-  monitorId: string
-  monitorName: string
-  flagKey: string
-  flagName: string
-  trigger: "manual" | "flag-change" | "schedule" | "api"
-  triggerLabel: string
-  status: "active" | "completed" | "stopped"
-  gateStatus: GateStatus
-  dataStatus: DataStatus
-  startedAt: string
-  endedAt?: string
-  revisionBefore: string
-  revisionAfter: string
-  changeSummary: string
-  sourceReference?: string
-  assessments: HealthAssessment[]
-  events: HealthSessionEvent[]
-  snapshot: {
-    createdAt: string
-    metricVersions: string[]
-    warmup: string
-    lookback: string
-    evaluationInterval: string
-    sustain: string
-    noDataPolicy: string
-    actions: string[]
-  }
 }

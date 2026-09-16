@@ -13,8 +13,7 @@ export const enReleaseHealthLive = {
   discard: "Discard",
   createPermission: "Requires project settings permission.",
   usageUnavailable: "Not yet available",
-  relatedUnavailable:
-    "Monitor and Session references are not connected to the API yet.",
+  relatedUnavailable: "Monitor references are not connected to the API yet.",
   versionsUnavailable:
     "Editing definitions and creating additional versions are not implemented yet.",
   lastSuccessful: "Last successful",
@@ -28,7 +27,7 @@ export const enReleaseHealthLive = {
     "You are configuring {{environment}}, as specified in this page's URL, not the environment selected in the header.",
   badge: "Live integration",
   notice:
-    "Connections and Metrics use the real API and Prometheus. Trends are queried on demand, not a persisted stream. Monitor and Session pages remain design previews.",
+    "Connections and Metrics use the real API and Prometheus. Trends are queried on demand, not a persisted stream. Monitor pages remain design previews.",
   connectionScope:
     "Prometheus v1 connections belong to this environment. Authorized users enter credentials here; the API never returns them.",
   metricScope:
@@ -82,7 +81,7 @@ export const zhReleaseHealthLive: typeof enReleaseHealthLive = {
   discard: "放弃修改",
   createPermission: "需要项目配置权限。",
   usageUnavailable: "尚未接入",
-  relatedUnavailable: "Monitor 和 Session 引用尚未接入真实 API。",
+  relatedUnavailable: "Monitor 引用尚未接入真实 API。",
   versionsUnavailable: "编辑定义及创建后续版本尚未实现。",
   lastSuccessful: "最后成功值",
   rangeUnavailable: "API 当前最多支持一小时，较长时间范围尚未开放。",
@@ -93,7 +92,7 @@ export const zhReleaseHealthLive: typeof enReleaseHealthLive = {
     "当前配置目标是 URL 指定的 {{environment}}，不是顶部选择的环境。",
   badge: "真实链路",
   notice:
-    "Connections 和 Metrics 已接入真实 API 与 Prometheus。趋势按需查询，尚非持久化 Stream；Monitor 和 Session 仍为设计预览。",
+    "Connections 和 Metrics 已接入真实 API 与 Prometheus。趋势按需查询，尚非持久化 Stream；Monitor 仍为设计预览。",
   connectionScope:
     "Prometheus v1 连接属于当前环境。具备权限的用户在此录入凭据；API 永不回显。",
   metricScope: "定义属于项目；Binding 与实时读数严格隔离到当前选中的环境。",

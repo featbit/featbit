@@ -101,6 +101,8 @@ export type MetricMonitorBinding = {
   rule: string
   latestCheck?: string
   checkedAt?: string
+  // Older bindings may not have a recorded creation time.
+  createdAt?: string | null
 }
 export const releaseHealthRoot = (scope: ReleaseHealthScope) =>
   `/api/v1/projects/${scope.projectId}/envs/${scope.envId}/release-health`
