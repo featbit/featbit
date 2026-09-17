@@ -115,7 +115,6 @@ public class ExperimentService(
             updates.Add(Builders<Experiment>.Update.Set(x => x.FlagId, update.FlagId));
         }
         SetIfNotNull(updates, x => x.Hypothesis, update.Hypothesis);
-        SetIfNotNull(updates, x => x.AccessToken, update.AccessToken);
         SetIfNotNull(updates, x => x.Change, update.Change);
         SetIfNotNull(updates, x => x.Constraints, update.Constraints);
         SetIfNotNull(updates, x => x.EnvSecret, update.EnvSecret);
@@ -735,7 +734,6 @@ public class ExperimentService(
             FlagName = flag?.Name,
             EnvId = experiment.EnvId,
             Hypothesis = experiment.Hypothesis,
-            AccessToken = experiment.AccessToken,
             Change = experiment.Change,
             Constraints = experiment.Constraints,
             EnvSecret = experiment.EnvSecret,

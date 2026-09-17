@@ -939,7 +939,6 @@ public class ExperimentService(
             FlagName = flag?.Name,
             EnvId = experiment.EnvId,
             Hypothesis = experiment.Hypothesis,
-            AccessToken = experiment.AccessToken,
             Change = experiment.Change,
             Constraints = experiment.Constraints,
             EnvSecret = experiment.EnvSecret,
@@ -1045,7 +1044,6 @@ public class ExperimentService(
         experiment.Stage = Normalize(update.Stage, experiment.Stage);
         experiment.FlagId = update.FlagId ?? experiment.FlagId;
         experiment.Hypothesis = Normalize(update.Hypothesis, experiment.Hypothesis);
-        experiment.AccessToken = Normalize(update.AccessToken, experiment.AccessToken);
         experiment.Change = Normalize(update.Change, experiment.Change);
         experiment.Constraints = Normalize(update.Constraints, experiment.Constraints);
         experiment.EnvSecret = Normalize(update.EnvSecret, experiment.EnvSecret);

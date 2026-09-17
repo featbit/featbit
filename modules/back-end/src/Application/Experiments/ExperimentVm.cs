@@ -51,8 +51,6 @@ public class ExperimentDetailVm : ExperimentVm
 {
     public string Hypothesis { get; set; }
 
-    public string AccessToken { get; set; }
-
     public string Change { get; set; }
 
     public string Constraints { get; set; }

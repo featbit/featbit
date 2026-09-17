@@ -184,7 +184,6 @@ CREATE TABLE IF NOT EXISTS experiments (
     flag_id uuid,
     env_id uuid,
     hypothesis text,
-    access_token text,
     change text,
     constraints text,
     env_secret text,
