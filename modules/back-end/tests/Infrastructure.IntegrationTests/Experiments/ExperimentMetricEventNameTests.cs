@@ -204,7 +204,7 @@ public class ExperimentMetricEventNameTests(ExperimentProviderParityFixture fixt
         Assert.Empty(read.GuardrailMetrics);
         var error = await Assert.ThrowsAsync<BusinessException>(() =>
             service.AnalyzeRunAsync(envId, experiment.Id, run.Id, new ExperimentRunAnalyzeRequest()));
-        Assert.Equal(ErrorCodes.ExperimentRunPrimaryMetricSnapshotMissing, error.Message);
+        Assert.Equal(ErrorCodes.Required("primaryMetric"), error.Message);
         Assert.Null(Assert.Single((await fixture.CreateExperimentServices(provider).ExperimentService.GetAsync(envId, experiment.Id)).ExperimentRuns).PrimaryMetric);
     }
 

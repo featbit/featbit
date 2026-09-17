@@ -26,8 +26,6 @@ public class ExperimentUpdate
 
     public string Goal { get; set; }
 
-    public string GuardrailMetrics { get; set; }
-
     public string Intent { get; set; }
 
     public string LastAction { get; set; }
@@ -35,8 +33,6 @@ public class ExperimentUpdate
     public string LastLearning { get; set; }
 
     public string OpenQuestions { get; set; }
-
-    public string PrimaryMetric { get; set; }
 
     public string SandboxId { get; set; }
 
@@ -62,21 +58,6 @@ public class UpdateExperimentValidator : AbstractValidator<UpdateExperiment>
     {
         RuleFor(x => x.Update)
             .NotNull().WithErrorCode(ErrorCodes.Required("update"));
-
-        When(x => x.Update != null, () =>
-        {
-            RuleFor(x => x.Update.PrimaryMetric)
-                .Must(string.IsNullOrWhiteSpace)
-                .WithErrorCode(ErrorCodes.Invalid("primaryMetric"))
-                .WithMessage(
-                    "Do not write primaryMetric through update_experiment. Use update_metrics with metricId or metricKey plus expectedDirection.");
-
-            RuleFor(x => x.Update.GuardrailMetrics)
-                .Must(string.IsNullOrWhiteSpace)
-                .WithErrorCode(ErrorCodes.Invalid("guardrailMetrics"))
-                .WithMessage(
-                    "Do not write guardrailMetrics through update_experiment. Use update_metrics with structured guardrail definitions.");
-        });
     }
 }
 

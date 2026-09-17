@@ -411,7 +411,7 @@ public class ExperimentService(
         experiment.Variants = BuildFeatureFlagVariantsJson(flag);
         AlignRunVariants(run, flag, inferMissing: true);
         var primarySnapshot = run.PrimaryMetric
-            ?? throw new BusinessException(ErrorCodes.ExperimentRunPrimaryMetricSnapshotMissing);
+            ?? throw new BusinessException(ErrorCodes.Required("primaryMetric"));
         var primaryMetricEvent = Normalize(primarySnapshot.EventName);
 
         if (string.IsNullOrWhiteSpace(primaryMetricEvent))

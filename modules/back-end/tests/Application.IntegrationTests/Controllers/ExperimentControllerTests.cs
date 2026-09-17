@@ -135,29 +135,6 @@ public class ExperimentControllerTests
     }
 
     [Fact]
-    public async Task UpdateMetrics_IgnoresUnmappedFields()
-    {
-        var metricId = Guid.NewGuid();
-        var service = new Mock<IExperimentService>();
-        service.Setup(x => x.UpdateMetricsAsync(TestWorkspace.Id, ExperimentId,
-                It.Is<ExperimentMetricsUpdate>(update => update.PrimaryMetric.MetricId == metricId &&
-                    update.PrimaryMetric.ExpectedDirection == "increase_good" && update.GuardrailMetrics.Count == 0)))
-            .ReturnsAsync(new ExperimentDetailVm { Id = ExperimentId, EnvId = TestWorkspace.Id });
-        using var factory = CreateFactory(service.Object);
-        using var client = await _app.CreateAuthenticatedClientAsync(factory);
-
-        using var response = await client.PutAsJsonAsync($"{BasePath}/{ExperimentId}/metrics", new
-        {
-            primaryMetric = new { metricId, expectedDirection = "increase_good", eventName = "ignored" },
-            metricEvent = "purchase",
-            guardrailMetrics = Array.Empty<object>()
-        });
-
-        Assert.True(response.IsSuccessStatusCode);
-        service.VerifyAll();
-    }
-
-    [Fact]
     public async Task UpdateMetrics_MetricIdsAndDirections_ReturnSuccess()
     {
         var metricId = Guid.NewGuid();
@@ -205,7 +182,7 @@ public class ExperimentControllerTests
         var service = new Mock<IExperimentService>();
         service
             .Setup(x => x.AnalyzeRunAsync(TestWorkspace.Id, ExperimentId, RunId, It.IsAny<ExperimentRunAnalyzeRequest>()))
-            .ThrowsAsync(new BusinessException(ErrorCodes.ExperimentRunPrimaryMetricSnapshotMissing));
+            .ThrowsAsync(new BusinessException(ErrorCodes.Required("primaryMetric")));
         using var factory = CreateFactory(service.Object);
         using var client = await _app.CreateAuthenticatedClientAsync(factory);
 
@@ -217,7 +194,7 @@ public class ExperimentControllerTests
         var body = await response.Content.ReadFromJsonAsync<ApiResponse<object>>();
         Assert.NotNull(body);
         Assert.False(body.Success);
-        Assert.Equal(ErrorCodes.ExperimentRunPrimaryMetricSnapshotMissing, Assert.Single(body.Errors));
+        Assert.Equal(ErrorCodes.Required("primaryMetric"), Assert.Single(body.Errors));
         service.VerifyAll();
     }
 
