@@ -156,8 +156,6 @@ public class ExperimentRunVm
 
     public string AnalysisSamplingPlan { get; set; }
 
-    public string DataSourceMode { get; set; }
-
     public string CustomerEndpointConfig { get; set; }
 
     public DateTime CreatedAt { get; set; }

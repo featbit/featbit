@@ -168,7 +168,6 @@ CREATE TABLE IF NOT EXISTS experiment_runs (
     assignment_unit_selector character varying(256),
     layer_traffic_percent double precision,
     analysis_sampling_plan text,
-    data_source_mode character varying(64),
     customer_endpoint_config text,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,

@@ -113,8 +113,6 @@ public class ExperimentRunUpdate
 
     public string AnalysisSamplingPlan { get; set; }
 
-    public string DataSourceMode { get; set; }
-
     public string CustomerEndpointConfig { get; set; }
 }
 

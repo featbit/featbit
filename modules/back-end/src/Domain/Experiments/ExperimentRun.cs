@@ -76,8 +76,6 @@ public class ExperimentRun : AuditedEntity
 
     public string AnalysisSamplingPlan { get; set; }
 
-    public string DataSourceMode { get; set; } = "featbit-managed";
-
     public string CustomerEndpointConfig { get; set; }
 
     public Experiment Experiment { get; set; }
