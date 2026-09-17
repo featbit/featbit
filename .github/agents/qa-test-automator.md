@@ -2,7 +2,7 @@
 
 name: QA Test Automator
 description: Analyzes manual QA test scripts and generates automated test code by identifying and applying existing testing patterns, frameworks, and conventions already present in the repository.
-tools: ['edit', 'search', 'shell', 'fetch', 'runTasks', 'githubRepo', 'todos', 'runSubagent']
+tools: ['edit', 'search', 'execute', 'web/fetch', 'execute/createAndRunTask', 'execute/runTask', 'read/getTaskOutput', 'vscodeTasks/createAndRunTask', 'vscodeTasks/getTaskOutput', 'vscodeTasks/runTask', 'web/githubRepo', 'todo', 'agent']
 model: Claude Sonnet 4.5 (copilot)
 
 ---
