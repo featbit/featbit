@@ -42,7 +42,7 @@ import { ExperimentMetricsSheet } from "./experiment-metrics-sheet"
 import {
   metricAggregationLabelKey,
   metricTypeLabelKey,
-  parseGuardrails,
+  parseGuardrailMetrics,
   parsePrimaryMetric,
   type SelectedMetric,
 } from "./exposure-utils"
@@ -195,7 +195,7 @@ export function ExposureDetails({
   const [metricsSheetOpen, setMetricsSheetOpen] = useState(false)
   const detailQueryKey = ["experiment-details", envId, experiment.id]
   const primary = parsePrimaryMetric(experiment.primaryMetric)
-  const guardrails = parseGuardrails(experiment.guardrails)
+  const guardrailMetrics = parseGuardrailMetrics(experiment.guardrailMetrics)
 
   const flagQuery = useQuery({
     queryKey: ["experiment-feature-flag", envId, experiment.flagId],
@@ -240,7 +240,7 @@ export function ExposureDetails({
   })
 
   const ready = Boolean(experiment.flagId && experiment.flagKey && primary)
-  const metrics = primary ? [primary, ...guardrails] : []
+  const metrics = primary ? [primary, ...guardrailMetrics] : []
 
   return (
     <>
@@ -533,7 +533,7 @@ export function ExposureDetails({
           open
           envId={envId}
           primary={primary}
-          guardrails={guardrails}
+          guardrailMetrics={guardrailMetrics}
           saving={metricsMutation.isPending}
           saveError={metricsMutation.isError}
           onOpenChange={setMetricsSheetOpen}

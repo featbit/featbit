@@ -1,4 +1,5 @@
 using Application.Bases.Models;
+using Domain.Experiments;
 using System.Text.Json.Serialization;
 
 namespace Application.Experiments;
@@ -62,7 +63,7 @@ public class ExperimentDetailVm : ExperimentVm
 
     public string Goal { get; set; }
 
-    public string Guardrails { get; set; }
+    public List<GuardrailMetricConfig> GuardrailMetrics { get; set; } = [];
 
     public string Intent { get; set; }
 
@@ -72,7 +73,7 @@ public class ExperimentDetailVm : ExperimentVm
 
     public string OpenQuestions { get; set; }
 
-    public string PrimaryMetric { get; set; }
+    public PrimaryMetricConfig PrimaryMetric { get; set; }
 
     public string SandboxStatus { get; set; }
 
@@ -103,13 +104,9 @@ public class ExperimentRunVm
 
     public string MethodReason { get; set; }
 
-    public string PrimaryMetricEvent { get; set; }
+    public PrimaryMetricConfig PrimaryMetric { get; set; }
 
-    public string MetricDescription { get; set; }
-
-    public string GuardrailEvents { get; set; }
-
-    public string GuardrailDescriptions { get; set; }
+    public List<GuardrailMetricConfig> GuardrailMetrics { get; set; } = [];
 
     public string ControlVariant { get; set; }
 
@@ -148,10 +145,6 @@ public class ExperimentRunVm
     public string WhyItHappened { get; set; }
 
     public string NextHypothesis { get; set; }
-
-    public string PrimaryMetricAgg { get; set; }
-
-    public string PrimaryMetricType { get; set; }
 
     public double? TrafficPercent { get; set; }
 

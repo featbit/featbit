@@ -23,7 +23,11 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { localizedPath } from "@/features/layout/layout-context"
+import {
+  getCurrentProjectEnv,
+  localizedPath,
+  localizedProjectEnvPath,
+} from "@/features/layout/layout-context"
 import type { Lang } from "@/features/layout/layout-types"
 import type {
   Layer,
@@ -46,6 +50,17 @@ type Props = {
   onRestore: (layer: Layer) => void
   onClearSearch: () => void
   onCreate: () => void
+}
+
+function experimentRunPath(lang: Lang, run: LayerRunSummary) {
+  const projectEnv = getCurrentProjectEnv()
+  const href = run.experimentId
+    ? `/experiments/${encodeURIComponent(run.experimentId)}?stage=measuring&runId=${encodeURIComponent(run.id)}`
+    : "/experiments"
+
+  return projectEnv
+    ? localizedProjectEnvPath(lang, href, projectEnv)
+    : localizedPath(lang, href)
 }
 
 function OverlapDetails({
@@ -174,10 +189,7 @@ function OverlapDetails({
                 />
                 {run.experimentId ? (
                   <Link
-                    to={localizedPath(
-                      lang,
-                      `/experiments/${encodeURIComponent(run.experimentId)}?stage=measuring&runId=${encodeURIComponent(run.id)}`
-                    )}
+                    to={experimentRunPath(lang, run)}
                     className="min-w-0 truncate text-sm font-medium underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                     onClick={() => setOpen(false)}
                   >
@@ -391,14 +403,7 @@ function ExperimentRuns({
                 className={`size-3 shrink-0 rounded-sm ${runColor(index)}`}
               />
               <Link
-                to={
-                  run.experimentId
-                    ? localizedPath(
-                        lang,
-                        `/experiments/${encodeURIComponent(run.experimentId)}?stage=measuring&runId=${encodeURIComponent(run.id)}`
-                      )
-                    : localizedPath(lang, "/experiments")
-                }
+                to={experimentRunPath(lang, run)}
                 className="truncate text-sm font-semibold text-foreground hover:underline"
               >
                 {run.experimentName}

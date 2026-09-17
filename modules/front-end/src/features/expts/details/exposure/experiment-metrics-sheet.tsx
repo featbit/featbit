@@ -62,11 +62,11 @@ const METRICS_PAGE_SIZE = 10
 
 function selectedMetricOptions(
   primary: SelectedMetric | null,
-  guardrails: SelectedMetric[]
+  guardrailMetrics: SelectedMetric[]
 ) {
   const options: Record<string, MetricOption> = {}
-  for (const metric of [primary, ...guardrails]) {
-    // Saved experiment metrics can have only a key and fall outside the catalog page.
+  for (const metric of [primary, ...guardrailMetrics]) {
+    // Saved experiment metrics can fall outside the current catalog page.
     if (metric) {
       options[metric.key] = {
         id: metric.id,
@@ -78,8 +78,8 @@ function selectedMetricOptions(
   return options
 }
 
-function guardrailsFromSelection(guardrails: SelectedMetric[]) {
-  return guardrails.map<GuardrailRow>((metric, index) => ({
+function guardrailMetricsFromSelection(guardrailMetrics: SelectedMetric[]) {
+  return guardrailMetrics.map<GuardrailRow>((metric, index) => ({
     id: `${metric.key}-${index}`,
     metricKey: metric.key,
     direction:
@@ -214,11 +214,9 @@ function MetricPicker({
                   }}
                 >
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate font-mono">
+                    <span className="block truncate">{metric.name}</span>
+                    <span className="block truncate font-mono text-xs text-muted-foreground">
                       {metric.key}
-                    </span>
-                    <span className="block truncate text-xs text-muted-foreground">
-                      {metric.name}
                     </span>
                   </span>
                   <Check
@@ -241,7 +239,7 @@ export function ExperimentMetricsSheet({
   open,
   envId,
   primary,
-  guardrails,
+  guardrailMetrics,
   saving,
   saveError,
   onOpenChange,
@@ -250,7 +248,7 @@ export function ExperimentMetricsSheet({
   open: boolean
   envId: string
   primary: SelectedMetric | null
-  guardrails: SelectedMetric[]
+  guardrailMetrics: SelectedMetric[]
   saving: boolean
   saveError: boolean
   onOpenChange: (open: boolean) => void
@@ -262,11 +260,11 @@ export function ExperimentMetricsSheet({
     primary?.direction === "decrease_good" ? "decrease_good" : "increase_good"
   )
   const [guardrailRows, setGuardrailRows] = useState<GuardrailRow[]>(() =>
-    guardrailsFromSelection(guardrails)
+    guardrailMetricsFromSelection(guardrailMetrics)
   )
   const [selectedOptions, setSelectedOptions] = useState<
     Record<string, MetricOption>
-  >(() => selectedMetricOptions(primary, guardrails))
+  >(() => selectedMetricOptions(primary, guardrailMetrics))
   const [dirty, setDirty] = useState(false)
   const [discardOpen, setDiscardOpen] = useState(false)
   const popoverPortalRef = useRef<HTMLDivElement>(null)
@@ -638,20 +636,15 @@ export function ExperimentMetricsSheet({
               onClick={() => {
                 if (!selectedPrimary) return
                 void onConfirm({
-                  metricId: selectedPrimary.id,
-                  metricKey: selectedPrimary.key,
-                  expectedDirection: primaryDirection,
-                  guardrails: JSON.stringify(
-                    selectedGuardrails
-                      .map(({ row, metric }) => {
-                        if (!metric) return null
-                        return {
-                          metricId: metric.id,
-                          metricKey: metric.key,
-                          direction: row.direction,
-                        }
-                      })
-                      .filter(Boolean)
+                  primaryMetric: {
+                    metricId: selectedPrimary.id,
+                    expectedDirection: primaryDirection,
+                  },
+                  guardrailMetrics: selectedGuardrails.flatMap(
+                    ({ row, metric }) =>
+                      metric
+                        ? [{ metricId: metric.id, direction: row.direction }]
+                        : []
                   ),
                 })
               }}

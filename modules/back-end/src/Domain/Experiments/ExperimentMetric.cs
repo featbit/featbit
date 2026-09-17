@@ -8,13 +8,13 @@ public class ExperimentMetric : AuditedEntity
 
     public string Key { get; set; }
 
+    public string EventName { get; set; }
+
     public string Description { get; set; }
 
     public string MetricType { get; set; } = "binary";
 
     public string MetricAgg { get; set; } = "once";
-
-    public string ExpectedDirection { get; set; } = "increase_good";
 
     public string Status { get; set; } = "active";
 }

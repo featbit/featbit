@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Application.Experiments;
 
 public class ExperimentRunAudienceUpdate
@@ -40,6 +42,7 @@ public class ExperimentRunObservationWindowUpdate
     public DateTime? ObservationEnd { get; set; }
 }
 
+[JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
 public class ExperimentRunUpdate
 {
     public string Slug { get; set; }
@@ -49,14 +52,6 @@ public class ExperimentRunUpdate
     public string Method { get; set; }
 
     public string MethodReason { get; set; }
-
-    public string PrimaryMetricEvent { get; set; }
-
-    public string MetricDescription { get; set; }
-
-    public string GuardrailEvents { get; set; }
-
-    public string GuardrailDescriptions { get; set; }
 
     public string ControlVariant { get; set; }
 
@@ -95,10 +90,6 @@ public class ExperimentRunUpdate
     public string WhyItHappened { get; set; }
 
     public string NextHypothesis { get; set; }
-
-    public string PrimaryMetricAgg { get; set; }
-
-    public string PrimaryMetricType { get; set; }
 
     public double? TrafficPercent { get; set; }
 

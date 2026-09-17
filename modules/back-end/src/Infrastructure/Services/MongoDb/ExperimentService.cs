@@ -121,12 +121,10 @@ public class ExperimentService(
         SetIfNotNull(updates, x => x.EnvSecret, update.EnvSecret);
         SetIfNotNull(updates, x => x.FlagServerUrl, update.FlagServerUrl);
         SetIfNotNull(updates, x => x.Goal, update.Goal);
-        SetIfNotNull(updates, x => x.Guardrails, update.Guardrails);
         SetIfNotNull(updates, x => x.Intent, update.Intent);
         SetIfNotNull(updates, x => x.LastAction, update.LastAction);
         SetIfNotNull(updates, x => x.LastLearning, update.LastLearning);
         SetIfNotNull(updates, x => x.OpenQuestions, update.OpenQuestions);
-        SetIfNotNull(updates, x => x.PrimaryMetric, update.PrimaryMetric);
         SetIfNotNull(updates, x => x.SandboxId, update.SandboxId);
         SetIfNotNull(updates, x => x.Variants, update.Variants);
         SetIfNotNull(updates, x => x.ConflictAnalysis, update.ConflictAnalysis);
@@ -152,40 +150,19 @@ public class ExperimentService(
         Guid id,
         ExperimentMetricsUpdate update)
     {
-        update ??= new ExperimentMetricsUpdate();
-
         var experiment = await GetExperimentAsync(envId, id);
         var updatedAt = DateTime.UtcNow;
-        var primaryMetric = await ResolveMetricAsync(envId, update.MetricId, Normalize(update.MetricKey, update.MetricEvent));
-        experiment.PrimaryMetric = BuildPrimaryMetricJson(primaryMetric, update.ExpectedDirection);
-        experiment.Guardrails = await BuildGuardrailsJsonAsync(envId, update.Guardrails, primaryMetric);
+        var primaryMetric = await ResolveMetricAsync(envId, update.PrimaryMetric.MetricId);
+        experiment.PrimaryMetric = BuildPrimaryMetricConfig(primaryMetric, update.PrimaryMetric.ExpectedDirection);
+        experiment.GuardrailMetrics = await BuildGuardrailMetricsConfigAsync(envId, update.GuardrailMetrics, primaryMetric);
         experiment.UpdatedAt = updatedAt;
 
         await mongoDb.CollectionOf<Experiment>().UpdateOneAsync(
             x => x.Id == id && x.EnvId == envId,
             Builders<Experiment>.Update
                 .Set(x => x.PrimaryMetric, experiment.PrimaryMetric)
-                .Set(x => x.Guardrails, experiment.Guardrails)
+                .Set(x => x.GuardrailMetrics, experiment.GuardrailMetrics)
                 .Set(x => x.UpdatedAt, updatedAt));
-
-        var latestRun = await mongoDb.CollectionOf<ExperimentRun>()
-            .Find(x => x.ExperimentId == id)
-            .SortByDescending(x => x.CreatedAt)
-            .FirstOrDefaultAsync();
-
-        if (latestRun != null)
-        {
-            latestRun.PrimaryMetricEvent = primaryMetric.Key;
-            latestRun.MetricDescription = primaryMetric.Description;
-            latestRun.PrimaryMetricType = NormalizeMetricType(primaryMetric.MetricType);
-            latestRun.PrimaryMetricAgg = NormalizeMetricAgg(primaryMetric.MetricAgg);
-            latestRun.GuardrailEvents = BuildGuardrailEventsJson(experiment.Guardrails);
-            latestRun.UpdatedAt = updatedAt;
-
-            await mongoDb.CollectionOf<ExperimentRun>().ReplaceOneAsync(
-                x => x.Id == latestRun.Id && x.ExperimentId == id,
-                latestRun);
-        }
 
         await AddActivityAsync(id, "note", "Experiment metrics updated", null, updatedAt);
         return await GetAsync(envId, id);
@@ -208,12 +185,8 @@ public class ExperimentService(
             ExperimentId = id,
             Method = previous?.Method ?? "bayesian_ab",
             MethodReason = previous?.MethodReason,
-            PrimaryMetricEvent = previous?.PrimaryMetricEvent,
-            MetricDescription = previous?.MetricDescription,
-            PrimaryMetricType = previous?.PrimaryMetricType ?? "binary",
-            PrimaryMetricAgg = previous?.PrimaryMetricAgg ?? "once",
-            GuardrailEvents = previous?.GuardrailEvents,
-            GuardrailDescriptions = previous?.GuardrailDescriptions,
+            PrimaryMetric = MetricSnapshots.Copy(experiment.PrimaryMetric),
+            GuardrailMetrics = MetricSnapshots.Copy(experiment.GuardrailMetrics),
             ControlVariant = previous?.ControlVariant,
             TreatmentVariant = previous?.TreatmentVariant,
             TrafficPercent = previous?.TrafficPercent ?? 100,
@@ -237,8 +210,11 @@ public class ExperimentService(
             UpdatedAt = now
         };
 
-        HydrateRunMetricConfig(run, experiment);
         await AlignRunVariantsAsync(envId, experiment, run, inferMissing: true);
+        if (string.IsNullOrWhiteSpace(run.PrimaryMetric?.EventName))
+        {
+            throw new BusinessException(ErrorCodes.Required("primaryMetric"));
+        }
 
         await NormalizeAndValidateLayerAssignmentAsync(envId, run);
         var number = await AllocateRunNumberAsync(envId, experiment, existingRuns);
@@ -249,7 +225,7 @@ public class ExperimentService(
             id,
             "note",
             $"{ExperimentRunNumber.CreationTitlePrefix}{run.Slug}",
-            previous == null ? "Empty template" : $"Copied config from {previous.Slug}",
+            previous == null ? "Metric snapshot from experiment" : $"Metric snapshot from experiment; other settings copied from {previous.Slug}",
             now);
 
         return await GetAsync(envId, id);
@@ -431,11 +407,12 @@ public class ExperimentService(
         request ??= new ExperimentRunAnalyzeRequest();
         var experiment = await GetExperimentAsync(envId, id);
         var run = await GetRunAsync(id, runId);
-        HydrateRunMetricConfig(run, experiment);
         var flag = await ExperimentFlagBinding.RequireAsync(featureFlagService, envId, experiment.FlagId);
         experiment.Variants = BuildFeatureFlagVariantsJson(flag);
         AlignRunVariants(run, flag, inferMissing: true);
-        var primaryMetricEvent = Normalize(run.PrimaryMetricEvent);
+        var primarySnapshot = run.PrimaryMetric
+            ?? throw new BusinessException(ErrorCodes.Required("primaryMetric"));
+        var primaryMetricEvent = Normalize(primarySnapshot.EventName);
 
         if (string.IsNullOrWhiteSpace(primaryMetricEvent))
         {
@@ -447,8 +424,8 @@ public class ExperimentService(
         var end = run.ObservationEnd ?? now;
         var startDate = DateOnly.FromDateTime(start).ToString("yyyy-MM-dd");
         var endDate = DateOnly.FromDateTime(end).ToString("yyyy-MM-dd");
-        var metricType = NormalizeMetricType(run.PrimaryMetricType);
-        var metricAgg = NormalizeMetricAgg(run.PrimaryMetricAgg);
+        var metricType = primarySnapshot.MetricType;
+        var metricAgg = primarySnapshot.MetricAgg;
 
         var stats = await statsService.QueryAsync(new QueryExperimentStats
         {
@@ -479,18 +456,19 @@ public class ExperimentService(
 
         var variants = stats.Variants?.ToArray() ?? [];
         var primaryMetricData = BuildMetricData(metricType, variants);
-        if (TryReadPrimaryMetric(experiment.PrimaryMetric, out var primary) &&
-            IsDecreaseGood(primary.ExpectedDirection))
+        if (IsDecreaseGood(run.PrimaryMetric.ExpectedDirection))
         {
             primaryMetricData["inverse"] = true;
         }
 
         var metrics = new Dictionary<string, Dictionary<string, object>>
         {
-            [primaryMetricEvent] = primaryMetricData
+            [MetricSnapshots.Identity(run.PrimaryMetric)] = primaryMetricData
         };
 
-        var guardrails = ParseGuardrailDefinitions(run.GuardrailEvents);
+        var guardrails = run.GuardrailMetrics.Select(metric => new GuardrailDefinition(
+            metric.EventName, metric.MetricType, metric.MetricAgg,
+            metric.Direction == "increase_bad", MetricSnapshots.Identity(metric), metric.MetricId, metric.MetricKey)).ToList();
         foreach (var guardrail in guardrails)
         {
             var guardrailStats = await statsService.QueryAsync(new QueryExperimentStats
@@ -529,7 +507,7 @@ public class ExperimentService(
                 guardrailData["inverse"] = true;
             }
 
-            metrics[guardrail.Event] = guardrailData;
+            metrics[guardrail.Key] = guardrailData;
         }
 
         var inputData = BuildInputDataJson(metrics);
@@ -763,12 +741,12 @@ public class ExperimentService(
             EnvSecret = experiment.EnvSecret,
             FlagServerUrl = experiment.FlagServerUrl,
             Goal = experiment.Goal,
-            Guardrails = experiment.Guardrails,
+            GuardrailMetrics = MetricSnapshots.Copy(experiment.GuardrailMetrics),
             Intent = experiment.Intent,
             LastAction = experiment.LastAction,
             LastLearning = experiment.LastLearning,
             OpenQuestions = experiment.OpenQuestions,
-            PrimaryMetric = experiment.PrimaryMetric,
+            PrimaryMetric = MetricSnapshots.Copy(experiment.PrimaryMetric),
             SandboxId = experiment.SandboxId,
             SandboxStatus = experiment.SandboxStatus,
             Variants = experiment.Variants,
@@ -778,7 +756,7 @@ public class ExperimentService(
             UpdatedAt = experiment.UpdatedAt,
             ExperimentRuns = experiment.ExperimentRuns
                 .OrderByDescending(x => x.CreatedAt)
-                .Select(x => ToRunVm(x, experiment))
+                .Select(x => ToRunVm(x))
                 .ToArray(),
             Activities = experiment.Activities
                 .OrderByDescending(x => x.CreatedAt)
@@ -788,15 +766,8 @@ public class ExperimentService(
         };
     }
 
-    private static ExperimentRunVm ToRunVm(
-        ExperimentRun run,
-        Experiment? experiment = null)
+    private static ExperimentRunVm ToRunVm(ExperimentRun run)
     {
-        if (experiment != null)
-        {
-            HydrateRunMetricConfig(run, experiment);
-        }
-
         return new ExperimentRunVm
         {
             Id = run.Id,
@@ -805,10 +776,8 @@ public class ExperimentService(
             Hypothesis = run.Hypothesis,
             Method = run.Method,
             MethodReason = run.MethodReason,
-            PrimaryMetricEvent = run.PrimaryMetricEvent,
-            MetricDescription = run.MetricDescription,
-            GuardrailEvents = run.GuardrailEvents,
-            GuardrailDescriptions = run.GuardrailDescriptions,
+            PrimaryMetric = MetricSnapshots.Copy(run.PrimaryMetric),
+            GuardrailMetrics = MetricSnapshots.Copy(run.GuardrailMetrics),
             ControlVariant = run.ControlVariant,
             TreatmentVariant = run.TreatmentVariant,
             TrafficAllocation = run.TrafficAllocation,
@@ -828,8 +797,6 @@ public class ExperimentService(
             ConfirmedOrRefuted = run.ConfirmedOrRefuted,
             WhyItHappened = run.WhyItHappened,
             NextHypothesis = run.NextHypothesis,
-            PrimaryMetricAgg = run.PrimaryMetricAgg,
-            PrimaryMetricType = run.PrimaryMetricType,
             TrafficPercent = run.TrafficPercent,
             LayerId = run.LayerId,
             AudienceFilters = run.AudienceFilters,
@@ -1065,10 +1032,6 @@ public class ExperimentService(
         run.Hypothesis = Normalize(update.Hypothesis, run.Hypothesis);
         run.Method = Normalize(update.Method, run.Method);
         run.MethodReason = Normalize(update.MethodReason, run.MethodReason);
-        run.PrimaryMetricEvent = Normalize(update.PrimaryMetricEvent, run.PrimaryMetricEvent);
-        run.MetricDescription = Normalize(update.MetricDescription, run.MetricDescription);
-        run.GuardrailEvents = Normalize(update.GuardrailEvents, run.GuardrailEvents);
-        run.GuardrailDescriptions = Normalize(update.GuardrailDescriptions, run.GuardrailDescriptions);
         run.ControlVariant = Normalize(update.ControlVariant, run.ControlVariant);
         run.TreatmentVariant = Normalize(update.TreatmentVariant, run.TreatmentVariant);
         run.TrafficAllocation = Normalize(update.TrafficAllocation, run.TrafficAllocation);
@@ -1082,8 +1045,6 @@ public class ExperimentService(
         run.ConfirmedOrRefuted = Normalize(update.ConfirmedOrRefuted, run.ConfirmedOrRefuted);
         run.WhyItHappened = Normalize(update.WhyItHappened, run.WhyItHappened);
         run.NextHypothesis = Normalize(update.NextHypothesis, run.NextHypothesis);
-        run.PrimaryMetricAgg = NormalizeMetricAgg(update.PrimaryMetricAgg ?? run.PrimaryMetricAgg);
-        run.PrimaryMetricType = NormalizeMetricType(update.PrimaryMetricType ?? run.PrimaryMetricType);
         run.LayerId = update.LayerId ?? run.LayerId;
         run.LayerKey = Normalize(update.LayerKey, run.LayerKey);
         run.AllocationKeySelector = Normalize(update.AllocationKeySelector, run.AllocationKeySelector);
@@ -1108,65 +1069,6 @@ public class ExperimentService(
         if (update.SliceStart.HasValue || update.SliceEnd.HasValue)
         {
             run.LayerTrafficPercent = Math.Clamp((run.SliceEnd ?? 100) - (run.SliceStart ?? 0), 0d, 100d);
-        }
-    }
-
-    private static void HydrateRunMetricConfig(
-        ExperimentRun run,
-        Experiment experiment)
-    {
-        if (string.IsNullOrWhiteSpace(run.PrimaryMetricEvent) &&
-            TryReadPrimaryMetric(experiment.PrimaryMetric, out var primary))
-        {
-            run.PrimaryMetricEvent = primary.Event;
-            run.MetricDescription = Normalize(run.MetricDescription, primary.Description ?? primary.Name);
-            run.PrimaryMetricType = NormalizeMetricType(primary.MetricType ?? run.PrimaryMetricType);
-            run.PrimaryMetricAgg = NormalizeMetricAgg(primary.MetricAgg ?? run.PrimaryMetricAgg);
-        }
-
-        if (string.IsNullOrWhiteSpace(run.GuardrailEvents))
-        {
-            run.GuardrailEvents = BuildGuardrailEventsJson(experiment.Guardrails);
-        }
-    }
-
-    private static bool TryReadPrimaryMetric(
-        string? raw,
-        out (string Event, string? Name, string? Description, string? MetricType, string? MetricAgg, string? ExpectedDirection) primary)
-    {
-        primary = default;
-        if (string.IsNullOrWhiteSpace(raw))
-        {
-            return false;
-        }
-
-        try
-        {
-            using var document = JsonDocument.Parse(raw);
-            var root = document.RootElement;
-            if (root.ValueKind != JsonValueKind.Object)
-            {
-                return false;
-            }
-
-            var eventName = GetJsonString(root, "event");
-            if (string.IsNullOrWhiteSpace(eventName))
-            {
-                return false;
-            }
-
-            primary = (
-                eventName,
-                GetJsonString(root, "name"),
-                GetJsonString(root, "description"),
-                GetJsonString(root, "metricType"),
-                GetJsonString(root, "metricAgg"),
-                GetJsonString(root, "expectedDirection"));
-            return true;
-        }
-        catch (JsonException)
-        {
-            return false;
         }
     }
 
@@ -1328,47 +1230,26 @@ public class ExperimentService(
         return run;
     }
 
-    private async Task<ExperimentMetric> ResolveMetricAsync(Guid envId, Guid? metricId, string? metricKey)
+    private async Task<ExperimentMetric> ResolveMetricAsync(Guid envId, Guid metricId)
     {
-        if (!metricId.HasValue && string.IsNullOrWhiteSpace(metricKey))
+        if (metricId == Guid.Empty)
         {
-            throw new ArgumentException("Select an existing metric by metricId or metricKey.");
+            throw new ArgumentException("Select an existing metric by metricId.");
         }
 
-        return await metricService.GetBySelectorAsync(envId, metricId, metricKey);
+        return await metricService.GetBySelectorAsync(envId, metricId, null);
     }
 
-    private async Task<string?> BuildGuardrailsJsonAsync(
+    private async Task<List<GuardrailMetricConfig>> BuildGuardrailMetricsConfigAsync(
         Guid envId,
-        string? raw,
+        IEnumerable<GuardrailMetricSelection> selections,
         ExperimentMetric primaryMetric)
     {
-        if (string.IsNullOrWhiteSpace(raw))
-        {
-            return null;
-        }
-
-        using var doc = JsonDocument.Parse(raw);
-        if (doc.RootElement.ValueKind != JsonValueKind.Array)
-        {
-            throw new ArgumentException("Guardrails must be a JSON array.");
-        }
-
-        var guardrails = new List<Dictionary<string, object>>();
+        var guardrails = new List<GuardrailMetricConfig>();
         var guardrailMetricIds = new HashSet<Guid>();
-        foreach (var item in doc.RootElement.EnumerateArray())
+        foreach (var selection in selections)
         {
-            if (item.ValueKind != JsonValueKind.Object)
-            {
-                continue;
-            }
-
-            var metricId = GetJsonGuid(item, "metricId") ?? GetJsonGuid(item, "id");
-            var metricKey =
-                GetJsonString(item, "metricKey") ??
-                GetJsonString(item, "key") ??
-                GetJsonString(item, "event");
-            var metric = await ResolveMetricAsync(envId, metricId, metricKey);
+            var metric = await ResolveMetricAsync(envId, selection.MetricId);
             if (metric.Id == primaryMetric.Id)
             {
                 throw new ArgumentException("Primary metric cannot also be selected as a guardrail.");
@@ -1379,51 +1260,33 @@ public class ExperimentService(
                 throw new ArgumentException("A guardrail metric can only be selected once.");
             }
 
-            var direction = GetJsonString(item, "direction");
-            if (direction is not ("increase_bad" or "decrease_bad"))
+            guardrails.Add(new GuardrailMetricConfig
             {
-                direction = "increase_bad";
-            }
-
-            var payload = new Dictionary<string, object>
-            {
-                ["name"] = metric.Name,
-                ["event"] = metric.Key,
-                ["metricType"] = NormalizeMetricType(metric.MetricType),
-                ["metricAgg"] = NormalizeMetricAgg(metric.MetricAgg),
-                ["direction"] = direction,
-                ["inverse"] = direction == "increase_bad"
-            };
-
-            if (!string.IsNullOrWhiteSpace(metric.Description))
-            {
-                payload["description"] = metric.Description;
-            }
-
-            guardrails.Add(payload);
+                MetricId = metric.Id,
+                MetricKey = metric.Key,
+                Name = metric.Name,
+                EventName = metric.EventName,
+                Description = metric.Description,
+                MetricType = metric.MetricType,
+                MetricAgg = metric.MetricAgg,
+                Direction = selection.Direction
+            });
         }
 
-        return JsonSerializer.Serialize(guardrails);
+        return guardrails;
     }
 
-    private static string BuildPrimaryMetricJson(ExperimentMetric metric, string? expectedDirection)
+    private static PrimaryMetricConfig BuildPrimaryMetricConfig(ExperimentMetric metric, string expectedDirection) => new()
     {
-        var payload = new Dictionary<string, object>
-        {
-            ["name"] = metric.Name,
-            ["event"] = metric.Key,
-            ["metricType"] = NormalizeMetricType(metric.MetricType),
-            ["metricAgg"] = NormalizeMetricAgg(metric.MetricAgg),
-            ["expectedDirection"] = NormalizeExpectedDirection(expectedDirection)
-        };
-
-        if (!string.IsNullOrWhiteSpace(metric.Description))
-        {
-            payload["description"] = metric.Description.Trim();
-        }
-
-        return JsonSerializer.Serialize(payload);
-    }
+        MetricId = metric.Id,
+        MetricKey = metric.Key,
+        Name = metric.Name,
+        EventName = metric.EventName,
+        Description = Normalize(metric.Description),
+        MetricType = metric.MetricType,
+        MetricAgg = metric.MetricAgg,
+        ExpectedDirection = expectedDirection
+    };
 
     private static string BuildInputDataJson(Dictionary<string, Dictionary<string, object>> metrics)
     {
@@ -1579,20 +1442,23 @@ public class ExperimentService(
             ? $"Gaussian(mu={run.PriorMean ?? 0}, sigma={run.PriorStddev ?? 0.3})"
             : "flat (improper)";
 
-        var primaryData = metrics.GetValueOrDefault(primaryMetricEvent);
+        var primaryKey = MetricSnapshots.Identity(run.PrimaryMetric);
+        var primaryData = metrics.GetValueOrDefault(primaryKey);
         var observed = BuildObservedCounts(primaryData, control, treatments);
         var srmPValue = SrmCheck(observed.Values.ToArray());
         var minN = observed.Count == 0 ? 0 : observed.Values.Min();
         var minimumSample = run.MinimumSample ?? 0;
-        var guardrailEvents = guardrails.Select(x => x.Event).ToHashSet();
-        var primaryKey = metrics.Keys.FirstOrDefault(key => !guardrailEvents.Contains(key))
-            ?? metrics.Keys.FirstOrDefault()
-            ?? primaryMetricEvent;
 
         var warnings = new List<string>();
         var primaryMetric = metrics.TryGetValue(primaryKey, out var resolvedPrimaryData)
-            ? ComputeMetricSection(primaryKey, resolvedPrimaryData, control, treatments, false, prior, primaryMetricAgg)
+            ? ComputeMetricSection(primaryMetricEvent, resolvedPrimaryData, control, treatments, false, prior, primaryMetricAgg)
             : null;
+
+        if (primaryMetric != null)
+        {
+            primaryMetric["metricId"] = run.PrimaryMetric.MetricId;
+            primaryMetric["metricKey"] = run.PrimaryMetric.MetricKey;
+        }
 
         if (primaryMetric == null && resolvedPrimaryData != null)
         {
@@ -1659,7 +1525,7 @@ public class ExperimentService(
         var sections = new List<Dictionary<string, object?>>();
         foreach (var guardrail in guardrails)
         {
-            if (!metrics.TryGetValue(guardrail.Event, out var guardrailData))
+            if (!metrics.TryGetValue(guardrail.Key, out var guardrailData))
             {
                 continue;
             }
@@ -1679,6 +1545,8 @@ public class ExperimentService(
                 guardrail.MetricAgg);
             if (section != null)
             {
+                section["metricId"] = guardrail.MetricId;
+                section["metricKey"] = guardrail.MetricKey;
                 sections.Add(section);
             }
         }
@@ -1850,60 +1718,6 @@ public class ExperimentService(
             .Split(['|', ','], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .DefaultIfEmpty("treatment")
             .ToArray();
-    }
-
-    private static List<GuardrailDefinition> ParseGuardrailDefinitions(string? value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return [];
-        }
-
-        try
-        {
-            using var doc = JsonDocument.Parse(value);
-            if (doc.RootElement.ValueKind != JsonValueKind.Array)
-            {
-                return [];
-            }
-
-            var guardrails = new List<GuardrailDefinition>();
-            foreach (var item in doc.RootElement.EnumerateArray())
-            {
-                if (item.ValueKind == JsonValueKind.String)
-                {
-                    var eventName = item.GetString();
-                    if (!string.IsNullOrWhiteSpace(eventName))
-                    {
-                        guardrails.Add(new GuardrailDefinition(eventName.Trim(), "binary", "once", false));
-                    }
-                    continue;
-                }
-
-                if (item.ValueKind != JsonValueKind.Object)
-                {
-                    continue;
-                }
-
-                var name = GetJsonString(item, "event") ?? GetJsonString(item, "name");
-                if (string.IsNullOrWhiteSpace(name))
-                {
-                    continue;
-                }
-
-                guardrails.Add(new GuardrailDefinition(
-                    name.Trim(),
-                    NormalizeMetricType(GetJsonString(item, "metricType")),
-                    NormalizeMetricAgg(GetJsonString(item, "metricAgg")),
-                    GetJsonBool(item, "inverse") ?? GetJsonString(item, "direction") == "increase_bad"));
-            }
-
-            return guardrails;
-        }
-        catch
-        {
-            return [];
-        }
     }
 
     private static Dictionary<string, long> BuildObservedCounts(
@@ -2398,7 +2212,7 @@ public class ExperimentService(
         return Math.Round(value * factor) / factor;
     }
 
-    private sealed record GuardrailDefinition(string Event, string MetricType, string MetricAgg, bool Inverse);
+    private sealed record GuardrailDefinition(string Event, string MetricType, string MetricAgg, bool Inverse, string Key, Guid MetricId, string MetricKey);
 
     private sealed record GaussianPrior(double Mean, double Variance, bool Proper);
 
@@ -2419,95 +2233,11 @@ public class ExperimentService(
         }
     }
 
-    private static string? BuildGuardrailEventsJson(string? guardrails)
-    {
-        if (string.IsNullOrWhiteSpace(guardrails))
-        {
-            return null;
-        }
-
-        try
-        {
-            using var doc = JsonDocument.Parse(guardrails);
-            if (doc.RootElement.ValueKind != JsonValueKind.Array)
-            {
-                return null;
-            }
-
-            var events = new List<Dictionary<string, object>>();
-            foreach (var item in doc.RootElement.EnumerateArray())
-            {
-                if (item.ValueKind != JsonValueKind.Object)
-                {
-                    continue;
-                }
-
-                var eventName = GetJsonString(item, "event");
-                if (string.IsNullOrWhiteSpace(eventName))
-                {
-                    eventName = GetJsonString(item, "name");
-                }
-
-                if (string.IsNullOrWhiteSpace(eventName))
-                {
-                    continue;
-                }
-
-                events.Add(new Dictionary<string, object>
-                {
-                    ["event"] = eventName.Trim(),
-                    ["metricType"] = NormalizeMetricType(GetJsonString(item, "metricType")),
-                    ["metricAgg"] = NormalizeMetricAgg(GetJsonString(item, "metricAgg")),
-                    ["inverse"] = GetJsonBool(item, "inverse") ?? GetJsonString(item, "direction") == "increase_bad"
-                });
-            }
-
-            return events.Count == 0 ? null : JsonSerializer.Serialize(events);
-        }
-        catch
-        {
-            return null;
-        }
-    }
-
     private static string? GetJsonString(JsonElement element, string property)
     {
         return element.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.String
             ? value.GetString()
             : null;
-    }
-
-    private static Guid? GetJsonGuid(JsonElement element, string property)
-    {
-        return element.TryGetProperty(property, out var value) &&
-               value.ValueKind == JsonValueKind.String &&
-               Guid.TryParse(value.GetString(), out var parsed)
-            ? parsed
-            : null;
-    }
-
-    private static bool? GetJsonBool(JsonElement element, string property)
-    {
-        return element.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.True
-            ? true
-            : element.TryGetProperty(property, out value) && value.ValueKind == JsonValueKind.False
-                ? false
-                : null;
-    }
-
-    private static string NormalizeMetricType(string? value)
-    {
-        return value == "numeric" ? "numeric" : "binary";
-    }
-
-    private static string NormalizeMetricAgg(string? value)
-    {
-        return value is "count" or "sum" or "average" ? value : "once";
-    }
-
-    private static string NormalizeExpectedDirection(string? value)
-    {
-        return IsDecreaseGood(value) ? "decrease_good" : "increase_good";
     }
 
     private static bool IsDecreaseGood(string? value)
