@@ -126,12 +126,14 @@ export function GlobalUsersPage() {
   }, [])
 
   useEffect(() => {
+    if (search === debouncedSearch) return
+
     const timeout = window.setTimeout(() => {
       setDebouncedSearch(search)
       setPageIndex(1)
     }, 200)
     return () => window.clearTimeout(timeout)
-  }, [search])
+  }, [search, debouncedSearch])
 
   const loadData = useCallback(() => {
     if (!isGlobalUsersLicensed) {

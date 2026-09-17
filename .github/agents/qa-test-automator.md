@@ -2,7 +2,7 @@
 
 name: QA Test Automator
 description: Analyzes manual QA test scripts and generates automated test code by identifying and applying existing testing patterns, frameworks, and conventions already present in the repository.
-tools: ['edit', 'search', 'shell', 'fetch', 'runTasks', 'githubRepo', 'todos', 'runSubagent']
+tools: ['edit', 'search', 'execute', 'web/fetch', 'execute/createAndRunTask', 'execute/runTask', 'read/getTaskOutput', 'vscodeTasks/createAndRunTask', 'vscodeTasks/getTaskOutput', 'vscodeTasks/runTask', 'web/githubRepo', 'todo', 'agent']
 model: Claude Sonnet 4.5 (copilot)
 
 ---
@@ -188,40 +188,33 @@ This repository contains multiple testing layers. Always match the right layer t
 - **Assertions**: `Assert.Equal()`, `Assert.True()`, `Assert.ThrowsAnyAsync<T>()`.
 - **CI**: `dotnet test -c Release --no-build --verbosity normal`.
 
-### Angular Frontend Tests (Jasmine/Karma)
+### React Frontend Tests (Vitest + React Testing Library)
 
-**Use for**: Frontend component tests.
+**Use for**: Frontend unit and component tests.
 
-**Location**: `modules/front-end/src/app/**/*.component.spec.ts`.
+**Location**: Colocated `*.test.ts` / `*.test.tsx` files under `modules/front-end/src/`, with application tests in `src/test/`.
 
 **Patterns**:
-- **Framework**: Jasmine + Karma, Angular TestBed.
-- **Structure**:
-  ```typescript
-  describe('LoginComponent', () => {
-    let component: LoginComponent;
-    let fixture: ComponentFixture<LoginComponent>;
+- **Framework**: Vitest with jsdom and React Testing Library; shared setup is in `src/test/setup.ts`.
+- **Setup**: Reuse existing render helpers and the providers needed by the component, such as TanStack Query, React Router, and the shared i18n instance. Use a fresh QueryClient for each render fixture.
+- **Mocking**: Use `vi.fn()`, `vi.spyOn()`, and `vi.mock()` following nearby tests. Mock every API dependency of the tested view and reset mocks/storage where needed.
+- **Assertions**: Use accessible roles and labels with `screen.getByRole()` / `screen.findByRole()` and jest-dom assertions such as `toBeInTheDocument()` and `toBeVisible()`. Await observable async state changes.
+- **Translations**: English and Chinese resources live in `src/lib/i18n/resources/`; existing i18n tests run with the unit suite.
+- **Command**: Run `npm test` from `modules/front-end`; to select a file, use `npm test -- src/path/to/example.test.tsx`. Verify script names against `package.json`.
+- **Style**: Follow the frontend Prettier configuration and `modules/front-end/AGENTS.md`.
 
-    beforeEach(async () => {
-      await TestBed.configureTestingModule({
-        imports: [RouterTestingModule],
-        declarations: [LoginComponent],
-      }).compileComponents();
-    });
+### Frontend Browser E2E (Playwright)
 
-    beforeEach(() => {
-      fixture = TestBed.createComponent(LoginComponent);
-      component = fixture.componentInstance;
-      fixture.detectChanges();
-    });
+**Use for**: Browser navigation, interaction, layout, and API/frontend integration behavior.
 
-    it('should create', () => {
-      expect(component).toBeTruthy();
-    });
-  });
-  ```
-- **Assertions**: Jasmine matchers (`expect().toBeTruthy()`, `.toEqual()`, `.toContain()`).
-- **File naming**: `[component-name].component.spec.ts`.
+**Location**: `modules/front-end/src/test/e2e/*.spec.ts`, excluded from Vitest.
+
+**Patterns**:
+- **Framework**: Playwright with Chromium, using `test` and `expect` from `@playwright/test`.
+- **Fixtures**: Reuse helpers in `src/test/e2e/helpers.ts` for runtime configuration, authenticated users, context, and API mocks. Mock all endpoints needed by mocked pages so requests do not reach a real API with fake tokens.
+- **Assertions**: Prefer accessible locators, Playwright's retrying assertions, and waits for specific responses or page state. Avoid arbitrary sleeps.
+- **Command**: Run `npm run test:e2e` from `modules/front-end`, optionally followed by `-- example.spec.ts` to select a file. Install Chromium first with `npx playwright install chromium`.
+- **Containers**: `npm run test:e2e:containers` builds the API and frontend from local code and starts them with PostgreSQL. Docker is required. The container smoke test exercises the real API; other tests may use mocks.
 
 ### Manual QA Test Script Format (`e2e/control-plane/manual_scripts/`)
 
@@ -264,12 +257,13 @@ Narrative objective.
 
 1. **Always reuse existing utilities.** If `BaseScenario` has `toggle_flag()`, use it. If `AssertionRegistry` has `add_pass()`, use it. Never create parallel helpers.
 
-2. **Match file placement.** New Python scenarios go in `e2e/control-plane/automation-py/scenarios/`. New C# tests go alongside existing test projects. New Angular specs go next to the component.
+2. **Match file placement.** New Python scenarios go in `e2e/control-plane/automation-py/scenarios/`. New C# tests go alongside existing test projects. New React unit/component tests go next to the code under test; browser specs go in `modules/front-end/src/test/e2e/`.
 
 3. **Match naming conventions exactly.**
    - Python scenarios: `cpXX.py` with `CPxxScenario` class.
    - C# tests: `[Feature]Tests.cs` with `[Feature]Tests` class.
-   - Angular: `[component].component.spec.ts`.
+   - React unit/component tests: `[name].test.ts` / `[name].test.tsx`.
+   - Playwright browser tests: `[feature].spec.ts` in `src/test/e2e/`.
 
 4. **Preserve assertion granularity.** Each "Observe" or "Expected Result" in the manual script should map to a distinct assertion with a descriptive name.
 
