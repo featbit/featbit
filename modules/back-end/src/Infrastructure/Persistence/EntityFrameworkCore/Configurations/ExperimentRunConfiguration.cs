@@ -47,7 +47,6 @@ public class ExperimentRunConfiguration : IEntityTypeConfiguration<ExperimentRun
         builder.Property(x => x.AssignmentUnitSelector).HasColumnName("assignment_unit_selector").HasMaxLength(256);
         builder.Property(x => x.LayerTrafficPercent).HasColumnName("layer_traffic_percent");
         builder.Property(x => x.AnalysisSamplingPlan).HasColumnName("analysis_sampling_plan");
-        builder.Property(x => x.CustomerEndpointConfig).HasColumnName("customer_endpoint_config");
 
         builder.Ignore(x => x.Experiment);
     }

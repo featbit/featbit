@@ -76,7 +76,5 @@ public class ExperimentRun : AuditedEntity
 
     public string AnalysisSamplingPlan { get; set; }
 
-    public string CustomerEndpointConfig { get; set; }
-
     public Experiment Experiment { get; set; }
 }

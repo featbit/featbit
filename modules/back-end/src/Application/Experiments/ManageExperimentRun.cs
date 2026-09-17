@@ -112,8 +112,6 @@ public class ExperimentRunUpdate
     public double? LayerTrafficPercent { get; set; }
 
     public string AnalysisSamplingPlan { get; set; }
-
-    public string CustomerEndpointConfig { get; set; }
 }
 
 public class CreateExperimentRun : IRequest<ExperimentDetailVm>

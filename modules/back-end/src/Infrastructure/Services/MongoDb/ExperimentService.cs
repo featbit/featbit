@@ -797,7 +797,6 @@ public class ExperimentService(
             AssignmentUnitSelector = run.AssignmentUnitSelector,
             LayerTrafficPercent = run.LayerTrafficPercent,
             AnalysisSamplingPlan = run.AnalysisSamplingPlan,
-            CustomerEndpointConfig = run.CustomerEndpointConfig,
             CreatedAt = run.CreatedAt,
             UpdatedAt = run.UpdatedAt
         };
@@ -1038,7 +1037,6 @@ public class ExperimentService(
         run.AssignmentUnitSelector = Normalize(update.AssignmentUnitSelector, run.AssignmentUnitSelector);
         run.AnalysisSamplingPlan = Normalize(update.AnalysisSamplingPlan, run.AnalysisSamplingPlan);
         run.AudienceFilters = Normalize(update.AudienceFilters, run.AudienceFilters);
-        run.CustomerEndpointConfig = Normalize(update.CustomerEndpointConfig, run.CustomerEndpointConfig);
 
         if (update.MinimumSample.HasValue) run.MinimumSample = update.MinimumSample;
         if (update.ObservationStart.HasValue) run.ObservationStart = update.ObservationStart;
