@@ -34,8 +34,6 @@ public class Experiment : AuditedEntity
 
     public string ConflictAnalysis { get; set; }
 
-    public string EntryMode { get; set; }
-
     // Null marks legacy data whose run history has not been used to seed the counter yet.
     // Only the database allocator updates this value; deleting a run never resets it.
     public long? LastRunNumber { get; set; }

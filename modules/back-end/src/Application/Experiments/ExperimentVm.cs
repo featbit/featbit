@@ -71,8 +71,6 @@ public class ExperimentDetailVm : ExperimentVm
 
     public string ConflictAnalysis { get; set; }
 
-    public string EntryMode { get; set; }
-
     public ICollection<ExperimentRunVm> ExperimentRuns { get; set; } = [];
 
     public ICollection<ExperimentActivityVm> Activities { get; set; } = [];

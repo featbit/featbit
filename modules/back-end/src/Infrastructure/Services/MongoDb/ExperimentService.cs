@@ -123,7 +123,6 @@ public class ExperimentService(
         SetIfNotNull(updates, x => x.LastLearning, update.LastLearning);
         SetIfNotNull(updates, x => x.Variants, update.Variants);
         SetIfNotNull(updates, x => x.ConflictAnalysis, update.ConflictAnalysis);
-        SetIfNotNull(updates, x => x.EntryMode, update.EntryMode);
 
         await mongoDb.CollectionOf<Experiment>().UpdateOneAsync(
             x => x.Id == id && x.EnvId == envId,
@@ -740,7 +739,6 @@ public class ExperimentService(
             PrimaryMetric = MetricSnapshots.Copy(experiment.PrimaryMetric),
             Variants = experiment.Variants,
             ConflictAnalysis = experiment.ConflictAnalysis,
-            EntryMode = experiment.EntryMode,
             CreatedAt = experiment.CreatedAt,
             UpdatedAt = experiment.UpdatedAt,
             ExperimentRuns = experiment.ExperimentRuns

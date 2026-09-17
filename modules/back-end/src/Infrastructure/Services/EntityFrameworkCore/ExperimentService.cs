@@ -949,7 +949,6 @@ public class ExperimentService(
             PrimaryMetric = MetricSnapshots.Copy(experiment.PrimaryMetric),
             Variants = experiment.Variants,
             ConflictAnalysis = experiment.ConflictAnalysis,
-            EntryMode = experiment.EntryMode,
             CreatedAt = experiment.CreatedAt,
             UpdatedAt = experiment.UpdatedAt,
             ExperimentRuns = experiment.ExperimentRuns
@@ -1043,7 +1042,6 @@ public class ExperimentService(
         experiment.LastLearning = Normalize(update.LastLearning, experiment.LastLearning);
         experiment.Variants = Normalize(update.Variants, experiment.Variants);
         experiment.ConflictAnalysis = Normalize(update.ConflictAnalysis, experiment.ConflictAnalysis);
-        experiment.EntryMode = Normalize(update.EntryMode, experiment.EntryMode);
     }
 
     private static void ApplyRunUpdate(ExperimentRun run, ExperimentRunUpdate update)

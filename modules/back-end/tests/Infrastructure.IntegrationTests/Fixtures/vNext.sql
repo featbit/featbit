@@ -191,7 +191,6 @@ CREATE TABLE IF NOT EXISTS experiments (
     primary_metric jsonb,
     variants text,
     conflict_analysis text,
-    entry_mode character varying(64),
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
     CONSTRAINT pk_experiments PRIMARY KEY (id)

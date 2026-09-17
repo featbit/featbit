@@ -29,8 +29,6 @@ public class ExperimentUpdate
     public string Variants { get; set; }
 
     public string ConflictAnalysis { get; set; }
-
-    public string EntryMode { get; set; }
 }
 
 public class UpdateExperiment : IRequest<ExperimentDetailVm>
