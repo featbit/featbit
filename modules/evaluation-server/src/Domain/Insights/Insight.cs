@@ -35,11 +35,8 @@ public class Insight
         return new EndUserMessage(envId, User!);
     }
 
-    public ICollection<InsightMessage> InsightMessages(Guid envId)
+    public void AppendInsightMessages(string envId, ICollection<InsightMessage> messages)
     {
-        var messages = new List<InsightMessage>();
-        var envIdString = $"{envId}";
-
         // flag messages
         if (Variations != null)
         {
@@ -50,7 +47,7 @@ public class Insight
                     continue;
                 }
 
-                messages.Add(InsightMessage.ForFlagValue(envIdString, User, variation));
+                messages.Add(InsightMessage.ForFlagValue(envId, User!, variation));
             }
         }
 
@@ -64,10 +61,9 @@ public class Insight
                     continue;
                 }
 
-                messages.Add(InsightMessage.ForMetric(envIdString, User, metric));
+                messages.Add(InsightMessage.ForMetric(envId, User!, metric));
             }
         }
 
-        return messages;
     }
 }

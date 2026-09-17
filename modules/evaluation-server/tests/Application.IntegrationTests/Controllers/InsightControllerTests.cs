@@ -179,7 +179,7 @@ public class InsightControllerTests(TestApp app)
                 Variations = [],
                 Metrics = new[]
                 {
-                    new MetricInsight { EventName = eventName, NumericValue = 1.0f }
+                    new MetricInsight { Type = "Custom", EventName = eventName, NumericValue = 1.0f }
                 }
             }
         };

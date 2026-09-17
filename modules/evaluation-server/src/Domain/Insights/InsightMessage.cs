@@ -7,6 +7,8 @@ namespace Domain.Insights;
 
 public class InsightMessage
 {
+    public const string FlagValueEvent = "FlagValue";
+
     // Version 2 identifies the v6 insight message contract; legacy messages have no version.
     [JsonPropertyName("schema_version")]
     public int SchemaVersion => 2;
@@ -48,7 +50,7 @@ public class InsightMessage
             variationValue = variation.Value
         };
 
-        return new InsightMessage(envId, "FlagValue", properties, variationInsight.Timestamp);
+        return new InsightMessage(envId, FlagValueEvent, properties, variationInsight.Timestamp);
     }
 
     public static InsightMessage ForMetric(string envId, EndUser user, MetricInsight metric)

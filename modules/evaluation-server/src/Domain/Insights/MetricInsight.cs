@@ -25,7 +25,7 @@ public partial class MetricInsight
 
     public bool IsValid()
     {
-        if (Type is not null && Type.Length > MaxTypeLength)
+        if (string.IsNullOrWhiteSpace(Type) || Type.Length > MaxTypeLength || Type == InsightMessage.FlagValueEvent)
         {
             return false;
         }
