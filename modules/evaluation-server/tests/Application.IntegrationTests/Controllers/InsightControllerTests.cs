@@ -5,7 +5,6 @@ using Domain.EndUsers;
 using Domain.Evaluation;
 using Domain.Insights;
 using Domain.Messages;
-using Domain.Shared;
 using Domain.Usages;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
@@ -72,8 +71,8 @@ public class InsightControllerTests(TestApp app)
         var result = await TrackAsync(producer.Object, insights);
 
         Assert.Equal(HttpStatusCode.OK, result.StatusCode);
-        producer.Verify(p => p.PublishAsync(Topics.EndUser, It.IsAny<EndUserMessage>()), Times.Once);
-        producer.Verify(p => p.PublishAsync(Topics.Insights, It.IsAny<InsightMessage>()), Times.AtLeastOnce);
+        producer.Verify(p => p.PublishBatchAsync(Topics.EndUser, It.Is<IReadOnlyCollection<EndUserMessage>>(x => x.Count == 1)), Times.Once);
+        producer.Verify(p => p.PublishBatchAsync(Topics.Insights, It.Is<IReadOnlyCollection<InsightMessage>>(x => x.Count == 1)), Times.Once);
         producer.Verify(p => p.PublishAsync(Topics.Usage, It.IsAny<InsightUsage>()), Times.Once);
     }
 
@@ -90,7 +89,7 @@ public class InsightControllerTests(TestApp app)
         var result = await TrackAsync(producer.Object, insights);
 
         Assert.Equal(HttpStatusCode.OK, result.StatusCode);
-        producer.Verify(p => p.PublishAsync(Topics.EndUser, It.IsAny<EndUserMessage>()), Times.Once);
+        producer.Verify(p => p.PublishBatchAsync(Topics.EndUser, It.Is<IReadOnlyCollection<EndUserMessage>>(x => x.Count == 1)), Times.Once);
     }
 
     [Fact]
@@ -106,7 +105,7 @@ public class InsightControllerTests(TestApp app)
         var result = await TrackAsync(producer.Object, insights);
 
         Assert.Equal(HttpStatusCode.OK, result.StatusCode);
-        producer.Verify(p => p.PublishAsync(Topics.EndUser, It.IsAny<EndUserMessage>()), Times.Exactly(2));
+        producer.Verify(p => p.PublishBatchAsync(Topics.EndUser, It.Is<IReadOnlyCollection<EndUserMessage>>(x => x.Count == 2)), Times.Once);
     }
 
     [Fact]
@@ -124,7 +123,7 @@ public class InsightControllerTests(TestApp app)
         var result = await TrackAsync(producer.Object, insights);
 
         Assert.Equal(HttpStatusCode.OK, result.StatusCode);
-        producer.Verify(p => p.PublishAsync(Topics.EndUser, It.IsAny<EndUserMessage>()), Times.Once);
+        producer.Verify(p => p.PublishBatchAsync(Topics.EndUser, It.Is<IReadOnlyCollection<EndUserMessage>>(x => x.Count == 1)), Times.Once);
     }
 
     // --- Malicious / bad data ---

@@ -56,12 +56,11 @@ public class InsightController : PublicApiControllerBase
             usage.AddEvents(insight.Variations?.Length ?? 0, insight.Metrics?.Length ?? 0);
         }
 
-        var tasks = endUserMessages.Select(x => _producer.PublishAsync(Topics.EndUser, x))
-            .Concat(insightMessages.Select(x => _producer.PublishAsync(Topics.Insights, x)))
-            .Append(_producer.PublishAsync(Topics.Usage, usage))
-            .ToArray();
-
-        await Task.WhenAll(tasks);
+        await Task.WhenAll(
+            _producer.PublishBatchAsync(Topics.EndUser, endUserMessages),
+            _producer.PublishBatchAsync(Topics.Insights, insightMessages),
+            _producer.PublishAsync(Topics.Usage, usage)
+        );
 
         return Ok();
     }
