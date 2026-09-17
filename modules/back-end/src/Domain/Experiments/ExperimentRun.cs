@@ -28,8 +28,6 @@ public class ExperimentRun : AuditedEntity
 
     public double? PriorStddev { get; set; }
 
-    public string InputData { get; set; }
-
     public string AnalysisResult { get; set; }
 
     public string Decision { get; set; }

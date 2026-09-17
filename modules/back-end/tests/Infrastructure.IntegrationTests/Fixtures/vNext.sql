@@ -144,7 +144,6 @@ CREATE TABLE IF NOT EXISTS experiment_runs (
     prior_proper boolean NOT NULL,
     prior_mean double precision,
     prior_stddev double precision,
-    input_data text,
     analysis_result text,
     decision text,
     decision_summary text,

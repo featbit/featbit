@@ -527,7 +527,7 @@ public abstract class WritableExperimentProviderTestsBase(
                 Method = "bayesian_ab",
                 ObservationStart = start, ObservationEnd = start.AddDays(1),
                 Decision = "PAUSE", NextHypothesis = "Try the next change",
-                InputData = "{\"privateInput\":true}", AnalysisResult = "{\"fullAnalysis\":true}"
+                AnalysisResult = "{\"fullAnalysis\":true}"
             });
         var configured = Assert.Single(detail.ExperimentRuns);
         Assert.Equal("bayesian_ab", configured.Method);
@@ -571,7 +571,6 @@ public abstract class WritableExperimentProviderTestsBase(
         Assert.False(current.HasLearning);
 
         var json = JsonSerializer.Serialize(listed, new JsonSerializerOptions(JsonSerializerDefaults.Web));
-        Assert.DoesNotContain("\"inputData\"", json);
         Assert.DoesNotContain("\"analysisResult\"", json);
         Assert.DoesNotContain("\"activities\"", json);
         Assert.DoesNotContain("\"nextHypothesis\"", json);

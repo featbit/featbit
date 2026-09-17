@@ -100,7 +100,7 @@ public class ExperimentMcpTools(
     }
 
     [McpServerTool(Name = "featbit_experiment_update_run")]
-    [Description("Patch an experiment run's method, variants, observations, input data, analysis result, decision, or learning fields. Metric snapshots cannot be edited; update the experiment's metric defaults and create a new run to use different metrics.")]
+    [Description("Patch an experiment run's method, variants, observations, analysis result, decision, or learning fields. Metric snapshots cannot be edited; update the experiment's metric defaults and create a new run to use different metrics.")]
     public async Task<ExperimentDetailVm> UpdateRun(
         [Description("Experiment experiment id.")]
         Guid experimentId,

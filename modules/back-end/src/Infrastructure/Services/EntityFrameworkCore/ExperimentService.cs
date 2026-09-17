@@ -525,7 +525,6 @@ public class ExperimentService(
             metrics[guardrail.Key] = guardrailData;
         }
 
-        var inputData = BuildInputDataJson(metrics);
         var control = Normalize(run.ControlVariant) ?? "control";
         var treatments = SplitTreatments(run.TreatmentVariant);
         var (analysisControl, analysisTreatments) = ResolveAnalysisVariantKeys(
@@ -537,7 +536,6 @@ public class ExperimentService(
             run, experiment.Name ?? id.ToString(), primaryMetricEvent, metricAgg,
             metrics, guardrails, analysisControl, analysisTreatments);
 
-        run.InputData = inputData;
         run.AnalysisResult = analysisResult;
         run.UpdatedAt = DateTime.UtcNow;
 
@@ -982,7 +980,6 @@ public class ExperimentService(
             PriorProper = run.PriorProper,
             PriorMean = run.PriorMean,
             PriorStddev = run.PriorStddev,
-            InputData = run.InputData,
             AnalysisResult = run.AnalysisResult,
             Decision = run.Decision,
             DecisionSummary = run.DecisionSummary,
@@ -1048,7 +1045,6 @@ public class ExperimentService(
         run.Method = Normalize(update.Method, run.Method);
         run.ControlVariant = Normalize(update.ControlVariant, run.ControlVariant);
         run.TreatmentVariant = Normalize(update.TreatmentVariant, run.TreatmentVariant);
-        run.InputData = Normalize(update.InputData, run.InputData);
         run.AnalysisResult = Normalize(update.AnalysisResult, run.AnalysisResult);
         run.Decision = Normalize(update.Decision, run.Decision);
         run.DecisionSummary = Normalize(update.DecisionSummary, run.DecisionSummary);
@@ -1332,14 +1328,6 @@ public class ExperimentService(
         MetricAgg = metric.MetricAgg,
         ExpectedDirection = expectedDirection
     };
-
-    private static string BuildInputDataJson(Dictionary<string, Dictionary<string, object>> metrics)
-    {
-        return JsonSerializer.Serialize(new Dictionary<string, object>
-        {
-            ["metrics"] = metrics
-        });
-    }
 
     private static Dictionary<string, object> BuildMetricData(
         string metricType,

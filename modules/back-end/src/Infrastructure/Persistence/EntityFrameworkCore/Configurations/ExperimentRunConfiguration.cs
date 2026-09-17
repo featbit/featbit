@@ -25,7 +25,6 @@ public class ExperimentRunConfiguration : IEntityTypeConfiguration<ExperimentRun
         builder.Property(x => x.PriorProper).HasColumnName("prior_proper");
         builder.Property(x => x.PriorMean).HasColumnName("prior_mean");
         builder.Property(x => x.PriorStddev).HasColumnName("prior_stddev");
-        builder.Property(x => x.InputData).HasColumnName("input_data");
         builder.Property(x => x.AnalysisResult).HasColumnName("analysis_result");
         builder.Property(x => x.DecisionSummary).HasColumnName("decision_summary");
         builder.Property(x => x.DecisionReason).HasColumnName("decision_reason");

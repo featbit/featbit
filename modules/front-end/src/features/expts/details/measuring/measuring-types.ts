@@ -27,7 +27,6 @@ export type MeasuringRun = ExperimentRunDetail & {
   priorProper?: boolean
   priorMean?: number | null
   priorStddev?: number | null
-  inputData?: string | null
   analysisResult?: string | null
   trafficPercent?: number | null
   layerId?: string | null
