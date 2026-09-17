@@ -44,7 +44,7 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
         });
         await using var db = CreateDbContext();
         await SeedExperimentAsync(db, metricType: "binary", metricAgg: "once",
-            controlVariant: "control-id", treatmentVariant: "treatment-id");
+            controlVariant: "control-id", treatmentVariants: ["treatment-id"]);
         var service = CreateService(db, stats);
         const string samplingPlan = """[{"variation":"treatment-id","role":"control","includeRate":100},{"variation":"control-id","role":"treatment","includeRate":100}]""";
 
@@ -53,14 +53,14 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
             {
                 Method = "bayesian_ab",
                 ControlVariant = "treatment-id",
-                TreatmentVariant = "control-id",
+                TreatmentVariants = ["control-id"],
                 AnalysisSamplingPlan = samplingPlan
             })
             : await service.UpdateRunAsync(EnvId, ExperimentId, RunId, new ExperimentRunUpdate
             {
                 Method = "bayesian_ab",
                 ControlVariant = "treatment-id",
-                TreatmentVariant = "control-id",
+                TreatmentVariants = ["control-id"],
                 AnalysisSamplingPlan = samplingPlan
             });
         Assert.Equal("treatment-id", Assert.Single(updated.ExperimentRuns).ControlVariant);
@@ -70,11 +70,11 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
 
         var query = Assert.Single(stats.Requests);
         Assert.Equal("treatment-id", query.ControlVariant);
-        Assert.Equal("control-id", query.TreatmentVariants);
+        Assert.Equal(new string[] { "control-id" }, query.TreatmentVariants);
         var run = Assert.Single(analyzed.ExperimentRuns);
         Assert.Equal("bayesian_ab", run.Method);
         Assert.Equal("treatment-id", run.ControlVariant);
-        Assert.Equal("control-id", run.TreatmentVariant);
+        Assert.Equal(new string[] { "control-id" }, run.TreatmentVariants);
         Assert.Equal(samplingPlan, run.AnalysisSamplingPlan);
         using var analysis = JsonDocument.Parse(run.AnalysisResult);
         Assert.Equal("treatment-id", analysis.RootElement.GetProperty("control").GetString());
@@ -83,13 +83,34 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
         var persisted = await db.Set<ExperimentRun>().AsNoTracking().SingleAsync(x => x.Id == RunId);
         Assert.Equal("bayesian_ab", persisted.Method);
         Assert.Equal("treatment-id", persisted.ControlVariant);
-        Assert.Equal("control-id", persisted.TreatmentVariant);
+        Assert.Equal(new string[] { "control-id" }, persisted.TreatmentVariants);
 
         var withNewRun = await service.CreateRunAsync(EnvId, ExperimentId);
         var copied = Assert.Single(withNewRun.ExperimentRuns, x => x.Id != RunId);
         Assert.Equal("bayesian_ab", copied.Method);
         Assert.Equal("treatment-id", copied.ControlVariant);
-        Assert.Equal("control-id", copied.TreatmentVariant);
+        Assert.Equal(new string[] { "control-id" }, copied.TreatmentVariants);
+    }
+
+    [DockerFact]
+    public async Task TreatmentVariants_JsonArray_RoundTripsAndTracksElementChanges()
+    {
+        await using var db = CreateDbContext();
+        var ids = new[] { "candidate|one", "candidate,two", new string('x', 300) };
+        await SeedExperimentAsync(db, metricType: "binary", metricAgg: "once", treatmentVariants: ids);
+        db.ChangeTracker.Clear();
+
+        var run = await db.Set<ExperimentRun>().AsTracking().SingleAsync(x => x.Id == RunId);
+        Assert.Equal(ids, run.TreatmentVariants);
+        var jsonType = await db.Database.SqlQueryRaw<string>(
+            "SELECT jsonb_typeof(treatment_variants) AS \"Value\" FROM experiment_runs").SingleAsync();
+        Assert.Equal("array", jsonType);
+
+        run.TreatmentVariants[0] = "updated;candidate";
+        await db.SaveChangesAsync();
+        db.ChangeTracker.Clear();
+        var reloaded = await db.Set<ExperimentRun>().SingleAsync(x => x.Id == RunId);
+        Assert.Equal(new[] { "updated;candidate", ids[1], ids[2] }, reloaded.TreatmentVariants);
     }
 
     [DockerFact]
@@ -97,14 +118,14 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
     {
         await using var db = CreateDbContext();
         await SeedExperimentAsync(db, metricType: "binary", metricAgg: "once",
-            controlVariant: "", treatmentVariant: "");
+            controlVariant: "", treatmentVariants: []);
         var service = CreateService(db, new FixedExperimentStatsService(new ExperimentStatsVm { Variants = [] }));
 
         var detail = await service.CreateRunAsync(EnvId, ExperimentId);
 
         var created = Assert.Single(detail.ExperimentRuns, x => x.Id != RunId);
         Assert.Equal("control-id", created.ControlVariant);
-        Assert.Equal("treatment-id", created.TreatmentVariant);
+        Assert.Equal(new string[] { "treatment-id" }, created.TreatmentVariants);
     }
 
     [DockerFact]
@@ -205,7 +226,7 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
             metricType: "binary",
             metricAgg: "once",
             controlVariant: "control-id",
-            treatmentVariant: "treatment-id");
+            treatmentVariants: ["treatment-id"]);
 
         var result = await CreateService(db, stats).AnalyzeRunAsync(
             EnvId,
@@ -253,7 +274,7 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
             trafficOffset: 10,
             layerId: layerId,
             controlVariant: "control-id",
-            treatmentVariant: "treatment-id",
+            treatmentVariants: ["treatment-id"],
             assignmentUnitSelector: "accountId",
             layerTrafficPercent: 30,
             analysisSamplingPlan: """[{"variation":"control-id","role":"control","includeRate":25},{"variation":"treatment-id","role":"treatment","includeRate":100}]""");
@@ -272,7 +293,7 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
         Assert.Equal(30, request.LayerTrafficPercent);
         Assert.Equal("""[{"variation":"control-id","role":"control","includeRate":25},{"variation":"treatment-id","role":"treatment","includeRate":100}]""", request.AnalysisSamplingPlan);
         Assert.Equal("control-id", request.ControlVariant);
-        Assert.Equal("treatment-id", request.TreatmentVariants);
+        Assert.Equal(new string[] { "treatment-id" }, request.TreatmentVariants);
     }
 
     [DockerFact]
@@ -312,7 +333,7 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
             });
         await using var db = CreateDbContext();
         await SeedExperimentAsync(db, metricType: "binary", metricAgg: "once",
-            controlVariant: "control-id", treatmentVariant: "treatment-id|other-id");
+            controlVariant: "control-id", treatmentVariants: ["treatment-id", "other-id"]);
         var run = await db.Set<ExperimentRun>().AsTracking().SingleAsync(x => x.Id == RunId);
         run.GuardrailMetrics = [
             new GuardrailMetricConfig { MetricId = Guid.NewGuid(), MetricKey = "errors", EventName = "errors", Direction = "increase_bad" },
@@ -359,7 +380,7 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
         {
             Assert.Equal(RunId, request.RunId);
             Assert.Equal("control-id", request.ControlVariant);
-            Assert.Equal("treatment-id|other-id", request.TreatmentVariants);
+            Assert.Equal(new string[] { "treatment-id", "other-id" }, request.TreatmentVariants);
         });
     }
 
@@ -388,7 +409,7 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
         string metricAgg,
         string metricEvent = "purchase",
         string controlVariant = "control",
-        string treatmentVariant = "treatment",
+        string[]? treatmentVariants = null,
         double? trafficPercent = null,
         int? trafficOffset = null,
         Guid? layerId = null,
@@ -419,7 +440,7 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
             Method = "bayesian_ab",
             PrimaryMetric = new PrimaryMetricConfig { MetricId = Guid.NewGuid(), MetricKey = metricEvent, EventName = metricEvent, MetricType = metricType, MetricAgg = metricAgg },
             ControlVariant = controlVariant,
-            TreatmentVariant = treatmentVariant,
+            TreatmentVariants = treatmentVariants ?? ["treatment"],
             TrafficPercent = trafficPercent,
             TrafficOffset = trafficOffset,
             LayerId = layerId,

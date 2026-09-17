@@ -137,7 +137,7 @@ CREATE TABLE IF NOT EXISTS experiment_runs (
     primary_metric jsonb,
     guardrail_metrics jsonb NOT NULL DEFAULT '[]'::jsonb,
     control_variant character varying(256),
-    treatment_variant character varying(256),
+    treatment_variants jsonb NOT NULL DEFAULT '[]'::jsonb,
     minimum_sample integer,
     observation_start timestamp with time zone,
     observation_end timestamp with time zone,

@@ -105,7 +105,7 @@ public abstract class ExperimentProviderTestsBase(ExperimentProviderParityFixtur
             TrafficPercent = 20,
             TrafficOffset = 0,
             ControlVariant = "control",
-            TreatmentVariants = "treatment"
+            TreatmentVariants = ["treatment"]
         };
 
         var actual = Normalize(await CreateExperimentStatsService().QueryAsync(request));

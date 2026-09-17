@@ -9,7 +9,7 @@ export type AnalysisMethod = "bayesian_ab"
 export type NewRunSetup = {
   method: AnalysisMethod
   controlVariant: string
-  treatmentVariant: string
+  treatmentVariants: string[]
   minimumSample: number
 }
 
@@ -22,7 +22,7 @@ export type MeasuringRun = ExperimentRunDetail & {
   primaryMetric?: PrimaryMetricConfig | null
   guardrailMetrics?: GuardrailMetricConfig[]
   controlVariant?: string | null
-  treatmentVariant?: string | null
+  treatmentVariants?: string[] | null
   minimumSample?: number | null
   priorProper?: boolean
   priorMean?: number | null
@@ -46,7 +46,7 @@ export type MeasuringRun = ExperimentRunDetail & {
 export type RunAssignmentUpdate = {
   method?: string | null
   controlVariant: string
-  treatmentVariant: string
+  treatmentVariants: string[]
   layerKey: string | null
   assignmentUnitSelector: string
   sliceStart: number

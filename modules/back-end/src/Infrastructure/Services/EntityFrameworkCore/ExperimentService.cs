@@ -199,7 +199,7 @@ public class ExperimentService(
             PrimaryMetric = MetricSnapshots.Copy(experiment.PrimaryMetric),
             GuardrailMetrics = MetricSnapshots.Copy(experiment.GuardrailMetrics),
             ControlVariant = previous?.ControlVariant,
-            TreatmentVariant = previous?.TreatmentVariant,
+            TreatmentVariants = previous?.TreatmentVariants?.ToArray() ?? [],
             TrafficPercent = previous?.TrafficPercent ?? 100,
             TrafficOffset = previous?.TrafficOffset ?? 0,
             LayerId = previous?.LayerId,
@@ -363,7 +363,10 @@ public class ExperimentService(
         run.SliceEnd = sliceEnd;
         run.AllocationPlan = Normalize(update.AllocationPlan);
         run.ControlVariant = Normalize(update.ControlVariant, run.ControlVariant);
-        run.TreatmentVariant = Normalize(update.TreatmentVariant, run.TreatmentVariant);
+        run.TreatmentVariants = update.TreatmentVariants?
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Select(x => x.Trim())
+            .ToArray() ?? run.TreatmentVariants;
         run.AssignmentUnitSelector = Normalize(update.AssignmentUnitSelector, run.AssignmentUnitSelector) ??
                                      run.AllocationKeySelector ??
                                      "user.keyId";
@@ -458,7 +461,7 @@ public class ExperimentService(
             TrafficOffset = run.TrafficOffset,
             LayerId = run.LayerId?.ToString("D"),
             ControlVariant = run.ControlVariant,
-            TreatmentVariants = run.TreatmentVariant,
+            TreatmentVariants = run.TreatmentVariants,
             LayerKey = run.LayerKey,
             AllocationKeySelector = run.AllocationKeySelector,
             SliceStart = run.SliceStart,
@@ -502,7 +505,7 @@ public class ExperimentService(
                 TrafficOffset = run.TrafficOffset,
                 LayerId = run.LayerId?.ToString("D"),
                 ControlVariant = run.ControlVariant,
-                TreatmentVariants = run.TreatmentVariant,
+                TreatmentVariants = run.TreatmentVariants,
                 LayerKey = run.LayerKey,
                 AllocationKeySelector = run.AllocationKeySelector,
                 SliceStart = run.SliceStart,
@@ -526,7 +529,7 @@ public class ExperimentService(
         }
 
         var control = Normalize(run.ControlVariant) ?? "control";
-        var treatments = SplitTreatments(run.TreatmentVariant);
+        var treatments = run.TreatmentVariants ?? [];
         var (analysisControl, analysisTreatments) = ResolveAnalysisVariantKeys(
             experiment.Variants,
             primaryMetricData,
@@ -777,11 +780,11 @@ public class ExperimentService(
         // Named defaults must not replace roles explicitly selected for this run.
         if (inferMissing &&
             string.IsNullOrWhiteSpace(run.ControlVariant) &&
-            string.IsNullOrWhiteSpace(run.TreatmentVariant) &&
+            (run.TreatmentVariants == null || run.TreatmentVariants.Length == 0) &&
             TryResolveNamedControlAndTreatments(variations, out var namedControl, out var namedTreatments))
         {
             run.ControlVariant = namedControl;
-            run.TreatmentVariant = string.Join("|", namedTreatments);
+            run.TreatmentVariants = namedTreatments;
             return;
         }
 
@@ -791,7 +794,7 @@ public class ExperimentService(
             control = PickControlVariationId(flag, variations);
         }
 
-        var treatments = ResolveTreatmentVariantIds(run.TreatmentVariant, variations)
+        var treatments = ResolveTreatmentVariantIds(run.TreatmentVariants, variations)
             .Where(x => !string.IsNullOrWhiteSpace(x))
             .Where(x => string.IsNullOrWhiteSpace(control) || !VariantTokenEquals(x, control))
             .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -813,7 +816,7 @@ public class ExperimentService(
 
         if (treatments.Length > 0)
         {
-            run.TreatmentVariant = string.Join("|", treatments);
+            run.TreatmentVariants = treatments;
         }
     }
 
@@ -861,22 +864,10 @@ public class ExperimentService(
     }
 
     private static string[] ResolveTreatmentVariantIds(
-        string? value,
+        string[]? values,
         IReadOnlyCollection<Variation> variations)
     {
-        var normalized = Normalize(value);
-        if (string.IsNullOrWhiteSpace(normalized))
-        {
-            return [];
-        }
-
-        var exact = TryResolveExistingVariantId(normalized, variations);
-        if (!string.IsNullOrWhiteSpace(exact))
-        {
-            return [exact];
-        }
-
-        return SplitTreatments(normalized)
+        return (values ?? [])
             .Select(x => ResolveVariantId(x, variations))
             .OfType<string>()
             .ToArray();
@@ -973,7 +964,7 @@ public class ExperimentService(
             PrimaryMetric = MetricSnapshots.Copy(run.PrimaryMetric),
             GuardrailMetrics = MetricSnapshots.Copy(run.GuardrailMetrics),
             ControlVariant = run.ControlVariant,
-            TreatmentVariant = run.TreatmentVariant,
+            TreatmentVariants = run.TreatmentVariants,
             MinimumSample = run.MinimumSample,
             ObservationStart = run.ObservationStart,
             ObservationEnd = run.ObservationEnd,
@@ -1044,7 +1035,10 @@ public class ExperimentService(
         run.Slug = Normalize(update.Slug, run.Slug);
         run.Method = Normalize(update.Method, run.Method);
         run.ControlVariant = Normalize(update.ControlVariant, run.ControlVariant);
-        run.TreatmentVariant = Normalize(update.TreatmentVariant, run.TreatmentVariant);
+        run.TreatmentVariants = update.TreatmentVariants?
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Select(x => x.Trim())
+            .ToArray() ?? run.TreatmentVariants;
         run.AnalysisResult = Normalize(update.AnalysisResult, run.AnalysisResult);
         run.Decision = Normalize(update.Decision, run.Decision);
         run.DecisionSummary = Normalize(update.DecisionSummary, run.DecisionSummary);
@@ -1737,20 +1731,6 @@ public class ExperimentService(
                 ["sum"] = 0D,
                 ["sum_squares"] = 0D
             };
-    }
-
-    private static string[] SplitTreatments(string? value)
-    {
-        var normalized = Normalize(value);
-        if (string.IsNullOrWhiteSpace(normalized))
-        {
-            return ["treatment"];
-        }
-
-        return normalized
-            .Split(['|', ','], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .DefaultIfEmpty("treatment")
-            .ToArray();
     }
 
     private static Dictionary<string, long> BuildObservedCounts(

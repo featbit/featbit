@@ -92,7 +92,7 @@ public class ExperimentRunVm
 
     public string ControlVariant { get; set; }
 
-    public string TreatmentVariant { get; set; }
+    public string[] TreatmentVariants { get; set; } = [];
 
     public int? MinimumSample { get; set; }
 

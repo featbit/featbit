@@ -232,7 +232,7 @@ public class ExperimentMetricEventNameTests(ExperimentProviderParityFixture fixt
         var run = Assert.Single((await experiments.CreateRunAsync(envId, experiment.Id)).ExperimentRuns);
         var configured = await experiments.UpdateRunAsync(envId, experiment.Id, run.Id, new ExperimentRunUpdate
         {
-            Method = "bayesian_ab", ControlVariant = "control", TreatmentVariant = "treatment",
+            Method = "bayesian_ab", ControlVariant = "control", TreatmentVariants = ["treatment"],
             ObservationStart = start, ObservationEnd = start.AddHours(1)
         });
 

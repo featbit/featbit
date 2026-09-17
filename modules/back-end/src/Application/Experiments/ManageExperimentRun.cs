@@ -16,7 +16,7 @@ public class ExperimentRunAudienceUpdate
 
     public string ControlVariant { get; set; }
 
-    public string TreatmentVariant { get; set; }
+    public string[] TreatmentVariants { get; set; }
 
     public string LayerKey { get; set; }
 
@@ -51,7 +51,7 @@ public class ExperimentRunUpdate
 
     public string ControlVariant { get; set; }
 
-    public string TreatmentVariant { get; set; }
+    public string[] TreatmentVariants { get; set; }
 
     public int? MinimumSample { get; set; }
 

@@ -113,7 +113,7 @@ describe("creating an experiment run", () => {
     expect(JSON.parse(options?.body as string)).toEqual({
       method: "bayesian_ab",
       controlVariant: "treatment-id",
-      treatmentVariant: "control-id",
+      treatmentVariants: ["control-id"],
       minimumSample: 500,
     })
     await waitFor(() =>
