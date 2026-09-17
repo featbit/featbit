@@ -1,4 +1,11 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react"
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { App } from "@/app/app"
 
@@ -592,6 +599,7 @@ describe("App shell", () => {
   }
 
   it("redirects to the localized login route", async () => {
+    mockAuthOptionsApi(false)
     render(<App />)
 
     expect(
@@ -599,11 +607,23 @@ describe("App shell", () => {
     ).toBeInTheDocument()
   })
 
-  it("shows SSO on the localized login route without changing the URL", async () => {
+  it("defaults to SSO and switches login modes without changing the URL", async () => {
     window.history.pushState({}, "", "/en/login")
     mockAuthOptionsApi()
 
     render(<App />)
+
+    expect(
+      await screen.findByRole("heading", { name: "Sign in with SSO" })
+    ).toBeInTheDocument()
+    expect(window.location.pathname).toBe("/en/login")
+
+    fireEvent.click(screen.getByRole("button", { name: "Back to sign in" }))
+
+    expect(
+      await screen.findByRole("heading", { name: "Sign in to your workspace" })
+    ).toBeInTheDocument()
+    expect(window.location.pathname).toBe("/en/login")
 
     fireEvent.click(
       await screen.findByRole("button", { name: "Sign in with SSO" })
@@ -647,6 +667,7 @@ describe("App shell", () => {
 
   it("redirects unauthenticated app routes to login", async () => {
     window.history.pushState({}, "", "/en")
+    mockAuthOptionsApi(false)
 
     render(<App />)
 
@@ -1100,9 +1121,14 @@ describe("App shell", () => {
 
     render(<App />)
 
-    fireEvent.click(
-      await screen.findByRole("link", { name: "member@example.com" })
-    )
+    const teamTable = await screen.findByRole("table")
+    const memberLink = await within(teamTable).findByRole("link", {
+      name: "member@example.com",
+    })
+    await act(async () => {
+      fireEvent.click(memberLink)
+      await vi.dynamicImportSettled()
+    })
 
     expect(
       await screen.findByRole("heading", { name: "Member One" })

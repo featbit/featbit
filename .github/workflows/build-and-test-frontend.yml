@@ -52,7 +52,7 @@ jobs:
         run: npm ci
 
       - name: Run unit and component tests
-        run: npm test -- --maxWorkers=2
+        run: npm test
 
   container-e2e:
     name: E2E with locally built API and frontend
