@@ -207,32 +207,6 @@ public abstract class ExperimentProviderTestsBase(ExperimentProviderParityFixtur
     }
 
     [DockerFact]
-    public async Task QueryExperimentStats_MissingCustomAssignmentSelector_ExcludesSamplingEvents()
-    {
-        var runId = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc");
-        await fixture.SeedSamplingPlanScenarioAsync(ProviderName);
-
-        var request = new QueryExperimentStats
-        {
-            RunId = runId,
-            EnvId = ExperimentProviderParityFixture.SamplingEnvId,
-            FlagKey = ExperimentProviderParityFixture.FlagKey,
-            MetricEvent = ExperimentProviderParityFixture.MetricEvent,
-            StartDate = "2026-01-01",
-            EndDate = "2026-01-02",
-            MetricType = "binary",
-            MetricAgg = "once",
-            AssignmentUnitSelector = "accountId",
-            LayerTrafficPercent = 100,
-            AnalysisSamplingPlan = TenTenSamplingPlan
-        };
-
-        var actual = Normalize(await CreateExperimentStatsService().QueryAsync(request));
-
-        Assert.Empty(actual.Variants);
-    }
-
-    [DockerFact]
     public async Task GetInsights_SeededScenario_ReturnsExpectedBuckets()
     {
         await fixture.SeedScenarioAsync(ProviderName);
@@ -595,12 +569,13 @@ public abstract class WritableExperimentProviderTestsBase(
             {
                 Id = Guid.NewGuid(), EnvId = envId, FlagKey = "copy-test-flag", UserKey = "copy-test-user",
                 VariationId = "copy-test-variation", VariationValue = null, ExposedAt = timestamp,
-                Properties = "{}", CreatedAt = timestamp
+                CreatedAt = timestamp
             },
             new ExperimentMetricEvent
             {
                 Id = Guid.NewGuid(), EnvId = envId, UserKey = "copy-test-user", EventName = "copy-test-metric",
-                EventType = "Custom", NumericValue = 1, OccurredAt = timestamp, Properties = "{}", CreatedAt = timestamp
+                EventType = "Custom", NumericValue = 1, OccurredAt = timestamp, CreatedAt = timestamp,
+                ApplicationType = "dotnet-server-sdk"
             }
         ]);
 

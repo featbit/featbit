@@ -1,6 +1,5 @@
 #nullable disable
 
-using System.Text.Json;
 using System.Text.Json.Serialization;
 using Domain.EndUsers;
 
@@ -22,7 +21,7 @@ public class InsightMessage
     public string Event { get; private set; }
 
     [JsonPropertyName("properties")]
-    public string Properties { get; private set; }
+    public object Properties { get; private set; }
 
     [JsonPropertyName("timestamp")]
     public long Timestamp { get; private set; }
@@ -32,7 +31,7 @@ public class InsightMessage
         Uuid = Guid.NewGuid().ToString();
         EnvId = envId;
         Event = @event;
-        Properties = JsonSerializer.Serialize(properties);
+        Properties = properties;
         Timestamp = timestampMs;
     }
 
@@ -42,7 +41,6 @@ public class InsightMessage
 
         var properties = new
         {
-            flagId = $"{envId}-{variationInsight.FeatureFlagKey}",
             featureFlagKey = variationInsight.FeatureFlagKey,
             userKeyId = user.KeyId,
             userName = user.Name,
@@ -57,10 +55,9 @@ public class InsightMessage
     {
         var properties = new
         {
-            type = metric.Type,
             eventName = metric.EventName,
             numericValue = metric.NumericValue,
-            user = new { keyId = user.KeyId, name = user.Name },
+            userKeyId = user.KeyId,
             applicationType = metric.AppType
         };
 

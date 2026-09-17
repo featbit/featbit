@@ -191,7 +191,6 @@ public class ExperimentStatsService(ClickHouseClient clickHouse) : IExperimentSt
             };
         }
 
-        var assignmentUnitSelector = NormalizeAssignmentUnitSelector(request);
         var layerKey = NormalizeLayerKey(request);
         var layerTrafficPercent = Math.Clamp(request.LayerTrafficPercent ?? 100d, 0.000001d, 100d);
         var sliceStart = Math.Clamp(request.SliceStart ?? 0d, 0d, 100d);
@@ -208,8 +207,6 @@ public class ExperimentStatsService(ClickHouseClient clickHouse) : IExperimentSt
         }
         var applyLayer = !string.IsNullOrWhiteSpace(layerKey) && (sliceStart > 0d || sliceEnd < 100d);
         var samplingScopeKey = request.FlagKey + ":";
-        var assignmentUnitExpression = AssignmentUnitExpression("user_key", "properties", assignmentUnitSelector);
-        var metricAssignmentUnitExpression = AssignmentUnitExpression("user_key", "properties", assignmentUnitSelector);
         var planSql = string.Join("\nUNION ALL\n", plan.Select(item => $"""
             SELECT
                 {ClickHouseSql.String(item.Variation)} AS variation,
@@ -228,7 +225,7 @@ public class ExperimentStatsService(ClickHouseClient clickHouse) : IExperimentSt
             exposure_base AS
             (
                 SELECT
-                    {assignmentUnitExpression} AS assignment_unit,
+                    user_key AS assignment_unit,
                     user_key,
                     variation_id AS actual_variation_id,
                     exposed_at
@@ -278,7 +275,7 @@ public class ExperimentStatsService(ClickHouseClient clickHouse) : IExperimentSt
             metric_source AS
             (
                 SELECT
-                    {metricAssignmentUnitExpression} AS assignment_unit,
+                    user_key AS assignment_unit,
                     occurred_at AS metric_ts,
                     numeric_value
                 FROM experiment_metric_events
@@ -351,9 +348,6 @@ public class ExperimentStatsService(ClickHouseClient clickHouse) : IExperimentSt
                   ?? DateOnly.ParseExact(request.EndDate, "yyyy-MM-dd").AddDays(1).ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
         var contribution = GetUserContributionExpression(request.MetricType, request.MetricAgg);
         var layerKey = string.IsNullOrWhiteSpace(request.LayerKey) ? request.FlagKey : request.LayerKey.Trim();
-        var allocationKeySelector = string.IsNullOrWhiteSpace(request.AllocationKeySelector)
-            ? "user.keyId"
-            : request.AllocationKeySelector.Trim();
         var plan = ParseAllocationPlan(request.AllocationPlan);
         if (plan.Length == 0)
         {
@@ -378,8 +372,6 @@ public class ExperimentStatsService(ClickHouseClient clickHouse) : IExperimentSt
                 {item.Start.ToString(System.Globalization.CultureInfo.InvariantCulture)} AS start_bucket,
                 {item.End.ToString(System.Globalization.CultureInfo.InvariantCulture)} AS end_bucket
             """));
-        var exposureAllocationKey = AllocationKeyExpression("user_key", "properties", allocationKeySelector);
-        var metricAllocationKey = AllocationKeyExpression("user_key", "properties", allocationKeySelector);
 
         var sql = $"""
             WITH plan AS
@@ -389,7 +381,7 @@ public class ExperimentStatsService(ClickHouseClient clickHouse) : IExperimentSt
             exposure_base AS
             (
                 SELECT
-                    {exposureAllocationKey} AS allocation_key,
+                    user_key AS allocation_key,
                     user_key,
                     variation_id,
                     exposed_at
@@ -459,7 +451,7 @@ public class ExperimentStatsService(ClickHouseClient clickHouse) : IExperimentSt
             metric_source AS
             (
                 SELECT
-                    {metricAllocationKey} AS allocation_key,
+                    user_key AS allocation_key,
                     occurred_at AS metric_ts,
                     numeric_value
                 FROM experiment_metric_events
@@ -562,31 +554,6 @@ public class ExperimentStatsService(ClickHouseClient clickHouse) : IExperimentSt
             .Where(x => !string.IsNullOrWhiteSpace(x))
             .Distinct(StringComparer.Ordinal)
             .ToArray();
-    }
-
-    private static string AllocationKeyExpression(string userKeyColumn, string propertiesColumn, string selector)
-    {
-        return string.IsNullOrWhiteSpace(selector) ||
-               selector is "user.keyId" or "user.key" or "keyId"
-            ? userKeyColumn
-            : $"ifNull(nullIf(JSONExtractString({propertiesColumn}, {ClickHouseSql.String(selector)}), ''), {userKeyColumn})";
-    }
-
-    private static string AssignmentUnitExpression(string userKeyColumn, string propertiesColumn, string selector)
-    {
-        return string.IsNullOrWhiteSpace(selector) ||
-               selector is "user.keyId" or "user.key" or "keyId"
-            ? userKeyColumn
-            : $"nullIf(JSONExtractString({propertiesColumn}, {ClickHouseSql.String(selector)}), '')";
-    }
-
-    private static string NormalizeAssignmentUnitSelector(QueryExperimentStats request)
-    {
-        return string.IsNullOrWhiteSpace(request.AssignmentUnitSelector)
-            ? string.IsNullOrWhiteSpace(request.AllocationKeySelector)
-                ? "user.keyId"
-                : request.AllocationKeySelector.Trim()
-            : request.AssignmentUnitSelector.Trim();
     }
 
     private static string? NormalizeLayerKey(QueryExperimentStats request)
