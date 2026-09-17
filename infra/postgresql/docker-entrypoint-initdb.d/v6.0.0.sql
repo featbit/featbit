@@ -63,7 +63,6 @@ CREATE TABLE IF NOT EXISTS experiment_exposure_events
     variation_id    character varying(256)   NOT NULL,
     variation_value character varying(512),
     exposed_at      timestamp with time zone NOT NULL,
-    properties      jsonb,
     created_at      timestamp with time zone NOT NULL,
     CONSTRAINT pk_experiment_exposure_events PRIMARY KEY (id)
 );
@@ -84,15 +83,15 @@ CREATE TABLE IF NOT EXISTS experiment_layers
 
 CREATE TABLE IF NOT EXISTS experiment_metric_events
 (
-    id            uuid                     NOT NULL,
-    env_id        uuid                     NOT NULL,
-    user_key      character varying(512)   NOT NULL,
-    event_name    character varying(256)   NOT NULL,
-    event_type    character varying(64)    NOT NULL,
-    numeric_value double precision         NOT NULL,
-    occurred_at   timestamp with time zone NOT NULL,
-    properties    jsonb,
-    created_at    timestamp with time zone NOT NULL,
+    id               uuid                     NOT NULL,
+    env_id           uuid                     NOT NULL,
+    user_key         character varying(512)   NOT NULL,
+    event_name       character varying(256)   NOT NULL,
+    event_type       character varying(64)    NOT NULL,
+    numeric_value    double precision         NOT NULL,
+    application_type character varying(64),
+    occurred_at      timestamp with time zone NOT NULL,
+    created_at       timestamp with time zone NOT NULL,
     CONSTRAINT pk_experiment_metric_events PRIMARY KEY (id)
 );
 

@@ -10,7 +10,6 @@ CREATE TABLE IF NOT EXISTS featbit.experiment_exposure_events
     variation_id LowCardinality(String),
     variation_value String,
     exposed_at DateTime64(3, 'UTC'),
-    properties String,
     created_at DateTime64(3, 'UTC') DEFAULT now64(3)
 )
 ENGINE = MergeTree
@@ -23,12 +22,11 @@ CREATE TABLE IF NOT EXISTS featbit.experiment_metric_events
     id UUID,
     env_id UUID,
     user_key String,
-    user_name String,
     event_name LowCardinality(String),
     event_type LowCardinality(String),
     numeric_value Float64,
+    application_type LowCardinality(String) DEFAULT '',
     occurred_at DateTime64(3, 'UTC'),
-    properties String,
     created_at DateTime64(3, 'UTC') DEFAULT now64(3)
 )
 ENGINE = MergeTree
@@ -49,8 +47,9 @@ ENGINE = Kafka
 SETTINGS
     kafka_broker_list = 'kafka:9092',
     kafka_topic_list = 'featbit-insights',
-    kafka_group_name = 'featbit_clickhouse_release_decision',
+    kafka_group_name = 'featbit_ch_insights_group_v6',
     kafka_format = 'JSONEachRow',
+    input_format_json_read_objects_as_strings = 1,
     kafka_num_consumers = 1,
     kafka_skip_broken_messages = 100;
 
@@ -69,7 +68,6 @@ SELECT
     JSONExtractString(properties, 'variationId') AS variation_id,
     JSONExtractString(properties, 'variationValue') AS variation_value,
     fromUnixTimestamp64Milli(timestamp, 'UTC') AS exposed_at,
-    properties,
     now64(3) AS created_at
 FROM
 (
@@ -95,13 +93,12 @@ AS
 SELECT
     uuid AS id,
     assumeNotNull(toUUIDOrNull(raw_env_id)) AS env_id,
-    JSONExtractString(JSONExtractRaw(properties, 'user'), 'keyId') AS user_key,
-    JSONExtractString(JSONExtractRaw(properties, 'user'), 'name') AS user_name,
+    JSONExtractString(properties, 'userKeyId') AS user_key,
     JSONExtractString(properties, 'eventName') AS event_name,
     event AS event_type,
     if(JSONHas(properties, 'numericValue'), JSONExtractFloat(properties, 'numericValue'), 0.0) AS numeric_value,
+    JSONExtractString(properties, 'applicationType') AS application_type,
     fromUnixTimestamp64Milli(timestamp, 'UTC') AS occurred_at,
-    properties,
     now64(3) AS created_at
 FROM
 (
@@ -117,5 +114,5 @@ FROM
 WHERE schema_version = 2
   AND event != 'FlagValue'
   AND toUUIDOrNull(raw_env_id) IS NOT NULL
-  AND notEmpty(JSONExtractString(JSONExtractRaw(properties, 'user'), 'keyId'))
+  AND notEmpty(JSONExtractString(properties, 'userKeyId'))
   AND notEmpty(JSONExtractString(properties, 'eventName'));
