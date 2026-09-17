@@ -473,6 +473,7 @@ test.describe("layout", () => {
     page,
   }) => {
     await mockRuntimeEnv(page, { HOSTING_MODE: "saas" })
+    await mockContextEndpoints(page)
     await setAuthenticatedUser(page)
     await setCurrentContext(page)
 
