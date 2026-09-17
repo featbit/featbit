@@ -55,8 +55,6 @@ public class ExperimentDetailVm : ExperimentVm
 
     public string Constraints { get; set; }
 
-    public string EnvSecret { get; set; }
-
     public string Goal { get; set; }
 
     public List<GuardrailMetricConfig> GuardrailMetrics { get; set; } = [];

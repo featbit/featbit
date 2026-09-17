@@ -941,7 +941,6 @@ public class ExperimentService(
             Hypothesis = experiment.Hypothesis,
             Change = experiment.Change,
             Constraints = experiment.Constraints,
-            EnvSecret = experiment.EnvSecret,
             Goal = experiment.Goal,
             GuardrailMetrics = MetricSnapshots.Copy(experiment.GuardrailMetrics),
             Intent = experiment.Intent,
@@ -1045,7 +1044,6 @@ public class ExperimentService(
         experiment.Hypothesis = Normalize(update.Hypothesis, experiment.Hypothesis);
         experiment.Change = Normalize(update.Change, experiment.Change);
         experiment.Constraints = Normalize(update.Constraints, experiment.Constraints);
-        experiment.EnvSecret = Normalize(update.EnvSecret, experiment.EnvSecret);
         experiment.Goal = Normalize(update.Goal, experiment.Goal);
         experiment.Intent = Normalize(update.Intent, experiment.Intent);
         experiment.LastAction = Normalize(update.LastAction, experiment.LastAction);

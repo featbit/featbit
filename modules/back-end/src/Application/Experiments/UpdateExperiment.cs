@@ -18,8 +18,6 @@ public class ExperimentUpdate
 
     public string Constraints { get; set; }
 
-    public string EnvSecret { get; set; }
-
     public string Goal { get; set; }
 
     public string Intent { get; set; }
