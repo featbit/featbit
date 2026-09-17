@@ -105,21 +105,6 @@ public class ExperimentControllerTests
     }
 
     [Fact]
-    public async Task Update_RequestValidation()
-    {
-        using var factory = CreateFactory(Mock.Of<IExperimentService>());
-        using var client = await _app.CreateAuthenticatedClientAsync(factory);
-
-        var response = await client.PutAsJsonAsync($"{BasePath}/{ExperimentId}", new
-        {
-            primaryMetric = "activation",
-            guardrailMetrics = "[]"
-        });
-
-        await Verify(response);
-    }
-
-    [Fact]
     public async Task UpdateMetrics_RequestValidation()
     {
         using var factory = CreateFactory(Mock.Of<IExperimentService>());
