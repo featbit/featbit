@@ -1,4 +1,8 @@
 import type { ExperimentRunDetail } from "../experiment-details-types"
+import type {
+  GuardrailMetricConfig,
+  PrimaryMetricConfig,
+} from "../metric-config-types"
 
 export type AnalysisMethod = "bayesian_ab"
 
@@ -17,10 +21,8 @@ export type ObservationWindowUpdate = {
 export type MeasuringRun = ExperimentRunDetail & {
   hypothesis?: string | null
   methodReason?: string | null
-  primaryMetricEvent?: string | null
-  metricDescription?: string | null
-  guardrailEvents?: string | null
-  guardrailDescriptions?: string | null
+  primaryMetric?: PrimaryMetricConfig | null
+  guardrailMetrics?: GuardrailMetricConfig[]
   controlVariant?: string | null
   treatmentVariant?: string | null
   trafficAllocation?: string | null
@@ -30,8 +32,6 @@ export type MeasuringRun = ExperimentRunDetail & {
   priorStddev?: number | null
   inputData?: string | null
   analysisResult?: string | null
-  primaryMetricAgg?: string | null
-  primaryMetricType?: string | null
   trafficPercent?: number | null
   layerId?: string | null
   layerKey?: string | null

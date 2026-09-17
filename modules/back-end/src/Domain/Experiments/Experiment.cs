@@ -26,7 +26,7 @@ public class Experiment : AuditedEntity
 
     public string Goal { get; set; }
 
-    public string Guardrails { get; set; }
+    public List<GuardrailMetricConfig> GuardrailMetrics { get; set; } = [];
 
     public string Intent { get; set; }
 
@@ -36,7 +36,7 @@ public class Experiment : AuditedEntity
 
     public string OpenQuestions { get; set; }
 
-    public string PrimaryMetric { get; set; }
+    public PrimaryMetricConfig PrimaryMetric { get; set; }
 
     public string SandboxId { get; set; }
 

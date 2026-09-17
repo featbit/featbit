@@ -58,7 +58,7 @@ function experiment(flag: (typeof flags)[number] | null) {
     conflictAnalysis: null,
     lastLearning: null,
     primaryMetric: null,
-    guardrails: null,
+    guardrailMetrics: null,
     createdAt: "2026-09-01T00:00:00Z",
     updatedAt: "2026-09-01T00:00:00Z",
   }
@@ -116,9 +116,7 @@ test("flag filtering sends an ID, restores its key after reload, and clears", as
   await expect(
     page.getByText("Second experiment", { exact: true })
   ).toBeVisible()
-  await page
-    .getByRole("button", { name: "Feature flag", exact: true })
-    .click()
+  await page.getByRole("button", { name: "Feature flag", exact: true }).click()
   const filtered = page.waitForResponse((response) => {
     const url = new URL(response.url())
     return (

@@ -148,7 +148,7 @@ export const enExperiments = {
       metricsSheet: {
         title: "Add experiment metrics",
         subtitle:
-          "Choose one Primary metric and optional Guardrails from the active Metrics catalog.",
+          "Choose one Primary metric and optional Guardrails from the active Metrics catalog. Changes apply to new runs; existing runs keep their metric settings.",
         search: "Search by metric name or key",
         filteredEmpty: "No active metrics match your search.",
         primary: "Primary metric",
@@ -187,6 +187,10 @@ export const enExperiments = {
       previousRuns: "Show previous runs",
       nextRuns: "Show more runs",
       newRunTitle: "Create experiment run",
+      metricSnapshot:
+        "Primary metric: {{metric}} ({{event}}). This run keeps its metric settings; later changes apply to new runs.",
+      metricsRequired:
+        "Configure a primary metric for this experiment before creating a run.",
       newRunDescription:
         "Choose the analysis method, variation roles, and observation window for this run.",
       analysisMethod: "Analysis method",
@@ -691,7 +695,8 @@ export const zhExperiments = {
       },
       metricsSheet: {
         title: "添加实验指标",
-        subtitle: "从活动指标目录中选择一个主要指标和可选的护栏指标。",
+        subtitle:
+          "从活动指标目录中选择一个主要指标和可选的护栏指标。修改用于新运行，已有运行保留原指标配置。",
         search: "按指标名称或键搜索",
         filteredEmpty: "没有符合搜索条件的活动指标。",
         primary: "主要指标",
@@ -727,6 +732,9 @@ export const zhExperiments = {
       previousRuns: "显示之前的运行",
       nextRuns: "显示更多运行",
       newRunTitle: "创建实验运行",
+      metricSnapshot:
+        "主指标：{{metric}}（{{event}}）。本次运行保留创建时的指标配置，后续修改用于新运行。",
+      metricsRequired: "请先为实验配置主指标，再创建运行。",
       newRunDescription: "选择此运行的分析方法、变体角色和观察窗口。",
       analysisMethod: "分析方法",
       newRunRolesHelp: "选择一个主要变体和至少一个对比变体。",

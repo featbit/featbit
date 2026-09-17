@@ -56,6 +56,11 @@ const schema = z.object({
       /^[A-Za-z0-9][A-Za-z0-9._:-]*$/,
       "releaseDecision.metrics.form.keyInvalid"
     ),
+  eventName: z
+    .string()
+    .trim()
+    .min(1, "releaseDecision.metrics.form.eventNameRequired")
+    .max(256, "releaseDecision.metrics.form.eventNameTooLong"),
   metricType: z.enum(["binary", "numeric"]),
   metricAgg: z.enum(["once", "count", "sum", "average"]),
   description: z.string(),
@@ -95,6 +100,7 @@ export function MetricSheet({
     defaultValues: {
       name: metric?.name ?? "",
       key: metric?.key ?? "",
+      eventName: metric?.eventName ?? "",
       metricType: metric?.metricType === "numeric" ? "numeric" : "binary",
       metricAgg:
         metric?.metricAgg === "count" ||
@@ -172,6 +178,7 @@ export function MetricSheet({
               ) as MetricAggregation
               const definition = {
                 name: values.name.trim(),
+                eventName: values.eventName.trim(),
                 description: values.description.trim() || null,
                 metricType: metricTypeValue,
                 metricAgg: metricAggValue,
@@ -237,6 +244,27 @@ export function MetricSheet({
                 {form.formState.errors.key ? (
                   <p className="text-xs text-destructive">
                     {t(form.formState.errors.key.message!)}
+                  </p>
+                ) : null}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="metric-event-name">
+                  {t("releaseDecision.metrics.form.eventName")}
+                </Label>
+                <Input
+                  id="metric-event-name"
+                  className="font-mono"
+                  maxLength={256}
+                  aria-invalid={Boolean(form.formState.errors.eventName)}
+                  {...form.register("eventName")}
+                />
+                <p className="text-xs leading-5 text-muted-foreground">
+                  {t("releaseDecision.metrics.form.eventNameHelper")}
+                </p>
+                {form.formState.errors.eventName ? (
+                  <p className="text-xs text-destructive">
+                    {t(form.formState.errors.eventName.message!)}
                   </p>
                 ) : null}
               </div>

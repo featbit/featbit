@@ -9,6 +9,7 @@ const metric: Metric = {
   envId: "env-id",
   name: "Checkout conversion",
   key: "checkout_completed",
+  eventName: "purchase",
   description: "Completed checkout",
   metricType: "binary",
   metricAgg: "once",
@@ -43,6 +44,38 @@ function renderSheet(currentMetric: Metric | null, onSubmit = vi.fn()) {
 }
 
 describe("MetricSheet", () => {
+  it("requires an SDK event name and submits it independently of the metric key", async () => {
+    const { onSubmit } = renderSheet(null)
+    fireEvent.change(screen.getByLabelText("Name *"), {
+      target: { value: "Purchase conversion" },
+    })
+    const eventInput = screen.getByLabelText("Event name *")
+    const form = eventInput.closest("form")!
+    fireEvent.submit(form)
+    await waitFor(() =>
+      expect(screen.getByText("Enter an event name.")).toBeVisible()
+    )
+    expect(onSubmit).not.toHaveBeenCalled()
+
+    fireEvent.change(eventInput, { target: { value: " purchase " } })
+    fireEvent.change(screen.getByLabelText("Name *"), {
+      target: { value: "Completed purchases" },
+    })
+    await waitFor(() =>
+      expect(screen.getByLabelText("Key *")).toHaveValue("completed-purchases")
+    )
+    expect(eventInput).toHaveValue(" purchase ")
+    fireEvent.submit(form)
+    await waitFor(() =>
+      expect(onSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          key: "completed-purchases",
+          eventName: "purchase",
+        })
+      )
+    )
+  })
+
   it("regenerates the key when the name changes after a manual key edit", async () => {
     renderSheet(null)
 
@@ -78,6 +111,9 @@ describe("MetricSheet", () => {
     fireEvent.change(screen.getByLabelText("Name *"), {
       target: { value: "Checkout completed" },
     })
+    fireEvent.change(screen.getByLabelText("Event name *"), {
+      target: { value: "purchase_completed" },
+    })
     await waitFor(() => expect(keyInput).toHaveValue("checkout_completed"))
     const form = keyInput.closest("form")
     expect(form).not.toBeNull()
@@ -87,6 +123,7 @@ describe("MetricSheet", () => {
     await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1))
     expect(onSubmit.mock.calls[0]?.[0]).toEqual({
       name: "Checkout completed",
+      eventName: "purchase_completed",
       description: "Completed checkout",
       metricType: "binary",
       metricAgg: "once",

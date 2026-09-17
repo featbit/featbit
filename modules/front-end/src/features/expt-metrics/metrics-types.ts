@@ -23,6 +23,7 @@ export type Metric = {
   envId: string
   name: string
   key: string
+  eventName: string
   description?: string | null
   metricType: MetricType | string
   metricAgg: MetricAggregation | string
@@ -40,6 +41,7 @@ export type PagedMetrics = {
 export type MetricCreatePayload = {
   name: string
   key: string
+  eventName: string
   description: string | null
   metricType: MetricType
   metricAgg: MetricAggregation
@@ -47,5 +49,5 @@ export type MetricCreatePayload = {
 
 export type MetricUpdatePayload = Pick<
   MetricCreatePayload,
-  "name" | "description" | "metricType" | "metricAgg"
+  "name" | "eventName" | "description" | "metricType" | "metricAgg"
 >

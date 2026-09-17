@@ -16,10 +16,8 @@ public class ExperimentRunConfiguration : IEntityTypeConfiguration<ExperimentRun
         builder.Property(x => x.Slug).HasMaxLength(128).IsRequired();
         builder.Property(x => x.Method).HasMaxLength(64);
         builder.Property(x => x.MethodReason).HasColumnName("method_reason");
-        builder.Property(x => x.PrimaryMetricEvent).HasColumnName("primary_metric_event").HasMaxLength(256);
-        builder.Property(x => x.MetricDescription).HasColumnName("metric_description");
-        builder.Property(x => x.GuardrailEvents).HasColumnName("guardrail_events");
-        builder.Property(x => x.GuardrailDescriptions).HasColumnName("guardrail_descriptions");
+        builder.Property(x => x.PrimaryMetric).HasColumnName("primary_metric").HasColumnType("jsonb");
+        builder.Property(x => x.GuardrailMetrics).HasColumnName("guardrail_metrics").HasColumnType("jsonb");
         builder.Property(x => x.ControlVariant).HasColumnName("control_variant").HasMaxLength(256);
         builder.Property(x => x.TreatmentVariant).HasColumnName("treatment_variant").HasMaxLength(256);
         builder.Property(x => x.TrafficAllocation).HasColumnName("traffic_allocation");
@@ -38,8 +36,6 @@ public class ExperimentRunConfiguration : IEntityTypeConfiguration<ExperimentRun
         builder.Property(x => x.ConfirmedOrRefuted).HasColumnName("confirmed_or_refuted");
         builder.Property(x => x.WhyItHappened).HasColumnName("why_it_happened");
         builder.Property(x => x.NextHypothesis).HasColumnName("next_hypothesis");
-        builder.Property(x => x.PrimaryMetricAgg).HasColumnName("primary_metric_agg").HasMaxLength(64);
-        builder.Property(x => x.PrimaryMetricType).HasColumnName("primary_metric_type").HasMaxLength(64);
         builder.Property(x => x.TrafficPercent).HasColumnName("traffic_percent");
         builder.Property(x => x.LayerId).HasColumnName("layer_id");
         builder.Property(x => x.AudienceFilters).HasColumnName("audience_filters");

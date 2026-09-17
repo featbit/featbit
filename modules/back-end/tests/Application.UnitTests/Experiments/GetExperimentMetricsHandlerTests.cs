@@ -26,7 +26,7 @@ public class GetExperimentMetricsHandlerTests
                 Id = Guid.NewGuid(),
                 EnvId = envId,
                 Name = "Pricing experiment",
-                PrimaryMetric = $"{{\"event\":\"{metric.Key}\"}}"
+                PrimaryMetric = new PrimaryMetricConfig { MetricId = metric.Id, MetricKey = "snapshot_key", EventName = "purchase" }
             },
             Runs =
             [
@@ -34,7 +34,7 @@ public class GetExperimentMetricsHandlerTests
                 {
                     Id = Guid.NewGuid(),
                     Slug = "run-1",
-                    PrimaryMetricEvent = metric.Key
+                    PrimaryMetric = new PrimaryMetricConfig { MetricId = metric.Id, MetricKey = "snapshot_key", EventName = "purchase" }
                 }
             ]
         };
@@ -50,7 +50,7 @@ public class GetExperimentMetricsHandlerTests
             .Setup(service => service.GetListAsync(
                 envId,
                 filter,
-                It.Is<IReadOnlyCollection<string>>(keys => keys.SequenceEqual(new[] { metric.Key }))))
+                It.Is<IReadOnlyCollection<Guid>>(ids => ids.SequenceEqual(new[] { metric.Id }))))
             .ReturnsAsync(new PagedResult<ExperimentMetric>(1, [metric]));
         var handler = new GetExperimentMetricsHandler(
             metricService.Object,
@@ -81,7 +81,7 @@ public class GetExperimentMetricsHandlerTests
         var filter = new ExperimentMetricFilter();
         var metricService = new Mock<IExperimentMetricService>();
         metricService
-            .Setup(service => service.GetListAsync(envId, filter, It.IsAny<IReadOnlyCollection<string>>()))
+            .Setup(service => service.GetListAsync(envId, filter, It.IsAny<IReadOnlyCollection<Guid>>()))
             .ReturnsAsync(new PagedResult<ExperimentMetric>(0, []));
         var experimentService = new Mock<IExperimentService>(MockBehavior.Strict);
         var handler = new GetExperimentMetricsHandler(

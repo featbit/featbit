@@ -314,12 +314,10 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
         await SeedExperimentAsync(db, metricType: "binary", metricAgg: "once",
             controlVariant: "control-id", treatmentVariant: "treatment-id|other-id");
         var run = await db.Set<ExperimentRun>().AsTracking().SingleAsync(x => x.Id == RunId);
-        run.GuardrailEvents = """
-            [
-              {"event":"errors","metricType":"binary","metricAgg":"once","inverse":true},
-              {"event":"engagement","metricType":"numeric","metricAgg":"count","inverse":false}
-            ]
-            """;
+        run.GuardrailMetrics = [
+            new GuardrailMetricConfig { MetricId = Guid.NewGuid(), MetricKey = "errors", EventName = "errors", Direction = "increase_bad" },
+            new GuardrailMetricConfig { MetricId = Guid.NewGuid(), MetricKey = "engagement", EventName = "engagement", MetricType = "numeric", MetricAgg = "count", Direction = "decrease_bad" }
+        ];
         await db.SaveChangesAsync();
 
         var result = await CreateService(db, stats, includeThirdArm: true).AnalyzeRunAsync(
@@ -408,8 +406,8 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
             Stage = "experiment",
             FlagId = Guid.Parse("44444444-4444-4444-4444-444444444444"),
             EnvId = EnvId,
-            PrimaryMetric = """{"event":"purchase","metricType":"binary","metricAgg":"once","expectedDirection":"increase"}""",
-            Guardrails = "[]",
+            PrimaryMetric = new PrimaryMetricConfig { MetricId = Guid.NewGuid(), MetricKey = "purchase", EventName = "purchase" },
+            GuardrailMetrics = [],
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -419,9 +417,7 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
             ExperimentId = ExperimentId,
             Slug = "run-1",
             Method = "bayesian_ab",
-            PrimaryMetricEvent = metricEvent,
-            PrimaryMetricType = metricType,
-            PrimaryMetricAgg = metricAgg,
+            PrimaryMetric = new PrimaryMetricConfig { MetricId = Guid.NewGuid(), MetricKey = metricEvent, EventName = metricEvent, MetricType = metricType, MetricAgg = metricAgg },
             ControlVariant = controlVariant,
             TreatmentVariant = treatmentVariant,
             TrafficPercent = trafficPercent,
