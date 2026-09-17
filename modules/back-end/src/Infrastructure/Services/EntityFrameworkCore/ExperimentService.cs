@@ -980,7 +980,6 @@ public class ExperimentService(
             GuardrailMetrics = MetricSnapshots.Copy(run.GuardrailMetrics),
             ControlVariant = run.ControlVariant,
             TreatmentVariant = run.TreatmentVariant,
-            TrafficAllocation = run.TrafficAllocation,
             MinimumSample = run.MinimumSample,
             ObservationStart = run.ObservationStart,
             ObservationEnd = run.ObservationEnd,
@@ -1058,7 +1057,6 @@ public class ExperimentService(
         run.MethodReason = Normalize(update.MethodReason, run.MethodReason);
         run.ControlVariant = Normalize(update.ControlVariant, run.ControlVariant);
         run.TreatmentVariant = Normalize(update.TreatmentVariant, run.TreatmentVariant);
-        run.TrafficAllocation = Normalize(update.TrafficAllocation, run.TrafficAllocation);
         run.InputData = Normalize(update.InputData, run.InputData);
         run.AnalysisResult = Normalize(update.AnalysisResult, run.AnalysisResult);
         run.Decision = Normalize(update.Decision, run.Decision);

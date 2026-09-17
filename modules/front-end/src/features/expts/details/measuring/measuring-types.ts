@@ -25,7 +25,6 @@ export type MeasuringRun = ExperimentRunDetail & {
   guardrailMetrics?: GuardrailMetricConfig[]
   controlVariant?: string | null
   treatmentVariant?: string | null
-  trafficAllocation?: string | null
   minimumSample?: number | null
   priorProper?: boolean
   priorMean?: number | null

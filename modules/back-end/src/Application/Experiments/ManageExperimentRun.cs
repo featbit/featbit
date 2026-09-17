@@ -57,8 +57,6 @@ public class ExperimentRunUpdate
 
     public string TreatmentVariant { get; set; }
 
-    public string TrafficAllocation { get; set; }
-
     public int? MinimumSample { get; set; }
 
     public DateTime? ObservationStart { get; set; }

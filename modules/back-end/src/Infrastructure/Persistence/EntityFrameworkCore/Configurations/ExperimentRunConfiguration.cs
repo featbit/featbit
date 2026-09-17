@@ -20,7 +20,6 @@ public class ExperimentRunConfiguration : IEntityTypeConfiguration<ExperimentRun
         builder.Property(x => x.GuardrailMetrics).HasColumnName("guardrail_metrics").HasColumnType("jsonb");
         builder.Property(x => x.ControlVariant).HasColumnName("control_variant").HasMaxLength(256);
         builder.Property(x => x.TreatmentVariant).HasColumnName("treatment_variant").HasMaxLength(256);
-        builder.Property(x => x.TrafficAllocation).HasColumnName("traffic_allocation");
         builder.Property(x => x.MinimumSample).HasColumnName("minimum_sample");
         builder.Property(x => x.ObservationStart).HasColumnName("observation_start");
         builder.Property(x => x.ObservationEnd).HasColumnName("observation_end");
