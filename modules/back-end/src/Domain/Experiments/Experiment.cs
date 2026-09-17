@@ -32,10 +32,6 @@ public class Experiment : AuditedEntity
 
     public PrimaryMetricConfig PrimaryMetric { get; set; }
 
-    public string SandboxId { get; set; }
-
-    public string SandboxStatus { get; set; } = "idle";
-
     public string Variants { get; set; }
 
     public string ConflictAnalysis { get; set; }

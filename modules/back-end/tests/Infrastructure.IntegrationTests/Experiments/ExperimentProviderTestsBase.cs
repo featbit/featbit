@@ -1023,7 +1023,6 @@ public abstract class WritableExperimentProviderTestsBase(
             PrimaryMetric = new PrimaryMetricConfig { MetricId = Guid.NewGuid(), MetricKey = "purchase", EventName = "purchase", Name = "Purchase" },
             Stage = "hypothesis",
             EnvId = ExperimentProviderParityFixture.EnvId,
-            SandboxStatus = "idle",
             CreatedAt = now,
             UpdatedAt = now
         };

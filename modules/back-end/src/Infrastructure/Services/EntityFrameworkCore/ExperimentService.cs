@@ -948,8 +948,6 @@ public class ExperimentService(
             LastLearning = experiment.LastLearning,
             OpenQuestions = experiment.OpenQuestions,
             PrimaryMetric = MetricSnapshots.Copy(experiment.PrimaryMetric),
-            SandboxId = experiment.SandboxId,
-            SandboxStatus = experiment.SandboxStatus,
             Variants = experiment.Variants,
             ConflictAnalysis = experiment.ConflictAnalysis,
             EntryMode = experiment.EntryMode,
@@ -1049,7 +1047,6 @@ public class ExperimentService(
         experiment.LastAction = Normalize(update.LastAction, experiment.LastAction);
         experiment.LastLearning = Normalize(update.LastLearning, experiment.LastLearning);
         experiment.OpenQuestions = Normalize(update.OpenQuestions, experiment.OpenQuestions);
-        experiment.SandboxId = Normalize(update.SandboxId, experiment.SandboxId);
         experiment.Variants = Normalize(update.Variants, experiment.Variants);
         experiment.ConflictAnalysis = Normalize(update.ConflictAnalysis, experiment.ConflictAnalysis);
         experiment.EntryMode = Normalize(update.EntryMode, experiment.EntryMode);

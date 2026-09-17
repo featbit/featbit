@@ -122,7 +122,6 @@ public class ExperimentService(
         SetIfNotNull(updates, x => x.LastAction, update.LastAction);
         SetIfNotNull(updates, x => x.LastLearning, update.LastLearning);
         SetIfNotNull(updates, x => x.OpenQuestions, update.OpenQuestions);
-        SetIfNotNull(updates, x => x.SandboxId, update.SandboxId);
         SetIfNotNull(updates, x => x.Variants, update.Variants);
         SetIfNotNull(updates, x => x.ConflictAnalysis, update.ConflictAnalysis);
         SetIfNotNull(updates, x => x.EntryMode, update.EntryMode);
@@ -741,8 +740,6 @@ public class ExperimentService(
             LastLearning = experiment.LastLearning,
             OpenQuestions = experiment.OpenQuestions,
             PrimaryMetric = MetricSnapshots.Copy(experiment.PrimaryMetric),
-            SandboxId = experiment.SandboxId,
-            SandboxStatus = experiment.SandboxStatus,
             Variants = experiment.Variants,
             ConflictAnalysis = experiment.ConflictAnalysis,
             EntryMode = experiment.EntryMode,

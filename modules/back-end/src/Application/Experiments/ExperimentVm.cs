@@ -69,10 +69,6 @@ public class ExperimentDetailVm : ExperimentVm
 
     public PrimaryMetricConfig PrimaryMetric { get; set; }
 
-    public string SandboxStatus { get; set; }
-
-    public string SandboxId { get; set; }
-
     public string Variants { get; set; }
 
     public string ConflictAnalysis { get; set; }

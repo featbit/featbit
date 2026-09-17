@@ -28,8 +28,6 @@ public class ExperimentUpdate
 
     public string OpenQuestions { get; set; }
 
-    public string SandboxId { get; set; }
-
     public string Variants { get; set; }
 
     public string ConflictAnalysis { get; set; }

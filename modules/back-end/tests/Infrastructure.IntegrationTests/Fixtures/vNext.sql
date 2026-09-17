@@ -194,8 +194,6 @@ CREATE TABLE IF NOT EXISTS experiments (
     last_run_number bigint,
     open_questions text,
     primary_metric jsonb,
-    sandbox_id text,
-    sandbox_status character varying(64),
     variants text,
     conflict_analysis text,
     entry_mode character varying(64),

@@ -40,7 +40,6 @@ public class CreateExperimentHandler(
             FlagId = request.FlagId,
             EnvId = request.EnvId,
             Stage = "hypothesis",
-            SandboxStatus = "idle",
             CreatedAt = now,
             UpdatedAt = now
         };
