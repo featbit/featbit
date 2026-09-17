@@ -20,8 +20,6 @@ public class Experiment : AuditedEntity
 
     public string EnvSecret { get; set; }
 
-    public string FlagServerUrl { get; set; }
-
     public string Goal { get; set; }
 
     public List<GuardrailMetricConfig> GuardrailMetrics { get; set; } = [];

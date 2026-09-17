@@ -187,7 +187,6 @@ CREATE TABLE IF NOT EXISTS experiments (
     change text,
     constraints text,
     env_secret text,
-    flag_server_url text,
     goal text,
     guardrail_metrics jsonb NOT NULL DEFAULT '[]'::jsonb,
     intent text,

@@ -118,7 +118,6 @@ public class ExperimentService(
         SetIfNotNull(updates, x => x.Change, update.Change);
         SetIfNotNull(updates, x => x.Constraints, update.Constraints);
         SetIfNotNull(updates, x => x.EnvSecret, update.EnvSecret);
-        SetIfNotNull(updates, x => x.FlagServerUrl, update.FlagServerUrl);
         SetIfNotNull(updates, x => x.Goal, update.Goal);
         SetIfNotNull(updates, x => x.Intent, update.Intent);
         SetIfNotNull(updates, x => x.LastAction, update.LastAction);
@@ -737,7 +736,6 @@ public class ExperimentService(
             Change = experiment.Change,
             Constraints = experiment.Constraints,
             EnvSecret = experiment.EnvSecret,
-            FlagServerUrl = experiment.FlagServerUrl,
             Goal = experiment.Goal,
             GuardrailMetrics = MetricSnapshots.Copy(experiment.GuardrailMetrics),
             Intent = experiment.Intent,
