@@ -26,8 +26,6 @@ public class ExperimentUpdate
 
     public string LastLearning { get; set; }
 
-    public string OpenQuestions { get; set; }
-
     public string Variants { get; set; }
 
     public string ConflictAnalysis { get; set; }

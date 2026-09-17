@@ -192,7 +192,6 @@ CREATE TABLE IF NOT EXISTS experiments (
     last_action text,
     last_learning text,
     last_run_number bigint,
-    open_questions text,
     primary_metric jsonb,
     variants text,
     conflict_analysis text,

@@ -28,8 +28,6 @@ public class Experiment : AuditedEntity
 
     public string LastLearning { get; set; }
 
-    public string OpenQuestions { get; set; }
-
     public PrimaryMetricConfig PrimaryMetric { get; set; }
 
     public string Variants { get; set; }

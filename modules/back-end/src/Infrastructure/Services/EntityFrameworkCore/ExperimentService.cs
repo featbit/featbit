@@ -946,7 +946,6 @@ public class ExperimentService(
             Intent = experiment.Intent,
             LastAction = experiment.LastAction,
             LastLearning = experiment.LastLearning,
-            OpenQuestions = experiment.OpenQuestions,
             PrimaryMetric = MetricSnapshots.Copy(experiment.PrimaryMetric),
             Variants = experiment.Variants,
             ConflictAnalysis = experiment.ConflictAnalysis,
@@ -1046,7 +1045,6 @@ public class ExperimentService(
         experiment.Intent = Normalize(update.Intent, experiment.Intent);
         experiment.LastAction = Normalize(update.LastAction, experiment.LastAction);
         experiment.LastLearning = Normalize(update.LastLearning, experiment.LastLearning);
-        experiment.OpenQuestions = Normalize(update.OpenQuestions, experiment.OpenQuestions);
         experiment.Variants = Normalize(update.Variants, experiment.Variants);
         experiment.ConflictAnalysis = Normalize(update.ConflictAnalysis, experiment.ConflictAnalysis);
         experiment.EntryMode = Normalize(update.EntryMode, experiment.EntryMode);

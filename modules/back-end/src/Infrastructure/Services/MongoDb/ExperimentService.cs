@@ -121,7 +121,6 @@ public class ExperimentService(
         SetIfNotNull(updates, x => x.Intent, update.Intent);
         SetIfNotNull(updates, x => x.LastAction, update.LastAction);
         SetIfNotNull(updates, x => x.LastLearning, update.LastLearning);
-        SetIfNotNull(updates, x => x.OpenQuestions, update.OpenQuestions);
         SetIfNotNull(updates, x => x.Variants, update.Variants);
         SetIfNotNull(updates, x => x.ConflictAnalysis, update.ConflictAnalysis);
         SetIfNotNull(updates, x => x.EntryMode, update.EntryMode);
@@ -738,7 +737,6 @@ public class ExperimentService(
             Intent = experiment.Intent,
             LastAction = experiment.LastAction,
             LastLearning = experiment.LastLearning,
-            OpenQuestions = experiment.OpenQuestions,
             PrimaryMetric = MetricSnapshots.Copy(experiment.PrimaryMetric),
             Variants = experiment.Variants,
             ConflictAnalysis = experiment.ConflictAnalysis,
