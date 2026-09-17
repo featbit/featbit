@@ -973,7 +973,6 @@ public class ExperimentService(
             Id = run.Id,
             ExperimentId = run.ExperimentId,
             Slug = run.Slug,
-            Hypothesis = run.Hypothesis,
             Method = run.Method,
             MethodReason = run.MethodReason,
             PrimaryMetric = MetricSnapshots.Copy(run.PrimaryMetric),
@@ -1050,7 +1049,6 @@ public class ExperimentService(
     private static void ApplyRunUpdate(ExperimentRun run, ExperimentRunUpdate update)
     {
         run.Slug = Normalize(update.Slug, run.Slug);
-        run.Hypothesis = Normalize(update.Hypothesis, run.Hypothesis);
         run.Method = Normalize(update.Method, run.Method);
         run.MethodReason = Normalize(update.MethodReason, run.MethodReason);
         run.ControlVariant = Normalize(update.ControlVariant, run.ControlVariant);

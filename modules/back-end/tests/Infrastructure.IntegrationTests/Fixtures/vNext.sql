@@ -133,7 +133,6 @@ CREATE TABLE IF NOT EXISTS experiment_runs (
     id uuid NOT NULL,
     experiment_id uuid NOT NULL,
     slug character varying(128) NOT NULL,
-    hypothesis text,
     method character varying(64),
     method_reason text,
     primary_metric jsonb,
