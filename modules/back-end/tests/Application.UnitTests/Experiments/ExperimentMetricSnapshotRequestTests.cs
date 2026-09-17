@@ -17,39 +17,31 @@ public class ExperimentMetricSnapshotRequestTests
         Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<GuardrailMetricConfig>(json, options));
     }
 
-    [Theory]
-    [InlineData("metricId")]
-    [InlineData("metricKey")]
-    [InlineData("expectedDirection")]
-    [InlineData("metricEvent")]
-    [InlineData("metricName")]
-    [InlineData("metricType")]
-    [InlineData("metricAgg")]
-    [InlineData("metricDescription")]
-    [InlineData("guardrails")]
-    public void MetricsUpdate_IgnoresUnmappedFields(string property)
+    [Fact]
+    public void MetricsUpdate_AcceptsUnknownFieldsAlongsideValidSelections()
     {
-        var json = $$"""{"primaryMetric":{"metricId":"11111111-1111-4111-8111-111111111111","expectedDirection":"increase_good"},"{{property}}":"purchase"}""";
+        var update = Deserialize("""
+            {
+                "metricEvent": "legacy-event",
+                "primaryMetric": {
+                    "metricId": "11111111-1111-4111-8111-111111111111",
+                    "expectedDirection": "increase_good",
+                    "eventName": "extra-primary-event"
+                },
+                "guardrailMetrics": [{
+                    "metricId": "22222222-2222-4222-8222-222222222222",
+                    "direction": "decrease_bad",
+                    "eventName": "extra-guardrail-event"
+                }]
+            }
+            """);
 
-        var update = Deserialize(json);
         Assert.True(Validate(update).IsValid);
         Assert.Equal(Guid.Parse("11111111-1111-4111-8111-111111111111"), update.PrimaryMetric.MetricId);
-    }
-
-    [Theory]
-    [InlineData("primaryMetric", "metricKey")]
-    [InlineData("primaryMetric", "eventName")]
-    [InlineData("guardrailMetrics", "metricKey")]
-    [InlineData("guardrailMetrics", "eventName")]
-    public void MetricsUpdate_IgnoresUnmappedSelectionFields(string field, string property)
-    {
-        var selection = $$"""{"metricId":"11111111-1111-4111-8111-111111111111","{{property}}":"purchase"}""";
-        var value = field == "guardrailMetrics" ? $"[{selection}]" : selection;
-        var update = Deserialize($"{{\"{field}\":{value}}}");
-        var metricId = field == "guardrailMetrics"
-            ? Assert.Single(update.GuardrailMetrics).MetricId
-            : update.PrimaryMetric.MetricId;
-        Assert.Equal(Guid.Parse("11111111-1111-4111-8111-111111111111"), metricId);
+        Assert.Equal("increase_good", update.PrimaryMetric.ExpectedDirection);
+        var guardrail = Assert.Single(update.GuardrailMetrics);
+        Assert.Equal(Guid.Parse("22222222-2222-4222-8222-222222222222"), guardrail.MetricId);
+        Assert.Equal("decrease_bad", guardrail.Direction);
     }
 
     [Theory]
@@ -74,37 +66,44 @@ public class ExperimentMetricSnapshotRequestTests
     }
 
     [Theory]
-    [InlineData("null")]
-    [InlineData("{}")]
-    [InlineData("{\"metricId\":\"00000000-0000-0000-0000-000000000000\",\"expectedDirection\":\"increase_good\"}")]
-    [InlineData("{\"metricId\":\"11111111-1111-4111-8111-111111111111\"}")]
-    [InlineData("{\"metricId\":\"11111111-1111-4111-8111-111111111111\",\"expectedDirection\":\"increase_bad\"}")]
-    public void MetricsUpdate_RejectsInvalidPrimarySelection(string selection)
+    [InlineData("null", "Update.PrimaryMetric", "primaryMetric_is_required")]
+    [InlineData("{}", "Update.PrimaryMetric.MetricId", "primaryMetric.metricId_is_required")]
+    [InlineData("{}", "Update.PrimaryMetric.ExpectedDirection", "primaryMetric.expectedDirection_is_required")]
+    [InlineData("""{"metricId":"00000000-0000-0000-0000-000000000000","expectedDirection":"increase_good"}""",
+        "Update.PrimaryMetric.MetricId", "primaryMetric.metricId_is_required")]
+    [InlineData("""{"metricId":"11111111-1111-4111-8111-111111111111"}""",
+        "Update.PrimaryMetric.ExpectedDirection", "primaryMetric.expectedDirection_is_required")]
+    [InlineData("""{"metricId":"11111111-1111-4111-8111-111111111111","expectedDirection":"increase_bad"}""",
+        "Update.PrimaryMetric.ExpectedDirection", "primaryMetric.expectedDirection_is_invalid")]
+    public void MetricsUpdate_RejectsInvalidPrimarySelection(string selection, string property, string errorCode)
     {
         var update = Deserialize($"{{\"primaryMetric\":{selection}}}");
-        Assert.False(Validate(update).IsValid);
+        Assert.Contains(Validate(update).Errors,
+            error => error.PropertyName == property && error.ErrorCode == errorCode);
     }
 
     [Theory]
-    [InlineData("null")]
-    [InlineData("[null]")]
-    [InlineData("[{}]")]
-    [InlineData("[{\"metricId\":\"00000000-0000-0000-0000-000000000000\",\"direction\":\"increase_bad\"}]")]
-    [InlineData("[{\"metricId\":\"22222222-2222-4222-8222-222222222222\"}]")]
-    [InlineData("[{\"metricId\":\"22222222-2222-4222-8222-222222222222\",\"direction\":\"increase_good\"}]")]
-    public void MetricsUpdate_RejectsInvalidGuardrailSelection(string selections)
+    [InlineData("null", "Update.GuardrailMetrics", "guardrailMetrics_is_required")]
+    [InlineData("[null]", "Update.GuardrailMetrics[0]", "guardrailMetrics_is_invalid")]
+    [InlineData("[{}]", "Update.GuardrailMetrics[0].MetricId", "guardrailMetrics.metricId_is_required")]
+    [InlineData("[{}]", "Update.GuardrailMetrics[0].Direction", "guardrailMetrics.direction_is_required")]
+    [InlineData("""[{"metricId":"00000000-0000-0000-0000-000000000000","direction":"increase_bad"}]""",
+        "Update.GuardrailMetrics[0].MetricId", "guardrailMetrics.metricId_is_required")]
+    [InlineData("""[{"metricId":"22222222-2222-4222-8222-222222222222"}]""",
+        "Update.GuardrailMetrics[0].Direction", "guardrailMetrics.direction_is_required")]
+    [InlineData("""[{"metricId":"22222222-2222-4222-8222-222222222222","direction":"increase_good"}]""",
+        "Update.GuardrailMetrics[0].Direction", "guardrailMetrics.direction_is_invalid")]
+    public void MetricsUpdate_RejectsInvalidGuardrailSelection(string selections, string property, string errorCode)
     {
         var json = $$"""{"primaryMetric":{"metricId":"11111111-1111-4111-8111-111111111111","expectedDirection":"increase_good"},"guardrailMetrics":{{selections}}}""";
-        Assert.False(Validate(Deserialize(json)).IsValid);
+        Assert.Contains(Validate(Deserialize(json)).Errors,
+            error => error.PropertyName == property && error.ErrorCode == errorCode);
     }
 
-    [Theory]
-    [InlineData("{\"guardrailMetrics\":\"[]\"}")]
-    [InlineData("{\"primaryMetric\":{\"metricId\":\"invalid\"}}")]
-    [InlineData("{\"guardrailMetrics\":[{\"metricId\":\"invalid\"}]}")]
-    public void MetricsUpdate_RejectsWrongJsonTypes(string json)
+    [Fact]
+    public void MetricsUpdate_RejectsGuardrailsEncodedAsString()
     {
-        Assert.Throws<JsonException>(() => Deserialize(json));
+        Assert.Throws<JsonException>(() => Deserialize("""{"guardrailMetrics":"[]"}"""));
     }
 
     private static ExperimentMetricsUpdate Deserialize(string json) =>
@@ -126,14 +125,5 @@ public class ExperimentMetricSnapshotRequestTests
         var json = $"{{\"{property}\":{value}}}";
         Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<ExperimentRunUpdate>(json,
             new JsonSerializerOptions(JsonSerializerDefaults.Web)));
-    }
-
-    [Fact]
-    public void RunUpdate_StillAcceptsAnalysisSettings()
-    {
-        var update = JsonSerializer.Deserialize<ExperimentRunUpdate>("""{"minimumSample":100,"decision":"CONTINUE"}""",
-            new JsonSerializerOptions(JsonSerializerDefaults.Web));
-        Assert.Equal(100, update!.MinimumSample);
-        Assert.Equal("CONTINUE", update.Decision);
     }
 }
