@@ -1,4 +1,4 @@
-import { Settings2 } from "lucide-react"
+import { Plus } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link, useLocation } from "react-router-dom"
@@ -28,28 +28,53 @@ import {
   localizedPath,
 } from "@/features/layout/layout-context"
 import type { Lang } from "@/features/layout/layout-types"
-import { MonitorConfigurationSheet } from "../components/monitor-configuration-sheet"
+import { MetricBindingSheet } from "./metric-binding-sheet"
+import { BindingConfirmation } from "./binding-confirmation"
+import { BindingActions, BindingRuleSummary } from "./binding-row-content"
+import { useBindingWebhooks } from "./binding-webhooks"
 import {
   DataStatusBadge,
   HealthStatusBadge,
   ObservationModeBadge,
   PurposeBadge,
 } from "../components/status-badges"
-import { metricSampleText, ruleSampleText } from "../release-health-display"
-import { checkoutMonitor, metricById } from "../release-health-mock-data"
+import { metricSampleText } from "../release-health-display"
+import {
+  checkoutMonitor,
+  metricById,
+  releaseMetrics,
+} from "../release-health-mock-data"
 
 import { formatMetricValue } from "../metrics/metric-contract"
-import type { MonitorBinding, ReleaseMetric } from "../release-health-types"
+import type {
+  BindingAlertRule,
+  MonitorBinding,
+  ReleaseMetric,
+} from "../release-health-types"
 
-export function FlagReleaseHealthTab({
-  envId,
-  flag,
-  lang,
-}: {
+type FlagHealthProps = {
   envId: string
   flag: FeatureFlag
   lang: Lang
-}) {
+  canManage?: boolean
+}
+
+export function FlagReleaseHealthTab(props: FlagHealthProps) {
+  const projectId = getCurrentProjectEnv()?.projectId ?? ""
+  return (
+    <FlagBindingsContent
+      key={projectId + ":" + props.envId + ":" + props.flag.id}
+      {...props}
+    />
+  )
+}
+
+function FlagBindingsContent({
+  envId,
+  flag,
+  lang,
+  canManage = true,
+}: FlagHealthProps) {
   const { t } = useTranslation()
   const context = getCurrentProjectEnv()
   const { hash } = useLocation()
@@ -60,7 +85,51 @@ export function FlagReleaseHealthTab({
     }
   }, [hash, flag.id])
   const [monitorEnabled, setMonitorEnabled] = useState(checkoutMonitor.enabled)
-  const [monitorOpen, setMonitorOpen] = useState(false)
+  const [bindings, setBindings] = useState<MonitorBinding[]>(
+    () => checkoutMonitor.bindings
+  )
+  const [editor, setEditor] = useState<MonitorBinding | "add" | null>(null)
+  const [removeTarget, setRemoveTarget] = useState<MonitorBinding | null>(null)
+  const webhooks = useBindingWebhooks(context?.projectId ?? "", envId)
+  const b = (key: string) => t("releaseHealth.binding." + key)
+  const actions = (binding: MonitorBinding, metric: ReleaseMetric) => (
+    <BindingActions
+      disabled={!canManage}
+      binding={binding}
+      metricName={metricSampleText(t, metric, "name")}
+      onEdit={() => setEditor(binding)}
+      onRemove={() => setRemoveTarget(binding)}
+      onToggle={() =>
+        setBindings((current) =>
+          current.map((item) =>
+            item.metricId === binding.metricId
+              ? { ...item, enabled: !item.enabled }
+              : item
+          )
+        )
+      }
+    />
+  )
+  const status = (binding: MonitorBinding) =>
+    !monitorEnabled || !binding.enabled ? (
+      <Badge variant="outline">{t("releaseHealth.flag.paused")}</Badge>
+    ) : null
+  function saveBinding(next: MonitorBinding) {
+    if (
+      editor === "add" &&
+      bindings.some((item) => item.metricId === next.metricId)
+    ) {
+      toast.error(b("duplicate"))
+      return
+    }
+    setBindings((current) =>
+      editor === "add"
+        ? [...current, next]
+        : current.map((item) => (item.metricId === next.metricId ? next : item))
+    )
+    setEditor(null)
+    toast.success(b("savedPreview"))
+  }
   const monitorName = t("releaseHealth.flag.monitorName", {
     flag: flag.name,
   })
@@ -95,6 +164,7 @@ export function FlagReleaseHealthTab({
             </span>
             <Switch
               checked={monitorEnabled}
+              disabled={!canManage}
               aria-label={t("releaseHealth.flag.toggleMonitor")}
               onCheckedChange={toggleMonitor}
             />
@@ -102,10 +172,11 @@ export function FlagReleaseHealthTab({
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => setMonitorOpen(true)}
+              disabled={!canManage}
+              onClick={() => setEditor("add")}
             >
-              <Settings2 />
-              {t("releaseHealth.flag.configure")}
+              <Plus />
+              {b("add")}
             </Button>
           </CardAction>
         </CardHeader>
@@ -116,15 +187,18 @@ export function FlagReleaseHealthTab({
             </span>
             <span className="text-sm font-medium">
               {t("releaseHealth.flag.bindingSummary", {
-                guards: checkoutMonitor.bindings.filter(
+                guards: bindings.filter(
                   (binding) => binding.purpose === "guard"
                 ).length,
-                observes: checkoutMonitor.bindings.filter(
-                  (binding) => binding.purpose === "observe"
+                trends: bindings.filter(
+                  (binding) => binding.purpose === "trend"
                 ).length,
               })}
             </span>
           </div>
+          <p className="mt-2 text-xs text-muted-foreground">
+            {b("previewNotice")}
+          </p>
           {!monitorEnabled ? (
             <div className="mt-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100">
               {t("releaseHealth.flag.pauseNotice")}
@@ -146,8 +220,13 @@ export function FlagReleaseHealthTab({
             </CardDescription>
           </CardHeader>
           <CardContent className="px-0">
+            {bindings.length === 0 && (
+              <div className="px-4 py-8 text-center text-sm text-muted-foreground">
+                {b("empty")}
+              </div>
+            )}
             <div className="grid grid-cols-1 gap-3 px-4 md:hidden">
-              {checkoutMonitor.bindings.map((binding) => {
+              {bindings.map((binding) => {
                 const metric = metricById(binding.metricId)
                 if (!metric) return null
                 return (
@@ -176,11 +255,19 @@ export function FlagReleaseHealthTab({
                     <div className="mt-3 flex flex-wrap items-center gap-2">
                       <ObservationModeBadge mode={binding.observationMode} />
                       <PurposeBadge purpose={binding.purpose} />
+                      {status(binding)}
                       <DataStatusBadge status={metric.environment.dataStatus} />
                     </div>
-                    <p className="mt-3 border-t pt-3 text-sm">
-                      {ruleSampleText(t, binding.rule)}
-                    </p>
+                    <div className="mt-3 border-t pt-3 text-sm">
+                      <BindingRuleSummary
+                        binding={binding}
+                        metric={metric}
+                        webhooks={webhooks.data ?? []}
+                      />
+                    </div>
+                    <div className="mt-3 flex justify-end">
+                      {actions(binding, metric)}
+                    </div>
                   </div>
                 )
               })}
@@ -200,13 +287,16 @@ export function FlagReleaseHealthTab({
                     <TableHead>
                       {t("releaseHealth.metrics.dataStatus")}
                     </TableHead>
-                    <TableHead className="pr-4">
+                    <TableHead>
                       {t("releaseHealth.flag.latestRuleCheck")}
+                    </TableHead>
+                    <TableHead className="pr-4 text-right">
+                      {b("actions")}
                     </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {checkoutMonitor.bindings.map((binding) => {
+                  {bindings.map((binding) => {
                     const metric = metricById(binding.metricId)
                     if (!metric) return null
                     return (
@@ -232,19 +322,29 @@ export function FlagReleaseHealthTab({
                         </TableCell>
                         <TableCell>
                           <PurposeBadge purpose={binding.purpose} />
+                          {status(binding)}
                         </TableCell>
-                        <TableCell>{ruleSampleText(t, binding.rule)}</TableCell>
+                        <TableCell>
+                          <BindingRuleSummary
+                            binding={binding}
+                            metric={metric}
+                            webhooks={webhooks.data ?? []}
+                          />
+                        </TableCell>
                         <TableCell>
                           <DataStatusBadge
                             status={metric.environment.dataStatus}
                           />
                         </TableCell>
-                        <TableCell className="pr-4">
+                        <TableCell>
                           <LatestRuleCheck
                             binding={binding}
                             metric={metric}
                             lang={lang}
                           />
+                        </TableCell>
+                        <TableCell className="pr-4">
+                          {actions(binding, metric)}
                         </TableCell>
                       </TableRow>
                     )
@@ -256,14 +356,40 @@ export function FlagReleaseHealthTab({
         </Card>
       </section>
 
-      <MonitorConfigurationSheet
-        key={`${envId}:${flag.id}:${monitorOpen}`}
-        open={monitorOpen}
-        monitoringEnabled={monitorEnabled}
-        flagName={flag.name}
-        flagKey={flag.key}
-        environmentName={context?.envName ?? "Environment"}
-        onOpenChange={setMonitorOpen}
+      {editor !== null && (
+        <MetricBindingSheet
+          binding={editor === "add" ? undefined : editor}
+          bindings={bindings}
+          metrics={releaseMetrics}
+          monitoringEnabled={monitorEnabled}
+          flagName={flag.name}
+          flagKey={flag.key}
+          environmentName={context?.envName ?? "Environment"}
+          projectId={context?.projectId ?? ""}
+          envId={envId}
+          lang={lang}
+          webhooks={webhooks}
+          onClose={() => setEditor(null)}
+          onSave={saveBinding}
+        />
+      )}
+      <BindingConfirmation
+        open={removeTarget !== null}
+        title={b("removeTitle")}
+        description={t("releaseHealth.binding.removeDescription", {
+          metric: removeTarget
+            ? metricSampleText(t, metricById(removeTarget.metricId)!, "name")
+            : "",
+        })}
+        confirm={b("remove")}
+        onCancel={() => setRemoveTarget(null)}
+        onConfirm={() => {
+          setBindings((current) =>
+            current.filter((item) => item.metricId !== removeTarget?.metricId)
+          )
+          setRemoveTarget(null)
+          toast.success(b("removedPreview"))
+        }}
       />
     </div>
   )
@@ -279,20 +405,44 @@ function LatestRuleCheck({
   lang: Lang
 }) {
   const { t } = useTranslation()
-  if (binding.purpose === "observe") {
+  if (binding.purpose === "trend") {
     return (
       <div className="space-y-1">
         <Badge variant="outline">
           {t("releaseHealth.status.notApplicable")}
         </Badge>
         <p className="text-xs text-muted-foreground">
-          {t("releaseHealth.flag.observeOnly")}
+          {t("releaseHealth.flag.trendOnly")}
         </p>
       </div>
     )
   }
 
-  const check = binding.latestCheck
+  return (
+    <div className="space-y-4">
+      {binding.rules.map((rule) => (
+        <div key={rule.id} className="space-y-1">
+          {binding.rules.length > 1 && (
+            <p className="text-xs font-medium">{rule.name}</p>
+          )}
+          <RuleCheck rule={rule} metric={metric} lang={lang} />
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function RuleCheck({
+  rule,
+  metric,
+  lang,
+}: {
+  rule: BindingAlertRule
+  metric: ReleaseMetric
+  lang: Lang
+}) {
+  const { t } = useTranslation()
+  const check = rule.latestCheck
   const locale = lang === "zh" ? "zh-CN" : "en-US"
   return (
     <div className="space-y-1">

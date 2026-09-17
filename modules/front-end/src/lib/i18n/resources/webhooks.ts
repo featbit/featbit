@@ -1,6 +1,188 @@
 export const enWebhooks = {
+  tabs: { resourceChanges: "Resource changes" },
+  releaseHealth: {
+    environment: "Environment",
+    allEnvironments: "All environments",
+    selectProjectFirst: "Select a project to filter by environment.",
+    title: "Reusable alert destinations",
+    description:
+      "Choose a destination for each alert rule. Share the same webhook across flags and projects in this organization.",
+    previewBadge: "Design preview",
+    previewNotice:
+      "Saved in this browser for this organization. No notifications are sent.",
+    previewShort: "Saved in this browser · No deliveries",
+    new: "New Release Health webhook",
+    newTitle: "New Release Health webhook",
+    editTitle: "Edit Release Health webhook",
+    sheetHelp: "A shared destination for alert rule notifications.",
+    namePlaceholder: "e.g. Production alerts",
+    scopeHelp:
+      "Choose where alert rules can use this webhook. Multiple projects and environments can share one destination.",
+    scopeUnavailable:
+      "Some environments are no longer available. Refresh and update the selection.",
+    triggered: "Alert triggered",
+    triggeredHelp:
+      "A Guard rule has Ready window data and meets its alert condition continuously for Sustain. Sent once per alert cycle, with Warning or Critical severity.",
+    recovered: "Alert recovered",
+    recoveredHelp:
+      "An active alert has Ready window data that no longer meets the alert condition continuously for Recovery. Sent once for the same alert cycle.",
+    eventsHelp:
+      "These are the only two event types, shared by all supported result profiles. Both are included. Only Guard rules that select this webhook send notifications; scopes do not subscribe to every alert.",
+    supportedEvents: "Supported events",
+    bothIncluded: "Both included",
+    noEventTitle: "When no event is sent",
+    supportedProfiles: "Supported result contracts · 9 profiles",
+    profilesHelp:
+      "Every supported metric is a single numeric time series. Result contracts describe values; the Guard rule determines alert and recovery conditions.",
+    rateCombinations:
+      "Rate supports all 18 combinations: events, requests, errors, operations, items or bytes per second, minute or hour.",
+    unsupportedResults:
+      "Multiple series, raw histograms/counters, booleans, strings and provider alert objects are not supported results. Queries must first produce one finite numeric series.",
+    sampleProfile: "Sample result profile",
+    sampleSeverity: "Sample rule severity",
+    sampleProfileHelp:
+      "Preview samples only. Values and thresholds use canonical units; fraction digits affect display, never the numbers in the payload.",
+    canonicalUnit: "Canonical unit",
+    rateNumerator: "Rate numerator",
+    ratePeriod: "Rate period",
+    warning: "Warning",
+    critical: "Critical",
+    allowedValues: "Allowed values",
+    nonEvents: {
+      collecting: {
+        title: "Collecting",
+        help: "The window is not ready. Record NotEvaluated and wait for enough valid data.",
+      },
+      "no-data": {
+        title: "NoData",
+        help: "No usable data in this window. Do not substitute zero or treat it as recovery.",
+      },
+      stale: {
+        title: "Stale",
+        help: "Data is too old for this window. Do not reuse the last value as a current check.",
+      },
+      error: {
+        title: "Error",
+        help: "The source or query failed. Record NotEvaluated and the data error.",
+      },
+      "invalid-contract": {
+        title: "Invalid result",
+        help: "Multiple series, nonnumeric values, NaN, Infinity and out-of-range points are rejected. They cannot trigger a metric alert or recovery.",
+      },
+      trend: {
+        title: "Trend binding",
+        help: "Trend has no alert rules and emits neither event.",
+      },
+      "paused-removed": {
+        title: "Pause / Remove / Trend",
+        help: "Stopping checks or removing a rule does not mean the alert recovered.",
+      },
+      ongoing: {
+        title: "Ongoing alert / Retry",
+        help: "An ongoing breach does not create another trigger event. A delivery retry keeps the same event ID.",
+      },
+    },
+    profileNotes: {
+      "gauge-count":
+        "Current level, such as queue depth. Nonnegative; fractional values are allowed.",
+      "gauge-percent":
+        "Utilization on a 0–100 scale. No automatic multiplication by 100.",
+      "gauge-ratio":
+        "A normalized level on a 0–1 scale. It is not displayed as percent.",
+      "gauge-duration":
+        "Provider-computed latency in milliseconds, including P95/P99. No hidden conversion to seconds.",
+      "gauge-data":
+        "A nonnegative byte value. The payload does not convert to KiB/MiB.",
+      "count-count":
+        "Count over the provider query window. Fractional estimates are allowed.",
+      "ratio-percent":
+        "A provider-computed proportion on a 0–100 percent scale.",
+      "ratio-ratio": "A provider-computed proportion on a 0–1 ratio scale.",
+      "rate-rate":
+        "A provider-computed rate in the configured numerator and time period.",
+    },
+    fieldNotes: {
+      eventType:
+        "Only these two notification types are supported; metric profiles do not introduce extra events.",
+      version:
+        "The version or revision used by this check, retained with the event.",
+      legacyUnit:
+        "Canonical unit label. The structured unit also records scale and rate period.",
+      precision:
+        "Display setting at event time. Payload values and thresholds remain unrounded.",
+      scale: "Percent uses 0–100; ratio uses 0–1. Null for other units.",
+      base: "Duration uses millisecond; data uses byte. Null for other units.",
+      rate: "Present for rate units; null for other units. Values already use this configured rate unit.",
+      constraints:
+        "Explicit data validation bound, or null when not configured. Unit limits still apply. This is not an alert threshold.",
+      canonical:
+        "Finite number in this metric version's canonical unit. No percent, duration, byte or rate conversion.",
+      readyOnly:
+        "These events only contain Ready checks. Unavailable data never produces a false recovery.",
+      health:
+        "Triggered: the rule's Warning/Critical severity. Recovered: Healthy for this rule only.",
+      recovery:
+        "Null for a trigger event; the actual recovery time for a recovery event in the same alert cycle.",
+    },
+    templateHelp:
+      "The default template lists each alert field explicitly. Use Custom to choose fields or change the JSON structure; one template handles both events.",
+    templateValid: "Valid JSON for both alert events and all 9 result profiles",
+    templateInvalid:
+      "The template must produce valid JSON for both alert events and every supported result profile, including all rate units. Open the preview to inspect errors.",
+    variables: "Available template variables",
+    variablesHelp:
+      "Use variables directly, as in other webhook templates. Quote string fields; leave numbers, objects and nullable fields unquoted to keep their types. The values below are examples.",
+    variableGroup: "Variable group",
+    templateExpression: "Template expression / type",
+    triggeredExample: "Triggered example",
+    recoveredExample: "Recovered example",
+    wholeObjectHelp: "To include all fields in this group, use:",
+    variableGroups: {
+      event: "The notification's identity, type and time.",
+      organization: "The organization that owns this alert.",
+      project: "The project containing the flag and metric.",
+      environment: "The environment where the rule was checked.",
+      flag: "The feature flag this metric is bound to.",
+      metric: "The metric definition, version and unit.",
+      resultContract: "The immutable result contract used by this check.",
+      unit: "All unit fields are listed. Fields that do not apply are null.",
+      constraints:
+        "Explicit data bounds. Unit limits always apply; bounds are not alert thresholds.",
+      binding: "The link between the flag, environment and metric.",
+      rule: "The alert rule's identity, revision and severity.",
+      condition: "The rule's threshold, aggregation and timing settings.",
+      evaluation: "The measured value, data status and check window.",
+      alert: "One alert cycle. recoveredAt is null until recovery.",
+      evidence: "A link to the evidence for this rule check.",
+    },
+    preview: "Preview payload",
+    previewTitle: "Alert payload preview",
+    sampleHelp:
+      "Sample data for this template. Switch event, result profile or rate unit to inspect the JSON. Nothing is sent to the endpoint.",
+    renderedPayload: "Rendered alert payload",
+    copied: "Copied",
+    copyFailed: "The payload could not be copied.",
+    authentication: "Headers & authentication",
+    authenticationHelp:
+      "Custom headers and a signing secret will use the shared webhook delivery engine. Credential configuration is unavailable in this preview.",
+    endpointInvalid:
+      "Enter an absolute HTTP or HTTPS URL without embedded username or password.",
+    lastDelivery: "Last delivery",
+    previewFor: "Preview payload for {{name}}",
+    editFor: "Edit {{name}}",
+    removeFor: "Remove {{name}}",
+    empty: "No Release Health webhooks yet",
+    emptyHelp:
+      "Create a shared alert destination, then select it in a Guard binding’s alert rule.",
+    usageNotice:
+      "Rule usage and delivery history will be available when alert delivery is connected.",
+    saved: "Preview webhook saved",
+    removeHelp:
+      "Remove “{{name}}”? Rules that use this destination will need another webhook. Rule checks are not removed or paused.",
+  },
   title: "Webhooks",
-  subtitle: "Send feature flag and segment events to external services.",
+  subtitle:
+    "Manage destinations for resource changes and Release Health alerts.",
   search: "Filter by name",
   project: "Project",
   projectSearch: "Search projects",
@@ -117,7 +299,7 @@ export const enWebhooks = {
   },
   environments: {
     title: "Choose environments",
-    description: "Select the environments this webhook should monitor.",
+    description: "Select the environments for this webhook.",
     selected: "Selected environments",
     clear: "Clear all",
     remove: "Remove {{name}}",
@@ -185,7 +367,170 @@ export const enWebhooks = {
 
 export const zhWebhooks = {
   ...enWebhooks,
-  subtitle: "将功能开关和用户组事件发送到外部服务。",
+  tabs: { resourceChanges: "资源变更" },
+  releaseHealth: {
+    environment: "环境",
+    allEnvironments: "全部环境",
+    selectProjectFirst: "请先选择项目，再按环境筛选。",
+    title: "可复用的告警通知目标",
+    description:
+      "每条告警规则选择一个通知目标，同一 Webhook 可供当前组织内多个 Flag 和项目复用。",
+    previewBadge: "设计预览",
+    previewNotice: "按组织保存在当前浏览器中，不会发送通知。",
+    previewShort: "保存在当前浏览器 · 不会投递",
+    new: "新建 Release Health Webhook",
+    newTitle: "新建 Release Health Webhook",
+    editTitle: "编辑 Release Health Webhook",
+    sheetHelp: "为告警规则配置可复用的通知目标。",
+    namePlaceholder: "例如：生产环境告警",
+    scopeHelp:
+      "选择哪些范围内的告警规则可以使用此 Webhook，支持多个项目和环境。",
+    scopeUnavailable: "部分环境已不可用，请刷新并调整选择。",
+    triggered: "告警触发",
+    triggeredHelp:
+      "Guard 规则的窗口数据为 Ready，连续满足异常条件达到 Sustain 时，每个告警周期通知一次；等级为该规则配置的 Warning 或 Critical。",
+    recovered: "告警恢复",
+    recoveredHelp:
+      "已有告警的窗口数据为 Ready，连续不满足异常条件达到 Recovery 时，为同一告警周期发送一次恢复通知。",
+    eventsHelp:
+      "仅支持以上两个事件类型，所有 Result Profile 共用且固定包含两类事件。只有明确选用此 Webhook 的 Guard 规则才会发送通知；选择范围不会订阅范围内所有告警。",
+    supportedEvents: "支持的事件",
+    bothIncluded: "固定包含两类事件",
+    noEventTitle: "不发送事件的情况",
+    supportedProfiles: "支持的结果契约 · 9 种 Profile",
+    profilesHelp:
+      "所有支持的 Metric 都是单条数值时间序列。Result contract 描述数据含义，由 Guard 规则决定告警与恢复条件。",
+    rateCombinations:
+      "Rate 支持全部 18 种组合：events、requests、errors、operations、items 或 bytes，分别按 second、minute 或 hour 计量。",
+    unsupportedResults:
+      "不支持多序列、原始 Histogram/Counter、布尔值、字符串或 Provider 告警对象。Query 必须先产生一条有限数值序列。",
+    sampleProfile: "示例 Result Profile",
+    sampleSeverity: "示例规则等级",
+    sampleProfileHelp:
+      "仅用于预览示例。比较值与阈值使用标准单位；小数位数只影响显示，不改变 Payload 数值。",
+    canonicalUnit: "标准单位",
+    rateNumerator: "Rate 分子单位",
+    ratePeriod: "Rate 时间单位",
+    warning: "Warning",
+    critical: "Critical",
+    allowedValues: "允许值",
+    nonEvents: {
+      collecting: {
+        title: "Collecting",
+        help: "尚未形成可检查窗口，记录 NotEvaluated，等待足够的有效数据。",
+      },
+      "no-data": {
+        title: "NoData",
+        help: "本次窗口没有可用数据，不以零值代替，也不视为恢复。",
+      },
+      stale: {
+        title: "Stale",
+        help: "数据已超过本次窗口允许的延迟，不使用旧值冒充当前检查。",
+      },
+      error: {
+        title: "Error",
+        help: "来源或查询失败，记录 NotEvaluated 与真实数据错误。",
+      },
+      "invalid-contract": {
+        title: "不符合契约的结果",
+        help: "拒绝多序列、非数值、NaN、Infinity 和越界点；这些结果不能触发指标告警或恢复。",
+      },
+      trend: {
+        title: "Trend 绑定",
+        help: "Trend 没有告警规则，不产生这两类事件。",
+      },
+      "paused-removed": {
+        title: "暂停 / 移除 / 改为 Trend",
+        help: "停止检查或移除规则不表示告警已经恢复。",
+      },
+      ongoing: {
+        title: "持续异常 / 投递重试",
+        help: "重复异常检查不产生新的触发事件；投递重试复用同一事件 ID。",
+      },
+    },
+    profileNotes: {
+      "gauge-count": "当前水平，例如队列深度；数值非负，允许小数。",
+      "gauge-percent": "0–100 尺度的利用率，不自动乘以 100。",
+      "gauge-ratio": "0–1 尺度的归一化水平，不自动显示为百分比。",
+      "gauge-duration":
+        "Provider 算好的毫秒值，适用于 P95/P99 等延迟；不隐藏转换为秒。",
+      "gauge-data": "非负字节数，Payload 不转换为 KiB/MiB。",
+      "count-count": "Provider 查询窗口内的计数，允许非整数估计。",
+      "ratio-percent": "Provider 算好的比例，使用 0–100 百分比尺度。",
+      "ratio-ratio": "Provider 算好的比例，使用 0–1 尺度。",
+      "rate-rate": "Provider 算好的速率，使用配置的分子单位与时间单位。",
+    },
+    fieldNotes: {
+      eventType: "仅支持这两类通知；不同 Metric Profile 不增加事件类型。",
+      version: "本次检查实际使用的版本或修订，随事件保留。",
+      legacyUnit: "标准单位标签；完整单位结构还包含尺度与速率时间单位。",
+      precision: "事件发生时的显示设置；Payload 比较值与阈值不做四舍五入。",
+      scale: "Percent 为 0–100，ratio 为 0–1；其他单位为 null。",
+      base: "Duration 为 millisecond，data 为 byte；其他单位为 null。",
+      rate: "仅 Rate 使用，其他单位为 null。数值已经按此速率单位计算。",
+      constraints:
+        "显式数据合法性边界；未配置时为 null，单位内建边界始终生效。它不是告警阈值。",
+      canonical:
+        "使用该 Metric Version 标准单位的有限数值；不做百分比、时长、字节或速率换算。",
+      readyOnly: "这两类事件只包含 Ready 检查；数据不可用不会产生虚构恢复。",
+      health:
+        "触发为该规则的 Warning/Critical；恢复为该规则的 Healthy，不代表其他规则。",
+      recovery: "触发时为 null；恢复事件中为同一告警周期的实际恢复时间。",
+    },
+    templateHelp:
+      "默认模板逐项列出告警字段。选择 Custom 可调整字段和 JSON 结构；同一模板处理触发与恢复事件。",
+    templateValid: "两类告警事件与全部 9 种 Profile 均生成有效 JSON",
+    templateInvalid:
+      "模板必须为两类告警事件和全部支持的 Profile（包括所有 Rate 单位）生成有效 JSON，请打开预览查看错误。",
+    variables: "可用模板变量",
+    variablesHelp:
+      "与已有 Webhook 模板一样，直接引用变量。字符串字段加引号；数字、对象及可为空的字段不加引号，以保留类型。下方数值均为示例。",
+    variableGroup: "变量分组",
+    templateExpression: "模板表达式 / 类型",
+    triggeredExample: "触发时示例",
+    recoveredExample: "恢复时示例",
+    wholeObjectHelp: "如需包含此分组的全部字段，可使用：",
+    variableGroups: {
+      event: "本次通知的标识、类型与发生时间。",
+      organization: "告警所属的组织。",
+      project: "Flag 与 Metric 所属的项目。",
+      environment: "规则检查所在的环境。",
+      flag: "此 Metric 绑定的 Feature Flag。",
+      metric: "指标定义、版本与单位。",
+      resultContract: "本次检查实际使用的不可变结果契约。",
+      unit: "列出全部单位字段，不适用的字段为 null。",
+      constraints: "显式数据边界，单位内建范围始终生效；不是告警阈值。",
+      binding: "Flag、环境与 Metric 之间的绑定。",
+      rule: "告警规则的标识、修订与严重等级。",
+      condition: "规则的阈值、聚合方式与时间设置。",
+      evaluation: "实际比较值、数据状态与检查窗口。",
+      alert: "一次告警周期；恢复前 recoveredAt 为 null。",
+      evidence: "本次规则检查的依据链接。",
+    },
+    preview: "预览 Payload",
+    previewTitle: "告警 Payload 预览",
+    sampleHelp:
+      "这里使用示例数据，可以切换事件、Result Profile 和 Rate 单位查看最终 JSON，不会向目标地址发送请求。",
+    renderedPayload: "渲染后的告警 Payload",
+    copied: "已复制",
+    copyFailed: "无法复制 Payload。",
+    authentication: "请求头与认证",
+    authenticationHelp:
+      "自定义 Header 与签名 Secret 将复用现有 Webhook 投递引擎。此预览暂不开放凭据配置。",
+    endpointInvalid: "请输入不含用户名或密码的完整 HTTP / HTTPS 地址。",
+    lastDelivery: "最近投递",
+    previewFor: "预览 {{name}} 的 Payload",
+    editFor: "编辑 {{name}}",
+    removeFor: "移除 {{name}}",
+    empty: "还没有 Release Health Webhook",
+    emptyHelp:
+      "创建可复用的告警通知目标，然后在 Guard binding 的告警规则中选择它。",
+    usageNotice: "规则引用与投递记录将在告警投递接入后提供。",
+    saved: "已保存预览 Webhook",
+    removeHelp:
+      "移除“{{name}}”？使用此通知目标的规则需要重新选择 Webhook，规则检查不会被删除或暂停。",
+  },
+  subtitle: "统一管理资源变更与 Release Health 告警的通知目标。",
   search: "按名称筛选",
   project: "项目",
   projectSearch: "搜索项目",
@@ -294,7 +639,7 @@ export const zhWebhooks = {
   environments: {
     ...enWebhooks.environments,
     title: "选择环境",
-    description: "选择此 Webhook 要监听的环境。",
+    description: "选择此 Webhook 使用的环境。",
     selected: "已选环境",
     clear: "全部清除",
     search: "搜索环境...",

@@ -18,20 +18,6 @@ export function metricSampleText(
   })
 }
 
-export function ruleSampleText(t: TFunction, rule: string) {
-  if (rule === "Observe trend") return t("releaseHealth.monitor.trendOnly")
-
-  const duration = rule.match(/^(.+?) for (\d+) min$/)
-  if (duration) {
-    return t("releaseHealth.samples.ruleForMinutes", {
-      condition: duration[1],
-      count: Number(duration[2]),
-    })
-  }
-
-  return rule
-}
-
 export function monitorSampleText(t: TFunction, monitor: string) {
   const keys: Record<string, string> = {
     "Checkout safety monitor": "checkoutSafety",

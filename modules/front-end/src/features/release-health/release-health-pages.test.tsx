@@ -7,7 +7,7 @@ import {
 } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { MemoryRouter, Route, Routes } from "react-router-dom"
-import { toast } from "sonner"
+
 import "@/lib/i18n/i18n"
 import { i18n } from "@/lib/i18n/i18n"
 import type { FeatureFlag } from "@/features/flags/flags-types"
@@ -491,7 +491,7 @@ describe("Release Health design pages", () => {
   })
 
   it("shows ongoing monitoring and configures it without starting an observation session", async () => {
-    render(
+    renderLive(
       <MemoryRouter
         initialEntries={["/en/feature-flags/search-ranking-v3/release-health"]}
       >
@@ -523,7 +523,7 @@ describe("Release Health design pages", () => {
     expect(screen.queryByText("Current gate")).not.toBeInTheDocument()
     expect(screen.queryByText("Response")).not.toBeInTheDocument()
     expect(screen.queryByText("Approval required")).not.toBeInTheDocument()
-    expect(screen.getByText("3 Guard · 1 Observe")).toBeVisible()
+    expect(screen.getByText("3 Guard · 1 Trend")).toBeVisible()
     const table = within(screen.getByRole("table"))
     expect(
       table.getByRole("columnheader", { name: "Latest rule check" })
@@ -550,49 +550,28 @@ describe("Release Health design pages", () => {
     })
     fireEvent.click(toggle)
     expect(toggle).toHaveAttribute("aria-checked", "false")
-    fireEvent.click(screen.getByRole("button", { name: "Configure" }))
+    fireEvent.click(screen.getByRole("button", { name: "Add binding" }))
     const dialog = within(await screen.findByRole("dialog"))
-    expect(
-      dialog.getByRole("heading", { name: "Configure health monitor" })
-    ).toBeVisible()
-    expect(dialog.getByText("Paused")).toBeVisible()
-    expect(dialog.queryByText("When to observe")).not.toBeInTheDocument()
-    expect(
-      dialog.queryByText(/Starting a session pins/)
-    ).not.toBeInTheDocument()
-    expect(
-      dialog.queryByRole("button", { name: "Start observation" })
-    ).not.toBeInTheDocument()
-    fireEvent.click(dialog.getByRole("button", { name: "Advanced settings" }))
-    expect(dialog.getByText("Evaluate every")).toBeVisible()
+    expect(dialog.getByText(/Monitoring is paused/)).toBeVisible()
     expect(dialog.queryByText("Gate")).not.toBeInTheDocument()
-    expect(dialog.queryByText("No-data policy")).not.toBeInTheDocument()
-    expect(dialog.queryByText("Actions")).not.toBeInTheDocument()
-    expect(dialog.queryByText("Require approval")).not.toBeInTheDocument()
-    expect(dialog.queryByText("Rich Webhook")).not.toBeInTheDocument()
+    expect(dialog.queryByText("Response")).not.toBeInTheDocument()
+    fireEvent.click(dialog.getByLabelText("Metric"))
     expect(
-      dialog.queryByText("Pause supported workflow")
+      screen.queryByRole("option", { name: /Checkout error rate/ })
     ).not.toBeInTheDocument()
-    const selectedMetrics = dialog.getAllByRole("checkbox", { checked: true })
-    selectedMetrics.forEach((checkbox) => fireEvent.click(checkbox))
-    expect(dialog.getByRole("button", { name: "Save monitor" })).toBeDisabled()
     fireEvent.click(
-      dialog.getByRole("checkbox", { name: "Checkout error rate" })
+      await screen.findByRole("option", { name: /Crash-free sessions/ })
     )
-    const saved = vi.spyOn(toast, "success")
-    try {
-      fireEvent.click(dialog.getByRole("button", { name: "Save monitor" }))
-      await waitFor(() =>
-        expect(saved).toHaveBeenCalledWith(
-          "Monitor configuration saved in this design preview."
-        )
-      )
-      await waitFor(() =>
-        expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
-      )
-      expect(toggle).toHaveAttribute("aria-checked", "false")
-    } finally {
-      saved.mockRestore()
-    }
+    fireEvent.click(dialog.getByRole("button", { name: "Add binding" }))
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    )
+    expect(screen.getByText("3 Guard · 2 Trend")).toBeVisible()
+    expect(toggle).toHaveAttribute("aria-checked", "false")
+    expect(
+      within(screen.getByRole("table")).getByRole("row", {
+        name: /Crash-free sessions/,
+      })
+    ).toBeVisible()
   })
 })

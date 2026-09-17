@@ -211,7 +211,8 @@ export function FlagDetailsPage() {
       Boolean(organizationId) &&
       ((activeTab === "targeting" && !previewing) ||
         activeTab === "settings" ||
-        activeTab === "variations"),
+        activeTab === "variations" ||
+        activeTab === "release-health"),
     staleTime: 5 * 60_000,
   })
   const settingsQuery = useQuery({
@@ -583,7 +584,12 @@ export function FlagDetailsPage() {
         {activeTab === "history" ? (
           <HistoryTab envId={envId} flagId={saved.id} lang={lang} />
         ) : activeTab === "release-health" ? (
-          <FlagReleaseHealthTab envId={envId} flag={saved} lang={lang} />
+          <FlagReleaseHealthTab
+            envId={envId}
+            flag={saved}
+            lang={lang}
+            canManage={!saved.isArchived && can("UpdateFlagTargetingRules")}
+          />
         ) : activeTab === "insights" ? (
           <InsightsTab envId={envId} flag={saved} />
         ) : activeTab === "settings" ? (

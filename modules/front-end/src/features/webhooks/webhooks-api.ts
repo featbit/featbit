@@ -15,13 +15,14 @@ const basePath = "/api/v1/webhooks"
 export function fetchWebhooks(input: {
   name: string
   projectId: string
+  envId?: string
   pageIndex: number
   pageSize: number
 }) {
   const params = new URLSearchParams({
     name: input.name,
     projectId: input.projectId,
-    envId: "",
+    envId: input.envId ?? "",
     pageIndex: String(input.pageIndex),
     pageSize: String(input.pageSize),
   })

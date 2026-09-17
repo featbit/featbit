@@ -52,16 +52,18 @@ const completionValues = [
   "data.object.name",
 ]
 
-function webhookCompletions(context: CompletionContext) {
+function webhookCompletions(context: CompletionContext, variables: string[]) {
   const word = context.matchBefore(/[@\w.]+/)
   if (!word || (word.from === word.to && !context.explicit)) return null
   return {
     from: word.from,
-    options: completionValues.map((label) => ({ label, type: "variable" })),
+    options: variables.map((label) => ({ label, type: "variable" })),
   }
 }
 
 type Props = {
+  variables?: string[]
+  validate?: (value: string) => string | null
   value: string
   onChange: (value: string) => void
   readOnly: boolean
@@ -70,6 +72,8 @@ type Props = {
 }
 
 export function CodeMirrorTemplateEditor({
+  variables = completionValues,
+  validate = validateJsonHandlebars,
   value,
   onChange,
   readOnly,
@@ -84,6 +88,12 @@ export function CodeMirrorTemplateEditor({
   const editable = useRef(new Compartment())
   const initialValue = useRef(value)
   const initialReadOnly = useRef(readOnly)
+  const variablesRef = useRef(variables)
+  const validateRef = useRef(validate)
+  useEffect(() => {
+    variablesRef.current = variables
+    validateRef.current = validate
+  }, [variables, validate])
 
   useEffect(() => {
     onChangeRef.current = onChange
@@ -103,14 +113,18 @@ export function CodeMirrorTemplateEditor({
         indentOnInput(),
         bracketMatching(),
         closeBrackets(),
-        autocompletion({ override: [webhookCompletions] }),
+        autocompletion({
+          override: [
+            (context) => webhookCompletions(context, variablesRef.current),
+          ],
+        }),
         highlightActiveLine(),
         highlightSelectionMatches(),
         json(),
         lintGutter(),
         linter(
           (view) => {
-            const message = validateJsonHandlebars(view.state.doc.toString())
+            const message = validateRef.current(view.state.doc.toString())
             return message
               ? [
                   {

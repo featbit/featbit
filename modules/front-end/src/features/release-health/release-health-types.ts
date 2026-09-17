@@ -89,7 +89,7 @@ export type DataStatus = "collecting" | "ready" | "no-data" | "stale" | "error"
 
 export type HealthStatus = "healthy" | "warning" | "critical" | "not-evaluated"
 
-export type MonitorPurpose = "observe" | "guard"
+export type MonitorPurpose = "trend" | "guard"
 
 export type MetricPoint = {
   timestamp: string
@@ -122,18 +122,41 @@ export type ReleaseMetric = {
   environment: EnvironmentMetricState
 }
 
+export type GuardAlertRule = {
+  operator: ">" | ">=" | "<" | "<="
+  threshold: number
+  severity: "warning" | "critical"
+  lookback: number
+  reducer: "latest" | "average" | "minimum" | "maximum"
+  sustain: number
+  recovery: number
+  evaluationInterval: number
+  warmup: number
+  dataDelay: number
+}
+
+export type RuleCheck = {
+  healthStatus: HealthStatus
+  dataStatus: DataStatus
+  value: number | null
+  checkedAt: string
+}
+
+export type BindingAlertRule = GuardAlertRule & {
+  id: string
+  name: string
+  webhookId: string | null
+  latestCheck?: RuleCheck
+}
+
 export type MonitorBinding = {
   metricId: string
+  enabled: boolean
   observationMode: MetricObservationMode
-  purpose: MonitorPurpose
-  rule: string
-  latestCheck?: {
-    healthStatus: HealthStatus
-    dataStatus: DataStatus
-    value: number | null
-    checkedAt: string
-  }
-}
+} & (
+  | { purpose: "trend"; rules?: never }
+  | { purpose: "guard"; rules: BindingAlertRule[] }
+)
 
 export type HealthMonitor = {
   id: string
@@ -141,9 +164,5 @@ export type HealthMonitor = {
   flagKey: string
   enabled: boolean
   bindings: MonitorBinding[]
-  warmup: string
-  lookback: string
-  evaluationInterval: string
-  sustain: string
   updatedAt: string
 }
