@@ -19,7 +19,6 @@ export type ObservationWindowUpdate = {
 }
 
 export type MeasuringRun = ExperimentRunDetail & {
-  methodReason?: string | null
   primaryMetric?: PrimaryMetricConfig | null
   guardrailMetrics?: GuardrailMetricConfig[]
   controlVariant?: string | null

@@ -196,7 +196,6 @@ public class ExperimentService(
             Id = Guid.NewGuid(),
             ExperimentId = id,
             Method = previous?.Method ?? "bayesian_ab",
-            MethodReason = previous?.MethodReason,
             PrimaryMetric = MetricSnapshots.Copy(experiment.PrimaryMetric),
             GuardrailMetrics = MetricSnapshots.Copy(experiment.GuardrailMetrics),
             ControlVariant = previous?.ControlVariant,
@@ -973,7 +972,6 @@ public class ExperimentService(
             ExperimentId = run.ExperimentId,
             Slug = run.Slug,
             Method = run.Method,
-            MethodReason = run.MethodReason,
             PrimaryMetric = MetricSnapshots.Copy(run.PrimaryMetric),
             GuardrailMetrics = MetricSnapshots.Copy(run.GuardrailMetrics),
             ControlVariant = run.ControlVariant,
@@ -1048,7 +1046,6 @@ public class ExperimentService(
     {
         run.Slug = Normalize(update.Slug, run.Slug);
         run.Method = Normalize(update.Method, run.Method);
-        run.MethodReason = Normalize(update.MethodReason, run.MethodReason);
         run.ControlVariant = Normalize(update.ControlVariant, run.ControlVariant);
         run.TreatmentVariant = Normalize(update.TreatmentVariant, run.TreatmentVariant);
         run.InputData = Normalize(update.InputData, run.InputData);

@@ -86,8 +86,6 @@ public class ExperimentRunVm
 
     public string Method { get; set; }
 
-    public string MethodReason { get; set; }
-
     public PrimaryMetricConfig PrimaryMetric { get; set; }
 
     public List<GuardrailMetricConfig> GuardrailMetrics { get; set; } = [];

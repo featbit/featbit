@@ -49,8 +49,6 @@ public class ExperimentRunUpdate
 
     public string Method { get; set; }
 
-    public string MethodReason { get; set; }
-
     public string ControlVariant { get; set; }
 
     public string TreatmentVariant { get; set; }

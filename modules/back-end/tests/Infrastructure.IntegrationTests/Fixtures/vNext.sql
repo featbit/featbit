@@ -134,7 +134,6 @@ CREATE TABLE IF NOT EXISTS experiment_runs (
     experiment_id uuid NOT NULL,
     slug character varying(128) NOT NULL,
     method character varying(64),
-    method_reason text,
     primary_metric jsonb,
     guardrail_metrics jsonb NOT NULL DEFAULT '[]'::jsonb,
     control_variant character varying(256),
