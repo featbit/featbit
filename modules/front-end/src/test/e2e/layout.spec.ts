@@ -228,13 +228,39 @@ test.describe("layout", () => {
         json: { success: true, data: { totalCount: 0, items: [] } },
       })
     })
+    await page.route("**/api/v1/workspaces", async (route) => {
+      await route.fulfill({
+        json: {
+          success: true,
+          data: {
+            id: "ws-1",
+            key: "acme-workspace",
+            name: "Acme Workspace",
+            license: createLicense("Growth"),
+          },
+        },
+      })
+    })
 
     await page.goto("/abc/en/workspace/global-users")
+    await expect(
+      page.getByRole("heading", { name: "Workspace", level: 1, exact: true })
+    ).toBeVisible()
+    await expect(
+      page.getByRole("button", { name: /Production CN/ })
+    ).toBeVisible()
     const otherPage = await context.newPage()
 
     try {
-      await mockRuntimeEnv(otherPage, { BASE_HREF: "abc" })
-      await otherPage.goto("/abc/en/login")
+      // Keep the sender on the same origin without starting an unmocked app
+      // that could expire the session shared by both tabs.
+      await otherPage.route("**/abc/broadcast-source", async (route) => {
+        await route.fulfill({
+          contentType: "text/html",
+          body: "<!doctype html><title>Broadcast source</title>",
+        })
+      })
+      await otherPage.goto("/abc/broadcast-source")
       await otherPage.evaluate(() => {
         const channel = new BroadcastChannel("featbit-ui-broadcast-channel")
         channel.postMessage("env-changed")
@@ -242,6 +268,12 @@ test.describe("layout", () => {
       })
 
       await expect(page).toHaveURL(/\/abc\/en\/workspace$/)
+      await expect(
+        page.getByRole("heading", { name: "Workspace", level: 1, exact: true })
+      ).toBeVisible()
+      await expect(
+        page.getByRole("button", { name: /Production CN/ })
+      ).toBeVisible()
     } finally {
       await otherPage.close()
     }
