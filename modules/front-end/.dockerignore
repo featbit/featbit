@@ -4,6 +4,7 @@ dist
 dist-ssr
 
 # Test and local tooling output
+logs
 test-results
 playwright-report
 coverage
