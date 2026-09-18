@@ -441,14 +441,14 @@ export function FullAnalysis({
               kind="primaryMetric"
               eventKey={
                 analysis.primary.event ||
-                run.primaryMetricEvent ||
+                run.primaryMetric?.eventName ||
                 analysis.primary.label ||
                 "—"
               }
               inverse={analysis.primary.inverse}
             />
             <p className="text-xs text-muted-foreground">
-              {run.metricDescription}
+              {run.primaryMetric?.description}
             </p>
           </div>
           {analysis.primary.rows.length ? (
@@ -884,6 +884,8 @@ export function MeasuringDetails({
     },
   })
 
+  const hasPrimaryMetric = Boolean(experiment.primaryMetric?.eventName?.trim())
+
   const openNewRunDialog = () => {
     const normalized = normalizeNewRunVariants("", [], flagVariations)
     createMutation.reset()
@@ -943,11 +945,13 @@ export function MeasuringDetails({
       return
     }
 
+    if (!hasPrimaryMetric) return
+
     createMutation.mutate({
       setup: {
         method: newRunMethod,
         controlVariant: newRunControlVariant,
-        treatmentVariant: newRunTreatmentVariants.join("|"),
+        treatmentVariants: newRunTreatmentVariants,
         minimumSample,
       },
       observationWindow: resolved.value,
@@ -1331,6 +1335,26 @@ export function MeasuringDetails({
             </DialogDescription>
           </DialogHeader>
           <div className="-mx-1 space-y-5 overflow-y-auto px-1 pt-2">
+            {hasPrimaryMetric ? (
+              <p className="text-sm text-muted-foreground">
+                {t(
+                  "releaseDecision.experiments.detailsPage.measuring.metricSnapshot",
+                  {
+                    metric: experiment.primaryMetric?.name,
+                    event: experiment.primaryMetric?.eventName,
+                  }
+                )}
+              </p>
+            ) : (
+              <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
+                <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+                <span>
+                  {t(
+                    "releaseDecision.experiments.detailsPage.measuring.metricsRequired"
+                  )}
+                </span>
+              </div>
+            )}
             <section className="space-y-3">
               <Label>
                 {t(
@@ -1547,6 +1571,7 @@ export function MeasuringDetails({
               type="button"
               disabled={
                 createMutation.isPending ||
+                !hasPrimaryMetric ||
                 !newRunControlVariant ||
                 newRunTreatmentVariants.length === 0 ||
                 flagVariations.length < 2

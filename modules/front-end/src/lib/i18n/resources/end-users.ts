@@ -189,7 +189,7 @@ export const zhEndUsers = {
     noFlags: "未找到功能开关",
     noSegments: "该目标用户不属于任何用户组",
     showing: "显示第 {{from}} 至 {{to}} 条，共 {{total}} 个功能开关",
-    showingSegments: "显示第 {{from}} 至 {{to}} 条，共 {{total}} 个用户分群",
+    showingSegments: "显示第 {{from}} 至 {{to}} 条，共 {{total}} 个用户组",
     expand: "展开返回值",
     variationTitle: "返回值",
     format: "格式化",

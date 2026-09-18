@@ -1,6 +1,7 @@
 import { ChevronDown, ChevronUp, Copy } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
+import { Link } from "react-router-dom"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -12,6 +13,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import {
+  getCurrentProjectEnv,
+  localizedPath,
+  localizedProjectEnvPath,
+} from "@/features/layout/layout-context"
+import type { Lang } from "@/features/layout/layout-types"
 import type {
   Metric,
   MetricExperimentUsage,
@@ -24,6 +31,7 @@ type Props = {
   loading: boolean
   archived: boolean
   query: string
+  lang: Lang
   mutatingId: string | null
   onCopy: (key: string) => void
   onEdit: (metric: Metric) => void
@@ -49,17 +57,44 @@ function RoleBadge({ role }: { role: MetricRole }) {
   )
 }
 
-function RunLine({ run }: { run: MetricRun }) {
+function RunLine({
+  run,
+  experimentId,
+  lang,
+}: {
+  run: MetricRun
+  experimentId: string
+  lang: Lang
+}) {
+  const projectEnv = getCurrentProjectEnv()
+  const href = `/experiments/${encodeURIComponent(experimentId)}?stage=measuring&runId=${encodeURIComponent(run.id)}`
+
   return (
     <div className="flex min-h-5 items-center gap-2 text-xs">
-      <code className="max-w-36 min-w-0 truncate text-muted-foreground">
-        {run.key}
-      </code>
+      <Link
+        to={
+          projectEnv
+            ? localizedProjectEnvPath(lang, href, projectEnv)
+            : localizedPath(lang, href)
+        }
+        target="_blank"
+        rel="noopener noreferrer"
+        className="max-w-36 min-w-0 truncate font-semibold text-foreground underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+        title={run.key}
+      >
+        <code>{run.key}</code>
+      </Link>
     </div>
   )
 }
 
-function UsageGroup({ usage }: { usage: MetricExperimentUsage }) {
+function UsageGroup({
+  usage,
+  lang,
+}: {
+  usage: MetricExperimentUsage
+  lang: Lang
+}) {
   const roleGroups = new Map<MetricRole, MetricRun[]>()
   for (const run of usage.runs ?? []) {
     roleGroups.set(run.role, [...(roleGroups.get(run.role) ?? []), run])
@@ -79,7 +114,12 @@ function UsageGroup({ usage }: { usage: MetricExperimentUsage }) {
             <RoleBadge role={role} />
           </div>
           {runs.map((run) => (
-            <RunLine key={run.id} run={run} />
+            <RunLine
+              key={run.id}
+              run={run}
+              experimentId={usage.experimentId}
+              lang={lang}
+            />
           ))}
         </div>
       ))}
@@ -87,7 +127,13 @@ function UsageGroup({ usage }: { usage: MetricExperimentUsage }) {
   )
 }
 
-function ExperimentRuns({ usage }: { usage?: MetricExperimentUsage[] }) {
+function ExperimentRuns({
+  usage,
+  lang,
+}: {
+  usage?: MetricExperimentUsage[]
+  lang: Lang
+}) {
   const { t } = useTranslation()
   const [expanded, setExpanded] = useState(false)
   const usageWithRuns = usage?.filter((item) => item.runs?.length)
@@ -108,11 +154,11 @@ function ExperimentRuns({ usage }: { usage?: MetricExperimentUsage[] }) {
   })
 
   return (
-    <div className="min-w-64">
+    <div className="min-w-0">
       <div className="divide-y">
         {visibleUsage.map((item) => (
           <div key={item.experimentId} className="py-2 first:pt-0 last:pb-0">
-            <UsageGroup usage={item} />
+            <UsageGroup usage={item} lang={lang} />
           </div>
         ))}
       </div>
@@ -145,6 +191,7 @@ export function MetricsTable({
   loading,
   archived,
   query,
+  lang,
   mutatingId,
   onCopy,
   onEdit,
@@ -156,19 +203,22 @@ export function MetricsTable({
   const { t } = useTranslation()
 
   return (
-    <Table className="min-w-[1120px] table-fixed">
+    <Table className="min-w-[1040px] table-fixed">
       <TableHeader className="border-b text-left text-foreground">
         <TableRow className="hover:bg-transparent">
-          <TableHead className="w-[34%] px-5 py-4 font-semibold">
+          <TableHead className="w-[24%] px-5 py-4 font-semibold">
             {t("releaseDecision.metrics.columns.metric")}
           </TableHead>
-          <TableHead className="w-[22%] px-5 py-4 font-semibold">
+          <TableHead className="w-[18%] px-5 py-4 font-semibold">
+            {t("releaseDecision.metrics.columns.eventName")}
+          </TableHead>
+          <TableHead className="w-[18%] px-5 py-4 font-semibold">
             {t("releaseDecision.metrics.columns.typeAggregation")}
           </TableHead>
-          <TableHead className="w-[31%] px-5 py-4 font-semibold">
+          <TableHead className="w-[23%] px-5 py-4 font-semibold">
             {t("releaseDecision.metrics.columns.experimentRuns")}
           </TableHead>
-          <TableHead className="w-[13%] px-5 py-4 font-semibold">
+          <TableHead className="w-[17%] px-5 py-4 font-semibold">
             {t("releaseDecision.metrics.columns.actions")}
           </TableHead>
         </TableRow>
@@ -177,7 +227,7 @@ export function MetricsTable({
         {loading ? (
           Array.from({ length: 5 }).map((_, rowIndex) => (
             <TableRow key={rowIndex}>
-              {["metric", "type", "runs", "actions"].map((column) => (
+              {["metric", "event", "type", "runs", "actions"].map((column) => (
                 <TableCell key={column} className="px-5 py-3">
                   <Skeleton
                     className={
@@ -190,7 +240,7 @@ export function MetricsTable({
           ))
         ) : items.length === 0 ? (
           <TableRow>
-            <TableCell colSpan={4} className="p-0">
+            <TableCell colSpan={5} className="p-0">
               <div className="flex min-h-64 flex-col items-center justify-center gap-2 px-6 py-12 text-center">
                 <p className="text-sm font-medium text-foreground">
                   {query
@@ -279,6 +329,14 @@ export function MetricsTable({
                   </div>
                 </TableCell>
                 <TableCell className="px-5 py-3 align-middle">
+                  <p
+                    className="truncate font-mono text-xs"
+                    title={metric.eventName}
+                  >
+                    {metric.eventName}
+                  </p>
+                </TableCell>
+                <TableCell className="px-5 py-3 align-middle">
                   <div className="space-y-1">
                     <p className="text-sm font-medium text-foreground">
                       {t(
@@ -291,7 +349,7 @@ export function MetricsTable({
                   </div>
                 </TableCell>
                 <TableCell className="px-5 py-3 align-middle">
-                  <ExperimentRuns usage={metric.experimentUsage} />
+                  <ExperimentRuns usage={metric.experimentUsage} lang={lang} />
                 </TableCell>
                 <TableCell className="px-5 py-3 align-middle">
                   <div className="flex items-center gap-1 whitespace-nowrap">

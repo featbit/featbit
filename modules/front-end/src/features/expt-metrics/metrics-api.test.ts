@@ -42,6 +42,7 @@ describe("metrics API", () => {
 
     await updateMetric("env-1", "metric-1", {
       name: "Checkout conversion",
+      eventName: "purchase",
       description: "Completed checkout",
       metricType: "binary",
       metricAgg: "once",
@@ -53,6 +54,7 @@ describe("metrics API", () => {
         method: "PUT",
         body: JSON.stringify({
           name: "Checkout conversion",
+          eventName: "purchase",
           description: "Completed checkout",
           metricType: "binary",
           metricAgg: "once",

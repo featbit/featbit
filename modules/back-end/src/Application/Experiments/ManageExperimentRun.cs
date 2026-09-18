@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Application.Experiments;
 
 public class ExperimentRunAudienceUpdate
@@ -14,7 +16,7 @@ public class ExperimentRunAudienceUpdate
 
     public string ControlVariant { get; set; }
 
-    public string TreatmentVariant { get; set; }
+    public string[] TreatmentVariants { get; set; }
 
     public string LayerKey { get; set; }
 
@@ -40,29 +42,16 @@ public class ExperimentRunObservationWindowUpdate
     public DateTime? ObservationEnd { get; set; }
 }
 
+[JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
 public class ExperimentRunUpdate
 {
     public string Slug { get; set; }
 
-    public string Hypothesis { get; set; }
-
     public string Method { get; set; }
-
-    public string MethodReason { get; set; }
-
-    public string PrimaryMetricEvent { get; set; }
-
-    public string MetricDescription { get; set; }
-
-    public string GuardrailEvents { get; set; }
-
-    public string GuardrailDescriptions { get; set; }
 
     public string ControlVariant { get; set; }
 
-    public string TreatmentVariant { get; set; }
-
-    public string TrafficAllocation { get; set; }
+    public string[] TreatmentVariants { get; set; }
 
     public int? MinimumSample { get; set; }
 
@@ -75,8 +64,6 @@ public class ExperimentRunUpdate
     public double? PriorMean { get; set; }
 
     public double? PriorStddev { get; set; }
-
-    public string InputData { get; set; }
 
     public string AnalysisResult { get; set; }
 
@@ -95,10 +82,6 @@ public class ExperimentRunUpdate
     public string WhyItHappened { get; set; }
 
     public string NextHypothesis { get; set; }
-
-    public string PrimaryMetricAgg { get; set; }
-
-    public string PrimaryMetricType { get; set; }
 
     public double? TrafficPercent { get; set; }
 
@@ -123,10 +106,6 @@ public class ExperimentRunUpdate
     public double? LayerTrafficPercent { get; set; }
 
     public string AnalysisSamplingPlan { get; set; }
-
-    public string DataSourceMode { get; set; }
-
-    public string CustomerEndpointConfig { get; set; }
 }
 
 public class CreateExperimentRun : IRequest<ExperimentDetailVm>

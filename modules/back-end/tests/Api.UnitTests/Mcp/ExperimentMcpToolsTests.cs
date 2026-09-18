@@ -11,6 +11,50 @@ namespace Api.UnitTests.Mcp;
 public class ExperimentMcpToolsTests
 {
     [Fact]
+    public async Task UpdateMetrics_ExposesCurrentSchema_AndDispatchesSelectors()
+    {
+        var experimentId = Guid.NewGuid();
+        var envId = Guid.NewGuid();
+        var update = new ExperimentMetricsUpdate
+        {
+            PrimaryMetric = new PrimaryMetricSelection { MetricId = Guid.NewGuid(), ExpectedDirection = "increase_good" },
+            GuardrailMetrics = [new GuardrailMetricSelection { MetricId = Guid.NewGuid(), Direction = "decrease_bad" }]
+        };
+        var context = new DefaultHttpContext();
+        var sender = new Mock<ISender>();
+        var service = new Mock<IExperimentService>();
+        var permissions = new Mock<IPermissionChecker>();
+        service.Setup(x => x.GetEnvIdAsync(experimentId)).ReturnsAsync(envId);
+        permissions.Setup(x => x.IsGrantedAsync(context, It.IsAny<PermissionRequirement>())).ReturnsAsync(true);
+        sender.Setup(x => x.Send(It.Is<UpdateExperimentMetrics>(request =>
+                request.Id == experimentId && request.EnvId == envId && request.Update == update),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ExperimentDetailVm { Id = experimentId });
+        var tools = new ExperimentMcpTools(sender.Object, service.Object,
+            new HttpContextAccessor { HttpContext = context }, permissions.Object);
+        var tool = ModelContextProtocol.Server.McpServerTool.Create(tools.UpdateMetrics);
+        var properties = tool.ProtocolTool.InputSchema.GetProperty("properties")
+            .GetProperty("update").GetProperty("properties");
+
+        Assert.Equal(new[] { "guardrailMetrics", "primaryMetric" },
+            properties.EnumerateObject().Select(property => property.Name).OrderBy(name => name));
+        Assert.Equal(new[] { "expectedDirection", "metricId" },
+            properties.GetProperty("primaryMetric").GetProperty("properties")
+                .EnumerateObject().Select(property => property.Name).OrderBy(name => name));
+        var guardrailSchema = properties.GetProperty("guardrailMetrics");
+        var guardrailTypes = guardrailSchema.GetProperty("type").EnumerateArray().Select(type => type.GetString()).ToArray();
+        Assert.Contains("array", guardrailTypes);
+        Assert.DoesNotContain("string", guardrailTypes);
+        Assert.Equal(new[] { "direction", "metricId" },
+            guardrailSchema.GetProperty("items").GetProperty("properties")
+                .EnumerateObject().Select(property => property.Name).OrderBy(name => name));
+
+        var result = await tools.UpdateMetrics(experimentId, update);
+        Assert.Equal(experimentId, result.Id);
+        sender.VerifyAll();
+    }
+
+    [Fact]
     public async Task UpdateExperiment_ExposesFlagIdInSchema_AndDispatchesIt()
     {
         var experimentId = Guid.NewGuid();
@@ -141,7 +185,7 @@ public class ExperimentMcpToolsTests
         {
             Method = "bayesian_ab",
             ControlVariant = "control",
-            TreatmentVariant = "treatment",
+            TreatmentVariants = ["treatment"],
             LayerId = layerId,
             LayerKey = "checkout",
             AssignmentUnitSelector = "user.keyId",
@@ -156,7 +200,7 @@ public class ExperimentMcpToolsTests
         Assert.Equal(runId, dispatched.RunId);
         Assert.Equal("bayesian_ab", dispatched.Update.Method);
         Assert.Equal("control", dispatched.Update.ControlVariant);
-        Assert.Equal("treatment", dispatched.Update.TreatmentVariant);
+        Assert.Equal(new string[] { "treatment" }, dispatched.Update.TreatmentVariants);
         Assert.Equal("checkout", dispatched.Update.LayerKey);
         Assert.Equal(layerId, dispatched.Update.LayerId);
         Assert.Equal("user.keyId", dispatched.Update.AssignmentUnitSelector);
@@ -194,7 +238,7 @@ public class ExperimentMcpToolsTests
         {
             Method = "bayesian_ab",
             ControlVariant = "control",
-            TreatmentVariant = "treatment",
+            TreatmentVariants = ["treatment"],
             AssignmentUnitSelector = "user.keyId",
             LayerTrafficPercent = 100,
             AnalysisSamplingPlan = samplingPlan
@@ -218,7 +262,7 @@ public class ExperimentMcpToolsTests
                     Slug = "run-1",
                     Method = "bayesian_ab",
                     ControlVariant = "control",
-                    TreatmentVariant = "treatment"
+                    TreatmentVariants = ["treatment"]
                 }
             ]
         };

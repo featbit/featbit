@@ -242,6 +242,7 @@ test.describe("workspace global users", () => {
   test("uses shared numbered pagination and changes page size", async ({
     page,
   }, testInfo) => {
+    await page.clock.install()
     await setupGlobalUsersPage({ page })
     await page.route("**/api/v1/global-users?*", (route) => {
       const params = new URL(route.request().url()).searchParams
@@ -277,6 +278,7 @@ test.describe("workspace global users", () => {
       pagination.locator('[data-slot="pagination-ellipsis"]')
     ).toHaveCount(1)
     await pagination.getByRole("button", { name: "8", exact: true }).click()
+    await page.clock.runFor(300)
     await expect(
       page.getByText("Pagination user 71", { exact: true })
     ).toBeVisible()

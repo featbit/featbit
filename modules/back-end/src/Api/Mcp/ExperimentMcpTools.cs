@@ -35,7 +35,7 @@ public class ExperimentMcpTools(
     public async Task<ExperimentDetailVm> UpdateExperiment(
         [Description("Experiment experiment id.")]
         Guid experimentId,
-        [Description("Partial experiment update. Leave fields null when they should not change.")]
+        [Description("Partial experiment update. Bind a feature flag using flagId from a Feature Flag read or create response. The flag must belong to the experiment environment. Leave fields null when they should not change.")]
         ExperimentUpdate update)
     {
         var envId = await ResolveAuthorizedEnvIdAsync(experimentId);
@@ -67,7 +67,7 @@ public class ExperimentMcpTools(
     }
 
     [McpServerTool(Name = "featbit_experiment_update_metrics")]
-    [Description("Select registered primary and guardrail metrics for a experiment experiment. Primary metric must already exist in the metric registry and is selected by metricId, metricKey, or legacy metricEvent-as-key. Guardrails must be a JSON array selecting registered metrics by metricId, metricKey, key, or event.")]
+    [Description("Select registered metrics by metricId as defaults for future experiment runs. Provide primaryMetric with metricId and expectedDirection (increase_good or decrease_good), and guardrailMetrics as an array of metricId and direction (increase_bad or decrease_bad). Existing runs retain their independent metric snapshots. Metric names, SDK event names, types, and aggregations come from the metric registry.")]
     public async Task<ExperimentDetailVm> UpdateMetrics(
         [Description("Experiment experiment id.")]
         Guid experimentId,
@@ -85,7 +85,7 @@ public class ExperimentMcpTools(
     }
 
     [McpServerTool(Name = "featbit_experiment_create_run")]
-    [Description("Create a new experiment experiment run.")]
+    [Description("Create an experiment run with an independent snapshot of the experiment's current primary metric and guardrails. Configure the experiment's primary metric first. The run's metric identity, SDK event name, calculation settings, and directions are fixed at creation.")]
     public async Task<ExperimentDetailVm> CreateRun(
         [Description("Experiment experiment id.")]
         Guid experimentId)
@@ -100,7 +100,7 @@ public class ExperimentMcpTools(
     }
 
     [McpServerTool(Name = "featbit_experiment_update_run")]
-    [Description("Patch an experiment run, including method, metrics, variants, observations, input data, analysis result, decision, or learning fields.")]
+    [Description("Patch an experiment run's method, variants, observations, analysis result, decision, or learning fields. Metric snapshots cannot be edited; update the experiment's metric defaults and create a new run to use different metrics.")]
     public async Task<ExperimentDetailVm> UpdateRun(
         [Description("Experiment experiment id.")]
         Guid experimentId,
@@ -127,7 +127,7 @@ public class ExperimentMcpTools(
         Guid experimentId,
         [Description("Experiment experiment run id.")]
         Guid runId,
-        [Description("Run traffic/sampling update. Requires controlVariant, treatmentVariant, assignmentUnitSelector, layerTrafficPercent, and analysisSamplingPlan. Use sliceStart/sliceEnd for explicit layer bucket ranges such as 30-60.")]
+        [Description("Run traffic/sampling update. Requires controlVariant, treatmentVariants, assignmentUnitSelector, layerTrafficPercent, and analysisSamplingPlan. Use sliceStart/sliceEnd for explicit layer bucket ranges such as 30-60.")]
         ExperimentMcpRunTrafficRequest request)
     {
         var envId = await ResolveAuthorizedEnvIdAsync(experimentId);
@@ -148,7 +148,7 @@ public class ExperimentMcpTools(
             {
                 Method = request.Method,
                 ControlVariant = request.ControlVariant,
-                TreatmentVariant = request.TreatmentVariant,
+                TreatmentVariants = request.TreatmentVariants,
                 TrafficPercent = request.TrafficPercent,
                 TrafficOffset = request.TrafficOffset,
                 LayerId = request.LayerId,
@@ -205,10 +205,13 @@ public class ExperimentMcpTools(
             throw new ArgumentException("controlVariant is required.");
         }
 
-        var treatments = SplitVariantList(request.TreatmentVariant);
+        var treatments = (request.TreatmentVariants ?? [])
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Select(x => x.Trim())
+            .ToArray();
         if (treatments.Length == 0)
         {
-            throw new ArgumentException("treatmentVariant must include at least one treatment variation.");
+            throw new ArgumentException("treatmentVariants must include at least one treatment variation.");
         }
 
         var assignmentUnitSelector = Normalize(request.AssignmentUnitSelector);
@@ -267,7 +270,7 @@ public class ExperimentMcpTools(
             .ToHashSet();
         if (!treatmentSet.SetEquals(treatmentEntries))
         {
-            throw new ArgumentException("analysisSamplingPlan must contain one treatment entry for every treatmentVariant.");
+            throw new ArgumentException("analysisSamplingPlan must contain one treatment entry for every id in treatmentVariants.");
         }
     }
 
@@ -327,14 +330,6 @@ public class ExperimentMcpTools(
         }
     }
 
-    private static string[] SplitVariantList(string variants)
-    {
-        return (variants ?? string.Empty)
-            .Split([',', ';', '|'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .ToArray();
-    }
-
     private static string? Normalize(string? value)
     {
         return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
@@ -383,11 +378,11 @@ public class ExperimentMcpRunTrafficRequest
     [Description("Run analysis method. Use bayesian_ab for Bayesian A/B/n analysis.")]
     public string Method { get; set; } = string.Empty;
 
-    [Description("Control variation value exactly as served by FeatBit exposure events.")]
+    [Description("Control variation ID from the bound feature flag.")]
     public string ControlVariant { get; set; } = string.Empty;
 
-    [Description("One or more treatment variation values exactly as served by FeatBit exposure events. Separate multiple values with commas.")]
-    public string TreatmentVariant { get; set; } = string.Empty;
+    [Description("Array of treatment variation IDs from the bound feature flag. Include one ID per array element.")]
+    public string[] TreatmentVariants { get; set; } = [];
 
     [Description("Optional mutual-exclusion layer key. The layer gates eligibility only and does not decide the served variation.")]
     public string LayerKey { get; set; } = string.Empty;

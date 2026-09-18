@@ -8,6 +8,8 @@ public class UpdateExperimentMetricRequest
 {
     public string Name { get; set; }
 
+    public string EventName { get; set; }
+
     public string Description { get; set; }
 
     public string MetricType { get; set; } = "binary";
@@ -28,6 +30,10 @@ public class UpdateExperimentMetricRequestValidator : AbstractValidator<UpdateEx
         RuleFor(x => x.Name)
             .NotEmpty().WithErrorCode(ErrorCodes.Required("name"))
             .MaximumLength(256).WithErrorCode(ErrorCodes.Invalid("name"));
+
+        RuleFor(x => x.EventName)
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("eventName"))
+            .MaximumLength(256).WithErrorCode(ErrorCodes.Invalid("eventName"));
 
         RuleFor(x => x.MetricType)
             .Must(value => MetricTypes.Contains(value))

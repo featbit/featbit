@@ -665,7 +665,7 @@ export function EditAssignmentSheet({
               void onSave({
                 method: run.method,
                 controlVariant: control,
-                treatmentVariant: treatments.join("|"),
+                treatmentVariants: treatments,
                 layerKey: layerKey.trim() || null,
                 assignmentUnitSelector: assignmentUnit.trim(),
                 sliceStart,

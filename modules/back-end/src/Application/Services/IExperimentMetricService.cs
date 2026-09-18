@@ -9,7 +9,7 @@ public interface IExperimentMetricService
     Task<PagedResult<ExperimentMetric>> GetListAsync(
         Guid envId,
         ExperimentMetricFilter filter,
-        IReadOnlyCollection<string> referencedKeys);
+        IReadOnlyCollection<Guid> referencedIds);
 
     Task<ExperimentMetric> CreateAsync(
         Guid envId,

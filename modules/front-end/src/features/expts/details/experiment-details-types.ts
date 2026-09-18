@@ -1,4 +1,8 @@
 import type { ExperimentStage } from "../index/experiment-types"
+import type {
+  GuardrailMetricConfig,
+  PrimaryMetricConfig,
+} from "./metric-config-types"
 
 export type ExperimentDetail = {
   id: string
@@ -18,8 +22,8 @@ export type ExperimentDetail = {
   conflictAnalysis: string | null
   variants?: string | null
   lastLearning: string | null
-  primaryMetric: string | null
-  guardrails: string | null
+  primaryMetric: PrimaryMetricConfig | null
+  guardrailMetrics: GuardrailMetricConfig[] | null
   experimentRuns: ExperimentRunDetail[]
   createdAt: string
   updatedAt: string
@@ -43,10 +47,14 @@ export type ExperimentRunDetail = {
 }
 
 export type ExperimentMetricsUpdate = {
-  metricId?: string
-  metricKey: string
-  expectedDirection: "increase_good" | "decrease_good"
-  guardrails: string
+  primaryMetric: {
+    metricId: string
+    expectedDirection: "increase_good" | "decrease_good"
+  }
+  guardrailMetrics: {
+    metricId: string
+    direction: "increase_bad" | "decrease_bad"
+  }[]
 }
 
 export type ExperimentDetailsUpdate = Pick<

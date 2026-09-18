@@ -111,7 +111,7 @@ describe("measuring utils", () => {
     const older = run({
       id: "a",
       controlVariant: "easy",
-      treatmentVariant: "normal|hard",
+      treatmentVariants: ["normal", "hard"],
     })
     const newer = run({ id: "b", createdAt: "2026-09-01T00:00:00Z" })
 
@@ -132,7 +132,7 @@ describe("measuring utils", () => {
   it("round-trips sampling roles and audience filters using backend shapes", () => {
     const configured = run({
       controlVariant: "easy-id",
-      treatmentVariant: "hard-id",
+      treatmentVariants: ["hard-id"],
       analysisSamplingPlan: JSON.stringify([
         { variation: "easy-id", role: "control", includeRate: 80 },
         { variation: "hard-id", role: "treatment", includeRate: 60 },
