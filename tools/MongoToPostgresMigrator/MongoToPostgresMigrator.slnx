@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/MongoToPostgresMigrator/MongoToPostgresMigrator.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/MongoToPostgresMigrator.Tests/MongoToPostgresMigrator.Tests.csproj" />
+  </Folder>
+</Solution>
