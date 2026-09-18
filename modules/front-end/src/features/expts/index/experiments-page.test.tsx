@@ -216,7 +216,7 @@ describe("experiment list refresh", () => {
       constraints: null,
       conflictAnalysis: null,
       primaryMetric: null,
-      guardrails: null,
+      guardrailMetrics: null,
     }
     vi.mocked(createExperiment).mockResolvedValue(created)
     vi.mocked(fetchExperimentDetail).mockResolvedValue(detail)

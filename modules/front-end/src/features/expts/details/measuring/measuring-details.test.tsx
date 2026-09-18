@@ -34,8 +34,16 @@ describe("creating an experiment run", () => {
       constraints: null,
       conflictAnalysis: null,
       lastLearning: null,
-      primaryMetric: null,
-      guardrails: null,
+      primaryMetric: {
+        metricId: "metric-1",
+        metricKey: "purchase",
+        name: "Purchase",
+        eventName: "purchase",
+        metricType: "binary",
+        metricAgg: "once",
+        expectedDirection: "increase_good",
+      },
+      guardrailMetrics: null,
       experimentRuns: [],
       createdAt: "2026-09-10T00:00:00Z",
       updatedAt: "2026-09-10T00:00:00Z",
@@ -105,7 +113,7 @@ describe("creating an experiment run", () => {
     expect(JSON.parse(options?.body as string)).toEqual({
       method: "bayesian_ab",
       controlVariant: "treatment-id",
-      treatmentVariant: "control-id",
+      treatmentVariants: ["control-id"],
       minimumSample: 500,
     })
     await waitFor(() =>

@@ -45,7 +45,7 @@ function experiment(runs: ExperimentRunDetail[]): ExperimentDetail {
     conflictAnalysis: null,
     lastLearning: "The shorter flow improved conversion.",
     primaryMetric: null,
-    guardrails: null,
+    guardrailMetrics: null,
     experimentRuns: runs,
     createdAt: "2026-08-30T10:00:00Z",
     updatedAt: "2026-08-31T10:00:00Z",

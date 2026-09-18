@@ -741,8 +741,7 @@ public class ExperimentStatsService(AppDbContext dbContext) : IExperimentStatsSe
     private static string[] GetSelectedVariants(QueryExperimentStats request)
     {
         return new[] { request.ControlVariant }
-            .Concat((request.TreatmentVariants ?? string.Empty)
-                .Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            .Concat((request.TreatmentVariants ?? []))
             .Where(x => !string.IsNullOrWhiteSpace(x))
             .Distinct(StringComparer.Ordinal)
             .ToArray();

@@ -14,19 +14,11 @@ public class ExperimentUpdate
 
     public string Hypothesis { get; set; }
 
-    public string AccessToken { get; set; }
-
     public string Change { get; set; }
 
     public string Constraints { get; set; }
 
-    public string EnvSecret { get; set; }
-
-    public string FlagServerUrl { get; set; }
-
     public string Goal { get; set; }
-
-    public string Guardrails { get; set; }
 
     public string Intent { get; set; }
 
@@ -34,17 +26,9 @@ public class ExperimentUpdate
 
     public string LastLearning { get; set; }
 
-    public string OpenQuestions { get; set; }
-
-    public string PrimaryMetric { get; set; }
-
-    public string SandboxId { get; set; }
-
     public string Variants { get; set; }
 
     public string ConflictAnalysis { get; set; }
-
-    public string EntryMode { get; set; }
 }
 
 public class UpdateExperiment : IRequest<ExperimentDetailVm>
@@ -62,21 +46,6 @@ public class UpdateExperimentValidator : AbstractValidator<UpdateExperiment>
     {
         RuleFor(x => x.Update)
             .NotNull().WithErrorCode(ErrorCodes.Required("update"));
-
-        When(x => x.Update != null, () =>
-        {
-            RuleFor(x => x.Update.PrimaryMetric)
-                .Must(string.IsNullOrWhiteSpace)
-                .WithErrorCode(ErrorCodes.Invalid("primaryMetric"))
-                .WithMessage(
-                    "Do not write primaryMetric through update_experiment. Use update_metrics with metricId or metricKey plus expectedDirection.");
-
-            RuleFor(x => x.Update.Guardrails)
-                .Must(string.IsNullOrWhiteSpace)
-                .WithErrorCode(ErrorCodes.Invalid("guardrails"))
-                .WithMessage(
-                    "Do not write guardrails through update_experiment. Use update_metrics with structured guardrail definitions.");
-        });
     }
 }
 

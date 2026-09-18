@@ -20,19 +20,19 @@ public class GetExperimentMetricsHandler(
         GetExperimentMetricList request,
         CancellationToken cancellationToken)
     {
-        IReadOnlyCollection<string> referencedKeys = [];
+        IReadOnlyCollection<Guid> referencedIds = [];
         if (!string.IsNullOrWhiteSpace(request.Filter.SearchText))
         {
             var experimentsMatchingSearch = await experimentService.GetExperimentsWithRunsAsync(
                 request.EnvId,
                 request.Filter.SearchText);
-            referencedKeys = experimentsMatchingSearch
-                .SelectMany(ExperimentMetricReadModel.GetReferencedKeys)
-                .Distinct(StringComparer.Ordinal)
+            referencedIds = experimentsMatchingSearch
+                .SelectMany(ExperimentMetricReadModel.GetReferencedIds)
+                .Distinct()
                 .ToArray();
         }
 
-        var metrics = await metricService.GetListAsync(request.EnvId, request.Filter, referencedKeys);
+        var metrics = await metricService.GetListAsync(request.EnvId, request.Filter, referencedIds);
         var result = mapper.Map<PagedResult<ExperimentMetricVm>>(metrics);
         if (metrics.Items.Count == 0)
         {

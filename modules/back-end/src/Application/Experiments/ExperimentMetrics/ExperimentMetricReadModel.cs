@@ -1,24 +1,29 @@
-using System.Text.Json;
 using Domain.Experiments;
 
 namespace Application.Experiments.ExperimentMetrics;
 
 public static class ExperimentMetricReadModel
 {
-    public static IReadOnlyCollection<string> GetReferencedKeys(ExperimentWithRuns experimentWithRuns)
+    public static IReadOnlyCollection<Guid> GetReferencedIds(ExperimentWithRuns experimentWithRuns)
     {
         ArgumentNullException.ThrowIfNull(experimentWithRuns);
-        var keys = new HashSet<string>(StringComparer.Ordinal);
-        Add(keys, ReadMetricKey(experimentWithRuns.Experiment.PrimaryMetric));
-        AddRange(keys, ReadMetricKeys(experimentWithRuns.Experiment.Guardrails));
+        var ids = new HashSet<Guid>();
+        Add(ids, experimentWithRuns.Experiment.PrimaryMetric);
+        foreach (var metric in experimentWithRuns.Experiment.GuardrailMetrics)
+        {
+            Add(ids, metric);
+        }
 
         foreach (var run in experimentWithRuns.Runs)
         {
-            Add(keys, Normalize(run.PrimaryMetricEvent));
-            AddRange(keys, ReadMetricKeys(run.GuardrailEvents));
+            Add(ids, run.PrimaryMetric);
+            foreach (var metric in run.GuardrailMetrics)
+            {
+                Add(ids, metric);
+            }
         }
 
-        return keys.ToArray();
+        return ids.ToArray();
     }
 
     public static ExperimentMetricUsageVm Build(
@@ -31,11 +36,11 @@ public static class ExperimentMetricReadModel
         var runs = new List<ExperimentMetricRunVm>();
         foreach (var run in experimentWithRuns.Runs.OrderByDescending(x => x.CreatedAt).ThenBy(x => x.Id))
         {
-            if (string.Equals(Normalize(run.PrimaryMetricEvent), metric.Key, StringComparison.Ordinal))
+            if (Matches(run.PrimaryMetric, metric))
             {
                 runs.Add(ToRun(run, "primary"));
             }
-            else if (ReadMetricKeys(run.GuardrailEvents).Contains(metric.Key, StringComparer.Ordinal))
+            else if (run.GuardrailMetrics.Any(snapshot => Matches(snapshot, metric)))
             {
                 runs.Add(ToRun(run, "guardrail"));
             }
@@ -49,7 +54,7 @@ public static class ExperimentMetricReadModel
         return new ExperimentMetricUsageVm
         {
             ExperimentId = experimentWithRuns.Experiment.Id,
-            ExperimentName = Normalize(experimentWithRuns.Experiment.Name) ?? "Experiment",
+            ExperimentName = experimentWithRuns.Experiment.Name,
             Runs = runs
         };
     }
@@ -64,97 +69,17 @@ public static class ExperimentMetricReadModel
         };
     }
 
-    private static string ReadMetricKey(string raw)
-    {
-        if (string.IsNullOrWhiteSpace(raw))
-        {
-            return null;
-        }
+    private static bool Matches(MetricConfig snapshot, ExperimentMetric metric) =>
+        snapshot is not null && snapshot.MetricId == metric.Id;
 
-        try
+    private static void Add(ISet<Guid> ids, MetricConfig snapshot)
+    {
+        if (snapshot is not null)
         {
-            using var document = JsonDocument.Parse(raw);
-            return ReadMetricKey(document.RootElement);
-        }
-        catch (JsonException)
-        {
-            return Normalize(raw);
+            ids.Add(snapshot.MetricId);
         }
     }
 
-    private static IReadOnlyCollection<string> ReadMetricKeys(string raw)
-    {
-        if (string.IsNullOrWhiteSpace(raw))
-        {
-            return [];
-        }
-
-        try
-        {
-            using var document = JsonDocument.Parse(raw);
-            if (document.RootElement.ValueKind != JsonValueKind.Array)
-            {
-                var single = ReadMetricKey(document.RootElement);
-                return single == null ? [] : [single];
-            }
-
-            return document.RootElement
-                .EnumerateArray()
-                .Select(ReadMetricKey)
-                .Where(x => x != null)
-                .Distinct(StringComparer.Ordinal)
-                .ToArray();
-        }
-        catch (JsonException)
-        {
-            return [Normalize(raw)];
-        }
-    }
-
-    private static string ReadMetricKey(JsonElement element)
-    {
-        if (element.ValueKind == JsonValueKind.String)
-        {
-            return Normalize(element.GetString());
-        }
-
-        if (element.ValueKind != JsonValueKind.Object)
-        {
-            return null;
-        }
-
-        foreach (var propertyName in new[] { "metricKey", "key", "event" })
-        {
-            if (element.TryGetProperty(propertyName, out var property) &&
-                property.ValueKind == JsonValueKind.String)
-            {
-                var value = Normalize(property.GetString());
-                if (value != null)
-                {
-                    return value;
-                }
-            }
-        }
-
-        return null;
-    }
-
-    private static void Add(ISet<string> keys, string key)
-    {
-        if (key != null)
-        {
-            keys.Add(key);
-        }
-    }
-
-    private static void AddRange(ISet<string> keys, IEnumerable<string> values)
-    {
-        foreach (var value in values)
-        {
-            Add(keys, value);
-        }
-    }
-
-    private static string Normalize(string value, string fallback = null) =>
-        string.IsNullOrWhiteSpace(value) ? fallback : value.Trim();
+    private static string Normalize(string value) =>
+        string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 }

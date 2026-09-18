@@ -1,11 +1,15 @@
 import type { ExperimentRunDetail } from "../experiment-details-types"
+import type {
+  GuardrailMetricConfig,
+  PrimaryMetricConfig,
+} from "../metric-config-types"
 
 export type AnalysisMethod = "bayesian_ab"
 
 export type NewRunSetup = {
   method: AnalysisMethod
   controlVariant: string
-  treatmentVariant: string
+  treatmentVariants: string[]
   minimumSample: number
 }
 
@@ -15,23 +19,15 @@ export type ObservationWindowUpdate = {
 }
 
 export type MeasuringRun = ExperimentRunDetail & {
-  hypothesis?: string | null
-  methodReason?: string | null
-  primaryMetricEvent?: string | null
-  metricDescription?: string | null
-  guardrailEvents?: string | null
-  guardrailDescriptions?: string | null
+  primaryMetric?: PrimaryMetricConfig | null
+  guardrailMetrics?: GuardrailMetricConfig[]
   controlVariant?: string | null
-  treatmentVariant?: string | null
-  trafficAllocation?: string | null
+  treatmentVariants?: string[] | null
   minimumSample?: number | null
   priorProper?: boolean
   priorMean?: number | null
   priorStddev?: number | null
-  inputData?: string | null
   analysisResult?: string | null
-  primaryMetricAgg?: string | null
-  primaryMetricType?: string | null
   trafficPercent?: number | null
   layerId?: string | null
   layerKey?: string | null
@@ -50,7 +46,7 @@ export type MeasuringRun = ExperimentRunDetail & {
 export type RunAssignmentUpdate = {
   method?: string | null
   controlVariant: string
-  treatmentVariant: string
+  treatmentVariants: string[]
   layerKey: string | null
   assignmentUnitSelector: string
   sliceStart: number

@@ -8,6 +8,8 @@ public class CreateExperimentMetricRequest
 
     public string Key { get; set; }
 
+    public string EventName { get; set; }
+
     public string Description { get; set; }
 
     public string MetricType { get; set; } = "binary";
@@ -31,6 +33,10 @@ public class CreateExperimentMetricRequestValidator : AbstractValidator<CreateEx
             .MaximumLength(128).WithErrorCode(ErrorCodes.Invalid("key"))
             .Matches("^[A-Za-z0-9][A-Za-z0-9_.:-]*$")
             .WithErrorCode(ErrorCodes.Invalid("key"));
+
+        RuleFor(x => x.EventName)
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("eventName"))
+            .MaximumLength(256).WithErrorCode(ErrorCodes.Invalid("eventName"));
 
         RuleFor(x => x.MetricType)
             .Must(value => MetricTypes.Contains(value))

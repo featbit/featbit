@@ -105,7 +105,7 @@ public abstract class ExperimentProviderTestsBase(ExperimentProviderParityFixtur
             TrafficPercent = 20,
             TrafficOffset = 0,
             ControlVariant = "control",
-            TreatmentVariants = "treatment"
+            TreatmentVariants = ["treatment"]
         };
 
         var actual = Normalize(await CreateExperimentStatsService().QueryAsync(request));
@@ -521,29 +521,25 @@ public abstract class WritableExperimentProviderTestsBase(
         var detail = await service.CreateRunAsync(ExperimentProviderParityFixture.EnvId, experiment.Id);
         var firstRun = Assert.Single(detail.ExperimentRuns);
         var start = new DateTime(2026, 9, 1, 0, 0, 0, DateTimeKind.Utc);
-        const string methodReason = "Compare variations with fixed allocation";
         detail = await service.UpdateRunAsync(ExperimentProviderParityFixture.EnvId, experiment.Id, firstRun.Id,
             new ExperimentRunUpdate
             {
-                Method = "bayesian_ab", MethodReason = methodReason,
+                Method = "bayesian_ab",
                 ObservationStart = start, ObservationEnd = start.AddDays(1),
                 Decision = "PAUSE", NextHypothesis = "Try the next change",
-                InputData = "{\"privateInput\":true}", AnalysisResult = "{\"fullAnalysis\":true}"
+                AnalysisResult = "{\"fullAnalysis\":true}"
             });
         var configured = Assert.Single(detail.ExperimentRuns);
         Assert.Equal("bayesian_ab", configured.Method);
-        Assert.Equal(methodReason, configured.MethodReason);
 
         detail = await service.CreateRunAsync(ExperimentProviderParityFixture.EnvId, experiment.Id);
         var secondRun = Assert.Single(detail.ExperimentRuns, run => run.Id != firstRun.Id);
         Assert.Equal("bayesian_ab", secondRun.Method);
-        Assert.Equal(methodReason, secondRun.MethodReason);
 
         detail = await service.UpdateRunAsync(ExperimentProviderParityFixture.EnvId, experiment.Id, secondRun.Id,
             new ExperimentRunUpdate { ObservationStart = start.AddDays(2) });
         var updated = Assert.Single(detail.ExperimentRuns, run => run.Id == secondRun.Id);
         Assert.Equal("bayesian_ab", updated.Method);
-        Assert.Equal(methodReason, updated.MethodReason);
 
         var firstPage = await service.GetListAsync(ExperimentProviderParityFixture.EnvId,
             new ExperimentFilter { Name = name, PageSize = 1, PageIndex = 0 });
@@ -575,7 +571,6 @@ public abstract class WritableExperimentProviderTestsBase(
         Assert.False(current.HasLearning);
 
         var json = JsonSerializer.Serialize(listed, new JsonSerializerOptions(JsonSerializerDefaults.Web));
-        Assert.DoesNotContain("\"inputData\"", json);
         Assert.DoesNotContain("\"analysisResult\"", json);
         Assert.DoesNotContain("\"activities\"", json);
         Assert.DoesNotContain("\"nextHypothesis\"", json);
@@ -628,6 +623,7 @@ public abstract class WritableExperimentProviderTestsBase(
             ExperimentProviderParityFixture.EnvId,
             new CreateExperimentMetricRequest
             {
+                EventName = "purchase",
                 Name = $"Metric {nameToken}",
                 Key = $"metric-{Guid.NewGuid():N}",
                 MetricType = "binary",
@@ -637,6 +633,7 @@ public abstract class WritableExperimentProviderTestsBase(
             ExperimentProviderParityFixture.EnvId,
             new CreateExperimentMetricRequest
             {
+                EventName = "purchase",
                 Name = $"Metric {Guid.NewGuid():N}",
                 Key = keyToken,
                 MetricType = "binary",
@@ -664,6 +661,7 @@ public abstract class WritableExperimentProviderTestsBase(
             ExperimentProviderParityFixture.EnvId,
             new CreateExperimentMetricRequest
             {
+                EventName = "purchase",
                 Name = "Primary guardrail invariant",
                 Key = $"metric-role-{Guid.NewGuid():N}",
                 MetricType = "binary",
@@ -671,16 +669,15 @@ public abstract class WritableExperimentProviderTestsBase(
             });
         var experiment = NewExperiment("Primary guardrail invariant");
         await experimentService.CreateAsync(experiment);
-        var guardrails = JsonSerializer.Serialize(new[] { new { metricId = metric.Id } });
+        List<GuardrailMetricSelection> guardrails = [new() { MetricId = metric.Id, Direction = "increase_bad" }];
 
         await Assert.ThrowsAsync<ArgumentException>(() => experimentService.UpdateMetricsAsync(
             ExperimentProviderParityFixture.EnvId,
             experiment.Id,
             new ExperimentMetricsUpdate
             {
-                MetricId = metric.Id,
-                ExpectedDirection = "increase_good",
-                Guardrails = guardrails
+                PrimaryMetric = new PrimaryMetricSelection { MetricId = metric.Id, ExpectedDirection = "increase_good" },
+                GuardrailMetrics = guardrails
             }));
     }
 
@@ -692,6 +689,7 @@ public abstract class WritableExperimentProviderTestsBase(
             ExperimentProviderParityFixture.EnvId,
             new CreateExperimentMetricRequest
             {
+                EventName = "purchase",
                 Name = "Primary metric",
                 Key = $"metric-primary-{Guid.NewGuid():N}",
                 MetricType = "binary",
@@ -701,6 +699,7 @@ public abstract class WritableExperimentProviderTestsBase(
             ExperimentProviderParityFixture.EnvId,
             new CreateExperimentMetricRequest
             {
+                EventName = "purchase",
                 Name = "Guardrail metric",
                 Key = $"metric-guardrail-{Guid.NewGuid():N}",
                 MetricType = "binary",
@@ -708,20 +707,19 @@ public abstract class WritableExperimentProviderTestsBase(
             });
         var experiment = NewExperiment("Duplicate guardrail invariant");
         await experimentService.CreateAsync(experiment);
-        var guardrails = JsonSerializer.Serialize(new[]
-        {
-            new { metricId = guardrailMetric.Id },
-            new { metricId = guardrailMetric.Id }
-        });
+        List<GuardrailMetricSelection> guardrails =
+        [
+            new() { MetricId = guardrailMetric.Id, Direction = "increase_bad" },
+            new() { MetricId = guardrailMetric.Id, Direction = "decrease_bad" }
+        ];
 
         await Assert.ThrowsAsync<ArgumentException>(() => experimentService.UpdateMetricsAsync(
             ExperimentProviderParityFixture.EnvId,
             experiment.Id,
             new ExperimentMetricsUpdate
             {
-                MetricId = primaryMetric.Id,
-                ExpectedDirection = "increase_good",
-                Guardrails = guardrails
+                PrimaryMetric = new PrimaryMetricSelection { MetricId = primaryMetric.Id, ExpectedDirection = "increase_good" },
+                GuardrailMetrics = guardrails
             }));
     }
 
@@ -894,6 +892,7 @@ public abstract class WritableExperimentProviderTestsBase(
         var key = $"metric-numeric-{Guid.NewGuid():N}";
         await service.CreateAsync(ExperimentProviderParityFixture.EnvId, new CreateExperimentMetricRequest
         {
+            EventName = "purchase",
             Name = "Numeric metric parity",
             Key = key,
             MetricType = "numeric",
@@ -918,6 +917,7 @@ public abstract class WritableExperimentProviderTestsBase(
         var key = $"metric-update-{Guid.NewGuid():N}";
         var created = await service.CreateAsync(ExperimentProviderParityFixture.EnvId, new CreateExperimentMetricRequest
         {
+            EventName = "purchase",
             Name = "Metric update parity",
             Key = key,
             MetricType = "binary",
@@ -926,6 +926,7 @@ public abstract class WritableExperimentProviderTestsBase(
 
         await service.UpdateAsync(ExperimentProviderParityFixture.EnvId, created.Id, new UpdateExperimentMetricRequest
         {
+            EventName = "purchase",
             Name = "Metric update parity",
             MetricType = "numeric",
             MetricAgg = "sum"
@@ -953,6 +954,7 @@ public abstract class WritableExperimentProviderTestsBase(
             ExperimentProviderParityFixture.EnvId,
             new CreateExperimentMetricRequest
             {
+                EventName = "purchase",
                 Name = "Metric restore parity",
                 Key = key,
                 MetricType = "binary",
@@ -981,6 +983,7 @@ public abstract class WritableExperimentProviderTestsBase(
         var key = $"metric-reuse-{Guid.NewGuid():N}";
         var metric = await metricService.CreateAsync(ExperimentProviderParityFixture.EnvId, new CreateExperimentMetricRequest
         {
+            EventName = "purchase",
             Name = "Metric reuse parity",
             Key = key,
             Description = "One registered metric can be selected by multiple experiments.",
@@ -995,10 +998,10 @@ public abstract class WritableExperimentProviderTestsBase(
 
         var first = await experimentService.UpdateMetricsAsync(
             ExperimentProviderParityFixture.EnvId, firstExperiment.Id,
-            new ExperimentMetricsUpdate { MetricId = metric.Id, ExpectedDirection = "increase_good", Guardrails = "[]" });
+            new ExperimentMetricsUpdate { PrimaryMetric = new PrimaryMetricSelection { MetricId = metric.Id, ExpectedDirection = "increase_good" } });
         var second = await experimentService.UpdateMetricsAsync(
             ExperimentProviderParityFixture.EnvId, secondExperiment.Id,
-            new ExperimentMetricsUpdate { MetricId = metric.Id, ExpectedDirection = "decrease_good", Guardrails = "[]" });
+            new ExperimentMetricsUpdate { PrimaryMetric = new PrimaryMetricSelection { MetricId = metric.Id, ExpectedDirection = "decrease_good" } });
 
         AssertPrimaryMetric(ProviderName, first, metric.Id, key, "increase_good");
         AssertPrimaryMetric(ProviderName, second, metric.Id, key, "decrease_good");
@@ -1012,9 +1015,9 @@ public abstract class WritableExperimentProviderTestsBase(
             Id = Guid.NewGuid(),
             Name = name,
             Description = "Provider parity experiment",
+            PrimaryMetric = new PrimaryMetricConfig { MetricId = Guid.NewGuid(), MetricKey = "purchase", EventName = "purchase", Name = "Purchase" },
             Stage = "hypothesis",
             EnvId = ExperimentProviderParityFixture.EnvId,
-            SandboxStatus = "idle",
             CreatedAt = now,
             UpdatedAt = now
         };
@@ -1027,16 +1030,17 @@ public abstract class WritableExperimentProviderTestsBase(
         string metricKey,
         string expectedDirection)
     {
-        using var doc = JsonDocument.Parse(experiment.PrimaryMetric);
-        var root = doc.RootElement;
+        var snapshot = Assert.IsType<PrimaryMetricConfig>(experiment.PrimaryMetric);
 
         Assert.NotEqual(Guid.Empty, metricId);
-        Assert.Equal(metricKey, root.GetProperty("event").GetString());
-        Assert.Equal(expectedDirection, root.GetProperty("expectedDirection").GetString());
-        Assert.Equal("binary", root.GetProperty("metricType").GetString());
-        Assert.Equal("once", root.GetProperty("metricAgg").GetString());
+        Assert.Equal(metricId, snapshot.MetricId);
+        Assert.Equal(metricKey, snapshot.MetricKey);
+        Assert.Equal("purchase", snapshot.EventName);
+        Assert.Equal(expectedDirection, snapshot.ExpectedDirection);
+        Assert.Equal("binary", snapshot.MetricType);
+        Assert.Equal("once", snapshot.MetricAgg);
         Assert.True(
-            root.GetProperty("description").GetString()?.Contains("multiple experiments") == true,
+            snapshot.Description?.Contains("multiple experiments") == true,
             $"{provider} should preserve the selected catalog metric description.");
     }
 }

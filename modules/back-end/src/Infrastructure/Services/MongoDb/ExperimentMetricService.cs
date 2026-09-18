@@ -14,9 +14,9 @@ public class ExperimentMetricService(MongoDbClient mongoDb) : IExperimentMetricS
     public async Task<PagedResult<ExperimentMetric>> GetListAsync(
         Guid envId,
         ExperimentMetricFilter filter,
-        IReadOnlyCollection<string> referencedKeys)
+        IReadOnlyCollection<Guid> referencedIds)
     {
-        referencedKeys ??= [];
+        referencedIds ??= [];
 
         filter ??= new ExperimentMetricFilter();
         var builder = Builders<ExperimentMetric>.Filter;
@@ -33,9 +33,9 @@ public class ExperimentMetricService(MongoDbClient mongoDb) : IExperimentMetricS
                 builder.Regex(x => x.Name, search),
                 builder.Regex(x => x.Key, search),
             };
-            if (referencedKeys.Count > 0)
+            if (referencedIds.Count > 0)
             {
-                searchFilters.Add(builder.In(x => x.Key, referencedKeys));
+                searchFilters.Add(builder.In(x => x.Id, referencedIds));
             }
 
             filters.Add(builder.Or(searchFilters));
@@ -83,6 +83,8 @@ public class ExperimentMetricService(MongoDbClient mongoDb) : IExperimentMetricS
             EnvId = envId,
             Name = Normalize(request.Name)!,
             Key = Normalize(request.Key)!,
+            EventName = Normalize(request.EventName)
+                ?? throw new ArgumentException("Event name is required.", nameof(request)),
             Description = Normalize(request.Description),
             MetricType = NormalizeMetricType(request.MetricType),
             MetricAgg = NormalizeMetricAgg(request.MetricType, request.MetricAgg),
@@ -103,6 +105,8 @@ public class ExperimentMetricService(MongoDbClient mongoDb) : IExperimentMetricS
         ArgumentNullException.ThrowIfNull(request);
         var metric = await GetMetricAsync(envId, id);
         metric.Name = Normalize(request.Name, metric.Name)!;
+        metric.EventName = Normalize(request.EventName)
+            ?? throw new ArgumentException("Event name is required.", nameof(request));
         metric.Description = Normalize(request.Description);
         metric.MetricType = NormalizeMetricType(request.MetricType);
         metric.MetricAgg = NormalizeMetricAgg(metric.MetricType, request.MetricAgg);

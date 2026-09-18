@@ -34,7 +34,7 @@ for (const resource of ["experiments", "segments"] as const) {
         flagName: null,
         runCount: 0,
         runMethodSummary: null,
-        stateSummary: { runs: [], hasLearning: false },
+        stateSummary: { hasLearning: false, runs: [] },
         type: "environment-specific",
         scopes: [],
         tags: [],

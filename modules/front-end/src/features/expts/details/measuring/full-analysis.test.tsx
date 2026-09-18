@@ -27,7 +27,7 @@ function bayesianRun(n: number): MeasuringRun {
     nextHypothesis: null,
     createdAt: "2026-09-07T00:00:00Z",
     controlVariant: "control",
-    treatmentVariant: "candidate|other",
+    treatmentVariants: ["candidate", "other"],
     analysisResult: JSON.stringify({
       type: "bayesian",
       prior: "flat (improper)",
@@ -139,10 +139,7 @@ describe("Bayesian full analysis", () => {
     const run = {
       ...bayesianRun(200),
       controlVariant: variants[0].key,
-      treatmentVariant: variants
-        .slice(1)
-        .map(({ key }) => key)
-        .join("|"),
+      treatmentVariants: variants.slice(1).map(({ key }) => key),
       analysisResult: JSON.stringify({
         type: "bayesian",
         primary_metric: {
