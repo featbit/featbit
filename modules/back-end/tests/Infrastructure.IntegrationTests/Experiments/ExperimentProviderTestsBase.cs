@@ -786,11 +786,11 @@ public abstract class WritableExperimentProviderTestsBase(
     }
 
     [DockerTheory]
-    [InlineData(0L, 1)]
-    [InlineData(3L, 4)]
-    [InlineData(12L, 13)]
+    [InlineData(0, 1)]
+    [InlineData(3, 4)]
+    [InlineData(12, 13)]
     public async Task CreateExperimentRun_Counter_PreservesNumbering(
-        long lastRunNumber, int expectedNumber)
+        int lastRunNumber, int expectedNumber)
     {
         var experiment = NewExperiment("Run counter");
         experiment.LastRunNumber = lastRunNumber;

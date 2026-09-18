@@ -202,7 +202,7 @@ public class ExperimentService(
         return await GetAsync(envId, id);
     }
 
-    private async Task<long> AllocateRunNumberAsync(
+    private async Task<int> AllocateRunNumberAsync(
         Guid envId, Experiment experiment)
     {
         var experiments = mongoDb.CollectionOf<Experiment>();
@@ -211,7 +211,7 @@ public class ExperimentService(
         // Reserve on the experiment document, independently of run deletion or insertion.
         var allocated = await experiments.FindOneAndUpdateAsync(
             filter,
-            Builders<Experiment>.Update.Inc(x => x.LastRunNumber, 1L),
+            Builders<Experiment>.Update.Inc(x => x.LastRunNumber, 1),
             new FindOneAndUpdateOptions<Experiment> { ReturnDocument = ReturnDocument.After });
 
         return allocated?.LastRunNumber

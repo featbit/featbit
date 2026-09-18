@@ -205,7 +205,7 @@ public class ExperimentService(
         return await GetAsync(envId, id);
     }
 
-    private async Task<long> AllocateRunNumberAsync(
+    private async Task<int> AllocateRunNumberAsync(
         Guid envId, Experiment experiment)
     {
         return await dbContext.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
@@ -218,7 +218,7 @@ public class ExperimentService(
             // A failed run insertion may leave a gap; reserved numbers are never reused.
             await experiments.ExecuteUpdateAsync(setters => setters
                 .SetProperty(x => x.LastRunNumber, x => x.LastRunNumber + 1));
-            var number = await experiments.Select(x => (long?)x.LastRunNumber).SingleOrDefaultAsync()
+            var number = await experiments.Select(x => (int?)x.LastRunNumber).SingleOrDefaultAsync()
                          ?? throw new EntityNotFoundException(nameof(Experiment), $"{envId}-{experiment.Id}");
 
             await transaction.CommitAsync();

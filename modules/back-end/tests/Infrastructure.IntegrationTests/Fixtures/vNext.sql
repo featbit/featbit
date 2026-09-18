@@ -171,7 +171,7 @@ CREATE TABLE IF NOT EXISTS experiments (
     intent text,
     last_action text,
     last_learning text,
-    last_run_number bigint NOT NULL DEFAULT 0,
+    last_run_number integer NOT NULL DEFAULT 0,
     primary_metric jsonb,
     variants text,
     conflict_analysis text,
