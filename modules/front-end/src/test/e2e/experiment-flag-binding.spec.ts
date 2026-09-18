@@ -49,7 +49,6 @@ function experiment(flag: (typeof flags)[number] | null) {
     runMethodSummary: null,
     stateSummary: { runs: [], hasLearning: false },
     experimentRuns: [],
-    activities: [],
     hypothesis: null,
     goal: null,
     intent: null,

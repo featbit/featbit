@@ -16,10 +16,10 @@ public class ExperimentConfiguration : IEntityTypeConfiguration<Experiment>
         builder.Property(x => x.Stage).HasMaxLength(64).IsRequired();
         builder.Property(x => x.FlagId).HasColumnName("flag_id");
         builder.Property(x => x.EnvId).HasColumnName("env_id");
+        builder.Property(x => x.LastRunNumber).HasColumnName("last_run_number").IsRequired().HasDefaultValue(0);
         builder.Property(x => x.PrimaryMetric).HasColumnName("primary_metric").HasColumnType("jsonb");
         builder.Property(x => x.GuardrailMetrics).HasColumnName("guardrail_metrics").HasColumnType("jsonb");
 
         builder.Ignore(x => x.ExperimentRuns);
-        builder.Ignore(x => x.Activities);
     }
 }

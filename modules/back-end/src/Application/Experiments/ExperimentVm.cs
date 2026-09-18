@@ -72,8 +72,6 @@ public class ExperimentDetailVm : ExperimentVm
     public string ConflictAnalysis { get; set; }
 
     public ICollection<ExperimentRunVm> ExperimentRuns { get; set; } = [];
-
-    public ICollection<ExperimentActivityVm> Activities { get; set; } = [];
 }
 
 public class ExperimentRunVm
@@ -151,27 +149,6 @@ public class ExperimentRunVm
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }
-}
-
-public class ExperimentActivityVm
-{
-    public Guid Id { get; set; }
-
-    public string Type { get; set; }
-
-    public string Title { get; set; }
-
-    public string Detail { get; set; }
-
-    public Guid? ActorId { get; set; }
-
-    public string ActorName { get; set; }
-
-    public string ActorEmail { get; set; }
-
-    public string ActorType { get; set; }
-
-    public DateTime CreatedAt { get; set; }
 }
 
 public class QueryExperiments : IRequest<PagedResult<ExperimentVm>>
