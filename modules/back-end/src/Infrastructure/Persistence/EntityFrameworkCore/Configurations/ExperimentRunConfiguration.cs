@@ -1,6 +1,5 @@
 using Domain.Experiments;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructure.Persistence.EntityFrameworkCore.Configurations;
@@ -19,14 +18,7 @@ public class ExperimentRunConfiguration : IEntityTypeConfiguration<ExperimentRun
         builder.Property(x => x.PrimaryMetric).HasColumnName("primary_metric").HasColumnType("jsonb");
         builder.Property(x => x.GuardrailMetrics).HasColumnName("guardrail_metrics").HasColumnType("jsonb");
         builder.Property(x => x.ControlVariant).HasColumnName("control_variant").HasMaxLength(256);
-        builder.Property(x => x.TreatmentVariants)
-            .HasColumnName("treatment_variants")
-            .HasColumnType("jsonb")
-            .IsRequired()
-            .Metadata.SetValueComparer(new ValueComparer<string[]>(
-                (left, right) => left.SequenceEqual(right),
-                values => values.Aggregate(0, (hash, value) => HashCode.Combine(hash, value)),
-                values => values.ToArray()));
+        builder.Property(x => x.TreatmentVariants).HasColumnName("treatment_variants").HasColumnType("jsonb").IsRequired();
         builder.Property(x => x.MinimumSample).HasColumnName("minimum_sample");
         builder.Property(x => x.ObservationStart).HasColumnName("observation_start");
         builder.Property(x => x.ObservationEnd).HasColumnName("observation_end");
