@@ -60,6 +60,7 @@ The following variables could be overridden by environment variables when runnin
 - **EVALUATION_URL**: **Optional**, the url of the evaluation server, this is used by the demo, ignore it if you don't want to run the demo, the default value is http://localhost:5100. It overrides **evaluationUrl**
 - **DISPLAY_API_URL**: **Optional**, the display url of the API server. This is an optional variable used when you want to override the API URL displayed in the 'Getting Started' UI. 
 - **DISPLAY_EVALUATION_URL**: **Optional**, the display url of the Evaluation server. This is an optional variable used when you want to override the Event and Streaming URL displayed in the 'Getting Started' UI.
+- **SHOW_ENV_SECRETS_IN_HEADER**: **Optional**, defaults to `true`. Set to `false` to disable the environment secrets hover card in the header. Environment switching remains available. This controls the shortcut's visibility, not permission to access environment secrets.
 - **BASE_HREF**: **Optional**, set the value if you want to deploy FeatBit UI to a path, for example https://www.example.com/abc/def/, in this case, the value should be `/abc/def/`.
 
 Bind the port 8081 or any other available port to 80.

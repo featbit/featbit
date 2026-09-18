@@ -2,6 +2,7 @@ import { HOSTING_MODE } from "@shared/constants";
 
 export const environment = {
   production: true,
+  showEnvSecretsInHeader: window['env']['showEnvSecretsInHeader'] !== 'false',
   url: window['env']['apiUrl'] || location.origin.replace(/\/$/, ''),
   demoUrl: window['env']['demoUrl'] || 'https://featbit-samples.vercel.app',
   evaluationUrl: window['env']['evaluationUrl'] || location.origin.replace(/\/$/, ''),
