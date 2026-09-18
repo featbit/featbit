@@ -24,32 +24,37 @@ public class InsightParser
         using var jsonDocument = JsonDocument.Parse(json);
         var root = jsonDocument.RootElement;
 
+        if (!root.TryGetProperty("schema_version", out var version) ||
+            version.ValueKind != JsonValueKind.Number ||
+            !version.TryGetInt32(out var schemaVersion) || schemaVersion != 2)
+        {
+            return null;
+        }
+
         var id = root.GetProperty("uuid").GetGuid();
-        var distinctId = root.GetProperty("distinct_id").GetString();
         var envId = root.GetProperty("env_id").GetString();
         var eventName = root.GetProperty("event").GetString();
-        var properties = root.GetProperty("properties").GetString();
-        var timestampMs = root.GetProperty("timestamp").GetInt64() / 1000;
+        var properties = root.GetProperty("properties");
+        var timestampMs = root.GetProperty("timestamp").GetInt64();
         var timestamp = DateTimeOffset.FromUnixTimeMilliseconds(timestampMs).UtcDateTime;
 
         return eventName == "FlagValue"
             ? TryBuildExposure(id, envId, properties, timestamp)
-            : TryBuildMetric(id, distinctId, envId, eventName, properties, timestamp);
+            : TryBuildMetric(id, envId, eventName, properties, timestamp);
     }
 
     private static ExperimentExposureEvent TryBuildExposure(
         Guid id,
         string envId,
-        string properties,
+        JsonElement properties,
         DateTime timestamp)
     {
-        if (!Guid.TryParse(envId, out var parsedEnvId) || string.IsNullOrWhiteSpace(properties))
+        if (!Guid.TryParse(envId, out var parsedEnvId) || properties.ValueKind != JsonValueKind.Object)
         {
             return null;
         }
 
-        using var document = JsonDocument.Parse(properties);
-        var root = document.RootElement;
+        var root = properties;
         var flagKey = GetString(root, "featureFlagKey");
         var userKey = GetString(root, "userKeyId");
         var variationId = GetString(root, "variationId");
@@ -70,30 +75,27 @@ public class InsightParser
             VariationId = variationId,
             VariationValue = GetString(root, "variationValue"),
             ExposedAt = timestamp,
-            Properties = properties,
             CreatedAt = DateTime.UtcNow
         };
     }
 
     private static ExperimentMetricEvent TryBuildMetric(
         Guid id,
-        string distinctId,
         string envId,
         string eventType,
-        string properties,
+        JsonElement properties,
         DateTime timestamp)
     {
         if (!Guid.TryParse(envId, out var parsedEnvId) ||
             string.IsNullOrWhiteSpace(eventType) ||
-            string.IsNullOrWhiteSpace(properties))
+            properties.ValueKind != JsonValueKind.Object)
         {
             return null;
         }
 
-        using var document = JsonDocument.Parse(properties);
-        var root = document.RootElement;
-        var userKey = GetString(root, "userKeyId") ?? GetNestedString(root, "user", "keyId");
-        var eventName = GetString(root, "eventName") ?? distinctId;
+        var root = properties;
+        var userKey = GetString(root, "userKeyId");
+        var eventName = GetString(root, "eventName");
 
         if (string.IsNullOrWhiteSpace(userKey) || string.IsNullOrWhiteSpace(eventName))
         {
@@ -108,8 +110,8 @@ public class InsightParser
             EventName = eventName,
             EventType = eventType,
             NumericValue = GetNumericValue(root),
+            ApplicationType = GetString(root, "applicationType"),
             OccurredAt = timestamp,
-            Properties = properties,
             CreatedAt = DateTime.UtcNow
         };
     }
@@ -118,13 +120,6 @@ public class InsightParser
     {
         return element.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.String
             ? value.GetString()
-            : null;
-    }
-
-    private static string GetNestedString(JsonElement element, string objectProperty, string property)
-    {
-        return element.TryGetProperty(objectProperty, out var nested) && nested.ValueKind == JsonValueKind.Object
-            ? GetString(nested, property)
             : null;
     }
 
