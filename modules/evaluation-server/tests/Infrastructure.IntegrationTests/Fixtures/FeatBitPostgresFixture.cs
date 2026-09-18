@@ -33,8 +33,7 @@ public sealed class FeatBitPostgresFixture : IAsyncLifetime
         new(@"v(\d+)\.(\d+)\.(\d+)", RegexOptions.IgnoreCase);
 
     // Default container DB is "postgres"; the init scripts create "featbit" themselves.
-    private readonly PostgreSqlContainer _container = new PostgreSqlBuilder()
-        .WithImage("postgres:16-alpine")
+    private readonly PostgreSqlContainer _container = new PostgreSqlBuilder("postgres:16-alpine")
         .Build();
 
     public string ConnectionString { get; private set; } = string.Empty;
