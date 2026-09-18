@@ -24,6 +24,12 @@
         <ProjectReference Include="..\..\src\Application\Application.csproj" />
         <ProjectReference Include="..\..\src\Infrastructure\Infrastructure.csproj" />
         <ProjectReference Include="..\TestBase\TestBase.csproj" />
+        <!--
+          MetricCollector, for asserting that the backlog gauges the sampler registers actually
+          emit. The sampler lives in Infrastructure, so these assertions cannot live beside the
+          other observability tests in Domain.UnitTests.
+        -->
+        <ProjectReference Include="..\..\..\shared\Observability.TestKit\Observability.TestKit.csproj" />
     </ItemGroup>
 
 </Project>

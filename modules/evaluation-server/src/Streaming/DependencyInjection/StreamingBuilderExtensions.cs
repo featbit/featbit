@@ -5,6 +5,7 @@ using Infrastructure;
 using Infrastructure.Caches;
 using Infrastructure.Fakes;
 using Infrastructure.MQ;
+using Infrastructure.MQ.Backlog;
 using Infrastructure.MQ.Kafka;
 using Infrastructure.MQ.Postgres;
 using Infrastructure.MQ.Redis;
@@ -12,6 +13,7 @@ using Infrastructure.Persistence;
 using Infrastructure.Store;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Streaming.DependencyInjection;
 
@@ -67,6 +69,32 @@ public static class StreamingBuilderExtensions
 
             services.AddSingleton<IMessageProducer, KafkaMessageProducer>();
             services.AddHostedService<KafkaMessageConsumer>();
+
+            AddBacklogSampler();
+        }
+
+        // Only Kafka gets a backlog sampler here, and the omissions are deliberate rather than
+        // unfinished. This service's Postgres consumer uses LISTEN/NOTIFY, so there is no queue
+        // table to count; its Redis consumer uses a pub/sub subscription, where an undelivered
+        // message is discarded rather than queued. Neither transport has a backlog that could be
+        // measured, and a gauge reporting a permanent zero for them would read as "healthy and
+        // drained" — strictly worse than no gauge at all.
+        void AddBacklogSampler()
+        {
+            var interval = BacklogSamplerOptions.Resolve(configuration);
+            if (interval is null)
+            {
+                return;
+            }
+
+            services.AddSingleton<KafkaLagReader>();
+            services.AddSingleton<IBacklogProbe>(sp =>
+                new KafkaBacklogProbe(sp.GetRequiredService<KafkaLagReader>()));
+
+            services.AddHostedService(sp => new MessagingBacklogSampler(
+                sp.GetServices<IBacklogProbe>(),
+                sp.GetRequiredService<ILogger<MessagingBacklogSampler>>(),
+                interval));
         }
 
         void AddPostgres()

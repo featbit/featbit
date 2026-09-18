@@ -11,3 +11,14 @@ $ENV:DOTNET_STARTUP_HOOKS="$INSTALL_DIR\net\OpenTelemetry.AutoInstrumentation.St
 $ENV:OTEL_DOTNET_AUTO_HOME="$INSTALL_DIR"
 $ENV:OTEL_EXPORTER_OTLP_PROTOCOL="grpc"
 $ENV:OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4317"
+
+# FeatBit's own metrics and traces live on dedicated Meters and ActivitySources. The
+# auto-instrumentation exports only the sources it is told about, so without these two variables
+# every custom instrument in docs/observability/instruments.md is dropped before it leaves the
+# process. The container images set the same defaults in start.sh.
+$FEATBIT_OTEL_SOURCES="FeatBit.Api,FeatBit.EvaluationServer,FeatBit.ControlPlane,FeatBit.EvaluationServer.Consistency,FeatBit.ControlPlane.Consistency"
+$ENV:OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES=$FEATBIT_OTEL_SOURCES
+$ENV:OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES=$FEATBIT_OTEL_SOURCES
+
+# Custom spans are gated and default to off. See docs/observability/index.md §11.
+$ENV:Observability__Traces__Categories="all"

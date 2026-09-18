@@ -1,5 +1,7 @@
+using System.Diagnostics;
 using System.Text.Json;
 using Domain.Messages;
+using Domain.Observability;
 using Domain.Shared;
 using Infrastructure.Caches.Redis;
 using Microsoft.Extensions.Logging;
@@ -11,17 +13,24 @@ public partial class RedisMessageProducer(IRedisClient redisClient, ILogger<Redi
 {
     public async Task PublishAsync<TMessage>(string topic, TMessage? message) where TMessage : class
     {
+        // M2: instrumented at the adapter. The exception below is swallowed (unchanged behavior),
+        // so counting the failure here is the only way it becomes visible.
+        using var publish = MessagingMetrics.Current.BeginPublish(MessagingSystems.Redis, topic);
+
         try
         {
             var jsonMessage = JsonSerializer.Serialize(message, ReusableJsonSerializerOptions.Web);
+            jsonMessage = JsonTraceContext.Inject(jsonMessage, Activity.Current);
 
             // RPush json message to topic list
             await redisClient.GetDatabase().ListRightPushAsync(topic, jsonMessage);
 
+            publish.Enqueued();
             Log.MessagePublished(logger, jsonMessage);
         }
         catch (Exception ex)
         {
+            publish.Failed(ex);
             Log.ErrorPublishMessage(logger, ex);
         }
     }

@@ -1,7 +1,9 @@
 using System.Buffers;
+using System.Diagnostics;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
+using Domain.Observability;
 using Microsoft.Extensions.Logging;
 using Streaming.Connections;
 
@@ -138,6 +140,17 @@ public sealed partial class MessageDispatcher
 
     private async Task HandleMessageAsync(ConnectionContext connection, Memory<byte> bytes, CancellationToken token)
     {
+        var metrics = StreamingMetrics.Current;
+        var start = Stopwatch.GetTimestamp();
+
+        // The dispatcher has already reassembled the message, so this is a length read on an
+        // existing buffer rather than any additional work.
+        var sizeBytes = bytes.Length;
+
+        // Not the raw wire value: an unrecognized messageType stays 'unknown' so a client cannot
+        // mint unbounded metric series by inventing message types.
+        var operation = StreamingReasons.Unknown;
+
         try
         {
             using var message = JsonDocument.Parse(bytes);
@@ -146,6 +159,12 @@ public sealed partial class MessageDispatcher
             if (!root.TryGetProperty(MessageTypePropertyName, out var messageTypeElement) ||
                 !root.TryGetProperty(DataPropertyName, out var dataElement))
             {
+                metrics.RecordMessage(
+                    operation,
+                    Outcomes.Rejected,
+                    StreamingReasons.InvalidRequest,
+                    Stopwatch.GetElapsedTime(start),
+                    sizeBytes);
                 return;
             }
 
@@ -153,19 +172,48 @@ public sealed partial class MessageDispatcher
             if (!_handlers.TryGetValue(messageType, out var handler))
             {
                 Log.NoHandlerFor(_logger, messageType, connection);
+                metrics.RecordMessage(
+                    operation,
+                    Outcomes.Rejected,
+                    StreamingReasons.UnknownType,
+                    Stopwatch.GetElapsedTime(start),
+                    sizeBytes);
                 return;
             }
 
+            // Safe to tag from here on: the handler's own Type comes from the registered handler
+            // set, which is fixed at startup.
+            operation = handler.Type;
+
             var ctx = new MessageContext(connection, dataElement, token);
             await handler.HandleAsync(ctx);
+
+            metrics.RecordMessage(
+                operation,
+                Outcomes.Success,
+                StreamingReasons.Accepted,
+                Stopwatch.GetElapsedTime(start),
+                sizeBytes);
         }
         catch (JsonException)
         {
             Log.ReceivedInvalid(_logger, Encoding.UTF8.GetString(bytes.Span), connection);
+            metrics.RecordMessage(
+                operation,
+                Outcomes.Rejected,
+                StreamingReasons.InvalidJson,
+                Stopwatch.GetElapsedTime(start),
+                sizeBytes);
         }
         catch (Exception ex)
         {
             Log.ErrorHandleMessage(_logger, Encoding.UTF8.GetString(bytes.Span), connection, ex);
+            metrics.RecordMessage(
+                operation,
+                Outcomes.Failure,
+                StreamingReasons.Error,
+                Stopwatch.GetElapsedTime(start),
+                sizeBytes);
         }
     }
 }
