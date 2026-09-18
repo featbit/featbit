@@ -6,11 +6,7 @@ public class ExperimentRun : AuditedEntity
 
     public string Slug { get; set; }
 
-    public string Hypothesis { get; set; }
-
     public string Method { get; set; }
-
-    public string MethodReason { get; set; }
 
     public PrimaryMetricConfig PrimaryMetric { get; set; }
 
@@ -18,9 +14,7 @@ public class ExperimentRun : AuditedEntity
 
     public string ControlVariant { get; set; }
 
-    public string TreatmentVariant { get; set; }
-
-    public string TrafficAllocation { get; set; }
+    public string[] TreatmentVariants { get; set; } = [];
 
     public int? MinimumSample { get; set; }
 
@@ -33,8 +27,6 @@ public class ExperimentRun : AuditedEntity
     public double? PriorMean { get; set; }
 
     public double? PriorStddev { get; set; }
-
-    public string InputData { get; set; }
 
     public string AnalysisResult { get; set; }
 
@@ -77,10 +69,6 @@ public class ExperimentRun : AuditedEntity
     public double? LayerTrafficPercent { get; set; } = 100;
 
     public string AnalysisSamplingPlan { get; set; }
-
-    public string DataSourceMode { get; set; } = "featbit-managed";
-
-    public string CustomerEndpointConfig { get; set; }
 
     public Experiment Experiment { get; set; }
 }

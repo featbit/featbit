@@ -105,7 +105,7 @@ public abstract class ExperimentProviderTestsBase(ExperimentProviderParityFixtur
             TrafficPercent = 20,
             TrafficOffset = 0,
             ControlVariant = "control",
-            TreatmentVariants = "treatment"
+            TreatmentVariants = ["treatment"]
         };
 
         var actual = Normalize(await CreateExperimentStatsService().QueryAsync(request));
@@ -521,29 +521,25 @@ public abstract class WritableExperimentProviderTestsBase(
         var detail = await service.CreateRunAsync(ExperimentProviderParityFixture.EnvId, experiment.Id);
         var firstRun = Assert.Single(detail.ExperimentRuns);
         var start = new DateTime(2026, 9, 1, 0, 0, 0, DateTimeKind.Utc);
-        const string methodReason = "Compare variations with fixed allocation";
         detail = await service.UpdateRunAsync(ExperimentProviderParityFixture.EnvId, experiment.Id, firstRun.Id,
             new ExperimentRunUpdate
             {
-                Method = "bayesian_ab", MethodReason = methodReason,
+                Method = "bayesian_ab",
                 ObservationStart = start, ObservationEnd = start.AddDays(1),
                 Decision = "PAUSE", NextHypothesis = "Try the next change",
-                InputData = "{\"privateInput\":true}", AnalysisResult = "{\"fullAnalysis\":true}"
+                AnalysisResult = "{\"fullAnalysis\":true}"
             });
         var configured = Assert.Single(detail.ExperimentRuns);
         Assert.Equal("bayesian_ab", configured.Method);
-        Assert.Equal(methodReason, configured.MethodReason);
 
         detail = await service.CreateRunAsync(ExperimentProviderParityFixture.EnvId, experiment.Id);
         var secondRun = Assert.Single(detail.ExperimentRuns, run => run.Id != firstRun.Id);
         Assert.Equal("bayesian_ab", secondRun.Method);
-        Assert.Equal(methodReason, secondRun.MethodReason);
 
         detail = await service.UpdateRunAsync(ExperimentProviderParityFixture.EnvId, experiment.Id, secondRun.Id,
             new ExperimentRunUpdate { ObservationStart = start.AddDays(2) });
         var updated = Assert.Single(detail.ExperimentRuns, run => run.Id == secondRun.Id);
         Assert.Equal("bayesian_ab", updated.Method);
-        Assert.Equal(methodReason, updated.MethodReason);
 
         var firstPage = await service.GetListAsync(ExperimentProviderParityFixture.EnvId,
             new ExperimentFilter { Name = name, PageSize = 1, PageIndex = 0 });
@@ -575,7 +571,6 @@ public abstract class WritableExperimentProviderTestsBase(
         Assert.False(current.HasLearning);
 
         var json = JsonSerializer.Serialize(listed, new JsonSerializerOptions(JsonSerializerDefaults.Web));
-        Assert.DoesNotContain("\"inputData\"", json);
         Assert.DoesNotContain("\"analysisResult\"", json);
         Assert.DoesNotContain("\"activities\"", json);
         Assert.DoesNotContain("\"nextHypothesis\"", json);
@@ -1023,7 +1018,6 @@ public abstract class WritableExperimentProviderTestsBase(
             PrimaryMetric = new PrimaryMetricConfig { MetricId = Guid.NewGuid(), MetricKey = "purchase", EventName = "purchase", Name = "Purchase" },
             Stage = "hypothesis",
             EnvId = ExperimentProviderParityFixture.EnvId,
-            SandboxStatus = "idle",
             CreatedAt = now,
             UpdatedAt = now
         };

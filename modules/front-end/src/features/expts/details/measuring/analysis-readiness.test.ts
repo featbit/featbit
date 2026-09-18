@@ -8,7 +8,7 @@ const run: MeasuringRun = {
   slug: "run-1",
   method: "bayesian_ab",
   controlVariant: "control",
-  treatmentVariant: "treatment",
+  treatmentVariants: ["treatment"],
   observationStart: "2026-09-01T00:00:00Z",
   primaryMetric: {
     metricId: "metric-1",

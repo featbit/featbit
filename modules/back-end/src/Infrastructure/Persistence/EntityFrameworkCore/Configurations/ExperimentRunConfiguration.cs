@@ -15,19 +15,16 @@ public class ExperimentRunConfiguration : IEntityTypeConfiguration<ExperimentRun
         builder.Property(x => x.ExperimentId).HasColumnName("experiment_id");
         builder.Property(x => x.Slug).HasMaxLength(128).IsRequired();
         builder.Property(x => x.Method).HasMaxLength(64);
-        builder.Property(x => x.MethodReason).HasColumnName("method_reason");
         builder.Property(x => x.PrimaryMetric).HasColumnName("primary_metric").HasColumnType("jsonb");
         builder.Property(x => x.GuardrailMetrics).HasColumnName("guardrail_metrics").HasColumnType("jsonb");
         builder.Property(x => x.ControlVariant).HasColumnName("control_variant").HasMaxLength(256);
-        builder.Property(x => x.TreatmentVariant).HasColumnName("treatment_variant").HasMaxLength(256);
-        builder.Property(x => x.TrafficAllocation).HasColumnName("traffic_allocation");
+        builder.Property(x => x.TreatmentVariants).HasColumnName("treatment_variants").HasColumnType("jsonb").IsRequired();
         builder.Property(x => x.MinimumSample).HasColumnName("minimum_sample");
         builder.Property(x => x.ObservationStart).HasColumnName("observation_start");
         builder.Property(x => x.ObservationEnd).HasColumnName("observation_end");
         builder.Property(x => x.PriorProper).HasColumnName("prior_proper");
         builder.Property(x => x.PriorMean).HasColumnName("prior_mean");
         builder.Property(x => x.PriorStddev).HasColumnName("prior_stddev");
-        builder.Property(x => x.InputData).HasColumnName("input_data");
         builder.Property(x => x.AnalysisResult).HasColumnName("analysis_result");
         builder.Property(x => x.DecisionSummary).HasColumnName("decision_summary");
         builder.Property(x => x.DecisionReason).HasColumnName("decision_reason");
@@ -48,8 +45,6 @@ public class ExperimentRunConfiguration : IEntityTypeConfiguration<ExperimentRun
         builder.Property(x => x.AssignmentUnitSelector).HasColumnName("assignment_unit_selector").HasMaxLength(256);
         builder.Property(x => x.LayerTrafficPercent).HasColumnName("layer_traffic_percent");
         builder.Property(x => x.AnalysisSamplingPlan).HasColumnName("analysis_sampling_plan");
-        builder.Property(x => x.DataSourceMode).HasColumnName("data_source_mode").HasMaxLength(64);
-        builder.Property(x => x.CustomerEndpointConfig).HasColumnName("customer_endpoint_config");
 
         builder.Ignore(x => x.Experiment);
     }

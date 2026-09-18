@@ -302,7 +302,7 @@ Do not add an Experiment Key, stage Select, Feature Flag picker, Metric picker, 
 - On failure, retain entered values and show recoverable inline error feedback.
 - Closing a dirty Sheet opens the shared discard-changes confirmation.
 
-New Experiments are created with stage `hypothesis` and sandbox status `idle`. These are backend defaults, not editable creation fields.
+New Experiments are created with stage `hypothesis`. This is a backend default, not an editable creation field.
 
 ## Delete Experiment Boundary
 

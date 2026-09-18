@@ -51,15 +51,9 @@ public class ExperimentDetailVm : ExperimentVm
 {
     public string Hypothesis { get; set; }
 
-    public string AccessToken { get; set; }
-
     public string Change { get; set; }
 
     public string Constraints { get; set; }
-
-    public string EnvSecret { get; set; }
-
-    public string FlagServerUrl { get; set; }
 
     public string Goal { get; set; }
 
@@ -71,19 +65,11 @@ public class ExperimentDetailVm : ExperimentVm
 
     public string LastLearning { get; set; }
 
-    public string OpenQuestions { get; set; }
-
     public PrimaryMetricConfig PrimaryMetric { get; set; }
-
-    public string SandboxStatus { get; set; }
-
-    public string SandboxId { get; set; }
 
     public string Variants { get; set; }
 
     public string ConflictAnalysis { get; set; }
-
-    public string EntryMode { get; set; }
 
     public ICollection<ExperimentRunVm> ExperimentRuns { get; set; } = [];
 
@@ -98,11 +84,7 @@ public class ExperimentRunVm
 
     public string Slug { get; set; }
 
-    public string Hypothesis { get; set; }
-
     public string Method { get; set; }
-
-    public string MethodReason { get; set; }
 
     public PrimaryMetricConfig PrimaryMetric { get; set; }
 
@@ -110,9 +92,7 @@ public class ExperimentRunVm
 
     public string ControlVariant { get; set; }
 
-    public string TreatmentVariant { get; set; }
-
-    public string TrafficAllocation { get; set; }
+    public string[] TreatmentVariants { get; set; } = [];
 
     public int? MinimumSample { get; set; }
 
@@ -125,8 +105,6 @@ public class ExperimentRunVm
     public double? PriorMean { get; set; }
 
     public double? PriorStddev { get; set; }
-
-    public string InputData { get; set; }
 
     public string AnalysisResult { get; set; }
 
@@ -169,10 +147,6 @@ public class ExperimentRunVm
     public double? LayerTrafficPercent { get; set; }
 
     public string AnalysisSamplingPlan { get; set; }
-
-    public string DataSourceMode { get; set; }
-
-    public string CustomerEndpointConfig { get; set; }
 
     public DateTime CreatedAt { get; set; }
 

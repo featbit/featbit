@@ -40,7 +40,7 @@ for (const width of [1366, 1920]) {
       primaryMetric: snapshot,
       guardrailMetrics: [],
       controlVariant: "control",
-      treatmentVariant: "treatment",
+      treatmentVariants: ["treatment"],
       observationStart: "2026-09-01T00:00:00Z",
       observationEnd: "2026-09-02T00:00:00Z",
       analysisResult: JSON.stringify({

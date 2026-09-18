@@ -185,7 +185,7 @@ public class ExperimentMcpToolsTests
         {
             Method = "bayesian_ab",
             ControlVariant = "control",
-            TreatmentVariant = "treatment",
+            TreatmentVariants = ["treatment"],
             LayerId = layerId,
             LayerKey = "checkout",
             AssignmentUnitSelector = "user.keyId",
@@ -200,7 +200,7 @@ public class ExperimentMcpToolsTests
         Assert.Equal(runId, dispatched.RunId);
         Assert.Equal("bayesian_ab", dispatched.Update.Method);
         Assert.Equal("control", dispatched.Update.ControlVariant);
-        Assert.Equal("treatment", dispatched.Update.TreatmentVariant);
+        Assert.Equal(new string[] { "treatment" }, dispatched.Update.TreatmentVariants);
         Assert.Equal("checkout", dispatched.Update.LayerKey);
         Assert.Equal(layerId, dispatched.Update.LayerId);
         Assert.Equal("user.keyId", dispatched.Update.AssignmentUnitSelector);
@@ -238,7 +238,7 @@ public class ExperimentMcpToolsTests
         {
             Method = "bayesian_ab",
             ControlVariant = "control",
-            TreatmentVariant = "treatment",
+            TreatmentVariants = ["treatment"],
             AssignmentUnitSelector = "user.keyId",
             LayerTrafficPercent = 100,
             AnalysisSamplingPlan = samplingPlan
@@ -262,7 +262,7 @@ public class ExperimentMcpToolsTests
                     Slug = "run-1",
                     Method = "bayesian_ab",
                     ControlVariant = "control",
-                    TreatmentVariant = "treatment"
+                    TreatmentVariants = ["treatment"]
                 }
             ]
         };

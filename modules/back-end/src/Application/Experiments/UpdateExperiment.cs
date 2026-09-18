@@ -14,15 +14,9 @@ public class ExperimentUpdate
 
     public string Hypothesis { get; set; }
 
-    public string AccessToken { get; set; }
-
     public string Change { get; set; }
 
     public string Constraints { get; set; }
-
-    public string EnvSecret { get; set; }
-
-    public string FlagServerUrl { get; set; }
 
     public string Goal { get; set; }
 
@@ -32,15 +26,9 @@ public class ExperimentUpdate
 
     public string LastLearning { get; set; }
 
-    public string OpenQuestions { get; set; }
-
-    public string SandboxId { get; set; }
-
     public string Variants { get; set; }
 
     public string ConflictAnalysis { get; set; }
-
-    public string EntryMode { get; set; }
 }
 
 public class UpdateExperiment : IRequest<ExperimentDetailVm>

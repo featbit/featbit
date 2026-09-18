@@ -6,8 +6,7 @@ export function analysisBlocker(
   run: MeasuringRun
 ) {
   const control = run.controlVariant?.trim()
-  const treatments = (run.treatmentVariant ?? "")
-    .split("|")
+  const treatments = (run.treatmentVariants ?? [])
     .map((value) => value.trim())
     .filter(Boolean)
   const method = run.method?.trim().toLowerCase()

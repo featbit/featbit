@@ -26,7 +26,7 @@ const run: MeasuringRun = {
   method: "bayesian_ab",
   minimumSample: 100,
   controlVariant: "control",
-  treatmentVariant: "candidate",
+  treatmentVariants: ["candidate"],
   observationStart: "2026-09-07T00:00:00Z",
   observationEnd: null,
   primaryMetric: {

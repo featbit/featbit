@@ -147,7 +147,7 @@ public abstract class ExperimentLayerReservationTests(ExperimentProviderParityFi
         await service.UpdateAsync(EnvId, run.ExperimentId, new ExperimentUpdate { FlagId = flag.Id });
         await service.UpdateRunAsync(EnvId, run.ExperimentId, run.Id, new ExperimentRunUpdate
         {
-            ControlVariant = "control", TreatmentVariant = "treatment"
+            ControlVariant = "control", TreatmentVariants = ["treatment"]
         });
         var before = await Allocation();
 

@@ -951,7 +951,7 @@ export function MeasuringDetails({
       setup: {
         method: newRunMethod,
         controlVariant: newRunControlVariant,
-        treatmentVariant: newRunTreatmentVariants.join("|"),
+        treatmentVariants: newRunTreatmentVariants,
         minimumSample,
       },
       observationWindow: resolved.value,

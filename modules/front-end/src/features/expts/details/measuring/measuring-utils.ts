@@ -201,8 +201,7 @@ export function orderedRuns(runs: MeasuringRun[]) {
 
 export function runVariants(run: MeasuringRun) {
   const control = run.controlVariant?.trim() ?? ""
-  const treatments = (run.treatmentVariant ?? "")
-    .split("|")
+  const treatments = (run.treatmentVariants ?? [])
     .map((item) => item.trim())
     .filter(Boolean)
   return [control, ...treatments].filter(Boolean)
