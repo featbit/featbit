@@ -1,6 +1,5 @@
 using System.Collections.Concurrent;
 using Application.Services;
-using Application.Users;
 using Dapper;
 using Domain.EndUsers;
 using Domain.Experiments;
@@ -292,9 +291,7 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
                 flags ?? new global::Infrastructure.Services.EntityFrameworkCore.FeatureFlagService(
                     dbContext,
                     NullLogger<FeatureFlagService>.Instance),
-                metricService,
-                new FixtureCurrentUser(),
-                new global::Infrastructure.Services.EntityFrameworkCore.UserService(dbContext)),
+                metricService),
             metricService);
     }
 
@@ -308,9 +305,7 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
                 client,
                 stats ?? new global::Infrastructure.Services.MongoDb.ExperimentStatsService(client),
                 flags ?? new global::Infrastructure.Services.MongoDb.FeatureFlagService(client),
-                metricService,
-                new FixtureCurrentUser(),
-                new global::Infrastructure.Services.MongoDb.UserService(client)),
+                metricService),
             metricService);
     }
 
@@ -331,43 +326,6 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
             ConnectionString = MongoConnectionString,
             Database = "featbit"
         }));
-    }
-
-    internal async Task SeedRunHistoryAsync(string provider, Guid experimentId, string[] slugs, string[] createdSlugs)
-    {
-        var runs = slugs.Select(slug => new ExperimentRun
-        {
-            Id = Guid.NewGuid(), ExperimentId = experimentId, Slug = slug,
-            CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow
-        }).ToArray();
-        var activities = createdSlugs.Select(slug => new ExperimentActivity
-        {
-            Id = Guid.NewGuid(), ExperimentId = experimentId, Type = "note",
-            Title = $"New experiment run created: {slug}", CreatedAt = DateTime.UtcNow
-        }).ToArray();
-
-        if (provider == "Postgres")
-        {
-            await using var context = CreateDbContext();
-            context.AddRange(runs);
-            context.AddRange(activities);
-            await context.SaveChangesAsync();
-        }
-        else
-        {
-            var client = CreateMongoDbClient();
-            // Old documents do not contain the newly introduced counter field at all.
-            await client.CollectionOf<Experiment>().UpdateOneAsync(
-                x => x.Id == experimentId, Builders<Experiment>.Update.Unset(x => x.LastRunNumber));
-            if (runs.Length > 0)
-            {
-                await client.CollectionOf<ExperimentRun>().InsertManyAsync(runs);
-            }
-            if (activities.Length > 0)
-            {
-                await client.CollectionOf<ExperimentActivity>().InsertManyAsync(activities);
-            }
-        }
     }
 
     private ClickHouseClient CreateClickHouseClient(string database = "featbit")
@@ -831,11 +789,6 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
 
         private static Guid MetricGuidFromSequence(int sequence) =>
             Guid.Parse($"10000000-0000-0000-0000-{sequence:000000000000}");
-    }
-
-    private sealed class FixtureCurrentUser : ICurrentUser
-    {
-        public Guid Id => Guid.Empty;
     }
 }
 

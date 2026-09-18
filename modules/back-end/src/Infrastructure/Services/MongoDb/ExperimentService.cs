@@ -5,10 +5,8 @@ using Application.ExperimentStats;
 using Application.Experiments;
 using Application.Experiments.ExperimentMetrics;
 using Application.Services;
-using Application.Users;
 using Domain.FeatureFlags;
 using Domain.Experiments;
-using Domain.Users;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System.Text.RegularExpressions;
@@ -20,9 +18,7 @@ public class ExperimentService(
     MongoDbClient mongoDb,
     IExperimentStatsService statsService,
     IFeatureFlagService featureFlagService,
-    IExperimentMetricService metricService,
-    ICurrentUser currentUser,
-    IUserService userService)
+    IExperimentMetricService metricService)
     : IExperimentService
 {
     private const double GuardrailHealthyHarmProbability = 0.01;
@@ -32,12 +28,6 @@ public class ExperimentService(
     {
         var flag = await ExperimentFlagBinding.ValidateAsync(featureFlagService, experiment.EnvId, experiment.FlagId);
         await mongoDb.CollectionOf<Experiment>().InsertOneAsync(experiment);
-        await AddActivityAsync(
-            experiment.Id,
-            "stage_change",
-            "Experiment created",
-            $"Experiment experiment \"{experiment.Name}\" created. Stage: hypothesis",
-            experiment.CreatedAt);
         return ToVm(experiment, flag);
     }
 
@@ -55,10 +45,6 @@ public class ExperimentService(
         experiment.ExperimentRuns = await mongoDb.CollectionOf<ExperimentRun>()
             .Find(x => x.ExperimentId == id)
             .SortBy(x => x.CreatedAt)
-            .ToListAsync();
-        experiment.Activities = await mongoDb.CollectionOf<ExperimentActivity>()
-            .Find(x => x.ExperimentId == id)
-            .SortByDescending(x => x.CreatedAt)
             .ToListAsync();
         var flag = await TryGetBoundFeatureFlagAsync(envId, experiment);
         AlignRunsForRead(experiment, flag);
@@ -91,7 +77,6 @@ public class ExperimentService(
         }
 
         await mongoDb.CollectionOf<ExperimentRun>().DeleteManyAsync(x => x.ExperimentId == id);
-        await mongoDb.CollectionOf<ExperimentActivity>().DeleteManyAsync(x => x.ExperimentId == id);
     }
 
     public async Task<ExperimentDetailVm> UpdateAsync(
@@ -158,7 +143,6 @@ public class ExperimentService(
                 .Set(x => x.GuardrailMetrics, experiment.GuardrailMetrics)
                 .Set(x => x.UpdatedAt, updatedAt));
 
-        await AddActivityAsync(id, "note", "Experiment metrics updated", null, updatedAt);
         return await GetAsync(envId, id);
     }
 
@@ -210,61 +194,28 @@ public class ExperimentService(
         }
 
         await NormalizeAndValidateLayerAssignmentAsync(envId, run);
-        var number = await AllocateRunNumberAsync(envId, experiment, existingRuns);
+        var number = await AllocateRunNumberAsync(envId, experiment);
         run.Slug = $"run-{number}";
         await mongoDb.CollectionOf<ExperimentRun>().InsertOneAsync(run);
         await PersistExperimentAsync(envId, experiment);
-        await AddActivityAsync(
-            id,
-            "note",
-            $"{ExperimentRunNumber.CreationTitlePrefix}{run.Slug}",
-            previous == null ? "Metric snapshot from experiment" : $"Metric snapshot from experiment; other settings copied from {previous.Slug}",
-            now);
 
         return await GetAsync(envId, id);
     }
 
-    private async Task<long> AllocateRunNumberAsync(
-        Guid envId, Experiment experiment, IReadOnlyCollection<ExperimentRun> existingRuns)
+    private async Task<int> AllocateRunNumberAsync(
+        Guid envId, Experiment experiment)
     {
-        await InitializeRunNumberAsync(envId, experiment, existingRuns.Select(x => x.Slug));
         var experiments = mongoDb.CollectionOf<Experiment>();
         var filter = Builders<Experiment>.Filter.Where(x => x.Id == experiment.Id && x.EnvId == envId);
 
         // Reserve on the experiment document, independently of run deletion or insertion.
         var allocated = await experiments.FindOneAndUpdateAsync(
             filter,
-            Builders<Experiment>.Update.Inc(x => x.LastRunNumber, 1L),
+            Builders<Experiment>.Update.Inc(x => x.LastRunNumber, 1),
             new FindOneAndUpdateOptions<Experiment> { ReturnDocument = ReturnDocument.After });
 
         return allocated?.LastRunNumber
             ?? throw new EntityNotFoundException(nameof(Experiment), $"{envId}-{experiment.Id}");
-    }
-
-    private async Task InitializeRunNumberAsync(
-        Guid envId, Experiment experiment, IEnumerable<string>? existingSlugs = null)
-    {
-        if (experiment.LastRunNumber.HasValue)
-        {
-            return;
-        }
-
-        existingSlugs ??= await mongoDb.CollectionOf<ExperimentRun>()
-            .Find(x => x.ExperimentId == experiment.Id)
-            .Project(x => x.Slug)
-            .ToListAsync();
-        var creationTitles = await mongoDb.CollectionOf<ExperimentActivity>()
-            .Find(x => x.ExperimentId == experiment.Id && x.Type == "note" &&
-                       x.Title.StartsWith(ExperimentRunNumber.CreationTitlePrefix))
-            .Project(x => x.Title)
-            .ToListAsync();
-        var lastUsed = ExperimentRunNumber.LastUsed(existingSlugs, creationTitles);
-
-        // Seed before either creation or deletion, even when legacy creation activities are absent.
-        // $max handles null/missing counters without lowering a concurrent allocation.
-        await mongoDb.CollectionOf<Experiment>().UpdateOneAsync(
-            x => x.Id == experiment.Id && x.EnvId == envId,
-            Builders<Experiment>.Update.Max(x => x.LastRunNumber, lastUsed));
     }
 
     public async Task<ExperimentDetailVm> DeleteRunAsync(Guid envId, Guid id, Guid runId)
@@ -279,9 +230,7 @@ public class ExperimentService(
             throw new EntityNotFoundException(nameof(ExperimentRun), $"{id}-{runId}");
         }
 
-        await InitializeRunNumberAsync(envId, experiment);
         await mongoDb.CollectionOf<ExperimentRun>().DeleteOneAsync(x => x.Id == runId && x.ExperimentId == id);
-        await AddActivityAsync(id, "note", $"Experiment run deleted: {run.Slug}");
         return await GetAsync(envId, id);
     }
 
@@ -304,7 +253,6 @@ public class ExperimentService(
         await mongoDb.CollectionOf<ExperimentRun>().ReplaceOneAsync(
             x => x.Id == runId && x.ExperimentId == id,
             run);
-        await AddActivityAsync(id, "note", $"Experiment run updated: {run.Slug}", null, run.UpdatedAt);
         return await GetAsync(envId, id);
     }
 
@@ -356,7 +304,6 @@ public class ExperimentService(
         await mongoDb.CollectionOf<ExperimentRun>().ReplaceOneAsync(
             x => x.Id == runId && x.ExperimentId == id,
             run);
-        await AddActivityAsync(id, "note", "Experiment run audience & traffic updated", null, run.UpdatedAt);
         return await GetAsync(envId, id);
     }
 
@@ -383,14 +330,6 @@ public class ExperimentService(
         await mongoDb.CollectionOf<ExperimentRun>().ReplaceOneAsync(
             x => x.Id == runId && x.ExperimentId == id,
             run);
-        await AddActivityAsync(
-            id,
-            "note",
-            "Observation window updated",
-            update.ObservationStart.HasValue || update.ObservationEnd.HasValue
-                ? $"From {update.ObservationStart?.ToString("u") ?? "—"} to {update.ObservationEnd?.ToString("u") ?? "—"}"
-                : "Cleared",
-            run.UpdatedAt);
         return await GetAsync(envId, id);
     }
 
@@ -524,12 +463,6 @@ public class ExperimentService(
         await mongoDb.CollectionOf<ExperimentRun>().ReplaceOneAsync(
             x => x.Id == runId && x.ExperimentId == id,
             run);
-        await AddActivityAsync(
-            id,
-            "note",
-            "Experiment run analyzed from FeatBit stats",
-            $"{flag.Key} · {primaryMetricEvent} · {startDate} to {endDate}",
-            run.UpdatedAt);
 
         return await GetAsync(envId, id);
     }
@@ -744,11 +677,6 @@ public class ExperimentService(
             ExperimentRuns = experiment.ExperimentRuns
                 .OrderByDescending(x => x.CreatedAt)
                 .Select(x => ToRunVm(x))
-                .ToArray(),
-            Activities = experiment.Activities
-                .OrderByDescending(x => x.CreatedAt)
-                .Take(20)
-                .Select(ToActivityVm)
                 .ToArray()
         };
     }
@@ -794,22 +722,6 @@ public class ExperimentService(
             AnalysisSamplingPlan = run.AnalysisSamplingPlan,
             CreatedAt = run.CreatedAt,
             UpdatedAt = run.UpdatedAt
-        };
-    }
-
-    private static ExperimentActivityVm ToActivityVm(ExperimentActivity activity)
-    {
-        return new ExperimentActivityVm
-        {
-            Id = activity.Id,
-            Type = activity.Type,
-            Title = activity.Title,
-            Detail = activity.Detail,
-            ActorId = activity.ActorId,
-            ActorName = activity.ActorName,
-            ActorEmail = activity.ActorEmail,
-            ActorType = activity.ActorType,
-            CreatedAt = activity.CreatedAt
         };
     }
 
@@ -2198,55 +2110,5 @@ public class ExperimentService(
         {
             updates.Add(Builders<Experiment>.Update.Set(field, value.Trim()));
         }
-    }
-
-    private async Task AddActivityAsync(
-        Guid experimentId,
-        string type,
-        string title,
-        string? detail = null,
-        DateTime? createdAt = null)
-    {
-        var actor = await ResolveActivityActorAsync();
-        await mongoDb.CollectionOf<ExperimentActivity>().InsertOneAsync(new ExperimentActivity
-        {
-            Id = Guid.NewGuid(),
-            ExperimentId = experimentId,
-            Type = type,
-            Title = title,
-            Detail = detail,
-            ActorId = actor.Id,
-            ActorName = actor.Name,
-            ActorEmail = actor.Email,
-            ActorType = actor.Type,
-            CreatedAt = createdAt ?? DateTime.UtcNow
-        });
-    }
-
-    private async Task<(Guid? Id, string? Name, string? Email, string Type)> ResolveActivityActorAsync()
-    {
-        var actorId = currentUser.Id;
-        if (actorId == Guid.Empty || actorId == SystemUser.Id)
-        {
-            return (SystemUser.Id, "System", null, "system");
-        }
-
-        var user = await userService.FindOneAsync(x => x.Id == actorId);
-        if (user != null)
-        {
-            return (
-                user.Id,
-                string.IsNullOrWhiteSpace(user.Name) ? user.Email : user.Name,
-                user.Email,
-                "user");
-        }
-
-        var operatorName = await userService.GetOperatorAsync(actorId);
-        if (!string.IsNullOrWhiteSpace(operatorName))
-        {
-            return (actorId, operatorName, null, "access_token");
-        }
-
-        return (actorId, "Unknown actor", null, "unknown");
     }
 }

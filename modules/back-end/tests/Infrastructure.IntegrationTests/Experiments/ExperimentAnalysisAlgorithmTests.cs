@@ -3,10 +3,8 @@ using System.Text.Json;
 using Application.ExperimentStats;
 using Application.Experiments;
 using Application.Services;
-using Application.Users;
 using Domain.FeatureFlags;
 using Domain.Experiments;
-using Domain.Users;
 using Infrastructure.Persistence.EntityFrameworkCore;
 using Infrastructure.Services.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -27,7 +25,6 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
     private static readonly Guid EnvId = Guid.Parse("11111111-1111-1111-1111-111111111111");
     private static readonly Guid ExperimentId = Guid.Parse("22222222-2222-2222-2222-222222222222");
     private static readonly Guid RunId = Guid.Parse("33333333-3333-3333-3333-333333333333");
-    private static readonly Guid UserId = Guid.Parse("55555555-5555-5555-5555-555555555555");
 
     [DockerTheory]
     [InlineData(false)]
@@ -372,9 +369,7 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
             db,
             stats,
             CreateFeatureFlagService(includeThirdArm),
-            null!,
-            new TestCurrentUser(UserId),
-            CreateUserService());
+            null!);
     }
 
     private AppDbContext CreateDbContext()
@@ -397,7 +392,7 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
         string? analysisSamplingPlan = null)
     {
         await db.Database.ExecuteSqlRawAsync(
-            "TRUNCATE TABLE experiment_activities, experiment_runs, experiments RESTART IDENTITY CASCADE;");
+            "TRUNCATE TABLE experiment_runs, experiments RESTART IDENTITY CASCADE;");
 
         var experiment = new Experiment
         {
@@ -507,31 +502,5 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
         service.Setup(x => x.FindOneAsync(It.IsAny<Expression<Func<FeatureFlag, bool>>>()))
             .ReturnsAsync((Expression<Func<FeatureFlag, bool>> predicate) => predicate.Compile()(flag) ? flag : null);
         return service.Object;
-    }
-
-    private static IUserService CreateUserService()
-    {
-        var user = new User(UserId, "experiment@example.com", "hashed", "Experiment Tester");
-        var service = new Mock<IUserService>();
-        service
-            .Setup(x => x.GetOperatorAsync(It.IsAny<Guid>()))
-            .ReturnsAsync((Guid id) => id == user.Id ? user.Name : string.Empty);
-        service
-            .Setup(x => x.GetListAsync(It.IsAny<IEnumerable<Guid>>()))
-            .ReturnsAsync((IEnumerable<Guid> ids) =>
-                (ICollection<User>)(ids.Contains(user.Id) ? [user] : Array.Empty<User>()));
-        service
-            .Setup(x => x.GetAsync(user.Id))
-            .ReturnsAsync(user);
-        service
-            .Setup(x => x.FindOneAsync(It.IsAny<Expression<Func<User, bool>>>()))
-            .ReturnsAsync((Expression<Func<User, bool>> predicate) =>
-                predicate.Compile()(user) ? user : null);
-        return service.Object;
-    }
-
-    private sealed class TestCurrentUser(Guid id) : ICurrentUser
-    {
-        public Guid Id { get; } = id;
     }
 }

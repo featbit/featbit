@@ -5,10 +5,8 @@ using Application.ExperimentStats;
 using Application.Experiments;
 using Application.Experiments.ExperimentMetrics;
 using Application.Services;
-using Application.Users;
 using Domain.FeatureFlags;
 using Domain.Experiments;
-using Domain.Users;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 
@@ -18,9 +16,7 @@ public class ExperimentService(
     AppDbContext dbContext,
     IExperimentStatsService statsService,
     IFeatureFlagService featureFlagService,
-    IExperimentMetricService metricService,
-    ICurrentUser currentUser,
-    IUserService userService)
+    IExperimentMetricService metricService)
     : IExperimentService
 {
     private const double GuardrailHealthyHarmProbability = 0.01;
@@ -30,12 +26,6 @@ public class ExperimentService(
     {
         var flag = await ExperimentFlagBinding.ValidateAsync(featureFlagService, experiment.EnvId, experiment.FlagId);
         await dbContext.Set<Experiment>().AddAsync(experiment);
-        await AddActivityAsync(
-            experiment.Id,
-            "stage_change",
-            "Experiment created",
-            $"Experiment experiment \"{experiment.Name}\" created. Stage: hypothesis",
-            experiment.CreatedAt);
         await dbContext.SaveChangesAsync();
 
         return ToVm(experiment, flag);
@@ -88,9 +78,6 @@ public class ExperimentService(
         await dbContext.Set<ExperimentRun>()
             .Where(x => x.ExperimentId == id)
             .ExecuteDeleteAsync();
-        await dbContext.Set<ExperimentActivity>()
-            .Where(x => x.ExperimentId == id)
-            .ExecuteDeleteAsync();
 
         dbContext.Set<Experiment>().Remove(experiment);
         await dbContext.SaveChangesAsync();
@@ -113,19 +100,9 @@ public class ExperimentService(
         }
 
         await ExperimentFlagBinding.ValidateAsync(featureFlagService, envId, update.FlagId);
-        var originalStage = experiment.Stage;
-
         ApplyUpdate(experiment, update);
         experiment.UpdatedAt = DateTime.UtcNow;
 
-        await AddActivityAsync(
-            experiment.Id,
-            originalStage == experiment.Stage ? "state_update" : "stage_change",
-            originalStage == experiment.Stage
-                ? "Decision state updated"
-                : $"Stage changed to {experiment.Stage}",
-            null,
-            experiment.UpdatedAt);
 
         await dbContext.SaveChangesAsync();
         return await GetAsync(envId, id);
@@ -148,12 +125,6 @@ public class ExperimentService(
         experiment.Stage = Normalize(stage, experiment.Stage);
         experiment.UpdatedAt = DateTime.UtcNow;
 
-        await AddActivityAsync(
-            experiment.Id,
-            "stage_change",
-            $"Stage changed to {experiment.Stage}",
-            null,
-            experiment.UpdatedAt);
 
         await dbContext.SaveChangesAsync();
         return await GetAsync(envId, id);
@@ -173,7 +144,6 @@ public class ExperimentService(
         experiment.GuardrailMetrics = guardrails;
         experiment.UpdatedAt = DateTime.UtcNow;
 
-        await AddActivityAsync(id, "note", "Experiment metrics updated", null, experiment.UpdatedAt);
         await dbContext.SaveChangesAsync();
 
         return await GetAsync(envId, id);
@@ -227,25 +197,17 @@ public class ExperimentService(
         }
 
         await NormalizeAndValidateLayerAssignmentAsync(envId, run);
-        var number = await AllocateRunNumberAsync(envId, experiment, existingRuns);
+        var number = await AllocateRunNumberAsync(envId, experiment);
         run.Slug = $"run-{number}";
         await dbContext.Set<ExperimentRun>().AddAsync(run);
-        await AddActivityAsync(
-            id,
-            "note",
-            $"{ExperimentRunNumber.CreationTitlePrefix}{run.Slug}",
-            previous == null ? "Metric snapshot from experiment" : $"Metric snapshot from experiment; other settings copied from {previous.Slug}",
-            now);
 
         await dbContext.SaveChangesAsync();
         return await GetAsync(envId, id);
     }
 
-    private async Task<long> AllocateRunNumberAsync(
-        Guid envId, Experiment experiment, IReadOnlyCollection<ExperimentRun> existingRuns)
+    private async Task<int> AllocateRunNumberAsync(
+        Guid envId, Experiment experiment)
     {
-        await InitializeRunNumberAsync(envId, experiment, existingRuns.Select(x => x.Slug));
-
         return await dbContext.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
         {
             await using var transaction = await dbContext.Database.BeginTransactionAsync();
@@ -256,39 +218,12 @@ public class ExperimentService(
             // A failed run insertion may leave a gap; reserved numbers are never reused.
             await experiments.ExecuteUpdateAsync(setters => setters
                 .SetProperty(x => x.LastRunNumber, x => x.LastRunNumber + 1));
-            var number = await experiments.Select(x => x.LastRunNumber).SingleOrDefaultAsync()
+            var number = await experiments.Select(x => (int?)x.LastRunNumber).SingleOrDefaultAsync()
                          ?? throw new EntityNotFoundException(nameof(Experiment), $"{envId}-{experiment.Id}");
 
             await transaction.CommitAsync();
             return number;
         });
-    }
-
-    private async Task InitializeRunNumberAsync(
-        Guid envId, Experiment experiment, IEnumerable<string>? existingSlugs = null)
-    {
-        if (experiment.LastRunNumber.HasValue)
-        {
-            return;
-        }
-
-        existingSlugs ??= await dbContext.Set<ExperimentRun>()
-            .Where(x => x.ExperimentId == experiment.Id)
-            .Select(x => x.Slug)
-            .ToListAsync();
-        var creationTitles = await dbContext.Set<ExperimentActivity>()
-            .Where(x => x.ExperimentId == experiment.Id && x.Type == "note" &&
-                        x.Title.StartsWith(ExperimentRunNumber.CreationTitlePrefix))
-            .Select(x => x.Title)
-            .ToListAsync();
-        var lastUsed = ExperimentRunNumber.LastUsed(existingSlugs, creationTitles);
-
-        // Seed before either creation or deletion, even when legacy creation activities are absent.
-        // Never lower a value initialized or incremented by a concurrent request.
-        await dbContext.Set<Experiment>()
-            .Where(x => x.Id == experiment.Id && x.EnvId == envId)
-            .ExecuteUpdateAsync(setters => setters
-                .SetProperty(x => x.LastRunNumber, x => Math.Max(x.LastRunNumber ?? 0, lastUsed)));
     }
 
     public async Task<ExperimentDetailVm> DeleteRunAsync(Guid envId, Guid id, Guid runId)
@@ -303,9 +238,7 @@ public class ExperimentService(
             throw new EntityNotFoundException(nameof(ExperimentRun), $"{id}-{runId}");
         }
 
-        await InitializeRunNumberAsync(envId, experiment);
         dbContext.Set<ExperimentRun>().Remove(run);
-        await AddActivityAsync(id, "note", $"Experiment run deleted: {run.Slug}");
         await dbContext.SaveChangesAsync();
 
         return await GetAsync(envId, id);
@@ -326,7 +259,6 @@ public class ExperimentService(
         await AlignRunVariantsAsync(envId, experiment, run, inferMissing: false);
         run.UpdatedAt = DateTime.UtcNow;
 
-        await AddActivityAsync(id, "note", $"Experiment run updated: {run.Slug}", null, run.UpdatedAt);
         await dbContext.SaveChangesAsync();
 
         return await GetAsync(envId, id);
@@ -377,7 +309,6 @@ public class ExperimentService(
         await NormalizeAndValidateLayerAssignmentAsync(envId, run);
         run.UpdatedAt = DateTime.UtcNow;
 
-        await AddActivityAsync(id, "note", "Experiment run audience & traffic updated", null, run.UpdatedAt);
         await dbContext.SaveChangesAsync();
 
         return await GetAsync(envId, id);
@@ -403,14 +334,6 @@ public class ExperimentService(
         await NormalizeAndValidateLayerAssignmentAsync(envId, run);
         run.UpdatedAt = DateTime.UtcNow;
 
-        await AddActivityAsync(
-            id,
-            "note",
-            "Observation window updated",
-            update.ObservationStart.HasValue || update.ObservationEnd.HasValue
-                ? $"From {update.ObservationStart?.ToString("u") ?? "—"} to {update.ObservationEnd?.ToString("u") ?? "—"}"
-                : "Cleared",
-            run.UpdatedAt);
         await dbContext.SaveChangesAsync();
 
         return await GetAsync(envId, id);
@@ -542,12 +465,6 @@ public class ExperimentService(
         run.AnalysisResult = analysisResult;
         run.UpdatedAt = DateTime.UtcNow;
 
-        await AddActivityAsync(
-            id,
-            "note",
-            "Experiment run analyzed from FeatBit stats",
-            $"{flag.Key} · {primaryMetricEvent} · {startDate} to {endDate}",
-            run.UpdatedAt);
 
         await dbContext.SaveChangesAsync();
         return await GetAsync(envId, id);
@@ -722,10 +639,6 @@ public class ExperimentService(
     private async Task LoadExperimentChildrenAsync(Experiment experiment)
     {
         experiment.ExperimentRuns = await dbContext.Set<ExperimentRun>()
-            .AsNoTracking()
-            .Where(x => x.ExperimentId == experiment.Id)
-            .ToListAsync();
-        experiment.Activities = await dbContext.Set<ExperimentActivity>()
             .AsNoTracking()
             .Where(x => x.ExperimentId == experiment.Id)
             .ToListAsync();
@@ -942,11 +855,6 @@ public class ExperimentService(
             ExperimentRuns = experiment.ExperimentRuns
                 .OrderByDescending(x => x.CreatedAt)
                 .Select(x => ToRunVm(x))
-                .ToArray(),
-            Activities = experiment.Activities
-                .OrderByDescending(x => x.CreatedAt)
-                .Take(20)
-                .Select(ToActivityVm)
                 .ToArray()
         };
 
@@ -994,22 +902,6 @@ public class ExperimentService(
             AnalysisSamplingPlan = run.AnalysisSamplingPlan,
             CreatedAt = run.CreatedAt,
             UpdatedAt = run.UpdatedAt
-        };
-    }
-
-    private static ExperimentActivityVm ToActivityVm(ExperimentActivity activity)
-    {
-        return new ExperimentActivityVm
-        {
-            Id = activity.Id,
-            Type = activity.Type,
-            Title = activity.Title,
-            Detail = activity.Detail,
-            ActorId = activity.ActorId,
-            ActorName = activity.ActorName,
-            ActorEmail = activity.ActorEmail,
-            ActorType = activity.ActorType,
-            CreatedAt = activity.CreatedAt
         };
     }
 
@@ -1213,56 +1105,6 @@ public class ExperimentService(
         }
 
         return run;
-    }
-
-    private async Task AddActivityAsync(
-        Guid experimentId,
-        string type,
-        string title,
-        string? detail = null,
-        DateTime? createdAt = null)
-    {
-        var actor = await ResolveActivityActorAsync();
-        await dbContext.Set<ExperimentActivity>().AddAsync(new ExperimentActivity
-        {
-            Id = Guid.NewGuid(),
-            ExperimentId = experimentId,
-            Type = type,
-            Title = title,
-            Detail = detail,
-            ActorId = actor.Id,
-            ActorName = actor.Name,
-            ActorEmail = actor.Email,
-            ActorType = actor.Type,
-            CreatedAt = createdAt ?? DateTime.UtcNow
-        });
-    }
-
-    private async Task<(Guid? Id, string? Name, string? Email, string Type)> ResolveActivityActorAsync()
-    {
-        var actorId = currentUser.Id;
-        if (actorId == Guid.Empty || actorId == SystemUser.Id)
-        {
-            return (SystemUser.Id, "System", null, "system");
-        }
-
-        var user = await userService.FindOneAsync(x => x.Id == actorId);
-        if (user != null)
-        {
-            return (
-                user.Id,
-                string.IsNullOrWhiteSpace(user.Name) ? user.Email : user.Name,
-                user.Email,
-                "user");
-        }
-
-        var operatorName = await userService.GetOperatorAsync(actorId);
-        if (!string.IsNullOrWhiteSpace(operatorName))
-        {
-            return (actorId, operatorName, null, "access_token");
-        }
-
-        return (actorId, "Unknown actor", null, "unknown");
     }
 
     private async Task<ExperimentMetric> ResolveMetricAsync(Guid envId, Guid metricId)

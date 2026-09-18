@@ -475,11 +475,11 @@ export const enExperiments = {
       dangerZone: "Danger zone",
       deleteTitle: "Delete experiment",
       deleteHelp:
-        "Permanently removes this experiment, all runs, and activity history. This action cannot be undone.",
+        "Permanently removes this experiment and all runs. This action cannot be undone.",
       deleteAction: "Delete experiment",
       deleteConfirmTitle: "Delete experiment permanently?",
       deleteConfirmDescription:
-        "Experiment <experimentName>{{name}}</experimentName> will be permanently removed, including all runs and activity history. This operation cannot be undone.",
+        "Experiment <experimentName>{{name}}</experimentName> will be permanently removed, including all runs. This operation cannot be undone.",
       deleting: "Deleting…",
       deleted: "Experiment deleted",
       deleteFailed: "The experiment could not be deleted. Try again.",
@@ -993,11 +993,11 @@ export const zhExperiments = {
       environmentId: "环境 ID",
       dangerZone: "危险区域",
       deleteTitle: "删除实验",
-      deleteHelp: "永久删除此实验、所有运行和活动历史。此操作无法撤销。",
+      deleteHelp: "永久删除此实验及所有运行。此操作无法撤销。",
       deleteAction: "删除实验",
       deleteConfirmTitle: "永久删除实验？",
       deleteConfirmDescription:
-        "实验 <experimentName>{{name}}</experimentName> 将被永久删除，包括所有运行和活动历史。此操作无法撤销。",
+        "实验 <experimentName>{{name}}</experimentName> 将被永久删除，包括所有运行。此操作无法撤销。",
       deleting: "正在删除…",
       deleted: "实验已删除",
       deleteFailed: "无法删除实验，请重试。",
