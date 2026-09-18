@@ -29,6 +29,7 @@ import { Router } from "@angular/router";
 })
 export class HeaderComponent implements OnInit {
   protected readonly SecretTypeEnum = SecretTypeEnum;
+  readonly showEnvSecretsInHeader = environment.showEnvSecretsInHeader;
 
   isSmallScreen = window.innerWidth <= 1080;
 

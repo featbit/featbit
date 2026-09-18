@@ -77,10 +77,11 @@
           <div class="selector-divider"></div>
           <div class="selector-item" (click)="envModalVisible=true"
                nz-popover
+               [nzPopoverTrigger]="showEnvSecretsInHeader ? 'hover' : null"
                i18n-nz-popover="@@common.env-secret"
                nzPopoverTitle="Environment Secrets"
                nzPopoverPlacement="bottomLeft"
-               [nzPopoverContent]="environmentSecretContent"
+               [nzPopoverContent]="showEnvSecretsInHeader ? environmentSecretContent : null"
                nzPopoverOverlayClassName="env-secret-popover">
             <div class="item-icon env-icon">
               <i nz-icon nzType="icons:icon-env"></i>
