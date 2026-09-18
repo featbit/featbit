@@ -30,10 +30,7 @@ ALTER TABLE segments
     ADD COLUMN committed_version bigint NOT NULL DEFAULT 0,
     ADD COLUMN pending           jsonb  NULL;
 
--- Related PRs
 -- https://github.com/featbit/featbit/pull/921
--- https://github.com/featbit/featbit/pull/959
--- https://github.com/featbit/featbit/pull/972
 
 -- Drop legacy experiment tables before applying the current schema.
 DROP TABLE IF EXISTS experiments;
