@@ -25,9 +25,6 @@ spec:
           memory: 1536Mi
           cpu: 1500m
       volumeMounts:
-        - mountPath: /docker-entrypoint-initdb.d
-          name: clickhouse-init
-          readOnly: true
         - mountPath: /etc/clickhouse-server/config.xml
           name: clickhouse-etc
           subPath: "config.xml"
@@ -56,12 +53,6 @@ spec:
       
   restartPolicy: OnFailure
   volumes:
-    - name: clickhouse-init
-      configMap:
-        name: clickhouse-init
-        items:
-          - key: "v6.0.0.sql"
-            path: "v6.0.0.sql"
     - name: clickhouse-server
       persistentVolumeClaim:
         claimName: clickhouse-server

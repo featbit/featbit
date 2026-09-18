@@ -8,8 +8,6 @@ kubectl delete -f .\infrastructure\kafka-pod.yaml
 
 kubectl delete -f .\infrastructure\clickhouse-configmap-etc.yaml
 
-kubectl delete -f .\infrastructure\clickhouse-init-configMap.yaml
-
 kubectl delete -f .\infrastructure\mongodb-init-configMap.yaml
 
 kubectl delete -f .\infrastructure\redis-service.yaml
