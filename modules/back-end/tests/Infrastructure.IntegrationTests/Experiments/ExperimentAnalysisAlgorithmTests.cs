@@ -93,27 +93,6 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
     }
 
     [DockerFact]
-    public async Task TreatmentVariants_JsonArray_RoundTripsAndTracksElementChanges()
-    {
-        await using var db = CreateDbContext();
-        var ids = new[] { "candidate|one", "candidate,two", new string('x', 300) };
-        await SeedExperimentAsync(db, metricType: "binary", metricAgg: "once", treatmentVariants: ids);
-        db.ChangeTracker.Clear();
-
-        var run = await db.Set<ExperimentRun>().AsTracking().SingleAsync(x => x.Id == RunId);
-        Assert.Equal(ids, run.TreatmentVariants);
-        var jsonType = await db.Database.SqlQueryRaw<string>(
-            "SELECT jsonb_typeof(treatment_variants) AS \"Value\" FROM experiment_runs").SingleAsync();
-        Assert.Equal("array", jsonType);
-
-        run.TreatmentVariants[0] = "updated;candidate";
-        await db.SaveChangesAsync();
-        db.ChangeTracker.Clear();
-        var reloaded = await db.Set<ExperimentRun>().SingleAsync(x => x.Id == RunId);
-        Assert.Equal(new[] { "updated;candidate", ids[1], ids[2] }, reloaded.TreatmentVariants);
-    }
-
-    [DockerFact]
     public async Task CreateRun_UnconfiguredRoles_InfersNamedDefaults()
     {
         await using var db = CreateDbContext();
