@@ -10,6 +10,7 @@ import {
 import { MemoryRouter } from "react-router-dom"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { i18n } from "@/lib/i18n/i18n"
+import { webhookHeadersSchema } from "./webhook-authentication"
 import { WebhooksPage } from "../webhooks-page"
 import { createWebhook, sendTestWebhook } from "../webhooks-api"
 import {
@@ -227,6 +228,10 @@ describe("preview destination lifecycle", () => {
       headers: [{ key: "Authorization", value: "must-not-persist" }],
     } as ReleaseHealthWebhookDraft)
     expect(readPreviewWebhooks(key)).toEqual([saved])
+    expect(saved.secret).toBe("must-not-persist")
+    expect(saved.headers).toEqual([
+      { key: "Authorization", value: "must-not-persist" },
+    ])
     expect(localStorage.getItem(key)).not.toContain("must-not-persist")
     identity.org = "another-org"
     expect(readPreviewWebhooks(previewStoreKey()!)).toEqual([])
@@ -280,7 +285,7 @@ describe("preview destination lifecycle", () => {
 })
 
 describe("Release Health webhook UI", () => {
-  it("shows supported events and all profiles, and carries the selected contract into both previews", async () => {
+  it("keeps field definitions static and selects result profiles and severities only in the payload preview", async () => {
     render(<WebhooksPage />, { wrapper: provider() })
     const dialog = within(
       await screen.findByRole("dialog", { name: "New Release Health webhook" })
@@ -307,16 +312,28 @@ describe("Release Health webhook UI", () => {
         expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
       )
     }
-    await choose(dialog, "Sample result profile", "Rate · structured rate")
-    await choose(dialog, "Rate numerator", "bytes")
-    await choose(dialog, "Rate period", "hour")
-    await choose(dialog, "Sample rule severity", "Warning")
+    expect(
+      dialog.queryByRole("combobox", { name: "Sample result profile" })
+    ).not.toBeInTheDocument()
+    expect(
+      dialog.queryByRole("combobox", { name: "Sample rule severity" })
+    ).not.toBeInTheDocument()
+    expect(
+      dialog.queryByRole("columnheader", { name: "Triggered example" })
+    ).not.toBeInTheDocument()
+    expect(
+      dialog.getByRole("columnheader", { name: "Allowed values / description" })
+    ).toBeVisible()
     await choose(dialog, "Variable group", "metric.resultContract.unit")
     expect(dialog.getByText("{{metric.resultContract.unit.per}}")).toBeVisible()
     fireEvent.click(dialog.getByRole("button", { name: "Preview payload" }))
     const preview = within(
       await screen.findByRole("dialog", { name: "Alert payload preview" })
     )
+    await choose(preview, "Sample result profile", "Rate · structured rate")
+    await choose(preview, "Rate numerator", "bytes")
+    await choose(preview, "Rate period", "hour")
+    await choose(preview, "Sample rule severity", "Warning")
     const read = () =>
       JSON.parse(preview.getByLabelText("Rendered alert payload").textContent!)
     expect(read().metric.resultContract.unit).toMatchObject({
@@ -341,9 +358,19 @@ describe("Release Health webhook UI", () => {
       per: null,
     })
     expect(read().evaluation.value).toBe(650.375)
+    fireEvent.click(preview.getByRole("button", { name: "Close" }))
+    expect(
+      dialog.getByRole("combobox", { name: "Variable group" })
+    ).toHaveTextContent("metric.resultContract.unit")
+    expect(
+      dialog.queryByRole("combobox", { name: "Sample result profile" })
+    ).not.toBeInTheDocument()
+    expect(dialog.getByLabelText("Payload template editor")).toHaveValue(
+      ALERT_PAYLOAD_TEMPLATE
+    )
     expect(sendTestWebhook).not.toHaveBeenCalled()
   })
-  it("matches variable examples to the field-level template and keeps custom edits when switching modes", async () => {
+  it("matches field definitions to the template and keeps custom edits when switching modes", async () => {
     render(<WebhooksPage />, { wrapper: provider() })
     const dialog = within(
       await screen.findByRole("dialog", { name: "New Release Health webhook" })
@@ -369,8 +396,8 @@ describe("Release Health webhook UI", () => {
       name: /\{\{evaluation.value\}\}/,
     })
     expect(value).toHaveTextContent("number")
-    expect(value).toHaveTextContent("2.6")
-    expect(value).toHaveTextContent("0.8")
+    expect(value).not.toHaveTextContent("2.6")
+    expect(value).not.toHaveTextContent("0.8")
     expect(ALERT_PAYLOAD_TEMPLATE).toContain('"value": {{evaluation.value}}')
     expect(ALERT_TEMPLATE_VARIABLES).toContain("evaluation.value")
     expect(dialog.getByText("{{evaluation}}")).toBeVisible()
@@ -379,8 +406,7 @@ describe("Release Health webhook UI", () => {
       name: /\{\{alert.recoveredAt\}\}/,
     })
     expect(recovered).toHaveTextContent("string | null")
-    expect(within(recovered).getByRole("cell", { name: "null" })).toBeVisible()
-    expect(recovered).toHaveTextContent("2026-09-17T02:20:00Z")
+    expect(recovered).not.toHaveTextContent("2026-09-17T02:20:00Z")
     fireEvent.click(dialog.getByRole("radio", { name: "Custom" }))
     const custom = '{"value": {{evaluation.value}} }'
     fireEvent.change(editor, { target: { value: custom } })
@@ -479,7 +505,7 @@ describe("Release Health webhook UI", () => {
         dialog.getByRole("button", { name: "Create webhook" })
       ).toBeEnabled()
     )
-    fireEvent.change(dialog.getByLabelText("Name"), {
+    fireEvent.change(dialog.getByRole("textbox", { name: "Name" }), {
       target: { value: "Operations" },
     })
     fireEvent.change(dialog.getByLabelText("Endpoint"), {
@@ -535,6 +561,129 @@ describe("Release Health webhook UI", () => {
     expect(createWebhook).not.toHaveBeenCalled()
     expect(sendTestWebhook).not.toHaveBeenCalled()
   })
+  it("edits authentication, validates duplicate headers, retains saved values on reopen, and discards unsaved changes", async () => {
+    render(<WebhooksPage />, { wrapper: provider() })
+    const dialog = within(
+      await screen.findByRole("dialog", { name: "New Release Health webhook" })
+    )
+    await waitFor(() =>
+      expect(
+        dialog.getByRole("button", { name: "Create webhook" })
+      ).toBeEnabled()
+    )
+    fireEvent.change(dialog.getByRole("textbox", { name: "Name" }), {
+      target: { value: "Authenticated" },
+    })
+    fireEvent.change(dialog.getByLabelText("Endpoint"), {
+      target: { value: "https://example.com/alerts" },
+    })
+    fireEvent.change(dialog.getByLabelText("Header 1 name"), {
+      target: { value: "Authorization" },
+    })
+    fireEvent.change(dialog.getByLabelText("Header 1 value"), {
+      target: { value: "Bearer sample-only" },
+    })
+    fireEvent.change(dialog.getByLabelText("Secret", { exact: true }), {
+      target: { value: "sample-signing-only" },
+    })
+    expect(dialog.getByLabelText("Secret", { exact: true })).toHaveAttribute(
+      "type",
+      "password"
+    )
+    fireEvent.click(dialog.getByRole("button", { name: "Show or hide secret" }))
+    expect(dialog.getByLabelText("Secret", { exact: true })).toHaveAttribute(
+      "type",
+      "text"
+    )
+    fireEvent.click(dialog.getByRole("button", { name: "Add header" }))
+    fireEvent.change(dialog.getByLabelText("Header 2 name"), {
+      target: { value: "authorization" },
+    })
+    fireEvent.click(dialog.getByRole("button", { name: "Create webhook" }))
+    expect(await dialog.findByRole("alert")).toHaveTextContent(
+      "Header names must be unique"
+    )
+    expect(readPreviewWebhooks(previewStoreKey()!)).toEqual([])
+    fireEvent.change(dialog.getByLabelText("Header 2 name"), {
+      target: { value: "X-Service" },
+    })
+    fireEvent.change(dialog.getByLabelText("Header 2 value"), {
+      target: { value: "checkout" },
+    })
+    fireEvent.click(dialog.getByRole("button", { name: "Create webhook" }))
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    )
+    expect(localStorage.getItem(previewStoreKey()!)).not.toContain(
+      "sample-only"
+    )
+    expect(localStorage.getItem(previewStoreKey()!)).not.toContain(
+      "sample-signing-only"
+    )
+    fireEvent.click(screen.getByRole("button", { name: "Edit Authenticated" }))
+    const edit = within(
+      await screen.findByRole("dialog", { name: "Edit Release Health webhook" })
+    )
+    expect(edit.getByLabelText("Header 1 value")).toHaveValue(
+      "Bearer sample-only"
+    )
+    expect(edit.getByLabelText("Header 2 value")).toHaveValue("checkout")
+    expect(edit.getByLabelText("Secret", { exact: true })).toHaveValue(
+      "sample-signing-only"
+    )
+    expect(edit.getByLabelText("Secret", { exact: true })).toHaveAttribute(
+      "type",
+      "password"
+    )
+    fireEvent.change(edit.getByLabelText("Secret", { exact: true }), {
+      target: { value: "unsaved" },
+    })
+    fireEvent.click(edit.getByRole("button", { name: "Cancel" }))
+    const discard = within(
+      await screen.findByRole("dialog", { name: "Discard changes?" })
+    )
+    fireEvent.click(discard.getByRole("button", { name: /Discard/ }))
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    )
+    expect(readPreviewWebhooks(previewStoreKey()!)[0].secret).toBe(
+      "sample-signing-only"
+    )
+    fireEvent.click(screen.getByRole("button", { name: "Edit Authenticated" }))
+    const reopened = within(
+      await screen.findByRole("dialog", { name: "Edit Release Health webhook" })
+    )
+    fireEvent.click(reopened.getByRole("button", { name: "Remove header 2" }))
+    fireEvent.click(reopened.getByRole("button", { name: "Remove header 1" }))
+    fireEvent.change(reopened.getByLabelText("Secret", { exact: true }), {
+      target: { value: "" },
+    })
+    fireEvent.click(reopened.getByRole("button", { name: "Save changes" }))
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    )
+    expect(readPreviewWebhooks(previewStoreKey()!)[0]).toMatchObject({
+      headers: [],
+      secret: "",
+    })
+    expect(sendTestWebhook).not.toHaveBeenCalled()
+    expect(createWebhook).not.toHaveBeenCalled()
+  })
+  it("rejects malformed headers and header injection while allowing optional empty rows", () => {
+    for (const key of ["Bad Name", "X:Name", ""]) {
+      expect(
+        webhookHeadersSchema.safeParse([{ key, value: "example" }]).success
+      ).toBe(false)
+    }
+    for (const value of ["hello\r\nX-Other: injected", "hello\0"]) {
+      expect(
+        webhookHeadersSchema.safeParse([{ key: "X-Example", value }]).success
+      ).toBe(false)
+    }
+    expect(
+      webhookHeadersSchema.safeParse([{ key: "", value: "" }]).success
+    ).toBe(true)
+  })
   it("blocks templates that fail for recovery while retaining the draft", async () => {
     render(<WebhooksPage />, { wrapper: provider() })
     const dialog = within(
@@ -545,7 +694,7 @@ describe("Release Health webhook UI", () => {
         dialog.getByRole("button", { name: "Create webhook" })
       ).toBeEnabled()
     )
-    fireEvent.change(dialog.getByLabelText("Name"), {
+    fireEvent.change(dialog.getByRole("textbox", { name: "Name" }), {
       target: { value: "Draft" },
     })
     fireEvent.change(dialog.getByLabelText("Endpoint"), {
@@ -562,7 +711,7 @@ describe("Release Health webhook UI", () => {
     expect(await dialog.findByRole("alert")).toHaveTextContent(
       "both alert events"
     )
-    expect(dialog.getByLabelText("Name")).toHaveValue("Draft")
+    expect(dialog.getByRole("textbox", { name: "Name" })).toHaveValue("Draft")
     expect(readPreviewWebhooks(previewStoreKey()!)).toEqual([])
   })
 })

@@ -11,10 +11,6 @@ import {
   validateAlertTemplate,
 } from "./alert-payload"
 import { AlertTemplateVariables } from "./alert-template-variables"
-import {
-  DEFAULT_ALERT_SAMPLE,
-  type AlertSampleOptions,
-} from "./alert-contract-samples"
 
 export function AlertTemplateFields({
   type,
@@ -29,10 +25,9 @@ export function AlertTemplateFields({
   onChange: (type: "default" | "custom", value: string) => void
   expanded: boolean
   onExpandedChange: (expanded: boolean) => void
-  onPreview: (sample: AlertSampleOptions) => void
+  onPreview: () => void
 }) {
   const { t } = useTranslation()
-  const [sample, setSample] = useState(DEFAULT_ALERT_SAMPLE)
   const [custom, setCustom] = useState(
     type === "custom" ? value : ALERT_PAYLOAD_TEMPLATE
   )
@@ -87,17 +82,12 @@ export function AlertTemplateFields({
             {t("webhooks.releaseHealth.templateValid")}
           </span>
         )}
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => onPreview(sample)}
-        >
+        <Button type="button" variant="outline" size="sm" onClick={onPreview}>
           <Code2 />
           {t("webhooks.releaseHealth.preview")}
         </Button>
       </div>
-      <AlertTemplateVariables sample={sample} onSampleChange={setSample} />
+      <AlertTemplateVariables />
     </section>
   )
 }

@@ -7,6 +7,10 @@ import {
   getCurrentWorkspace,
 } from "@/features/layout/layout-context"
 import { ALERT_PAYLOAD_TEMPLATE, validateAlertTemplate } from "./alert-payload"
+import {
+  webhookHeadersSchema,
+  type WebhookAuthentication,
+} from "./webhook-authentication"
 
 export function isPreviewEndpoint(value: string) {
   try {
@@ -21,7 +25,7 @@ export function isPreviewEndpoint(value: string) {
   }
 }
 
-const hookSchema = z.object({
+const storedHookSchema = z.object({
   id: z.string().min(1),
   purpose: z.literal("release-health"),
   name: z.string().trim().min(1).max(100),
@@ -32,12 +36,19 @@ const hookSchema = z.object({
   payloadTemplateType: z.enum(["default", "custom"]),
   payloadTemplate: z.string().min(1),
 })
+const hookSchema = storedHookSchema.extend({
+  headers: webhookHeadersSchema.default([]),
+  secret: z.string().default(""),
+})
 export type ReleaseHealthWebhook = z.infer<typeof hookSchema>
 export type ReleaseHealthWebhookDraft = Omit<
   ReleaseHealthWebhook,
-  "id" | "purpose"
->
-const catalogueSchema = z.array(hookSchema)
+  "id" | "purpose" | "headers" | "secret"
+> &
+  Partial<WebhookAuthentication>
+const catalogueSchema = z.array(storedHookSchema)
+// Credentials are editable in the preview, but never persisted to browser storage.
+const authentication = new Map<string, Map<string, WebhookAuthentication>>()
 const changed = "featbit:release-health-webhooks-preview-changed"
 
 export function previewStoreKey() {
@@ -58,13 +69,17 @@ export function previewStoreKey() {
 export function readPreviewWebhooks(key: string): ReleaseHealthWebhook[] {
   const value = localStorage.getItem(key)
   return value
-    ? catalogueSchema
-        .parse(JSON.parse(value))
-        .map((item) =>
+    ? catalogueSchema.parse(JSON.parse(value)).map((item) => ({
+        ...item,
+        payloadTemplate:
           item.payloadTemplateType === "default"
-            ? { ...item, payloadTemplate: ALERT_PAYLOAD_TEMPLATE }
-            : item
-        )
+            ? ALERT_PAYLOAD_TEMPLATE
+            : item.payloadTemplate,
+        headers: (authentication.get(key)?.get(item.id)?.headers ?? []).map(
+          (header) => ({ ...header })
+        ),
+        secret: authentication.get(key)?.get(item.id)?.secret ?? "",
+      }))
     : []
 }
 
@@ -72,6 +87,18 @@ function writePreviewWebhooks(key: string, items: ReleaseHealthWebhook[]) {
   // An allowlist schema prevents credentials or delivery data from entering this preview store.
   const safe = catalogueSchema.parse(items)
   localStorage.setItem(key, JSON.stringify(safe))
+  authentication.set(
+    key,
+    new Map(
+      items.map((item) => [
+        item.id,
+        {
+          headers: item.headers.map((header) => ({ ...header })),
+          secret: item.secret,
+        },
+      ])
+    )
+  )
   window.dispatchEvent(new CustomEvent(changed, { detail: key }))
 }
 
@@ -101,6 +128,7 @@ export function savePreviewWebhook(
     purpose: "release-health",
   })
   if (validateAlertTemplate(item.payloadTemplate)) throw new Error("template")
+  item.headers = item.headers.filter((header) => header.key)
   writePreviewWebhooks(
     key,
     id

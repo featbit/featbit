@@ -1,8 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useState } from "react"
-import { Controller, useForm, useWatch } from "react-hook-form"
+import { Controller, useController, useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { Activity, Box, LockKeyhole, X } from "lucide-react"
+import { Activity, Box, X } from "lucide-react"
 import { z } from "zod"
 import {
   AlertDialog,
@@ -32,7 +32,6 @@ import { scopeEnvironmentIds, serializeScopes } from "../webhook-utils"
 import { ALERT_PAYLOAD_TEMPLATE, validateAlertTemplate } from "./alert-payload"
 import { AlertTemplateFields } from "./alert-template-fields"
 import { AlertEventsSection } from "./alert-events-section"
-import type { AlertSampleOptions } from "./alert-contract-samples"
 import { PayloadPreviewDialog } from "./payload-preview-dialog"
 import {
   isPreviewEndpoint,
@@ -40,7 +39,12 @@ import {
   type ReleaseHealthWebhookDraft,
 } from "./preview-store"
 
+import { webhookHeadersSchema } from "./webhook-authentication"
+import { WebhookAuthenticationFields } from "./webhook-authentication-fields"
+
 const schema = z.object({
+  headers: webhookHeadersSchema,
+  secret: z.string(),
   name: z.string().trim().min(1, "webhooks.validation.nameRequired").max(100),
   url: z
     .string()
@@ -85,11 +89,15 @@ export function ReleaseHealthWebhookSheet({
   const h = (key: string) => t(`webhooks.releaseHealth.${key}`)
   const [picker, setPicker] = useState(false)
   const [expanded, setExpanded] = useState(false)
-  const [preview, setPreview] = useState<AlertSampleOptions | null>(null)
+  const [preview, setPreview] = useState(false)
   const [discard, setDiscard] = useState(false)
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
+      headers: webhook?.headers?.length
+        ? webhook.headers.map((header) => ({ ...header }))
+        : [{ key: "", value: "" }],
+      secret: webhook?.secret ?? "",
       name: webhook?.name ?? "",
       url: webhook?.url ?? "",
       isActive: webhook?.isActive ?? true,
@@ -101,6 +109,14 @@ export function ReleaseHealthWebhookSheet({
       payloadTemplateType: webhook?.payloadTemplateType ?? "default",
       payloadTemplate: webhook?.payloadTemplate ?? ALERT_PAYLOAD_TEMPLATE,
     },
+  })
+  const { field: headersField } = useController({
+    control: form.control,
+    name: "headers",
+  })
+  const { field: secretField } = useController({
+    control: form.control,
+    name: "secret",
   })
   const values = useWatch({ control: form.control })
   const selected = values.environmentIds ?? []
@@ -133,6 +149,8 @@ export function ReleaseHealthWebhookSheet({
     }
     try {
       await onSave({
+        headers: data.headers.filter((header) => header.key),
+        secret: data.secret,
         name: data.name,
         url: data.url,
         isActive: data.isActive,
@@ -157,7 +175,7 @@ export function ReleaseHealthWebhookSheet({
         {t(message)}
       </p>
     ) : null
-  const nested = picker || expanded || preview !== null || discard
+  const nested = picker || expanded || preview || discard
   return (
     <>
       <Sheet
@@ -326,35 +344,19 @@ export function ReleaseHealthWebhookSheet({
                 }}
                 expanded={expanded}
                 onExpandedChange={setExpanded}
-                onPreview={setPreview}
+                onPreview={() => setPreview(true)}
               />
-              <section className="space-y-3 border-t pt-6">
-                <h3 className="flex items-center gap-2 font-medium">
-                  <LockKeyhole className="size-4" />
-                  {h("authentication")}
-                </h3>
-                <p className="text-xs leading-5 text-muted-foreground">
-                  {h("authenticationHelp")}
-                </p>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="rh-hook-header">
-                      {t("webhooks.sheet.customHeaders")}
-                    </Label>
-                    <Input
-                      id="rh-hook-header"
-                      disabled
-                      placeholder="Authorization"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="rh-hook-secret">
-                      {t("webhooks.sheet.secret")}
-                    </Label>
-                    <Input id="rh-hook-secret" disabled type="password" />
-                  </div>
-                </div>
-              </section>
+              <WebhookAuthenticationFields
+                headers={(values.headers ?? []).map((header) => ({
+                  key: header.key ?? "",
+                  value: header.value ?? "",
+                }))}
+                secret={values.secret ?? ""}
+                onHeadersChange={headersField.onChange}
+                onSecretChange={secretField.onChange}
+                errors={errors}
+                disabled={isSubmitting}
+              />
             </div>
             <SheetFooter className="flex-row items-center justify-end border-t px-6 py-4">
               <div className="mr-auto">{errorText(errors.root?.message)}</div>
@@ -395,8 +397,7 @@ export function ReleaseHealthWebhookSheet({
       {preview && (
         <PayloadPreviewDialog
           template={values.payloadTemplate ?? ""}
-          initialSample={preview}
-          onClose={() => setPreview(null)}
+          onClose={() => setPreview(false)}
         />
       )}
       <AlertDialog open={discard} onOpenChange={setDiscard}>

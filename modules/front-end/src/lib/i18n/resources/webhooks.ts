@@ -131,11 +131,10 @@ export const enWebhooks = {
       "The template must produce valid JSON for both alert events and every supported result profile, including all rate units. Open the preview to inspect errors.",
     variables: "Available template variables",
     variablesHelp:
-      "Use variables directly, as in other webhook templates. Quote string fields; leave numbers, objects and nullable fields unquoted to keep their types. The values below are examples.",
+      "Field definitions are the same for every preview scenario. Quote string fields; leave numbers, objects and nullable fields unquoted to keep their types. Use Preview payload to try different result profiles and rule severities.",
     variableGroup: "Variable group",
     templateExpression: "Template expression / type",
-    triggeredExample: "Triggered example",
-    recoveredExample: "Recovered example",
+    fieldDefinition: "Allowed values / description",
     wholeObjectHelp: "To include all fields in this group, use:",
     variableGroups: {
       event: "The notification's identity, type and time.",
@@ -164,7 +163,21 @@ export const enWebhooks = {
     copyFailed: "The payload could not be copied.",
     authentication: "Headers & authentication",
     authenticationHelp:
-      "Custom headers and a signing secret will use the shared webhook delivery engine. Credential configuration is unavailable in this preview.",
+      "Add request headers for the receiving endpoint and an optional signing secret.",
+    authenticationPreviewHelp:
+      "In this design preview, headers and secret are kept only in this tab until you refresh or close it. No notifications are sent.",
+    noCustomHeaders:
+      "No custom headers. Add a header if your endpoint requires one.",
+    headerNameLabel: "Header {{number}} name",
+    headerValueLabel: "Header {{number}} value",
+    removeHeaderLabel: "Remove header {{number}}",
+    headerNameInvalid:
+      "Enter a valid HTTP header name, without spaces or separators such as a colon.",
+    headerDuplicate: "Header names must be unique (case-insensitive).",
+    headerValueInvalid:
+      "Header values cannot contain line breaks or null characters.",
+    secretHelp:
+      "Optional. Used to sign webhook requests. Clear this field to remove the secret.",
     endpointInvalid:
       "Enter an absolute HTTP or HTTPS URL without embedded username or password.",
     lastDelivery: "Last delivery",
@@ -484,11 +497,10 @@ export const zhWebhooks = {
       "模板必须为两类告警事件和全部支持的 Profile（包括所有 Rate 单位）生成有效 JSON，请打开预览查看错误。",
     variables: "可用模板变量",
     variablesHelp:
-      "与已有 Webhook 模板一样，直接引用变量。字符串字段加引号；数字、对象及可为空的字段不加引号，以保留类型。下方数值均为示例。",
+      "字段定义不随预览场景变化。字符串字段加引号；数字、对象及可为空的字段不加引号，以保留类型。请在 Preview payload 中切换结果类型和规则等级，查看不同场景。",
     variableGroup: "变量分组",
     templateExpression: "模板表达式 / 类型",
-    triggeredExample: "触发时示例",
-    recoveredExample: "恢复时示例",
+    fieldDefinition: "允许值 / 说明",
     wholeObjectHelp: "如需包含此分组的全部字段，可使用：",
     variableGroups: {
       event: "本次通知的标识、类型与发生时间。",
@@ -515,8 +527,18 @@ export const zhWebhooks = {
     copied: "已复制",
     copyFailed: "无法复制 Payload。",
     authentication: "请求头与认证",
-    authenticationHelp:
-      "自定义 Header 与签名 Secret 将复用现有 Webhook 投递引擎。此预览暂不开放凭据配置。",
+    authenticationHelp: "配置接收端所需的请求头，以及可选的签名 Secret。",
+    authenticationPreviewHelp:
+      "此设计预览仅在当前标签页内保留 Header 和 Secret，刷新或关闭后清除，不发送通知。",
+    noCustomHeaders: "未配置自定义 Header。接收端需要时可添加。",
+    headerNameLabel: "Header {{number}} 名称",
+    headerValueLabel: "Header {{number}} 值",
+    removeHeaderLabel: "移除 Header {{number}}",
+    headerNameInvalid:
+      "请输入合法的 HTTP Header 名称，不包含空格或冒号等分隔符。",
+    headerDuplicate: "Header 名称不能重复，不区分大小写。",
+    headerValueInvalid: "Header 值不能包含换行或空字符。",
+    secretHelp: "可选，用于对 Webhook 请求签名。清空此字段可移除 Secret。",
     endpointInvalid: "请输入不含用户名或密码的完整 HTTP / HTTPS 地址。",
     lastDelivery: "最近投递",
     previewFor: "预览 {{name}} 的 Payload",

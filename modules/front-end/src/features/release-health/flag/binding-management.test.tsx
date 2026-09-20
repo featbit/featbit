@@ -52,6 +52,8 @@ function hook(id: string, isActive = true, env = "prod") {
     scopeNames: ["Project/" + env],
     payloadTemplateType: "default",
     payloadTemplate: ALERT_PAYLOAD_TEMPLATE,
+    headers: [],
+    secret: "",
   } satisfies ReleaseHealthWebhook
 }
 function setHooks(items: ReleaseHealthWebhook[]) {

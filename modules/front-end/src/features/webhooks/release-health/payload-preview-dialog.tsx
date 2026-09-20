@@ -12,25 +12,20 @@ import {
 } from "@/components/ui/dialog"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { renderAlertPayload, type AlertEvent } from "./alert-payload"
-import {
-  DEFAULT_ALERT_SAMPLE,
-  type AlertSampleOptions,
-} from "./alert-contract-samples"
+import { DEFAULT_ALERT_SAMPLE } from "./alert-contract-samples"
 import { ALERT_EVENT_CATALOG } from "./alert-event-catalog"
 import { AlertSamplePicker } from "./alert-sample-picker"
 
 export function PayloadPreviewDialog({
   template,
-  initialSample = DEFAULT_ALERT_SAMPLE,
   onClose,
 }: {
   template: string
-  initialSample?: AlertSampleOptions
   onClose: () => void
 }) {
   const { t } = useTranslation()
   const [event, setEvent] = useState<AlertEvent>("alert.triggered")
-  const [sample, setSample] = useState(initialSample)
+  const [sample, setSample] = useState(DEFAULT_ALERT_SAMPLE)
   const [copied, setCopied] = useState(false)
   let payload = ""
   let error = ""

@@ -9,21 +9,13 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { alertVariableGroups } from "./alert-template-schema"
-import { AlertSamplePicker } from "./alert-sample-picker"
-import type { AlertSampleOptions } from "./alert-contract-samples"
+import { ALERT_TEMPLATE_GROUPS } from "./alert-template-schema"
 
-export function AlertTemplateVariables({
-  sample,
-  onSampleChange,
-}: {
-  sample: AlertSampleOptions
-  onSampleChange: (sample: AlertSampleOptions) => void
-}) {
+export function AlertTemplateVariables() {
   const { t } = useTranslation()
   const h = (key: string) => t(`webhooks.releaseHealth.${key}`)
   const [selected, setSelected] = useState("event")
-  const groups = alertVariableGroups(sample)
+  const groups = ALERT_TEMPLATE_GROUPS
   const group = groups.find((item) => item.name === selected)!
   return (
     <details open className="rounded-lg border px-4 py-3">
@@ -34,7 +26,6 @@ export function AlertTemplateVariables({
         <p className="text-xs leading-5 text-muted-foreground">
           {h("variablesHelp")}
         </p>
-        <AlertSamplePicker value={sample} onChange={onSampleChange} />
         <div className="flex flex-wrap items-center gap-3">
           <Select
             value={selected}
@@ -71,10 +62,7 @@ export function AlertTemplateVariables({
                   {h("templateExpression")}
                 </th>
                 <th scope="col" className="p-3 font-medium">
-                  {h("triggeredExample")}
-                </th>
-                <th scope="col" className="p-3 font-medium">
-                  {h("recoveredExample")}
+                  {h("fieldDefinition")}
                 </th>
               </tr>
             </thead>
@@ -86,6 +74,8 @@ export function AlertTemplateVariables({
                     <span className="mt-1 block text-muted-foreground">
                       {field.type}
                     </span>
+                  </th>
+                  <td className="p-3 align-top">
                     {field.values && (
                       <div
                         className="mt-2 flex flex-wrap gap-1"
@@ -107,12 +97,9 @@ export function AlertTemplateVariables({
                         {h(`fieldNotes.${field.note}`)}
                       </p>
                     )}
-                  </th>
-                  <td className="p-3 align-top">
-                    <code className="break-all">{field.triggered}</code>
-                  </td>
-                  <td className="p-3 align-top">
-                    <code className="break-all">{field.recovered}</code>
+                    {!field.values && !field.note && (
+                      <span className="text-muted-foreground">—</span>
+                    )}
                   </td>
                 </tr>
               ))}
