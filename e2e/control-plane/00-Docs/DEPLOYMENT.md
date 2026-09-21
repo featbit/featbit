@@ -908,7 +908,7 @@ Each cluster runs:
 
 Each cluster runs:
 
-- **UI** - Angular-based web interface (port 8081/8082)
+- **UI** - React-based web interface (port 8081/8082)
 - **API Server** - REST API backend (port 5000/5001)
 - **Evaluation Server** - Feature flag evaluation engine (port 5100/5101)
 - **Control Plane** - Administrative control services (port 5200)

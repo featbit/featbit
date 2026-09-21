@@ -453,7 +453,7 @@ describe("feature flag targeting tab", () => {
     )
   })
 
-  it("offers Angular-compatible segment membership conditions", async () => {
+  it("initializes a segment membership condition with an empty selection", async () => {
     const props = renderTargeting(
       exampleFlag({
         rules: [

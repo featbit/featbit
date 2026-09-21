@@ -12,14 +12,12 @@ coverage
 
 # Design assets, migration notes, and scripts are not used by the production build
 design
-implementation-details
 .impeccable
 scripts
 AGENTS.md
 DESIGN.md
 PRODUCT.md
 README.md
-plan.md
 
 # Local configuration and credentials
 .env*

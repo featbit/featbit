@@ -65,7 +65,7 @@ Use the established React release workbench:
 - no ambient shadows, decorative cards, gradients, or large branded areas;
 - muted code treatment for Feature Flag keys;
 - semantic color only for Experiment stage;
-- no Angular/ng-zorro visual cloning;
+- use the shared shadcn/Base UI visual language;
 - no changes outside main content and the owned New experiment overlay.
 
 ## Main Page

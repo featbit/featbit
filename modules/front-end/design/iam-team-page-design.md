@@ -1,6 +1,6 @@
 # IAM Team Page Design
 
-This document is the React design contract for the IAM Team list page and its `Add team member` sheet. Angular remains a functional reference for permissions and API behavior, but the React implementation must use shadcn/ui, Base UI primitives, Tailwind tokens, and the authenticated layout defined in [react-layout-design.md](react-layout-design.md).
+This document is the React design contract for the IAM Team list page and its `Add team member` sheet. The React implementation must use shadcn/ui, Base UI primitives, Tailwind tokens, and the authenticated layout defined in [react-layout-design.md](react-layout-design.md).
 
 The Team member detail page has a separate React design contract in [iam-team-detail-page-design.md](iam-team-detail-page-design.md).
 
@@ -120,7 +120,7 @@ Apply the same semantic hierarchy in dark mode. Do not hard-code light-theme hex
 ## Internationalization
 
 - All user-visible text belongs in the IAM feature resource file.
-- Preserve Angular terminology where it remains appropriate, including `添加成员`, `权限`, `策略`, `组`, and `初始密码`.
+- Preserve product terminology where it remains appropriate, including `添加成员`, `权限`, `策略`, `组`, and `初始密码`.
 - English selector titles use plural forms: `Policies` and `Groups`.
 - Do not introduce hard-coded user-visible strings in feature components.
 
