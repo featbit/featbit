@@ -61,7 +61,7 @@ describe("FlagEditorSheet", () => {
     expect(onOpenChange).not.toHaveBeenCalled()
   })
 
-  it("generates the clone key from the name using the Angular slug rules", () => {
+  it("generates a lowercase clone key with hyphens and no punctuation", () => {
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false } },
     })

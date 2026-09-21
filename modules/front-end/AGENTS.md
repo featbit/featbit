@@ -3,8 +3,6 @@
 ## Frontend Context
 
 - The maintained React application belongs in `front-end`.
-- The retired Angular source is no longer in the working tree. Historical behavior can be consulted in Git history when needed.
-- The Angular-to-React migration is complete.
 - Follow `DESIGN.md` and `design/*.md` for design requirements, `PRODUCT.md` for product context, and `README.md` for development and deployment instructions.
 
 ## Technology Decisions
@@ -20,7 +18,7 @@
 ## UI And Asset Rules
 
 - Do not modify `front-end/src/index.css`.
-- Do not copy Angular/ng-zorro styling one-to-one.
+- Use the shared React design system and shadcn/Base UI component styling.
 - Prefer shadcn/ui and Tailwind default tokens for buttons, text colors, spacing, radius, focus rings, and common controls.
 - When developing any module in `front-end`, prefer the native shadcn/Base UI components in `front-end/src/components/ui/*`.
 - Do not modify the original `components/ui/*` shadcn component files for feature-specific needs; compose or wrap them from feature/layout files.
@@ -28,8 +26,7 @@
 - Prefer shadcn default component styles and tokens. Add only small amounts of Tailwind in feature or layout files when necessary.
 - Every shadcn/Base UI `Select` must include `SelectGroup` inside `SelectContent`, and every `SelectItem` must be nested in a `SelectGroup`. Never render `SelectItem` directly under `SelectContent`, even when the select has only one logical group. Follow the `OrganizationSelect` composition in `front-end/src/features/organization/general/components/organization-form-fields.tsx`; this preserves the expected option spacing, grouping semantics, and popup alignment with the trigger.
 - Split code by responsibility so individual files do not become unusually large.
-- Copy only necessary assets such as FeatBit logo, brand SVGs, sample JSON, `env.template.js`, required Monaco assets, and irreplaceable business-specific icons.
-- Do not copy the old Angular login background.
+- Copy only necessary assets such as FeatBit logo, brand SVGs, sample JSON, `env.template.js`, and irreplaceable business-specific icons.
 - Follow the saved login and SSO design contracts in `design/`.
 
 ## Integration Testing
