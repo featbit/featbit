@@ -35,7 +35,6 @@ public class ExperimentRunConfiguration : IEntityTypeConfiguration<ExperimentRun
         builder.Property(x => x.NextHypothesis).HasColumnName("next_hypothesis");
         builder.Property(x => x.TrafficPercent).HasColumnName("traffic_percent");
         builder.Property(x => x.LayerId).HasColumnName("layer_id");
-        builder.Property(x => x.AudienceFilters).HasColumnName("audience_filters");
         builder.Property(x => x.TrafficOffset).HasColumnName("traffic_offset");
         builder.Property(x => x.LayerKey).HasColumnName("layer_key").HasMaxLength(128);
         builder.Property(x => x.AllocationKeySelector).HasColumnName("allocation_key_selector").HasMaxLength(256);
