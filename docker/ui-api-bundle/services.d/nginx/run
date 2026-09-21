@@ -1,7 +1,0 @@
-#!/command/execlineb -P
-
-foreground {
-    pipeline { cat /app/frontend/assets/env.template.js } redirfd -w 1 /app/frontend/assets/env.js envsubst
-}
-
-nginx -g "daemon off;"
