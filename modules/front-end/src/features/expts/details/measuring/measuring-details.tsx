@@ -68,7 +68,6 @@ import {
   updateExperimentRunAssignment,
   updateExperimentRunMinimumSample,
   updateExperimentRunObservationWindow,
-  updateExperimentRunSetup,
 } from "./measuring-api"
 import type {
   AnalysisMethod,
@@ -87,8 +86,7 @@ import {
   normalizedMethod,
   orderedRuns,
   parseAnalysis,
-  parseAudienceFilters,
-  parseExperimentVariantNames,
+  parseRunVariationNames,
   parseSamplingPlan,
   runVariants,
 } from "./measuring-utils"
@@ -513,14 +511,9 @@ function AssignmentSummary({
   const { t } = useTranslation()
   const ids = runVariants(run)
   const variationMap = new Map(
-    variations.flatMap((variation) => [
-      [variation.id, variation] as const,
-      [variation.value, variation] as const,
-      [variation.name, variation] as const,
-    ])
+    variations.map((variation) => [variation.id, variation] as const)
   )
   const sampling = parseSamplingPlan(run)
-  const audienceFilters = parseAudienceFilters(run.audienceFilters)
   const start = run.sliceStart ?? 0
   const end = run.sliceEnd ?? 100
   const selectedLayer = layers.find((layer) => layer.key === run.layerKey)
@@ -659,37 +652,6 @@ function AssignmentSummary({
             )}
           </p>
         </section>
-        <section className="space-y-2 py-4">
-          <h4 className="text-sm font-medium">
-            {t(
-              "releaseDecision.experiments.detailsPage.measuring.audienceFilters"
-            )}
-          </h4>
-          {audienceFilters.length ? (
-            <div className="space-y-2">
-              {audienceFilters.map((filter, index) => (
-                <div
-                  key={`${filter.property}-${filter.op}-${index}`}
-                  className="flex flex-wrap items-center gap-2 text-sm"
-                >
-                  <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
-                    {filter.property}
-                  </code>
-                  <span className="text-muted-foreground">
-                    {t(
-                      `releaseDecision.experiments.detailsPage.measuring.filterOps.${filter.op}`
-                    )}
-                  </span>
-                  <span>{filter.value || "—"}</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              {t("releaseDecision.experiments.detailsPage.measuring.noFilters")}
-            </p>
-          )}
-        </section>
       </div>
     </aside>
   )
@@ -712,10 +674,6 @@ export function MeasuringDetails({
   const runs = useMemo(
     () => orderedRuns(experiment.experimentRuns as MeasuringRun[]),
     [experiment.experimentRuns]
-  )
-  const variantNames = useMemo(
-    () => parseExperimentVariantNames(experiment.variants),
-    [experiment.variants]
   )
   const [localSelectedRunId, setLocalSelectedRunId] = useState(
     runs.at(-1)?.id ?? ""
@@ -776,6 +734,10 @@ export function MeasuringDetails({
   })
   const updateCache = (updated: ExperimentDetail) =>
     queryClient.setQueryData(queryKey, updated)
+  const variantNames = useMemo(
+    () => (selected ? parseRunVariationNames(selected.variations) : {}),
+    [selected?.variations]
+  )
   const flagVariations = flagQuery.data?.variations ?? []
   const createMutation = useMutation({
     mutationFn: async ({
@@ -785,19 +747,10 @@ export function MeasuringDetails({
       setup: NewRunSetup
       observationWindow: ObservationWindowUpdate
     }) => {
-      const createdState = await createExperimentRun(envId, experiment.id)
-      const createdRun = orderedRuns(
-        createdState.experimentRuns as MeasuringRun[]
-      ).at(-1)
-      if (!createdRun) return createdState
-
-      await updateExperimentRunSetup(envId, experiment.id, createdRun.id, setup)
-      return updateExperimentRunObservationWindow(
-        envId,
-        experiment.id,
-        createdRun.id,
-        observationWindow
-      )
+      return createExperimentRun(envId, experiment.id, {
+        ...setup,
+        ...observationWindow,
+      })
     },
     onSuccess: (updated) => {
       updateCache(updated)
@@ -1201,7 +1154,7 @@ export function MeasuringDetails({
             <div className="min-w-0 border-t p-4 xl:border-t-0">
               <AssignmentSummary
                 run={selected}
-                variations={flagQuery.data?.variations ?? []}
+                variations={selected.variations}
                 layers={layersQuery.data?.items ?? []}
                 onEdit={() => setAssignmentOpen(true)}
               />
@@ -1229,7 +1182,7 @@ export function MeasuringDetails({
         <EditAssignmentSheet
           open
           run={selected}
-          variations={flagQuery.data?.variations ?? []}
+          variations={selected.variations}
           layers={layersQuery.data?.items ?? []}
           saving={assignmentMutation.isPending}
           saveError={assignmentMutation.isError}

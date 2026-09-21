@@ -23,8 +23,8 @@
     <a href="https://www.python.org/">
       <img src="https://img.shields.io/badge/Python-%3E=3.9-FFDD53?style=flat-square&logo=python&logoColor=white"/>
     </a>
-    <a href="https://angular.io/">
-      <img src="https://img.shields.io/badge/Angular-19.0-DD0031?style=flat-square&logo=angular&logoColor=white"/>
+    <a href="https://react.dev/">
+      <img src="https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black"/>
     </a>
   </div>
 

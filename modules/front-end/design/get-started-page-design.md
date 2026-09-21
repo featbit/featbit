@@ -1,6 +1,6 @@
 # Get Started Page Design
 
-This document defines the React redesign of the authenticated **Get Started** page in `front-end`. The Angular page is the functional source of truth. The React application, `PRODUCT.md`, `DESIGN.md`, and the existing Feature Flags and settings surfaces are the visual source of truth.
+This document defines the React redesign of the authenticated **Get Started** page in `front-end`. The React application, `PRODUCT.md`, `DESIGN.md`, and the existing Feature Flags and settings surfaces are the visual source of truth.
 
 This is a design-only contract. No React source, route, API, test, configuration, i18n resource, shared component, sidebar, or context-bar implementation is authorized by this document.
 
@@ -12,7 +12,7 @@ The design covers only the Get Started main-content surface inside the existing 
 - create or reuse Feature Flag behavior;
 - SDK selection, environment configuration, secrets, endpoints, install commands, starter code, copy actions, and SDK documentation;
 - live evaluation verification, success, timeout, retry, skip, and completion;
-- the Documentation, Team, and Support links currently rendered by Angular's `guide` component;
+- the Documentation, Team, and Support links currently rendered by the Resources rail;
 - loading, error, empty, permission, and incomplete-configuration states.
 
 The following are explicitly out of scope:
@@ -21,7 +21,7 @@ The following are explicitly out of scope:
 - the context bar, environment switcher, SDK configuration trigger, and subscription badge;
 - changes to the authenticated shell or global page padding contract;
 - onboarding organization/project creation;
-- adding SDK languages that the Angular flow does not currently support;
+- adding SDK language options beyond those specified in this document;
 - implementation code or backend changes.
 
 The main-content design must assume the existing sidebar and context bar remain visible around it. They are intentionally excluded from the mockup.
@@ -63,7 +63,7 @@ Across all three baselines:
 
 ## 3. Design read
 
-**Reading this as:** a redesign-preserve migration of a first-run developer workflow for engineers, product engineers, and release operators, using FeatBit's restrained neutral workbench language and shadcn/Base UI component vocabulary.
+**Reading this as:** a first-run developer workflow for engineers, product engineers, and release operators, using FeatBit's restrained neutral workbench language and shadcn/Base UI component vocabulary.
 
 - **Color strategy:** Restrained. Neutral product tokens carry the page. Green is limited to confirmed completion, amber to active event listening, and red to actionable failures.
 - **Theme scene:** A developer is integrating FeatBit into an application during a normal work session on a desktop or laptop and needs to move from configuration to a verified evaluation without losing project or environment context.
@@ -90,13 +90,13 @@ The user should always be able to answer:
 
 The first answer remains owned by the unchanged context bar. The Get Started page must not duplicate project or environment selectors inside the page.
 
-## 5. Verified Angular behavior to preserve
+## 5. Required behavior
 
 ### Entry and completion marker
 
-- Route: `/get-started` in Angular; the React route family should be `/:lang/get-started`.
+- Route family: `/:lang/get-started`.
 - First entry is used after login or organization onboarding when the unscoped `get-started` local-storage marker is absent.
-- Angular sets the marker to `true` when Step 1 initializes. React should preserve the same effective behavior so merely leaving the flow does not force it again on every login.
+- Set the marker to `true` when Step 1 initializes so merely leaving the flow does not force it again on every login.
 - `?status=init` may be present after onboarding. It must not create a second page layout or duplicate shell context.
 
 ### Step 1: Create a Feature Flag
@@ -110,7 +110,7 @@ The first answer remains owned by the unchanged context bar. The Get Started pag
   - Name, required.
   - Key, required, auto-generated from Name, editable, pattern-limited to letters, numbers, `.`, `_`, and `-`.
   - Key uniqueness, checked asynchronously.
-  - Description, optional, maximum 512 characters for Angular parity.
+  - Description, optional, maximum 512 characters.
   - Variation type, fixed to Boolean.
   - Default ON variation, `True`.
   - Default OFF variation, `False`.
@@ -154,7 +154,7 @@ The first answer remains owned by the unchanged context bar. The Get Started pag
 
 ### Resource links
 
-Preserve every capability from Angular's `guide` surface:
+Preserve every capability from the Resources rail:
 
 - create Feature Flags for the quick demo;
 - open the interactive demo with the current client secret and evaluation URL;
@@ -172,7 +172,7 @@ Preserve every capability from Angular's `guide` surface:
 
 ### One page, three task states
 
-Keep the workflow on one route and replace the large Angular navigation-step card with a compact progress strip. Only one step body is rendered at a time.
+Keep the workflow on one route with a compact progress strip. Only one step body is rendered at a time.
 
 - Completed steps use a small green check and remain available for backward navigation.
 - The current step uses a dark neutral filled number.
@@ -183,7 +183,7 @@ Do not use three equal feature cards, a large onboarding hero, a modal wizard, o
 
 ### Keep help adjacent but secondary
 
-Retain Angular's right-side guide, but redesign it as one compact **Resources** rail. This keeps all support functions on the page without interrupting the primary task.
+Use one compact **Resources** rail on the right. This keeps all support functions on the page without interrupting the primary task.
 
 ### Progressive disclosure for dense code
 
@@ -340,7 +340,7 @@ Use line-style tabs in this exact order:
 
 ### SDK configuration
 
-Use one compact bordered list instead of Angular's description table.
+Use one compact bordered list.
 
 Rows:
 
@@ -427,7 +427,7 @@ Show the selected flag directly below:
 - Helper: `Run the starter code from Step 2. Detection can take up to 5 seconds after the event is sent.`
 - Show a thin determinate 120-second progress indicator and a textual remaining-time value.
 - The current status must remain readable without relying on color.
-- Poll every 5 seconds using the same Insights behavior as Angular.
+- Poll every 5 seconds to refresh Insights.
 - Back remains available and stops the active timer.
 - `Skip` remains a low-emphasis exit action.
 
@@ -535,7 +535,7 @@ The dynamic demo link is disabled with helper text when no client secret is avai
 - Use thin borders and tonal fills instead of ambient shadows.
 - Use lucide-react icons at 14-16px only where they improve recognition: Check, Copy, ExternalLink, ChevronDown, RotateCcw, ArrowLeft, ArrowRight, Eye, EyeOff, and AlertCircle.
 - Do not add a large green brand field, blue primary actions, purple competitor accents, gradients, glass, glow, heavy shadows, giant type, decorative illustration, or a marketing hero.
-- Do not visually copy Angular/ng-zorro steps, page headers, description tables, or Prism card styling.
+- Use shared shadcn steps, page headers, bordered lists, and code-display styling.
 - Keep light and dark themes structurally identical. Dark mode uses the existing neutral tokens rather than a separate visual composition.
 
 ## 15. Supported desktop widths
@@ -575,7 +575,7 @@ This section is implementation guidance only. It does not authorize source chang
 - Reuse Feature Flag list/create/key-validation and Insights API contracts already present in `front-end` rather than duplicating parallel endpoints.
 - Use TanStack Query for flag, environment, and Insights server state.
 - Use React Hook Form and Zod for Step 1 creation validation.
-- Use the current code-display decision from the React migration: Shiki or a lightweight composed CodeBlock, never Prism.
+- Use Shiki or a lightweight composed CodeBlock, never Prism.
 - Keep SDK definitions data-driven so tabs, commands, docs, secret compatibility, code language, and snippet builders share one source.
 
 ## 17. i18n and copy
@@ -589,12 +589,12 @@ This section is implementation guidance only. It does not authorize source chang
 ## 18. Acceptance criteria
 
 - The page preserves create-or-select behavior for a Boolean Feature Flag.
-- All six Angular SDKs, install commands, generated starter code, documentation links, endpoint values, secret selection, and copy actions remain available.
+- All six SDK language options, install commands, generated starter code, documentation links, endpoint values, secret selection, and copy actions remain available.
 - Event verification retains 5-second polling, a 120-second window, success, timeout, Retry, Back, Skip, and Feature Flags completion navigation.
-- All Angular guide links remain available in the redesigned Resources rail.
+- All guide links remain available in the redesigned Resources rail.
 - Secrets are masked by default and copied as full values.
 - The current project and environment remain owned by the unchanged context bar.
-- The page uses the current React neutral shadcn/Base UI visual language and does not clone Angular or either competitor.
+- The page uses the current React neutral shadcn/Base UI visual language.
 - The page is compact and legible at the supported desktop widths.
 - Loading, error, empty, missing-secret, missing-endpoint, permission, listening, success, and timeout states have explicit recoverable treatments.
 - The three default working states match the corresponding visual-baseline assets in Section 2, including step status, shared scenario data, action hierarchy, and Resources-rail structure.

@@ -117,7 +117,7 @@ public class ExperimentMetricEventNameTests(ExperimentProviderParityFixture fixt
         var metrics = fixture.CreateExperimentMetricService(provider);
         await metrics.ArchiveAsync(envId, primary.Id);
         await metrics.ArchiveAsync(envId, guardrail.Id);
-        var withNewRun = await fixture.CreateExperimentServices(provider).ExperimentService.CreateRunAsync(envId, experimentId);
+        var withNewRun = await fixture.CreateExperimentServices(provider).ExperimentService.CreateRunAsync(envId, experimentId, new ExperimentRunCreate { ControlVariant = "control", TreatmentVariants = ["treatment"] });
         var next = Assert.Single(withNewRun.ExperimentRuns, saved => saved.Id != run.Id);
         Assert.Equal(newDefaults.PrimaryMetric, next.PrimaryMetric);
         Assert.Equal(Assert.Single(newDefaults.GuardrailMetrics), Assert.Single(next.GuardrailMetrics));
@@ -193,7 +193,7 @@ public class ExperimentMetricEventNameTests(ExperimentProviderParityFixture fixt
         {
             Id = Guid.NewGuid(), EnvId = envId, Name = "No metrics", CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow
         });
-        var error = await Assert.ThrowsAsync<BusinessException>(() => service.CreateRunAsync(envId, experiment.Id));
+        var error = await Assert.ThrowsAsync<BusinessException>(() => service.CreateRunAsync(envId, experiment.Id, new ExperimentRunCreate { ControlVariant = "control", TreatmentVariants = ["treatment"] }));
         Assert.Equal(ErrorCodes.Required("primaryMetric"), error.Message);
         Assert.Empty((await service.GetAsync(envId, experiment.Id)).ExperimentRuns);
     }
@@ -229,7 +229,7 @@ public class ExperimentMetricEventNameTests(ExperimentProviderParityFixture fixt
             PrimaryMetric = new PrimaryMetricSelection { MetricId = primary.Id, ExpectedDirection = "increase_good" },
             GuardrailMetrics = [new GuardrailMetricSelection { MetricId = guardrail.Id, Direction = "decrease_bad" }]
         });
-        var run = Assert.Single((await experiments.CreateRunAsync(envId, experiment.Id)).ExperimentRuns);
+        var run = Assert.Single((await experiments.CreateRunAsync(envId, experiment.Id, new ExperimentRunCreate { ControlVariant = "control", TreatmentVariants = ["treatment"] })).ExperimentRuns);
         var configured = await experiments.UpdateRunAsync(envId, experiment.Id, run.Id, new ExperimentRunUpdate
         {
             Method = "bayesian_ab", ControlVariant = "control", TreatmentVariants = ["treatment"],
@@ -251,7 +251,7 @@ public class ExperimentMetricEventNameTests(ExperimentProviderParityFixture fixt
                 {
                     Id = Guid.NewGuid(), EnvId = envId, FlagKey = "checkout-flow", UserKey = userKey,
                     VariationId = treatment ? "treatment" : "control", VariationValue = treatment ? "true" : "false",
-                    ExposedAt = start.AddMinutes(1), Properties = "{}", CreatedAt = start
+                    ExposedAt = start.AddMinutes(1), CreatedAt = start
                 });
                 if (index < (treatment ? 8 : 5))
                 {
@@ -259,7 +259,7 @@ public class ExperimentMetricEventNameTests(ExperimentProviderParityFixture fixt
                     {
                         Id = Guid.NewGuid(), EnvId = envId, UserKey = userKey, EventName = "purchase",
                         EventType = "CustomEvent", NumericValue = treatment ? 20 : 10,
-                        OccurredAt = start.AddMinutes(2), Properties = "{}", CreatedAt = start
+                        OccurredAt = start.AddMinutes(2), CreatedAt = start
                     });
                 }
             }

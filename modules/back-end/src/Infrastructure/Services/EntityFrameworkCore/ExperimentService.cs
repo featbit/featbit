@@ -5,10 +5,8 @@ using Application.ExperimentStats;
 using Application.Experiments;
 using Application.Experiments.ExperimentMetrics;
 using Application.Services;
-using Application.Users;
 using Domain.FeatureFlags;
 using Domain.Experiments;
-using Domain.Users;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 
@@ -18,9 +16,7 @@ public class ExperimentService(
     AppDbContext dbContext,
     IExperimentStatsService statsService,
     IFeatureFlagService featureFlagService,
-    IExperimentMetricService metricService,
-    ICurrentUser currentUser,
-    IUserService userService)
+    IExperimentMetricService metricService)
     : IExperimentService
 {
     private const double GuardrailHealthyHarmProbability = 0.01;
@@ -30,12 +26,6 @@ public class ExperimentService(
     {
         var flag = await ExperimentFlagBinding.ValidateAsync(featureFlagService, experiment.EnvId, experiment.FlagId);
         await dbContext.Set<Experiment>().AddAsync(experiment);
-        await AddActivityAsync(
-            experiment.Id,
-            "stage_change",
-            "Experiment created",
-            $"Experiment experiment \"{experiment.Name}\" created. Stage: hypothesis",
-            experiment.CreatedAt);
         await dbContext.SaveChangesAsync();
 
         return ToVm(experiment, flag);
@@ -53,8 +43,7 @@ public class ExperimentService(
         }
 
         await LoadExperimentChildrenAsync(experiment);
-        var flag = await TryGetBoundFeatureFlagAsync(envId, experiment);
-        AlignRunsForRead(experiment, flag);
+        var flag = await ExperimentFlagBinding.FindAsync(featureFlagService, envId, experiment.FlagId);
         return ToDetailVm(experiment, flag);
     }
 
@@ -88,9 +77,6 @@ public class ExperimentService(
         await dbContext.Set<ExperimentRun>()
             .Where(x => x.ExperimentId == id)
             .ExecuteDeleteAsync();
-        await dbContext.Set<ExperimentActivity>()
-            .Where(x => x.ExperimentId == id)
-            .ExecuteDeleteAsync();
 
         dbContext.Set<Experiment>().Remove(experiment);
         await dbContext.SaveChangesAsync();
@@ -113,19 +99,9 @@ public class ExperimentService(
         }
 
         await ExperimentFlagBinding.ValidateAsync(featureFlagService, envId, update.FlagId);
-        var originalStage = experiment.Stage;
-
         ApplyUpdate(experiment, update);
         experiment.UpdatedAt = DateTime.UtcNow;
 
-        await AddActivityAsync(
-            experiment.Id,
-            originalStage == experiment.Stage ? "state_update" : "stage_change",
-            originalStage == experiment.Stage
-                ? "Decision state updated"
-                : $"Stage changed to {experiment.Stage}",
-            null,
-            experiment.UpdatedAt);
 
         await dbContext.SaveChangesAsync();
         return await GetAsync(envId, id);
@@ -148,12 +124,6 @@ public class ExperimentService(
         experiment.Stage = Normalize(stage, experiment.Stage);
         experiment.UpdatedAt = DateTime.UtcNow;
 
-        await AddActivityAsync(
-            experiment.Id,
-            "stage_change",
-            $"Stage changed to {experiment.Stage}",
-            null,
-            experiment.UpdatedAt);
 
         await dbContext.SaveChangesAsync();
         return await GetAsync(envId, id);
@@ -173,15 +143,15 @@ public class ExperimentService(
         experiment.GuardrailMetrics = guardrails;
         experiment.UpdatedAt = DateTime.UtcNow;
 
-        await AddActivityAsync(id, "note", "Experiment metrics updated", null, experiment.UpdatedAt);
         await dbContext.SaveChangesAsync();
 
         return await GetAsync(envId, id);
     }
 
-    public async Task<ExperimentDetailVm> CreateRunAsync(Guid envId, Guid id)
+    public async Task<ExperimentDetailVm> CreateRunAsync(Guid envId, Guid id, ExperimentRunCreate setup)
     {
-        var experiment = await GetTrackedExperimentAsync(envId, id);
+        ArgumentNullException.ThrowIfNull(setup);
+        var experiment = await GetReadOnlyExperimentAsync(envId, id);
 
         var existingRuns = await dbContext.Set<ExperimentRun>()
             .Where(x => x.ExperimentId == id)
@@ -195,11 +165,11 @@ public class ExperimentService(
         {
             Id = Guid.NewGuid(),
             ExperimentId = id,
-            Method = previous?.Method ?? "bayesian_ab",
+            Method = setup.Method ?? "bayesian_ab",
             PrimaryMetric = MetricSnapshots.Copy(experiment.PrimaryMetric),
             GuardrailMetrics = MetricSnapshots.Copy(experiment.GuardrailMetrics),
-            ControlVariant = previous?.ControlVariant,
-            TreatmentVariants = previous?.TreatmentVariants?.ToArray() ?? [],
+            ControlVariant = setup.ControlVariant,
+            TreatmentVariants = setup.TreatmentVariants ?? [],
             TrafficPercent = previous?.TrafficPercent ?? 100,
             TrafficOffset = previous?.TrafficOffset ?? 0,
             LayerId = previous?.LayerId,
@@ -211,41 +181,35 @@ public class ExperimentService(
             AssignmentUnitSelector = previous?.AssignmentUnitSelector ?? previous?.AllocationKeySelector ?? "user.keyId",
             LayerTrafficPercent = previous?.LayerTrafficPercent ?? 100,
             AnalysisSamplingPlan = previous?.AnalysisSamplingPlan,
-            AudienceFilters = previous?.AudienceFilters,
-            MinimumSample = previous?.MinimumSample,
+            MinimumSample = setup.MinimumSample,
             PriorProper = previous?.PriorProper ?? false,
             PriorMean = previous?.PriorMean,
             PriorStddev = previous?.PriorStddev,
-            ObservationStart = now,
+            ObservationStart = setup.ObservationStart ?? now,
+            ObservationEnd = setup.ObservationEnd,
             CreatedAt = now,
             UpdatedAt = now
         };
-        await AlignRunVariantsAsync(envId, experiment, run, inferMissing: true);
         if (string.IsNullOrWhiteSpace(run.PrimaryMetric?.EventName))
         {
             throw new BusinessException(ErrorCodes.Required("primaryMetric"));
         }
+        var flag = await ExperimentFlagBinding.RequireAsync(featureFlagService, envId, experiment.FlagId);
+        run.Variations = RunVariationSnapshot.Copy(flag.Variations);
+        RunVariationSnapshot.ValidateSelection(run);
 
         await NormalizeAndValidateLayerAssignmentAsync(envId, run);
-        var number = await AllocateRunNumberAsync(envId, experiment, existingRuns);
+        var number = await AllocateRunNumberAsync(envId, experiment);
         run.Slug = $"run-{number}";
         await dbContext.Set<ExperimentRun>().AddAsync(run);
-        await AddActivityAsync(
-            id,
-            "note",
-            $"{ExperimentRunNumber.CreationTitlePrefix}{run.Slug}",
-            previous == null ? "Metric snapshot from experiment" : $"Metric snapshot from experiment; other settings copied from {previous.Slug}",
-            now);
 
         await dbContext.SaveChangesAsync();
         return await GetAsync(envId, id);
     }
 
-    private async Task<long> AllocateRunNumberAsync(
-        Guid envId, Experiment experiment, IReadOnlyCollection<ExperimentRun> existingRuns)
+    private async Task<int> AllocateRunNumberAsync(
+        Guid envId, Experiment experiment)
     {
-        await InitializeRunNumberAsync(envId, experiment, existingRuns.Select(x => x.Slug));
-
         return await dbContext.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
         {
             await using var transaction = await dbContext.Database.BeginTransactionAsync();
@@ -256,39 +220,12 @@ public class ExperimentService(
             // A failed run insertion may leave a gap; reserved numbers are never reused.
             await experiments.ExecuteUpdateAsync(setters => setters
                 .SetProperty(x => x.LastRunNumber, x => x.LastRunNumber + 1));
-            var number = await experiments.Select(x => x.LastRunNumber).SingleOrDefaultAsync()
+            var number = await experiments.Select(x => (int?)x.LastRunNumber).SingleOrDefaultAsync()
                          ?? throw new EntityNotFoundException(nameof(Experiment), $"{envId}-{experiment.Id}");
 
             await transaction.CommitAsync();
             return number;
         });
-    }
-
-    private async Task InitializeRunNumberAsync(
-        Guid envId, Experiment experiment, IEnumerable<string>? existingSlugs = null)
-    {
-        if (experiment.LastRunNumber.HasValue)
-        {
-            return;
-        }
-
-        existingSlugs ??= await dbContext.Set<ExperimentRun>()
-            .Where(x => x.ExperimentId == experiment.Id)
-            .Select(x => x.Slug)
-            .ToListAsync();
-        var creationTitles = await dbContext.Set<ExperimentActivity>()
-            .Where(x => x.ExperimentId == experiment.Id && x.Type == "note" &&
-                        x.Title.StartsWith(ExperimentRunNumber.CreationTitlePrefix))
-            .Select(x => x.Title)
-            .ToListAsync();
-        var lastUsed = ExperimentRunNumber.LastUsed(existingSlugs, creationTitles);
-
-        // Seed before either creation or deletion, even when legacy creation activities are absent.
-        // Never lower a value initialized or incremented by a concurrent request.
-        await dbContext.Set<Experiment>()
-            .Where(x => x.Id == experiment.Id && x.EnvId == envId)
-            .ExecuteUpdateAsync(setters => setters
-                .SetProperty(x => x.LastRunNumber, x => Math.Max(x.LastRunNumber ?? 0, lastUsed)));
     }
 
     public async Task<ExperimentDetailVm> DeleteRunAsync(Guid envId, Guid id, Guid runId)
@@ -303,9 +240,7 @@ public class ExperimentService(
             throw new EntityNotFoundException(nameof(ExperimentRun), $"{id}-{runId}");
         }
 
-        await InitializeRunNumberAsync(envId, experiment);
         dbContext.Set<ExperimentRun>().Remove(run);
-        await AddActivityAsync(id, "note", $"Experiment run deleted: {run.Slug}");
         await dbContext.SaveChangesAsync();
 
         return await GetAsync(envId, id);
@@ -318,15 +253,20 @@ public class ExperimentService(
         ExperimentRunUpdate update)
     {
         update ??= new ExperimentRunUpdate();
-        var experiment = await GetTrackedExperimentAsync(envId, id);
+        await EnsureExperimentExistsAsync(envId, id);
 
         var run = await GetTrackedRunAsync(id, runId);
+        RunVariationSnapshot.EnsureSelectionCanChange(run, update.ControlVariant, update.TreatmentVariants);
+        var selection = RunVariationSnapshot.Selection(run);
         ApplyRunUpdate(run, update);
         await NormalizeAndValidateLayerAssignmentAsync(envId, run);
-        await AlignRunVariantsAsync(envId, experiment, run, inferMissing: false);
+        if (update.ControlVariant != null || update.TreatmentVariants != null)
+        {
+            RunVariationSnapshot.ValidateSelection(run);
+            RunVariationSnapshot.InvalidateChangedSelection(run, selection);
+        }
         run.UpdatedAt = DateTime.UtcNow;
 
-        await AddActivityAsync(id, "note", $"Experiment run updated: {run.Slug}", null, run.UpdatedAt);
         await dbContext.SaveChangesAsync();
 
         return await GetAsync(envId, id);
@@ -342,6 +282,8 @@ public class ExperimentService(
         await EnsureExperimentExistsAsync(envId, id);
 
         var run = await GetTrackedRunAsync(id, runId);
+        RunVariationSnapshot.EnsureSelectionCanChange(run, update.ControlVariant, update.TreatmentVariants);
+        var selection = RunVariationSnapshot.Selection(run);
         var sliceStart = Math.Clamp(update.SliceStart ?? update.TrafficOffset ?? 0, 0, 100);
         var sliceEnd = Math.Clamp(
             update.SliceEnd ?? Math.Min(
@@ -362,22 +304,22 @@ public class ExperimentService(
         run.SliceStart = sliceStart;
         run.SliceEnd = sliceEnd;
         run.AllocationPlan = Normalize(update.AllocationPlan);
-        run.ControlVariant = Normalize(update.ControlVariant, run.ControlVariant);
-        run.TreatmentVariants = update.TreatmentVariants?
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .Select(x => x.Trim())
-            .ToArray() ?? run.TreatmentVariants;
+        if (update.ControlVariant != null) run.ControlVariant = update.ControlVariant;
+        run.TreatmentVariants = update.TreatmentVariants?.ToArray() ?? run.TreatmentVariants;
         run.AssignmentUnitSelector = Normalize(update.AssignmentUnitSelector, run.AssignmentUnitSelector) ??
                                      run.AllocationKeySelector ??
                                      "user.keyId";
         run.LayerTrafficPercent = Math.Clamp(sliceEnd - sliceStart, 0d, 100d);
         run.AnalysisSamplingPlan = Normalize(update.AnalysisSamplingPlan);
-        run.AudienceFilters = Normalize(update.AudienceFilters);
         run.Method = Normalize(update.Method, run.Method);
         await NormalizeAndValidateLayerAssignmentAsync(envId, run);
+        if (update.ControlVariant != null || update.TreatmentVariants != null)
+        {
+            RunVariationSnapshot.ValidateSelection(run);
+            RunVariationSnapshot.InvalidateChangedSelection(run, selection);
+        }
         run.UpdatedAt = DateTime.UtcNow;
 
-        await AddActivityAsync(id, "note", "Experiment run audience & traffic updated", null, run.UpdatedAt);
         await dbContext.SaveChangesAsync();
 
         return await GetAsync(envId, id);
@@ -403,14 +345,6 @@ public class ExperimentService(
         await NormalizeAndValidateLayerAssignmentAsync(envId, run);
         run.UpdatedAt = DateTime.UtcNow;
 
-        await AddActivityAsync(
-            id,
-            "note",
-            "Observation window updated",
-            update.ObservationStart.HasValue || update.ObservationEnd.HasValue
-                ? $"From {update.ObservationStart?.ToString("u") ?? "—"} to {update.ObservationEnd?.ToString("u") ?? "—"}"
-                : "Cleared",
-            run.UpdatedAt);
         await dbContext.SaveChangesAsync();
 
         return await GetAsync(envId, id);
@@ -423,11 +357,9 @@ public class ExperimentService(
         ExperimentRunAnalyzeRequest request)
     {
         request ??= new ExperimentRunAnalyzeRequest();
-        var experiment = await GetTrackedExperimentAsync(envId, id);
+        var experiment = await GetReadOnlyExperimentAsync(envId, id);
         var run = await GetTrackedRunAsync(id, runId);
         var flag = await ExperimentFlagBinding.RequireAsync(featureFlagService, envId, experiment.FlagId);
-        experiment.Variants = BuildFeatureFlagVariantsJson(flag);
-        AlignRunVariants(run, flag, inferMissing: true);
         var primarySnapshot = run.PrimaryMetric
             ?? throw new BusinessException(ErrorCodes.Required("primaryMetric"));
         var primaryMetricEvent = Normalize(primarySnapshot.EventName);
@@ -437,6 +369,7 @@ public class ExperimentService(
             throw new InvalidOperationException("Primary metric event is required before analysis.");
         }
 
+        RunVariationSnapshot.ValidateSelection(run);
         var now = DateTime.UtcNow;
         var start = ExperimentRunAllocation.ObservationStart(run);
         var end = run.ObservationEnd ?? now;
@@ -530,24 +463,13 @@ public class ExperimentService(
 
         var control = Normalize(run.ControlVariant) ?? "control";
         var treatments = run.TreatmentVariants ?? [];
-        var (analysisControl, analysisTreatments) = ResolveAnalysisVariantKeys(
-            experiment.Variants,
-            primaryMetricData,
-            control,
-            treatments);
         var analysisResult = BuildBayesianAnalysisJson(
             run, experiment.Name ?? id.ToString(), primaryMetricEvent, metricAgg,
-            metrics, guardrails, analysisControl, analysisTreatments);
+            metrics, guardrails, control, treatments);
 
         run.AnalysisResult = analysisResult;
         run.UpdatedAt = DateTime.UtcNow;
 
-        await AddActivityAsync(
-            id,
-            "note",
-            "Experiment run analyzed from FeatBit stats",
-            $"{flag.Key} · {primaryMetricEvent} · {startDate} to {endDate}",
-            run.UpdatedAt);
 
         await dbContext.SaveChangesAsync();
         return await GetAsync(envId, id);
@@ -725,194 +647,9 @@ public class ExperimentService(
             .AsNoTracking()
             .Where(x => x.ExperimentId == experiment.Id)
             .ToListAsync();
-        experiment.Activities = await dbContext.Set<ExperimentActivity>()
-            .AsNoTracking()
-            .Where(x => x.ExperimentId == experiment.Id)
-            .ToListAsync();
     }
 
-    private static void AlignRunsForRead(Experiment experiment, FeatureFlag? flag)
-    {
-        if (flag == null)
-        {
-            return;
-        }
 
-        experiment.Variants = BuildFeatureFlagVariantsJson(flag);
-        foreach (var run in experiment.ExperimentRuns)
-        {
-            AlignRunVariants(run, flag, inferMissing: false);
-        }
-    }
-
-    private async Task AlignRunVariantsAsync(
-        Guid envId,
-        Experiment experiment,
-        ExperimentRun run,
-        bool inferMissing)
-    {
-        var flag = await TryGetBoundFeatureFlagAsync(envId, experiment);
-        if (flag == null)
-        {
-            return;
-        }
-
-        experiment.Variants = BuildFeatureFlagVariantsJson(flag);
-        AlignRunVariants(run, flag, inferMissing);
-    }
-
-    private Task<FeatureFlag?> TryGetBoundFeatureFlagAsync(Guid envId, Experiment experiment) =>
-        ExperimentFlagBinding.FindAsync(featureFlagService, envId, experiment.FlagId);
-
-    private static void AlignRunVariants(
-        ExperimentRun run,
-        FeatureFlag flag,
-        bool inferMissing)
-    {
-        var variations = flag.Variations?
-            .Where(x => !string.IsNullOrWhiteSpace(x.Id))
-            .ToArray() ?? [];
-        if (variations.Length == 0)
-        {
-            return;
-        }
-
-        // Named defaults must not replace roles explicitly selected for this run.
-        if (inferMissing &&
-            string.IsNullOrWhiteSpace(run.ControlVariant) &&
-            (run.TreatmentVariants == null || run.TreatmentVariants.Length == 0) &&
-            TryResolveNamedControlAndTreatments(variations, out var namedControl, out var namedTreatments))
-        {
-            run.ControlVariant = namedControl;
-            run.TreatmentVariants = namedTreatments;
-            return;
-        }
-
-        var control = ResolveVariantId(run.ControlVariant, variations);
-        if (string.IsNullOrWhiteSpace(control) && inferMissing)
-        {
-            control = PickControlVariationId(flag, variations);
-        }
-
-        var treatments = ResolveTreatmentVariantIds(run.TreatmentVariants, variations)
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .Where(x => string.IsNullOrWhiteSpace(control) || !VariantTokenEquals(x, control))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToArray();
-
-        if (treatments.Length == 0 && inferMissing && !string.IsNullOrWhiteSpace(control))
-        {
-            treatments = variations
-                .Where(x => !VariantTokenEquals(x.Id, control))
-                .OrderBy(x => IsTreatmentVariation(x) ? 0 : 1)
-                .Select(x => x.Id)
-                .ToArray();
-        }
-
-        if (!string.IsNullOrWhiteSpace(control))
-        {
-            run.ControlVariant = control;
-        }
-
-        if (treatments.Length > 0)
-        {
-            run.TreatmentVariants = treatments;
-        }
-    }
-
-    private static bool TryResolveNamedControlAndTreatments(
-        IReadOnlyCollection<Variation> variations,
-        out string control,
-        out string[] treatments)
-    {
-        control = variations.FirstOrDefault(IsControlVariation)?.Id ?? string.Empty;
-        treatments = variations
-            .Where(IsTreatmentVariation)
-            .Select(x => x.Id)
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .ToArray();
-
-        return !string.IsNullOrWhiteSpace(control) && treatments.Length > 0;
-    }
-
-    private static string? ResolveVariantId(
-        string? token,
-        IReadOnlyCollection<Variation> variations)
-    {
-        var normalized = Normalize(token);
-        if (string.IsNullOrWhiteSpace(normalized))
-        {
-            return null;
-        }
-
-        return TryResolveExistingVariantId(normalized, variations) ?? normalized;
-    }
-
-    private static string? TryResolveExistingVariantId(
-        string? token,
-        IReadOnlyCollection<Variation> variations)
-    {
-        var normalized = Normalize(token);
-        if (string.IsNullOrWhiteSpace(normalized))
-        {
-            return null;
-        }
-
-        var matched = variations.FirstOrDefault(x => VariantTokenEquals(x.Id, normalized));
-
-        return matched?.Id;
-    }
-
-    private static string[] ResolveTreatmentVariantIds(
-        string[]? values,
-        IReadOnlyCollection<Variation> variations)
-    {
-        return (values ?? [])
-            .Select(x => ResolveVariantId(x, variations))
-            .OfType<string>()
-            .ToArray();
-    }
-
-    private static string? PickControlVariationId(
-        FeatureFlag flag,
-        IReadOnlyCollection<Variation> variations)
-    {
-        return variations.FirstOrDefault(IsControlVariation)?.Id
-            ?? variations.FirstOrDefault(x => VariantTokenEquals(x.Id, flag.DisabledVariationId))?.Id
-            ?? variations.First().Id;
-    }
-
-    private static bool IsControlVariation(Variation variation)
-    {
-        return VariantTokenEquals(variation.Name, "control");
-    }
-
-    private static bool IsTreatmentVariation(Variation variation)
-    {
-        return VariantTokenEquals(variation.Name, "treatment");
-    }
-
-    private static bool VariantTokenEquals(string? left, string? right)
-    {
-        return string.Equals(Normalize(left), Normalize(right), StringComparison.OrdinalIgnoreCase);
-    }
-
-    private static string BuildFeatureFlagVariantsJson(FeatureFlag flag)
-    {
-        var rows = (flag.Variations ?? [])
-            .Where(x => !string.IsNullOrWhiteSpace(x.Id))
-            .Select(x => new
-            {
-                key = x.Id,
-                name = x.Name,
-                value = x.Value,
-                description = string.IsNullOrWhiteSpace(x.Value)
-                    ? x.Name
-                    : $"{x.Name} ({x.Value})"
-            });
-
-        return JsonSerializer.Serialize(rows);
-    }
 
     private static ExperimentDetailVm ToDetailVm(Experiment experiment, FeatureFlag? flag)
     {
@@ -935,18 +672,12 @@ public class ExperimentService(
             LastAction = experiment.LastAction,
             LastLearning = experiment.LastLearning,
             PrimaryMetric = MetricSnapshots.Copy(experiment.PrimaryMetric),
-            Variants = experiment.Variants,
             ConflictAnalysis = experiment.ConflictAnalysis,
             CreatedAt = experiment.CreatedAt,
             UpdatedAt = experiment.UpdatedAt,
             ExperimentRuns = experiment.ExperimentRuns
                 .OrderByDescending(x => x.CreatedAt)
                 .Select(x => ToRunVm(x))
-                .ToArray(),
-            Activities = experiment.Activities
-                .OrderByDescending(x => x.CreatedAt)
-                .Take(20)
-                .Select(ToActivityVm)
                 .ToArray()
         };
 
@@ -965,6 +696,7 @@ public class ExperimentService(
             GuardrailMetrics = MetricSnapshots.Copy(run.GuardrailMetrics),
             ControlVariant = run.ControlVariant,
             TreatmentVariants = run.TreatmentVariants,
+            Variations = run.Variations,
             MinimumSample = run.MinimumSample,
             ObservationStart = run.ObservationStart,
             ObservationEnd = run.ObservationEnd,
@@ -982,7 +714,6 @@ public class ExperimentService(
             NextHypothesis = run.NextHypothesis,
             TrafficPercent = run.TrafficPercent,
             LayerId = run.LayerId,
-            AudienceFilters = run.AudienceFilters,
             TrafficOffset = run.TrafficOffset,
             LayerKey = run.LayerKey,
             AllocationKeySelector = run.AllocationKeySelector,
@@ -994,22 +725,6 @@ public class ExperimentService(
             AnalysisSamplingPlan = run.AnalysisSamplingPlan,
             CreatedAt = run.CreatedAt,
             UpdatedAt = run.UpdatedAt
-        };
-    }
-
-    private static ExperimentActivityVm ToActivityVm(ExperimentActivity activity)
-    {
-        return new ExperimentActivityVm
-        {
-            Id = activity.Id,
-            Type = activity.Type,
-            Title = activity.Title,
-            Detail = activity.Detail,
-            ActorId = activity.ActorId,
-            ActorName = activity.ActorName,
-            ActorEmail = activity.ActorEmail,
-            ActorType = activity.ActorType,
-            CreatedAt = activity.CreatedAt
         };
     }
 
@@ -1026,7 +741,6 @@ public class ExperimentService(
         experiment.Intent = Normalize(update.Intent, experiment.Intent);
         experiment.LastAction = Normalize(update.LastAction, experiment.LastAction);
         experiment.LastLearning = Normalize(update.LastLearning, experiment.LastLearning);
-        experiment.Variants = Normalize(update.Variants, experiment.Variants);
         experiment.ConflictAnalysis = Normalize(update.ConflictAnalysis, experiment.ConflictAnalysis);
     }
 
@@ -1034,11 +748,8 @@ public class ExperimentService(
     {
         run.Slug = Normalize(update.Slug, run.Slug);
         run.Method = Normalize(update.Method, run.Method);
-        run.ControlVariant = Normalize(update.ControlVariant, run.ControlVariant);
-        run.TreatmentVariants = update.TreatmentVariants?
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .Select(x => x.Trim())
-            .ToArray() ?? run.TreatmentVariants;
+        if (update.ControlVariant != null) run.ControlVariant = update.ControlVariant;
+        run.TreatmentVariants = update.TreatmentVariants?.ToArray() ?? run.TreatmentVariants;
         run.AnalysisResult = Normalize(update.AnalysisResult, run.AnalysisResult);
         run.Decision = Normalize(update.Decision, run.Decision);
         run.DecisionSummary = Normalize(update.DecisionSummary, run.DecisionSummary);
@@ -1054,7 +765,6 @@ public class ExperimentService(
         run.AllocationPlan = Normalize(update.AllocationPlan, run.AllocationPlan);
         run.AssignmentUnitSelector = Normalize(update.AssignmentUnitSelector, run.AssignmentUnitSelector);
         run.AnalysisSamplingPlan = Normalize(update.AnalysisSamplingPlan, run.AnalysisSamplingPlan);
-        run.AudienceFilters = Normalize(update.AudienceFilters, run.AudienceFilters);
 
         if (update.MinimumSample.HasValue) run.MinimumSample = update.MinimumSample;
         if (update.ObservationStart.HasValue) run.ObservationStart = update.ObservationStart;
@@ -1176,6 +886,11 @@ public class ExperimentService(
         return (start, end);
     }
 
+    private async Task<Experiment> GetReadOnlyExperimentAsync(Guid envId, Guid id) =>
+        await dbContext.Set<Experiment>().AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == id && x.EnvId == envId)
+        ?? throw new EntityNotFoundException(nameof(Experiment), $"{envId}-{id}");
+
     private async Task<Experiment> GetTrackedExperimentAsync(Guid envId, Guid id)
     {
         var experiment = await dbContext.Set<Experiment>()
@@ -1213,56 +928,6 @@ public class ExperimentService(
         }
 
         return run;
-    }
-
-    private async Task AddActivityAsync(
-        Guid experimentId,
-        string type,
-        string title,
-        string? detail = null,
-        DateTime? createdAt = null)
-    {
-        var actor = await ResolveActivityActorAsync();
-        await dbContext.Set<ExperimentActivity>().AddAsync(new ExperimentActivity
-        {
-            Id = Guid.NewGuid(),
-            ExperimentId = experimentId,
-            Type = type,
-            Title = title,
-            Detail = detail,
-            ActorId = actor.Id,
-            ActorName = actor.Name,
-            ActorEmail = actor.Email,
-            ActorType = actor.Type,
-            CreatedAt = createdAt ?? DateTime.UtcNow
-        });
-    }
-
-    private async Task<(Guid? Id, string? Name, string? Email, string Type)> ResolveActivityActorAsync()
-    {
-        var actorId = currentUser.Id;
-        if (actorId == Guid.Empty || actorId == SystemUser.Id)
-        {
-            return (SystemUser.Id, "System", null, "system");
-        }
-
-        var user = await userService.FindOneAsync(x => x.Id == actorId);
-        if (user != null)
-        {
-            return (
-                user.Id,
-                string.IsNullOrWhiteSpace(user.Name) ? user.Email : user.Name,
-                user.Email,
-                "user");
-        }
-
-        var operatorName = await userService.GetOperatorAsync(actorId);
-        if (!string.IsNullOrWhiteSpace(operatorName))
-        {
-            return (actorId, operatorName, null, "access_token");
-        }
-
-        return (actorId, "Unknown actor", null, "unknown");
     }
 
     private async Task<ExperimentMetric> ResolveMetricAsync(Guid envId, Guid metricId)
@@ -1351,104 +1016,6 @@ public class ExperimentService(
         }
 
         return metricData;
-    }
-
-    private static (string Control, string[] Treatments) ResolveAnalysisVariantKeys(
-        string? variantsJson,
-        Dictionary<string, object> metricData,
-        string control,
-        string[] treatments)
-    {
-        var candidatesByToken = BuildVariantAnalysisKeyCandidates(variantsJson);
-        var resolvedControl = ResolveAnalysisVariantKey(control, metricData, candidatesByToken);
-        var resolvedTreatments = treatments
-            .Select(x => ResolveAnalysisVariantKey(x, metricData, candidatesByToken))
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .Where(x => !VariantTokenEquals(x, resolvedControl))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToArray();
-
-        return (resolvedControl, resolvedTreatments);
-    }
-
-    private static string ResolveAnalysisVariantKey(
-        string token,
-        Dictionary<string, object> metricData,
-        IReadOnlyDictionary<string, string[]> candidatesByToken)
-    {
-        var existing = FindExistingMetricKey(metricData, token);
-        if (!string.IsNullOrWhiteSpace(existing))
-        {
-            return existing;
-        }
-
-        if (candidatesByToken.TryGetValue(token, out var candidates))
-        {
-            foreach (var candidate in candidates)
-            {
-                existing = FindExistingMetricKey(metricData, candidate);
-                if (!string.IsNullOrWhiteSpace(existing))
-                {
-                    return existing;
-                }
-            }
-
-            return candidates.FirstOrDefault() ?? token;
-        }
-
-        return token;
-    }
-
-    private static string? FindExistingMetricKey(Dictionary<string, object> metricData, string? token)
-    {
-        var normalized = Normalize(token);
-        if (string.IsNullOrWhiteSpace(normalized))
-        {
-            return null;
-        }
-
-        return metricData.Keys.FirstOrDefault(key => VariantTokenEquals(key, normalized));
-    }
-
-    private static Dictionary<string, string[]> BuildVariantAnalysisKeyCandidates(string? variantsJson)
-    {
-        var map = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
-        if (string.IsNullOrWhiteSpace(variantsJson))
-        {
-            return map;
-        }
-
-        try
-        {
-            using var document = JsonDocument.Parse(variantsJson);
-            if (document.RootElement.ValueKind != JsonValueKind.Array)
-            {
-                return map;
-            }
-
-            foreach (var item in document.RootElement.EnumerateArray())
-            {
-                var key = GetJsonString(item, "key");
-                var name = GetJsonString(item, "name");
-                var value = GetJsonString(item, "value");
-                var candidates = new[] { key, name, value }
-                    .OfType<string>()
-                    .Where(x => !string.IsNullOrWhiteSpace(x))
-                    .Distinct(StringComparer.OrdinalIgnoreCase)
-                    .ToArray();
-
-                foreach (var token in candidates)
-                {
-                    map[token] = candidates;
-                }
-            }
-        }
-        catch (JsonException)
-        {
-            // If stored variant metadata is invalid, fall back to the run tokens.
-        }
-
-        return map;
     }
 
     private static string BuildBayesianAnalysisJson(
@@ -2244,13 +1811,6 @@ public class ExperimentService(
         {
             return new BayesianComparison(error, 0, 0, 0, 0, 0, 0, 0, false);
         }
-    }
-
-    private static string? GetJsonString(JsonElement element, string property)
-    {
-        return element.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.String
-            ? value.GetString()
-            : null;
     }
 
     private static bool IsDecreaseGood(string? value)

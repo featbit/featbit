@@ -22,6 +22,7 @@ vi.mock("@/lib/api/authenticated-api", () => ({ fetchApi: vi.fn() }))
 
 const run: MeasuringRun = {
   id: "run-1",
+  variations: [],
   slug: "run-1",
   method: "bayesian_ab",
   minimumSample: 100,

@@ -9,7 +9,7 @@ Included:
 - the compact Feature Flag summary header;
 - `Targeting`, `Variations`, `Triggers`, `Insights`, `Settings`, and `History` tabs;
 - dialogs, popovers, sheets, validation, loading, empty, error, permission, license, archived, and dirty-navigation states directly owned by those tabs;
-- all non-experiment Feature Flag detail behavior present in Angular.
+- all non-experiment Feature Flag detail behavior specified in this document.
 
 Excluded:
 
@@ -18,7 +18,7 @@ Excluded:
 - the Feature Flags index and Compare page;
 - all experimentation and A/B-test UI, routes, commands, references, warnings, and terminology.
 
-Angular under `front-end-v1/src/app/features/safe/feature-flags/details/` is a read-only functional reference. The visual target is the compact neutral React/shadcn workbench established by `front-end` and the accepted Segment Details design. Do not reproduce Angular/ng-zorro layout or styling.
+The visual target is the compact neutral React/shadcn workbench established by `front-end` and the accepted Segment Details design. Use the shared layout and component tokens.
 
 ## Design Assets
 
@@ -109,7 +109,7 @@ For an archived flag:
 - replace the ON/OFF status Badge with an `Archived` Badge;
 - keep all information readable but disable mutation controls;
 - expose `Restore` and `Remove permanently` in the Settings lifecycle section;
-- require the same permission and change-comment behavior as Angular;
+- enforce the documented permissions and optional/required change-comment rules;
 - return to the Feature Flags index after successful permanent removal.
 
 ## Targeting Tab
@@ -225,7 +225,7 @@ Scheduling adds title and scheduled time. Change request adds reason and reviewe
 
 #### Review dialog family
 
-All three Targeting submission paths use the current React Segment Targeting review dialog as their shared shell, rather than reproducing the Angular modal styling:
+All three Targeting submission paths use the current React Segment Targeting review dialog as their shared shell:
 
 - `sm:max-w-3xl`-scale centered Dialog with the same header spacing, title/description hierarchy, close action, body rhythm, and transparent borderless footer;
 - `Changes` followed by inline `{count} changes`;
@@ -246,7 +246,7 @@ Scheduled time must be in the future. Inline validation belongs directly beneath
 
 `Change request` opens the same shell titled `Request approval for targeting changes`. After the unchanged ledger it shows required Reason and required searchable multi-select Reviewers. Exclude the current user from reviewer results and require at least one reviewer. The primary action is `Submit request`; submission creates a pending request and does not apply the draft immediately.
 
-Do not place Save, Schedule, and Change Request tabs inside these dialogs. The Targeting toolbar already provides one explicit immediate-save action and two independently gated More-menu commands. Keeping a dedicated entry and primary verb for each path reduces mode errors while preserving all Angular behavior, including the combined scheduled approval path.
+Do not place Save, Schedule, and Change Request tabs inside these dialogs. The Targeting toolbar already provides one explicit immediate-save action and two independently gated More-menu commands. Keeping a dedicated entry and primary verb for each path reduces mode errors while preserving all documented behavior, including the combined scheduled approval path.
 
 Reference states:
 
@@ -258,7 +258,7 @@ The pending-changes surface lists scheduled changes and change requests, includi
 
 #### Pending changes Sheet
 
-Clicking `Pending changes` opens a right-side Sheet over the Feature Flag detail page. Use the current React Sheet vocabulary rather than copying the 600px Angular drawer: fixed header, independently scrolling body, `760px` desktop width, full-width on a narrow viewport, and no footer that competes with item actions. The page remains visible beneath the standard modal backdrop; this Sheet does not alter the sidebar or context bar.
+Clicking `Pending changes` opens a right-side Sheet over the Feature Flag detail page. Use the current React Sheet vocabulary: fixed header, independently scrolling body, `760px` desktop width, full-width on a narrow viewport, and no footer that competes with item actions. The page remains visible beneath the standard modal backdrop; this Sheet does not alter the sidebar or context bar.
 
 The header contains `Pending changes`, the total count, a concise flag-specific description, and the standard close button. The body begins with `x pending changes · y needs your review` and a compact status filter. This count includes schedules and change requests already submitted to the server; it does not include the current unsaved Targeting draft.
 
@@ -274,7 +274,7 @@ Render the queue as one bordered list with dividers rather than a stack of neste
 
 Keep the first actionable item expanded in the reference state and the remaining items collapsed. Expansion affects only the selected item. Long queues scroll inside the Sheet; long ChangeLedgers use their own bounded scroll only after the item would otherwise dominate the viewport.
 
-Promote workflow actions out of the Angular ellipsis menu:
+Expose workflow actions directly:
 
 - a reviewer sees explicit `Decline` and primary `Approve` buttons while their decision is pending;
 - an approved standalone Change Request exposes primary `Apply changes` to the creator or an approving reviewer;
@@ -328,7 +328,7 @@ Variations is a new route and the only place for editing the variation collectio
 
 - names are required and trimmed;
 - values are validated by immutable type;
-- boolean values are `true` or `false` and retain the fixed boolean variation constraints from Angular;
+- boolean values are `true` or `false` and retain the fixed boolean variation constraints;
 - number values must be valid numbers;
 - JSON must parse as a JSON object under the confirmed backend validator;
 - string and JSON values may open a larger editor with `Format`, `Cancel`, and `Apply` actions;
@@ -348,7 +348,7 @@ After a successful save, refresh the summary, Targeting variation options, Histo
 
 ### Main table
 
-Use a compact table instead of Angular cards. Columns are `Type`, `Action`, `Status`, `Trigger URL`, `Usage`, and `Actions`.
+Use a compact table. Columns are `Type`, `Action`, `Status`, `Trigger URL`, `Usage`, and `Actions`.
 
 Each trigger preserves:
 
@@ -372,7 +372,7 @@ The empty state explains what event triggers do and repeats `Add trigger` for au
 
 ## Insights Tab
 
-Insights retains Angular reporting behavior but uses Recharts and current React table/filter patterns.
+Insights retains reporting behavior but uses Recharts and current React table/filter patterns.
 
 ### Evaluation chart
 
@@ -388,7 +388,7 @@ Place `Period` and `Interval` filters above one bordered chart surface. Supporte
 - Last 6 months;
 - Last 12 months.
 
-Available interval choices remain conditional on the selected period exactly as in Angular: minute, hour, day, week, and month where supported. Changing period selects its first valid interval and refreshes both chart and end-user results.
+Available interval choices remain conditional on the selected period: minute, hour, day, week, and month where supported. Changing period selects its first valid interval and refreshes both chart and end-user results.
 
 The chart shows Total plus each variation as separate lines, a compact legend, localized time axis, Tooltip values, and the total evaluation count. Use a stable semantic series-color mapping that works in light and dark themes. Do not use G2.
 
@@ -430,7 +430,7 @@ Preserve the independent backend operations and permissions for name, descriptio
 
 ## History Tab
 
-Reuse the accepted Segment Details/global Audit Logs React contract rather than the Angular embedded presentation.
+Reuse the accepted Segment Details/global Audit Logs React contract.
 
 ### Toolbar and query
 
@@ -531,7 +531,7 @@ License gating applies to Schedule and Change Request independently. A license-g
 
 ## Functional Invariants
 
-- The Targeting status switch preserves Angular confirmation and optional/required change-comment behavior; the persistent header status is read-only.
+- The Targeting status switch preserves confirmation and optional/required change-comment behavior; the persistent header status is read-only.
 - `If OFF, serve` is part of Targeting > Default rule and nowhere else.
 - Targeting preserves default, individual, ordered rule, percentage rollout, property/operator, validation, review, schedule, change-request, and pending-change behavior.
 - Variations preserves immutable type, typed validation, add/edit/remove, ordering, expanded string/JSON editing, revision, and comment behavior.
@@ -546,15 +546,15 @@ License gating applies to Schedule and Change Request independently. A license-g
 
 - Only Feature Flag details main content and its directly owned overlays are designed; sidebar and context bar remain unchanged.
 - The page has exactly six route-backed tabs in this order: Targeting, Variations, Triggers, Insights, Settings, History.
-- The persistent header exposes identity, immutable metadata, and status without reproducing Angular's stacked settings blocks or adding a one-item overflow menu.
+- The persistent header exposes identity, immutable metadata, and status without stacked settings blocks or a one-item overflow menu.
 - The persistent header shows only read-only status, while Targeting contains the page's single interactive global ON/OFF switch.
 - Targeting shows ON and OFF default serving on one compact Default rule surface; `If OFF, serve` is not duplicated elsewhere.
 - Targeting and Settings visibly follow the accepted Segment Details hierarchy and review patterns while retaining Feature Flag-specific behavior.
 - Variations is a first-class editor tab, not a modal launched from Settings.
 - Trigger URLs clearly distinguish one-time revealed and later masked states.
-- Insights uses Recharts and current React filters/table conventions, not G2/ng-zorro presentation.
+- Insights uses Recharts and current React filters/table conventions.
 - History reuses the React audit-table contract and hides the redundant Type filter/column.
 - Permission, license, loading, empty, error, archived, validation, dirty-navigation, partial-success, and conflict states are specified.
 - No experiment or A/B-test UI appears in any design asset.
 - The design uses current React/shadcn tokens, compact density, thin borders, quiet tonal surfaces, and no ambient card shadows.
-- No React or Angular implementation, configuration, dependency, test, or resource file is changed as part of this design-only task.
+- No implementation, configuration, dependency, test, or resource file is changed as part of this design-only task.

@@ -3,7 +3,7 @@ import { chartSeries, insightRange, INSIGHTS_INTERVALS } from "./insights-utils"
 import { VARIATION_CHART_COLORS } from "../../variation-colors"
 
 describe("insights utilities", () => {
-  it("keeps the Angular-compatible interval choices", () => {
+  it("provides the supported aggregation intervals for each period", () => {
     expect(INSIGHTS_INTERVALS["30m"]).toEqual(["MINUTE"])
     expect(INSIGHTS_INTERVALS["2H"]).toEqual(["HOUR", "MINUTE"])
     expect(INSIGHTS_INTERVALS["1M"]).toEqual(["DAY", "WEEK"])

@@ -3,7 +3,6 @@ import type {
   AnalysisSection,
   MeasuringRun,
   ParsedAnalysis,
-  AudienceFilter,
 } from "./measuring-types"
 
 function objectValue(value: unknown): Record<string, unknown> | null {
@@ -29,29 +28,12 @@ function parseObject(value: string | null | undefined) {
   }
 }
 
-export function parseExperimentVariantNames(
-  value: string | null | undefined
+export function parseRunVariationNames(
+  variations: { id: string; name: string; value: string }[]
 ): Record<string, string> {
-  if (!value?.trim()) return {}
-  try {
-    const variants: unknown = JSON.parse(value)
-    if (!Array.isArray(variants)) return {}
-
-    return Object.fromEntries(
-      variants.flatMap((item) => {
-        const variant = objectValue(item)
-        const name = stringValue(variant?.name)
-        if (!variant || !name) return []
-
-        return [variant.key, variant.name, variant.value].flatMap((token) => {
-          const normalized = stringValue(token)
-          return normalized ? [[normalized, name] as const] : []
-        })
-      })
-    )
-  } catch {
-    return {}
-  }
+  return Object.fromEntries(
+    variations.map((variation) => [variation.id, variation.name])
+  )
 }
 
 export function formatAnalysisVerdict(
@@ -248,56 +230,6 @@ export function serializeSamplingPlan(
       label: labels[variation] ?? variation,
     }))
   )
-}
-
-export function parseAudienceFilters(
-  value: string | null | undefined
-): AudienceFilter[] {
-  if (!value?.trim()) return []
-  try {
-    const parsed = JSON.parse(value)
-    if (!Array.isArray(parsed)) return []
-    return parsed.flatMap((item) => {
-      const entry = objectValue(item)
-      const property = stringValue(entry?.property)
-      if (!property) return []
-      const rawOp = stringValue(entry?.op)
-      const op: AudienceFilter["op"] =
-        rawOp === "neq" || rawOp === "in" || rawOp === "nin" ? rawOp : "eq"
-      const rawValues = Array.isArray(entry?.values)
-        ? entry.values
-            .filter((value): value is string => typeof value === "string")
-            .join(", ")
-        : (stringValue(entry?.value) ?? "")
-      return [{ property, op, value: rawValues }]
-    })
-  } catch {
-    return []
-  }
-}
-
-export function serializeAudienceFilters(filters: AudienceFilter[]) {
-  const entries: Array<
-    | { property: string; op: "eq" | "neq"; value: string }
-    | { property: string; op: "in" | "nin"; values: string[] }
-  > = []
-  filters.forEach((filter) => {
-    const property = filter.property.trim()
-    if (!property) return
-    if (filter.op === "in" || filter.op === "nin") {
-      entries.push({
-        property,
-        op: filter.op,
-        values: filter.value
-          .split(",")
-          .map((value) => value.trim())
-          .filter(Boolean),
-      })
-      return
-    }
-    entries.push({ property, op: filter.op, value: filter.value.trim() })
-  })
-  return JSON.stringify(entries)
 }
 
 export function normalizedMethod(method: string | null | undefined) {

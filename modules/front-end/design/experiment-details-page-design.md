@@ -21,7 +21,7 @@ The approved visual scope currently includes:
 Explicitly excluded:
 
 - sidebar, context bar, Header, environment switcher, and authenticated-shell changes;
-- Experiments, Metrics, and Layers list redesigns, which have already been migrated separately;
+- Experiments, Metrics, and Layers list redesigns, which have separate design contracts;
 - Measuring-stage visual behavior for Frequentist or any future analysis method;
 - Audit log UI;
 - React, route, API, backend, test, configuration, package, or i18n implementation.
@@ -166,12 +166,11 @@ RDA's observed-performance and Bandit-recommendation tables may be presented as 
 
 #### Experiment traffic assignment summary
 
-The right-hand summary is titled `Experiment traffic assignment` and has exactly four independent sections in this order:
+The right-hand summary is titled `Experiment traffic assignment` and has exactly three independent sections in this order:
 
 1. `Baseline & Arms`;
 2. `Layer eligibility`;
-3. `Analysis sampling`;
-4. `Audience filters`.
+3. `Analysis sampling`.
 
 The summary does not display a `Method` row. Method and algorithm already appear in the selected Run header and analysis metadata; repeating Method here incorrectly implies it belongs to assignment editing.
 
@@ -180,8 +179,6 @@ The summary does not display a `Method` row. Method and algorithm already appear
 `Layer eligibility` shows only Layer-related data: Layer key, Assignment unit, bucket start, bucket end, active range, and width. Layer eligibility determines whether an exposure can enter the Run; it does not select a Variation.
 
 `Analysis sampling` shows the per-Variation include rate and role. Sampling is applied inside each actual served Variation and must not be represented as the live Feature Flag rollout split.
-
-`Audience filters` is never nested under `Layer eligibility`. When no filter exists, show the independent value `No filters — all users eligible`.
 
 #### Edit assignment Sheet
 
@@ -193,13 +190,12 @@ The summary does not display a `Method` row. Method and algorithm already appear
 - `Baseline & Arms` lists all real Feature Flag Variations, uses a single Baseline selection, and allows the remaining included Variations to be selected as Arms;
 - `Layer eligibility` provides the registered Layer selection and supported Layer fields, including Assignment unit and bucket range; derived active range and width remain visible;
 - `Analysis sampling` provides one include-rate control per included Variation and may provide `Set all to 100%` as a compact bulk convenience;
-- `Audience filters` remains its own group, provides the supported filter builder entry, and shows `No filters — all users eligible` when empty;
 - do not add live rollout weights, traffic-split editing, phase configuration, scheduler controls, or other behavior not supported by the current RDA/backend contract;
 - the fixed footer contains `Cancel` and `Save changes`, uses the standard Sheet padding and whitespace, and has no top border or horizontal divider; Cancel and close discard uncommitted edits, Save is disabled for invalid assignment data, repeated submission is prevented, and recoverable errors keep the Sheet open.
 
 #### Bandit design boundary
 
-The Run method is persisted before this view is opened. `Edit assignment` may change analysis roles, Layer eligibility, sampling, and Audience filters, but it must not change the Run's analysis method. A future method-change workflow requires its own product and backend contract and must not be inferred from this design.
+The Run method is persisted before this view is opened. `Edit assignment` may change analysis roles, Layer eligibility, and sampling, but it must not change the Run's analysis method. A future method-change workflow requires its own product and backend contract and must not be inferred from this design.
 
 ### Measuring stage — Bayesian A/B/n Run
 
@@ -258,16 +254,15 @@ The Run's raw Sample check remains visible with its configured minimum and per-V
 
 #### Bayesian traffic assignment
 
-The right-hand `Experiment traffic assignment` summary uses exactly four independent sections in this order:
+The right-hand `Experiment traffic assignment` summary uses exactly three independent sections in this order:
 
 1. `Control & Treatments`;
 2. `Layer eligibility`;
-3. `Analysis sampling`;
-4. `Audience filters`.
+3. `Analysis sampling`.
 
 `Control & Treatments` replaces the Bandit-specific `Baseline & Arms` terminology. Show the actual Feature Flag Variation name and served value for the single Control and every Treatment. These remain analysis roles; Feature Flag targeting determines which Variation is served.
 
-Layer eligibility, per-Variation analysis sampling, and Audience filters follow the same semantics and separation defined for Bandit. Audience filters never appear inside Layer eligibility. The summary does not display Method because Method is already visible in the selected Run header and is not assignment data.
+Layer eligibility and per-Variation analysis sampling follow the same semantics and separation defined for Bandit. The summary does not display Method because Method is already visible in the selected Run header and is not assignment data.
 
 The `Edit assignment` entry remains visible, but this asset approves only the Bayesian read-only Measuring state. A future Bayesian edit-state asset must use `Control & Treatments`, must not expose Method editing, and must be approved separately rather than inferred from the Bandit Sheet image.
 
@@ -329,7 +324,7 @@ Use the established React release workbench language:
 - thin borders and restrained radii;
 - no ambient shadows, gradients, decorative cards, or large empty presentation areas;
 - semantic color only for warnings, errors, and meaningful status;
-- no Angular/ng-zorro visual cloning;
+- use the shared shadcn/Base UI visual language;
 - no blue body text or blue labels merely for emphasis.
 
 The page must remain readable at a glance. The Experiment identity and current stage come first, followed by the four-stage workflow and the current stage content.
@@ -802,10 +797,9 @@ This document is design guidance only. It does not authorize React, API, backend
 - [ ] Full analysis preserves Window, Algorithm, Data as of, and the raw SRM p-value/status.
 - [ ] A combined Bandit table retains distinct `Observed performance` and `Bandit recommendation` column groups.
 - [ ] Binary metrics keep event count and Rate; Numeric metrics use Samples and Mean; Samples maps to `n`.
-- [ ] The traffic-assignment summary contains separate Baseline & Arms, Layer eligibility, Analysis sampling, and Audience filters sections.
-- [ ] Audience filters never appear inside Layer eligibility.
+- [ ] The traffic-assignment summary contains separate Baseline & Arms, Layer eligibility, and Analysis sampling sections.
 - [ ] The traffic-assignment summary and Edit assignment Sheet do not display or edit Method.
-- [ ] Edit assignment changes only supported roles, Layer eligibility, sampling, and Audience filters.
+- [ ] Edit assignment changes only supported roles, Layer eligibility, and sampling.
 - [ ] A Bayesian Run header shows Run slug, `Bayesian A/B/n`, decision, and observation window without Bandit-only fields.
 - [ ] Bayesian Full analysis preserves Window, Prior, Data as of, SRM, Primary metric, every Guardrail, and Sample check.
 - [ ] Bayesian Numeric results use Samples, Mean, Relative lift, 95% interval, and the persisted Signal; Binary results retain event count and Rate.

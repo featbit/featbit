@@ -30,15 +30,11 @@ public class Experiment : AuditedEntity
 
     public PrimaryMetricConfig PrimaryMetric { get; set; }
 
-    public string Variants { get; set; }
-
     public string ConflictAnalysis { get; set; }
 
     // Null marks legacy data whose run history has not been used to seed the counter yet.
     // Only the database allocator updates this value; deleting a run never resets it.
-    public long? LastRunNumber { get; set; }
+    public int LastRunNumber { get; set; } = 0;
 
     public ICollection<ExperimentRun> ExperimentRuns { get; set; } = [];
-
-    public ICollection<ExperimentActivity> Activities { get; set; } = [];
 }

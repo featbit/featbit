@@ -448,7 +448,10 @@ test.describe("workspace global users", () => {
     await expect(evaluateDialog.getByText("Beta users")).toBeVisible()
 
     const detailsPopupPromise = page.waitForEvent("popup")
-    await evaluateDialog.getByRole("button", { name: "Details" }).click()
+    await evaluateDialog
+      .getByRole("tabpanel", { name: "Segments", exact: true })
+      .getByRole("button", { name: "Details", exact: true })
+      .click()
     const detailsPopup = await detailsPopupPromise
     await expect(detailsPopup).toHaveURL("/en/segments/segment-1/targeting")
   })

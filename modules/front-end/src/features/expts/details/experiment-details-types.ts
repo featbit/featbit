@@ -20,7 +20,6 @@ export type ExperimentDetail = {
   change: string | null
   constraints: string | null
   conflictAnalysis: string | null
-  variants?: string | null
   lastLearning: string | null
   primaryMetric: PrimaryMetricConfig | null
   guardrailMetrics: GuardrailMetricConfig[] | null
@@ -30,6 +29,8 @@ export type ExperimentDetail = {
 }
 
 export type ExperimentRunDetail = {
+  variations: { id: string; name: string; value: string }[]
+
   id: string
   slug: string
   method: string | null

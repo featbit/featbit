@@ -50,6 +50,7 @@ describe("creating an experiment run", () => {
     }
     const createdRun: MeasuringRun = {
       id: "run-1",
+      variations: [],
       slug: "run-1",
       method: "bayesian_ab",
       decision: null,
@@ -106,15 +107,17 @@ describe("creating an experiment run", () => {
     fireEvent.change(minimum, { target: { value: "500" } })
     fireEvent.click(dialog.getByRole("button", { name: "Create run" }))
 
-    await waitFor(() => expect(fetchApi).toHaveBeenCalledTimes(3))
-    const [path, options] = vi.mocked(fetchApi).mock.calls[1]
-    expect(path).toBe("/api/v1/envs/env-1/experiments/experiment-1/runs/run-1")
-    expect(options?.method).toBe("PUT")
+    await waitFor(() => expect(fetchApi).toHaveBeenCalledTimes(1))
+    const [path, options] = vi.mocked(fetchApi).mock.calls[0]
+    expect(path).toBe("/api/v1/envs/env-1/experiments/experiment-1/runs")
+    expect(options?.method).toBe("POST")
     expect(JSON.parse(options?.body as string)).toEqual({
       method: "bayesian_ab",
       controlVariant: "treatment-id",
       treatmentVariants: ["control-id"],
       minimumSample: 500,
+      observationStart: expect.any(String),
+      observationEnd: null,
     })
     await waitFor(() =>
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument()

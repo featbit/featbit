@@ -3,10 +3,8 @@ using System.Text.Json;
 using Application.ExperimentStats;
 using Application.Experiments;
 using Application.Services;
-using Application.Users;
 using Domain.FeatureFlags;
 using Domain.Experiments;
-using Domain.Users;
 using Infrastructure.Persistence.EntityFrameworkCore;
 using Infrastructure.Services.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -27,7 +25,6 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
     private static readonly Guid EnvId = Guid.Parse("11111111-1111-1111-1111-111111111111");
     private static readonly Guid ExperimentId = Guid.Parse("22222222-2222-2222-2222-222222222222");
     private static readonly Guid RunId = Guid.Parse("33333333-3333-3333-3333-333333333333");
-    private static readonly Guid UserId = Guid.Parse("55555555-5555-5555-5555-555555555555");
 
     [DockerTheory]
     [InlineData(false)]
@@ -85,7 +82,7 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
         Assert.Equal("treatment-id", persisted.ControlVariant);
         Assert.Equal(new string[] { "control-id" }, persisted.TreatmentVariants);
 
-        var withNewRun = await service.CreateRunAsync(EnvId, ExperimentId);
+        var withNewRun = await service.CreateRunAsync(EnvId, ExperimentId, new ExperimentRunCreate { ControlVariant = "treatment-id", TreatmentVariants = ["control-id"] });
         var copied = Assert.Single(withNewRun.ExperimentRuns, x => x.Id != RunId);
         Assert.Equal("bayesian_ab", copied.Method);
         Assert.Equal("treatment-id", copied.ControlVariant);
@@ -93,18 +90,23 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
     }
 
     [DockerFact]
-    public async Task CreateRun_UnconfiguredRoles_InfersNamedDefaults()
+    public async Task CreateRun_ExplicitRoles_PersistsSnapshot()
     {
         await using var db = CreateDbContext();
         await SeedExperimentAsync(db, metricType: "binary", metricAgg: "once",
             controlVariant: "", treatmentVariants: []);
         var service = CreateService(db, new FixedExperimentStatsService(new ExperimentStatsVm { Variants = [] }));
 
-        var detail = await service.CreateRunAsync(EnvId, ExperimentId);
+        var detail = await service.CreateRunAsync(EnvId, ExperimentId, new ExperimentRunCreate { ControlVariant = "control-id", TreatmentVariants = ["treatment-id"] });
 
         var created = Assert.Single(detail.ExperimentRuns, x => x.Id != RunId);
         Assert.Equal("control-id", created.ControlVariant);
         Assert.Equal(new string[] { "treatment-id" }, created.TreatmentVariants);
+        var json = await db.Database.SqlQueryRaw<string>(
+            "SELECT variations::text AS \"Value\" FROM experiment_runs WHERE id = {0}", created.Id).SingleAsync();
+        using var snapshot = JsonDocument.Parse(json);
+        var variation = snapshot.RootElement.EnumerateArray().First();
+        Assert.Equal(new[] { "id", "name", "value" }, variation.EnumerateObject().Select(x => x.Name).Order().ToArray());
     }
 
     [DockerFact]
@@ -196,7 +198,8 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
             Window = new ExperimentStatsWindowVm { Start = "2026-01-01", End = "2026-01-02" },
             Variants =
             [
-                Variant("treatment-id", users: 1, conversions: 0, sumValue: 0, sumSquares: 0)
+                Variant("treatment-id", users: 1, conversions: 0, sumValue: 0, sumSquares: 0),
+                Variant("control", users: 99, conversions: 50, sumValue: 50, sumSquares: 50)
             ]
         });
         await using var db = CreateDbContext();
@@ -372,9 +375,7 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
             db,
             stats,
             CreateFeatureFlagService(includeThirdArm),
-            null!,
-            new TestCurrentUser(UserId),
-            CreateUserService());
+            null!);
     }
 
     private AppDbContext CreateDbContext()
@@ -397,12 +398,13 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
         string? analysisSamplingPlan = null)
     {
         await db.Database.ExecuteSqlRawAsync(
-            "TRUNCATE TABLE experiment_activities, experiment_runs, experiments RESTART IDENTITY CASCADE;");
+            "TRUNCATE TABLE experiment_runs, experiments RESTART IDENTITY CASCADE;");
 
         var experiment = new Experiment
         {
             Id = ExperimentId,
             Name = "Checkout flow",
+            LastRunNumber = 1,
             Stage = "experiment",
             FlagId = Guid.Parse("44444444-4444-4444-4444-444444444444"),
             EnvId = EnvId,
@@ -418,6 +420,9 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
             Slug = "run-1",
             Method = "bayesian_ab",
             PrimaryMetric = new PrimaryMetricConfig { MetricId = Guid.NewGuid(), MetricKey = metricEvent, EventName = metricEvent, MetricType = metricType, MetricAgg = metricAgg },
+            Variations = new[] { controlVariant }.Concat(treatmentVariants ?? ["treatment"])
+                .Where(x => !string.IsNullOrWhiteSpace(x)).Distinct()
+                .Select(x => new Variation { Id = x, Name = x.Replace("-id", ""), Value = x.Replace("-id", "") }).ToArray(),
             ControlVariant = controlVariant,
             TreatmentVariants = treatmentVariants ?? ["treatment"],
             TrafficPercent = trafficPercent,
@@ -507,31 +512,5 @@ public class ExperimentAnalysisAlgorithmTests : IntegrationTestBase
         service.Setup(x => x.FindOneAsync(It.IsAny<Expression<Func<FeatureFlag, bool>>>()))
             .ReturnsAsync((Expression<Func<FeatureFlag, bool>> predicate) => predicate.Compile()(flag) ? flag : null);
         return service.Object;
-    }
-
-    private static IUserService CreateUserService()
-    {
-        var user = new User(UserId, "experiment@example.com", "hashed", "Experiment Tester");
-        var service = new Mock<IUserService>();
-        service
-            .Setup(x => x.GetOperatorAsync(It.IsAny<Guid>()))
-            .ReturnsAsync((Guid id) => id == user.Id ? user.Name : string.Empty);
-        service
-            .Setup(x => x.GetListAsync(It.IsAny<IEnumerable<Guid>>()))
-            .ReturnsAsync((IEnumerable<Guid> ids) =>
-                (ICollection<User>)(ids.Contains(user.Id) ? [user] : Array.Empty<User>()));
-        service
-            .Setup(x => x.GetAsync(user.Id))
-            .ReturnsAsync(user);
-        service
-            .Setup(x => x.FindOneAsync(It.IsAny<Expression<Func<User, bool>>>()))
-            .ReturnsAsync((Expression<Func<User, bool>> predicate) =>
-                predicate.Compile()(user) ? user : null);
-        return service.Object;
-    }
-
-    private sealed class TestCurrentUser(Guid id) : ICurrentUser
-    {
-        public Guid Id { get; } = id;
     }
 }

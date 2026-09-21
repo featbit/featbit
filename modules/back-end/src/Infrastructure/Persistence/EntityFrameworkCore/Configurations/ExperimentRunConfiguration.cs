@@ -17,6 +17,7 @@ public class ExperimentRunConfiguration : IEntityTypeConfiguration<ExperimentRun
         builder.Property(x => x.Method).HasMaxLength(64);
         builder.Property(x => x.PrimaryMetric).HasColumnName("primary_metric").HasColumnType("jsonb");
         builder.Property(x => x.GuardrailMetrics).HasColumnName("guardrail_metrics").HasColumnType("jsonb");
+        builder.Property(x => x.Variations).HasColumnName("variations").HasColumnType("jsonb").IsRequired();
         builder.Property(x => x.ControlVariant).HasColumnName("control_variant").HasMaxLength(256);
         builder.Property(x => x.TreatmentVariants).HasColumnName("treatment_variants").HasColumnType("jsonb").IsRequired();
         builder.Property(x => x.MinimumSample).HasColumnName("minimum_sample");
@@ -35,7 +36,6 @@ public class ExperimentRunConfiguration : IEntityTypeConfiguration<ExperimentRun
         builder.Property(x => x.NextHypothesis).HasColumnName("next_hypothesis");
         builder.Property(x => x.TrafficPercent).HasColumnName("traffic_percent");
         builder.Property(x => x.LayerId).HasColumnName("layer_id");
-        builder.Property(x => x.AudienceFilters).HasColumnName("audience_filters");
         builder.Property(x => x.TrafficOffset).HasColumnName("traffic_offset");
         builder.Property(x => x.LayerKey).HasColumnName("layer_key").HasMaxLength(128);
         builder.Property(x => x.AllocationKeySelector).HasColumnName("allocation_key_selector").HasMaxLength(256);

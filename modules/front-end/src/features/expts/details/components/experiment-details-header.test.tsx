@@ -7,6 +7,7 @@ import { ExperimentDetailsHeader } from "./experiment-details-header"
 
 const run = (id: string) => ({
   id,
+  variations: [],
   slug: id,
   method: "bayesian_ab",
   decision: "INCONCLUSIVE",

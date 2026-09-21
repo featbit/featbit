@@ -18,7 +18,6 @@ public class ExperimentExposureEventConfiguration : IEntityTypeConfiguration<Exp
         builder.Property(x => x.VariationId).HasColumnName("variation_id").HasMaxLength(256).IsRequired();
         builder.Property(x => x.VariationValue).HasColumnName("variation_value").HasMaxLength(512);
         builder.Property(x => x.ExposedAt).HasColumnName("exposed_at");
-        builder.Property(x => x.Properties).HasColumnType("jsonb");
         builder.Property(x => x.CreatedAt).HasColumnName("created_at");
     }
 }

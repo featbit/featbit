@@ -3,12 +3,15 @@ using Domain.Messages;
 using Domain.Shared;
 using Infrastructure.Caches.Redis;
 using Microsoft.Extensions.Logging;
+using StackExchange.Redis;
 
 namespace Infrastructure.MQ.Redis;
 
 public partial class RedisMessageProducer(IRedisClient redisClient, ILogger<RedisMessageProducer> logger)
     : IMessageProducer
 {
+    private const int MaxBatchSize = 100;
+
     public async Task PublishAsync<TMessage>(string topic, TMessage? message) where TMessage : class
     {
         try
@@ -23,6 +26,49 @@ public partial class RedisMessageProducer(IRedisClient redisClient, ILogger<Redi
         catch (Exception ex)
         {
             Log.ErrorPublishMessage(logger, ex);
+        }
+    }
+
+    public async Task PublishBatchAsync<TMessage>(string topic, IReadOnlyCollection<TMessage> messages)
+        where TMessage : class
+    {
+        if (messages.Count == 0)
+        {
+            return;
+        }
+
+        try
+        {
+            var database = redisClient.GetDatabase();
+            if (messages.Count <= MaxBatchSize)
+            {
+                // hot path
+                await PublishBatchCoreAsync(database, messages);
+            }
+            else
+            {
+                foreach (var batch in messages.Chunk(MaxBatchSize))
+                {
+                    await PublishBatchCoreAsync(database, batch);
+                }
+            }
+
+            Log.MessageBatchPublished(logger, messages.Count, topic);
+        }
+        catch (Exception ex)
+        {
+            Log.ErrorPublishMessage(logger, ex);
+        }
+
+        return;
+
+        Task PublishBatchCoreAsync(IDatabase redis, IReadOnlyCollection<TMessage> batch)
+        {
+            var values = batch.Select(message =>
+                (RedisValue)JsonSerializer.Serialize(message, ReusableJsonSerializerOptions.Web)
+            ).ToArray();
+
+            return redis.ListRightPushAsync(topic, values);
         }
     }
 }

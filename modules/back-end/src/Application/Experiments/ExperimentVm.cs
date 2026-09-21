@@ -67,13 +67,9 @@ public class ExperimentDetailVm : ExperimentVm
 
     public PrimaryMetricConfig PrimaryMetric { get; set; }
 
-    public string Variants { get; set; }
-
     public string ConflictAnalysis { get; set; }
 
     public ICollection<ExperimentRunVm> ExperimentRuns { get; set; } = [];
-
-    public ICollection<ExperimentActivityVm> Activities { get; set; } = [];
 }
 
 public class ExperimentRunVm
@@ -89,6 +85,8 @@ public class ExperimentRunVm
     public PrimaryMetricConfig PrimaryMetric { get; set; }
 
     public List<GuardrailMetricConfig> GuardrailMetrics { get; set; } = [];
+
+    public ICollection<Domain.FeatureFlags.Variation> Variations { get; set; } = [];
 
     public string ControlVariant { get; set; }
 
@@ -128,8 +126,6 @@ public class ExperimentRunVm
 
     public Guid? LayerId { get; set; }
 
-    public string AudienceFilters { get; set; }
-
     public int? TrafficOffset { get; set; }
 
     public string LayerKey { get; set; }
@@ -151,27 +147,6 @@ public class ExperimentRunVm
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }
-}
-
-public class ExperimentActivityVm
-{
-    public Guid Id { get; set; }
-
-    public string Type { get; set; }
-
-    public string Title { get; set; }
-
-    public string Detail { get; set; }
-
-    public Guid? ActorId { get; set; }
-
-    public string ActorName { get; set; }
-
-    public string ActorEmail { get; set; }
-
-    public string ActorType { get; set; }
-
-    public DateTime CreatedAt { get; set; }
 }
 
 public class QueryExperiments : IRequest<PagedResult<ExperimentVm>>

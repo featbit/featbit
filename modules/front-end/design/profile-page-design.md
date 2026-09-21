@@ -1,6 +1,6 @@
 # Profile Page Design
 
-This document defines the React design target for the account Profile page. Angular remains the functional reference, but React should treat Profile as an account-level surface opened from the left-bottom Account menu. Do not keep it as an Organization tab and do not copy Angular/ng-zorro styling.
+This document defines the React design target for the account Profile page. React should treat Profile as an account-level surface opened from the left-bottom Account menu. Do not keep it as an Organization tab.
 
 ## Scope And Boundaries
 
@@ -9,8 +9,8 @@ This design document covers only the Profile page content area inside the authen
 - Implementing this page must not modify authenticated layout primitives such as the context bar, sidebar navigation groups, top-right subscription/license badge, layout spacing contract, or route-level layout frame.
 - The Account menu `Profile` item is the entry point. Clicking it navigates to the independent Profile page.
 - Profile is not part of Organization. `/organization/profile` may exist only as a backward-compatible alias that redirects to the account Profile route.
-- The page must preserve every Angular Profile behavior: update current user's name/email; reset password for local-origin users only; validate email, current password, new password, and confirm password.
-- Do not add account-avatar upload, profile images, multi-factor authentication, sessions, API tokens, notification preferences, or extra read-only identity panels in this migration. They are not present in Angular's functional scope.
+- The page must support: update current user's name/email; reset password for local-origin users only; validate email, current password, new password, and confirm password.
+- Do not add account-avatar upload, profile images, multi-factor authentication, sessions, API tokens, notification preferences, or extra read-only identity panels. They are not specified in this document's functional scope.
 
 ## Design Assets
 
@@ -22,9 +22,9 @@ The mockup shows only the Profile page content area. It intentionally excludes t
 
 The mockup and this contract must follow the current `front-end` implementation, not legacy design images. Use the real React styles from `WorkspaceLayout`, `Section`, `Input`, `Button`, and existing Workspace/Organization general-setting sections as the source of truth.
 
-## Angular Functional Reference
+## Functional Requirements
 
-Angular currently renders Profile inside Organization and provides two forms:
+The account Profile surface provides two forms:
 
 - Profile form:
   - `Name`
@@ -62,7 +62,7 @@ Compatibility route:
 Entry point:
 
 - The left-bottom Account menu item `Profile` navigates to `/:lang/account/profile`.
-- The Account menu remains a dropdown. Do not turn Profile into a nested sidebar item and do not add an Account navigation group for this migration.
+- The Account menu remains a dropdown. Do not turn Profile into a nested sidebar item and do not add an Account navigation group.
 - The global context bar remains `Organization / Project / Environment`; Profile does not change or replace it.
 
 Page header:
@@ -96,7 +96,7 @@ Behavior:
 
 - Use React Hook Form + Zod.
 - Email is required and must be a valid email.
-- Name may be empty for parity with Angular.
+- Name may be empty.
 - Disable `Save profile` while the mutation is in progress.
 - On success, update the stored `auth` profile payload, refresh any layout/account-menu profile state, and show toast `Profile successfully updated`.
 - On request failure, keep user input in place and show toast `Operation failed, please try again`.
@@ -168,12 +168,12 @@ Rules:
 - Use the actual page header contract: `mb-5 space-y-1`, `text-2xl font-semibold tracking-normal`, and `text-sm text-muted-foreground`.
 - Use actual section rhythm: `border-b py-8 first:pt-7 last:border-b-0`.
 - Use actual field rhythm: labels with `text-sm font-medium`, field wrappers with `space-y-2` or `flex flex-col gap-2`, and two-column rows with `grid gap-5 lg:grid-cols-2`.
-- Use compact settings sections, not Angular's large blank vertical blocks.
+- Use compact settings sections with restrained vertical spacing.
 - Use neutral section dividers and form rows instead of standalone cards when the page background already provides separation.
 - Use bordered surfaces with no ambient shadows only if the local page pattern requires a bounded panel.
 - Use the current neutral shadcn palette from `front-end/src/index.css`: `bg-background`, `text-foreground`, `text-muted-foreground`, `border-border`, `border-input`, and `bg-primary text-primary-foreground`.
 - Do not use legacy blue primary buttons unless the existing React component for this surface already does so.
-- Do not use old Angular input prefix icons.
+- Use plain labeled inputs without decorative prefix icons.
 - Do not use large green brand accents, colored side borders, decorative cards, or marketing-style composition.
 - Use lucide icons only where recognition helps: `User`, `Mail`, `Lock`, `Shield`, `Info`, `Copy`.
 - Keep both light and dark themes structurally identical.
@@ -194,7 +194,7 @@ Rules:
 - Successful profile update: toast `Profile successfully updated`; Account menu name/email refreshes.
 - Successful password reset: toast `Reset password success`; password fields clear.
 - Backend reset failure with reason: warning toast with the returned reason.
-- Request error: toast `Operation failed, please try again` for profile and `Operation failed` for password reset, matching Angular's existing password error copy where possible.
+- Request error: toast `Operation failed, please try again` for profile and `Operation failed` for password reset.
 
 ## Interaction Model
 

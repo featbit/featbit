@@ -18,7 +18,7 @@ The following are explicitly out of scope:
 - the context bar and environment switcher;
 - any change to the authenticated application shell.
 
-The Angular implementation is the functional source of truth, not a visual reference. The React Segments index implementation is the primary local reference for page spacing, toolbar density, bordered table treatment, copyable keys, row actions, empty states, and pagination.
+The React Segments index implementation is the primary local reference for page spacing, toolbar density, bordered table treatment, copyable keys, row actions, empty states, and pagination.
 
 ## 2. Visual Reference
 
@@ -45,7 +45,7 @@ Feature Flags is an operational release surface. A user should be able to answer
 3. What value or set of variations is it serving?
 4. Who changed it most recently, when, and why?
 
-The design should feel like a compact release workbench: neutral, calm, and information-dense. It must not copy Angular/ng-zorro styling, use large green action surfaces, or distribute common actions across a long row of text links.
+The design should feel like a compact release workbench: neutral, calm, and information-dense. Use shared component styling and avoid large green action surfaces or long rows of action links.
 
 ## 4. Page Structure
 
@@ -96,14 +96,14 @@ On a large desktop, all groups share one compact row. At narrower supported desk
 3. **Status**
    - Outline single-select filter with `All statuses`, `On`, and `Off`.
    - Active value is visible in the trigger.
-   - This maps to the Angular `isEnabled` filter; it must not be a client-only filter.
+   - This maps to the API `isEnabled` filter; it must not be a client-only filter.
 
 4. **Show archived**
    - Outline toggle button with an Archive icon.
    - Active state uses the neutral accent background, matching the implemented Segments page.
    - Switching active/archived mode resets the page index to 1.
 
-Do not add a variation-type filter unless the backend list contract gains that capability. The Angular API does not currently expose it as a list filter.
+Do not add a variation-type filter unless the backend list contract gains that capability. The API does not currently expose it as a list filter.
 
 ### Right side
 
@@ -122,7 +122,7 @@ Compare and New flag are global page actions. They remain visible and enabled ac
 
 ## 6. URL and List State
 
-Preserve the Angular index behavior by serializing the list state into query parameters:
+Persist navigation state by serializing the list state into query parameters:
 
 - search text;
 - selected tags;
@@ -157,13 +157,13 @@ The following styling rules are strict consistency requirements:
 | Last change      |             20% | Time, actor, optional comment                 |
 | Actions          |             12% | Visible Details action and overflow menu      |
 
-Keep a minimum table width. Do not hide Tags at narrower desktop widths as Angular does; horizontal scrolling preserves the complete operational view.
+Keep a minimum table width. Do not hide Tags at narrower desktop widths; horizontal scrolling preserves the complete operational view.
 
 ### Selection
 
 - The header checkbox selects or clears the current page.
 - The indeterminate state is shown when only some current-page rows are selected.
-- Selection may persist while paging and filtering, matching Angular's retained selection behavior.
+- Selection may persist while paging and filtering, matching the selection persistence contract.
 - A selected count always reflects the full retained selection, not only visible rows.
 - Archived flags may be selected only if the current bulk action can legally operate on them; otherwise selection controls are disabled with a reason.
 
@@ -274,7 +274,7 @@ If any selected flag fails the permission/license check, Copy to environment is 
 - The table header remains visible at every width. At the initial scroll position, Selection, Flag, Status & serving, Tags, and the start of Last change are visible; the remaining content is reachable horizontally.
 - Pagination may wrap its result count and controls onto separate lines, but remains outside the table border.
 
-This makes batch copy discoverable only when relevant, removes the Angular page-level overflow menu, preserves the Segment-style table, and keeps Compare/New flag available throughout selection mode.
+This makes batch copy discoverable only when relevant, avoids a redundant page-level overflow menu, preserves the Segment-style table, and keeps Compare/New flag available throughout selection mode.
 
 ## 9. Pagination
 
@@ -363,8 +363,8 @@ The visual reference is a six-state board for one stable Dialog: Ready to copy, 
   - CircleX plus `This flag cannot be copied`;
   - helper text `A flag with this key already exists in the target environment.`;
   - does not offer a limitations acknowledgement.
-- The existing Angular `keyCheck`, `targetUserCheck`, `targetRuleCheck`, `newProperties`, and `passed` outcomes remain the behavioral source of truth.
-- The permanent Angular Restrictions banner is replaced by contextual details under affected flags; its business meaning is not removed.
+- The `keyCheck`, `targetUserCheck`, `targetRuleCheck`, `newProperties`, and `passed` outcomes remain the behavioral source of truth.
+- Show copy restrictions as contextual details under affected flags, preserving all eligibility rules.
 
 #### Stable precheck states
 
@@ -421,7 +421,7 @@ The visual reference is a six-state board for one stable Dialog: Ready to copy, 
 ### Compare
 
 - The page-level Compare button navigates to cross-environment comparison.
-- The row-level `Compare` item in the three-dot menu opens the **same right-side detailed comparison Sheet** as the Compare page's `View differences` entry. Do not design or implement a second drawer, dialog, compact variant, or Angular-styled comparison surface for the index entry.
+- The row-level `Compare` item in the three-dot menu opens the **same right-side detailed comparison Sheet** as the Compare page's `View differences` entry. Do not design or implement a second drawer, dialog, compact variant, or separate comparison surface for the index entry.
 - Reuse the same Sheet frame, width, backdrop, header hierarchy, three-column settings table, row order, difference states, selection controls, append/overwrite modes, `After copy` previews, compatibility warnings, sticky footer, and `Copy settings` behavior defined in [feature-flags-compare-page-design.md](feature-flags-compare-page-design.md).
 - The only entry-context difference is target selection. `View differences` already has a locked target environment from the selected matrix cell; Index `Compare` opens the same Sheet with the current environment locked as Source and a searchable Target environment selector in the same header position.
 - Until a Target is selected, keep the shared Sheet header and direction layout visible, show `Select a target environment to view differences` in the comparison body, and keep `Copy settings` disabled. Do not render an empty settings grid or a separate target-selection step.
@@ -478,7 +478,7 @@ Tag-option, permissions, environment-list, and precheck failures are surfaced wi
 
 ## 12. Permission and License Behavior
 
-Preserve the Angular permission/license gates for create, toggle, copy, clone, archive, restore, and remove.
+Preserve the permission/license gates for create, toggle, copy, clone, archive, restore, and remove.
 
 - Evaluate permissions against the flag RN, including its tags.
 - Evaluate create against the current environment flag wildcard RN.

@@ -1,6 +1,6 @@
 # Workspace Billing Tab Design
 
-This document defines the React design target for the Workspace `Billing` tab content only. Angular remains the functional reference, but React should use the existing authenticated React layout, Workspace page frame, shadcn/ui primitives, Tailwind tokens, lucide-react icons, TanStack Query/Table, React Hook Form + Zod, and `react-i18next`.
+This document defines the React design target for the Workspace `Billing` tab content only. React should use the existing authenticated React layout, Workspace page frame, shadcn/ui primitives, Tailwind tokens, lucide-react icons, TanStack Query/Table, React Hook Form + Zod, and `react-i18next`.
 
 Do not change the authenticated layout, sidebar, top context bar, account menu, subscription/license badge, Workspace page header, or Workspace tabs when implementing this design. The design target starts inside the active `Billing` tab panel.
 
@@ -11,9 +11,9 @@ Do not change the authenticated layout, sidebar, top context bar, account menu, 
 - Upgrade plan drawer concept: [workspace-billing-upgrade-plan.png](workspace-billing-upgrade-plan.png)
 - Billing information edit concept: [workspace-billing-information-edit.png](workspace-billing-information-edit.png)
 
-## Angular Functional Reference
+## Functional Requirements
 
-Angular billing currently provides:
+Billing provides:
 
 - SaaS-only billing tab under Workspace.
 - Current subscription summary from `GET /api/v1/billing/subscription`.
@@ -29,7 +29,7 @@ Angular billing currently provides:
 - Support mail action to `support@featbit.co`.
 - Checkout return flow driven by `payment_status`, including canceled, verifying, success, and delayed-verification states.
 
-Preserve these behaviors, but do not copy Angular/ng-zorro layout or styling one-to-one.
+Implement these behaviors using shared layout and component tokens.
 
 ## Scope
 
@@ -133,7 +133,7 @@ Edit mode:
 - Use React Hook Form + Zod.
 - Required fields: company name, contact email, address, country/region.
 - Validate email locally.
-- Fields match Angular names and placeholders.
+- Use the field names and placeholders specified in this document.
 - Footer actions: secondary `Cancel`, primary `Save changes`.
 - Saving state disables actions and shows progress on the primary button.
 - On save success, return to display mode and show toast `Billing information updated successfully.`
@@ -153,7 +153,7 @@ Table columns:
 Behavior:
 
 - Use TanStack Table.
-- Client-side pagination is acceptable if the API returns the current list like Angular; use page size 5 to match Angular behavior.
+- Client-side pagination is acceptable if the API returns the complete list; use page size 5 to match documented behavior.
 - Status badges:
   - `paid`: green or neutral-success `Paid`.
   - `pending`: amber `Pending`.
@@ -163,7 +163,7 @@ Behavior:
 - Empty state preserves the panel and table area, with file-text icon and `No invoices yet`.
 - Include a low-emphasis support note below the title or table footer: `Need a PDF or have a question about a charge? Contact support.`
 
-Do not invent invoice download actions unless the API supports them. Angular currently directs users to support for download/questions.
+Do not invent invoice download actions unless the API supports them. Direct users to support for invoice downloads and questions.
 
 ## Pricing Drawer
 
@@ -246,7 +246,7 @@ Modal content:
   - Primary `Confirm upgrade` for upgrades.
   - Secondary/destructive-neutral `Schedule downgrade` for downgrades.
 
-After a successful update, persist the same notification intent as Angular and refresh billing data. Do not rely on a full page reload in the design target.
+After a successful update, persist the notification intent and refresh billing data. Do not rely on a full page reload in the design target.
 
 ## API Data Shape
 

@@ -124,7 +124,6 @@ public class ExperimentStatsService(MongoDbClient mongoDb) : IExperimentStatsSer
         var plan = ParseSamplingPlan(request.AnalysisSamplingPlan)
             .Where(x => x.Role is "control" or "treatment")
             .ToDictionary(x => x.Variation, StringComparer.Ordinal);
-        var assignmentUnitSelector = NormalizeAssignmentUnitSelector(request);
         var layerKey = NormalizeLayerKey(request);
         var layerTrafficPercent = Math.Clamp(request.LayerTrafficPercent ?? 100d, 0d, 100d);
         var sliceStart = Math.Clamp(request.SliceStart ?? 0d, 0d, 100d);
@@ -166,7 +165,7 @@ public class ExperimentStatsService(MongoDbClient mongoDb) : IExperimentStatsSer
                     return null;
                 }
 
-                var assignmentUnit = GetAssignmentUnit(x.UserKey, x.Properties, assignmentUnitSelector);
+                var assignmentUnit = x.UserKey;
                 if (string.IsNullOrWhiteSpace(assignmentUnit))
                 {
                     return null;
@@ -258,7 +257,7 @@ public class ExperimentStatsService(MongoDbClient mongoDb) : IExperimentStatsSer
             .Select(x => new
             {
                 Metric = x,
-                AssignmentUnit = GetAssignmentUnit(x.UserKey, x.Properties, assignmentUnitSelector)
+                AssignmentUnit = x.UserKey
             })
             .Where(x => !string.IsNullOrWhiteSpace(x.AssignmentUnit) &&
                         assignmentUnits.Contains(x.AssignmentUnit) &&
@@ -313,9 +312,6 @@ public class ExperimentStatsService(MongoDbClient mongoDb) : IExperimentStatsSer
                   ?? DateOnly.ParseExact(request.EndDate, "yyyy-MM-dd").AddDays(1).ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
         var plan = ParseAllocationPlan(request.AllocationPlan);
         var layerKey = string.IsNullOrWhiteSpace(request.LayerKey) ? request.FlagKey : request.LayerKey.Trim();
-        var allocationKeySelector = string.IsNullOrWhiteSpace(request.AllocationKeySelector)
-            ? "user.keyId"
-            : request.AllocationKeySelector.Trim();
         var sliceStart = Math.Clamp(request.SliceStart ?? 0, 0, 100);
         var sliceEnd = Math.Clamp(request.SliceEnd ?? 100, 0, 100);
 
@@ -331,7 +327,7 @@ public class ExperimentStatsService(MongoDbClient mongoDb) : IExperimentStatsSer
         var assignments = exposureDocs
             .Select(x =>
             {
-                var allocationKey = GetAllocationKey(x.UserKey, x.Properties, allocationKeySelector);
+                var allocationKey = x.UserKey;
                 if (string.IsNullOrWhiteSpace(allocationKey))
                 {
                     return null;
@@ -429,7 +425,7 @@ public class ExperimentStatsService(MongoDbClient mongoDb) : IExperimentStatsSer
             .Select(x => new
             {
                 Metric = x,
-                AllocationKey = GetAllocationKey(x.UserKey, x.Properties, allocationKeySelector)
+                AllocationKey = x.UserKey
             })
             .Where(x => allocationKeys.Contains(x.AllocationKey) &&
                         firstEvaluationLookup.TryGetValue(x.AllocationKey, out var fe) &&
@@ -612,67 +608,6 @@ public class ExperimentStatsService(MongoDbClient mongoDb) : IExperimentStatsSer
         return normalized is "control" or "treatment" or "holdout" or "exclude"
             ? normalized
             : "treatment";
-    }
-
-    private static string GetAllocationKey(string userKey, string properties, string selector)
-    {
-        if (string.IsNullOrWhiteSpace(selector) ||
-            selector is "user.keyId" or "user.key" or "keyId")
-        {
-            return userKey;
-        }
-
-        if (string.IsNullOrWhiteSpace(properties))
-        {
-            return userKey;
-        }
-
-        try
-        {
-            using var document = JsonDocument.Parse(properties);
-            return document.RootElement.TryGetProperty(selector, out var value)
-                ? value.ToString()
-                : userKey;
-        }
-        catch
-        {
-            return userKey;
-        }
-    }
-
-    private static string? GetAssignmentUnit(string userKey, string properties, string selector)
-    {
-        if (string.IsNullOrWhiteSpace(selector) ||
-            selector is "user.keyId" or "user.key" or "keyId")
-        {
-            return userKey;
-        }
-
-        if (string.IsNullOrWhiteSpace(properties))
-        {
-            return null;
-        }
-
-        try
-        {
-            using var document = JsonDocument.Parse(properties);
-            return document.RootElement.TryGetProperty(selector, out var value)
-                ? value.ToString()
-                : null;
-        }
-        catch
-        {
-            return null;
-        }
-    }
-
-    private static string NormalizeAssignmentUnitSelector(QueryExperimentStats request)
-    {
-        return string.IsNullOrWhiteSpace(request.AssignmentUnitSelector)
-            ? string.IsNullOrWhiteSpace(request.AllocationKeySelector)
-                ? "user.keyId"
-                : request.AllocationKeySelector.Trim()
-            : request.AssignmentUnitSelector.Trim();
     }
 
     private static string? NormalizeLayerKey(QueryExperimentStats request)

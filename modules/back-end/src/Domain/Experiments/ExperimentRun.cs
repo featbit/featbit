@@ -12,6 +12,8 @@ public class ExperimentRun : AuditedEntity
 
     public List<GuardrailMetricConfig> GuardrailMetrics { get; set; } = [];
 
+    public ICollection<Domain.FeatureFlags.Variation> Variations { get; set; } = [];
+
     public string ControlVariant { get; set; }
 
     public string[] TreatmentVariants { get; set; } = [];
@@ -49,8 +51,6 @@ public class ExperimentRun : AuditedEntity
     public double? TrafficPercent { get; set; } = 100;
 
     public Guid? LayerId { get; set; }
-
-    public string AudienceFilters { get; set; }
 
     public int? TrafficOffset { get; set; } = 0;
 

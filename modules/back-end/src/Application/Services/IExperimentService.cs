@@ -30,7 +30,7 @@ public interface IExperimentService
         Guid id,
         ExperimentMetricsUpdate update);
 
-    Task<ExperimentDetailVm> CreateRunAsync(Guid envId, Guid id);
+    Task<ExperimentDetailVm> CreateRunAsync(Guid envId, Guid id, ExperimentRunCreate setup);
 
     Task<ExperimentDetailVm> DeleteRunAsync(Guid envId, Guid id, Guid runId);
 

@@ -29,9 +29,6 @@ public abstract class ExperimentProviderTestsBase(ExperimentProviderParityFixtur
     protected (IExperimentService ExperimentService, IExperimentMetricService MetricService)
         CreateExperimentServices() => fixture.CreateExperimentServices(ProviderName);
 
-    protected Task SeedRunHistoryAsync(Guid experimentId, string[] slugs, string[] createdSlugs) =>
-        fixture.SeedRunHistoryAsync(ProviderName, experimentId, slugs, createdSlugs);
-
     private const string TenTenSamplingPlan = """
         [
           { "variation": "control", "role": "control", "includeRate": 11.111111 },
@@ -204,32 +201,6 @@ public abstract class ExperimentProviderTestsBase(ExperimentProviderParityFixtur
         var actual = Normalize(await CreateExperimentStatsService().QueryAsync(request));
         var totalUsers = actual.Variants.Sum(x => x.Users);
         Assert.InRange(totalUsers, 1, 159);
-    }
-
-    [DockerFact]
-    public async Task QueryExperimentStats_MissingCustomAssignmentSelector_ExcludesSamplingEvents()
-    {
-        var runId = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc");
-        await fixture.SeedSamplingPlanScenarioAsync(ProviderName);
-
-        var request = new QueryExperimentStats
-        {
-            RunId = runId,
-            EnvId = ExperimentProviderParityFixture.SamplingEnvId,
-            FlagKey = ExperimentProviderParityFixture.FlagKey,
-            MetricEvent = ExperimentProviderParityFixture.MetricEvent,
-            StartDate = "2026-01-01",
-            EndDate = "2026-01-02",
-            MetricType = "binary",
-            MetricAgg = "once",
-            AssignmentUnitSelector = "accountId",
-            LayerTrafficPercent = 100,
-            AnalysisSamplingPlan = TenTenSamplingPlan
-        };
-
-        var actual = Normalize(await CreateExperimentStatsService().QueryAsync(request));
-
-        Assert.Empty(actual.Variants);
     }
 
     [DockerFact]
@@ -511,14 +482,14 @@ public abstract class WritableExperimentProviderTestsBase(
     {
         var name = $"list-summary-{Guid.NewGuid():N}";
         var service = CreateExperimentServices().ExperimentService;
-        var emptyExperiment = NewExperiment($"{name}-empty");
+        var emptyExperiment = await NewExperimentAsync($"{name}-empty");
         emptyExperiment.LastLearning = " \t\n ";
         await service.CreateAsync(emptyExperiment);
-        var experiment = NewExperiment($"{name}-with-runs");
+        var experiment = await NewExperimentAsync($"{name}-with-runs");
         experiment.LastLearning = "Experiment learning";
         await service.CreateAsync(experiment);
 
-        var detail = await service.CreateRunAsync(ExperimentProviderParityFixture.EnvId, experiment.Id);
+        var detail = await service.CreateRunAsync(ExperimentProviderParityFixture.EnvId, experiment.Id, new ExperimentRunCreate { ControlVariant = "control", TreatmentVariants = ["treatment"] });
         var firstRun = Assert.Single(detail.ExperimentRuns);
         var start = new DateTime(2026, 9, 1, 0, 0, 0, DateTimeKind.Utc);
         detail = await service.UpdateRunAsync(ExperimentProviderParityFixture.EnvId, experiment.Id, firstRun.Id,
@@ -532,7 +503,7 @@ public abstract class WritableExperimentProviderTestsBase(
         var configured = Assert.Single(detail.ExperimentRuns);
         Assert.Equal("bayesian_ab", configured.Method);
 
-        detail = await service.CreateRunAsync(ExperimentProviderParityFixture.EnvId, experiment.Id);
+        detail = await service.CreateRunAsync(ExperimentProviderParityFixture.EnvId, experiment.Id, new ExperimentRunCreate { ControlVariant = "control", TreatmentVariants = ["treatment"] });
         var secondRun = Assert.Single(detail.ExperimentRuns, run => run.Id != firstRun.Id);
         Assert.Equal("bayesian_ab", secondRun.Method);
 
@@ -590,12 +561,13 @@ public abstract class WritableExperimentProviderTestsBase(
             {
                 Id = Guid.NewGuid(), EnvId = envId, FlagKey = "copy-test-flag", UserKey = "copy-test-user",
                 VariationId = "copy-test-variation", VariationValue = null, ExposedAt = timestamp,
-                Properties = "{}", CreatedAt = timestamp
+                CreatedAt = timestamp
             },
             new ExperimentMetricEvent
             {
                 Id = Guid.NewGuid(), EnvId = envId, UserKey = "copy-test-user", EventName = "copy-test-metric",
-                EventType = "Custom", NumericValue = 1, OccurredAt = timestamp, Properties = "{}", CreatedAt = timestamp
+                EventType = "Custom", NumericValue = 1, OccurredAt = timestamp, CreatedAt = timestamp,
+                ApplicationType = "dotnet-server-sdk"
             }
         ]);
 
@@ -667,7 +639,7 @@ public abstract class WritableExperimentProviderTestsBase(
                 MetricType = "binary",
                 MetricAgg = "once"
             });
-        var experiment = NewExperiment("Primary guardrail invariant");
+        var experiment = await NewExperimentAsync("Primary guardrail invariant");
         await experimentService.CreateAsync(experiment);
         List<GuardrailMetricSelection> guardrails = [new() { MetricId = metric.Id, Direction = "increase_bad" }];
 
@@ -705,7 +677,7 @@ public abstract class WritableExperimentProviderTestsBase(
                 MetricType = "binary",
                 MetricAgg = "once"
             });
-        var experiment = NewExperiment("Duplicate guardrail invariant");
+        var experiment = await NewExperimentAsync("Duplicate guardrail invariant");
         await experimentService.CreateAsync(experiment);
         List<GuardrailMetricSelection> guardrails =
         [
@@ -728,8 +700,8 @@ public abstract class WritableExperimentProviderTestsBase(
     {
         var (experimentService, _) = CreateExperimentServices();
         var searchToken = $"pricing-{Guid.NewGuid():N}";
-        var matchingExperiment = NewExperiment($"Experiment {searchToken}");
-        var nonMatchingExperiment = NewExperiment($"Experiment checkout-{Guid.NewGuid():N}");
+        var matchingExperiment = await NewExperimentAsync($"Experiment {searchToken}");
+        var nonMatchingExperiment = await NewExperimentAsync($"Experiment checkout-{Guid.NewGuid():N}");
         await experimentService.CreateAsync(matchingExperiment);
         await experimentService.CreateAsync(nonMatchingExperiment);
 
@@ -745,12 +717,12 @@ public abstract class WritableExperimentProviderTestsBase(
     public async Task CreateExperimentRun_PersistsCanonicalIdAndSlug()
     {
         var (experimentService, _) = CreateExperimentServices();
-        var experiment = NewExperiment("Create run without legacy run id");
+        var experiment = await NewExperimentAsync("Create run without legacy run id");
         await experimentService.CreateAsync(experiment);
 
         var detail = await experimentService.CreateRunAsync(
             ExperimentProviderParityFixture.EnvId,
-            experiment.Id);
+            experiment.Id, new ExperimentRunCreate { ControlVariant = "control", TreatmentVariants = ["treatment"] });
 
         var run = Assert.Single(detail.ExperimentRuns);
         Assert.NotEqual(Guid.Empty, run.Id);
@@ -764,13 +736,13 @@ public abstract class WritableExperimentProviderTestsBase(
     [InlineData(3, "1,2,3")]
     public async Task CreateExperimentRun_AfterDeletion_DoesNotReuseNumbers(int count, string deletedNumbers)
     {
-        var experiment = NewExperiment("Run numbering after deletion");
+        var experiment = await NewExperimentAsync("Run numbering after deletion");
         await CreateExperimentServices().ExperimentService.CreateAsync(experiment);
 
         for (var number = 1; number <= count; number++)
         {
             await CreateExperimentServices().ExperimentService.CreateRunAsync(
-                ExperimentProviderParityFixture.EnvId, experiment.Id);
+                ExperimentProviderParityFixture.EnvId, experiment.Id, new ExperimentRunCreate { ControlVariant = "control", TreatmentVariants = ["treatment"] });
         }
 
         var before = await CreateExperimentServices().ExperimentService.GetAsync(
@@ -783,28 +755,24 @@ public abstract class WritableExperimentProviderTestsBase(
         }
 
         var after = await CreateExperimentServices().ExperimentService.CreateRunAsync(
-            ExperimentProviderParityFixture.EnvId, experiment.Id);
+            ExperimentProviderParityFixture.EnvId, experiment.Id, new ExperimentRunCreate { ControlVariant = "control", TreatmentVariants = ["treatment"] });
         var created = Assert.Single(after.ExperimentRuns, x => before.ExperimentRuns.All(y => y.Id != x.Id));
         Assert.Equal($"run-{count + 1}", created.Slug);
     }
 
     [DockerTheory]
-    [InlineData("run-1,run-3,run-5", "", 6)]
-    [InlineData("run-2,run-10,manual,run-999x", "", 11)]
-    [InlineData("", "run-1,run-2,run-3", 4)]
-    [InlineData("run-1", "run-1,run-12", 13)]
-    public async Task CreateExperimentRun_LegacyHistory_InitializesCounter(
-        string currentSlugs, string createdSlugs, int expectedNumber)
+    [InlineData(0, 1)]
+    [InlineData(3, 4)]
+    [InlineData(12, 13)]
+    public async Task CreateExperimentRun_Counter_PreservesNumbering(
+        int lastRunNumber, int expectedNumber)
     {
-        var experiment = NewExperiment("Legacy run numbering");
+        var experiment = await NewExperimentAsync("Run counter");
+        experiment.LastRunNumber = lastRunNumber;
         await CreateExperimentServices().ExperimentService.CreateAsync(experiment);
-        await SeedRunHistoryAsync(
-            experiment.Id,
-            currentSlugs.Split(',', StringSplitOptions.RemoveEmptyEntries),
-            createdSlugs.Split(',', StringSplitOptions.RemoveEmptyEntries));
 
         var detail = await CreateExperimentServices().ExperimentService.CreateRunAsync(
-            ExperimentProviderParityFixture.EnvId, experiment.Id);
+            ExperimentProviderParityFixture.EnvId, experiment.Id, new ExperimentRunCreate { ControlVariant = "control", TreatmentVariants = ["treatment"] });
         Assert.Single(detail.ExperimentRuns, x => x.Slug == $"run-{expectedNumber}");
 
         foreach (var run in detail.ExperimentRuns)
@@ -814,33 +782,8 @@ public abstract class WritableExperimentProviderTestsBase(
         }
 
         var next = await CreateExperimentServices().ExperimentService.CreateRunAsync(
-            ExperimentProviderParityFixture.EnvId, experiment.Id);
+            ExperimentProviderParityFixture.EnvId, experiment.Id, new ExperimentRunCreate { ControlVariant = "control", TreatmentVariants = ["treatment"] });
         Assert.Equal($"run-{expectedNumber + 1}", Assert.Single(next.ExperimentRuns).Slug);
-    }
-
-    [DockerTheory]
-    [InlineData("2")]
-    [InlineData("2,4")]
-    [InlineData("5")]
-    [InlineData("1,2,3,4,5")]
-    public async Task CreateExperimentRun_LegacyRunsDeletedBeforeFirstCreation_PreservesNumbers(string deletedNumbers)
-    {
-        var experiment = NewExperiment("Legacy deletion before counter initialization");
-        await CreateExperimentServices().ExperimentService.CreateAsync(experiment);
-        await SeedRunHistoryAsync(experiment.Id, ["run-1", "run-2", "run-3", "run-4", "run-5"], []);
-        var detail = await CreateExperimentServices().ExperimentService.GetAsync(
-            ExperimentProviderParityFixture.EnvId, experiment.Id);
-
-        foreach (var number in deletedNumbers.Split(','))
-        {
-            var run = detail.ExperimentRuns.Single(x => x.Slug == $"run-{number}");
-            await CreateExperimentServices().ExperimentService.DeleteRunAsync(
-                ExperimentProviderParityFixture.EnvId, experiment.Id, run.Id);
-        }
-
-        var next = await CreateExperimentServices().ExperimentService.CreateRunAsync(
-            ExperimentProviderParityFixture.EnvId, experiment.Id);
-        Assert.Single(next.ExperimentRuns, x => x.Slug == "run-6");
     }
 
     [DockerTheory]
@@ -849,18 +792,15 @@ public abstract class WritableExperimentProviderTestsBase(
     public async Task CreateExperimentRun_ConcurrentRequests_AllocateDistinctNumbers(int lastUsed)
     {
         const int count = 12;
-        var experiment = NewExperiment("Concurrent run numbering");
+        var experiment = await NewExperimentAsync("Concurrent run numbering");
+        experiment.LastRunNumber = lastUsed;
         await CreateExperimentServices().ExperimentService.CreateAsync(experiment);
-        if (lastUsed > 0)
-        {
-            await SeedRunHistoryAsync(experiment.Id, [], [$"run-{lastUsed}"]);
-        }
         var start = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var requests = Enumerable.Range(0, count).Select(async _ =>
         {
             var service = CreateExperimentServices().ExperimentService;
             await start.Task;
-            await service.CreateRunAsync(ExperimentProviderParityFixture.EnvId, experiment.Id);
+            await service.CreateRunAsync(ExperimentProviderParityFixture.EnvId, experiment.Id, new ExperimentRunCreate { ControlVariant = "control", TreatmentVariants = ["treatment"] });
         }).ToArray();
 
         start.SetResult();
@@ -881,7 +821,7 @@ public abstract class WritableExperimentProviderTestsBase(
         }
 
         var next = await CreateExperimentServices().ExperimentService.CreateRunAsync(
-            ExperimentProviderParityFixture.EnvId, experiment.Id);
+            ExperimentProviderParityFixture.EnvId, experiment.Id, new ExperimentRunCreate { ControlVariant = "control", TreatmentVariants = ["treatment"] });
         Assert.Equal($"run-{lastUsed + count + 1}", Assert.Single(next.ExperimentRuns).Slug);
     }
 
@@ -991,8 +931,8 @@ public abstract class WritableExperimentProviderTestsBase(
             MetricAgg = "once"
         });
 
-        var firstExperiment = NewExperiment("Metric reuse first");
-        var secondExperiment = NewExperiment("Metric reuse second");
+        var firstExperiment = await NewExperimentAsync("Metric reuse first");
+        var secondExperiment = await NewExperimentAsync("Metric reuse second");
         await experimentService.CreateAsync(firstExperiment);
         await experimentService.CreateAsync(secondExperiment);
 
@@ -1007,14 +947,20 @@ public abstract class WritableExperimentProviderTestsBase(
         AssertPrimaryMetric(ProviderName, second, metric.Id, key, "decrease_good");
     }
 
-    private static Experiment NewExperiment(string name)
+    private async Task<Experiment> NewExperimentAsync(string name)
     {
+        var flag = new Domain.FeatureFlags.FeatureFlag(ExperimentProviderParityFixture.EnvId, name, "", Guid.NewGuid().ToString(), true, "boolean",
+            [new Domain.FeatureFlags.Variation { Id = "control", Name = "Control", Value = "false" },
+             new Domain.FeatureFlags.Variation { Id = "treatment", Name = "Treatment", Value = "true" }],
+            "control", "treatment", [], Guid.NewGuid());
+        await fixture.CreateFeatureFlagService(ProviderName).AddOneAsync(flag);
         var now = DateTime.UtcNow;
         return new Experiment
         {
             Id = Guid.NewGuid(),
             Name = name,
             Description = "Provider parity experiment",
+            FlagId = flag.Id,
             PrimaryMetric = new PrimaryMetricConfig { MetricId = Guid.NewGuid(), MetricKey = "purchase", EventName = "purchase", Name = "Purchase" },
             Stage = "hypothesis",
             EnvId = ExperimentProviderParityFixture.EnvId,

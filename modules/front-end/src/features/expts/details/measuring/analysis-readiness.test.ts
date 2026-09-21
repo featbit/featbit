@@ -5,6 +5,7 @@ import type { MeasuringRun } from "./measuring-types"
 
 const run: MeasuringRun = {
   id: "run-1",
+  variations: [],
   slug: "run-1",
   method: "bayesian_ab",
   controlVariant: "control",

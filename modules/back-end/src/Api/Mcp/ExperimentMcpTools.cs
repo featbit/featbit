@@ -16,9 +16,9 @@ public class ExperimentMcpTools(
     IPermissionChecker permissionChecker)
 {
     [McpServerTool(Name = "featbit_experiment_get_experiment")]
-    [Description("Read a experiment experiment by id, including runs and activities. The API resolves the FeatBit environment from the experiment.")]
+    [Description("Read an experiment by ID, including runs. The API resolves the FeatBit environment from the experiment.")]
     public async Task<ExperimentDetailVm> GetExperiment(
-        [Description("Experiment experiment id.")]
+        [Description("Experiment ID.")]
         Guid experimentId)
     {
         var envId = await ResolveAuthorizedEnvIdAsync(experimentId);
@@ -31,9 +31,9 @@ public class ExperimentMcpTools(
     }
 
     [McpServerTool(Name = "featbit_experiment_update_experiment")]
-    [Description("Patch experiment experiment fields such as goal, intent, hypothesis, constraints, learning, and last action. Use metric registry tools plus featbit_experiment_update_metrics for primary metrics and guardrails. The API resolves the FeatBit environment from the experiment.")]
+    [Description("Patch experiment fields such as goal, intent, hypothesis, constraints, learning, and last action. Use metric registry tools plus featbit_experiment_update_metrics for primary metrics and guardrails. The API resolves the FeatBit environment from the experiment.")]
     public async Task<ExperimentDetailVm> UpdateExperiment(
-        [Description("Experiment experiment id.")]
+        [Description("Experiment ID.")]
         Guid experimentId,
         [Description("Partial experiment update. Bind a feature flag using flagId from a Feature Flag read or create response. The flag must belong to the experiment environment. Leave fields null when they should not change.")]
         ExperimentUpdate update)
@@ -49,9 +49,9 @@ public class ExperimentMcpTools(
     }
 
     [McpServerTool(Name = "featbit_experiment_set_stage")]
-    [Description("Move a experiment experiment to a framework stage such as intent, hypothesis, implementing, measuring, or learning.")]
+    [Description("Move an experiment to a framework stage such as intent, hypothesis, implementing, measuring, or learning.")]
     public async Task<ExperimentDetailVm> SetStage(
-        [Description("Experiment experiment id.")]
+        [Description("Experiment ID.")]
         Guid experimentId,
         [Description("Target experiment stage.")]
         string stage)
@@ -69,7 +69,7 @@ public class ExperimentMcpTools(
     [McpServerTool(Name = "featbit_experiment_update_metrics")]
     [Description("Select registered metrics by metricId as defaults for future experiment runs. Provide primaryMetric with metricId and expectedDirection (increase_good or decrease_good), and guardrailMetrics as an array of metricId and direction (increase_bad or decrease_bad). Existing runs retain their independent metric snapshots. Metric names, SDK event names, types, and aggregations come from the metric registry.")]
     public async Task<ExperimentDetailVm> UpdateMetrics(
-        [Description("Experiment experiment id.")]
+        [Description("Experiment ID.")]
         Guid experimentId,
         [Description("Primary metric and guardrail update payload.")]
         ExperimentMetricsUpdate update)
@@ -87,7 +87,7 @@ public class ExperimentMcpTools(
     [McpServerTool(Name = "featbit_experiment_create_run")]
     [Description("Create an experiment run with an independent snapshot of the experiment's current primary metric and guardrails. Configure the experiment's primary metric first. The run's metric identity, SDK event name, calculation settings, and directions are fixed at creation.")]
     public async Task<ExperimentDetailVm> CreateRun(
-        [Description("Experiment experiment id.")]
+        [Description("Experiment ID.")]
         Guid experimentId)
     {
         var envId = await ResolveAuthorizedEnvIdAsync(experimentId);
@@ -102,9 +102,9 @@ public class ExperimentMcpTools(
     [McpServerTool(Name = "featbit_experiment_update_run")]
     [Description("Patch an experiment run's method, variants, observations, analysis result, decision, or learning fields. Metric snapshots cannot be edited; update the experiment's metric defaults and create a new run to use different metrics.")]
     public async Task<ExperimentDetailVm> UpdateRun(
-        [Description("Experiment experiment id.")]
+        [Description("Experiment ID.")]
         Guid experimentId,
-        [Description("Experiment experiment run id.")]
+        [Description("Experiment run ID.")]
         Guid runId,
         [Description("Partial run update. Leave fields null when they should not change.")]
         ExperimentRunUpdate update)
@@ -121,11 +121,11 @@ public class ExperimentMcpTools(
     }
 
     [McpServerTool(Name = "featbit_experiment_update_run_traffic")]
-    [Description("Configure a run's analysis scope and sampling without modifying the Feature Flag. Supports layer id/key, assignment unit, bucket slice start/end, traffic offset, allocation plan, audience filters, and analysis sampling plan. Layer reservations are validated against observation windows, including future reservations. Decisions do not change reservations. Choose includeRate from actual exposure counts in the run window: desired analyzed users / observed served users * 100, capped at 100. Actual rollout, targeting, or flag toggle changes must use Feature Flag tools with explicit customer confirmation; a run decision is not confirmation.")]
+    [Description("Configure a run's analysis scope and sampling without modifying the Feature Flag. Supports layer ID/key, assignment unit, bucket slice start/end, traffic offset, allocation plan, and analysis sampling plan. Layer reservations are validated against observation windows, including future reservations. Decisions do not change reservations. Choose includeRate from actual exposure counts in the run window: desired analyzed users / observed served users * 100, capped at 100. Actual rollout, targeting, or flag toggle changes must use Feature Flag tools with explicit customer confirmation; a run decision is not confirmation.")]
     public async Task<ExperimentDetailVm> UpdateRunTraffic(
-        [Description("Experiment experiment id.")]
+        [Description("Experiment ID.")]
         Guid experimentId,
-        [Description("Experiment experiment run id.")]
+        [Description("Experiment run ID.")]
         Guid runId,
         [Description("Run traffic/sampling update. Requires controlVariant, treatmentVariants, assignmentUnitSelector, layerTrafficPercent, and analysisSamplingPlan. Use sliceStart/sliceEnd for explicit layer bucket ranges such as 30-60.")]
         ExperimentMcpRunTrafficRequest request)
@@ -160,17 +160,16 @@ public class ExperimentMcpTools(
                 LayerTrafficPercent = request.LayerTrafficPercent,
                 AllocationPlan = Normalize(request.AllocationPlan),
                 AnalysisSamplingPlan = request.AnalysisSamplingPlan,
-                AudienceFilters = Normalize(request.AudienceFilters),
             }
         });
     }
 
     [McpServerTool(Name = "featbit_experiment_analyze_run")]
-    [Description("Run server-side analysis for a experiment experiment run and return the refreshed experiment.")]
+    [Description("Run server-side analysis for an experiment run and return the refreshed experiment.")]
     public async Task<ExperimentDetailVm> AnalyzeRun(
-        [Description("Experiment experiment id.")]
+        [Description("Experiment ID.")]
         Guid experimentId,
-        [Description("Experiment experiment run id.")]
+        [Description("Experiment run ID.")]
         Guid runId,
         [Description("When true, fetch fresh stats instead of reusing existing analysis input where possible.")]
         bool forceFresh = false)
@@ -387,7 +386,7 @@ public class ExperimentMcpRunTrafficRequest
     [Description("Optional mutual-exclusion layer key. The layer gates eligibility only and does not decide the served variation.")]
     public string LayerKey { get; set; } = string.Empty;
 
-    [Description("Optional mutual-exclusion layer id. Prefer layerKey when the user is selecting by registered layer key.")]
+    [Description("Optional mutual-exclusion layer ID. Prefer layerKey when the user is selecting by registered layer key.")]
     public Guid? LayerId { get; set; }
 
     [Description("Legacy analysis traffic percentage, from 1 to 100. Prefer sliceStart/sliceEnd plus layerTrafficPercent for layer bucket assignments.")]
@@ -416,7 +415,4 @@ public class ExperimentMcpRunTrafficRequest
 
     [Description("Optional legacy JSON allocation plan. Prefer analysisSamplingPlan unless intentionally reproducing allocation-plan behavior.")]
     public string AllocationPlan { get; set; } = string.Empty;
-
-    [Description("Optional audience filters stored on the run for operator visibility.")]
-    public string AudienceFilters { get; set; } = string.Empty;
 }
