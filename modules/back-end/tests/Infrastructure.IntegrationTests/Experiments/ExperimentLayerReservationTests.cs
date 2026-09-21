@@ -64,7 +64,7 @@ public abstract class ExperimentLayerReservationTests(ExperimentProviderParityFi
     {
         var first = await CreateRun(DateTime.UtcNow.AddDays(-10), DateTime.UtcNow.AddDays(-9));
         await CreateRun(Day(1), Day(10));
-        await AssertConflict(() => Service().CreateRunAsync(EnvId, first.ExperimentId));
+        await AssertConflict(() => Service().CreateRunAsync(EnvId, first.ExperimentId, new ExperimentRunCreate { ControlVariant = "control", TreatmentVariants = ["treatment"] }));
         Assert.Single((await Service().GetAsync(EnvId, first.ExperimentId)).ExperimentRuns);
     }
 
@@ -73,7 +73,7 @@ public abstract class ExperimentLayerReservationTests(ExperimentProviderParityFi
     {
         var now = DateTime.UtcNow;
         var first = await CreateRun(now.AddDays(-1), null);
-        var detail = await Service().CreateRunAsync(EnvId, first.ExperimentId);
+        var detail = await Service().CreateRunAsync(EnvId, first.ExperimentId, new ExperimentRunCreate { ControlVariant = "control", TreatmentVariants = ["treatment"] });
         var second = detail.ExperimentRuns.Single(x => x.Id != first.Id);
         await Service().UpdateRunAsync(EnvId, first.ExperimentId, second.Id,
             new ExperimentRunUpdate { SliceStart = 20, SliceEnd = 50, Decision = "ROLLBACK" });
@@ -103,13 +103,18 @@ public abstract class ExperimentLayerReservationTests(ExperimentProviderParityFi
     private async Task<ExperimentRunVm> CreateRun(
         DateTime start, DateTime? end, double bucketStart = 0, double bucketEnd = 30)
     {
+        var flag = new Domain.FeatureFlags.FeatureFlag(EnvId, "Layer test", "", Guid.NewGuid().ToString(), true, "boolean",
+            [new Domain.FeatureFlags.Variation { Id = "control", Name = "Control", Value = "false" },
+             new Domain.FeatureFlags.Variation { Id = "treatment", Name = "Treatment", Value = "true" }],
+            "control", "treatment", [], Guid.NewGuid());
+        await fixture.CreateFeatureFlagService(provider).AddOneAsync(flag);
         var experiment = new Experiment
         {
             PrimaryMetric = new PrimaryMetricConfig { MetricId = Guid.NewGuid(), MetricKey = "purchase", EventName = "purchase" },
-            Id = Guid.NewGuid(), Name = "Layer reservation test", Stage = "measuring", EnvId = EnvId
+            Id = Guid.NewGuid(), Name = "Layer reservation test", Stage = "measuring", EnvId = EnvId, FlagId = flag.Id
         };
         await Service().CreateAsync(experiment);
-        var created = await Service().CreateRunAsync(EnvId, experiment.Id);
+        var created = await Service().CreateRunAsync(EnvId, experiment.Id, new ExperimentRunCreate { ControlVariant = "control", TreatmentVariants = ["treatment"] });
         var run = Assert.Single(created.ExperimentRuns);
         Assert.Equal(run.CreatedAt, run.ObservationStart);
         var updated = await Service().UpdateRunAsync(EnvId, experiment.Id, run.Id, new ExperimentRunUpdate

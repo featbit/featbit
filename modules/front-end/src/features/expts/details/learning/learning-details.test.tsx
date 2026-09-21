@@ -11,6 +11,7 @@ function run(
   values: Partial<ExperimentRunDetail> & Pick<ExperimentRunDetail, "id">
 ): ExperimentRunDetail {
   return {
+    variations: [],
     slug: values.id,
     method: "bayesian_ab",
     decision: "CONTINUE",

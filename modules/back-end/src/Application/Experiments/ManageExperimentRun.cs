@@ -104,8 +104,20 @@ public class ExperimentRunUpdate
     public string AnalysisSamplingPlan { get; set; }
 }
 
+public class ExperimentRunCreate
+{
+    public string Method { get; set; } = "bayesian_ab";
+    public string ControlVariant { get; set; }
+    public string[] TreatmentVariants { get; set; } = [];
+    public int? MinimumSample { get; set; }
+    public DateTime? ObservationStart { get; set; }
+    public DateTime? ObservationEnd { get; set; }
+}
+
 public class CreateExperimentRun : IRequest<ExperimentDetailVm>
 {
+    public ExperimentRunCreate Setup { get; set; }
+
     public Guid EnvId { get; set; }
 
     public Guid Id { get; set; }
@@ -161,7 +173,7 @@ public class CreateExperimentRunHandler(
         CreateExperimentRun request,
         CancellationToken cancellationToken)
     {
-        return await service.CreateRunAsync(request.EnvId, request.Id);
+        return await service.CreateRunAsync(request.EnvId, request.Id, request.Setup);
     }
 }
 

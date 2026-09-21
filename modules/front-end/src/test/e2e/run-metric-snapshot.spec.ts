@@ -35,6 +35,7 @@ for (const width of [1366, 1920]) {
     }
     const run: MeasuringRun = {
       id: "run-1",
+      variations: [],
       slug: "run-1",
       method: "bayesian_ab",
       primaryMetric: snapshot,

@@ -12,9 +12,15 @@ function runPath(envId: string, experimentId: string, runId?: string) {
   return runId ? `${base}/${encodeURIComponent(runId)}` : base
 }
 
-export function createExperimentRun(envId: string, experimentId: string) {
+export function createExperimentRun(
+  envId: string,
+  experimentId: string,
+  setup: NewRunSetup & ObservationWindowUpdate
+) {
   return fetchApi<ExperimentDetail>(runPath(envId, experimentId), {
     method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(setup),
   })
 }
 
@@ -25,19 +31,6 @@ export function deleteExperimentRun(
 ) {
   return fetchApi<ExperimentDetail>(runPath(envId, experimentId, runId), {
     method: "DELETE",
-  })
-}
-
-export function updateExperimentRunSetup(
-  envId: string,
-  experimentId: string,
-  runId: string,
-  setup: NewRunSetup
-) {
-  return fetchApi<ExperimentDetail>(runPath(envId, experimentId, runId), {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(setup),
   })
 }
 

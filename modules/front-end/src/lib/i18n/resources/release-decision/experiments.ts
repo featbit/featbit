@@ -276,7 +276,7 @@ export const enExperiments = {
       guardrail: "Guardrail",
       directionNotRecorded: "Direction not recorded",
       noData: "No data",
-      variant: "Variant",
+      variant: "Variation",
       samples: "Samples (n)",
       events: "Events",
       rate: "Rate",
@@ -361,6 +361,13 @@ export const enExperiments = {
       notConfigured: "Not configured",
       saveChanges: "Save changes",
       saving: "Saving…",
+      decidedRolesLocked:
+        "This run already has a decision. Its control and treatments are locked. Create a new run to make a different comparison.",
+      confirmRolesChangeTitle: "Change groups and clear analysis?",
+      confirmRolesChangeDescription:
+        "The control or treatments have changed. Saving will clear this run’s existing analysis results. Run the analysis again for the new selection. Collected exposure and metric data will not be deleted.",
+      backToEditing: "Back to editing",
+      saveAndClearAnalysis: "Save and clear analysis",
       assignmentSaved: "Experiment assignment saved",
       assignmentSaveFailed: "The assignment could not be saved.",
       deleteRun: "Delete this run",
@@ -880,6 +887,13 @@ export const zhExperiments = {
       notConfigured: "未配置",
       saveChanges: "保存更改",
       saving: "正在保存…",
+      decidedRolesLocked:
+        "此 Run 已形成决策，对照组和实验组不可修改。如需进行新的比较，请新建 Run。",
+      confirmRolesChangeTitle: "修改分组并清除分析？",
+      confirmRolesChangeDescription:
+        "对照组或实验组已修改。保存后，当前 Run 的已有分析结果将被清除，需要重新分析。已采集的曝光和指标数据不会被删除。",
+      backToEditing: "返回编辑",
+      saveAndClearAnalysis: "保存并清除分析",
       assignmentSaved: "实验分配已保存",
       assignmentSaveFailed: "无法保存分配。",
       deleteRun: "删除此运行",
