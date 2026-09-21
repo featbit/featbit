@@ -649,7 +649,7 @@ Four tags, with distinct contracts:
 | `Startup` | `health/startup` | Has the process finished initializing? Fails until ready, then passes forever. |
 | `Readiness` | `health/readiness` | Should this instance receive traffic? **Only hard dependencies.** |
 | `Liveness` | `health/liveness` | Is the process wedged beyond recovery? Failing it **restarts the pod**. |
-| `Diagnostics` | `health/diagnostics` | Detail-rich operator information. **Never gates traffic.** |
+| `Diagnostics` | `health/diagnostics` | Detail-rich operator information. **Never gates traffic.** Per-check detail requires authentication; anonymous callers get status and timing only. |
 
 Two rules that follow from the restart/rotation consequences:
 

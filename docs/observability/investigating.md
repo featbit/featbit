@@ -523,3 +523,8 @@ Before mining signals, three endpoints on every service answer "is this thing we
 `/health/diagnostics` is the one to reach for during an incident. It never gates traffic, so reading
 it is always safe, and it reports exception **types only** — never messages or stack traces — so it
 is safe to expose to an on-call dashboard.
+
+**Call it authenticated.** Anonymously it answers only the aggregate status, per-check status, and
+timings, and sets `detailRedacted: true`; the per-check `data` that makes it worth reading — DC
+reachability, leader identity, the selected store — is served only to an authenticated caller, since
+anyone able to reach the port would otherwise be able to enumerate the deployment.

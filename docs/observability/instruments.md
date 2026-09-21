@@ -157,6 +157,7 @@ against a production datastore. Everything about it is bounded and fail-quiet as
 | Property | Behavior |
 | --- | --- |
 | Interval | `Observability:Messaging:BacklogSampleIntervalSeconds`, default **30 s**, floored at **5 s**. `0` or negative **disables** sampling entirely; an unparseable value falls back to the default, so a typo cannot silently turn the diagnostic off |
+| Export gate | Registered **only when `ENABLE_OPENTELEMETRY=true`**. The sampler exists to feed a gauge, so with export off the query is datastore load with no consumer. Observability is opt-in, and that has to include the cost it imposes on a production store rather than only the cost of shipping the data |
 | Topic set | Fixed at startup from the same list the consumer drains, so gauge cardinality is bounded and a topic can never be consumed without being watched |
 | Unknown | Reported as **`-1`**, never `0`. A zero reads as "drained", which is the most misleading thing a backlog gauge can say while a broker is unreachable |
 | Probe failure | Caught per provider. That provider's topics go to `-1`, other providers are still sampled, the loop does not fault, and `worker.loop_failures` records it. A diagnostic must never be the reason a service stops |
@@ -880,6 +881,14 @@ The `health/diagnostics` response writer emits exception **type names only**, ne
 exception text routinely embeds connection strings and authentication principals, and this endpoint
 exists to be read by humans.
 
+It also **withholds per-check `description` and `data` from an unauthenticated caller**, and says so
+with `detailRedacted: true`. The endpoint stays anonymous, because an endpoint you need credentials
+to reach is an endpoint nobody reads at 3am — but a check's structured data is where the deployment
+describes itself: datacenter identity and reachability, which datacenter is local, leadership and
+the leader's instance id, the selected store. Status, duration, and tags stay visible to everyone,
+so the endpoint still answers *what* is unhealthy without credentials; *why* requires
+authentication.
+
 ---
 
 ## Known gaps: what is deliberately not measured
@@ -901,6 +910,16 @@ done.**
 | `messaging.redelivered` under Kafka and Redis | Not built | Shipped for Postgres only, where the consumer's poll already increments `deliver_count` on every delivery and the count is readable with no behavior change. Under Kafka and Redis there is genuinely nothing to count — no retry or dead-letter path exists, both Kafka consumers `StoreOffset` in a `finally` regardless of outcome, and the Redis consumer pops before processing — so a message is delivered exactly once or not at all. The absent series means "not applicable to this provider", not zero |
 | A single end-to-end trace across the message queue | **Built**, with one residual | All three transports carry W3C trace context, so change propagation and data sync join into one trace across every service boundary — Kafka in message headers, Postgres in the `queue_messages.trace_parent`/`.trace_state` columns, Redis as sibling properties on the JSON payload. The batched publish paths carry it the same way — Redis injects into every message of the batch, and the Postgres `COPY` writes `trace_parent` and `trace_state` for every row. The control plane inherits this automatically, since it registers the back-end's producers and consumers rather than having its own. **The residual is `insights.ingest` and `insights.flush`**, which remain *two traces, not a parent/child pair*, under every transport: they are separated by a buffer and a flush cycle, not just by the queue, so no wire-level propagation can join them. Note also that the Postgres carrier requires `v6.0.0.sql` to have been applied — until it is, the producer's insert fails and is swallowed |
 | Evaluation batch size | Not applicable | `/api/public/featureflag/evaluate` evaluates the flags of one environment for one end user; there is no caller-supplied batch to size. `sync.payload_items` already carries the count where a count exists |
+
+### Found while instrumenting, and deliberately not fixed here
+
+Instrumenting a failure path sometimes reveals that the path itself is wrong. Recording those here
+rather than fixing them silently, because each one is a **behavior** change and this work is bound
+by the rule that telemetry must not change behavior.
+
+| Finding | Why it is not fixed here |
+| --- | --- |
+| **A fatal Kafka consume error stops consumption without stopping the process.** Both Kafka consumers log the error and `break`, so the consumer loop and `ExecuteAsync` complete *successfully*. The host's stop-on-exception behavior never fires, and the pod stays alive and Ready with consumption permanently dead | Pre-existing behavior, not introduced here. Letting the exception escape so the host stops is a deployment-visible change — pods would begin restarting on a broker condition that currently goes unnoticed — and belongs in its own change with its own review. What this work does add is the ability to *see* it: `worker.running` drops to 0 and `worker.last_success_age` climbs without bound, which is exactly the "a worker can stop without producing further errors" risk the original audit named |
 
 ### Instruments you might expect but will not find
 

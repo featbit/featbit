@@ -1,5 +1,6 @@
 using Confluent.Kafka;
 using Domain.Messages;
+using Domain.Observability;
 using Infrastructure.Caches.Redis;
 using Infrastructure.MQ.Backlog;
 using Infrastructure.MQ.Kafka;
@@ -119,6 +120,15 @@ public static class MqServiceCollectionExtensions
             {
                 // Explicitly disabled. The gauges are never registered, so they report nothing
                 // rather than reporting a frozen "unknown" forever.
+                return;
+            }
+
+            // The sampler is the only instrumentation here that costs something when nobody is
+            // listening: it queries the broker or the queue table on a timer. Observability is
+            // opt-in, and that has to include the load it puts on a datastore — so with export
+            // disabled the sampler is not registered at all and the gauge simply does not exist.
+            if (!TelemetryExport.IsEnabled())
+            {
                 return;
             }
 

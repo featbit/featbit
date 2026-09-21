@@ -1,5 +1,6 @@
 using Confluent.Kafka;
 using Domain.Messages;
+using Domain.Observability;
 using Domain.Shared;
 using Infrastructure;
 using Infrastructure.Caches;
@@ -83,6 +84,15 @@ public static class StreamingBuilderExtensions
         {
             var interval = BacklogSamplerOptions.Resolve(configuration);
             if (interval is null)
+            {
+                return;
+            }
+
+            // The sampler is the only instrumentation here that costs something when nobody is
+            // listening: it queries the broker or the queue table on a timer. Observability is
+            // opt-in, and that has to include the load it puts on a datastore — so with export
+            // disabled the sampler is not registered at all and the gauge simply does not exist.
+            if (!TelemetryExport.IsEnabled())
             {
                 return;
             }
