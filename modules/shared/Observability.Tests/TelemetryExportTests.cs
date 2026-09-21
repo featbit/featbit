@@ -13,14 +13,10 @@ namespace FeatBit.Observability.Tests;
 /// </remarks>
 public class TelemetryExportTests
 {
-    [Theory]
-    [InlineData("true")]
-    [InlineData("True")]
-    [InlineData("TRUE")]
-    [InlineData(" true ")]
-    public void IsEnabled_WithTrue_IsEnabled(string value)
+    [Fact]
+    public void IsEnabled_WithTheExactValue_IsEnabled()
     {
-        Assert.True(TelemetryExport.IsEnabled(value));
+        Assert.True(TelemetryExport.IsEnabled("true"));
     }
 
     [Theory]
@@ -33,9 +29,20 @@ public class TelemetryExportTests
     [InlineData("enabled")]
     public void IsEnabled_WithAnythingElse_IsDisabled(string? value)
     {
-        // Deliberately strict, and deliberately matching the entrypoint's own comparison: start.sh
-        // tests for the literal string "true", so "1" enabling the sampler here while leaving the
-        // profiler off would be the worst of both worlds — the cost with none of the signal.
+        Assert.False(TelemetryExport.IsEnabled(value));
+    }
+
+    [Theory]
+    [InlineData("True")]
+    [InlineData("TRUE")]
+    [InlineData(" true ")]
+    [InlineData("true ")]
+    public void IsEnabled_WithASpellingTheEntrypointRejects_IsDisabled(string value)
+    {
+        // start.sh gates the profiler on [ "$ENABLE_OPENTELEMETRY" = "true" ] — exact, ordinal, and
+        // untrimmed. Accepting a spelling it rejects would start the sampler's periodic datastore
+        // query in a process that exports nothing: the cost with none of the signal. The gate that
+        // spends money must never be the more permissive one.
         Assert.False(TelemetryExport.IsEnabled(value));
     }
 

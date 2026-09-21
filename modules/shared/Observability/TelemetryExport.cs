@@ -27,8 +27,8 @@ public static class TelemetryExport
     public const string EnabledVariable = "ENABLE_OPENTELEMETRY";
 
     /// <summary>
-    /// Whether telemetry export is enabled. Anything other than <c>true</c> — including the
-    /// variable being absent — reads as disabled, matching the entrypoint's own comparison.
+    /// Whether telemetry export is enabled. Anything other than the exact string <c>true</c> —
+    /// including the variable being absent — reads as disabled.
     /// </summary>
     public static bool IsEnabled() => IsEnabled(Environment.GetEnvironmentVariable(EnabledVariable));
 
@@ -36,6 +36,14 @@ public static class TelemetryExport
     /// Whether <paramref name="value"/> enables export. Exposed so the rule can be tested without
     /// mutating process-wide environment state.
     /// </summary>
+    /// <remarks>
+    /// <b>Exact, ordinal, and untrimmed, because the entrypoint is.</b> <c>start.sh</c> gates the
+    /// profiler on <c>[ "$ENABLE_OPENTELEMETRY" = "true" ]</c>, so <c>True</c> and <c>&#160;true&#160;</c>
+    /// leave metrics and traces unexported. A more forgiving rule here would be the worst possible
+    /// pairing: this gate decides whether to spend a periodic query against a production datastore,
+    /// and accepting a spelling the exporter rejects would buy that cost with no signal at all.
+    /// Whichever gate is stricter has to be the one that spends money.
+    /// </remarks>
     public static bool IsEnabled(string? value)
-        => string.Equals(value?.Trim(), "true", StringComparison.OrdinalIgnoreCase);
+        => string.Equals(value, "true", StringComparison.Ordinal);
 }
