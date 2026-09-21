@@ -35,7 +35,10 @@ for (const width of [1366, 1920]) {
     }
     const run: MeasuringRun = {
       id: "run-1",
-      variations: [],
+      variations: [
+        { id: "control", name: "Original", value: "false" },
+        { id: "treatment", name: "Updated", value: "true" },
+      ],
       slug: "run-1",
       method: "bayesian_ab",
       primaryMetric: snapshot,
@@ -122,12 +125,16 @@ for (const width of [1366, 1920]) {
       })
     )
     const runUpdates: Record<string, unknown>[] = []
+    const runCreates: Record<string, unknown>[] = []
     await page.route(
       "**/api/v1/envs/*/experiments/experiment-1/runs**",
       (route) => {
         if (route.request().method() === "POST") {
+          const body = route.request().postDataJSON()
+          runCreates.push(body)
           current.experimentRuns.unshift({
             ...run,
+            ...body,
             id: "run-2",
             slug: "run-2",
             primaryMetric: { ...current.primaryMetric! },
@@ -175,8 +182,8 @@ for (const width of [1366, 1920]) {
 
     const saved = page.waitForResponse(
       (response) =>
-        response.url().endsWith("/runs/run-2/observation-window") &&
-        response.request().method() === "PUT" &&
+        response.url().endsWith("/experiments/experiment-1/runs") &&
+        response.request().method() === "POST" &&
         response.ok()
     )
     await dialog
@@ -187,11 +194,16 @@ for (const width of [1366, 1920]) {
     await expect(
       page.getByText("Updated definition", { exact: true })
     ).toBeVisible()
-    expect(runUpdates).toHaveLength(2)
-    for (const update of runUpdates) {
-      expect(update).not.toHaveProperty("primaryMetric")
-      expect(update).not.toHaveProperty("guardrailMetrics")
-    }
+    expect(runUpdates).toHaveLength(0)
+    expect(runCreates).toHaveLength(1)
+    expect(runCreates[0]).toMatchObject({
+      method: "bayesian_ab",
+      controlVariant: "control",
+      treatmentVariants: ["treatment"],
+      observationStart: expect.any(String),
+    })
+    expect(runCreates[0]).not.toHaveProperty("primaryMetric")
+    expect(runCreates[0]).not.toHaveProperty("guardrailMetrics")
 
     current.primaryMetric = null
     current.experimentRuns = [run]
