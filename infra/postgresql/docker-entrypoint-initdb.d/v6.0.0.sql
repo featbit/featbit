@@ -36,21 +36,6 @@ ALTER TABLE segments
 DROP TABLE IF EXISTS experiments;
 DROP TABLE IF EXISTS experiment_metrics;
 
-CREATE TABLE IF NOT EXISTS experiment_activities
-(
-    id            uuid                     NOT NULL,
-    type          character varying(128)   NOT NULL,
-    title         character varying(512)   NOT NULL,
-    detail        text,
-    actor_id      uuid,
-    actor_name    character varying(256),
-    actor_email   character varying(512),
-    actor_type    character varying(64),
-    created_at    timestamp with time zone NOT NULL,
-    experiment_id uuid                     NOT NULL,
-    CONSTRAINT pk_experiment_activities PRIMARY KEY (id)
-);
-
 CREATE TABLE IF NOT EXISTS experiment_exposure_events
 (
     id              uuid                     NOT NULL,
@@ -86,7 +71,7 @@ CREATE TABLE IF NOT EXISTS experiment_metric_events
     event_name       character varying(256)   NOT NULL,
     event_type       character varying(64)    NOT NULL,
     numeric_value    double precision         NOT NULL,
-    application_type character varying(64),
+    application_type character varying(128),
     occurred_at      timestamp with time zone NOT NULL,
     created_at       timestamp with time zone NOT NULL,
     CONSTRAINT pk_experiment_metric_events PRIMARY KEY (id)
@@ -94,17 +79,17 @@ CREATE TABLE IF NOT EXISTS experiment_metric_events
 
 CREATE TABLE IF NOT EXISTS experiment_metrics
 (
-    id                 uuid                     NOT NULL,
-    env_id             uuid                     NOT NULL,
-    name               character varying(256)   NOT NULL,
-    key                character varying(128)   NOT NULL,
-    description        text,
-    metric_type        character varying(64)    NOT NULL,
-    metric_agg         character varying(64)    NOT NULL,
-    event_name         character varying(256)   NOT NULL,
-    status             character varying(64)    NOT NULL,
-    created_at         timestamp with time zone NOT NULL,
-    updated_at         timestamp with time zone NOT NULL,
+    id          uuid                     NOT NULL,
+    env_id      uuid                     NOT NULL,
+    name        character varying(256)   NOT NULL,
+    key         character varying(128)   NOT NULL,
+    event_name  varchar(256)             NOT NULL,
+    description text,
+    metric_type character varying(64)    NOT NULL,
+    metric_agg  character varying(64)    NOT NULL,
+    status      character varying(64)    NOT NULL,
+    created_at  timestamp with time zone NOT NULL,
+    updated_at  timestamp with time zone NOT NULL,
     CONSTRAINT pk_experiment_metrics PRIMARY KEY (id)
 );
 
@@ -143,6 +128,7 @@ CREATE TABLE IF NOT EXISTS experiment_runs
     guardrail_metrics        jsonb                    NOT NULL DEFAULT '[]'::jsonb,
     control_variant          character varying(256),
     treatment_variants       jsonb                    NOT NULL DEFAULT '[]'::jsonb,
+    variations               jsonb                    NOT NULL DEFAULT '[]'::jsonb,
     minimum_sample           integer,
     observation_start        timestamp with time zone,
     observation_end          timestamp with time zone,
@@ -160,7 +146,6 @@ CREATE TABLE IF NOT EXISTS experiment_runs
     next_hypothesis          text,
     traffic_percent          double precision,
     layer_id                 uuid,
-    audience_filters         text,
     traffic_offset           integer,
     layer_key                character varying(128),
     allocation_key_selector  character varying(256),
@@ -191,9 +176,8 @@ CREATE TABLE IF NOT EXISTS experiments
     intent            text,
     last_action       text,
     last_learning     text,
-    last_run_number   bigint,
+    last_run_number   integer                  NOT NULL DEFAULT 0,
     primary_metric    jsonb,
-    variants          text,
     conflict_analysis text,
     created_at        timestamp with time zone NOT NULL,
     updated_at        timestamp with time zone NOT NULL,
@@ -260,8 +244,6 @@ CREATE UNIQUE INDEX IF NOT EXISTS ix_experiment_metrics_env_id_key
     ON experiment_metrics (env_id, key);
 CREATE UNIQUE INDEX IF NOT EXISTS ix_experiment_layers_env_id_key
     ON experiment_layers (env_id, key);
-CREATE INDEX IF NOT EXISTS ix_experiment_activities_experiment_id_created_at
-    ON experiment_activities (experiment_id, created_at);
 
 CREATE UNIQUE INDEX IF NOT EXISTS ix_experiment_runs_experiment_id_slug
     ON experiment_runs (experiment_id, slug);
