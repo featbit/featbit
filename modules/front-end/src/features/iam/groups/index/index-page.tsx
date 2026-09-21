@@ -38,12 +38,14 @@ export function GroupPage() {
   const [removing, setRemoving] = useState(false)
 
   useEffect(() => {
+    if (search === debouncedSearch) return
+
     const timeout = window.setTimeout(() => {
       setDebouncedSearch(search)
       setPageIndex(1)
     }, 300)
     return () => window.clearTimeout(timeout)
-  }, [search])
+  }, [search, debouncedSearch])
 
   const loadGroups = useCallback(() => {
     setLoading(true)

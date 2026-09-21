@@ -58,12 +58,14 @@ export function TeamPage() {
   const [isRemoving, setIsRemoving] = useState(false)
 
   useEffect(() => {
+    if (search === debouncedSearch) return
+
     const timeout = window.setTimeout(() => {
       setDebouncedSearch(search)
       setPageIndex(1)
     }, 300)
     return () => window.clearTimeout(timeout)
-  }, [search])
+  }, [search, debouncedSearch])
 
   const memberParams = useMemo(
     () => ({

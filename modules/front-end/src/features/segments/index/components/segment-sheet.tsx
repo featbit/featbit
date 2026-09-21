@@ -31,6 +31,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { slugify } from "@/lib/slugify"
 import { cn } from "@/lib/utils"
 import type {
   ScopeResource,
@@ -55,14 +56,6 @@ type KeyState = "idle" | "validating" | "valid" | "duplicate" | "error"
 type KeyValidation = {
   signature: string
   state: Exclude<KeyState, "idle" | "validating">
-}
-
-function slugify(value: string) {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9._-]+/g, "-")
-    .replace(/^-+|-+$/g, "")
 }
 
 function normalizeScopes(resources: ScopeResource[], currentRn: string) {
@@ -105,7 +98,6 @@ export function SegmentSheet({
   const { t } = useTranslation()
   const [type, setType] = useState<SegmentType>("environment-specific")
   const [keyValidation, setKeyValidation] = useState<KeyValidation | null>(null)
-  const [keyManuallyEdited, setKeyManuallyEdited] = useState(false)
   const [nameInteracted, setNameInteracted] = useState(false)
   const [selectedScopes, setSelectedScopes] = useState<ScopeResource[]>([
     currentScope,
@@ -124,12 +116,10 @@ export function SegmentSheet({
   const gated = type === "shared" && !shareableGranted
 
   useEffect(() => {
-    if (!keyManuallyEdited) {
-      form.setValue("key", slugify(name), {
-        shouldValidate: nameInteracted,
-      })
-    }
-  }, [form, keyManuallyEdited, name, nameInteracted])
+    form.setValue("key", slugify(name), {
+      shouldValidate: nameInteracted,
+    })
+  }, [form, name, nameInteracted])
 
   useEffect(() => {
     if (gated || !key || form.formState.errors.key) return
@@ -332,9 +322,7 @@ export function SegmentSheet({
                             keyState === "duplicate" ||
                             keyState === "error"
                           }
-                          {...form.register("key", {
-                            onChange: () => setKeyManuallyEdited(true),
-                          })}
+                          {...form.register("key")}
                         />
                         {keyState === "validating" ? (
                           <Loader2 className="absolute top-1/2 right-3 size-4 -translate-y-1/2 animate-spin text-muted-foreground" />

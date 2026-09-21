@@ -79,4 +79,15 @@ public partial class KafkaMessageProducer : IMessageProducer
 
         return Task.CompletedTask;
     }
+
+    public async Task PublishBatchAsync<TMessage>(string topic, IReadOnlyCollection<TMessage> messages)
+        where TMessage : class
+    {
+        // Produce already enqueues records for native Kafka batching. Keep one record per event
+        // and the existing asynchronous delivery-report semantics.
+        foreach (var message in messages)
+        {
+            await PublishAsync(topic, message);
+        }
+    }
 }

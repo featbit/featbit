@@ -16,9 +16,9 @@ public class ExperimentMcpTools(
     IPermissionChecker permissionChecker)
 {
     [McpServerTool(Name = "featbit_experiment_get_experiment")]
-    [Description("Read a experiment experiment by id, including runs and activities. The API resolves the FeatBit environment from the experiment.")]
+    [Description("Read an experiment by ID, including runs. The API resolves the FeatBit environment from the experiment.")]
     public async Task<ExperimentDetailVm> GetExperiment(
-        [Description("Experiment experiment id.")]
+        [Description("Experiment ID.")]
         Guid experimentId)
     {
         var envId = await ResolveAuthorizedEnvIdAsync(experimentId);
@@ -31,11 +31,11 @@ public class ExperimentMcpTools(
     }
 
     [McpServerTool(Name = "featbit_experiment_update_experiment")]
-    [Description("Patch experiment experiment fields such as goal, intent, hypothesis, constraints, learning, and last action. Use metric registry tools plus featbit_experiment_update_metrics for primary metrics and guardrails. The API resolves the FeatBit environment from the experiment.")]
+    [Description("Patch experiment fields such as goal, intent, hypothesis, constraints, learning, and last action. Use metric registry tools plus featbit_experiment_update_metrics for primary metrics and guardrails. The API resolves the FeatBit environment from the experiment.")]
     public async Task<ExperimentDetailVm> UpdateExperiment(
-        [Description("Experiment experiment id.")]
+        [Description("Experiment ID.")]
         Guid experimentId,
-        [Description("Partial experiment update. Leave fields null when they should not change.")]
+        [Description("Partial experiment update. Bind a feature flag using flagId from a Feature Flag read or create response. The flag must belong to the experiment environment. Leave fields null when they should not change.")]
         ExperimentUpdate update)
     {
         var envId = await ResolveAuthorizedEnvIdAsync(experimentId);
@@ -49,9 +49,9 @@ public class ExperimentMcpTools(
     }
 
     [McpServerTool(Name = "featbit_experiment_set_stage")]
-    [Description("Move a experiment experiment to a framework stage such as intent, hypothesis, implementing, measuring, or learning.")]
+    [Description("Move an experiment to a framework stage such as intent, hypothesis, implementing, measuring, or learning.")]
     public async Task<ExperimentDetailVm> SetStage(
-        [Description("Experiment experiment id.")]
+        [Description("Experiment ID.")]
         Guid experimentId,
         [Description("Target experiment stage.")]
         string stage)
@@ -67,9 +67,9 @@ public class ExperimentMcpTools(
     }
 
     [McpServerTool(Name = "featbit_experiment_update_metrics")]
-    [Description("Select registered primary and guardrail metrics for a experiment experiment. Primary metric must already exist in the metric registry and is selected by metricId, metricKey, or legacy metricEvent-as-key. Guardrails must be a JSON array selecting registered metrics by metricId, metricKey, key, or event.")]
+    [Description("Select registered metrics by metricId as defaults for future experiment runs. Provide primaryMetric with metricId and expectedDirection (increase_good or decrease_good), and guardrailMetrics as an array of metricId and direction (increase_bad or decrease_bad). Existing runs retain their independent metric snapshots. Metric names, SDK event names, types, and aggregations come from the metric registry.")]
     public async Task<ExperimentDetailVm> UpdateMetrics(
-        [Description("Experiment experiment id.")]
+        [Description("Experiment ID.")]
         Guid experimentId,
         [Description("Primary metric and guardrail update payload.")]
         ExperimentMetricsUpdate update)
@@ -85,9 +85,9 @@ public class ExperimentMcpTools(
     }
 
     [McpServerTool(Name = "featbit_experiment_create_run")]
-    [Description("Create a new experiment experiment run.")]
+    [Description("Create an experiment run with an independent snapshot of the experiment's current primary metric and guardrails. Configure the experiment's primary metric first. The run's metric identity, SDK event name, calculation settings, and directions are fixed at creation.")]
     public async Task<ExperimentDetailVm> CreateRun(
-        [Description("Experiment experiment id.")]
+        [Description("Experiment ID.")]
         Guid experimentId)
     {
         var envId = await ResolveAuthorizedEnvIdAsync(experimentId);
@@ -100,11 +100,11 @@ public class ExperimentMcpTools(
     }
 
     [McpServerTool(Name = "featbit_experiment_update_run")]
-    [Description("Patch a experiment experiment run, including method, metrics, variants, observations, input data, analysis result, decision, or learning fields.")]
+    [Description("Patch an experiment run's method, variants, observations, analysis result, decision, or learning fields. Metric snapshots cannot be edited; update the experiment's metric defaults and create a new run to use different metrics.")]
     public async Task<ExperimentDetailVm> UpdateRun(
-        [Description("Experiment experiment id.")]
+        [Description("Experiment ID.")]
         Guid experimentId,
-        [Description("Experiment experiment run id.")]
+        [Description("Experiment run ID.")]
         Guid runId,
         [Description("Partial run update. Leave fields null when they should not change.")]
         ExperimentRunUpdate update)
@@ -121,21 +121,23 @@ public class ExperimentMcpTools(
     }
 
     [McpServerTool(Name = "featbit_experiment_update_run_traffic")]
-    [Description("Configure experiment traffic assignment for a experiment run. Feature flag evaluation decides the served variation; layer only gates eligibility; analysis sampling happens inside each actual served variation. Supports layer id/key, assignment unit, bucket slice start/end, traffic offset, allocation plan, audience filters, and analysis sampling plan. Choose includeRate from the actual exposure distribution in the run window: includeRate = desired analyzed users for that variation / observed served users for that variation * 100, capped at 100. If the run is already collecting, analyzing, or decided, set confirmedByUser true only after the user explicitly approves changing evidence scope.")]
+    [Description("Configure a run's analysis scope and sampling without modifying the Feature Flag. Supports layer ID/key, assignment unit, bucket slice start/end, traffic offset, allocation plan, and analysis sampling plan. Layer reservations are validated against observation windows, including future reservations. Decisions do not change reservations. Choose includeRate from actual exposure counts in the run window: desired analyzed users / observed served users * 100, capped at 100. Actual rollout, targeting, or flag toggle changes must use Feature Flag tools with explicit customer confirmation; a run decision is not confirmation.")]
     public async Task<ExperimentDetailVm> UpdateRunTraffic(
-        [Description("Experiment experiment id.")]
+        [Description("Experiment ID.")]
         Guid experimentId,
-        [Description("Experiment experiment run id.")]
+        [Description("Experiment run ID.")]
         Guid runId,
-        [Description("Run traffic/sampling update. Requires controlVariant, treatmentVariant, assignmentUnitSelector, layerTrafficPercent, and analysisSamplingPlan. Use sliceStart/sliceEnd for explicit layer bucket ranges such as 30-60.")]
+        [Description("Run traffic/sampling update. Requires controlVariant, treatmentVariants, assignmentUnitSelector, layerTrafficPercent, and analysisSamplingPlan. Use sliceStart/sliceEnd for explicit layer bucket ranges such as 30-60.")]
         ExperimentMcpRunTrafficRequest request)
     {
         var envId = await ResolveAuthorizedEnvIdAsync(experimentId);
         var experiment = await experimentService.GetAsync(envId, experimentId);
-        var run = experiment.ExperimentRuns.FirstOrDefault(x => x.Id == runId)
-                  ?? throw new InvalidOperationException($"Run {runId} was not found in experiment {experimentId}.");
+        if (!experiment.ExperimentRuns.Any(x => x.Id == runId))
+        {
+            throw new InvalidOperationException($"Run {runId} was not found in experiment {experimentId}.");
+        }
 
-        ValidateRunTrafficRequest(request, run);
+        ValidateRunTrafficRequest(request);
 
         return await mediator.Send(new UpdateExperimentRunAudience
         {
@@ -146,11 +148,11 @@ public class ExperimentMcpTools(
             {
                 Method = request.Method,
                 ControlVariant = request.ControlVariant,
-                TreatmentVariant = request.TreatmentVariant,
+                TreatmentVariants = request.TreatmentVariants,
                 TrafficPercent = request.TrafficPercent,
                 TrafficOffset = request.TrafficOffset,
-                LayerId = Normalize(request.LayerId) ?? Normalize(request.LayerKey),
-                LayerKey = Normalize(request.LayerKey) ?? Normalize(request.LayerId),
+                LayerId = request.LayerId,
+                LayerKey = Normalize(request.LayerKey),
                 AllocationKeySelector = Normalize(request.AllocationKeySelector),
                 SliceStart = request.SliceStart,
                 SliceEnd = request.SliceEnd,
@@ -158,17 +160,16 @@ public class ExperimentMcpTools(
                 LayerTrafficPercent = request.LayerTrafficPercent,
                 AllocationPlan = Normalize(request.AllocationPlan),
                 AnalysisSamplingPlan = request.AnalysisSamplingPlan,
-                AudienceFilters = Normalize(request.AudienceFilters),
             }
         });
     }
 
     [McpServerTool(Name = "featbit_experiment_analyze_run")]
-    [Description("Run server-side analysis for a experiment experiment run and return the refreshed experiment.")]
+    [Description("Run server-side analysis for an experiment run and return the refreshed experiment.")]
     public async Task<ExperimentDetailVm> AnalyzeRun(
-        [Description("Experiment experiment id.")]
+        [Description("Experiment ID.")]
         Guid experimentId,
-        [Description("Experiment experiment run id.")]
+        [Description("Experiment run ID.")]
         Guid runId,
         [Description("When true, fetch fresh stats instead of reusing existing analysis input where possible.")]
         bool forceFresh = false)
@@ -185,8 +186,7 @@ public class ExperimentMcpTools(
     }
 
     private static void ValidateRunTrafficRequest(
-        ExperimentMcpRunTrafficRequest request,
-        ExperimentRunVm run)
+        ExperimentMcpRunTrafficRequest request)
     {
         if (request is null)
         {
@@ -194,9 +194,9 @@ public class ExperimentMcpTools(
         }
 
         var method = Normalize(request.Method) ?? "bayesian_ab";
-        if (method is not ("bayesian_ab" or "bandit"))
+        if (method != "bayesian_ab")
         {
-            throw new ArgumentException("method must be bayesian_ab or bandit.");
+            throw new ArgumentException("method must be bayesian_ab.");
         }
 
         if (string.IsNullOrWhiteSpace(request.ControlVariant))
@@ -204,10 +204,13 @@ public class ExperimentMcpTools(
             throw new ArgumentException("controlVariant is required.");
         }
 
-        var treatments = SplitVariantList(request.TreatmentVariant);
+        var treatments = (request.TreatmentVariants ?? [])
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Select(x => x.Trim())
+            .ToArray();
         if (treatments.Length == 0)
         {
-            throw new ArgumentException("treatmentVariant must include at least one treatment variation.");
+            throw new ArgumentException("treatmentVariants must include at least one treatment variation.");
         }
 
         var assignmentUnitSelector = Normalize(request.AssignmentUnitSelector);
@@ -266,13 +269,7 @@ public class ExperimentMcpTools(
             .ToHashSet();
         if (!treatmentSet.SetEquals(treatmentEntries))
         {
-            throw new ArgumentException("analysisSamplingPlan must contain one treatment entry for every treatmentVariant.");
-        }
-
-        var evidenceSensitive = Normalize(run.Status) is "collecting" or "analyzing" or "decided";
-        if (evidenceSensitive && request.ConfirmedByUser != true)
-        {
-            throw new InvalidOperationException("Changing traffic/sampling for a collecting, analyzing, or decided run requires confirmedByUser=true after explicit user approval.");
+            throw new ArgumentException("analysisSamplingPlan must contain one treatment entry for every id in treatmentVariants.");
         }
     }
 
@@ -332,14 +329,6 @@ public class ExperimentMcpTools(
         }
     }
 
-    private static string[] SplitVariantList(string variants)
-    {
-        return (variants ?? string.Empty)
-            .Split([',', ';', '|'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .ToArray();
-    }
-
     private static string? Normalize(string? value)
     {
         return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
@@ -385,20 +374,20 @@ public class ExperimentMcpTools(
 
 public class ExperimentMcpRunTrafficRequest
 {
-    [Description("Run method. Use bayesian_ab for fixed control/treatment analysis or bandit for adaptive arms.")]
+    [Description("Run analysis method. Use bayesian_ab for Bayesian A/B/n analysis.")]
     public string Method { get; set; } = string.Empty;
 
-    [Description("Control or baseline variation value exactly as served by FeatBit exposure events.")]
+    [Description("Control variation ID from the bound feature flag.")]
     public string ControlVariant { get; set; } = string.Empty;
 
-    [Description("One or more treatment variation values exactly as served by FeatBit exposure events. Separate multiple values with commas.")]
-    public string TreatmentVariant { get; set; } = string.Empty;
+    [Description("Array of treatment variation IDs from the bound feature flag. Include one ID per array element.")]
+    public string[] TreatmentVariants { get; set; } = [];
 
     [Description("Optional mutual-exclusion layer key. The layer gates eligibility only and does not decide the served variation.")]
     public string LayerKey { get; set; } = string.Empty;
 
-    [Description("Optional mutual-exclusion layer id. Prefer layerKey when the user is selecting by registered layer key.")]
-    public string LayerId { get; set; } = string.Empty;
+    [Description("Optional mutual-exclusion layer ID. Prefer layerKey when the user is selecting by registered layer key.")]
+    public Guid? LayerId { get; set; }
 
     [Description("Legacy analysis traffic percentage, from 1 to 100. Prefer sliceStart/sliceEnd plus layerTrafficPercent for layer bucket assignments.")]
     public double? TrafficPercent { get; set; }
@@ -426,10 +415,4 @@ public class ExperimentMcpRunTrafficRequest
 
     [Description("Optional legacy JSON allocation plan. Prefer analysisSamplingPlan unless intentionally reproducing allocation-plan behavior.")]
     public string AllocationPlan { get; set; } = string.Empty;
-
-    [Description("Optional audience filters stored on the run for operator visibility.")]
-    public string AudienceFilters { get; set; } = string.Empty;
-
-    [Description("Set true only after the user explicitly approves changing traffic/sampling for a collecting, analyzing, or decided run.")]
-    public bool? ConfirmedByUser { get; set; }
 }

@@ -1,6 +1,6 @@
 # Access Token Page Design
 
-This document is the React design contract for the Access Tokens list page, its New, Edit, and View Sheet states, and the one-time creation result. Angular remains the read-only functional reference for API behavior, permissions, resource names, validation, and one-time token disclosure. The React implementation must use the current FeatBit shadcn/ui, Base UI, Tailwind, TanStack Table, React Hook Form, Zod, and authenticated-workbench conventions without visually cloning ng-zorro.
+This document is the React design contract for the Access Tokens list page, its New, Edit, and View Sheet states, and the one-time creation result. The React implementation must use the current FeatBit shadcn/ui, Base UI, Tailwind, TanStack Table, React Hook Form, Zod, and authenticated-workbench conventions.
 
 ## Scope
 
@@ -66,7 +66,7 @@ Table geometry follows the existing React workbench:
 
 ### Row actions and permissions
 
-The action menu preserves the Angular behavior:
+The action menu preserves the documented behavior:
 
 - `Edit` opens the Edit Sheet.
 - Active token: `Deactivate`.
@@ -76,7 +76,7 @@ The action menu preserves the Angular behavior:
 - Service-token actions require `ManageServiceAccessTokens`.
 - Without the matching permission, replace the menu with `View` and open the Sheet in a non-editable state.
 
-Use a confirmation Dialog for Deactivate and Remove rather than copying the Angular popconfirm:
+Use a confirmation Dialog for Deactivate and Remove using shared shadcn styling:
 
 - Deactivate explains that API calls will stop and that the token may be activated again.
 - Remove names the token and states that the operation cannot be reverted.
@@ -354,7 +354,7 @@ The complete value is visible only in this result:
 
 ## Final Design Rejections
 
-- no Angular/ng-zorro visual cloning;
+- use the shared shadcn/Base UI visual language;
 - no Type Badge in the main table;
 - no full-width Resource scope Select;
 - no large All/Specific button cards;

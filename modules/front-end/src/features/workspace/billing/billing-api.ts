@@ -3,6 +3,10 @@ import { fetchApi } from "@/lib/api/authenticated-api"
 export type BillingCycle = "monthly" | "yearly" | string
 
 export type BillingSubscription = {
+  status?: string
+  retryPaymentUrl?: string | null
+  retryPaymentState?:
+    "not_required" | "available" | "unavailable" | "no_open_invoice"
   plan?: string
   billingCycle?: BillingCycle
   baseMau?: number

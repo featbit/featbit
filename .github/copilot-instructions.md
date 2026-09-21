@@ -1,6 +1,6 @@
 # FeatBit — Copilot Instructions
 
-FeatBit is an open-source feature flag management platform. It is a polyglot monorepo with .NET APIs, an Angular UI, and Kubernetes-based multi-cluster deployment tooling.
+FeatBit is an open-source feature flag management platform. It is a polyglot monorepo with .NET APIs, a React UI, and Kubernetes-based multi-cluster deployment tooling.
 
 ## Workflow
 
@@ -88,7 +88,7 @@ modules/
   back-end/           # API server (.NET 10, C#, Clean Architecture)
   evaluation-server/  # Flag evaluation + streaming (.NET 10, C#)
   control-plane/      # Cross-DC control plane API (.NET 10, C#)
-  front-end/          # Web UI (Angular 19, TypeScript)
+  front-end/          # Web UI (React 19, Vite, TypeScript)
 e2e/
   control-plane/  # Control-Plane infrastructure for multi-cluster testing
 ```
@@ -138,14 +138,24 @@ dotnet test tests/Api.UnitTests -c Release --verbosity normal
 
 ### Front-end (`modules/front-end/`)
 
+Run commands from `modules/front-end`. Use its `package.json` as the source of truth for available scripts when implementing changes or reviewing CI.
+
 ```sh
 npm ci
-npm run build:prod     # production build with localization
-npm test               # run all tests (Karma/Jasmine)
-npm run i18n           # extract + validate i18n strings
-
-# After adding UI text, run `npm run i18n` and add translations to src/locale/messages.xx.xlf
+npm run dev                   # Vite development server
+npm run typecheck             # TypeScript checks
+npm run build                 # TypeScript checks + Vite production build
+npm run lint                  # ESLint
+npm test                      # Vitest unit/component tests, including i18n tests
+npm run test:e2e              # Playwright browser tests against the development server
+npm run test:e2e:containers   # Playwright against locally built API and frontend containers
 ```
+
+Install Chromium with `npx playwright install chromium` before running browser tests. Container E2E also requires Docker; the runner builds the API and frontend from the current source tree and starts PostgreSQL.
+
+UI translations use `react-i18next`. When adding or changing UI text, update both English and Chinese strings in `src/lib/i18n/resources/` and use the shared i18n instance from `src/lib/i18n/i18n.ts`. Existing translation tests run as part of `npm test`; this React package has no separate translation-extraction script.
+
+Follow [the frontend instructions](../modules/front-end/AGENTS.md) for UI conventions and project constraints.
 
 ### Control-Plane QA Automation (`e2e/control-plane/02-Tests/automation-py/`)
 
@@ -172,12 +182,15 @@ Style: black (line-length 100), isort (profile black), flake8, mypy.
 - Arrange-Act-Assert (AAA) structure in tests
 - Allman braces, PascalCase methods, `_camelCase` private fields, `var` for obvious types
 
-### TypeScript / Angular
+### TypeScript / React
 
-- 2-space indentation, single quotes
-- NG-ZORRO (Ant Design) component library
-- i18n via `@angular/localize`: English on port 4200, Chinese on port 4201
-- Test files: `[component-name].component.spec.ts` using Jasmine + Karma with Angular TestBed
+- Follow the frontend Prettier configuration: 2-space indentation, double quotes, no semicolons, LF line endings.
+- React function components and hooks, Vite SPA, and React Router for routing.
+- Use the existing shadcn/ui and Base UI components with Tailwind CSS.
+- Use TanStack Query for server state, TanStack Table for tables, and React Hook Form + Zod for forms.
+- Use `react-i18next` and the shared English/Chinese resources for UI text.
+- Unit/component tests use Vitest and React Testing Library in colocated `*.test.ts` / `*.test.tsx` files or `src/test/`.
+- Browser E2E tests use Playwright in `src/test/e2e/*.spec.ts`; Vitest excludes that directory.
 
 ### Python (QA scenarios)
 
@@ -206,8 +219,8 @@ cd modules/back-end/src/Api && dotnet run
 # Swagger at http://localhost:5000/swagger
 
 # Run UI
-cd modules/front-end && npm install && npm start
-# Available at http://localhost:4200
+cd modules/front-end && npm ci && npm run dev
+# Available at http://localhost:5173
 ```
 
 Default credentials: `test@featbit.com` / `123456`

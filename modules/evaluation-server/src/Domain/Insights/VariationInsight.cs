@@ -15,8 +15,6 @@ public partial class VariationInsight
 
     public Variation? Variation { get; set; }
 
-    public bool SendToExperiment { get; set; }
-
     public long Timestamp { get; set; }
 
     public bool IsValid()

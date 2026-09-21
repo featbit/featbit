@@ -216,7 +216,6 @@ public class ExperimentStatsService(AppDbContext dbContext) : IExperimentStatsSe
         var end = ToUnspecifiedUtcDateTime(request.EndTime)
                   ?? ToUnspecifiedUtcDateTime(DateOnly.ParseExact(request.EndDate, "yyyy-MM-dd").AddDays(1));
         var contribution = GetUserContributionExpression(request.MetricType, request.MetricAgg);
-        var assignmentUnitSelector = NormalizeAssignmentUnitSelector(request);
         var layerKey = NormalizeLayerKey(request);
         var layerTrafficPercent = Math.Clamp(request.LayerTrafficPercent ?? 100d, 0d, 100d);
         var sliceStart = Math.Clamp(request.SliceStart ?? 0d, 0d, 100d);
@@ -252,11 +251,7 @@ public class ExperimentStatsService(AppDbContext dbContext) : IExperimentStatsSe
             exposure_base AS MATERIALIZED
             (
                 SELECT
-                    CASE
-                        WHEN @AssignmentUnitSelector IN ('user.keyId', 'user.key', 'keyId', '')
-                            THEN user_key
-                        ELSE properties ->> @AssignmentUnitSelector
-                    END AS assignment_unit,
+                    user_key AS assignment_unit,
                     user_key,
                     variation_id AS actual_variation_id,
                     exposed_at
@@ -365,11 +360,7 @@ public class ExperimentStatsService(AppDbContext dbContext) : IExperimentStatsSe
             metric_source AS MATERIALIZED
             (
                 SELECT
-                    CASE
-                        WHEN @AssignmentUnitSelector IN ('user.keyId', 'user.key', 'keyId', '')
-                            THEN user_key
-                        ELSE properties ->> @AssignmentUnitSelector
-                    END AS assignment_unit,
+                    user_key AS assignment_unit,
                     occurred_at AS metric_ts,
                     numeric_value
                 FROM experiment_metric_events
@@ -423,7 +414,6 @@ public class ExperimentStatsService(AppDbContext dbContext) : IExperimentStatsSe
                 request.MetricEvent,
                 StartTime = start,
                 EndTime = end,
-                AssignmentUnitSelector = assignmentUnitSelector,
                 ApplyLayer = applyLayer,
                 LayerKey = layerKey ?? string.Empty,
                 SliceStart = sliceStart,
@@ -464,9 +454,6 @@ public class ExperimentStatsService(AppDbContext dbContext) : IExperimentStatsSe
         var layerKey = string.IsNullOrWhiteSpace(request.LayerKey)
             ? request.FlagKey
             : request.LayerKey.Trim();
-        var allocationKeySelector = string.IsNullOrWhiteSpace(request.AllocationKeySelector)
-            ? "user.keyId"
-            : request.AllocationKeySelector.Trim();
 
         var sql = $"""
             WITH plan AS MATERIALIZED
@@ -484,11 +471,7 @@ public class ExperimentStatsService(AppDbContext dbContext) : IExperimentStatsSe
             exposure_base AS MATERIALIZED
             (
                 SELECT
-                    CASE
-                        WHEN @AllocationKeySelector IN ('user.keyId', 'user.key', 'keyId', '')
-                            THEN user_key
-                        ELSE coalesce(properties ->> @AllocationKeySelector, user_key)
-                    END AS allocation_key,
+                    user_key AS allocation_key,
                     user_key,
                     variation_id,
                     exposed_at
@@ -602,11 +585,7 @@ public class ExperimentStatsService(AppDbContext dbContext) : IExperimentStatsSe
             metric_source AS MATERIALIZED
             (
                 SELECT
-                    CASE
-                        WHEN @AllocationKeySelector IN ('user.keyId', 'user.key', 'keyId', '')
-                            THEN user_key
-                        ELSE coalesce(properties ->> @AllocationKeySelector, user_key)
-                    END AS allocation_key,
+                    user_key AS allocation_key,
                     occurred_at AS metric_ts,
                     numeric_value
                 FROM experiment_metric_events
@@ -659,7 +638,6 @@ public class ExperimentStatsService(AppDbContext dbContext) : IExperimentStatsSe
                 StartTime = start,
                 EndTime = end,
                 LayerKey = layerKey,
-                AllocationKeySelector = allocationKeySelector,
                 SliceStart = Math.Clamp(request.SliceStart ?? 0, 0, 100),
                 SliceEnd = Math.Clamp(request.SliceEnd ?? 100, 0, 100),
                 request.AllocationPlan,
@@ -741,20 +719,10 @@ public class ExperimentStatsService(AppDbContext dbContext) : IExperimentStatsSe
     private static string[] GetSelectedVariants(QueryExperimentStats request)
     {
         return new[] { request.ControlVariant }
-            .Concat((request.TreatmentVariants ?? string.Empty)
-                .Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            .Concat((request.TreatmentVariants ?? []))
             .Where(x => !string.IsNullOrWhiteSpace(x))
             .Distinct(StringComparer.Ordinal)
             .ToArray();
-    }
-
-    private static string NormalizeAssignmentUnitSelector(QueryExperimentStats request)
-    {
-        return string.IsNullOrWhiteSpace(request.AssignmentUnitSelector)
-            ? string.IsNullOrWhiteSpace(request.AllocationKeySelector)
-                ? "user.keyId"
-                : request.AllocationKeySelector.Trim()
-            : request.AssignmentUnitSelector.Trim();
     }
 
     private static string? NormalizeLayerKey(QueryExperimentStats request)

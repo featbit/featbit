@@ -90,7 +90,7 @@ export function ResourcesRail({
           href: "https://docs.featbit.co/api-docs/overview",
         },
         {
-          label: t("getStarted.resources.links.experimentationGuide"),
+          label: t("getStarted.resources.links.releaseDecisionGuide"),
           href: "https://docs.featbit.co/experimentation/understanding-experimentation",
         },
       ],

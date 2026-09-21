@@ -1,6 +1,10 @@
 using System.Linq.Expressions;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using Api.Controllers;
+using Application.Bases;
+using Application.Bases.Exceptions;
 using Application.Bases.Models;
 using Application.Experiments;
 using Application.Services;
@@ -41,18 +45,63 @@ public class ExperimentControllerTests
     }
 
     [Fact]
-    public async Task Update_RequestValidation()
+    public async Task CreateUpdateAndFilter_UseFlagId_AndReturnResolvedDisplayFields()
     {
-        using var factory = CreateFactory(Mock.Of<IExperimentService>());
+        var flagId = Guid.NewGuid();
+        var service = new Mock<IExperimentService>();
+        var detail = new ExperimentDetailVm
+        {
+            Id = ExperimentId, EnvId = TestWorkspace.Id, FlagId = flagId,
+            FlagKey = "checkout", FlagName = "Checkout flow"
+        };
+        service.Setup(x => x.CreateAsync(It.Is<Domain.Experiments.Experiment>(experiment =>
+                experiment.EnvId == TestWorkspace.Id && experiment.FlagId == flagId)))
+            .ReturnsAsync(detail);
+        service.Setup(x => x.UpdateAsync(TestWorkspace.Id, ExperimentId,
+                It.Is<ExperimentUpdate>(update => update.FlagId == flagId)))
+            .ReturnsAsync(detail);
+        service.Setup(x => x.GetListAsync(TestWorkspace.Id,
+                It.Is<ExperimentFilter>(filter => filter.FlagId == flagId)))
+            .ReturnsAsync(new PagedResult<ExperimentVm>(1, [detail]));
+        using var factory = CreateFactory(service.Object);
         using var client = await _app.CreateAuthenticatedClientAsync(factory);
 
-        var response = await client.PutAsJsonAsync($"{BasePath}/{ExperimentId}", new
-        {
-            primaryMetric = "activation",
-            guardrails = "[]"
-        });
+        using var created = await client.PostAsJsonAsync(BasePath, new { name = "Checkout", flagId });
+        Assert.True(created.IsSuccessStatusCode);
+        using var updated = await client.PutAsJsonAsync($"{BasePath}/{ExperimentId}", new { flagId });
+        Assert.True(updated.IsSuccessStatusCode);
+        using var payload = System.Text.Json.JsonDocument.Parse(await updated.Content.ReadAsStringAsync());
+        var data = payload.RootElement.GetProperty("data");
+        Assert.Equal(flagId, data.GetProperty("flagId").GetGuid());
+        Assert.Equal("checkout", data.GetProperty("flagKey").GetString());
+        Assert.Equal("Checkout flow", data.GetProperty("flagName").GetString());
+        using var listed = await client.GetAsync($"{BasePath}?flagId={flagId}");
+        Assert.True(listed.IsSuccessStatusCode);
+        service.VerifyAll();
+    }
 
-        await Verify(response);
+    [Fact]
+    public async Task FeatureFlagById_RequiresAuthentication_AndScopesTheLookupToEnvironment()
+    {
+        var flag = new Domain.FeatureFlags.FeatureFlag
+        {
+            Id = Guid.NewGuid(), EnvId = TestWorkspace.Id, Key = "checkout", Name = "Checkout flow"
+        };
+        var service = new Mock<IFeatureFlagService>();
+        service.Setup(x => x.FindOneAsync(It.IsAny<Expression<Func<Domain.FeatureFlags.FeatureFlag, bool>>>()))
+            .ReturnsAsync((Expression<Func<Domain.FeatureFlags.FeatureFlag, bool>> predicate) =>
+                predicate.Compile()(flag) ? flag : null);
+        using var factory = _app.WithServices(services => services.Replace(ServiceDescriptor.Scoped(_ => service.Object)));
+        var path = $"/api/v1/envs/{flag.EnvId}/feature-flags/by-id/{flag.Id}";
+        using var anonymous = factory.CreateClient();
+        Assert.Equal(System.Net.HttpStatusCode.Unauthorized, (await anonymous.GetAsync(path)).StatusCode);
+        using var client = await _app.CreateAuthenticatedClientAsync(factory);
+        using var found = await client.GetAsync(path);
+        Assert.True(found.IsSuccessStatusCode);
+        using var payload = System.Text.Json.JsonDocument.Parse(await found.Content.ReadAsStringAsync());
+        Assert.Equal(flag.Id, payload.RootElement.GetProperty("data").GetProperty("id").GetGuid());
+        using var missing = await client.GetAsync($"/api/v1/envs/{Guid.NewGuid()}/feature-flags/by-id/{flag.Id}");
+        Assert.Equal(System.Net.HttpStatusCode.NotFound, missing.StatusCode);
     }
 
     [Fact]
@@ -63,15 +112,35 @@ public class ExperimentControllerTests
 
         var response = await client.PutAsJsonAsync($"{BasePath}/{ExperimentId}/metrics", new
         {
-            metricName = "",
-            metricEvent = "checkout activated",
-            metricType = "unsupported",
-            metricAgg = "median",
-            expectedDirection = "flat",
-            guardrails = "[{\"event\":\"latency\",\"metricType\":\"binary\",\"metricAgg\":\"once\"}]"
+            primaryMetric = new { metricId = Guid.Empty, expectedDirection = "flat" },
+            guardrailMetrics = new[] { new { metricId = Guid.Empty, direction = "flat" } }
         });
 
         await Verify(response);
+    }
+
+    [Fact]
+    public async Task UpdateMetrics_MetricIdsAndDirections_ReturnSuccess()
+    {
+        var metricId = Guid.NewGuid();
+        var guardrailId = Guid.NewGuid();
+        var service = new Mock<IExperimentService>();
+        service.Setup(x => x.UpdateMetricsAsync(TestWorkspace.Id, ExperimentId,
+                It.Is<ExperimentMetricsUpdate>(update => update.PrimaryMetric.MetricId == metricId &&
+                    update.PrimaryMetric.ExpectedDirection == "increase_good" && update.GuardrailMetrics.Count == 1 &&
+                    update.GuardrailMetrics[0].MetricId == guardrailId && update.GuardrailMetrics[0].Direction == "decrease_bad")))
+            .ReturnsAsync(new ExperimentDetailVm { Id = ExperimentId, EnvId = TestWorkspace.Id });
+        using var factory = CreateFactory(service.Object);
+        using var client = await _app.CreateAuthenticatedClientAsync(factory);
+
+        using var response = await client.PutAsJsonAsync($"{BasePath}/{ExperimentId}/metrics", new
+        {
+            primaryMetric = new { metricId, expectedDirection = "increase_good" },
+            guardrailMetrics = new[] { new { metricId = guardrailId, direction = "decrease_bad" } }
+        });
+
+        Assert.True(response.IsSuccessStatusCode);
+        service.VerifyAll();
     }
 
     [Fact]
@@ -80,7 +149,7 @@ public class ExperimentControllerTests
         var service = new Mock<IExperimentService>();
         service
             .Setup(x => x.AnalyzeRunAsync(TestWorkspace.Id, ExperimentId, RunId, It.IsAny<ExperimentRunAnalyzeRequest>()))
-            .ReturnsAsync(new ExperimentDetailVm { Id = ExperimentId, FeatBitEnvId = TestWorkspace.Id });
+            .ReturnsAsync(new ExperimentDetailVm { Id = ExperimentId, EnvId = TestWorkspace.Id });
         using var factory = CreateFactory(service.Object);
         using var client = await _app.CreateAuthenticatedClientAsync(factory);
 
@@ -89,6 +158,28 @@ public class ExperimentControllerTests
             new { forceFresh = true });
 
         Assert.True(response.IsSuccessStatusCode);
+        service.VerifyAll();
+    }
+
+    [Fact]
+    public async Task AnalyzeRun_MissingPrimaryMetricSnapshot_ReturnsUnprocessableEntity()
+    {
+        var service = new Mock<IExperimentService>();
+        service
+            .Setup(x => x.AnalyzeRunAsync(TestWorkspace.Id, ExperimentId, RunId, It.IsAny<ExperimentRunAnalyzeRequest>()))
+            .ThrowsAsync(new BusinessException(ErrorCodes.Required("primaryMetric")));
+        using var factory = CreateFactory(service.Object);
+        using var client = await _app.CreateAuthenticatedClientAsync(factory);
+
+        using var response = await client.PostAsJsonAsync(
+            $"{BasePath}/{ExperimentId}/runs/{RunId}/analyze",
+            new { forceFresh = true });
+
+        Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
+        var body = await response.Content.ReadFromJsonAsync<ApiResponse<object>>();
+        Assert.NotNull(body);
+        Assert.False(body.Success);
+        Assert.Equal(ErrorCodes.Required("primaryMetric"), Assert.Single(body.Errors));
         service.VerifyAll();
     }
 

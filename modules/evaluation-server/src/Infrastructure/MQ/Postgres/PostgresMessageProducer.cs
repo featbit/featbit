@@ -6,6 +6,7 @@ using Domain.Observability;
 using Domain.Shared;
 using Microsoft.Extensions.Logging;
 using Npgsql;
+using NpgsqlTypes;
 
 namespace Infrastructure.MQ.Postgres;
 
@@ -43,6 +44,40 @@ public partial class PostgresMessageProducer(NpgsqlDataSource dataSource, ILogge
         catch (Exception ex)
         {
             publish.Failed(ex);
+            Log.ErrorPublishMessage(logger, ex);
+        }
+    }
+
+    public async Task PublishBatchAsync<TMessage>(string topic, IReadOnlyCollection<TMessage> messages)
+        where TMessage : class
+    {
+        if (messages.Count == 0)
+        {
+            return;
+        }
+
+        try
+        {
+            await using var connection = await dataSource.OpenConnectionAsync();
+
+            await using var writer = await connection.BeginBinaryImportAsync(
+                "COPY queue_messages (topic, payload) FROM STDIN (FORMAT BINARY)"
+            );
+
+            foreach (var message in messages)
+            {
+                var json = JsonSerializer.Serialize(message, ReusableJsonSerializerOptions.Web);
+                await writer.StartRowAsync();
+                await writer.WriteAsync(topic, NpgsqlDbType.Varchar);
+                await writer.WriteAsync(json, NpgsqlDbType.Text);
+            }
+
+            await writer.CompleteAsync();
+            
+            Log.MessageBatchPublished(logger, messages.Count, topic);
+        }
+        catch (Exception ex)
+        {
             Log.ErrorPublishMessage(logger, ex);
         }
     }

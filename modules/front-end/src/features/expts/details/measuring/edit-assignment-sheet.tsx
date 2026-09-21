@@ -1,0 +1,604 @@
+import { Check, ChevronsUpDown, ListChecks } from "lucide-react"
+import { useMemo, useRef, useState, type RefObject } from "react"
+import { useTranslation } from "react-i18next"
+import { StablePopoverContent } from "@/components/stable-popover-content"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Popover, PopoverTrigger } from "@/components/ui/popover"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet"
+import type { FlagVariation } from "@/features/flags/flags-types"
+import type { Layer } from "@/features/expt-layers/layers-types"
+import { cn } from "@/lib/utils"
+import type { RunAssignmentUpdate, MeasuringRun } from "./measuring-types"
+import {
+  parseSamplingPlan,
+  runVariants,
+  serializeSamplingPlan,
+} from "./measuring-utils"
+
+function variationLabel(variation: FlagVariation | undefined, id: string) {
+  return variation?.name ?? id
+}
+
+function clampNumber(value: number, min: number, max: number) {
+  if (!Number.isFinite(value)) return min
+  return Math.min(max, Math.max(min, value))
+}
+
+function selectedLayerLabel(layer: Layer) {
+  return layer.name === layer.key ? layer.name : `${layer.name} (${layer.key})`
+}
+
+function LayerPicker({
+  layers,
+  value,
+  portalContainer,
+  onSelect,
+}: {
+  layers: Layer[]
+  value: string
+  portalContainer: RefObject<HTMLDivElement | null>
+  onSelect: (layer: Layer) => void
+}) {
+  const { t } = useTranslation()
+  const [open, setOpen] = useState(false)
+  const [search, setSearch] = useState("")
+  const selectedLayer = layers.find((layer) => layer.key === value)
+  const normalizedSearch = search.trim().toLocaleLowerCase()
+  const visibleLayers = normalizedSearch
+    ? layers.filter((layer) =>
+        `${layer.name} ${layer.key}`
+          .toLocaleLowerCase()
+          .includes(normalizedSearch)
+      )
+    : layers
+
+  return (
+    <Popover
+      open={open}
+      onOpenChange={(nextOpen) => {
+        setOpen(nextOpen)
+        if (!nextOpen) setSearch("")
+      }}
+    >
+      <PopoverTrigger
+        render={
+          <Button
+            id="assignment-layer-key"
+            type="button"
+            variant="outline"
+            className="w-full min-w-0 justify-between px-3 font-normal"
+          />
+        }
+      >
+        <span
+          className={cn(
+            "min-w-0 truncate text-left",
+            !selectedLayer && "text-muted-foreground"
+          )}
+        >
+          {selectedLayer
+            ? selectedLayerLabel(selectedLayer)
+            : t(
+                "releaseDecision.experiments.detailsPage.measuring.selectLayer"
+              )}
+        </span>
+        <ChevronsUpDown className="size-3.5 shrink-0 text-muted-foreground" />
+      </PopoverTrigger>
+      <StablePopoverContent
+        portalContainer={portalContainer}
+        align="start"
+        className="w-[var(--anchor-width)] min-w-72 p-0"
+      >
+        <Command shouldFilter={false}>
+          <CommandInput
+            value={search}
+            onValueChange={setSearch}
+            placeholder={t(
+              "releaseDecision.experiments.detailsPage.measuring.searchLayer"
+            )}
+          />
+          <CommandList>
+            <CommandEmpty>
+              {t(
+                "releaseDecision.experiments.detailsPage.measuring.noLayersFound"
+              )}
+            </CommandEmpty>
+            <CommandGroup>
+              {visibleLayers.map((layer) => (
+                <CommandItem
+                  key={layer.id}
+                  value={`${layer.name} ${layer.key}`}
+                  onSelect={() => {
+                    onSelect(layer)
+                    setOpen(false)
+                    setSearch("")
+                  }}
+                >
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate">{layer.name}</span>
+                    <code className="block truncate text-xs text-muted-foreground">
+                      {layer.key}
+                    </code>
+                  </span>
+                  <Check
+                    className={cn(
+                      "size-4 text-primary",
+                      value === layer.key ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </StablePopoverContent>
+    </Popover>
+  )
+}
+
+export function EditAssignmentSheet({
+  open,
+  run,
+  variations,
+  layers,
+  saving,
+  saveError,
+  onOpenChange,
+  onSave,
+}: {
+  open: boolean
+  run: MeasuringRun
+  variations: FlagVariation[]
+  layers: Layer[]
+  saving: boolean
+  saveError: boolean
+  onOpenChange: (open: boolean) => void
+  onSave: (update: RunAssignmentUpdate) => Promise<void>
+}) {
+  const { t } = useTranslation()
+  const popoverPortalRef = useRef<HTMLDivElement>(null)
+  const [confirmSaveOpen, setConfirmSaveOpen] = useState(false)
+  const configuredVariants = runVariants(run)
+  const available = useMemo(
+    () => variations.map((variation) => variation.id),
+    [variations]
+  )
+  const variationMap = useMemo(
+    () => new Map(variations.map((variation) => [variation.id, variation])),
+    [variations]
+  )
+  const [control, setControl] = useState(
+    configuredVariants[0] ?? available[0] ?? ""
+  )
+  const [treatments, setTreatments] = useState<string[]>(
+    configuredVariants.slice(1)
+  )
+  const [layerKey, setLayerKey] = useState(run.layerKey ?? "")
+  const [assignmentUnit, setAssignmentUnit] = useState(
+    run.assignmentUnitSelector ?? "user.keyId"
+  )
+  const [sliceStart, setSliceStart] = useState(run.sliceStart ?? 0)
+  const [sliceEnd, setSliceEnd] = useState(run.sliceEnd ?? 100)
+  const [sampling, setSampling] = useState<Record<string, number>>(() => {
+    const raw = parseSamplingPlan(run)
+    return Object.fromEntries(
+      configuredVariants.map((variant, index) => [
+        variant,
+        raw[runVariants(run)[index]] ?? raw[variant] ?? 100,
+      ])
+    )
+  })
+
+  const hasDecision = Boolean(run.decision?.trim())
+  const selectionChanged =
+    control !== run.controlVariant ||
+    JSON.stringify([...treatments].sort()) !==
+      JSON.stringify([...(run.treatmentVariants ?? [])].sort())
+  const clearsAnalysis =
+    !hasDecision && selectionChanged && Boolean(run.analysisResult?.trim())
+  const included = [control, ...treatments].filter(Boolean)
+  const valid = Boolean(
+    control &&
+    !(hasDecision && selectionChanged) &&
+    treatments.length > 0 &&
+    included.every((id) => available.includes(id)) &&
+    assignmentUnit.trim() &&
+    sliceStart >= 0 &&
+    sliceEnd <= 100 &&
+    sliceStart < sliceEnd &&
+    included.every(
+      (variant) =>
+        (sampling[variant] ?? 100) >= 0 && (sampling[variant] ?? 100) <= 100
+    )
+  )
+
+  const saveAssignment = () => {
+    if (!valid || saving) return
+    void onSave({
+      method: run.method,
+      controlVariant: control,
+      treatmentVariants: treatments,
+      layerKey: layerKey.trim() || null,
+      assignmentUnitSelector: assignmentUnit.trim(),
+      sliceStart,
+      sliceEnd,
+      analysisSamplingPlan: serializeSamplingPlan(
+        control,
+        treatments,
+        sampling,
+        Object.fromEntries(
+          variations.map((variation) => [variation.id, variation.name])
+        )
+      ),
+    }).catch(() => undefined)
+  }
+
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent
+        ref={popoverPortalRef}
+        className="gap-0 p-0 data-[side=right]:w-[min(100vw,592px)] data-[side=right]:sm:max-w-[592px]"
+      >
+        <SheetHeader className="border-b px-6 py-5 pr-12">
+          <SheetTitle>
+            {t(
+              "releaseDecision.experiments.detailsPage.measuring.editAssignment"
+            )}
+          </SheetTitle>
+          <SheetDescription className="mt-1.5 leading-5">
+            {t(
+              "releaseDecision.experiments.detailsPage.measuring.assignmentSubtitle",
+              {
+                run: run.slug,
+              }
+            )}
+          </SheetDescription>
+        </SheetHeader>
+
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
+          <div className="space-y-5 divide-y">
+            <section className="space-y-4 pb-5">
+              <div className="space-y-1">
+                <h3 className="font-medium">
+                  {t(
+                    "releaseDecision.experiments.detailsPage.measuring.controlTreatments"
+                  )}
+                </h3>
+                <p className="text-xs leading-5 text-muted-foreground">
+                  {t(
+                    "releaseDecision.experiments.detailsPage.measuring.rolesHelp"
+                  )}
+                </p>
+              </div>
+              {hasDecision ? (
+                <p className="rounded-md border bg-muted/50 p-3 text-sm text-muted-foreground">
+                  {t(
+                    "releaseDecision.experiments.detailsPage.measuring.decidedRolesLocked"
+                  )}
+                </p>
+              ) : null}
+              <div className="space-y-3">
+                <Label className="font-normal text-muted-foreground">
+                  {t(
+                    "releaseDecision.experiments.detailsPage.measuring.control"
+                  )}
+                </Label>
+                <RadioGroup
+                  disabled={hasDecision || saving}
+                  value={control}
+                  onValueChange={(value) => {
+                    setControl(value)
+                    setTreatments((current) =>
+                      current.filter((item) => item !== value)
+                    )
+                  }}
+                >
+                  {available.map((id) => (
+                    <label
+                      key={id}
+                      className="flex cursor-pointer items-center gap-2 text-sm"
+                    >
+                      <RadioGroupItem value={id} />
+                      <span>{variationLabel(variationMap.get(id), id)}</span>
+                    </label>
+                  ))}
+                </RadioGroup>
+              </div>
+              <div className="space-y-3">
+                <Label className="font-normal text-muted-foreground">
+                  {t(
+                    "releaseDecision.experiments.detailsPage.measuring.treatments"
+                  )}
+                </Label>
+                {available
+                  .filter((id) => id !== control)
+                  .map((id) => (
+                    <label
+                      key={id}
+                      className="flex cursor-pointer items-center gap-2 text-sm"
+                    >
+                      <Checkbox
+                        disabled={hasDecision || saving}
+                        checked={treatments.includes(id)}
+                        onCheckedChange={(checked) =>
+                          setTreatments((current) =>
+                            checked
+                              ? [...new Set([...current, id])]
+                              : current.filter((item) => item !== id)
+                          )
+                        }
+                      />
+                      <span>{variationLabel(variationMap.get(id), id)}</span>
+                    </label>
+                  ))}
+              </div>
+            </section>
+
+            <section className="space-y-4 py-5">
+              <h3 className="font-medium">
+                {t(
+                  "releaseDecision.experiments.detailsPage.measuring.layerEligibility"
+                )}
+              </h3>
+              <div className="grid grid-cols-[140px_minmax(0,1fr)] items-center gap-x-4 gap-y-3">
+                <Label
+                  htmlFor="assignment-layer-key"
+                  className="font-normal text-muted-foreground"
+                >
+                  {t(
+                    "releaseDecision.experiments.detailsPage.measuring.layerKey"
+                  )}
+                </Label>
+                <LayerPicker
+                  layers={layers}
+                  value={layerKey}
+                  portalContainer={popoverPortalRef}
+                  onSelect={(layer) => {
+                    setLayerKey(layer.key)
+                    setAssignmentUnit(layer.assignmentUnitSelector)
+                  }}
+                />
+                <Label
+                  htmlFor="assignment-unit"
+                  className="font-normal text-muted-foreground"
+                >
+                  {t(
+                    "releaseDecision.experiments.detailsPage.measuring.assignmentUnit"
+                  )}
+                </Label>
+                <Input
+                  id="assignment-unit"
+                  value={assignmentUnit}
+                  readOnly
+                  className="bg-muted/40 text-muted-foreground"
+                />
+                <Label
+                  htmlFor="assignment-start"
+                  className="font-normal text-muted-foreground"
+                >
+                  {t(
+                    "releaseDecision.experiments.detailsPage.measuring.bucketStart"
+                  )}
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="assignment-start"
+                    type="number"
+                    min={0}
+                    max={99}
+                    value={sliceStart}
+                    className="pr-8"
+                    onChange={(event) =>
+                      setSliceStart(
+                        clampNumber(Number(event.target.value), 0, 99)
+                      )
+                    }
+                  />
+                  <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs text-muted-foreground">
+                    %
+                  </span>
+                </div>
+                <Label
+                  htmlFor="assignment-end"
+                  className="font-normal text-muted-foreground"
+                >
+                  {t(
+                    "releaseDecision.experiments.detailsPage.measuring.bucketEnd"
+                  )}
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="assignment-end"
+                    type="number"
+                    min={1}
+                    max={100}
+                    value={sliceEnd}
+                    className="pr-8"
+                    onChange={(event) =>
+                      setSliceEnd(
+                        clampNumber(Number(event.target.value), 1, 100)
+                      )
+                    }
+                  />
+                  <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs text-muted-foreground">
+                    %
+                  </span>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {t(
+                  "releaseDecision.experiments.detailsPage.measuring.activeRange",
+                  {
+                    start: sliceStart,
+                    end: sliceEnd,
+                    width: Math.max(0, sliceEnd - sliceStart),
+                  }
+                )}
+              </p>
+            </section>
+
+            <section className="space-y-4 py-5">
+              <div className="flex items-center justify-between gap-4">
+                <h3 className="font-medium">
+                  {t(
+                    "releaseDecision.experiments.detailsPage.measuring.analysisSampling"
+                  )}
+                </h3>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={
+                    included.length === 0 ||
+                    included.every((id) => (sampling[id] ?? 100) === 100)
+                  }
+                  onClick={() =>
+                    setSampling(
+                      Object.fromEntries(included.map((id) => [id, 100]))
+                    )
+                  }
+                >
+                  <ListChecks />
+                  {t(
+                    "releaseDecision.experiments.detailsPage.measuring.setAll"
+                  )}
+                </Button>
+              </div>
+              <div className="space-y-3">
+                {included.map((id) => (
+                  <div
+                    key={id}
+                    className="grid grid-cols-[1fr_96px] items-center gap-4"
+                  >
+                    <Label
+                      htmlFor={`sampling-${id}`}
+                      className="truncate font-normal text-muted-foreground"
+                    >
+                      {variationLabel(variationMap.get(id), id)}
+                    </Label>
+                    <div className="relative">
+                      <Input
+                        id={`sampling-${id}`}
+                        type="number"
+                        min={0}
+                        max={100}
+                        value={sampling[id] ?? 100}
+                        className="pr-8"
+                        onChange={(event) =>
+                          setSampling((current) => ({
+                            ...current,
+                            [id]: clampNumber(
+                              Number(event.target.value),
+                              0,
+                              100
+                            ),
+                          }))
+                        }
+                      />
+                      <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs text-muted-foreground">
+                        %
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <SheetFooter className="flex-row justify-end px-6 py-5">
+          {saveError ? (
+            <p className="mr-auto self-center text-sm text-destructive">
+              {t(
+                "releaseDecision.experiments.detailsPage.measuring.assignmentSaveFailed"
+              )}
+            </p>
+          ) : null}
+          <Button
+            type="button"
+            variant="outline"
+            disabled={saving}
+            onClick={() => onOpenChange(false)}
+          >
+            {t("releaseDecision.experiments.detailsPage.cancel")}
+          </Button>
+          <Button
+            type="button"
+            disabled={!valid || saving}
+            onClick={() => {
+              if (clearsAnalysis) setConfirmSaveOpen(true)
+              else saveAssignment()
+            }}
+          >
+            {t(
+              saving
+                ? "releaseDecision.experiments.detailsPage.measuring.saving"
+                : "releaseDecision.experiments.detailsPage.measuring.saveChanges"
+            )}
+          </Button>
+        </SheetFooter>
+        <AlertDialog open={confirmSaveOpen} onOpenChange={setConfirmSaveOpen}>
+          <AlertDialogContent className="sm:max-w-md">
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                {t(
+                  "releaseDecision.experiments.detailsPage.measuring.confirmRolesChangeTitle"
+                )}
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                {t(
+                  "releaseDecision.experiments.detailsPage.measuring.confirmRolesChangeDescription"
+                )}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="border-t-0 bg-transparent">
+              <AlertDialogCancel render={<Button variant="outline" />}>
+                {t(
+                  "releaseDecision.experiments.detailsPage.measuring.backToEditing"
+                )}
+              </AlertDialogCancel>
+              <AlertDialogAction
+                render={<Button variant="destructive" />}
+                disabled={!valid || saving}
+                onClick={saveAssignment}
+              >
+                {t(
+                  "releaseDecision.experiments.detailsPage.measuring.saveAndClearAnalysis"
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </SheetContent>
+    </Sheet>
+  )
+}

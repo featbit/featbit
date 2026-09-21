@@ -11,9 +11,7 @@ public class CreateExperiment : IRequest<ExperimentVm>
 
     public string Description { get; set; }
 
-    public string FlagKey { get; set; }
-
-    public string FeatBitProjectKey { get; set; }
+    public Guid? FlagId { get; set; }
 }
 
 public class CreateExperimentValidator : AbstractValidator<CreateExperiment>
@@ -39,11 +37,9 @@ public class CreateExperimentHandler(
             Id = Guid.NewGuid(),
             Name = request.Name.Trim(),
             Description = string.IsNullOrWhiteSpace(request.Description) ? null : request.Description.Trim(),
-            FlagKey = string.IsNullOrWhiteSpace(request.FlagKey) ? null : request.FlagKey.Trim(),
-            FeatBitProjectKey = string.IsNullOrWhiteSpace(request.FeatBitProjectKey) ? null : request.FeatBitProjectKey.Trim(),
-            FeatBitEnvId = request.EnvId,
+            FlagId = request.FlagId,
+            EnvId = request.EnvId,
             Stage = "hypothesis",
-            SandboxStatus = "idle",
             CreatedAt = now,
             UpdatedAt = now
         };

@@ -1,3 +1,4 @@
+import { enPagination, zhPagination } from "./resources/pagination"
 import i18n from "i18next"
 import { initReactI18next } from "react-i18next"
 import { enAccessTokens, zhAccessTokens } from "./resources/access-tokens"
@@ -6,9 +7,9 @@ import { enAuth, zhAuth } from "./resources/auth"
 import { enChangeRequests, zhChangeRequests } from "./resources/change-requests"
 import { enEndUsers, zhEndUsers } from "./resources/end-users"
 import {
-  enExperimentation,
-  zhExperimentation,
-} from "./resources/experimentation"
+  enReleaseDecision,
+  zhReleaseDecision,
+} from "./resources/release-decision"
 import { enFeatureFlags, zhFeatureFlags } from "./resources/feature-flags"
 import { enGetStarted, zhGetStarted } from "./resources/get-started"
 import { enLayout, zhLayout } from "./resources/layout"
@@ -30,6 +31,7 @@ i18n.use(initReactI18next).init({
   resources: {
     en: {
       common: {
+        pagination: enPagination,
         auth: enAuth,
         selectWorkspace: enWorkspaceSelection,
         onboarding: enOnboarding,
@@ -44,7 +46,7 @@ i18n.use(initReactI18next).init({
         auditLogs: enAuditLogs,
         changeRequests: enChangeRequests,
         endUsers: enEndUsers,
-        experimentation: enExperimentation,
+        releaseDecision: enReleaseDecision,
         featureFlags: enFeatureFlags,
         getStarted: enGetStarted,
         segments: enSegments,
@@ -53,6 +55,7 @@ i18n.use(initReactI18next).init({
     },
     zh: {
       common: {
+        pagination: zhPagination,
         auth: zhAuth,
         selectWorkspace: zhWorkspaceSelection,
         onboarding: zhOnboarding,
@@ -67,7 +70,7 @@ i18n.use(initReactI18next).init({
         auditLogs: zhAuditLogs,
         changeRequests: zhChangeRequests,
         endUsers: zhEndUsers,
-        experimentation: zhExperimentation,
+        releaseDecision: zhReleaseDecision,
         featureFlags: zhFeatureFlags,
         getStarted: zhGetStarted,
         segments: zhSegments,

@@ -6,27 +6,17 @@ public class ExperimentRun : AuditedEntity
 
     public string Slug { get; set; }
 
-    public string Status { get; set; } = "draft";
-
-    public string Hypothesis { get; set; }
-
     public string Method { get; set; }
 
-    public string MethodReason { get; set; }
+    public PrimaryMetricConfig PrimaryMetric { get; set; }
 
-    public string PrimaryMetricEvent { get; set; }
+    public List<GuardrailMetricConfig> GuardrailMetrics { get; set; } = [];
 
-    public string MetricDescription { get; set; }
-
-    public string GuardrailEvents { get; set; }
-
-    public string GuardrailDescriptions { get; set; }
+    public ICollection<Domain.FeatureFlags.Variation> Variations { get; set; } = [];
 
     public string ControlVariant { get; set; }
 
-    public string TreatmentVariant { get; set; }
-
-    public string TrafficAllocation { get; set; }
+    public string[] TreatmentVariants { get; set; } = [];
 
     public int? MinimumSample { get; set; }
 
@@ -39,8 +29,6 @@ public class ExperimentRun : AuditedEntity
     public double? PriorMean { get; set; }
 
     public double? PriorStddev { get; set; }
-
-    public string InputData { get; set; }
 
     public string AnalysisResult { get; set; }
 
@@ -60,17 +48,9 @@ public class ExperimentRun : AuditedEntity
 
     public string NextHypothesis { get; set; }
 
-    public string RunId { get; set; }
-
-    public string PrimaryMetricAgg { get; set; } = "once";
-
-    public string PrimaryMetricType { get; set; } = "binary";
-
     public double? TrafficPercent { get; set; } = 100;
 
-    public string LayerId { get; set; }
-
-    public string AudienceFilters { get; set; }
+    public Guid? LayerId { get; set; }
 
     public int? TrafficOffset { get; set; } = 0;
 
@@ -89,10 +69,6 @@ public class ExperimentRun : AuditedEntity
     public double? LayerTrafficPercent { get; set; } = 100;
 
     public string AnalysisSamplingPlan { get; set; }
-
-    public string DataSourceMode { get; set; } = "featbit-managed";
-
-    public string CustomerEndpointConfig { get; set; }
 
     public Experiment Experiment { get; set; }
 }

@@ -60,33 +60,35 @@ public class InsightController : PublicApiControllerBase
             return Ok();
         }
 
-        var envId = EnvId;
+        var envIdString = EnvId.ToString();
 
-        var endUserMessages = new List<EndUserMessage>();
-        var insightMessages = new List<InsightMessage>();
-        var usage = new InsightUsage(envId);
+        var endUserMessages = new List<EndUserMessage>(validInsights.Length);
+        var insightMessages = new List<InsightMessage>(validInsights.Length);
+        var usage = new InsightUsage(EnvId);
         foreach (var insight in validInsights)
         {
-            var key = $"{envId:N}:{insight!.User!.KeyId}";
+            var key = $"{envIdString}:{insight!.User!.KeyId}";
             if (!_cache.TryGetValue(key, out _))
             {
                 _cache.Set(key, string.Empty, _cacheEntryOptions);
-                endUserMessages.Add(insight.EndUserMessage(envId));
+                endUserMessages.Add(insight.EndUserMessage(EnvId));
                 usage.AddUser(insight.User!.KeyId);
             }
 
-            insightMessages.AddRange(insight.InsightMessages(envId));
+            insight.AppendInsightMessages(envIdString, insightMessages);
             usage.AddEvents(insight.Variations?.Length ?? 0, insight.Metrics?.Length ?? 0);
         }
 
-        var tasks = endUserMessages.Select(x => _producer.PublishAsync(Topics.EndUser, x))
-            .Concat(insightMessages.Select(x => _producer.PublishAsync(Topics.Insights, x)))
-            .Append(_producer.PublishAsync(Topics.Usage, usage))
-            .ToArray();
+        await Task.WhenAll(
+            _producer.PublishBatchAsync(Topics.EndUser, endUserMessages),
+            _producer.PublishBatchAsync(Topics.Insights, insightMessages),
+            _producer.PublishAsync(Topics.Usage, usage)
+        );
 
-        await Task.WhenAll(tasks);
-
-        trace.SetTag("insights.published", tasks.Length);
+        // One per end-user message, one per insight message, plus the usage record. The batched
+        // producer calls changed the number of publish operations, not the number of messages,
+        // which is what this tag has always carried.
+        trace.SetTag("insights.published", endUserMessages.Count + insightMessages.Count + 1);
         trace.Success();
 
         return Ok();

@@ -21,11 +21,11 @@ Excluded for now:
 - changes to the organization/project/environment context bar;
 - mobile-first layout work.
 
-The Angular implementation is the functional reference only. The React page must use the existing shadcn/Base UI, Tailwind, TanStack Query, TanStack Table, React Hook Form, Zod, `react-i18next`, Lucide, and Sonner patterns already established in `front-end`.
+The React page must use the existing shadcn/Base UI, Tailwind, TanStack Query, TanStack Table, React Hook Form, Zod, `react-i18next`, Lucide, and Sonner patterns already established in `front-end`.
 
 ## Design Direction
 
-Use the existing React product language: a compact, neutral desktop workbench with thin borders, calm spacing, and familiar controls. Do not reproduce the Angular/ng-zorro green action styling, table spacing, modal treatment, or inline divider-heavy action column.
+Use the existing React product language: a compact, neutral desktop workbench with thin borders, calm spacing, and familiar controls. Use neutral actions, shared table spacing and Dialog styling, and compact action menus without inline dividers.
 
 The page should feel adjacent to the React End Users, Access Tokens, Webhooks, and Relay Proxies list pages:
 
@@ -75,7 +75,7 @@ Debounce name search by 400ms and reset the page index to `1` whenever the norma
 
 ### Table
 
-Use one full-width bordered table. Do not wrap the table in an additional card. Match the React Team page: keep the subtle outer border, the table-header bottom border, and horizontal row separators only. Do not render vertical borders between columns. Retain server-side data and the Angular information hierarchy while tightening the presentation.
+Use one full-width bordered table. Do not wrap the table in an additional card. Match the React Team page: keep the subtle outer border, the table-header bottom border, and horizontal row separators only. Do not render vertical borders between columns. Retain server-side data and the documented information hierarchy while tightening the presentation.
 
 | Column | Content | Behavior |
 | --- | --- | --- |
@@ -143,7 +143,7 @@ Preserve server pagination and page sizes `10`, `20`, and `30`.
 
 ## New Segment Sheet
 
-`New segment` opens a right-side Sheet rather than reproducing the Angular centered modal. The form contains enough conditional and hierarchical content that a Sheet gives it a more stable desktop workspace while keeping the index visible behind it.
+`New segment` opens a right-side Sheet. The form contains enough conditional and hierarchical content that a Sheet gives it a more stable desktop workspace while keeping the index visible behind it.
 
 Use a width around 560-640px, standard Sheet header, scrollable body, and sticky footer.
 
@@ -156,7 +156,7 @@ Use a width around 560-640px, standard Sheet header, scrollable body, and sticky
 
 Default to `Current environment`.
 
-Switching type retains Name and Description, revalidates Key against the selected type, and switches the visible scope controls. This improves the Angular reset behavior without changing any backend capability. Do not submit stale key-validation results from the previous type.
+Switching type retains Name and Description, revalidates Key against the selected type, and switches the visible scope controls. Do not submit stale key-validation results from the previous type.
 
 ### Common fields
 
@@ -197,7 +197,7 @@ When the Shareable Segment license feature is granted, show:
 - the current environment as visibly included and non-removable;
 - outline action `Choose scopes`.
 
-Selected scopes must support organization, project, and environment resources, matching the Angular resource-space behavior. When a broader selected scope already includes the current environment, the request payload may omit the redundant current-environment RN exactly as the Angular implementation does.
+Selected scopes must support organization, project, and environment resources. When a broader selected scope already includes the current environment, the request payload may omit the redundant current-environment RN.
 
 When the license is not granted:
 
@@ -209,7 +209,7 @@ When the license is not granted:
 
 ### Choose Scopes Dialog
 
-Open a centered Dialog above the Sheet. Reuse the interaction vocabulary of the React environment/resource pickers rather than porting the Angular resource finder.
+Open a centered Dialog above the Sheet. Reuse the interaction vocabulary of the React environment/resource pickers.
 
 - Search by resource name or full path.
 - Present a hierarchical, scrollable organization -> project -> environment result list.
@@ -228,7 +228,7 @@ Use `Cancel` and primary `Create segment`.
 - Disable Create when required fields are invalid, key validation is pending/failed, the selected type is license-gated, or a request is already pending.
 - Pending label: `Creating...`.
 - Keep values and the Sheet open on failure; use the standard error toast.
-- On success, close the Sheet, refresh/invalidate the list, and navigate to the new Segment targeting route, preserving the Angular post-create destination.
+- On success, close the Sheet, refresh/invalidate the list, and navigate to the new Segment targeting route.
 - If dismissal is attempted after changes, use the shared discard-changes confirmation.
 
 ## Archive, Restore, and Remove
@@ -289,7 +289,7 @@ Keep the Dialog open on failure. On success, close it, show success feedback, re
 
 ## Permissions and Licensing
 
-Build the Segment resource RN from the current environment prefix, Segment key, and tags, matching Angular behavior. Continue to respect Segment-all-actions fallback and fine-grained license rules through the shared permission/license layer.
+Build the Segment resource RN from the current environment prefix, Segment key, and tags. Continue to respect Segment-all-actions fallback and fine-grained license rules through the shared permission/license layer.
 
 | Capability | Check | Presentation |
 | --- | --- | --- |
@@ -363,7 +363,7 @@ Use Sonner success/error toasts for copy, create, archive, restore, permanent re
 
 ## Functional Invariants
 
-The React migration must preserve these index-level contracts:
+The implementation must support these index-level contracts:
 
 - load Segments from the current environment with name, archived state, zero-based API page index, and page size;
 - preserve server-returned name, key, type, scopes, tags, update timestamp, archived state, and total count;
@@ -385,7 +385,7 @@ The React migration must preserve these index-level contracts:
 ## Acceptance Criteria
 
 - Only the Segments index workflow and its supporting overlays are designed; sidebar, context bar, and Segment details remain unchanged/out of scope.
-- The delivered light design matches the current React list-page rhythm and does not clone Angular/ng-zorro styling.
+- The delivered light design matches the current React list-page rhythm.
 - The table exposes Segment identity, type, shareable scopes, tags, update time, Details, and state-appropriate actions in a compact layout.
 - Details remains direct; state-changing/destructive row actions use the overflow menu.
 - Search, active/archived filtering, copying, server pagination, creation, archive blocking, archive, restore, removal, permissions, license gating, and change comments all have explicit behavior.
