@@ -9,7 +9,9 @@ const POSTGRES_PORT = 5432;
 const API_PORT = 5000;
 const FRONTEND_PORT = 80;
 const frontendDirectory = fileURLToPath(new URL("../", import.meta.url));
-const backendDirectory = fileURLToPath(new URL("../../back-end/", import.meta.url));
+// The API image builds from modules/, not modules/back-end/: its Dockerfile copies both
+// back-end/ and shared/, and the shared observability projects sit outside back-end/.
+const modulesDirectory = fileURLToPath(new URL("../../", import.meta.url));
 const runId = randomUUID();
 const logDirectory = join(frontendDirectory, "logs", "e2e-containers", runId);
 const postgresImage = process.env.FEATBIT_E2E_POSTGRES_IMAGE ?? "postgres:16-alpine";
@@ -187,7 +189,7 @@ try {
   await buildImage(
     "api",
     apiImage,
-    backendDirectory,
+    modulesDirectory,
     fileURLToPath(new URL("../../back-end/deploy/Dockerfile", import.meta.url))
   );
   await buildImage(
