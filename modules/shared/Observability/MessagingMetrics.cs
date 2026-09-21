@@ -189,8 +189,13 @@ public sealed class MessagingMetrics
     /// <see cref="PublishScope.Failed"/> when it throws. A scope disposed without either is recorded
     /// as a failure, so a missed call cannot masquerade as a success.
     /// </summary>
-    public PublishScope BeginPublish(string provider, string destination)
-        => new(this, provider, destination);
+    /// <param name="messageCount">
+    /// How many messages this call hands to the transport. Defaults to one. A batch publish passes
+    /// its size so that <see cref="Published"/> stays a count of <i>messages</i> rather than of
+    /// calls — one batch of 500 must not read the same as one message.
+    /// </param>
+    public PublishScope BeginPublish(string provider, string destination, long messageCount = 1)
+        => new(this, provider, destination, messageCount);
 
     /// <summary>
     /// Times the handling of one consumed message and records its outcome. Same
@@ -260,17 +265,20 @@ public sealed class MessagingMetrics
         private readonly MessagingMetrics _owner;
         private readonly string _provider;
         private readonly string _destination;
+        private readonly long _messageCount;
         private readonly long _startedTimestamp;
         private TailSampledTrace _trace;
         private string _outcome;
         private string? _errorType;
         private bool _completed;
 
-        internal PublishScope(MessagingMetrics owner, string provider, string destination)
+        internal PublishScope(
+            MessagingMetrics owner, string provider, string destination, long messageCount = 1)
         {
             _owner = owner;
             _provider = provider;
             _destination = destination;
+            _messageCount = messageCount < 1 ? 1 : messageCount;
             _startedTimestamp = Stopwatch.GetTimestamp();
             _outcome = Outcomes.Failure;
             _errorType = null;
@@ -287,6 +295,13 @@ public sealed class MessagingMetrics
 
             _trace.SetTag(ObservabilityTags.Provider, provider);
             _trace.SetTag(ObservabilityTags.Destination, destination);
+
+            // Only tagged for a genuine batch. A value of 1 on every single-message publish would
+            // be noise on the overwhelming majority of spans.
+            if (_messageCount > 1)
+            {
+                _trace.SetTag("messaging.batch_size", _messageCount);
+            }
         }
 
         /// <summary>Marks the message as accepted by the transport.</summary>
@@ -326,7 +341,7 @@ public sealed class MessagingMetrics
                 ? Tags(_provider, _destination, _outcome)
                 : Tags(_provider, _destination, _outcome, _errorType);
 
-            _owner.Published.Add(1, tags);
+            _owner.Published.Add(_messageCount, tags);
             _owner.PublishDuration.Record(Stopwatch.GetElapsedTime(_startedTimestamp).TotalMilliseconds, tags);
         }
     }

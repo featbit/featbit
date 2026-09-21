@@ -91,6 +91,12 @@ is fire-and-forget and swallows publish exceptions, so `enqueued` is the stronge
 code supports. Reporting `success` would assert a guarantee that does not exist. Upgrading to real
 confirmation is a behavior change, and is deliberately out of scope for instrumentation work.
 
+**A batch publish counts every message, not the call.** `PublishBatchAsync` hands its size to the
+publish scope, so `published` stays a count of messages — one batch of 500 reads as 500, not as 1 —
+while `publish_duration` still measures the single call that carried them. Redis and Postgres batch
+natively, with a multi-value `RPUSH` and a binary `COPY`; Kafka's batch method loops the
+single-message path, because `Produce()` already enqueues into the client's own batching buffer.
+
 `delivery_failures` is a **separate counter, not an outcome on `published`**. Kafka's broker report
 arrives long after the publish call returned and its scope closed, so folding the two together would
 double-count the message.
@@ -806,14 +812,17 @@ point, since the shape of the retries is what distinguishes a flaky endpoint fro
 
 | Span name | Kind | Category | Attributes | Emitted from |
 | --- | --- | --- | --- | --- |
-| `messaging.publish` | Producer | `messaging` | `provider`, `destination`, `outcome`, `reason` | all Kafka/Redis/Postgres producers, all three services |
+| `messaging.publish` | Producer | `messaging` | `provider`, `destination`, `outcome`, `reason`, `messaging.batch_size` | all Kafka/Redis/Postgres producers, all three services |
 
 The `messaging` category was previously defined and accepted by
 `TraceGate` but checked by no production code, so enabling it silently did nothing. This span is
 what makes it mean something.
 
 The span lives inside `PublishScope`, which every MQ publish in all three services already funnels
-through — so it covers all twelve call sites and cannot be forgotten by the thirteenth.
+through — so it covers all twelve call sites and cannot be forgotten by the thirteenth. That
+includes the batched paths: `messaging.batch_size` is tagged only when a call carries more than one
+message, so it appears on batch spans and stays off the single-message publishes that make up most
+of the traffic.
 
 **The consume side is deliberately not duplicated.** The six consumers already start an ingress
 activity covering the same work, and a second span around it would report the same duration twice
@@ -890,7 +899,7 @@ done.**
 | `buffer.bytes` on `UsageTracker` and the ELS Postgres channel | Not built | Shipped for `InsightsTracker` only. The other two are not alike: ELS's `PostgresMessageConsumer` holds `ChannelMessage(string, long)` — a channel name and a row id, **no payload** — so bytes would be a constant multiple of `buffer.items` and carry no information beyond it. `UsageTracker`'s `Channel<UsageRecord>` has no caller holding a serialized form, so measuring it would mean serializing purely for telemetry on the ingest path. For both, `buffer.items` and `buffer.capacity` already answer the question |
 | `oldest_message.age` — MQ backlog | Not built | `messaging.backlog` ships (see [Backlog depth and the background sampler](#backlog-depth-and-the-background-sampler)), so *depth* is answered. Age is not: Redis lists expose no enqueue timestamp without reading the head element, Kafka's committed-offset arithmetic yields a message count rather than a time, and only the Postgres transport has an `enqueued_at` column to read. One transport out of three would give a series absent for reasons an operator cannot see from the metric, which is worse than a consistently absent one |
 | `messaging.redelivered` under Kafka and Redis | Not built | Shipped for Postgres only, where the consumer's poll already increments `deliver_count` on every delivery and the count is readable with no behavior change. Under Kafka and Redis there is genuinely nothing to count — no retry or dead-letter path exists, both Kafka consumers `StoreOffset` in a `finally` regardless of outcome, and the Redis consumer pops before processing — so a message is delivered exactly once or not at all. The absent series means "not applicable to this provider", not zero |
-| A single end-to-end trace across the message queue | **Built**, with one residual | All three transports carry W3C trace context, so change propagation and data sync join into one trace across every service boundary — Kafka in message headers, Postgres in the `queue_messages.trace_parent`/`.trace_state` columns, Redis as sibling properties on the JSON payload. The control plane inherits this automatically, since it registers the back-end's producers and consumers rather than having its own. **The residual is `insights.ingest` and `insights.flush`**, which remain *two traces, not a parent/child pair*, under every transport: they are separated by a buffer and a flush cycle, not just by the queue, so no wire-level propagation can join them. Note also that the Postgres carrier requires `v6.0.0.sql` to have been applied — until it is, the producer's insert fails and is swallowed |
+| A single end-to-end trace across the message queue | **Built**, with one residual | All three transports carry W3C trace context, so change propagation and data sync join into one trace across every service boundary — Kafka in message headers, Postgres in the `queue_messages.trace_parent`/`.trace_state` columns, Redis as sibling properties on the JSON payload. The batched publish paths carry it the same way — Redis injects into every message of the batch, and the Postgres `COPY` writes `trace_parent` and `trace_state` for every row. The control plane inherits this automatically, since it registers the back-end's producers and consumers rather than having its own. **The residual is `insights.ingest` and `insights.flush`**, which remain *two traces, not a parent/child pair*, under every transport: they are separated by a buffer and a flush cycle, not just by the queue, so no wire-level propagation can join them. Note also that the Postgres carrier requires `v6.0.0.sql` to have been applied — until it is, the producer's insert fails and is swallowed |
 | Evaluation batch size | Not applicable | `/api/public/featureflag/evaluate` evaluates the flags of one environment for one end user; there is no caller-supplied batch to size. `sync.payload_items` already carries the count where a count exists |
 
 ### Instruments you might expect but will not find
