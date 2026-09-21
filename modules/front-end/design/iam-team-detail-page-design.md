@@ -1,8 +1,6 @@
 # IAM Team Detail Page Design
 
-> Historical context: references to Angular describe the retired frontend behavior. Its source is available in Git history, not in the working tree. Current implementation lives in `modules/front-end`.
-
-This document is the React design contract for the IAM Team member detail page. The retired Angular implementation provides a historical functional reference for API behavior and permission relationships, but the React page must use the authenticated shell, shadcn/ui, Base UI primitives, Tailwind semantic tokens, and the compact workbench language defined in [react-layout-design.md](react-layout-design.md).
+This document is the React design contract for the IAM Team member detail page. The React page must use the authenticated shell, shadcn/ui, Base UI primitives, Tailwind semantic tokens, and the compact workbench language defined in [react-layout-design.md](react-layout-design.md).
 
 ## Design Asset
 

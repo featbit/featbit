@@ -1,8 +1,6 @@
 # Organization Page Design
 
-> Historical context: references to Angular describe the retired frontend behavior. Its source is available in Git history, not in the working tree. Current implementation lives in `modules/front-end`.
-
-This document defines the React design target for the Organization admin area. The retired Angular implementation provides the historical functional and information-architecture reference, but React should use the new authenticated layout, shadcn/ui primitives, Tailwind tokens, lucide-react icons, TanStack Query/Table, React Hook Form + Zod, and the shared typed API client. Do not copy the Angular/ng-zorro layout or visual styling.
+This document defines the React design target for the Organization admin area. React should use the new authenticated layout, shadcn/ui primitives, Tailwind tokens, lucide-react icons, TanStack Query/Table, React Hook Form + Zod, and the shared typed API client. Use shared layout and component tokens.
 
 ## Scope And Boundaries
 
@@ -12,7 +10,7 @@ This design document covers only the Organization content area inside the authen
 - Projects tab design and mockups should show only the main page content area. Do not include the sidebar, context bar, or other authenticated shell chrome when documenting or implementing this tab.
 - Organization belongs under Admin navigation, next to Workspace, IAM, Relay Proxies, and Integrations.
 - The top application context bar remains `Organization / Project / Environment`. Organization page content may show organization identity and switching controls, but it must not change the global context bar contract.
-- Profile management is an Angular functional reference, but React should treat user profile as an account-level surface. If `/organization/profile` is preserved for route compatibility, it should redirect to or reuse the account Profile surface rather than make Organization own personal account settings.
+- Treat user profile as an account-level surface. If `/organization/profile` is preserved for route compatibility, it should redirect to or reuse the account Profile surface rather than make Organization own personal account settings.
 - If implementation requires a reusable layout primitive change, stop and update the layout design contract first instead of changing it as part of Organization page work.
 
 ## Design Assets
@@ -26,9 +24,9 @@ Related design contracts:
 - Global Users table and drawer precedent: [workspace-global-users-page-design.md](workspace-global-users-page-design.md)
 - Account Profile surface: [profile-page-design.md](profile-page-design.md)
 
-## Angular Functional Reference
+## Functional Requirements
 
-Angular exposes Organization as an Admin navigation entry with three tab-level areas:
+The UI exposes Organization as an Admin navigation entry with three tab-level areas:
 
 - Organization: update organization name, copy organization ID, view organization key, update default feature-flag sorting, switch organization, create organization when multi-organization is licensed, and update default permissions for new organization members.
 - Projects: filter projects, create/edit/delete projects, create/edit/delete environments, copy project/environment IDs, show current project/environment, and manage environment SDK secrets.
@@ -36,7 +34,7 @@ Angular exposes Organization as an Admin navigation entry with three tab-level a
 
 React should preserve the Organization and Projects behaviors, but should move Profile into the account/profile route family because the React authenticated layout already reserves the account menu for profile and personal preferences.
 
-Permission and license behavior from Angular should be preserved:
+Permission and license behavior must be preserved:
 
 - Updating organization name requires `UpdateOrgName`.
 - Updating default flag sorting requires `UpdateOrgSortFlagsBy`.
@@ -130,7 +128,7 @@ Fields and actions:
 
 Behavior:
 
-- Use the backend enum shape from Angular's `FlagSortedBy`.
+- Use the backend enum shape from `FlagSortedBy`.
 - Disable update if the user lacks `UpdateOrgSortFlagsBy`.
 - Keep helper copy minimal: `Default ordering for feature flag lists in this organization.`
 
@@ -148,9 +146,9 @@ Fields:
 
 Behavior:
 
-- Preserve Angular's rule that policy and group cannot both be empty after the form is touched.
+- Preserve the rule that policy and group cannot both be empty after the form is touched.
 - Use separate loading rows inside each select while remote options load.
-- Show system-managed policies with a compact neutral badge or star icon, not a bright green Angular-style marker.
+- Show system-managed policies with a compact neutral badge or star icon.
 - Disable update if the user lacks `UpdateOrgDefaultUserPermissions`.
 - On success, update the current organization store/localStorage and invalidate IAM/organization queries that depend on default permissions.
 
@@ -197,11 +195,11 @@ Create organization drawer:
 
 ## Projects Tab
 
-The Projects tab is an operational inventory of projects, environments, and SDK secrets. Angular's current page preserves the needed behavior, but its card spacing, action density, colored tags, and secret wrapping make the hierarchy hard to scan. React should redesign the page as a compact resource-management workbench while preserving every functional capability.
+The Projects tab is an operational inventory of projects, environments, and SDK secrets. Present projects as a compact resource-management workbench with clear spacing, restrained action density, neutral tags, and readable secret values.
 
 ### Functional Scope
 
-Preserve these Angular behaviors:
+Preserve these documented behaviors:
 
 - List all accessible projects for the current organization and keep the current project first.
 - Filter projects locally by project name.
@@ -224,13 +222,13 @@ Toolbar:
 - Right: primary `Create project` button with `Plus`.
 - Search filters project names locally unless the backend later supports server-side filtering.
 - Keep toolbar visible above loading, empty, and filtered-empty states.
-- Search input width should be around `320-420px`, not the Angular `520px` pill. Use the standard shadcn input height and a `Search` icon.
-- Do not add environment or secret filters in the first migration. The first view should be understandable before it becomes a full inventory table.
+- Search input width should be around `320-420px`. Use the standard shadcn input height and a `Search` icon.
+- Do not add environment or secret filters. The first view should be understandable before it becomes a full inventory table.
 
 Main inventory:
 
 - Use a vertical list of project sections. Each section is a compact `rounded-md border bg-background` resource block matching the current `front-end` table containers, with no ambient shadow and no nested cards.
-- Project sections use a single compact header row and an environment `Table` below it. Do not use Angular's separate gray environment cards.
+- Project sections use a single compact header row and an environment `Table` below it. Keep environments within the project table.
 - The current project appears first and shows a compact neutral `Current` badge beside the project name.
 - Project header must not consume much vertical space. Keep it to one line with tight padding, roughly `px-4 py-2` or equivalent.
 - Project header left side: project name, `Key: {key}` badge, optional `Current` badge, and muted metadata such as `{environmentCount} environments`, all on one line with truncation.
@@ -272,7 +270,7 @@ Secret actions:
 - Secret row actions in the `View secrets` sheet: Copy secret value, Edit secret name, and Delete secret.
 - Copy must be a first-class visible action. Each shown secret needs its own copy icon button next to the masked/truncated value, with tooltip `Copy secret`.
 - The `Secrets` cell should also expose a `View secrets` action when an environment has any secret. This opens a focused sheet for viewing and copying the environment's secrets.
-- Delete secret is guarded by confirmation with Angular's important warning preserved: `This operation cannot be reverted. Make sure this secret is removed from all SDKs before removing.`
+- Delete secret is guarded by confirmation with this warning: `This operation cannot be reverted. Make sure this secret is removed from all SDKs before removing.`
 - Copying a secret value uses an icon button and toast `Copied`; clicking the raw value should not be the only copy path.
 - Secrets are editable only for their display name. Users can create secrets, rename existing secrets, and delete secrets, but cannot edit secret `Type` or `Value`.
 
@@ -280,13 +278,13 @@ Secret display:
 
 - Show each secret on its own row. Each row contains secret name, type badge (`server` or `client`), masked/truncated value, and copy action.
 - Do not expose long secret strings as raw wrapping text in the environment row.
-- Use neutral badges for both `client` and `server`. Do not recreate Angular's cyan/geekblue tag colors.
+- Use neutral badges for both `client` and `server`.
 - Use `font-mono text-xs` for secret values and truncate to a stable width.
 - If a secret name or masked value does not fit, truncate with ellipsis and provide a tooltip with the full visible text. Copy still copies the full secret value.
 - Show at most two compact secret rows in the environment row. If there are more, show `+N more` and a `View secrets` control. Opening it lists all secrets for that environment.
 - The expanded secret view is a right-side `Sheet`, not an inline expansion. It should be optimized for scanning and copying: rows with `Name`, `Type`, masked `Value`, copy button, edit-name button, and delete button. Keep row height compact but give the value column enough width to distinguish secrets.
 - The sheet must show both the corresponding project and environment. Use title/subtitle such as `Production secrets` plus `Growth Platform / Production`, or an equivalent compact header treatment.
-- Values remain masked/truncated by default; copying copies the full value. Do not add an eye/reveal action in the first migration unless product/security requirements ask for explicit reveal.
+- Values remain masked/truncated by default; copying copies the full value. Do not add an eye/reveal action unless product/security requirements ask for explicit reveal.
 - If an environment has no secrets, show muted `No secrets` plus the same `Add secret` action when the user can create one.
 
 Drawers and dialogs:
@@ -294,7 +292,7 @@ Drawers and dialogs:
 - Project create/edit: right-side `Sheet`, `420-480px` wide, with `Name` and `Key`.
 - Environment create/edit: right-side `Sheet`, `420-480px` wide, with `Name`, `Key`, `Description`, and a checkbox/toggle for `Require change comment`.
 - Secret create/edit-name: compact `Dialog` is acceptable because the form is short. Creation fields are `Name` and `Type`; edit fields include `Name` only.
-- `Type` selection uses the existing Angular enum values: `client` and `server`. Present them as `Client Side SDK` and `Server Side SDK`.
+- `Type` selection uses the existing API enum values: `client` and `server`. Present them as `Client Side SDK` and `Server Side SDK`.
 - During secret edit, show `Type` and masked `Value` as read-only context only if useful, but the only editable field must be `Name`.
 - Creating a secret from the environment row or from the secrets sheet must use the same validation, permission check, mutation, and success handling.
 - Drawer/dialog footers use one primary action: `Create project`, `Save project`, `Create environment`, `Save environment`, `Create secret`, or `Save secret`. Do not add a secondary Cancel button unless the shared dialog pattern requires it.
@@ -303,7 +301,7 @@ Drawers and dialogs:
 
 Pagination:
 
-- Preserve Angular's "load more" behavior only if the API remains list-based. Prefer a compact list with incremental reveal over full table pagination while project counts are small.
+- Preserve incremental loading only if the API remains list-based. Prefer a compact list with incremental reveal over full table pagination while project counts are small.
 - If organizations commonly have many projects, move to TanStack Table or virtualized grouped rows later.
 - Initial reveal count may remain `3` for parity, but React should make the visible count a page constant rather than embedding the value in UI components.
 
@@ -324,11 +322,11 @@ Pagination:
 
 ## Account Profile Compatibility
 
-Angular's Profile tab updates the current user's name/email and resets local-user passwords. React should treat this as account-level work:
+The account Profile surface updates the current user's name/email and resets local-user passwords:
 
 - Account menu `Profile` opens the account Profile surface.
 - `/organization/profile` may redirect to account Profile for backward-compatible bookmarks.
-- The account Profile design should preserve Angular behavior: update name/email; reset password only for local-origin users; validate email, current password, new password, and confirm password.
+- The account Profile design should preserve documented behavior: update name/email; reset password only for local-origin users; validate email, current password, new password, and confirm password.
 - Do not duplicate profile forms inside Organization tabs.
 - Follow the dedicated Profile page contract in [profile-page-design.md](profile-page-design.md).
 
@@ -358,7 +356,7 @@ Layout rules:
   - Line tabs use the foreground underline from the current Tabs implementation, not a blue underline.
 - General tab forms use a two-column grid with long one-column fields. A field may use one column or two explicitly, but `Name`, `Sort flags by`, and `Organization` should stay one-column width.
 - The four General-tab action buttons, `Save changes`, `Save sorting`, `Save permissions`, and `Create organization`, must use the same fixed visual width and align to the same right edge.
-- Projects tab uses bordered resource blocks plus table-like nested rows. It must not use wide pill search inputs, large rounded Angular cards, green action links, or raw wrapping secret values.
+- Projects tab uses bordered resource blocks plus table-like nested rows. It must not use wide pill search inputs, large rounded cards, green action links, or raw wrapping secret values.
 - Projects tables should visually match existing React tables: `rounded-md border` wrapper, shadcn `Table`, muted or border-only header, compact `px-4 py-3` or tighter cells, and `align-middle` cells.
 - Projects tab uses a compact density target: reduce row padding, avoid extra helper text inside rows, keep cell content vertically centered, and avoid multi-line wrapping except for the bounded secret row stack.
 - Use the exact column label `Require change comment`; do not use the shorter `Change comments` label because it hides the boolean setting's meaning.
@@ -411,7 +409,7 @@ Account Profile:
 - Sorting and default permissions live in the same `Preferences` visual section but must submit through separate forms/mutations because they use different backend APIs.
 - Search inputs should update results without requiring submit.
 - Async selects should debounce remote search and show option-level loading.
-- Project and environment key fields should debounce uniqueness validation at roughly the Angular cadence (`300ms`) unless the shared validation helper uses a different standard.
+- Project and environment key fields should debounce uniqueness validation by roughly `300ms` unless the shared validation helper uses a different standard.
 - Destructive actions use shadcn confirmation dialogs or a shared `ConfirmAction` wrapper.
 - Action menus should group low-frequency actions so project/environment rows stay scannable.
 - Drawers close on successful create/edit and preserve typed values on validation errors.
@@ -486,7 +484,7 @@ Dynamic content ranges:
 - Projects: 0 to dozens. Current project should stay first.
 - Environments per project: usually 1 to 5, but support more without row overflow.
 - Secrets per environment: 0 to many. Long secret values must truncate and copy cleanly.
-- Policy/group search: server-side search, up to the API page size used by Angular.
+- Policy/group search: server-side search, using the page size supported by the API.
 
 ## Implementation Notes For Later
 
@@ -498,7 +496,7 @@ Dynamic content ranges:
 - Split General tab mutations by backend contract: identity/name update, sorting preference update, default permissions update, and create organization.
 - Split Projects tab by responsibility: projects page container, toolbar/search, project section, compact environment table row, secret cell, secrets sheet, project sheet, environment sheet, secret dialog, confirm wrappers, and project context synchronization helpers.
 - Use React Hook Form + Zod for forms and async validation where needed.
-- Reuse Angular endpoint contracts for project, environment, and environment-secret APIs: `/api/v1/projects`, `/api/v1/projects/{projectId}/envs`, and `/api/v1/envs/{envId}/secrets`.
+- Reuse API endpoint contracts for project, environment, and environment-secret APIs: `/api/v1/projects`, `/api/v1/projects/{projectId}/envs`, and `/api/v1/envs/{envId}/secrets`.
 - Preserve the existing key uniqueness checks for project and environment creation.
 - Preserve the existing localStorage current project/environment shape so the layout context bar, header secret access, and route guards continue to work, but do not include those shell elements in the Projects page implementation.
 - Use shadcn `Button`, `Input`, `Select`/combobox composition, `Tabs`, `Sheet`, `Dialog`, `Table`, `Badge`, `Skeleton`, `Tooltip`, and `DropdownMenu`.

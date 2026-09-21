@@ -1,7 +1,5 @@
 # Login Page Design Contract
 
-> Historical context: references to Angular describe the retired frontend behavior. Its source is available in Git history, not in the working tree. Current implementation lives in `modules/front-end`.
-
 ## Required Designs
 
 Implementation must strictly follow these design images:
@@ -15,10 +13,10 @@ Related SSO page design: [sso-login-page-design.md](sso-login-page-design.md)
 
 ## Design Requirements
 
-- Create a fully redesigned login page rather than copying the Angular login screen.
+- Follow the saved login composition and shared component styling.
 - Keep all authentication page elements from the current login concept while aligning the visual treatment with the authenticated React layout.
 - Keep the page modern, structured, and quiet, with less card-like composition.
-- Preserve the current Angular FeatBit brand logo style: dark charcoal symbol plus FeatBit wordmark.
+- Preserve the FeatBit brand logo style: dark charcoal symbol plus FeatBit wordmark.
 - Make authentication the primary task while using the left side to express FeatBit's product category through feature release and rollout visuals.
 - Avoid marketing-page composition, layout screenshots, dashboard previews, AI messaging, and decorative illustrations.
 
@@ -69,7 +67,7 @@ Related SSO page design: [sso-login-page-design.md](sso-login-page-design.md)
 - Light theme should use layout-like white and very light slate surfaces, crisp slate text, thin light borders, and blue primary actions.
 - Dark theme should use neutral dark slate surfaces, light foreground text, muted slate secondary text, thin dark borders, and the same blue primary action language.
 - Use small green, orange, and blue status accents only where they support the rollout visual.
-- Avoid bright Angular green dominance, warm ivory/evergreen login-specific palettes, purple/blue gradient dominance, decorative blobs, bokeh, stock illustrations, and heavy shadows.
+- Avoid bright green dominance, warm ivory/evergreen login-specific palettes, purple/blue gradient dominance, decorative blobs, bokeh, stock illustrations, and heavy shadows.
 - Use subtle borders and layout dividers for structure.
 
 ## Implementation Notes

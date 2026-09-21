@@ -1,7 +1,5 @@
 # SSO Login Page Design Contract
 
-> Historical context: references to Angular describe the retired frontend behavior. Its source is available in Git history, not in the working tree. Current implementation lives in `modules/front-end`.
-
 ## Required Designs
 
 Implementation must strictly follow these design images:
@@ -26,7 +24,7 @@ Related design: [login-page-design.md](login-page-design.md)
 ## Layout
 
 - Use the same header as the main login page:
-  - Angular-style FeatBit logo on the left.
+  - FeatBit brand logo on the left.
   - theme toggle icon button in the top-right header, immediately before the language switcher.
   - language switcher on the right.
   - subtle horizontal divider below the header.
@@ -74,7 +72,7 @@ Related design: [login-page-design.md](login-page-design.md)
 - Use small green, orange, and blue status accents only where they support the rollout visual.
 - Use shadcn/ui and Tailwind defaults for input and button styling.
 - Keep dividers subtle but visible.
-- Avoid warm ivory/evergreen login-specific palettes, floating cards, heavy shadows, decorative blobs, bokeh, stock illustration, and old Angular/ng-zorro styling.
+- Avoid warm ivory/evergreen login-specific palettes, floating cards, heavy shadows, decorative blobs, bokeh, or stock illustration.
 
 ## Implementation Notes
 

@@ -1,8 +1,6 @@
 # IAM Group Detail Page Design
 
-> Historical context: references to Angular describe the retired frontend behavior. Its source is available in Git history, not in the working tree. Current implementation lives in `modules/front-end`.
-
-This document is the React design contract for the IAM Group detail page. The retired Angular implementation provides a historical functional reference for Group relationships and API behavior, but the React page must use the current IAM Team detail page as its structural and visual template.
+This document is the React design contract for the IAM Group detail page. The React page must use the current IAM Team detail page as its structural and visual template.
 
 Related list contract: [iam-group-page-design.md](iam-group-page-design.md).
 
@@ -132,7 +130,7 @@ Use a confirmation dialog that names the member or policy and states that only i
 
 The header action opens a destructive confirmation dialog naming the group and stating that deletion cannot be reverted. On success, return to the Group list and show a translated toast.
 
-Do not use inline Angular popconfirms.
+Use shared confirmation Dialogs instead of inline popconfirms.
 
 ## States
 
@@ -151,7 +149,7 @@ Do not use inline Angular popconfirms.
 - Use current shared shadcn/Base UI components and do not modify generated component files.
 - Body and table text use the established compact `14px` scale; controls stay around `32px` high.
 - Use destructive red only for destructive actions, confirmation, and error state.
-- Do not recreate the Angular split settings panel or ng-zorro visual language.
+- Use the shared settings layout and shadcn/Base UI visual language.
 
 ## Internationalization And Accessibility
 

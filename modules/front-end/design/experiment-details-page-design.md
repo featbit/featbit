@@ -1,7 +1,5 @@
 # Experiment Details Page Design
 
-> Historical context: references to Angular describe the retired frontend behavior. Its source is available in Git history, not in the working tree. Current implementation lives in `modules/front-end`.
-
 ## Scope
 
 This document defines the approved React design for the **Experiment details** main page in `front-end`.
@@ -23,7 +21,7 @@ The approved visual scope currently includes:
 Explicitly excluded:
 
 - sidebar, context bar, Header, environment switcher, and authenticated-shell changes;
-- Experiments, Metrics, and Layers list redesigns, which have already been migrated separately;
+- Experiments, Metrics, and Layers list redesigns, which have separate design contracts;
 - Measuring-stage visual behavior for Frequentist or any future analysis method;
 - Audit log UI;
 - React, route, API, backend, test, configuration, package, or i18n implementation.
@@ -326,7 +324,7 @@ Use the established React release workbench language:
 - thin borders and restrained radii;
 - no ambient shadows, gradients, decorative cards, or large empty presentation areas;
 - semantic color only for warnings, errors, and meaningful status;
-- no Angular/ng-zorro visual cloning;
+- use the shared shadcn/Base UI visual language;
 - no blue body text or blue labels merely for emphasis.
 
 The page must remain readable at a glance. The Experiment identity and current stage come first, followed by the four-stage workflow and the current stage content.

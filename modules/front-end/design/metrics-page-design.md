@@ -1,7 +1,5 @@
 # Metrics Page Design
 
-> Historical context: references to Angular describe the retired frontend behavior. Its source is available in Git history, not in the working tree. Current implementation lives in `modules/front-end`.
-
 ## Scope
 
 This document defines the React design for the **Metrics** list page in `front-end`.
@@ -76,7 +74,7 @@ Each Metric has four distinct concerns:
 
 Do not collapse these concepts into one generic Status. Metric lifecycle belongs in the Metric column; Run lifecycle belongs beside each Run in Experiment runs.
 
-### Current rda-demo lifecycle behavior and migration decision
+### Lifecycle behavior and transition requirements
 
 The current rda-demo Catalog status control and the Archive action operate on the same Metric `status` field; they are not separate pieces of lifecycle data.
 
@@ -85,7 +83,7 @@ The current rda-demo Catalog status control and the Archive action operate on th
 - The existing update normalization accepts `archived` but does not transition an already archived Metric back to `active`. Therefore, changing Catalog status to Active is not a dependable restore path.
 - This also means the Catalog status selector duplicates the Archive action while bypassing the approved Key-confirmation interaction.
 
-The React migration must use one explicit lifecycle path per transition:
+The implementation must use one explicit lifecycle path per transition:
 
 - New and Edit do not expose Catalog status.
 - Archive is initiated only by the confirmed Archive action and preserves historical Experiment and Run references.
@@ -104,7 +102,7 @@ Use the established React workbench language:
 - dark foreground text for names, headings, and actions;
 - muted foreground text for descriptions, aggregation details, empty values, and pagination;
 - semantic color only for lifecycle dots and Primary/Guardrail roles;
-- no Angular/ng-zorro styling;
+- use shared shadcn/Tailwind styling;
 - no visual changes outside the main content.
 
 The page is a catalog and relationship workbench, not an analytics dashboard. Do not add KPI cards, charts, summary tiles, decorative illustrations, or a page-level total.

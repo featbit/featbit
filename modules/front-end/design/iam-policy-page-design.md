@@ -1,8 +1,6 @@
 # IAM Policy Page Design
 
-> Historical context: references to Angular describe the retired frontend behavior. Its source is available in Git history, not in the working tree. Current implementation lives in `modules/front-end`.
-
-This document is the React design contract for the IAM Policy list page, its `Add policy` sheet, and the Policy details page. The retired Angular implementation provides the historical functional reference for Policy data, API behavior, relationship semantics, and managed-policy restrictions, but the React implementation must follow the current IAM Team and Group pages and their shadcn/ui, Base UI, Tailwind, TanStack Table, and authenticated-shell conventions.
+This document is the React design contract for the IAM Policy list page, its `Add policy` sheet, and the Policy details page. The React implementation must follow the current IAM Team and Group pages and their shadcn/ui, Base UI, Tailwind, TanStack Table, and authenticated-shell conventions.
 
 The current Policy details scope includes the Team and Groups relationship tabs. Permissions intentionally remains a placeholder until the permission editor receives its own implementation contract.
 
@@ -133,7 +131,7 @@ Pagination must follow the current React Team and Group page pattern.
 
 Removing a customer-managed policy requires a destructive confirmation dialog that names the policy and states that the operation cannot be reverted. While the request is in flight, disable the confirm action and show its saving label. On success, remove the row, update the total count, and show a translated Sonner toast.
 
-The UI and confirmation handler must both prevent removal of a system-managed policy. Do not use the Angular popconfirm visual treatment.
+The UI and confirmation handler must both prevent removal of a system-managed policy. Use the shared confirmation Dialog visual treatment.
 
 ## Policy Details
 
@@ -207,7 +205,7 @@ The Policy Groups tab follows the Groups relationship tab on the current React T
 
 ### Relationship Removal Dialogs
 
-Removal confirmations use the same shadcn destructive dialog structure as the implemented Team and Group relationship flows, while preserving the Angular meaning exactly. The affected entity name is visually emphasized with semibold or bold inline text.
+Removal confirmations use the same shadcn destructive dialog structure as the implemented Team and Group relationship flows, while preserving the documented action semantics. The affected entity name is visually emphasized with semibold or bold inline text.
 
 - Member: `Are you sure to remove the member ` **{member name}** ` from the current policy?`
 - Group: `Are you sure to remove the policy from the group ` **{group name}** `?`
@@ -240,7 +238,7 @@ Do not replace the object name with a generic noun, put it on an unrelated line,
 - Use current shared shadcn components without modifying generated files.
 - Use Lucide icons at the established compact scale.
 - Keep light and dark themes structurally identical; do not hard-code light-theme colors in feature code.
-- Do not recreate Angular/ng-zorro styling or introduce FeatBit-green table/actions.
+- Use shared shadcn styling and neutral table/action colors.
 - Do not add gradients, glass effects, oversized radii, decorative cards, or marketing-page composition.
 
 ## API And Data Contract
@@ -313,5 +311,5 @@ Only route registration and IAM translation resources may live outside this feat
 - Permissions displays only the documented placeholder in this phase.
 - Team mirrors the Group-details member relationship pattern; Groups mirrors the Team-details group relationship pattern.
 - Relationship searches debounce and reset pagination, and add/remove mutations refresh both the table and counter.
-- Remove-member and remove-group dialogs use the documented Angular-equivalent copy and emphasize the affected member or group name.
+- Remove-member and remove-group dialogs use the documented copy and emphasize the affected member or group name.
 - Details are verified on `http://localhost:5173/:lang/iam/policies/:policyId/permission`, `/team`, and `/groups`.

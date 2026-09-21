@@ -1,7 +1,5 @@
 # Feature Flags Compare Page Design
 
-> Historical context: references to Angular describe the retired frontend behavior. Its source is available in Git history, not in the working tree. Current implementation lives in `modules/front-end`.
-
 ## 1. Scope
 
 This document defines the React redesign of the Feature Flags Compare workflow in `front-end`.
@@ -23,7 +21,7 @@ The following are out of scope:
 - changes to global environment switching;
 - implementation, routes, tests, dependencies, API contracts, or configuration.
 
-The Angular implementation is the functional source of truth. The approved React Feature Flags index and the implemented React Segments/Audit Logs tables are the visual references. Do not copy Angular/ng-zorro styling.
+The approved React Feature Flags index and the implemented React Segments/Audit Logs tables are the visual references. Use the shared shadcn/Base UI styling.
 
 ## 2. Visual Reference
 
@@ -172,7 +170,7 @@ The first column identifies the source-environment flag without repeating descri
 
 ### Difference categories
 
-The overview preserves the five Angular comparison categories:
+The overview preserves the five comparison categories:
 
 1. On/OFF state
 2. Individual targeting
@@ -277,11 +275,11 @@ Rules:
 - Use concise status text such as `Different` or `No difference` beside the setting name; semantic color supplements the checkbox state but never replaces text.
 - The complete row is not a checkbox target. Selection is controlled by its checkbox so users can still select text, expand content, and operate mode controls safely.
 
-#### Angular selection defect must not be migrated
+#### Selection consistency
 
-- The current Angular drawer can exhibit a defect where `Select All` changes `row.selected` but an otherwise eligible individual checkbox cannot be toggled.
+- Every eligible individual checkbox must be independently toggleable, including after `Select All` changes `row.selected`.
 - This is not intended product behavior and must not be treated as a functional requirement.
-- Angular also calculates Select All across all rows and filters bulk selection only by `hasDiff`; that can produce an incorrect checked state or select an incompatible Targeting Rules row.
+- Calculate Select All state and bulk selection from eligible rows. Checking only `hasDiff` is insufficient: incompatible Targeting Rules rows must remain excluded.
 - The React implementation must derive both individual and header selection from the eligible-row definition above and use one consistent state path for both interactions.
 
 ### Append and overwrite modes
@@ -291,7 +289,7 @@ For Individual targeting and Targeting rules, selecting the row reveals:
 - `Overwrite existing users/rules`;
 - `Append to existing users/rules`.
 
-Default mode remains `overwrite`, matching Angular. Mode selection is local to the row.
+Default mode remains `overwrite`. Mode selection is local to the row.
 
 ### Applied-value preview
 
@@ -303,7 +301,7 @@ When a differing row is selected, show a compact `After copy` preview in the tar
 
 #### Targeting Rules after-copy preview
 
-- Match Angular behavior by rendering the computed post-copy flag through the same Targeting Rules renderer used for the current Source and Target values.
+- Match documented behavior by rendering the computed post-copy flag through the same Targeting Rules renderer used for the current Source and Target values.
 - A count such as `2 rules` may appear as a summary, but it must never replace the concrete rule preview.
 - For every resulting rule, preserve and expose:
   - rule order;
@@ -317,7 +315,7 @@ When a differing row is selected, show a compact `After copy` preview in the tar
   - label the preview `After copy · Existing target rules will be replaced`.
 - `Append rules` preview:
   - show current Target rules first;
-  - append only Source rules identified by the Angular diff result as different;
+  - append only Source rules identified by the diff result as different;
   - label the preview `After copy · Existing target rules will be kept`.
 - Switching between overwrite and append recomputes the entire preview immediately, including rule order and count.
 - When the result contains many or complex rules, individual rules may be collapsed by default, but each rule must remain expandable. Do not reduce the preview to count-only text.
@@ -412,19 +410,19 @@ State-specific behavior:
   - runtime copy must name the applicable reason (`permission` or `license`) rather than showing an ambiguous combined explanation;
   - offer `Learn more` only when a relevant plan/license destination exists.
 
-#### Mapping from Angular Restrictions
+#### Copy restrictions
 
-- Angular's permanent `Restrictions` alert is represented by contextual precheck outcomes in this Dialog, not by a second standalone information banner.
+- Represent copy restrictions as contextual precheck outcomes in this Dialog. Do not add a second standalone information banner.
 - `Individual Targeting: Cannot be copied as they are environment specific.` maps to the warning `Individual targeting won’t be copied` with supporting text `Users are environment-specific.`
 - `Targeting Rules: Cannot be copied if any of them has references to environment-specific segments or uses shared segments incompatible with the target environment.` appears only when the existing `targetRuleCheck` fails. Use `Targeting rules won’t be copied` and retain the compatibility explanation.
 - If both checks pass or are irrelevant, do not show their restriction copy. The user sees only the checks that affect this flag and target.
-- These presentation changes do not alter Angular's underlying copy eligibility or `Copy Anyway` semantics.
+- These presentation changes do not alter the underlying copy eligibility or `Copy Anyway` semantics.
 
 ### Warning acknowledgement
 
 - When one or more copyable settings will be omitted, show a neutral/amber warning surface directly above the footer.
 - Require an unchecked acknowledgement with the label `Copy anyway` and supporting text `The settings listed above will be omitted.`
-- Keep the primary `Copy flag` action disabled until `Copy anyway` is checked. This preserves Angular's existing selection semantics while keeping the final mutation label explicit.
+- Keep the primary `Copy flag` action disabled until `Copy anyway` is checked. This preserves the selection semantics while keeping the final mutation label explicit.
 - The design image shows the checked state so the enabled `Copy flag` action is visible; the default state remains unchecked.
 - Do not require acknowledgement for a fully safe result.
 
@@ -542,7 +540,7 @@ This design task does not authorize implementation or any non-design-file change
 - [ ] Search, Tags, pagination, and organization flag sorting behavior are preserved.
 - [ ] Matrix supports all applied target environments through horizontal scrolling.
 - [ ] Table uses one outer border and horizontal separators without vertical grid lines.
-- [ ] All five Angular difference categories are preserved.
+- [ ] All five difference categories are preserved.
 - [ ] Difference, no-difference, and missing-flag states are explicit.
 - [ ] Missing flags reuse the existing Copy to environment precheck workflow.
 - [ ] The Feature flag column shows name, key, and tags without description text.
@@ -555,7 +553,7 @@ This design task does not authorize implementation or any non-design-file change
 - [ ] Detailed sheet preserves Select All, per-setting selection, append/overwrite modes, applied previews, and compatibility warnings.
 - [ ] Every eligible differing setting can be selected independently; individual selection and Select All update the same state and never diverge.
 - [ ] Select All checked/indeterminate state is calculated only from eligible rows and never selects no-difference or incompatible rows.
-- [ ] The observed Angular individual-checkbox/Select All defect is explicitly not migrated.
+- [ ] Individual checkboxes and Select All use consistent eligibility rules and remain independently operable.
 - [ ] Targeting Rules After copy uses the complete rule renderer; overwrite shows the full replacement set and append shows retained Target rules plus differing Source rules.
 - [ ] Rule count is never the only Targeting Rules preview, and changing copy mode recomputes the concrete preview immediately.
 - [ ] Copy settings refreshes the overview after success and preserves selections after failure.

@@ -1,8 +1,6 @@
 # Webhooks Page, View/Edit, Live Debug, and View Logs Design
 
-> Historical context: references to Angular describe the retired frontend behavior. Its source is available in Git history, not in the working tree. Current implementation lives in `modules/front-end`.
-
-This document is the React design contract for the Webhooks main page, Webhook View/Edit Sheet, Live Debug Dialog, and View Logs Sheet. The retired Angular implementation provides the historical functional reference for data, filters, pagination, form behavior, test-payload generation, request behavior, persisted delivery logs, and action flows, but the React experience must use the authenticated React visual language defined in [react-layout-design.md](react-layout-design.md), shadcn/ui, Base UI primitives, Tailwind tokens, and lucide-react.
+This document is the React design contract for the Webhooks main page, Webhook View/Edit Sheet, Live Debug Dialog, and View Logs Sheet. The React experience must use the authenticated React visual language defined in [react-layout-design.md](react-layout-design.md), shadcn/ui, Base UI primitives, Tailwind tokens, and lucide-react.
 
 ## Design Asset
 
@@ -22,7 +20,7 @@ This design covers the Webhooks main content page, its Webhook View/Edit Sheet, 
 - Keep the current sidebar and context bar unchanged and outside the design surface.
 - Do not add page tabs, summary cards, charts, onboarding illustrations, delivery metrics, or a second navigation layer.
 - The View/Edit Sheet is visually specified here. The New Webhook workflow reuses the Edit structure with create-mode defaults; the removal confirmation remains behaviorally specified without a separate visual asset.
-- Do not modify Angular behavior, API contracts, backend validation, permissions, license behavior, or routing as part of this design task.
+- Do not modify documented behavior, API contracts, backend validation, permissions, license behavior, or routing as part of this design task.
 
 ## Accepted Design Decisions
 
@@ -64,12 +62,12 @@ Use the React product's restrained, neutral workbench style.
 - Use the normal `background` page surface and `foreground` text.
 - Use `muted-foreground` for the subtitle, creator, relative delivery time, inactive state, and secondary metadata.
 - Use one-pixel `border` dividers and no ambient card shadow.
-- Use the standard dark-neutral primary button; do not carry Angular's green action styling into React.
+- Use the standard dark-neutral primary button.
 - Reserve green and red for delivery semantics, not decoration. Inactive and never-triggered states remain neutral.
 - Use Inter Variable and the existing compact type scale: 24px page title, 14px body and labels, and 12px secondary metadata.
 - Keep light and dark themes structurally identical and use semantic tokens rather than hard-coded light-theme colors.
 
-The page should feel continuous with the current React Access Tokens and Relay Proxies list surfaces: direct page header, compact toolbar, one bordered data surface, and concise pagination. Angular/ng-zorro is a functional reference, not a visual template.
+The page should feel continuous with the current React Access Tokens and Relay Proxies list surfaces: direct page header, compact toolbar, one bordered data surface, and concise pagination.
 
 ## Main Page Layout
 
@@ -107,7 +105,7 @@ The toolbar uses one row on desktop, with filters on the left and the primary ac
 - Place `New webhook` on the far right with a leading Plus icon.
 - Use the default primary Button at the established compact height.
 - Activating it opens the Add Webhook workflow; it does not navigate away from the list.
-- Do not add an inline enable switch, bulk action, export, refresh, or advanced-filter button. Angular and the current API do not expose those main-page operations.
+- Do not add an inline enable switch, bulk action, export, refresh, or advanced-filter button. The current API does not expose those main-page operations.
 
 ## Table
 
@@ -131,7 +129,7 @@ Do not split `Active` and last delivery into separate table columns. Their relat
 - Active state uses a small green dot plus `Active`; inactive uses a neutral dot plus `Inactive`.
 - A successful last delivery uses a green CheckCircle icon and the HTTP response code when present.
 - A failed last delivery uses a red CircleAlert or XCircle icon and the invalid response code when present; use `ERROR` if no response code exists.
-- Time uses localized compact relative text in the row, such as `8 min ago`. The tooltip includes the localized absolute date/time and the complete Angular-equivalent success or failure explanation.
+- Time uses localized compact relative text in the row, such as `8 min ago`. The tooltip includes the localized absolute date/time and the complete documented success or failure explanation.
 - `Never triggered` uses neutral styling. Do not present it as an error.
 - The Status cell is clickable even when the hook is inactive or has never triggered, because the deliveries surface may still contain earlier records.
 
@@ -212,7 +210,7 @@ Use one right-side Sheet for reading and editing a webhook. View and Edit are mo
 ### General fields
 
 - Use required Name and Endpoint inputs plus an Active Switch. Keep Name and Endpoint on one responsive two-column row when space permits; stack them below the narrow breakpoint.
-- Name keeps Angular's required, debounced asynchronous case-insensitive duplicate validation, validating feedback, and unknown-validation failure. When editing, the current saved name remains valid.
+- Name keeps the required, debounced asynchronous case-insensitive duplicate validation, validating feedback, and unknown-validation failure. When editing, the current saved name remains valid.
 - Endpoint is required and uses the existing absolute HTTP/HTTPS URL validation. Invalid copy: `Enter a valid absolute HTTP or HTTPS URL.`
 - Active defaults from the saved webhook and remains configuration state; changing it does not imply a delivery result.
 
@@ -232,7 +230,7 @@ Use one right-side Sheet for reading and editing a webhook. View and Edit are mo
 ### Events editor
 
 - Render Feature flag and Segment as two compact bordered groups, stacked on narrow widths.
-- Each group has a group checkbox with checked, unchecked, and indeterminate states, followed by every canonical Angular event for that group.
+- Each group has a group checkbox with checked, unchecked, and indeterminate states, followed by every canonical event for that group.
 - Readable event labels are translated; canonical values remain the submitted identity and must be available to assistive technology or secondary text.
 - Require at least one selected event across both groups. Put the error under the Events section, not in a toast.
 - Do not invent event types. The image is illustrative; `WebhookEvents` in the functional reference remains the authoritative event inventory.
@@ -240,10 +238,10 @@ Use one right-side Sheet for reading and editing a webhook. View and Edit are mo
 ### Request editor
 
 - Custom headers use editable Name/Value rows with an icon-only Remove action and `Add header` below the rows.
-- Preserve Angular behavior: rows without a header name are omitted from the submitted payload. Retain entered values while editing and do not silently trim or redact the saved payload.
+- Preserve documented behavior: rows without a header name are omitted from the submitted payload. Retain entered values while editing and do not silently trim or redact the saved payload.
 - Header values use password-style masking by default with reveal/hide. Browser password managers and autocomplete should not treat arbitrary header rows as account credentials.
 - Payload template type uses a compact `Default` / `Custom` RadioGroup or segmented single-choice control.
-- Use CodeMirror 6 for the payload-template editor; do not migrate Angular Monaco or add Monaco to React.
+- Use CodeMirror 6 for the payload-template editor; do not add Monaco.
 - Default shows the canonical default Handlebars JSON template in a read-only CodeMirror instance. Custom enables editing, undo/redo, selection, search, formatting, and JSON Handlebars validation.
 - The embedded editor has a default height of approximately `240px`. Do not add a drag-to-resize handle.
 - Put one icon action labeled `Expand editor` at the editor's upper-right. Do not provide a second `Enter full screen` action; both names would represent the same capability.
@@ -263,7 +261,7 @@ Use one right-side Sheet for reading and editing a webhook. View and Edit are mo
 - CodeMirror supplies the editing surface and extension system. The existing JSON Handlebars validator remains authoritative because ordinary JSON parsing alone does not understand every Handlebars construct.
 - Map validator results to CodeMirror diagnostics and a keyboard-accessible diagnostics panel. Keep raw invalid text intact and identify the failing range/message without rewriting the user's template.
 - Formatting must call the JSON Handlebars-safe formatter used by this feature. Do not run a plain JSON formatter over a template when it would alter or reject valid Handlebars expressions.
-- If Handlebars variable suggestions are retained from Angular, implement them through an explicit CodeMirror completion source; do not imply that `@codemirror/lang-json` provides domain-specific webhook completions automatically.
+- If Handlebars variable suggestions are supported, implement them through an explicit CodeMirror completion source; do not imply that `@codemirror/lang-json` provides domain-specific webhook completions automatically.
 
 ### Security editor
 
@@ -316,11 +314,11 @@ For an unsaved new webhook, use the existing temporary webhook ID behavior. The 
 ### Event selection
 
 - Use one required, searchable Select labeled `Event`.
-- Default to the existing Angular default, `feature_flag.toggled`.
+- Default to `feature_flag.toggled`.
 - Group options under `Feature flag` and `Segment` using `SelectContent > SelectGroup > SelectItem`.
 - Each option uses a readable translated label as the primary line and its canonical event value as secondary monospace text.
 - Search matches both the translated label and canonical value.
-- Preserve every canonical Feature Flag and Segment event currently defined by Angular; the displayed label must never alter the submitted value.
+- Preserve every supported canonical Feature Flag and Segment event; the displayed label must never alter the submitted value.
 - Keep the selected event visible after sending so the user can understand and repeat the exact request.
 
 ### Before sending
@@ -353,7 +351,7 @@ After a successful HTTP response, keep the configuration area and add the result
 - `Request` contains `Headers` and `Payload` sections.
 - Request headers include the URL/method and effective request headers returned by the delivery model. Format the payload as JSON when possible and preserve raw text otherwise.
 - `Response` contains `Headers` and `Body`. Format the body as JSON when possible and preserve empty or non-JSON bodies honestly.
-- Use Shiki or the shared lightweight `CodeBlock`; do not migrate Angular's Prism component.
+- Use Shiki or the shared lightweight `CodeBlock`; do not use Prism.
 - Code panels use a compact neutral dark surface, readable syntax colors, monospace text, internal scrolling, selectable text, and a Copy action where the shared CodeBlock provides one. Do not imitate a full IDE or add fake window controls.
 - Footer actions become outline `Close` and primary `Send again`. Sending again creates a new delivery ID, uses the currently selected event, and replaces the prior result after the request completes.
 
@@ -435,7 +433,7 @@ Place the filters on one compact row directly below the header.
 - Changing status resets the page index to `1` and reloads.
 - Status is a single-choice filter; do not represent it with three independent checkboxes.
 
-Keep the current filter controls visible during loading and failure. Do not add date range, endpoint, response-code, free-text, sorting, or refresh controls because the existing API and Angular flow do not expose them.
+Keep the current filter controls visible during loading and failure. Do not add date range, endpoint, response-code, free-text, sorting, or refresh controls because the existing API does not expose them.
 
 ### Delivery table
 
@@ -451,7 +449,7 @@ Use a single flat bordered table below the filters.
 - Preserve server ordering, newest `startedAt` first.
 - Make the expansion button or summary row the detail affordance; do not make status badges look like buttons.
 - Expand at most one delivery at a time.
-- After each successful page/filter load, expand the first returned row by default, matching Angular behavior.
+- After each successful page/filter load, expand the first returned row by default.
 - Clicking the expanded row collapses it. Clicking another row closes the prior detail and opens the selected one.
 - Use response status code `200` when a successful legacy result has no response object, matching the current fallback. Use `ERROR` when a failed result has no response status.
 
@@ -479,7 +477,7 @@ Render the detail immediately below its summary row inside the same table width.
 - Empty headers or body use quiet inline text such as `No response headers` or `Empty response body`; do not render a blank dark panel.
 - For Anti-SSRF or transport failures without an HTTP response, keep the Response tab available with `ERROR` and show the recorded error message.
 
-Use Shiki or the shared lightweight `CodeBlock` for request/response content; do not migrate Angular's Prism implementation. Code panels use a compact neutral dark surface, selectable monospace text, horizontal/internal scrolling, readable contrast, and no fake editor controls.
+Use Shiki or the shared lightweight `CodeBlock` for request/response content; do not use Prism. Code panels use a compact neutral dark surface, selectable monospace text, horizontal/internal scrolling, readable contrast, and no fake editor controls.
 
 ### Pagination
 
@@ -535,7 +533,7 @@ Use Shiki or the shared lightweight `CodeBlock` for request/response content; do
 ### New webhook
 
 - `New webhook` opens the same Sheet structure as Edit mode with title `New webhook` and primary action `Create webhook`.
-- Defaults match Angular: Active on, Prevent Empty Payloads off, payload-template type Default, canonical default template loaded, and no scope, event, header, or secret values preselected beyond any existing Angular initialization behavior.
+- Defaults: Active on, Prevent Empty Payloads off, payload-template type Default, canonical default template loaded, and no scope, event, header, or secret values preselected beyond the documented initialization defaults.
 - The same validation, scope/event editors, custom-template draft preservation, unsaved Live Debug behavior, dirty-close confirmation, error handling, and accessibility rules apply.
 - On success, close the Sheet, show translated success feedback, refresh the list, and return to page one when required to make the newly created newest-first webhook visible.
 
@@ -608,7 +606,7 @@ This is a professional desktop workbench, not a mobile-first surface.
 - All headings, labels, placeholders, statuses, messages, menu items, tooltips, pagination copy, relative times, and toast feedback must use `react-i18next`.
 - Event labels may be translated, but API request values remain canonical strings such as `feature_flag.toggled`.
 - Let table columns truncate dynamic strings rather than forcing translated controls to fixed English widths.
-- Format absolute dates and times with the active locale; do not preserve Angular's hard-coded `en-US` formatting.
+- Format absolute dates and times with the active locale; do not preserve hard-coded `en-US` formatting.
 
 ## Functional Invariants
 
@@ -623,7 +621,7 @@ The React Webhooks experience is incomplete unless all of these remain true:
 7. New, View-by-name, visible Edit, Live debug, View logs, and Remove entry points remain available.
 8. Status and delivery-result affordances remain distinct: active state is configuration; last delivery is operational history.
 9. No environment filter, inline status toggle, bulk mutation, sorting, or other unsupported filter is added.
-10. Create/edit, unsaved live debug, saved live debug, delivery history, delivery detail, and removal preserve the Angular behavior listed in this document.
+10. Create/edit, unsaved live debug, saved live debug, delivery history, delivery detail, and removal preserve the documented behavior listed in this document.
 11. The sidebar and context bar remain untouched.
 12. Saved-row and valid unsaved-form Live Debug entries reuse the same Dialog without saving or submitting a parent form.
 13. Live Debug sends a real request generated from the selected canonical event and current webhook configuration.
@@ -638,7 +636,7 @@ The React Webhooks experience is incomplete unless all of these remain true:
 22. Closing View Logs resets Sheet-local state, preserves the main-page state, restores focus, and performs no webhook mutation.
 23. View and Edit use one right-side Sheet with identical General, Scopes, Events, Request, and Security section order.
 24. View mode masks secrets and arbitrary custom-header values by default while retaining accessible reveal and copy behavior.
-25. Edit preserves every Angular field, canonical event, validation rule, custom-template draft, scope serialization rule, and create/update payload field.
+25. Edit preserves every field, canonical event, validation rule, custom-template draft, scope serialization rule, and create/update payload field.
 26. Unsaved Live Debug uses the current valid Edit/New draft and never saves, closes, or submits the parent Sheet.
 27. Dirty Edit/New drafts require explicit discard confirmation before closing.
 28. Payload templates use CodeMirror 6 in embedded and expanded modes; Monaco is not part of the React implementation.
@@ -646,7 +644,7 @@ The React Webhooks experience is incomplete unless all of these remain true:
 
 ## Final Design Rejections
 
-- no Angular/ng-zorro visual cloning;
+- use the shared shadcn/Base UI visual language;
 - no sidebar or context-bar redesign;
 - no status metric cards or delivery chart above the list;
 - no card-per-webhook layout;
@@ -668,7 +666,7 @@ The React Webhooks experience is incomplete unless all of these remain true:
 - no Monaco editor in the React Webhook workflow;
 - no separate `Expand editor` and `Enter full screen` actions, and no drag-resize handle;
 - no expanded-template Save/Apply action that competes with the parent Sheet's `Save changes`;
-- no inline enable switch unsupported by the Angular main page;
+- no inline enable switch on the main page;
 - no mobile redesign that removes operational columns;
 - no Live Debug Sheet or separate debug route;
 - no large success card that displaces request and response diagnostics;

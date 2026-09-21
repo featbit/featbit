@@ -1,7 +1,5 @@
 # FeatBit React Layout Design
 
-> Historical context: references to Angular describe the retired frontend behavior. Its source is available in Git history, not in the working tree. Current implementation lives in `modules/front-end`.
-
 This document is the implementation design contract for the authenticated React layout. The current saved design governs the header/context bar, sidebar, sidebar collapse behavior, account menu, subscription/license badge, density, typography scale, and light/dark layout language. The Feature Flags content shown in the images is only a placeholder/example and still needs a separate product-page design pass before it becomes an implementation target. Pixel-perfect reproduction is not required, but meaningful layout deviations should update this document and the saved design assets first.
 
 ## Design Assets
@@ -14,7 +12,7 @@ This document is the implementation design contract for the authenticated React 
 
 - Build a modern FeatBit layout with shadcn/ui, Base UI primitives, Tailwind CSS, and lucide-react.
 - Use shadcn/ui components as the default implementation source for standard controls and surfaces. Only create custom UI when shadcn does not provide the needed component or when FeatBit-specific behavior cannot be represented by composing shadcn components.
-- Do not copy Angular/ng-zorro styling or the old Angular color palette.
+- Use shared shadcn/Tailwind styling and semantic color tokens.
 - Prefer shadcn default neutral tokens, semantic colors, subtle borders, restrained shadows, compact density, and 6-8px radius controls.
 - Support light and dark mode as first-class themes using shadcn native dark-mode patterns.
 - Use the current FeatBit logo style: mark + wordmark when the sidebar is expanded, mark only when collapsed.
@@ -87,7 +85,7 @@ Navigation groups:
 
 ## Subscription And License Badge
 
-The top-right badge follows the Angular implementation's information model, but uses shadcn styling.
+The top-right badge uses shadcn styling and displays the following subscription/license states.
 
 States:
 

@@ -1,7 +1,5 @@
 # Layers Page Design
 
-> Historical context: references to Angular describe the retired frontend behavior. Its source is available in Git history, not in the working tree. Current implementation lives in `modules/front-end`.
-
 ## Scope
 
 This document defines the React design for the **Layers** workflow in `front-end`.
@@ -72,7 +70,7 @@ Use the established React workbench language:
 - dark foreground text for names and actions;
 - muted foreground text for descriptions, keys, summaries, empty values, and pagination;
 - semantic color only for state and allocation visualization;
-- no Angular/ng-zorro styling;
+- use shared shadcn/Tailwind styling;
 - no visual changes outside the main content.
 
 Blue and purple are data-visualization colors in this page. They are reserved for Traffic allocation segments and their matching run markers. Ordinary links, descriptions, summaries, and actions must not be blue at rest.

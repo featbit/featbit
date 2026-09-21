@@ -1,8 +1,6 @@
 # Workspace Page Design
 
-> Historical context: references to Angular describe the retired frontend behavior. Its source is available in Git history, not in the working tree. Current implementation lives in `modules/front-end`.
-
-This document defines the React design target for the Workspace admin area. The retired Angular implementation provides the historical functional reference, but React should use the new authenticated layout, shadcn/ui primitives, Tailwind tokens, lucide-react icons, TanStack Query/Table, React Hook Form + Zod, and Recharts. Do not copy the Angular/ng-zorro layout or visual styling.
+This document defines the React design target for the Workspace admin area. React should use the new authenticated layout, shadcn/ui primitives, Tailwind tokens, lucide-react icons, TanStack Query/Table, React Hook Form + Zod, and Recharts. Use shared layout and component tokens.
 
 ## Scope And Boundaries
 
@@ -27,9 +25,9 @@ This design document covers only the Workspace page content area inside the auth
 - Billing tab light theme concept: [workspace-billing-light.png](workspace-billing-light.png)
 - Billing tab detailed design: [workspace-billing-page-design.md](workspace-billing-page-design.md)
 
-## Angular Functional Reference
+## Functional Requirements
 
-Angular exposes Workspace as an Admin navigation entry with these tab-level areas:
+The UI exposes Workspace as an Admin navigation entry with these tab-level areas:
 
 - Workspace: edit workspace name and key; edit OIDC SSO settings when the license grants SSO and the user has permission.
 - License: copy Workspace Id, update a self-hosted license, and show license details or a no-license notice.
@@ -37,7 +35,7 @@ Angular exposes Workspace as an Admin navigation entry with these tab-level area
 - Billing: SaaS-only subscription and invoice area, including checkout return state when `payment_status` is present.
 - Global Users: license-gated global end-user table with search, display columns, import, evaluate, and detail actions.
 
-Permission and license behavior from Angular should be preserved:
+Permission and license behavior must be preserved:
 
 - License tab remains visible, but update actions are disabled or explained when `UpdateWorkspaceLicense` is not granted.
 - SSO settings render only when the license grants SSO and the user can update workspace SSO settings.
@@ -77,7 +75,7 @@ Use shadcn-style tabs with a bottom border. Keep tab density compact and avoid w
 
 ## General Tab
 
-The General tab replaces Angular's simple vertical form with a more structured settings page:
+The General tab uses a structured settings page:
 
 - Section: `Workspace identity`
   - Fields: `Name`, `Key`
@@ -160,7 +158,7 @@ SaaS license view:
 
 License detail:
 
-- Replace the Angular license card with a shadcn-styled details panel using neutral status badges.
+- Use a shadcn-styled license details panel using neutral status badges.
 - If no license is available, show an info alert with a link to the FeatBit dashboard.
 - On wide screens, keep the lower license details area composed and avoid stretching feature rows across the full viewport. Use a constrained detail area or balanced internal grid as shown in the design asset.
 - Keep the lower license details area left-aligned with the rest of the License tab content. Do not center or indent the `License status` and `Licensed features` sections relative to `Workspace ID` and `License key`.
@@ -178,7 +176,7 @@ The Usage tab should feel like an operational analytics page, not a decorative d
 Toolbar:
 
 - Do not repeat an inner `Usage` title or descriptive subtitle inside the tab body.
-- Right: period selector with options matching Angular behavior, such as current month, last 7 days, and last 30 days.
+- Right: period selector with options matching documented behavior, such as current month, last 7 days, and last 30 days.
 - Inline with the selector: selected date range as muted text.
 
 Summary metrics:

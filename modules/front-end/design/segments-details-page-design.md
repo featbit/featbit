@@ -1,7 +1,5 @@
 # Segments Details Page Design
 
-> Historical context: references to Angular describe the retired frontend behavior. Its source is available in Git history, not in the working tree. Current implementation lives in `modules/front-end`.
-
 ## Scope
 
 This document defines the React redesign of the Segment details workflow in `front-end`.
@@ -24,7 +22,7 @@ Excluded:
 - changes to the organization/project/environment context bar;
 - mobile-first layout work.
 
-The Angular page is the functional reference only. The React page must use the compact, neutral shadcn/Base UI and Tailwind patterns established in `front-end`; it must not reproduce the Angular/ng-zorro visual structure.
+The React page must use the compact, neutral shadcn/Base UI and Tailwind patterns established in `front-end`.
 
 ## Design Asset
 
@@ -76,7 +74,7 @@ Content order:
 3. `Targeting`, `Settings`, and `History` tabs.
 4. Active-tab content.
 
-The Angular implementation renders editable settings above its tabs. React separates those responsibilities: identity and frequently needed metadata remain visible in the summary header, while editable descriptive fields move into the `Settings` tab. This reduces repeated vertical weight on the main targeting workflow without removing functionality.
+Separate identity and settings responsibilities: identity and frequently needed metadata remain visible in the summary header, while editable descriptive fields move into the `Settings` tab. This reduces repeated vertical weight on the main targeting workflow without removing functionality.
 
 Routes should preserve the existing localized route prefix and use explicit detail-tab paths:
 
@@ -179,7 +177,7 @@ Keep each panel at a stable bounded height when many users are selected:
 
 The combobox query searches both selected and available users. Matching selected users appear first with a visible `Selected` state and remain removable; available results follow and remain addable. This lets users locate an existing member without adding a second filter control.
 
-Results must support the Angular search behavior and user creation capability. A user already selected in either collection must not be duplicated in the same collection. If the same user moves between included and excluded, resolve the conflict explicitly rather than allowing contradictory targeting.
+Results must support user search and creation. A user already selected in either collection must not be duplicated in the same collection. If the same user moves between included and excluded, resolve the conflict explicitly rather than allowing contradictory targeting.
 
 For Shareable Segments:
 
@@ -208,9 +206,9 @@ Each rule is one flat bordered block with:
 - ordered condition rows;
 - `Add condition` as a lightweight action.
 
-`Add rule` appends the new rule to the end of the ordered rule list, preserving the Angular behavior and the position of existing rules. After insertion, scroll the new rule into view and move focus to its name field so the result of the action is immediately visible. Do not prepend a new rule or shift the existing rules downward.
+`Add rule` appends the new rule to the end of the ordered rule list, preserving the documented behavior and the position of existing rules. After insertion, scroll the new rule into view and move focus to its name field so the result of the action is immediately visible. Do not prepend a new rule or shift the existing rules downward.
 
-Each condition retains the Angular model and supported behavior:
+Each condition retains the condition model and supported behavior:
 
 - user property selection, including adding a property when supported;
 - operator selection appropriate to the property/value type;
@@ -234,7 +232,7 @@ This copy clarifies precedence without adding another configuration control.
 
 ## Review And Save Dialog
 
-`Review & save` opens a centered shadcn Dialog, approximately 700-740px wide, that preserves the Angular targeting change-review workflow while replacing its generic diff presentation with a readable domain summary.
+`Review & save` opens a centered shadcn Dialog, approximately 700-740px wide, that preserves the targeting change-review workflow while replacing its generic diff presentation with a readable domain summary.
 
 Header:
 
@@ -359,7 +357,7 @@ The persistent Segment summary header remains the authoritative read-only surfac
 - the Shareable scope count and scope Popover;
 - the last successfully saved tags.
 
-Do not repeat Key, Type, or Scopes as disabled fields in the Settings body. Their Angular functionality remains available in the persistent header while the Settings form stays focused on editable values. The header continues to show last-saved values while a draft is dirty and updates only after the relevant save operation succeeds.
+Do not repeat Key, Type, or Scopes as disabled fields in the Settings body. Their functionality remains available in the persistent header while the Settings form stays focused on editable values. The header continues to show last-saved values while a draft is dirty and updates only after the relevant save operation succeeds.
 
 ### Command row
 
@@ -373,7 +371,7 @@ Use the same compact command row immediately below the tabs:
 
 ### General
 
-Use normal labeled form controls instead of Angular's inline pencil, cancel, and save icons.
+Use labeled form controls with explicit edit, save, and cancel actions.
 
 Fields:
 
@@ -483,7 +481,7 @@ History is a read-only audit table built as a reusable audit-history component. 
 ### History query contract
 
 - Always filter by Segment reference type and the current Segment ID.
-- For a Shareable Segment, set `crossEnvironment=true` exactly as Angular does so records from every shared scope are included.
+- For a Shareable Segment, set `crossEnvironment=true` so records from every shared scope are included.
 - For a Current-environment Segment, keep history environment-scoped and do not show a cross-scope indicator.
 - Load the newest records first, using the existing audit-log page size of 10 unless the shared API contract changes.
 - Preserve the API total count and append later pages through `Load more`; do not replace the loaded records when loading the next page.
@@ -788,7 +786,7 @@ Do not show errors before a field is interacted with or the user requests review
 
 ## Functional Invariants
 
-The React migration must preserve:
+The implementation must support:
 
 - loading the Segment and its Feature Flag references by ID;
 - copying the complete Segment key;
@@ -814,9 +812,9 @@ The React migration must preserve:
 
 - Only the Segment details main content and its supporting Dialogs/popovers are designed; sidebar and context bar remain unchanged.
 - `Targeting`, `Settings`, and `History` are distinct route-backed tabs, with `Targeting` as default.
-- The compact header exposes Segment identity, type, key, scopes, tags, and Feature Flag references without duplicating the old Angular settings block.
+- The compact header exposes Segment identity, type, key, scopes, tags, and Feature Flag references without duplicating identity fields in Settings.
 - Included and Excluded users are side by side at normal desktop widths and remain independently operable.
-- Rules are full-width, compact, reorderable, and expose every Angular condition operation.
+- Rules are full-width, compact, reorderable, and expose every supported condition operation.
 - Targeting Review produces a complete, deterministic, non-mutating semantic diff for every supported user, rule, condition, operator, value, and combined-change edge case listed in the Targeting diff completeness requirement; automated tests cover the full matrix rather than only the design-image examples.
 - Targeting Review uses one borderless semantic muted Changes surface with a compact three-column ledger, inline user disclosures, neutral `Rule` object Badges, vertical condition diffs, an inline Changes count, and one bounded 360px scrollbar without dropping any atomic change. It has no intermediate Targeting-users or Rules group headings and no Raw data action.
 - Unsaved changes are explicit and saving always passes through review/change-comment behavior.
@@ -836,5 +834,5 @@ The React migration must preserve:
 - Included and Excluded History changes show at most two preview names by default, expand independently to bounded 240px two-column user lists with vertical scrolling, and keep `Show less` outside the scroll region.
 - Rules History changes remain visible when small; large groups show two changes by default and expand independently inside a bounded 320px vertically scrollable region without dropping condition-level details.
 - Permission or license denial disables mutation without hiding persisted data.
-- The design uses current React/shadcn hierarchy, has no ambient card shadows, and does not copy Angular/ng-zorro styling.
-- No React or Angular implementation file is changed as part of this design-only task.
+- The design uses current React/shadcn hierarchy, has no ambient card shadows.
+- No implementation file is changed as part of this design-only task.

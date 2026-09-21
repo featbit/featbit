@@ -1,8 +1,6 @@
 # Workspace Global Users Tab Design
 
-> Historical context: references to Angular describe the retired frontend behavior. Its source is available in Git history, not in the working tree. Current implementation lives in `modules/front-end`.
-
-This document defines the React design target for the Workspace `Global Users` tab content only. The retired Angular implementation provides the historical functional reference, but React should use the existing authenticated layout, existing Workspace page frame, shadcn/ui primitives, Tailwind tokens, lucide-react icons, TanStack Query, TanStack Table, and `react-i18next`.
+This document defines the React design target for the Workspace `Global Users` tab content only. React should use the existing authenticated layout, existing Workspace page frame, shadcn/ui primitives, Tailwind tokens, lucide-react icons, TanStack Query, TanStack Table, and `react-i18next`.
 
 Do not change the authenticated layout, sidebar, top context bar, account menu, subscription/license badge, Workspace page header, or Workspace tabs when implementing this design. The design target starts inside the active `Global Users` tab panel.
 
@@ -27,9 +25,9 @@ This design covers only the content rendered inside the Workspace `Global Users`
 - Keep the tab body table-first and operational.
 - Preserve the license-gated nature of Global Users.
 
-## Angular Functional Reference
+## Functional Requirements
 
-Angular previously provided these behaviors:
+Required behaviors:
 
 - Fetches `GET /api/v1/global-users` with `name`, zero-based `pageIndex`, and `pageSize`.
 - Debounces search by 200 ms.
@@ -105,7 +103,7 @@ Cell behavior:
 Column behavior:
 
 - Custom property columns are shown only when selected in `Display`.
-- Discover custom property options from loaded rows, matching Angular behavior.
+- Discover custom property options from loaded rows.
 - Keep discovered options in memory across pages during the current tab session so the dropdown does not shrink while paginating.
 
 Pagination:
@@ -207,14 +205,14 @@ Feature Flags tab:
 - `Key` includes copy action.
 - `Variation` uses a subtle colored marker and compact value badge.
 - JSON and string variation values can be expanded into a read-only code modal.
-- `Details` opens the flag targeting page in a new browser tab, matching Angular behavior.
+- `Details` opens the flag targeting page in a new browser tab.
 - Use server-side pagination for flags.
 
 Segments tab:
 
 - Search input: `Filter by name`.
 - Table columns: `Name`, `Type`, `Last updated`, `Actions`.
-- `Details` opens the segment targeting page in a new browser tab, matching Angular behavior.
+- `Details` opens the segment targeting page in a new browser tab.
 - Segment filtering can remain client-side if the API still returns all segments for a user.
 
 ### Details Action
@@ -276,7 +274,7 @@ GlobalUser:
 - Keep color usage consistent with existing Workspace designs: FeatBit blue for primary actions and active states, green only for success/granted semantics, amber only where a warning or tier meaning exists, and muted gray for secondary information.
 - Avoid hero sections, decorative illustrations, large colored bands, oversized typography, and layout chrome inside design images.
 - Avoid hard vertical split compositions in action images; overlays should feel like modals/drawers on top of the same tab page.
-- Do not copy Angular/ng-zorro table, modal, or drawer styling one-to-one.
+- Use shared shadcn table, Dialog, and Sheet styling.
 - Dark mode should preserve the exact same layout with neutral dark surfaces, low-contrast borders, readable foreground text, muted secondary text, and restrained semantic accents.
 
 ## Acceptance Criteria For Later Implementation
@@ -288,7 +286,7 @@ GlobalUser:
 - Display dropdown discovers and toggles custom property columns.
 - Import modal validates JSON format and 500 MB size before upload.
 - Successful import closes the modal and refreshes the table.
-- Evaluate drawer shows Feature Flags and Segments tabs with Angular-equivalent actions.
+- Evaluate drawer shows Feature Flags and Segments tabs with documented actions.
 - Details drawer shows built-in and customized properties.
 - Loading, empty, error, gated, and permission-disabled states are present.
 - The tab works in `/en` and `/zh` routes and uses i18n keys for visible text.
