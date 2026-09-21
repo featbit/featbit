@@ -1,5 +1,6 @@
 #nullable disable
 
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Domain.EndUsers;
 
@@ -8,10 +9,6 @@ namespace Domain.Insights;
 public class InsightMessage
 {
     public const string FlagValueEvent = "FlagValue";
-
-    // Version 2 identifies the v6 insight message contract; legacy messages have no version.
-    [JsonPropertyName("schema_version")]
-    public int SchemaVersion => 2;
 
     [JsonPropertyName("uuid")]
     public string Uuid { get; private set; }
@@ -23,7 +20,7 @@ public class InsightMessage
     public string Event { get; private set; }
 
     [JsonPropertyName("properties")]
-    public object Properties { get; private set; }
+    public string Properties { get; private set; }
 
     [JsonPropertyName("timestamp")]
     public long Timestamp { get; private set; }
@@ -33,8 +30,9 @@ public class InsightMessage
         Uuid = Guid.NewGuid().ToString();
         EnvId = envId;
         Event = @event;
-        Properties = properties;
-        Timestamp = timestampMs;
+        Properties = JsonSerializer.Serialize(properties);
+        // Keep microsecond timestamps so v6 can consume messages from both old and new ELS instances.
+        Timestamp = timestampMs * 1000; // milliseconds to microseconds
     }
 
     public static InsightMessage ForFlagValue(string envId, EndUser user, VariationInsight variationInsight)
@@ -59,7 +57,7 @@ public class InsightMessage
         {
             eventName = metric.EventName,
             numericValue = metric.NumericValue,
-            userKeyId = user.KeyId,
+            user = new { keyId = user.KeyId, name = user.Name },
             applicationType = metric.AppType
         };
 

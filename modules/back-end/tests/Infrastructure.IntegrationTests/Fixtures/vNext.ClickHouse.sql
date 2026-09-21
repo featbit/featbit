@@ -1,3 +1,9 @@
+-- Bootstrap/reference schema, not an in-place upgrade script.
+-- v6 keeps the legacy featbit-insights wire contract: JSON-string properties and microsecond timestamps.
+-- The separate consumer group lets the legacy events writer keep running during rollout.
+-- Existing deployments must coordinate the new group's starting offsets with historical backfill
+-- to avoid gaps or duplicates; CREATE TABLE IF NOT EXISTS does not alter an existing Kafka table.
+
 CREATE DATABASE IF NOT EXISTS featbit;
 
 CREATE TABLE IF NOT EXISTS featbit.experiment_exposure_events
@@ -36,7 +42,6 @@ SETTINGS index_granularity = 8192;
 
 CREATE TABLE IF NOT EXISTS featbit.kafka_insight_events_queue
 (
-    schema_version UInt32,
     uuid UUID,
     env_id String,
     event String,
@@ -49,7 +54,7 @@ SETTINGS
     kafka_topic_list = 'featbit-insights',
     kafka_group_name = 'featbit_ch_insights_group_v6',
     kafka_format = 'JSONEachRow',
-    input_format_json_read_objects_as_strings = 1,
+    input_format_skip_unknown_fields = 1,
     kafka_num_consumers = 1,
     kafka_skip_broken_messages = 100;
 
@@ -67,21 +72,19 @@ SELECT
     JSONExtractString(properties, 'userName') AS user_name,
     JSONExtractString(properties, 'variationId') AS variation_id,
     JSONExtractString(properties, 'variationValue') AS variation_value,
-    fromUnixTimestamp64Milli(timestamp, 'UTC') AS exposed_at,
+    fromUnixTimestamp64Micro(timestamp, 'UTC') AS exposed_at,
     now64(3) AS created_at
 FROM
     (
         SELECT
             uuid,
             env_id AS raw_env_id,
-            schema_version,
             event,
             properties,
             timestamp
         FROM featbit.kafka_insight_events_queue
     )
-WHERE schema_version = 2
-  AND event = 'FlagValue'
+WHERE event = 'FlagValue'
   AND toUUIDOrNull(raw_env_id) IS NOT NULL
   AND notEmpty(JSONExtractString(properties, 'featureFlagKey'))
   AND notEmpty(JSONExtractString(properties, 'userKeyId'))
@@ -93,26 +96,24 @@ AS
 SELECT
     uuid AS id,
     assumeNotNull(toUUIDOrNull(raw_env_id)) AS env_id,
-    JSONExtractString(properties, 'userKeyId') AS user_key,
+    JSONExtractString(properties, 'user', 'keyId') AS user_key,
     JSONExtractString(properties, 'eventName') AS event_name,
     event AS event_type,
     if(JSONHas(properties, 'numericValue'), JSONExtractFloat(properties, 'numericValue'), 0.0) AS numeric_value,
     JSONExtractString(properties, 'applicationType') AS application_type,
-    fromUnixTimestamp64Milli(timestamp, 'UTC') AS occurred_at,
+    fromUnixTimestamp64Micro(timestamp, 'UTC') AS occurred_at,
     now64(3) AS created_at
 FROM
     (
         SELECT
             uuid,
             env_id AS raw_env_id,
-            schema_version,
             event,
             properties,
             timestamp
         FROM featbit.kafka_insight_events_queue
     )
-WHERE schema_version = 2
-  AND event != 'FlagValue'
+WHERE event != 'FlagValue'
   AND toUUIDOrNull(raw_env_id) IS NOT NULL
-  AND notEmpty(JSONExtractString(properties, 'userKeyId'))
-  AND notEmpty(JSONExtractString(properties, 'eventName'));
+  AND notEmpty(user_key)
+  AND notEmpty(event_name);

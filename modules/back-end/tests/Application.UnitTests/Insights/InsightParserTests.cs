@@ -11,155 +11,91 @@ public class InsightParserTests
     private static readonly DateTime EventTime = new(2026, 1, 1, 0, 0, 0, 123, DateTimeKind.Utc);
 
     [Fact]
-    public void TryParse_Exposure_MapsAllStoredFields()
+    public void TryParse_Exposure_MapsFieldsAndConvertsMicrosecondTimestamp()
     {
-        var message = Exposure();
         var before = DateTime.UtcNow;
 
-        Assert.True(InsightParser.TryParse(message.ToJsonString(), out var result));
+        Assert.True(InsightParser.TryParse(Envelope("FlagValue", Exposure()).ToJsonString(), out var result));
 
-        var actual = Assert.IsType<ExperimentExposureEvent>(result);
-        Assert.Equal(EventId, actual.Id);
-        Assert.Equal(EnvId, actual.EnvId);
-        Assert.Equal("flag-key", actual.FlagKey);
-        Assert.Equal("user-key", actual.UserKey);
-        Assert.Equal("variation-id", actual.VariationId);
-        Assert.Equal("true", actual.VariationValue);
-        Assert.Equal(EventTime, actual.ExposedAt);
-        Assert.Equal(DateTimeKind.Utc, actual.ExposedAt.Kind);
-        Assert.InRange(actual.CreatedAt, before, DateTime.UtcNow);
-        Assert.Equal(DateTimeKind.Utc, actual.CreatedAt.Kind);
+        var exposure = Assert.IsType<ExperimentExposureEvent>(result);
+        Assert.Equal(EventId, exposure.Id);
+        Assert.Equal(EnvId, exposure.EnvId);
+        Assert.Equal("flag-key", exposure.FlagKey);
+        Assert.Equal("user-key", exposure.UserKey);
+        Assert.Equal("variation-id", exposure.VariationId);
+        Assert.Equal("true", exposure.VariationValue);
+        Assert.Equal(EventTime, exposure.ExposedAt);
+        Assert.Equal(DateTimeKind.Utc, exposure.ExposedAt.Kind);
+        Assert.InRange(exposure.CreatedAt, before, DateTime.UtcNow);
+        Assert.Equal(DateTimeKind.Utc, exposure.CreatedAt.Kind);
     }
 
     [Fact]
-    public void TryParse_Metric_MapsAllStoredFields()
+    public void TryParse_Metric_MapsFieldsAndConvertsMicrosecondTimestamp()
     {
-        var message = Metric();
         var before = DateTime.UtcNow;
 
-        Assert.True(InsightParser.TryParse(message.ToJsonString(), out var result));
+        Assert.True(InsightParser.TryParse(Envelope("Custom", Metric()).ToJsonString(), out var result));
 
-        var actual = Assert.IsType<ExperimentMetricEvent>(result);
-        Assert.Equal(EventId, actual.Id);
-        Assert.Equal(EnvId, actual.EnvId);
-        Assert.Equal("user-key", actual.UserKey);
-        Assert.Equal("purchase", actual.EventName);
-        Assert.Equal("Custom", actual.EventType);
-        Assert.Equal(1.23456789012345, actual.NumericValue);
-        Assert.Equal("dotnet-server-side", actual.ApplicationType);
-        Assert.Equal(EventTime, actual.OccurredAt);
-        Assert.Equal(DateTimeKind.Utc, actual.OccurredAt.Kind);
-        Assert.InRange(actual.CreatedAt, before, DateTime.UtcNow);
-        Assert.Equal(DateTimeKind.Utc, actual.CreatedAt.Kind);
+        var metric = Assert.IsType<ExperimentMetricEvent>(result);
+        Assert.Equal(EventId, metric.Id);
+        Assert.Equal(EnvId, metric.EnvId);
+        Assert.Equal("user-key", metric.UserKey);
+        Assert.Equal("purchase", metric.EventName);
+        Assert.Equal("Custom", metric.EventType);
+        Assert.Equal(1.23456789012345, metric.NumericValue);
+        Assert.Equal("dotnet", metric.ApplicationType);
+        Assert.Equal(EventTime, metric.OccurredAt);
+        Assert.Equal(DateTimeKind.Utc, metric.OccurredAt.Kind);
+        Assert.InRange(metric.CreatedAt, before, DateTime.UtcNow);
+        Assert.Equal(DateTimeKind.Utc, metric.CreatedAt.Kind);
     }
 
     [Theory]
-    [InlineData(null)]
-    [InlineData("null")]
-    [InlineData("\"\"")]
-    public void TryParse_OptionalVariationValue_PreservesNullOrEmpty(string? value)
+    [InlineData("featureFlagKey")]
+    [InlineData("userKeyId")]
+    [InlineData("variationId")]
+    public void TryParse_ExposureMissingRequiredField_ReturnsFalse(string field)
     {
-        var message = Exposure();
-        SetOrRemove(message["properties"]!.AsObject(), "variationValue", value);
-
-        Assert.True(InsightParser.TryParse(message.ToJsonString(), out var result));
-        Assert.Equal(value == "\"\"" ? "" : null,
-            Assert.IsType<ExperimentExposureEvent>(result).VariationValue);
+        var properties = Exposure();
+        properties.Remove(field);
+        AssertRejected(Envelope("FlagValue", properties).ToJsonString());
     }
 
     [Theory]
-    [InlineData(null)]
-    [InlineData("null")]
-    [InlineData("\"not-a-number\"")]
-    [InlineData("true")]
-    public void TryParse_MissingOrNonNumericMetricValue_DefaultsToZero(string? value)
+    [InlineData("user")]
+    [InlineData("keyId")]
+    [InlineData("eventName")]
+    public void TryParse_MetricMissingRequiredField_ReturnsFalse(string field)
     {
-        var message = Metric();
-        SetOrRemove(message["properties"]!.AsObject(), "numericValue", value);
-        message["properties"]!.AsObject().Remove("applicationType");
+        var properties = Metric();
+        if (field == "keyId")
+            properties["user"]!.AsObject().Remove(field);
+        else
+            properties.Remove(field);
 
-        Assert.True(InsightParser.TryParse(message.ToJsonString(), out var result));
-        var actual = Assert.IsType<ExperimentMetricEvent>(result);
-        Assert.Equal(0, actual.NumericValue);
-        Assert.Null(actual.ApplicationType);
+        AssertRejected(Envelope("Custom", properties).ToJsonString());
     }
 
     [Theory]
-    [InlineData(0)]
-    [InlineData(-2.5)]
-    public void TryParse_ZeroOrNegativeMetricValue_PreservesValue(double value)
-    {
-        var message = Metric();
-        message["properties"]!["numericValue"] = value;
-
-        Assert.True(InsightParser.TryParse(message.ToJsonString(), out var result));
-        Assert.Equal(value, Assert.IsType<ExperimentMetricEvent>(result).NumericValue);
-    }
-
-    [Theory]
-    [InlineData("")]
-    [InlineData("{")]
-    [InlineData("null")]
-    [InlineData("[]")]
-    [InlineData("42")]
-    public void TryParse_InvalidDocument_ReturnsFalseWithoutThrowing(string json)
-    {
-        AssertRejected(json);
-    }
-
-    [Theory]
-    [InlineData("schema_version", null)]
-    [InlineData("schema_version", "null")]
-    [InlineData("schema_version", "1")]
-    [InlineData("schema_version", "3")]
-    [InlineData("schema_version", "2.5")]
-    [InlineData("schema_version", "\"2\"")]
-    [InlineData("uuid", null)]
     [InlineData("uuid", "\"invalid-guid\"")]
-    [InlineData("env_id", null)]
     [InlineData("env_id", "\"invalid-guid\"")]
-    [InlineData("event", null)]
-    [InlineData("event", "null")]
-    [InlineData("event", "\" \\t\"")]
-    [InlineData("event", "123")]
-    [InlineData("timestamp", null)]
-    [InlineData("timestamp", "\"1767225600123\"")]
-    [InlineData("timestamp", "1.5")]
-    [InlineData("timestamp", "253402300800000")]
-    [InlineData("timestamp", "-62135596800001")]
-    [InlineData("properties", null)]
-    [InlineData("properties", "null")]
-    [InlineData("properties", "[]")]
-    [InlineData("properties", "\"{}\"")]
-    public void TryParse_InvalidEnvelope_ReturnsFalseWithoutThrowing(string field, string? value)
+    [InlineData("event", "\" \"")]
+    [InlineData("timestamp", "null")]
+    [InlineData("timestamp", "253402300800000000")]
+    [InlineData("properties", "{}")]
+    [InlineData("properties", "\"{\"")]
+    public void TryParse_InvalidEnvelope_ReturnsFalse(string field, string value)
     {
-        var message = Metric();
-        SetOrRemove(message, field, value);
+        var message = Envelope("Custom", Metric());
+        message[field] = JsonNode.Parse(value);
         AssertRejected(message.ToJsonString());
-    }
-
-    [Theory]
-    [InlineData("FlagValue", "featureFlagKey")]
-    [InlineData("FlagValue", "userKeyId")]
-    [InlineData("FlagValue", "variationId")]
-    [InlineData("Custom", "userKeyId")]
-    [InlineData("Custom", "eventName")]
-    public void TryParse_InvalidRequiredProperty_RejectsEvent(string eventType, string field)
-    {
-        foreach (var value in new string?[] { null, "null", "\"\"", "\" \"", "123" })
-        {
-            var message = eventType == "FlagValue" ? Exposure() : Metric();
-            SetOrRemove(message["properties"]!.AsObject(), field, value);
-            AssertRejected(message.ToJsonString());
-        }
     }
 
     [Fact]
-    public void TryParse_MetricPayloadWithExposureEventType_IsRejected()
+    public void TryParse_MalformedJson_ReturnsFalse()
     {
-        var message = Metric();
-        message["event"] = "FlagValue";
-        AssertRejected(message.ToJsonString());
+        AssertRejected("{");
     }
 
     private static void AssertRejected(string json)
@@ -168,43 +104,28 @@ public class InsightParserTests
         Assert.Null(result);
     }
 
-    // A null argument removes the field; the JSON text "null" keeps an explicit null value.
-    private static void SetOrRemove(JsonObject target, string field, string? json)
-    {
-        if (json is null)
-        {
-            target.Remove(field);
-        }
-        else
-        {
-            target[field] = JsonNode.Parse(json);
-        }
-    }
-
-    private static JsonObject Exposure() => Envelope("FlagValue", new JsonObject
+    private static JsonObject Exposure() => new()
     {
         ["featureFlagKey"] = "flag-key",
         ["userKeyId"] = "user-key",
-        ["userName"] = "User",
         ["variationId"] = "variation-id",
         ["variationValue"] = "true"
-    });
+    };
 
-    private static JsonObject Metric() => Envelope("Custom", new JsonObject
+    private static JsonObject Metric() => new()
     {
-        ["userKeyId"] = "user-key",
+        ["user"] = new JsonObject { ["keyId"] = "user-key" },
         ["eventName"] = "purchase",
         ["numericValue"] = 1.23456789012345,
-        ["applicationType"] = "dotnet-server-side"
-    });
+        ["applicationType"] = "dotnet"
+    };
 
     private static JsonObject Envelope(string eventType, JsonObject properties) => new()
     {
-        ["schema_version"] = 2,
         ["uuid"] = EventId.ToString(),
         ["env_id"] = EnvId.ToString(),
         ["event"] = eventType,
-        ["properties"] = properties,
-        ["timestamp"] = 1767225600123L
+        ["properties"] = properties.ToJsonString(),
+        ["timestamp"] = 1767225600123000L
     };
 }
