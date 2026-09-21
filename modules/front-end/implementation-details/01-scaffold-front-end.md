@@ -2,7 +2,7 @@
 
 ## Goal
 
-Create the standalone React application foundation in `front-end` without modifying the existing Angular `front-end-v1`.
+Maintain the standalone React application foundation in `front-end`.
 
 ## Decisions
 
@@ -102,4 +102,4 @@ front-end/
 - Tailwind and shadcn/ui components render correctly.
 - Light, dark, and system theme modes can be selected and persist across reloads.
 - Runtime env typing includes `VERSION`, and the app can read `window.env.version` with a `dev` fallback.
-- No files in Angular `front-end-v1` are modified.
+- The application builds independently of the retired frontend.

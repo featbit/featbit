@@ -1,6 +1,8 @@
 # IAM Policy Page Design
 
-This document is the React design contract for the IAM Policy list page, its `Add policy` sheet, and the Policy details page. Angular remains the functional reference for Policy data, API behavior, relationship semantics, and managed-policy restrictions, but the React implementation must follow the current IAM Team and Group pages and their shadcn/ui, Base UI, Tailwind, TanStack Table, and authenticated-shell conventions.
+> Historical context: references to Angular describe the retired frontend behavior. Its source is available in Git history, not in the working tree. Current implementation lives in `modules/front-end`.
+
+This document is the React design contract for the IAM Policy list page, its `Add policy` sheet, and the Policy details page. The retired Angular implementation provides the historical functional reference for Policy data, API behavior, relationship semantics, and managed-policy restrictions, but the React implementation must follow the current IAM Team and Group pages and their shadcn/ui, Base UI, Tailwind, TanStack Table, and authenticated-shell conventions.
 
 The current Policy details scope includes the Team and Groups relationship tabs. Permissions intentionally remains a placeholder until the permission editor receives its own implementation contract.
 

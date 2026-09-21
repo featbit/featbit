@@ -27,17 +27,14 @@ RUN dotnet publish -r linux-x64 --self-contained -c Release -o /backend/publish
 
 ### build frontend
 
-FROM node:16.17 as frontendBuilder
+FROM node:22.19 as frontendBuilder
 
 WORKDIR /frontend
 COPY modules/front-end/package*.json .
-# Skip postinstall: scripts/ isn't copied yet, and the dark-CSS generation
-# step is run deterministically by `npm run build:prod` (which chains
-# `npm run build:dark-css`). Mirrors modules/front-end/Dockerfile.
-RUN npm install --ignore-scripts
+RUN npm ci
 COPY modules/front-end/ .
 
-RUN npm run build:prod
+RUN npm run build
 
 ### run app
 FROM debian:bullseye-slim
@@ -48,7 +45,7 @@ RUN apt-get update -y &&  \
     ln -sf /dev/stdout /var/log/nginx/access.log &&  \
     ln -sf /dev/stderr /var/log/nginx/error.log
 
-COPY --from=frontendBuilder /frontend/dist/featbit/ /app/frontend
+COPY --from=frontendBuilder /frontend/dist/ /app/frontend
 COPY --from=backendBuilder /backend/publish /app/backend
 
 COPY docker/ui-api-bundle/nginx.conf /etc/nginx/nginx.conf

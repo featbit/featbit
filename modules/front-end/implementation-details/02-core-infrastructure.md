@@ -1,5 +1,7 @@
 # 02 - Core Infrastructure
 
+> Historical context: Angular references describe behavior of the retired frontend, available in Git history. The maintained application is `modules/front-end`.
+
 ## Goal
 
 Build the shared runtime layer used by every migrated page: env loading, typed API access, auth/session state, current context stores, permission helpers, and base UI building blocks.
@@ -37,7 +39,7 @@ Build the shared runtime layer used by every migrated page: env loading, typed A
   - current project
   - current environment
   - license/plan state
-- Preserve localStorage key compatibility where current Angular behavior depends on it.
+- Preserve localStorage key compatibility where historical Angular behavior depends on it.
 - Separate server state in TanStack Query from client UI state in local stores.
 
 ## Permissions And License

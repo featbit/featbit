@@ -1,6 +1,8 @@
 # Access Token Page Design
 
-This document is the React design contract for the Access Tokens list page, its New, Edit, and View Sheet states, and the one-time creation result. Angular remains the read-only functional reference for API behavior, permissions, resource names, validation, and one-time token disclosure. The React implementation must use the current FeatBit shadcn/ui, Base UI, Tailwind, TanStack Table, React Hook Form, Zod, and authenticated-workbench conventions without visually cloning ng-zorro.
+> Historical context: references to Angular describe the retired frontend behavior. Its source is available in Git history, not in the working tree. Current implementation lives in `modules/front-end`.
+
+This document is the React design contract for the Access Tokens list page, its New, Edit, and View Sheet states, and the one-time creation result. The retired Angular implementation provides the historical read-only functional reference for API behavior, permissions, resource names, validation, and one-time token disclosure. The React implementation must use the current FeatBit shadcn/ui, Base UI, Tailwind, TanStack Table, React Hook Form, Zod, and authenticated-workbench conventions without visually cloning ng-zorro.
 
 ## Scope
 

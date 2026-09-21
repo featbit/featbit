@@ -1,5 +1,7 @@
 # 04 - Feature Domain Pages
 
+> Historical context: Angular references describe behavior of the retired frontend, available in Git history. The maintained application is `modules/front-end`.
+
 ## Goal
 
 Migrate the main product domains page by page while preserving backend API contracts and improving the user experience with the new React UI system.

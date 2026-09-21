@@ -1,6 +1,8 @@
 # IAM Group Detail Page Design
 
-This document is the React design contract for the IAM Group detail page. Angular remains a functional reference for Group relationships and API behavior, but the React page must use the current IAM Team detail page as its structural and visual template.
+> Historical context: references to Angular describe the retired frontend behavior. Its source is available in Git history, not in the working tree. Current implementation lives in `modules/front-end`.
+
+This document is the React design contract for the IAM Group detail page. The retired Angular implementation provides a historical functional reference for Group relationships and API behavior, but the React page must use the current IAM Team detail page as its structural and visual template.
 
 Related list contract: [iam-group-page-design.md](iam-group-page-design.md).
 

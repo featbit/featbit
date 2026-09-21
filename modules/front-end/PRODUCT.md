@@ -12,7 +12,7 @@ Users often arrive in the middle of a workflow on desktop or laptop screens: fin
 
 ## Product Purpose
 
-The React front end in `front-end` is a parallel replacement for the existing Angular management UI. It exists to modernize FeatBit's authenticated product experience while preserving backend contracts, language-prefixed routing, runtime configuration, and feature-management workflows.
+The React front end in `front-end` is the maintained FeatBit management UI. It exists to modernize FeatBit's authenticated product experience while preserving backend contracts, language-prefixed routing, runtime configuration, and feature-management workflows.
 
 Success means the React app feels like a capable feature-management workbench: clear context, low-noise density, visible risk and status, reliable light and dark themes, and reusable shadcn/Tailwind-based components that make future page migrations faster without copying Angular/ng-zorro styling.
 
@@ -24,7 +24,7 @@ The voice should be plainspoken and task-oriented. It can guide users through se
 
 ## Anti-references
 
-Do not recreate the Angular/ng-zorro visual system one-to-one, including its old green-dominant palette, legacy spacing, or control styling. The Angular app is a functional reference only.
+Do not recreate the Angular/ng-zorro visual system one-to-one, including its old green-dominant palette, legacy spacing, or control styling. Historical behavior from the retired frontend remains a compatibility reference only.
 
 Do not copy the old Angular login background or old illustration card. The React login experience should follow the saved design contracts in `design/login-page-design.md` and `design/sso-login-page-design.md`.
 

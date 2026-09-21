@@ -1,6 +1,8 @@
 # Workspace Usage Page Design
 
-This document defines the React design target for the Workspace `Usage` tab. Angular remains the functional reference, but React should use the authenticated React layout, shadcn/ui primitives, Tailwind tokens, lucide-react icons, TanStack Query, TanStack Table, and Recharts. Do not implement this page by copying Angular/ng-zorro structure or styling one-to-one.
+> Historical context: references to Angular describe the retired frontend behavior. Its source is available in Git history, not in the working tree. Current implementation lives in `modules/front-end`.
+
+This document defines the React design target for the Workspace `Usage` tab. The retired Angular implementation provides the historical functional reference, but React should use the authenticated React layout, shadcn/ui primitives, Tailwind tokens, lucide-react icons, TanStack Query, TanStack Table, and Recharts. Do not implement this page by copying Angular/ng-zorro structure or styling one-to-one.
 
 ## Design Assets
 
@@ -20,7 +22,7 @@ This design covers only the Workspace `Usage` tab content inside the authenticat
 
 ## Angular Functional Reference
 
-Angular currently provides these behaviors:
+Angular previously provided these behaviors:
 
 - Period selector supports `This month`, `Last 7 days`, and `Last 30 days`.
 - In SaaS mode, Angular loads the current billing cycle and prepends `Current billing cycle` and `Previous billing cycle` when the cycle is monthly or shorter.

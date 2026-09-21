@@ -1,5 +1,7 @@
 # Get Started Page Design
 
+> Historical context: references to Angular describe the retired frontend behavior. Its source is available in Git history, not in the working tree. Current implementation lives in `modules/front-end`.
+
 This document defines the React redesign of the authenticated **Get Started** page in `front-end`. The Angular page is the functional source of truth. The React application, `PRODUCT.md`, `DESIGN.md`, and the existing Feature Flags and settings surfaces are the visual source of truth.
 
 This is a design-only contract. No React source, route, API, test, configuration, i18n resource, shared component, sidebar, or context-bar implementation is authorized by this document.

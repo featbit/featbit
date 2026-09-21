@@ -2,7 +2,7 @@
 
 ## Goal
 
-Migrate English and Chinese copy from Angular templates and `messages.zh.xlf` into `react-i18next` JSON namespaces while preserving language-prefixed routing.
+Maintain English and Chinese copy in `react-i18next` resources while preserving language-prefixed routing.
 
 ## Routing
 
@@ -13,36 +13,11 @@ Migrate English and Chinese copy from Angular templates and `messages.zh.xlf` in
 
 ## Resource Organization
 
-Use namespace-based JSON files:
-
-```text
-src/lib/i18n/locales/
-  en/
-    common.json
-    auth.json
-    navigation.json
-    feature-flags.json
-    users.json
-    segments.json
-    experiments.json
-    audit-logs.json
-    admin.json
-  zh/
-    common.json
-    auth.json
-    navigation.json
-    feature-flags.json
-    users.json
-    segments.json
-    experiments.json
-    audit-logs.json
-    admin.json
-```
+Maintain English and Chinese translations in the TypeScript resource modules under `src/lib/i18n/resources/`, registered by `src/lib/i18n/i18n.ts`.
 
 ## Extraction Rules
 
-- Extract source English copy from Angular templates and TypeScript where available.
-- Extract Chinese copy from `messages.zh.xlf`.
+- Update both English and Chinese resources for new or changed UI copy.
 - Keep keys stable and semantic, not based on full sentences.
 - Avoid embedding route names, permissions, or API enum labels directly in components.
 - Centralize common labels such as Save, Cancel, Delete, Search, Filter, Status, Type, Tags, Created, Updated, and Confirm.

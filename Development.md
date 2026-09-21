@@ -40,96 +40,34 @@ at [http://localhost:5000/swagger](http://localhost:5000/swagger).
 
 ## Run UI
 
-The UI is built with [Angular](https://angular.io/) and [NG-ZORRO](https://ng.ant.design/docs/introduce/en), please
-refer to their docs for more details.
-
-Navigate to **modules/front-end** folder and do the following commands:
+The UI uses React, TypeScript, Vite, and shadcn/ui. Use Node.js 22.19, matching the frontend Dockerfile.
 
 ```bash
-npm install
-npm run start
+cd modules/front-end
+npm ci
+npm run dev
 ```
 
-Then UI should be available at [http://localhost:4200](http://localhost:4200).
+Open http://localhost:5173. English and Chinese share the same development server; use the language switcher or `/en/` and `/zh/` routes.
 
-The above process would launch the UI in English language.
+Edit `modules/front-end/public/assets/env.js` to configure browser-accessible service URLs. See the [frontend development guide](modules/front-end/README.md) for runtime variables, Docker deployment, and testing.
 
-As **ng serve** only supports one single locale, during development, the locale-switcher component doesn't work. If you
-want to check a different language, run the app with one of the following command
+### Build and test
 
+```bash
+npm run build
+npm test
+npm run test:e2e
 ```
-npm run start // English, available at localhost:4200
-npm run start:zh // Chinese, available at localhost:4201
-```
+
+The production build is written to `modules/front-end/dist/`. Browser tests require Playwright Chromium; container tests additionally require Docker.
 
 ### Serve UI under a path
 
-Instead of serving the UI directly at the domain root, you may need to serve it under a specific path, for example `http://localhost:4200/abc/def/`.
-
-#### Development Mode
-
-For local development, use the **start:base-href** command:
-
-```bash
-npm run start:base-href
-```
-
-This command is defined in `package.json` as:
-```json
-"start:base-href": "ng serve --serve-path /abc/def/ --configuration=development --port=4200"
-```
-
-**Important:** You must also update the `<base href>` tag in [index.html](./modules/front-end/src/index.html):
-
-```html
-<!-- Change from: -->
-<base href="/">
-
-<!-- To: -->
-<base href="/abc/def/">
-```
-
-You can replace `/abc/def/` with your own path in both the npm script and the index.html file.
-
-#### Docker Mode
-
-When running the UI in a Docker container, set the `BASE_HREF` environment variable in docker-compose.yml:
-
-```yaml
-services:
-  ui:
-    image: featbit/ui:latest
-    environment:
-      - BASE_HREF=/abc/def/
-    ports:
-      - "80:80"
-```
-
-The **ports** is important if you run this in your local machine.
-The Docker entrypoint script will automatically configure nginx and update all locale-specific index.html files with the correct base href.
-
+For the standalone UI container, set `BASE_HREF=/abc/def/`. The entrypoint normalizes the path, updates the HTML asset URLs, generates runtime configuration, and configures Nginx. See the [frontend guide](modules/front-end/README.md) for the current deployment contract.
 
 ### Internationalization
 
-FeatBit should be available to everyone everywhere, and we don't want language to be a barrier. So for this reason we
-have implemented internationalization features into our codebase.
+The UI uses `react-i18next`. English and Chinese translations are maintained in TypeScript modules under `modules/front-end/src/lib/i18n/resources/` and registered in `src/lib/i18n/i18n.ts`.
 
-FeatBit UI uses official [@angular/localize
-](https://www.npmjs.com/package/@angular/localize) package to implement the i18n, please read
-the [official doc](https://angular.io/guide/i18n-overview) for how to use it. The language resource files are under *
-*modules/front-end/src/locale** folder, with following format messages.xx.xlf, xx is the language code.
-
-Currently only English and Chinese are available, we would be very grateful to have contributors for other languages
-too.
-
-If you put a text in the UI, at the end of the developing work, you need to put its translations into the corresponding
-resource file. This work could be very tedious, we created
-a [library](https://github.com/featbit/angular-locales-generator) to facilitate the job, you need to run the command
-
-```bash
-npm run i18n
-```
-
-English would be generated automatically in messages.xlf, you just need to put the translations into message.xx.xlf. A
-small trick is to search this text `<target></target>` in the file and put the translation between **target** tag.
-
+Update both languages when adding or changing UI text. Preserve semantic translation keys and use interpolation for dynamic values. Run `npm test` to include the existing i18n checks.

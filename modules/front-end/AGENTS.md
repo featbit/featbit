@@ -1,9 +1,9 @@
 # Agent Instructions
 
-## React Migration Context
+## Frontend Context
 
-- The existing Angular project in `front-end-v1` is the read-only reference implementation.
-- The new React implementation belongs in `front-end`.
+- The maintained React application belongs in `front-end`.
+- The retired Angular source is no longer in the working tree. Historical behavior can be consulted in Git history when needed.
 - Follow `plan.md` and `implementation-details/*.md` for the migration plan and detailed implementation guidance.
 - Do not rename `plan.md` to `AGENTS.md`; keep this file as durable agent instructions and keep the migration plan separate.
 

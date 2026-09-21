@@ -1,5 +1,7 @@
 # End Users Page Design
 
+> Historical context: references to Angular describe the retired frontend behavior. Its source is available in Git history, not in the working tree. Current implementation lives in `modules/front-end`.
+
 This document defines the React design target for the environment-level `End Users` main page. Angular is the functional reference; the existing React Workspace `Global Users` page is the visual and interaction reference.
 
 Do not change the authenticated sidebar, context bar, account menu, subscription badge, or surrounding application shell. The design starts inside the existing main content area for the `/end-users` route.

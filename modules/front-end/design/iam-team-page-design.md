@@ -1,6 +1,8 @@
 # IAM Team Page Design
 
-This document is the React design contract for the IAM Team list page and its `Add team member` sheet. Angular remains a functional reference for permissions and API behavior, but the React implementation must use shadcn/ui, Base UI primitives, Tailwind tokens, and the authenticated layout defined in [react-layout-design.md](react-layout-design.md).
+> Historical context: references to Angular describe the retired frontend behavior. Its source is available in Git history, not in the working tree. Current implementation lives in `modules/front-end`.
+
+This document is the React design contract for the IAM Team list page and its `Add team member` sheet. The retired Angular implementation provides a historical functional reference for permissions and API behavior, but the React implementation must use shadcn/ui, Base UI primitives, Tailwind tokens, and the authenticated layout defined in [react-layout-design.md](react-layout-design.md).
 
 The Team member detail page has a separate React design contract in [iam-team-detail-page-design.md](iam-team-detail-page-design.md).
 

@@ -1,5 +1,7 @@
 # Feature Flag Details Page Design
 
+> Historical context: references to Angular describe the retired frontend behavior. Its source is available in Git history, not in the working tree. Current implementation lives in `modules/front-end`.
+
 ## Scope
 
 This document defines the React redesign of the Feature Flag details main content in `front-end`.
@@ -18,7 +20,7 @@ Excluded:
 - the Feature Flags index and Compare page;
 - all experimentation and A/B-test UI, routes, commands, references, warnings, and terminology.
 
-Angular under `front-end-v1/src/app/features/safe/feature-flags/details/` is a read-only functional reference. The visual target is the compact neutral React/shadcn workbench established by `front-end` and the accepted Segment Details design. Do not reproduce Angular/ng-zorro layout or styling.
+Historical feature flag behavior is documented below; consult Git history if the retired implementation is needed. The visual target is the compact neutral React/shadcn workbench established by `front-end` and the accepted Segment Details design. Do not reproduce Angular/ng-zorro layout or styling.
 
 ## Design Assets
 

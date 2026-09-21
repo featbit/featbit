@@ -2,7 +2,7 @@
 
 ## Summary
 
-Create a standalone React front-end in `D:\Workspace\FeatBit\featbit\modules\front-end` and develop it in parallel with the existing Angular `front-end-v1`. The React version will use **Vite SPA + React Router front-end mode**, build to static files, and be served by Nginx. The deployment entry point should only be switched after the existing management layout functionality has been fully migrated.
+Maintain the React application in `modules/front-end` using **Vite SPA + React Router front-end mode**, built to static files and served by Nginx. The retired Angular source has been removed; historical migration references below describe previous behavior and do not require a parallel local application.
 
 ## Key Changes
 
@@ -29,7 +29,7 @@ Future steps will be appended below this list as the migration scope expands:
 4. Build core infrastructure: env loader, API client, auth/session store, workspace/org/project/env store, permission/license helpers, and base toast/dialog/drawer/table/form components. See [implementation detail 02](implementation-details/02-core-infrastructure.md).
 5. Migrate feature domains page by page: feature flags, users, segments, experiments, audit logs, workspace, organization, relay proxies, IAM, and integrations. See [implementation detail 04](implementation-details/04-feature-domain-pages.md); Organization follows [organization-page-design.md](design/organization-page-design.md).
 6. Migrate complex capabilities: feature flag targeting/rules, change review/pending changes, policy editor, resource editor/finder, lightweight JSON editor, Shiki/lightweight CodeBlock, and Recharts charting. See [implementation detail 05](implementation-details/05-complex-capabilities.md).
-7. Migrate i18n copy: extract English/Chinese resources from Angular templates and `messages.zh.xlf`, then organize them as react-i18next JSON namespaces. See [implementation detail 06](implementation-details/06-i18n-migration.md).
+7. Maintain English/Chinese copy in the react-i18next resources under `src/lib/i18n/resources/`. See [implementation detail 06](implementation-details/06-i18n-migration.md).
 8. Align deployment and documentation: README, local development commands, production build, Docker/Nginx, environment variables, and future cutover steps. See [implementation detail 07](implementation-details/07-deployment-and-documentation.md).
 
 ## Asset Policy
@@ -95,8 +95,8 @@ Use Testcontainers for real-environment integration coverage. The current FeatBi
 ## Assumptions
 
 - The React directory is fixed as `front-end`.
-- The migration strategy is a complete parallel implementation, with no Angular/React hybrid mounting.
+- The maintained application is a standalone React SPA.
 - React Router will only be used in front-end SPA mode.
 - `react-i18next` is the default i18n solution.
 - Playwright is the default browser E2E runner, and Testcontainers is used only for real-stack integration tests, not as a replacement for unit/component coverage.
-- The current Angular project is a read-only reference during the migration and will not be modified.
+- Consult Git history only when historical behavior needs clarification.

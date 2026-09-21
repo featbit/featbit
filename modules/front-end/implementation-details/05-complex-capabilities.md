@@ -1,5 +1,7 @@
 # 05 - Complex Capabilities
 
+> Historical context: Angular references describe behavior of the retired frontend, available in Git history. The maintained application is `modules/front-end`.
+
 ## Goal
 
 Migrate complex shared product capabilities that cut across multiple feature domains.
@@ -32,7 +34,7 @@ Migrate complex shared product capabilities that cut across multiple feature dom
 
 - Use CodeMirror 6 as the only embedded editor in the React implementation.
 - Do not include Monaco Editor, `@monaco-editor/react`, Monaco workers, or copied Monaco assets.
-- Cover the current Angular Monaco use cases with CodeMirror extensions:
+- Cover the historical Angular Monaco use cases with CodeMirror extensions:
   - feature flag JSON/string variation editing and read-only viewing
   - webhook JSON Handlebars payload template editing
   - formatting, copy, reset, read-only mode, validation, and accessible keyboard behavior

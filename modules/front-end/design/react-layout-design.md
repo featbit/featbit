@@ -1,5 +1,7 @@
 # FeatBit React Layout Design
 
+> Historical context: references to Angular describe the retired frontend behavior. Its source is available in Git history, not in the working tree. Current implementation lives in `modules/front-end`.
+
 This document is the implementation design contract for the authenticated React layout. The current saved design governs the header/context bar, sidebar, sidebar collapse behavior, account menu, subscription/license badge, density, typography scale, and light/dark layout language. The Feature Flags content shown in the images is only a placeholder/example and still needs a separate product-page design pass before it becomes an implementation target. Pixel-perfect reproduction is not required, but meaningful layout deviations should update this document and the saved design assets first.
 
 ## Design Assets

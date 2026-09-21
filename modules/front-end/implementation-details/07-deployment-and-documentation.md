@@ -2,7 +2,7 @@
 
 ## Goal
 
-Prepare the React front-end for local development, production build, Docker/Nginx deployment, environment configuration, and future cutover from Angular.
+Prepare the React front-end for local development, production build, Docker/Nginx deployment, environment configuration, and ongoing React releases.
 
 ## Docker And Nginx
 
@@ -52,15 +52,15 @@ Prepare the React front-end for local development, production build, Docker/Ngin
   - `FEATBIT_POSTGRES_IMAGE`
 - Explain that evaluation-server is not part of the default integration stack.
 
-## Cutover Notes
+## Deployment Notes
 
-- Keep Angular and React deployments parallel until parity is accepted.
-- Do not change external docker-compose or release entry points until React parity is verified.
-- Define a later cutover checklist for routing, Docker image names, docs, and rollback.
+- The maintained frontend is the React application in `modules/front-end`.
+- Keep deployment entry points aligned with its Dockerfile and runtime configuration.
+- Use versioned images for rollback.
 
 ## Acceptance Criteria
 
 - A developer can run the React app locally from README instructions.
 - Production Docker image can be built and served with Nginx.
 - `/health`, `/en/*`, `/zh/*`, and runtime env generation including `VERSION` work in the built image.
-- Documentation clearly states what is still parallel-only and what is ready for cutover.
+- Documentation describes the current React deployment.

@@ -1,6 +1,8 @@
 # Organization Page Design
 
-This document defines the React design target for the Organization admin area. Angular remains the functional and information-architecture reference, but React should use the new authenticated layout, shadcn/ui primitives, Tailwind tokens, lucide-react icons, TanStack Query/Table, React Hook Form + Zod, and the shared typed API client. Do not copy the Angular/ng-zorro layout or visual styling.
+> Historical context: references to Angular describe the retired frontend behavior. Its source is available in Git history, not in the working tree. Current implementation lives in `modules/front-end`.
+
+This document defines the React design target for the Organization admin area. The retired Angular implementation provides the historical functional and information-architecture reference, but React should use the new authenticated layout, shadcn/ui primitives, Tailwind tokens, lucide-react icons, TanStack Query/Table, React Hook Form + Zod, and the shared typed API client. Do not copy the Angular/ng-zorro layout or visual styling.
 
 ## Scope And Boundaries
 

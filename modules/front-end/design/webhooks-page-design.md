@@ -1,6 +1,8 @@
 # Webhooks Page, View/Edit, Live Debug, and View Logs Design
 
-This document is the React design contract for the Webhooks main page, Webhook View/Edit Sheet, Live Debug Dialog, and View Logs Sheet. Angular remains the functional reference for data, filters, pagination, form behavior, test-payload generation, request behavior, persisted delivery logs, and action flows, but the React experience must use the authenticated React visual language defined in [react-layout-design.md](react-layout-design.md), shadcn/ui, Base UI primitives, Tailwind tokens, and lucide-react.
+> Historical context: references to Angular describe the retired frontend behavior. Its source is available in Git history, not in the working tree. Current implementation lives in `modules/front-end`.
+
+This document is the React design contract for the Webhooks main page, Webhook View/Edit Sheet, Live Debug Dialog, and View Logs Sheet. The retired Angular implementation provides the historical functional reference for data, filters, pagination, form behavior, test-payload generation, request behavior, persisted delivery logs, and action flows, but the React experience must use the authenticated React visual language defined in [react-layout-design.md](react-layout-design.md), shadcn/ui, Base UI primitives, Tailwind tokens, and lucide-react.
 
 ## Design Asset
 

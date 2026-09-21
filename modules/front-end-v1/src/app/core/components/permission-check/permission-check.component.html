@@ -1,7 +1,0 @@
-<div class="permission">
-  @if (canTakeAction) {
-    <ng-content></ng-content>
-  } @else {
-    <message [type]="'warning'" [content]="messageIfDeny"></message>
-  }
-</div>

@@ -1,6 +1,8 @@
 # Profile Page Design
 
-This document defines the React design target for the account Profile page. Angular remains the functional reference, but React should treat Profile as an account-level surface opened from the left-bottom Account menu. Do not keep it as an Organization tab and do not copy Angular/ng-zorro styling.
+> Historical context: references to Angular describe the retired frontend behavior. Its source is available in Git history, not in the working tree. Current implementation lives in `modules/front-end`.
+
+This document defines the React design target for the account Profile page. The retired Angular implementation provides the historical functional reference, but React should treat Profile as an account-level surface opened from the left-bottom Account menu. Do not keep it as an Organization tab and do not copy Angular/ng-zorro styling.
 
 ## Scope And Boundaries
 
@@ -24,7 +26,7 @@ The mockup and this contract must follow the current `front-end` implementation,
 
 ## Angular Functional Reference
 
-Angular currently renders Profile inside Organization and provides two forms:
+Angular previously rendered Profile inside Organization and provides two forms:
 
 - Profile form:
   - `Name`

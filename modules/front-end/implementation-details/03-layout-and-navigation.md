@@ -1,5 +1,7 @@
 # 03 - Layout, Login, And Navigation
 
+> Historical context: Angular references describe behavior of the retired frontend, available in Git history. The maintained application is `modules/front-end`.
+
 ## Goal
 
 Migrate the application layout: login, auth guard, secure layout, side navigation, top header, top-right subscription/license badge, left-bottom account menu with current version display, theme and locale controls, and workspace/org/project/env switching.
@@ -42,7 +44,7 @@ When the user asks for one of these steps by number, keep the implementation ins
 - Implement [the saved SSO login design contract](../design/sso-login-page-design.md) strictly for the `Sign in with SSO` flow.
 - Treat the saved light/dark login images as required implementation baselines, not loose references.
 - Use a restrained split layout:
-  - header with current Angular FeatBit logo style, top-right theme toggle, language switcher, and header-bottom divider.
+  - header with established FeatBit logo style, top-right theme toggle, language switcher, and header-bottom divider.
   - left area with feature rollout / traffic split abstraction, not a layout screenshot and not AI messaging.
   - right authentication column with email/password login, Google/GitHub OAuth, and a separate Enterprise SSO section.
 - Preserve the saved login page elements and hierarchy, but style colors, backgrounds, borders, controls, shadows, and light/dark theme tokens to match the authenticated React layout.

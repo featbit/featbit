@@ -1,5 +1,7 @@
 # Login Page Design Contract
 
+> Historical context: references to Angular describe the retired frontend behavior. Its source is available in Git history, not in the working tree. Current implementation lives in `modules/front-end`.
+
 ## Required Designs
 
 Implementation must strictly follow these design images:

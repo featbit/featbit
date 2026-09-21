@@ -1,5 +1,7 @@
 # Segments Index Page Design
 
+> Historical context: references to Angular describe the retired frontend behavior. Its source is available in Git history, not in the working tree. Current implementation lives in `modules/front-end`.
+
 ## Scope
 
 This document defines the React redesign of the Segments index workflow in `front-end`.

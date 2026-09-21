@@ -1,6 +1,8 @@
 # Workspace Global Users Tab Design
 
-This document defines the React design target for the Workspace `Global Users` tab content only. Angular remains the functional reference, but React should use the existing authenticated layout, existing Workspace page frame, shadcn/ui primitives, Tailwind tokens, lucide-react icons, TanStack Query, TanStack Table, and `react-i18next`.
+> Historical context: references to Angular describe the retired frontend behavior. Its source is available in Git history, not in the working tree. Current implementation lives in `modules/front-end`.
+
+This document defines the React design target for the Workspace `Global Users` tab content only. The retired Angular implementation provides the historical functional reference, but React should use the existing authenticated layout, existing Workspace page frame, shadcn/ui primitives, Tailwind tokens, lucide-react icons, TanStack Query, TanStack Table, and `react-i18next`.
 
 Do not change the authenticated layout, sidebar, top context bar, account menu, subscription/license badge, Workspace page header, or Workspace tabs when implementing this design. The design target starts inside the active `Global Users` tab panel.
 
@@ -27,7 +29,7 @@ This design covers only the content rendered inside the Workspace `Global Users`
 
 ## Angular Functional Reference
 
-Angular currently provides these behaviors:
+Angular previously provided these behaviors:
 
 - Fetches `GET /api/v1/global-users` with `name`, zero-based `pageIndex`, and `pageSize`.
 - Debounces search by 200 ms.

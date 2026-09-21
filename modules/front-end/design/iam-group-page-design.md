@@ -1,6 +1,8 @@
 # IAM Group Page Design
 
-This document is the React design contract for the IAM Group list page. Angular remains a functional reference for Group data and API behavior, but the React implementation must follow the current IAM Team list page structure and its shadcn/ui, Base UI, Tailwind, TanStack Table, and authenticated-shell conventions.
+> Historical context: references to Angular describe the retired frontend behavior. Its source is available in Git history, not in the working tree. Current implementation lives in `modules/front-end`.
+
+This document is the React design contract for the IAM Group list page. The retired Angular implementation provides a historical functional reference for Group data and API behavior, but the React implementation must follow the current IAM Team list page structure and its shadcn/ui, Base UI, Tailwind, TanStack Table, and authenticated-shell conventions.
 
 The Group detail page has a separate contract in [iam-group-detail-page-design.md](iam-group-detail-page-design.md).
 
