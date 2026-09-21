@@ -126,8 +126,6 @@ public class ExperimentRunVm
 
     public Guid? LayerId { get; set; }
 
-    public string AudienceFilters { get; set; }
-
     public int? TrafficOffset { get; set; }
 
     public string LayerKey { get; set; }

@@ -87,7 +87,6 @@ import {
   normalizedMethod,
   orderedRuns,
   parseAnalysis,
-  parseAudienceFilters,
   parseExperimentVariantNames,
   parseSamplingPlan,
   runVariants,
@@ -520,7 +519,6 @@ function AssignmentSummary({
     ])
   )
   const sampling = parseSamplingPlan(run)
-  const audienceFilters = parseAudienceFilters(run.audienceFilters)
   const start = run.sliceStart ?? 0
   const end = run.sliceEnd ?? 100
   const selectedLayer = layers.find((layer) => layer.key === run.layerKey)
@@ -658,37 +656,6 @@ function AssignmentSummary({
               "releaseDecision.experiments.detailsPage.measuring.samplingHelp"
             )}
           </p>
-        </section>
-        <section className="space-y-2 py-4">
-          <h4 className="text-sm font-medium">
-            {t(
-              "releaseDecision.experiments.detailsPage.measuring.audienceFilters"
-            )}
-          </h4>
-          {audienceFilters.length ? (
-            <div className="space-y-2">
-              {audienceFilters.map((filter, index) => (
-                <div
-                  key={`${filter.property}-${filter.op}-${index}`}
-                  className="flex flex-wrap items-center gap-2 text-sm"
-                >
-                  <code className="rounded bg-muted px-1.5 py-0.5 text-xs">
-                    {filter.property}
-                  </code>
-                  <span className="text-muted-foreground">
-                    {t(
-                      `releaseDecision.experiments.detailsPage.measuring.filterOps.${filter.op}`
-                    )}
-                  </span>
-                  <span>{filter.value || "—"}</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              {t("releaseDecision.experiments.detailsPage.measuring.noFilters")}
-            </p>
-          )}
         </section>
       </div>
     </aside>

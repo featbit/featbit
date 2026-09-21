@@ -121,7 +121,7 @@ public class ExperimentMcpTools(
     }
 
     [McpServerTool(Name = "featbit_experiment_update_run_traffic")]
-    [Description("Configure a run's analysis scope and sampling without modifying the Feature Flag. Supports layer ID/key, assignment unit, bucket slice start/end, traffic offset, allocation plan, audience filters, and analysis sampling plan. Layer reservations are validated against observation windows, including future reservations. Decisions do not change reservations. Choose includeRate from actual exposure counts in the run window: desired analyzed users / observed served users * 100, capped at 100. Actual rollout, targeting, or flag toggle changes must use Feature Flag tools with explicit customer confirmation; a run decision is not confirmation.")]
+    [Description("Configure a run's analysis scope and sampling without modifying the Feature Flag. Supports layer ID/key, assignment unit, bucket slice start/end, traffic offset, allocation plan, and analysis sampling plan. Layer reservations are validated against observation windows, including future reservations. Decisions do not change reservations. Choose includeRate from actual exposure counts in the run window: desired analyzed users / observed served users * 100, capped at 100. Actual rollout, targeting, or flag toggle changes must use Feature Flag tools with explicit customer confirmation; a run decision is not confirmation.")]
     public async Task<ExperimentDetailVm> UpdateRunTraffic(
         [Description("Experiment ID.")]
         Guid experimentId,
@@ -160,7 +160,6 @@ public class ExperimentMcpTools(
                 LayerTrafficPercent = request.LayerTrafficPercent,
                 AllocationPlan = Normalize(request.AllocationPlan),
                 AnalysisSamplingPlan = request.AnalysisSamplingPlan,
-                AudienceFilters = Normalize(request.AudienceFilters),
             }
         });
     }
@@ -416,7 +415,4 @@ public class ExperimentMcpRunTrafficRequest
 
     [Description("Optional legacy JSON allocation plan. Prefer analysisSamplingPlan unless intentionally reproducing allocation-plan behavior.")]
     public string AllocationPlan { get; set; } = string.Empty;
-
-    [Description("Optional audience filters stored on the run for operator visibility.")]
-    public string AudienceFilters { get; set; } = string.Empty;
 }

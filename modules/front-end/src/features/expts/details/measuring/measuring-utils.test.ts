@@ -6,11 +6,9 @@ import {
   normalizedMethod,
   orderedRuns,
   parseAnalysis,
-  parseAudienceFilters,
   parseExperimentVariantNames,
   parseSamplingPlan,
   runVariants,
-  serializeAudienceFilters,
   serializeSamplingPlan,
 } from "./measuring-utils"
 
@@ -129,7 +127,7 @@ describe("measuring utils", () => {
     expect(normalizedMethod(null)).toBe("bayesian_ab")
   })
 
-  it("round-trips sampling roles and audience filters using backend shapes", () => {
+  it("round-trips sampling roles using backend shapes", () => {
     const configured = run({
       controlVariant: "easy-id",
       treatmentVariants: ["hard-id"],
@@ -161,23 +159,6 @@ describe("measuring utils", () => {
         label: "Hard",
       },
     ])
-
-    const filters = parseAudienceFilters(
-      JSON.stringify([{ property: "country", op: "in", values: ["DE", "FR"] }])
-    )
-    expect(filters).toEqual([
-      { property: "country", op: "in", value: "DE, FR" },
-    ])
-    expect(JSON.parse(serializeAudienceFilters(filters))).toEqual([
-      { property: "country", op: "in", values: ["DE", "FR"] },
-    ])
-  })
-
-  it("treats empty or invalid audience-filter JSON as no filters", () => {
-    expect(parseAudienceFilters("[]")).toEqual([])
-    expect(parseAudienceFilters("")).toEqual([])
-    expect(parseAudienceFilters(null)).toEqual([])
-    expect(parseAudienceFilters("not-json")).toEqual([])
   })
 
   it("maps experiment variant ids and values to their names", () => {

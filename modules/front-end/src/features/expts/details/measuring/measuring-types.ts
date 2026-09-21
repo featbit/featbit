@@ -38,7 +38,6 @@ export type MeasuringRun = ExperimentRunDetail & {
   assignmentUnitSelector?: string | null
   layerTrafficPercent?: number | null
   analysisSamplingPlan?: string | null
-  audienceFilters?: string | null
   trafficOffset?: number | null
   updatedAt?: string
 }
@@ -52,7 +51,6 @@ export type RunAssignmentUpdate = {
   sliceStart: number
   sliceEnd: number
   analysisSamplingPlan: string
-  audienceFilters: string | null
 }
 
 export type AnalysisRow = {
@@ -96,10 +94,4 @@ export type ParsedAnalysis = {
   }
   primary?: AnalysisSection
   guardrails: AnalysisSection[]
-}
-
-export type AudienceFilter = {
-  property: string
-  op: "eq" | "neq" | "in" | "nin"
-  value: string
 }

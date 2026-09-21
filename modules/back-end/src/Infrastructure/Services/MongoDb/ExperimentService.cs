@@ -177,7 +177,6 @@ public class ExperimentService(
             AssignmentUnitSelector = previous?.AssignmentUnitSelector ?? previous?.AllocationKeySelector ?? "user.keyId",
             LayerTrafficPercent = previous?.LayerTrafficPercent ?? 100,
             AnalysisSamplingPlan = previous?.AnalysisSamplingPlan,
-            AudienceFilters = previous?.AudienceFilters,
             MinimumSample = previous?.MinimumSample,
             PriorProper = previous?.PriorProper ?? false,
             PriorMean = previous?.PriorMean,
@@ -296,7 +295,6 @@ public class ExperimentService(
                                      "user.keyId";
         run.LayerTrafficPercent = Math.Clamp(sliceEnd - sliceStart, 0d, 100d);
         run.AnalysisSamplingPlan = Normalize(update.AnalysisSamplingPlan);
-        run.AudienceFilters = Normalize(update.AudienceFilters);
         run.Method = Normalize(update.Method, run.Method);
         await NormalizeAndValidateLayerAssignmentAsync(envId, run);
         run.UpdatedAt = DateTime.UtcNow;
@@ -710,7 +708,6 @@ public class ExperimentService(
             NextHypothesis = run.NextHypothesis,
             TrafficPercent = run.TrafficPercent,
             LayerId = run.LayerId,
-            AudienceFilters = run.AudienceFilters,
             TrafficOffset = run.TrafficOffset,
             LayerKey = run.LayerKey,
             AllocationKeySelector = run.AllocationKeySelector,
@@ -931,7 +928,6 @@ public class ExperimentService(
         run.AllocationPlan = Normalize(update.AllocationPlan, run.AllocationPlan);
         run.AssignmentUnitSelector = Normalize(update.AssignmentUnitSelector, run.AssignmentUnitSelector);
         run.AnalysisSamplingPlan = Normalize(update.AnalysisSamplingPlan, run.AnalysisSamplingPlan);
-        run.AudienceFilters = Normalize(update.AudienceFilters, run.AudienceFilters);
 
         if (update.MinimumSample.HasValue) run.MinimumSample = update.MinimumSample;
         if (update.ObservationStart.HasValue) run.ObservationStart = update.ObservationStart;

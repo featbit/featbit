@@ -50,8 +50,6 @@ public class ExperimentRun : AuditedEntity
 
     public Guid? LayerId { get; set; }
 
-    public string AudienceFilters { get; set; }
-
     public int? TrafficOffset { get; set; } = 0;
 
     public string LayerKey { get; set; }
