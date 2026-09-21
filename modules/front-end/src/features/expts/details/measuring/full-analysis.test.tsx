@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest"
 import "@/lib/i18n/i18n"
 import { FullAnalysis } from "./measuring-details"
 import type { MeasuringRun } from "./measuring-types"
-import { parseExperimentVariantNames } from "./measuring-utils"
+import { parseRunVariationNames } from "./measuring-utils"
 
 const variantNames = {
   control: "Original",
@@ -15,6 +15,7 @@ function bayesianRun(n: number): MeasuringRun {
   const variants = Object.keys(variantNames)
   return {
     id: "run-id",
+    variations: [],
     slug: "run-1",
     method: "bayesian_ab",
     decision: null,
@@ -114,23 +115,23 @@ describe("Bayesian full analysis", () => {
   it("shows variation names in tables and comparison summaries", () => {
     const variants = [
       {
-        key: "1e2bded9-a870-cb37-8e9a-ff93b82edcee",
+        id: "1e2bded9-a870-cb37-8e9a-ff93b82edcee",
         name: "control-updated",
         value: "off",
       },
       {
-        key: "121efaee-b1ef-5631-9cee-f24137a8e6bc",
+        id: "121efaee-b1ef-5631-9cee-f24137a8e6bc",
         name: "candidate-1-updated",
         value: "guided",
       },
       {
-        key: "82da7db8-3a02-9d37-8631-a766bf2dc76a",
+        id: "82da7db8-3a02-9d37-8631-a766bf2dc76a",
         name: "candidate-2-updated",
         value: "compact",
       },
     ]
-    const rows = variants.map(({ key }, index) => ({
-      variant: key,
+    const rows = variants.map(({ id }, index) => ({
+      variant: id,
       n: 200,
       conversions: 100,
       rate: 0.5,
@@ -138,15 +139,15 @@ describe("Bayesian full analysis", () => {
     }))
     const run = {
       ...bayesianRun(200),
-      controlVariant: variants[0].key,
-      treatmentVariants: variants.slice(1).map(({ key }) => key),
+      controlVariant: variants[0].id,
+      treatmentVariants: variants.slice(1).map(({ id }) => id),
       analysisResult: JSON.stringify({
         type: "bayesian",
         primary_metric: {
           event: "purchase",
           metric_type: "proportion",
           rows,
-          verdict: `${variants[1].key}: strong signal -> adopt treatment; ${variants[2].key}: inconclusive`,
+          verdict: `${variants[1].id}: strong signal -> adopt treatment; ${variants[2].id}: inconclusive`,
         },
         guardrails: [
           {
@@ -159,16 +160,13 @@ describe("Bayesian full analysis", () => {
               is_control,
               mean: 3,
             })),
-            verdict: `${variants[1].key}: guardrail clear; ${variants[2].key}: guardrail ALARM - likely regression`,
+            verdict: `${variants[1].id}: guardrail clear; ${variants[2].id}: guardrail ALARM - likely regression`,
           },
         ],
       }),
     }
     render(
-      <FullAnalysis
-        run={run}
-        variantNames={parseExperimentVariantNames(JSON.stringify(variants))}
-      />
+      <FullAnalysis run={run} variantNames={parseRunVariationNames(variants)} />
     )
 
     expect(
@@ -181,12 +179,12 @@ describe("Bayesian full analysis", () => {
         "candidate-1-updated: guardrail clear; candidate-2-updated: guardrail ALARM - likely regression"
       )
     ).toBeInTheDocument()
-    for (const { key, name } of variants) {
-      expect(document.body).not.toHaveTextContent(key)
+    for (const { id, name } of variants) {
+      expect(document.body).not.toHaveTextContent(id)
       for (const table of screen.getAllByRole("table")) {
         expect(within(table).getByText(name)).toBeInTheDocument()
       }
-      expect(run.analysisResult).toContain(key)
+      expect(run.analysisResult).toContain(id)
     }
   })
 

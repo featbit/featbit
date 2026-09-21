@@ -6,7 +6,7 @@ import {
   normalizedMethod,
   orderedRuns,
   parseAnalysis,
-  parseExperimentVariantNames,
+  parseRunVariationNames,
   parseSamplingPlan,
   runVariants,
   serializeSamplingPlan,
@@ -15,6 +15,7 @@ import {
 function run(overrides: Partial<MeasuringRun> = {}): MeasuringRun {
   return {
     id: "run-id",
+    variations: [],
     slug: "run-1",
     method: "bayesian_ab",
     decision: null,
@@ -161,22 +162,16 @@ describe("measuring utils", () => {
     ])
   })
 
-  it("maps experiment variant ids and values to their names", () => {
+  it("maps only run snapshot variation ids to their names", () => {
     expect(
-      parseExperimentVariantNames(
-        JSON.stringify([
-          { key: "normal-id", name: "Normal", value: "normal" },
-          { key: "hard-id", name: "Hard", value: "hard" },
-        ])
-      )
+      parseRunVariationNames([
+        { id: "normal-id", name: "Normal", value: "normal" },
+        { id: "hard-id", name: "Hard", value: "hard" },
+      ])
     ).toEqual({
       "normal-id": "Normal",
-      Normal: "Normal",
-      normal: "Normal",
       "hard-id": "Hard",
-      Hard: "Hard",
-      hard: "Hard",
     })
-    expect(parseExperimentVariantNames("not-json")).toEqual({})
+    expect(parseRunVariationNames([])).toEqual({})
   })
 })

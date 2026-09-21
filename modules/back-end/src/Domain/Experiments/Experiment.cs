@@ -30,8 +30,6 @@ public class Experiment : AuditedEntity
 
     public PrimaryMetricConfig PrimaryMetric { get; set; }
 
-    public string Variants { get; set; }
-
     public string ConflictAnalysis { get; set; }
 
     // Null marks legacy data whose run history has not been used to seed the counter yet.

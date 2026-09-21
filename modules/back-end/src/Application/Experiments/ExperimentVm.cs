@@ -67,8 +67,6 @@ public class ExperimentDetailVm : ExperimentVm
 
     public PrimaryMetricConfig PrimaryMetric { get; set; }
 
-    public string Variants { get; set; }
-
     public string ConflictAnalysis { get; set; }
 
     public ICollection<ExperimentRunVm> ExperimentRuns { get; set; } = [];
@@ -87,6 +85,8 @@ public class ExperimentRunVm
     public PrimaryMetricConfig PrimaryMetric { get; set; }
 
     public List<GuardrailMetricConfig> GuardrailMetrics { get; set; } = [];
+
+    public ICollection<Domain.FeatureFlags.Variation> Variations { get; set; } = [];
 
     public string ControlVariant { get; set; }
 

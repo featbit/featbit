@@ -2,6 +2,16 @@ import { Check, ChevronsUpDown, ListChecks } from "lucide-react"
 import { useMemo, useRef, useState, type RefObject } from "react"
 import { useTranslation } from "react-i18next"
 import { StablePopoverContent } from "@/components/stable-popover-content"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -176,32 +186,14 @@ export function EditAssignmentSheet({
 }) {
   const { t } = useTranslation()
   const popoverPortalRef = useRef<HTMLDivElement>(null)
-  const configuredVariants = useMemo(
-    () =>
-      runVariants(run).map((token) => {
-        const match = variations.find(
-          (variation) =>
-            variation.id === token ||
-            variation.value === token ||
-            variation.name === token
-        )
-        return match?.id ?? token
-      }),
-    [run, variations]
+  const [confirmSaveOpen, setConfirmSaveOpen] = useState(false)
+  const configuredVariants = runVariants(run)
+  const available = useMemo(
+    () => variations.map((variation) => variation.id),
+    [variations]
   )
-  const available = useMemo(() => {
-    const fromFlag = variations.map((variation) => variation.id)
-    return [...new Set([...fromFlag, ...configuredVariants])]
-  }, [configuredVariants, variations])
   const variationMap = useMemo(
-    () =>
-      new Map(
-        variations.flatMap((variation) => [
-          [variation.id, variation] as const,
-          [variation.value, variation] as const,
-          [variation.name, variation] as const,
-        ])
-      ),
+    () => new Map(variations.map((variation) => [variation.id, variation])),
     [variations]
   )
   const [control, setControl] = useState(
@@ -226,10 +218,19 @@ export function EditAssignmentSheet({
     )
   })
 
+  const hasDecision = Boolean(run.decision?.trim())
+  const selectionChanged =
+    control !== run.controlVariant ||
+    JSON.stringify([...treatments].sort()) !==
+      JSON.stringify([...(run.treatmentVariants ?? [])].sort())
+  const clearsAnalysis =
+    !hasDecision && selectionChanged && Boolean(run.analysisResult?.trim())
   const included = [control, ...treatments].filter(Boolean)
   const valid = Boolean(
     control &&
+    !(hasDecision && selectionChanged) &&
     treatments.length > 0 &&
+    included.every((id) => available.includes(id)) &&
     assignmentUnit.trim() &&
     sliceStart >= 0 &&
     sliceEnd <= 100 &&
@@ -239,6 +240,27 @@ export function EditAssignmentSheet({
         (sampling[variant] ?? 100) >= 0 && (sampling[variant] ?? 100) <= 100
     )
   )
+
+  const saveAssignment = () => {
+    if (!valid || saving) return
+    void onSave({
+      method: run.method,
+      controlVariant: control,
+      treatmentVariants: treatments,
+      layerKey: layerKey.trim() || null,
+      assignmentUnitSelector: assignmentUnit.trim(),
+      sliceStart,
+      sliceEnd,
+      analysisSamplingPlan: serializeSamplingPlan(
+        control,
+        treatments,
+        sampling,
+        Object.fromEntries(
+          variations.map((variation) => [variation.id, variation.name])
+        )
+      ),
+    }).catch(() => undefined)
+  }
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -277,6 +299,13 @@ export function EditAssignmentSheet({
                   )}
                 </p>
               </div>
+              {hasDecision ? (
+                <p className="rounded-md border bg-muted/50 p-3 text-sm text-muted-foreground">
+                  {t(
+                    "releaseDecision.experiments.detailsPage.measuring.decidedRolesLocked"
+                  )}
+                </p>
+              ) : null}
               <div className="space-y-3">
                 <Label className="font-normal text-muted-foreground">
                   {t(
@@ -284,6 +313,7 @@ export function EditAssignmentSheet({
                   )}
                 </Label>
                 <RadioGroup
+                  disabled={hasDecision || saving}
                   value={control}
                   onValueChange={(value) => {
                     setControl(value)
@@ -317,6 +347,7 @@ export function EditAssignmentSheet({
                       className="flex cursor-pointer items-center gap-2 text-sm"
                     >
                       <Checkbox
+                        disabled={hasDecision || saving}
                         checked={treatments.includes(id)}
                         onCheckedChange={(checked) =>
                           setTreatments((current) =>
@@ -523,28 +554,10 @@ export function EditAssignmentSheet({
           <Button
             type="button"
             disabled={!valid || saving}
-            onClick={() =>
-              void onSave({
-                method: run.method,
-                controlVariant: control,
-                treatmentVariants: treatments,
-                layerKey: layerKey.trim() || null,
-                assignmentUnitSelector: assignmentUnit.trim(),
-                sliceStart,
-                sliceEnd,
-                analysisSamplingPlan: serializeSamplingPlan(
-                  control,
-                  treatments,
-                  sampling,
-                  Object.fromEntries(
-                    variations.map((variation) => [
-                      variation.id,
-                      variation.name,
-                    ])
-                  )
-                ),
-              })
-            }
+            onClick={() => {
+              if (clearsAnalysis) setConfirmSaveOpen(true)
+              else saveAssignment()
+            }}
           >
             {t(
               saving
@@ -553,6 +566,38 @@ export function EditAssignmentSheet({
             )}
           </Button>
         </SheetFooter>
+        <AlertDialog open={confirmSaveOpen} onOpenChange={setConfirmSaveOpen}>
+          <AlertDialogContent className="sm:max-w-md">
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                {t(
+                  "releaseDecision.experiments.detailsPage.measuring.confirmRolesChangeTitle"
+                )}
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                {t(
+                  "releaseDecision.experiments.detailsPage.measuring.confirmRolesChangeDescription"
+                )}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="border-t-0 bg-transparent">
+              <AlertDialogCancel render={<Button variant="outline" />}>
+                {t(
+                  "releaseDecision.experiments.detailsPage.measuring.backToEditing"
+                )}
+              </AlertDialogCancel>
+              <AlertDialogAction
+                render={<Button variant="destructive" />}
+                disabled={!valid || saving}
+                onClick={saveAssignment}
+              >
+                {t(
+                  "releaseDecision.experiments.detailsPage.measuring.saveAndClearAnalysis"
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </SheetContent>
     </Sheet>
   )

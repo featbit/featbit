@@ -43,8 +43,7 @@ public class ExperimentService(
         }
 
         await LoadExperimentChildrenAsync(experiment);
-        var flag = await TryGetBoundFeatureFlagAsync(envId, experiment);
-        AlignRunsForRead(experiment, flag);
+        var flag = await ExperimentFlagBinding.FindAsync(featureFlagService, envId, experiment.FlagId);
         return ToDetailVm(experiment, flag);
     }
 
@@ -149,9 +148,10 @@ public class ExperimentService(
         return await GetAsync(envId, id);
     }
 
-    public async Task<ExperimentDetailVm> CreateRunAsync(Guid envId, Guid id)
+    public async Task<ExperimentDetailVm> CreateRunAsync(Guid envId, Guid id, ExperimentRunCreate setup)
     {
-        var experiment = await GetTrackedExperimentAsync(envId, id);
+        ArgumentNullException.ThrowIfNull(setup);
+        var experiment = await GetReadOnlyExperimentAsync(envId, id);
 
         var existingRuns = await dbContext.Set<ExperimentRun>()
             .Where(x => x.ExperimentId == id)
@@ -165,11 +165,11 @@ public class ExperimentService(
         {
             Id = Guid.NewGuid(),
             ExperimentId = id,
-            Method = previous?.Method ?? "bayesian_ab",
+            Method = setup.Method ?? "bayesian_ab",
             PrimaryMetric = MetricSnapshots.Copy(experiment.PrimaryMetric),
             GuardrailMetrics = MetricSnapshots.Copy(experiment.GuardrailMetrics),
-            ControlVariant = previous?.ControlVariant,
-            TreatmentVariants = previous?.TreatmentVariants?.ToArray() ?? [],
+            ControlVariant = setup.ControlVariant,
+            TreatmentVariants = setup.TreatmentVariants ?? [],
             TrafficPercent = previous?.TrafficPercent ?? 100,
             TrafficOffset = previous?.TrafficOffset ?? 0,
             LayerId = previous?.LayerId,
@@ -181,19 +181,22 @@ public class ExperimentService(
             AssignmentUnitSelector = previous?.AssignmentUnitSelector ?? previous?.AllocationKeySelector ?? "user.keyId",
             LayerTrafficPercent = previous?.LayerTrafficPercent ?? 100,
             AnalysisSamplingPlan = previous?.AnalysisSamplingPlan,
-            MinimumSample = previous?.MinimumSample,
+            MinimumSample = setup.MinimumSample,
             PriorProper = previous?.PriorProper ?? false,
             PriorMean = previous?.PriorMean,
             PriorStddev = previous?.PriorStddev,
-            ObservationStart = now,
+            ObservationStart = setup.ObservationStart ?? now,
+            ObservationEnd = setup.ObservationEnd,
             CreatedAt = now,
             UpdatedAt = now
         };
-        await AlignRunVariantsAsync(envId, experiment, run, inferMissing: true);
         if (string.IsNullOrWhiteSpace(run.PrimaryMetric?.EventName))
         {
             throw new BusinessException(ErrorCodes.Required("primaryMetric"));
         }
+        var flag = await ExperimentFlagBinding.RequireAsync(featureFlagService, envId, experiment.FlagId);
+        run.Variations = RunVariationSnapshot.Copy(flag.Variations);
+        RunVariationSnapshot.ValidateSelection(run);
 
         await NormalizeAndValidateLayerAssignmentAsync(envId, run);
         var number = await AllocateRunNumberAsync(envId, experiment);
@@ -250,12 +253,18 @@ public class ExperimentService(
         ExperimentRunUpdate update)
     {
         update ??= new ExperimentRunUpdate();
-        var experiment = await GetTrackedExperimentAsync(envId, id);
+        await EnsureExperimentExistsAsync(envId, id);
 
         var run = await GetTrackedRunAsync(id, runId);
+        RunVariationSnapshot.EnsureSelectionCanChange(run, update.ControlVariant, update.TreatmentVariants);
+        var selection = RunVariationSnapshot.Selection(run);
         ApplyRunUpdate(run, update);
         await NormalizeAndValidateLayerAssignmentAsync(envId, run);
-        await AlignRunVariantsAsync(envId, experiment, run, inferMissing: false);
+        if (update.ControlVariant != null || update.TreatmentVariants != null)
+        {
+            RunVariationSnapshot.ValidateSelection(run);
+            RunVariationSnapshot.InvalidateChangedSelection(run, selection);
+        }
         run.UpdatedAt = DateTime.UtcNow;
 
         await dbContext.SaveChangesAsync();
@@ -273,6 +282,8 @@ public class ExperimentService(
         await EnsureExperimentExistsAsync(envId, id);
 
         var run = await GetTrackedRunAsync(id, runId);
+        RunVariationSnapshot.EnsureSelectionCanChange(run, update.ControlVariant, update.TreatmentVariants);
+        var selection = RunVariationSnapshot.Selection(run);
         var sliceStart = Math.Clamp(update.SliceStart ?? update.TrafficOffset ?? 0, 0, 100);
         var sliceEnd = Math.Clamp(
             update.SliceEnd ?? Math.Min(
@@ -293,11 +304,8 @@ public class ExperimentService(
         run.SliceStart = sliceStart;
         run.SliceEnd = sliceEnd;
         run.AllocationPlan = Normalize(update.AllocationPlan);
-        run.ControlVariant = Normalize(update.ControlVariant, run.ControlVariant);
-        run.TreatmentVariants = update.TreatmentVariants?
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .Select(x => x.Trim())
-            .ToArray() ?? run.TreatmentVariants;
+        if (update.ControlVariant != null) run.ControlVariant = update.ControlVariant;
+        run.TreatmentVariants = update.TreatmentVariants?.ToArray() ?? run.TreatmentVariants;
         run.AssignmentUnitSelector = Normalize(update.AssignmentUnitSelector, run.AssignmentUnitSelector) ??
                                      run.AllocationKeySelector ??
                                      "user.keyId";
@@ -305,6 +313,11 @@ public class ExperimentService(
         run.AnalysisSamplingPlan = Normalize(update.AnalysisSamplingPlan);
         run.Method = Normalize(update.Method, run.Method);
         await NormalizeAndValidateLayerAssignmentAsync(envId, run);
+        if (update.ControlVariant != null || update.TreatmentVariants != null)
+        {
+            RunVariationSnapshot.ValidateSelection(run);
+            RunVariationSnapshot.InvalidateChangedSelection(run, selection);
+        }
         run.UpdatedAt = DateTime.UtcNow;
 
         await dbContext.SaveChangesAsync();
@@ -344,11 +357,9 @@ public class ExperimentService(
         ExperimentRunAnalyzeRequest request)
     {
         request ??= new ExperimentRunAnalyzeRequest();
-        var experiment = await GetTrackedExperimentAsync(envId, id);
+        var experiment = await GetReadOnlyExperimentAsync(envId, id);
         var run = await GetTrackedRunAsync(id, runId);
         var flag = await ExperimentFlagBinding.RequireAsync(featureFlagService, envId, experiment.FlagId);
-        experiment.Variants = BuildFeatureFlagVariantsJson(flag);
-        AlignRunVariants(run, flag, inferMissing: true);
         var primarySnapshot = run.PrimaryMetric
             ?? throw new BusinessException(ErrorCodes.Required("primaryMetric"));
         var primaryMetricEvent = Normalize(primarySnapshot.EventName);
@@ -358,6 +369,7 @@ public class ExperimentService(
             throw new InvalidOperationException("Primary metric event is required before analysis.");
         }
 
+        RunVariationSnapshot.ValidateSelection(run);
         var now = DateTime.UtcNow;
         var start = ExperimentRunAllocation.ObservationStart(run);
         var end = run.ObservationEnd ?? now;
@@ -451,14 +463,9 @@ public class ExperimentService(
 
         var control = Normalize(run.ControlVariant) ?? "control";
         var treatments = run.TreatmentVariants ?? [];
-        var (analysisControl, analysisTreatments) = ResolveAnalysisVariantKeys(
-            experiment.Variants,
-            primaryMetricData,
-            control,
-            treatments);
         var analysisResult = BuildBayesianAnalysisJson(
             run, experiment.Name ?? id.ToString(), primaryMetricEvent, metricAgg,
-            metrics, guardrails, analysisControl, analysisTreatments);
+            metrics, guardrails, control, treatments);
 
         run.AnalysisResult = analysisResult;
         run.UpdatedAt = DateTime.UtcNow;
@@ -642,188 +649,7 @@ public class ExperimentService(
             .ToListAsync();
     }
 
-    private static void AlignRunsForRead(Experiment experiment, FeatureFlag? flag)
-    {
-        if (flag == null)
-        {
-            return;
-        }
 
-        experiment.Variants = BuildFeatureFlagVariantsJson(flag);
-        foreach (var run in experiment.ExperimentRuns)
-        {
-            AlignRunVariants(run, flag, inferMissing: false);
-        }
-    }
-
-    private async Task AlignRunVariantsAsync(
-        Guid envId,
-        Experiment experiment,
-        ExperimentRun run,
-        bool inferMissing)
-    {
-        var flag = await TryGetBoundFeatureFlagAsync(envId, experiment);
-        if (flag == null)
-        {
-            return;
-        }
-
-        experiment.Variants = BuildFeatureFlagVariantsJson(flag);
-        AlignRunVariants(run, flag, inferMissing);
-    }
-
-    private Task<FeatureFlag?> TryGetBoundFeatureFlagAsync(Guid envId, Experiment experiment) =>
-        ExperimentFlagBinding.FindAsync(featureFlagService, envId, experiment.FlagId);
-
-    private static void AlignRunVariants(
-        ExperimentRun run,
-        FeatureFlag flag,
-        bool inferMissing)
-    {
-        var variations = flag.Variations?
-            .Where(x => !string.IsNullOrWhiteSpace(x.Id))
-            .ToArray() ?? [];
-        if (variations.Length == 0)
-        {
-            return;
-        }
-
-        // Named defaults must not replace roles explicitly selected for this run.
-        if (inferMissing &&
-            string.IsNullOrWhiteSpace(run.ControlVariant) &&
-            (run.TreatmentVariants == null || run.TreatmentVariants.Length == 0) &&
-            TryResolveNamedControlAndTreatments(variations, out var namedControl, out var namedTreatments))
-        {
-            run.ControlVariant = namedControl;
-            run.TreatmentVariants = namedTreatments;
-            return;
-        }
-
-        var control = ResolveVariantId(run.ControlVariant, variations);
-        if (string.IsNullOrWhiteSpace(control) && inferMissing)
-        {
-            control = PickControlVariationId(flag, variations);
-        }
-
-        var treatments = ResolveTreatmentVariantIds(run.TreatmentVariants, variations)
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .Where(x => string.IsNullOrWhiteSpace(control) || !VariantTokenEquals(x, control))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToArray();
-
-        if (treatments.Length == 0 && inferMissing && !string.IsNullOrWhiteSpace(control))
-        {
-            treatments = variations
-                .Where(x => !VariantTokenEquals(x.Id, control))
-                .OrderBy(x => IsTreatmentVariation(x) ? 0 : 1)
-                .Select(x => x.Id)
-                .ToArray();
-        }
-
-        if (!string.IsNullOrWhiteSpace(control))
-        {
-            run.ControlVariant = control;
-        }
-
-        if (treatments.Length > 0)
-        {
-            run.TreatmentVariants = treatments;
-        }
-    }
-
-    private static bool TryResolveNamedControlAndTreatments(
-        IReadOnlyCollection<Variation> variations,
-        out string control,
-        out string[] treatments)
-    {
-        control = variations.FirstOrDefault(IsControlVariation)?.Id ?? string.Empty;
-        treatments = variations
-            .Where(IsTreatmentVariation)
-            .Select(x => x.Id)
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .ToArray();
-
-        return !string.IsNullOrWhiteSpace(control) && treatments.Length > 0;
-    }
-
-    private static string? ResolveVariantId(
-        string? token,
-        IReadOnlyCollection<Variation> variations)
-    {
-        var normalized = Normalize(token);
-        if (string.IsNullOrWhiteSpace(normalized))
-        {
-            return null;
-        }
-
-        return TryResolveExistingVariantId(normalized, variations) ?? normalized;
-    }
-
-    private static string? TryResolveExistingVariantId(
-        string? token,
-        IReadOnlyCollection<Variation> variations)
-    {
-        var normalized = Normalize(token);
-        if (string.IsNullOrWhiteSpace(normalized))
-        {
-            return null;
-        }
-
-        var matched = variations.FirstOrDefault(x => VariantTokenEquals(x.Id, normalized));
-
-        return matched?.Id;
-    }
-
-    private static string[] ResolveTreatmentVariantIds(
-        string[]? values,
-        IReadOnlyCollection<Variation> variations)
-    {
-        return (values ?? [])
-            .Select(x => ResolveVariantId(x, variations))
-            .OfType<string>()
-            .ToArray();
-    }
-
-    private static string? PickControlVariationId(
-        FeatureFlag flag,
-        IReadOnlyCollection<Variation> variations)
-    {
-        return variations.FirstOrDefault(IsControlVariation)?.Id
-            ?? variations.FirstOrDefault(x => VariantTokenEquals(x.Id, flag.DisabledVariationId))?.Id
-            ?? variations.First().Id;
-    }
-
-    private static bool IsControlVariation(Variation variation)
-    {
-        return VariantTokenEquals(variation.Name, "control");
-    }
-
-    private static bool IsTreatmentVariation(Variation variation)
-    {
-        return VariantTokenEquals(variation.Name, "treatment");
-    }
-
-    private static bool VariantTokenEquals(string? left, string? right)
-    {
-        return string.Equals(Normalize(left), Normalize(right), StringComparison.OrdinalIgnoreCase);
-    }
-
-    private static string BuildFeatureFlagVariantsJson(FeatureFlag flag)
-    {
-        var rows = (flag.Variations ?? [])
-            .Where(x => !string.IsNullOrWhiteSpace(x.Id))
-            .Select(x => new
-            {
-                key = x.Id,
-                name = x.Name,
-                value = x.Value,
-                description = string.IsNullOrWhiteSpace(x.Value)
-                    ? x.Name
-                    : $"{x.Name} ({x.Value})"
-            });
-
-        return JsonSerializer.Serialize(rows);
-    }
 
     private static ExperimentDetailVm ToDetailVm(Experiment experiment, FeatureFlag? flag)
     {
@@ -846,7 +672,6 @@ public class ExperimentService(
             LastAction = experiment.LastAction,
             LastLearning = experiment.LastLearning,
             PrimaryMetric = MetricSnapshots.Copy(experiment.PrimaryMetric),
-            Variants = experiment.Variants,
             ConflictAnalysis = experiment.ConflictAnalysis,
             CreatedAt = experiment.CreatedAt,
             UpdatedAt = experiment.UpdatedAt,
@@ -871,6 +696,7 @@ public class ExperimentService(
             GuardrailMetrics = MetricSnapshots.Copy(run.GuardrailMetrics),
             ControlVariant = run.ControlVariant,
             TreatmentVariants = run.TreatmentVariants,
+            Variations = run.Variations,
             MinimumSample = run.MinimumSample,
             ObservationStart = run.ObservationStart,
             ObservationEnd = run.ObservationEnd,
@@ -915,7 +741,6 @@ public class ExperimentService(
         experiment.Intent = Normalize(update.Intent, experiment.Intent);
         experiment.LastAction = Normalize(update.LastAction, experiment.LastAction);
         experiment.LastLearning = Normalize(update.LastLearning, experiment.LastLearning);
-        experiment.Variants = Normalize(update.Variants, experiment.Variants);
         experiment.ConflictAnalysis = Normalize(update.ConflictAnalysis, experiment.ConflictAnalysis);
     }
 
@@ -923,11 +748,8 @@ public class ExperimentService(
     {
         run.Slug = Normalize(update.Slug, run.Slug);
         run.Method = Normalize(update.Method, run.Method);
-        run.ControlVariant = Normalize(update.ControlVariant, run.ControlVariant);
-        run.TreatmentVariants = update.TreatmentVariants?
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .Select(x => x.Trim())
-            .ToArray() ?? run.TreatmentVariants;
+        if (update.ControlVariant != null) run.ControlVariant = update.ControlVariant;
+        run.TreatmentVariants = update.TreatmentVariants?.ToArray() ?? run.TreatmentVariants;
         run.AnalysisResult = Normalize(update.AnalysisResult, run.AnalysisResult);
         run.Decision = Normalize(update.Decision, run.Decision);
         run.DecisionSummary = Normalize(update.DecisionSummary, run.DecisionSummary);
@@ -1064,6 +886,11 @@ public class ExperimentService(
         return (start, end);
     }
 
+    private async Task<Experiment> GetReadOnlyExperimentAsync(Guid envId, Guid id) =>
+        await dbContext.Set<Experiment>().AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == id && x.EnvId == envId)
+        ?? throw new EntityNotFoundException(nameof(Experiment), $"{envId}-{id}");
+
     private async Task<Experiment> GetTrackedExperimentAsync(Guid envId, Guid id)
     {
         var experiment = await dbContext.Set<Experiment>()
@@ -1189,104 +1016,6 @@ public class ExperimentService(
         }
 
         return metricData;
-    }
-
-    private static (string Control, string[] Treatments) ResolveAnalysisVariantKeys(
-        string? variantsJson,
-        Dictionary<string, object> metricData,
-        string control,
-        string[] treatments)
-    {
-        var candidatesByToken = BuildVariantAnalysisKeyCandidates(variantsJson);
-        var resolvedControl = ResolveAnalysisVariantKey(control, metricData, candidatesByToken);
-        var resolvedTreatments = treatments
-            .Select(x => ResolveAnalysisVariantKey(x, metricData, candidatesByToken))
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .Where(x => !VariantTokenEquals(x, resolvedControl))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToArray();
-
-        return (resolvedControl, resolvedTreatments);
-    }
-
-    private static string ResolveAnalysisVariantKey(
-        string token,
-        Dictionary<string, object> metricData,
-        IReadOnlyDictionary<string, string[]> candidatesByToken)
-    {
-        var existing = FindExistingMetricKey(metricData, token);
-        if (!string.IsNullOrWhiteSpace(existing))
-        {
-            return existing;
-        }
-
-        if (candidatesByToken.TryGetValue(token, out var candidates))
-        {
-            foreach (var candidate in candidates)
-            {
-                existing = FindExistingMetricKey(metricData, candidate);
-                if (!string.IsNullOrWhiteSpace(existing))
-                {
-                    return existing;
-                }
-            }
-
-            return candidates.FirstOrDefault() ?? token;
-        }
-
-        return token;
-    }
-
-    private static string? FindExistingMetricKey(Dictionary<string, object> metricData, string? token)
-    {
-        var normalized = Normalize(token);
-        if (string.IsNullOrWhiteSpace(normalized))
-        {
-            return null;
-        }
-
-        return metricData.Keys.FirstOrDefault(key => VariantTokenEquals(key, normalized));
-    }
-
-    private static Dictionary<string, string[]> BuildVariantAnalysisKeyCandidates(string? variantsJson)
-    {
-        var map = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
-        if (string.IsNullOrWhiteSpace(variantsJson))
-        {
-            return map;
-        }
-
-        try
-        {
-            using var document = JsonDocument.Parse(variantsJson);
-            if (document.RootElement.ValueKind != JsonValueKind.Array)
-            {
-                return map;
-            }
-
-            foreach (var item in document.RootElement.EnumerateArray())
-            {
-                var key = GetJsonString(item, "key");
-                var name = GetJsonString(item, "name");
-                var value = GetJsonString(item, "value");
-                var candidates = new[] { key, name, value }
-                    .OfType<string>()
-                    .Where(x => !string.IsNullOrWhiteSpace(x))
-                    .Distinct(StringComparer.OrdinalIgnoreCase)
-                    .ToArray();
-
-                foreach (var token in candidates)
-                {
-                    map[token] = candidates;
-                }
-            }
-        }
-        catch (JsonException)
-        {
-            // If stored variant metadata is invalid, fall back to the run tokens.
-        }
-
-        return map;
     }
 
     private static string BuildBayesianAnalysisJson(
@@ -2082,13 +1811,6 @@ public class ExperimentService(
         {
             return new BayesianComparison(error, 0, 0, 0, 0, 0, 0, 0, false);
         }
-    }
-
-    private static string? GetJsonString(JsonElement element, string property)
-    {
-        return element.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.String
-            ? value.GetString()
-            : null;
     }
 
     private static bool IsDecreaseGood(string? value)
