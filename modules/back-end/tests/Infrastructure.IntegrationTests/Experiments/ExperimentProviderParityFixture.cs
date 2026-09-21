@@ -373,9 +373,8 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
                 user_name String,
                 variation_id LowCardinality(String),
                 variation_value String,
-                exposed_at DateTime64(6, 'UTC'),
-                properties String,
-                created_at DateTime64(6, 'UTC') DEFAULT now64(6)
+                exposed_at DateTime64(3, 'UTC'),
+                created_at DateTime64(3, 'UTC') DEFAULT now64(3)
             )
             ENGINE = MergeTree
             PARTITION BY (env_id, toYYYYMM(exposed_at))
@@ -389,13 +388,12 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
                 id UUID,
                 env_id UUID,
                 user_key String,
-                user_name String,
                 event_name LowCardinality(String),
                 event_type LowCardinality(String),
                 numeric_value Float64,
-                occurred_at DateTime64(6, 'UTC'),
-                properties String,
-                created_at DateTime64(6, 'UTC') DEFAULT now64(6)
+                application_type LowCardinality(String) DEFAULT '',
+                occurred_at DateTime64(3, 'UTC'),
+                created_at DateTime64(3, 'UTC') DEFAULT now64(3)
             )
             ENGINE = MergeTree
             PARTITION BY (env_id, toYYYYMM(occurred_at))
@@ -453,7 +451,7 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
     {
         await using var writer = await connection.BeginBinaryImportAsync("""
             COPY experiment_exposure_events
-                (id, env_id, flag_key, user_key, variation_id, variation_value, exposed_at, properties, created_at)
+                (id, env_id, flag_key, user_key, variation_id, variation_value, exposed_at, created_at)
             FROM STDIN (FORMAT BINARY)
             """);
 
@@ -474,7 +472,6 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
                 await writer.WriteAsync(exposure.VariationValue, NpgsqlDbType.Varchar);
             }
             await writer.WriteAsync(exposure.ExposedAt, NpgsqlDbType.TimestampTz);
-            await writer.WriteAsync(exposure.Properties, NpgsqlDbType.Jsonb);
             await writer.WriteAsync(exposure.CreatedAt, NpgsqlDbType.TimestampTz);
         }
 
@@ -487,7 +484,7 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
     {
         await using var writer = await connection.BeginBinaryImportAsync("""
             COPY experiment_metric_events
-                (id, env_id, user_key, event_name, event_type, numeric_value, occurred_at, properties, created_at)
+                (id, env_id, user_key, event_name, event_type, numeric_value, occurred_at, created_at)
             FROM STDIN (FORMAT BINARY)
             """);
 
@@ -501,7 +498,6 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
             await writer.WriteAsync(metric.EventType, NpgsqlDbType.Varchar);
             await writer.WriteAsync(metric.NumericValue, NpgsqlDbType.Double);
             await writer.WriteAsync(metric.OccurredAt, NpgsqlDbType.TimestampTz);
-            await writer.WriteAsync(metric.Properties, NpgsqlDbType.Jsonb);
             await writer.WriteAsync(metric.CreatedAt, NpgsqlDbType.TimestampTz);
         }
 
@@ -550,7 +546,6 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
                 VariationId = x.VariationId,
                 VariationValue = x.VariationValue,
                 ExposedAt = x.ExposedAt.UtcDateTime,
-                Properties = x.Properties,
                 CreatedAt = x.CreatedAt.UtcDateTime
             }));
 
@@ -564,7 +559,6 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
                 EventType = x.EventType,
                 NumericValue = x.NumericValue,
                 OccurredAt = x.OccurredAt.UtcDateTime,
-                Properties = x.Properties,
                 CreatedAt = x.CreatedAt.UtcDateTime
             }));
 
@@ -597,14 +591,13 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
                      {ChString(exposure.VariationId)},
                      {ChString(exposure.VariationValue)},
                      {ChDateTime64(exposure.ExposedAt)},
-                     {ChString(exposure.Properties)},
                      {ChDateTime64(exposure.CreatedAt)})
                     """;
             });
 
             await clickHouse.ExecuteCommandAsync($"""
                 INSERT INTO experiment_exposure_events
-                    (id, env_id, flag_key, user_key, user_name, variation_id, variation_value, exposed_at, properties, created_at)
+                    (id, env_id, flag_key, user_key, user_name, variation_id, variation_value, exposed_at, created_at)
                 VALUES
                     {string.Join(",\n", values)}
                 """);
@@ -612,26 +605,20 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
 
         foreach (var chunk in metrics.Chunk(500))
         {
-            var values = chunk.Select(metric =>
-            {
-                var userName = userNames.GetValueOrDefault(metric.UserKey, metric.UserKey);
-                return $"""
+            var values = chunk.Select(metric => $"""
                     ({ChUuid(metric.Id)},
                      {ChUuid(metric.EnvId)},
                      {ChString(metric.UserKey)},
-                     {ChString(userName)},
                      {ChString(metric.EventName)},
                      {ChString(metric.EventType)},
                      {metric.NumericValue.ToString(System.Globalization.CultureInfo.InvariantCulture)},
                      {ChDateTime64(metric.OccurredAt)},
-                     {ChString(metric.Properties)},
                      {ChDateTime64(metric.CreatedAt)})
-                    """;
-            });
+                    """);
 
             await clickHouse.ExecuteCommandAsync($"""
                 INSERT INTO experiment_metric_events
-                    (id, env_id, user_key, user_name, event_name, event_type, numeric_value, occurred_at, properties, created_at)
+                    (id, env_id, user_key, event_name, event_type, numeric_value, occurred_at, created_at)
                 VALUES
                     {string.Join(",\n", values)}
                 """);
@@ -656,7 +643,7 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
 
     private static string ChDateTime64(DateTimeOffset value)
     {
-        return $"toDateTime64('{value.UtcDateTime:yyyy-MM-dd HH:mm:ss.ffffff}', 6, 'UTC')";
+        return $"toDateTime64('{value.UtcDateTime:yyyy-MM-dd HH:mm:ss.fff}', 3, 'UTC')";
     }
 
     private static class Scenario
@@ -815,8 +802,8 @@ public sealed record ScenarioExposure(
     string VariationId,
     string VariationValue,
     DateTimeOffset ExposedAt,
-    DateTimeOffset CreatedAt,
-    string Properties = "{}");
+    DateTimeOffset CreatedAt
+);
 
 public sealed record ScenarioMetric(
     Guid Id,
@@ -826,5 +813,5 @@ public sealed record ScenarioMetric(
     string EventType,
     double NumericValue,
     DateTimeOffset OccurredAt,
-    DateTimeOffset CreatedAt,
-    string Properties = "{}");
+    DateTimeOffset CreatedAt
+);

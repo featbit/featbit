@@ -251,7 +251,7 @@ public class ExperimentMetricEventNameTests(ExperimentProviderParityFixture fixt
                 {
                     Id = Guid.NewGuid(), EnvId = envId, FlagKey = "checkout-flow", UserKey = userKey,
                     VariationId = treatment ? "treatment" : "control", VariationValue = treatment ? "true" : "false",
-                    ExposedAt = start.AddMinutes(1), Properties = "{}", CreatedAt = start
+                    ExposedAt = start.AddMinutes(1), CreatedAt = start
                 });
                 if (index < (treatment ? 8 : 5))
                 {
@@ -259,7 +259,7 @@ public class ExperimentMetricEventNameTests(ExperimentProviderParityFixture fixt
                     {
                         Id = Guid.NewGuid(), EnvId = envId, UserKey = userKey, EventName = "purchase",
                         EventType = "CustomEvent", NumericValue = treatment ? 20 : 10,
-                        OccurredAt = start.AddMinutes(2), Properties = "{}", CreatedAt = start
+                        OccurredAt = start.AddMinutes(2), CreatedAt = start
                     });
                 }
             }

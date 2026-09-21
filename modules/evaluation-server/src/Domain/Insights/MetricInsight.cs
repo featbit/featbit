@@ -7,20 +7,17 @@ namespace Domain.Insights;
 public partial class MetricInsight
 {
     private const int MaxEventNameLength = 128;
-    private const int MaxRouteLength = 256;
     private const int MaxTypeLength = 64;
     private const int MaxAppTypeLength = 128;
 
     [GeneratedRegex("^([a-zA-Z0-9_-]+)$")]
     private static partial Regex EventNameRegex();
 
-    public string Route { get; set; }
-
     public string Type { get; set; }
 
     public string EventName { get; set; }
 
-    public float NumericValue { get; set; }
+    public double NumericValue { get; set; }
 
     public string AppType { get; set; }
 
@@ -28,12 +25,7 @@ public partial class MetricInsight
 
     public bool IsValid()
     {
-        if (Route is not null && Route.Length > MaxRouteLength)
-        {
-            return false;
-        }
-
-        if (Type is not null && Type.Length > MaxTypeLength)
+        if (string.IsNullOrWhiteSpace(Type) || Type.Length > MaxTypeLength || Type == InsightMessage.FlagValueEvent)
         {
             return false;
         }

@@ -14,7 +14,5 @@ public class ExperimentExposureEvent : Entity
 
     public DateTime ExposedAt { get; set; }
 
-    public string Properties { get; set; }
-
     public DateTime CreatedAt { get; set; }
 }
