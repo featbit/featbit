@@ -140,7 +140,6 @@ CREATE TABLE IF NOT EXISTS experiment_runs (
     next_hypothesis text,
     traffic_percent double precision,
     layer_id uuid,
-    audience_filters text,
     traffic_offset integer,
     layer_key character varying(128),
     allocation_key_selector character varying(256),

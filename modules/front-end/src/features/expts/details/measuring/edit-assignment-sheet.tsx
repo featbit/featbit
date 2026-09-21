@@ -1,4 +1,4 @@
-import { Check, ChevronsUpDown, ListChecks, Plus, Trash2 } from "lucide-react"
+import { Check, ChevronsUpDown, ListChecks } from "lucide-react"
 import { useMemo, useRef, useState, type RefObject } from "react"
 import { useTranslation } from "react-i18next"
 import { StablePopoverContent } from "@/components/stable-popover-content"
@@ -17,14 +17,6 @@ import { Label } from "@/components/ui/label"
 import { Popover, PopoverTrigger } from "@/components/ui/popover"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import {
   Sheet,
   SheetContent,
   SheetDescription,
@@ -35,16 +27,10 @@ import {
 import type { FlagVariation } from "@/features/flags/flags-types"
 import type { Layer } from "@/features/expt-layers/layers-types"
 import { cn } from "@/lib/utils"
-import type {
-  AudienceFilter,
-  RunAssignmentUpdate,
-  MeasuringRun,
-} from "./measuring-types"
+import type { RunAssignmentUpdate, MeasuringRun } from "./measuring-types"
 import {
-  parseAudienceFilters,
   parseSamplingPlan,
   runVariants,
-  serializeAudienceFilters,
   serializeSamplingPlan,
 } from "./measuring-utils"
 
@@ -239,9 +225,6 @@ export function EditAssignmentSheet({
       ])
     )
   })
-  const [filters, setFilters] = useState<AudienceFilter[]>(() =>
-    parseAudienceFilters(run.audienceFilters)
-  )
 
   const included = [control, ...treatments].filter(Boolean)
   const valid = Boolean(
@@ -518,127 +501,6 @@ export function EditAssignmentSheet({
                 ))}
               </div>
             </section>
-
-            <section className="space-y-2 pt-5">
-              <div className="flex items-center justify-between gap-4">
-                <h3 className="font-medium">
-                  {t(
-                    "releaseDecision.experiments.detailsPage.measuring.audienceFilters"
-                  )}
-                </h3>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    setFilters((current) => [
-                      ...current,
-                      { property: "", op: "eq", value: "" },
-                    ])
-                  }
-                >
-                  <Plus />
-                  {t(
-                    "releaseDecision.experiments.detailsPage.measuring.addFilter"
-                  )}
-                </Button>
-              </div>
-              {filters.length ? (
-                <div className="space-y-3 pt-2">
-                  {filters.map((filter, index) => (
-                    <div
-                      key={index}
-                      className="grid grid-cols-[minmax(0,1fr)_144px_minmax(0,1fr)_auto] items-center gap-2"
-                    >
-                      <Input
-                        value={filter.property}
-                        placeholder={t(
-                          "releaseDecision.experiments.detailsPage.measuring.property"
-                        )}
-                        onChange={(event) =>
-                          setFilters((current) =>
-                            current.map((item, itemIndex) =>
-                              itemIndex === index
-                                ? { ...item, property: event.target.value }
-                                : item
-                            )
-                          )
-                        }
-                      />
-                      <Select
-                        value={filter.op}
-                        onValueChange={(value) =>
-                          setFilters((current) =>
-                            current.map((item, itemIndex) =>
-                              itemIndex === index
-                                ? { ...item, op: value as AudienceFilter["op"] }
-                                : item
-                            )
-                          )
-                        }
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue>
-                            {t(
-                              `releaseDecision.experiments.detailsPage.measuring.filterOps.${filter.op}`
-                            )}
-                          </SelectValue>
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectGroup>
-                            {(["eq", "neq", "in", "nin"] as const).map((op) => (
-                              <SelectItem key={op} value={op}>
-                                {t(
-                                  `releaseDecision.experiments.detailsPage.measuring.filterOps.${op}`
-                                )}
-                              </SelectItem>
-                            ))}
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
-                      <Input
-                        value={filter.value}
-                        placeholder={t(
-                          "releaseDecision.experiments.detailsPage.measuring.filterValue"
-                        )}
-                        onChange={(event) =>
-                          setFilters((current) =>
-                            current.map((item, itemIndex) =>
-                              itemIndex === index
-                                ? { ...item, value: event.target.value }
-                                : item
-                            )
-                          )
-                        }
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon-sm"
-                        aria-label={t(
-                          "releaseDecision.experiments.detailsPage.measuring.removeFilter"
-                        )}
-                        onClick={() =>
-                          setFilters((current) =>
-                            current.filter(
-                              (_, itemIndex) => itemIndex !== index
-                            )
-                          )
-                        }
-                      >
-                        <Trash2 />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="pt-1 text-sm text-muted-foreground">
-                  {t(
-                    "releaseDecision.experiments.detailsPage.measuring.noFilters"
-                  )}
-                </p>
-              )}
-            </section>
           </div>
         </div>
 
@@ -681,7 +543,6 @@ export function EditAssignmentSheet({
                     ])
                   )
                 ),
-                audienceFilters: serializeAudienceFilters(filters),
               })
             }
           >
