@@ -1,0 +1,13 @@
+{
+  "name": "featbit-local-stack",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "init_dbs": "node cli.mjs init_dbs",
+    "up": "node cli.mjs up",
+    "test:track": "node cli.mjs track",
+    "logs": "node cli.mjs logs",
+    "down": "node cli.mjs down"
+  }
+}
