@@ -17,6 +17,24 @@ db.dc_leases.createIndex({ dcId: 1 }, { unique: true });
 db.dc_leases.createIndex({ leaseExpiresAt: 1 });
 
 // https://github.com/featbit/featbit/pull/921
+
+// Preserve legacy data without migrating it into the v6 schema. If migration is needed, contact FeatBit for data migration assistance.
+const legacyCollections = ["Events", "Experiments", "ExperimentMetrics"];
+const existingCollections = db.getCollectionNames();
+for (const name of legacyCollections) {
+    if (existingCollections.includes(name + "Legacy")) {
+        throw new Error("Legacy collection already exists: " + name + "Legacy");
+    }
+}
+for (const name of legacyCollections) {
+    if (existingCollections.includes(name)) {
+        const result = db.getCollection(name).renameCollection(name + "Legacy", false);
+        if (result.ok !== 1) {
+            throw new Error("Failed to archive collection: " + name);
+        }
+    }
+}
+
 db.ExperimentExposureEvents.createIndex({ envId: 1, flagKey: 1, exposedAt: 1 });
 db.ExperimentMetricEvents.createIndex({ envId: 1, eventName: 1, occurredAt: 1 });
 db.Experiments.createIndex({ envId: 1, updatedAt: 1 });

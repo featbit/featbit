@@ -6,7 +6,24 @@ metadata:
 data:
   # Source: infra/clickhouse/docker-entrypoint-initdb.d/v6.0.0.sql
   v6.0.0.sql: |
+    -- Initialization and v6 upgrade for the default single-node deployment.
+    -- Existing installations: clickhouse-client --multiquery < v6.0.0.sql
+    -- Stop on the first error; do not use --ignore-error or run concurrent upgrades.
+    -- API/ELS can keep publishing. Retire legacy analytics queries at cutover.
+    -- Assumes kafka:9092, featbit-insights and the original consumer group ch_group.
+    -- Custom Kafka settings or replicated/distributed deployments require a tailored upgrade.
+    -- Historical data stays in events_legacy; contact FeatBit for historical migration.
+    -- Kafka delivery remains at-least-once. Do not reset/delete the group's offsets.
+
     CREATE DATABASE IF NOT EXISTS featbit;
+
+    -- Reject archive collisions and cluster layouts before changing the old chain.
+    SELECT throwIf(countIf(name = 'events') > 0 AND countIf(name = 'events_legacy') > 0,
+                   'Both events and events_legacy exist; resolve the archive conflict first')
+    FROM system.tables WHERE database = 'featbit';
+    SELECT throwIf(count() > 0, 'Replicated/distributed deployments need a tailored upgrade')
+    FROM system.tables WHERE database = 'featbit'
+        AND (name = 'distributed_events' OR (name = 'events' AND engine != 'MergeTree'));
 
     CREATE TABLE IF NOT EXISTS featbit.experiment_exposure_events
     (
@@ -42,6 +59,11 @@ data:
     ORDER BY (env_id, event_name, occurred_at, cityHash64(user_key))
     SETTINGS index_granularity = 8192;
 
+    -- Keep the old definitions detached for recovery; never reactivate them alongside v6.
+    DETACH TABLE IF EXISTS featbit.events_mv PERMANENTLY SYNC;
+    DETACH TABLE IF EXISTS featbit.kafka_events_queue PERMANENTLY SYNC;
+    RENAME TABLE IF EXISTS featbit.events TO featbit.events_legacy;
+
     CREATE TABLE IF NOT EXISTS featbit.kafka_insight_events_queue
     (
         uuid UUID,
@@ -54,15 +76,15 @@ data:
     SETTINGS
         kafka_broker_list = 'kafka:9092',
         kafka_topic_list = 'featbit-insights',
-        kafka_group_name = 'featbit_ch_insights_group_v6',
+        kafka_group_name = 'ch_group',
         kafka_format = 'JSONEachRow',
         input_format_skip_unknown_fields = 1,
         kafka_num_consumers = 1,
         kafka_skip_broken_messages = 100;
 
-    DROP VIEW IF EXISTS featbit.experiment_exposure_events_mv;
-    DROP VIEW IF EXISTS featbit.experiment_metric_events_mv;
-
+    -- Create the exposure view first, prioritizing flag-result events.
+    -- Consumption starts here; metric events may be skipped until the second view exists.
+    -- This short cutover gap is accepted. Treat any statement failure as an incomplete upgrade.
     CREATE MATERIALIZED VIEW IF NOT EXISTS featbit.experiment_exposure_events_mv
     TO featbit.experiment_exposure_events
     AS

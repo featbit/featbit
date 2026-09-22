@@ -32,10 +32,20 @@ ALTER TABLE segments
 
 -- https://github.com/featbit/featbit/pull/921
 
--- Drop legacy experiment tables before applying the current schema.
-DROP TABLE IF EXISTS experiments;
-DROP TABLE IF EXISTS experiment_metrics;
+-- Preserve legacy data without migrating it into the v6 schema. If migration is needed, contact FeatBit for data migration assistance.
+ALTER TABLE IF EXISTS events RENAME TO events_legacy;
+ALTER TABLE IF EXISTS events_legacy RENAME CONSTRAINT events_pkey TO events_pkey_legacy;
+ALTER INDEX IF EXISTS idx_events_combined RENAME TO idx_events_combined_legacy;
 
+ALTER TABLE IF EXISTS experiments RENAME TO experiments_legacy;
+ALTER TABLE IF EXISTS experiments_legacy RENAME CONSTRAINT pk_experiments TO pk_experiments_legacy;
+ALTER INDEX IF EXISTS ix_experiments_env_id_feature_flag_id RENAME TO ix_experiments_env_id_feature_flag_id_legacy;
+
+ALTER TABLE IF EXISTS experiment_metrics RENAME TO experiment_metrics_legacy;
+ALTER TABLE IF EXISTS experiment_metrics_legacy RENAME CONSTRAINT pk_experiment_metrics TO pk_experiment_metrics_legacy;
+ALTER INDEX IF EXISTS ix_experiment_metrics_env_id RENAME TO ix_experiment_metrics_env_id_legacy;
+
+-- New tables for experiment exposure events, layers, and metric events
 CREATE TABLE IF NOT EXISTS experiment_exposure_events
 (
     id              uuid                     NOT NULL,
