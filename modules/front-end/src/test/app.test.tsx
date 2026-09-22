@@ -1246,7 +1246,7 @@ describe("App shell", () => {
 
   it("completes onboarding and persists the initialized organization", async () => {
     const fetchMock = mockOnboardingApi()
-    window.history.pushState({}, "", "/en/onboarding")
+    window.history.pushState({}, "", "/en")
     signIn()
     localStorage.setItem(
       "current-workspace_user-1",

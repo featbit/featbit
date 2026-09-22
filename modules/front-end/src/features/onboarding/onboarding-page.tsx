@@ -10,11 +10,14 @@ import {
   chooseProjectEnv,
   fetchProjects,
   getCurrentOrganization,
+  getCurrentWorkspace,
+  getIsSsoFirstLogin,
   localizedPath,
   persistCurrentOrganization,
   resolveLang,
   saveCurrentProjectEnv,
 } from "@/features/layout/layout-context"
+import type { Organization } from "@/features/layout/layout-types"
 import {
   completeOnboarding,
   createExampleProject,
@@ -163,12 +166,26 @@ export function OnboardingPage() {
           environments: defaultEnvironments,
         })
 
-        persistCurrentOrganization({
+        const initializedOrganization = {
           ...currentOrganization,
           initialized: true,
           name: organizationName.trim(),
           key: organizationKey,
-        })
+        }
+        persistCurrentOrganization(initializedOrganization)
+        queryClient.setQueryData<Organization[]>(
+          authContextQueryKeys.organizations(
+            getStoredUserProfile().id ?? "",
+            getCurrentWorkspace()?.id ?? "",
+            getIsSsoFirstLogin()
+          ),
+          (organizations) =>
+            organizations?.map((organization) =>
+              organization.id === initializedOrganization.id
+                ? initializedOrganization
+                : organization
+            )
+        )
         saveCurrentProjectEnv({
           projectId: projectKey.trim(),
           projectName: projectName.trim(),
