@@ -28,6 +28,10 @@ public static class RowSerializer
         writer.WriteString("disabledVariationId", row["disabled_variation_id"] as string);
         writer.WriteJsonString("fallthrough", row["fallthrough"] as string);
         writer.WriteBoolean("exptIncludeAllTargets", (bool)row["expt_include_all_targets"]);
+        writer.WriteBoolean(
+            "insightsEnabled",
+            !row.TryGetValue("insights_enabled", out var insightsEnabled) || insightsEnabled is not false
+        );
         writer.WriteStringArray("tags", row["tags"] as string[] ?? []);
         writer.WriteString("updatedAt", (DateTime)row["updated_at"]);
         writer.WriteBoolean("isArchived", (bool)row["is_archived"]);

@@ -7,9 +7,11 @@ using Infrastructure.Caches.Redis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Npgsql;
 using Streaming.Connections;
 using Streaming.Consumers;
+using Streaming.Insights;
 using Streaming.Messages;
 using Streaming.Services;
 
@@ -28,6 +30,12 @@ public static class StreamingServiceCollectionExtensions
 
         // system clock
         services.AddSingleton<ISystemClock, SystemClock>();
+        services.TryAddSingleton(TimeProvider.System);
+
+        // per-flag insight settings, read on the insight ingestion path
+        services.AddMetrics();
+        services.AddSingleton<InsightsMetrics>();
+        services.AddSingleton<IInsightsSettingCache, InsightsSettingCache>();
 
         // request validator
         services.AddSingleton<IRequestValidator, RequestValidator>();

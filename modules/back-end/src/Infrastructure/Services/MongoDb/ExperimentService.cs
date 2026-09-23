@@ -95,7 +95,11 @@ public class ExperimentService(
         SetIfNotNull(updates, x => x.Stage, update.Stage);
         if (update.FlagId.HasValue)
         {
-            await ExperimentFlagBinding.ValidateAsync(featureFlagService, envId, update.FlagId);
+            var boundFlag = await ExperimentFlagBinding.ValidateAsync(featureFlagService, envId, update.FlagId);
+            if (boundFlag != null && await HasUnendedRunAsync(id))
+            {
+                ExperimentFlagBinding.EnsureInsightsEnabled(boundFlag);
+            }
             updates.Add(Builders<Experiment>.Update.Set(x => x.FlagId, update.FlagId));
         }
         SetIfNotNull(updates, x => x.Hypothesis, update.Hypothesis);
@@ -191,6 +195,10 @@ public class ExperimentService(
             throw new BusinessException(ErrorCodes.Required("primaryMetric"));
         }
         var flag = await ExperimentFlagBinding.RequireAsync(featureFlagService, envId, experiment.FlagId);
+        if (ExperimentFlagBinding.IsUnended(run, now))
+        {
+            ExperimentFlagBinding.EnsureInsightsEnabled(flag);
+        }
         run.Variations = RunVariationSnapshot.Copy(flag.Variations);
         RunVariationSnapshot.ValidateSelection(run);
 
@@ -247,6 +255,7 @@ public class ExperimentService(
         RunVariationSnapshot.EnsureSelectionCanChange(run, update.ControlVariant, update.TreatmentVariants);
         var selection = RunVariationSnapshot.Selection(run);
         ApplyRunUpdate(run, update);
+        await EnsureUnendedRunCollectsInsightsAsync(envId, id, run);
         await NormalizeAndValidateLayerAssignmentAsync(envId, run);
         if (update.ControlVariant != null || update.TreatmentVariants != null)
         {
@@ -332,6 +341,7 @@ public class ExperimentService(
         var run = await GetRunAsync(id, runId);
         run.ObservationStart = update.ObservationStart;
         run.ObservationEnd = update.ObservationEnd;
+        await EnsureUnendedRunCollectsInsightsAsync(envId, id, run);
         await NormalizeAndValidateLayerAssignmentAsync(envId, run);
         run.UpdatedAt = DateTime.UtcNow;
 
@@ -539,6 +549,30 @@ public class ExperimentService(
                 Experiment = experiment,
                 Runs = runsByExperiment[experiment.Id].ToArray()
             })
+            .ToArray();
+    }
+
+    public async Task<IReadOnlyList<ExperimentRef>> GetRunningForFlagAsync(Guid envId, Guid flagId, DateTime now)
+    {
+        var experiments = await mongoDb.CollectionOf<Experiment>()
+            .Find(x => x.EnvId == envId && x.FlagId == flagId)
+            .ToListAsync();
+        if (experiments.Count == 0)
+        {
+            return [];
+        }
+
+        var experimentIds = experiments.Select(x => x.Id).ToArray();
+        var runningIds = await mongoDb.CollectionOf<ExperimentRun>()
+            .Distinct(
+                x => x.ExperimentId,
+                x => experimentIds.Contains(x.ExperimentId) && (x.ObservationEnd == null || x.ObservationEnd > now)
+            )
+            .ToListAsync();
+
+        return experiments
+            .Where(x => runningIds.Contains(x.Id))
+            .Select(x => new ExperimentRef(x.Id, x.Name))
             .ToArray();
     }
 
@@ -885,6 +919,29 @@ public class ExperimentService(
         }
 
         return experiment;
+    }
+
+    private async Task<bool> HasUnendedRunAsync(Guid experimentId)
+    {
+        var now = DateTime.UtcNow;
+        return await mongoDb.CollectionOf<ExperimentRun>()
+            .Find(x => x.ExperimentId == experimentId && (x.ObservationEnd == null || x.ObservationEnd > now))
+            .AnyAsync();
+    }
+
+    private async Task EnsureUnendedRunCollectsInsightsAsync(Guid envId, Guid experimentId, ExperimentRun run)
+    {
+        if (!ExperimentFlagBinding.IsUnended(run, DateTime.UtcNow))
+        {
+            return;
+        }
+
+        var flagId = await mongoDb.CollectionOf<Experiment>()
+            .Find(x => x.Id == experimentId && x.EnvId == envId)
+            .Project(x => x.FlagId)
+            .FirstOrDefaultAsync();
+        ExperimentFlagBinding.EnsureInsightsEnabled(
+            await ExperimentFlagBinding.FindAsync(featureFlagService, envId, flagId));
     }
 
     private async Task EnsureExperimentExistsAsync(Guid envId, Guid id)

@@ -10,7 +10,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n/i18n"
 import { ApiRequestError } from "@/lib/api/authenticated-api"
 import { toast } from "sonner"
-import { updateFeatureFlagGeneral } from "../../flags-api"
+import {
+  fetchRunningExperiments,
+  updateFeatureFlagGeneral,
+} from "../../flags-api"
 import type { FeatureFlag } from "../../flags-types"
 import { SettingsTab } from "./settings-tab"
 
@@ -20,6 +23,7 @@ vi.mock("../../flags-api", () => ({
   restoreFeatureFlag: vi.fn(),
   updateFeatureFlagGeneral: vi.fn(),
   fetchFeatureFlagTags: vi.fn().mockResolvedValue([]),
+  fetchRunningExperiments: vi.fn(),
 }))
 
 vi.mock("sonner", () => ({
@@ -48,6 +52,7 @@ function renderSettings(
     canUpdateName: boolean
     canUpdateDescription: boolean
     canUpdateTags: boolean
+    canToggle: boolean
   }> = {}
 ) {
   const queryClient = new QueryClient({
@@ -58,6 +63,7 @@ function renderSettings(
     canUpdateName: true,
     canUpdateDescription: true,
     canUpdateTags: true,
+    canToggle: true,
     ...permissions,
   }
   const result = render(
@@ -69,6 +75,7 @@ function renderSettings(
         canUpdateName={generalPermissions.canUpdateName}
         canUpdateDescription={generalPermissions.canUpdateDescription}
         canUpdateTags={generalPermissions.canUpdateTags}
+        canToggle={generalPermissions.canToggle}
         canArchive
         canRestore
         canDelete
@@ -83,6 +90,8 @@ function renderSettings(
 describe("SettingsTab", () => {
   beforeEach(() => {
     vi.mocked(updateFeatureFlagGeneral).mockReset()
+    vi.mocked(fetchRunningExperiments).mockReset()
+    vi.mocked(fetchRunningExperiments).mockResolvedValue([])
     vi.mocked(toast.error).mockReset()
     vi.mocked(toast.success).mockReset()
   })
@@ -184,6 +193,7 @@ describe("SettingsTab", () => {
           name: "Checkout rollout",
           description: "Updated description",
           tags: [],
+          insightsEnabled: true,
         },
         ""
       )
@@ -193,6 +203,7 @@ describe("SettingsTab", () => {
       name: "Checkout rollout",
       description: "Updated description",
       tags: [],
+      insightsEnabled: true,
       revision: "revision-2",
     })
   })
@@ -233,6 +244,7 @@ describe("SettingsTab", () => {
           name: "Checkout redesign ",
           description: "Updated description",
           tags: ["checkout"],
+          insightsEnabled: true,
         },
         ""
       )
@@ -257,5 +269,81 @@ describe("SettingsTab", () => {
       )
     )
     expect(onSaved).not.toHaveBeenCalled()
+  })
+
+  it("shows insights enabled by default with the helper text", () => {
+    renderSettings()
+
+    expect(
+      screen.getByRole("checkbox", { name: "Insights enabled" })
+    ).toBeChecked()
+    expect(
+      screen.getByText(/nothing is recorded about this flag's evaluations/)
+    ).toBeInTheDocument()
+  })
+
+  it("saves insights disabled through the General update", async () => {
+    vi.mocked(updateFeatureFlagGeneral).mockResolvedValue("revision-3")
+    renderSettings()
+
+    fireEvent.click(screen.getByRole("checkbox", { name: "Insights enabled" }))
+    fireEvent.click(screen.getByRole("button", { name: "Review & save" }))
+    fireEvent.click(await screen.findByRole("button", { name: "Save changes" }))
+
+    await waitFor(() =>
+      expect(updateFeatureFlagGeneral).toHaveBeenCalledWith(
+        "env-1",
+        "checkout-redesign",
+        expect.objectContaining({ insightsEnabled: false }),
+        ""
+      )
+    )
+  })
+
+  it("locks the checkbox and names running experiments", async () => {
+    vi.mocked(fetchRunningExperiments).mockResolvedValue([
+      { id: "expt-1", name: "Checkout copy test" },
+    ])
+    renderSettings()
+
+    expect(await screen.findByText(/Checkout copy test/)).toBeInTheDocument()
+    expect(
+      screen.getByRole("checkbox", { name: "Insights enabled" })
+    ).toHaveAttribute("aria-disabled", "true")
+  })
+
+  it("does not look up experiments when insights are already disabled", () => {
+    renderSettings({ ...flag, insightsEnabled: false })
+
+    expect(
+      screen.getByRole("checkbox", { name: "Insights enabled" })
+    ).not.toBeChecked()
+    expect(fetchRunningExperiments).not.toHaveBeenCalled()
+  })
+
+  it("is read-only without the toggle permission", () => {
+    renderSettings(flag, { canToggle: false })
+
+    expect(
+      screen.getByRole("checkbox", { name: "Insights enabled" })
+    ).toHaveAttribute("aria-disabled", "true")
+  })
+
+  it("explains a 409 from save as a running-experiment conflict", async () => {
+    vi.mocked(updateFeatureFlagGeneral).mockRejectedValue(
+      new ApiRequestError(409, "insights_required_by_running_experiment")
+    )
+    renderSettings()
+
+    fireEvent.click(screen.getByRole("checkbox", { name: "Insights enabled" }))
+    fireEvent.click(screen.getByRole("button", { name: "Review & save" }))
+    fireEvent.click(await screen.findByRole("button", { name: "Save changes" }))
+
+    await waitFor(() =>
+      expect(toast.error).toHaveBeenCalledWith(
+        expect.stringContaining("Insights cannot be disabled")
+      )
+    )
+    expect(fetchRunningExperiments).toHaveBeenCalledTimes(2)
   })
 })

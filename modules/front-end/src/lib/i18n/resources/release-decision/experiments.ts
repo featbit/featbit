@@ -202,6 +202,8 @@ export const enExperiments = {
       creating: "Creating…",
       runCreated: "Experiment run created",
       createFailed: "The experiment run could not be created.",
+      insightsDisabled:
+        "Insights are disabled for this flag. Enable insights on the flag before starting an experiment.",
       noRuns: "No experiment runs yet.",
       noRunsHelp:
         "Create a run to configure assignment, collect evidence, and make a decision.",
@@ -739,6 +741,7 @@ export const zhExperiments = {
       creating: "正在创建…",
       runCreated: "实验运行已创建",
       createFailed: "无法创建实验运行。",
+      insightsDisabled: "此开关已禁用洞察。请先在开关上启用洞察，再开始实验。",
       noRuns: "尚无实验运行。",
       noRunsHelp: "创建运行以配置分配、收集依据并做出决策。",
       observationWindow: "观察窗口",

@@ -26,6 +26,7 @@ public abstract class FlagInstruction : Instruction
                 FlagInstructionKind.ArchiveFlag => Permissions.ArchiveFlag,
                 FlagInstructionKind.RestoreFlag => Permissions.RestoreFlag,
                 FlagInstructionKind.UpdateDisabledVariation => Permissions.UpdateFlagOffVariation,
+                FlagInstructionKind.UpdateInsightsEnabled => Permissions.ToggleFlag,
 
                 var kind when FlagInstructionKind.UpdateVariationKinds.Contains(kind) => Permissions.UpdateFlagVariations,
                 var kind when FlagInstructionKind.UpdateDefaultRuleKinds.Contains(kind) => Permissions.UpdateFlagDefaultRule,

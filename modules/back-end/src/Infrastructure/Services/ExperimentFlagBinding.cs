@@ -33,6 +33,23 @@ internal static class ExperimentFlagBinding
         await ValidateAsync(service, envId, flagId)
         ?? throw new BusinessException(ErrorCodes.Required("flagId"));
 
+    /// <summary>
+    /// A run collects insight data until its observation window ends; a run scheduled to start later counts too.
+    /// </summary>
+    public static bool IsUnended(ExperimentRun run, DateTime now) =>
+        run.ObservationEnd is null || run.ObservationEnd > now;
+
+    /// <summary>
+    /// Experiments need insight data, so a run cannot collect on a flag with insights disabled.
+    /// </summary>
+    public static void EnsureInsightsEnabled(FeatureFlag? flag)
+    {
+        if (flag is { InsightsEnabled: false })
+        {
+            throw new BusinessException(ErrorCodes.InsightsDisabled);
+        }
+    }
+
     public static async Task<Dictionary<Guid, FeatureFlag>> LoadAsync(
         IFeatureFlagService service,
         Guid envId,

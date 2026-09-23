@@ -3,6 +3,7 @@ using Api.Authentication;
 using Api.Swagger.Examples;
 using Application.AuditLogs;
 using Application.Bases.Models;
+using Application.Experiments;
 using Application.FeatureFlags;
 using Domain.Workspaces;
 using Domain.FeatureFlags;
@@ -58,6 +59,27 @@ public class FeatureFlagController : ApiControllerBase
 
         var flag = await Mediator.Send(request);
         return Ok(flag);
+    }
+
+    /// <summary>
+    /// Get the running experiments of a feature flag
+    /// </summary>
+    /// <remarks>
+    /// Experiments bound to the flag with a run whose observation window has not ended. Insights cannot be
+    /// disabled on the flag while this list is non-empty.
+    /// </remarks>
+    [HttpGet("{key}/running-experiments")]
+    [Authorize(Permissions.CanAccessEnv)]
+    public async Task<ApiResponse<IReadOnlyList<ExperimentRef>>> GetRunningExperimentsAsync(Guid envId, string key)
+    {
+        var request = new GetRunningExperiments
+        {
+            EnvId = envId,
+            Key = key
+        };
+
+        var experiments = await Mediator.Send(request);
+        return Ok(experiments);
     }
 
     /// <summary>

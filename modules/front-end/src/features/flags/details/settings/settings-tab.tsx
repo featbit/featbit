@@ -1,17 +1,19 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useEffect, useMemo, useState } from "react"
 import { useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { z } from "zod"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { ApiRequestError } from "@/lib/api/authenticated-api"
 import {
   archiveFeatureFlag,
+  fetchRunningExperiments,
   removeFeatureFlag,
   restoreFeatureFlag,
   updateFeatureFlagGeneral,
@@ -37,6 +39,7 @@ type Props = {
   canUpdateName: boolean
   canUpdateDescription: boolean
   canUpdateTags: boolean
+  canToggle: boolean
   canArchive: boolean
   canRestore: boolean
   canDelete: boolean
@@ -51,6 +54,7 @@ export function SettingsTab({
   canUpdateName,
   canUpdateDescription,
   canUpdateTags,
+  canToggle,
   canArchive,
   canRestore,
   canDelete,
@@ -71,6 +75,7 @@ export function SettingsTab({
           .min(1, t("featureFlags.detailsPage.settings.nameRequired")),
         description: z.string(),
         tags: z.array(z.string()),
+        insightsEnabled: z.boolean(),
       }),
     [t]
   )
@@ -89,8 +94,15 @@ export function SettingsTab({
       name: watched.name ?? baseline.name,
       description: watched.description ?? baseline.description,
       tags: watched.tags ?? baseline.tags,
+      insightsEnabled: watched.insightsEnabled ?? baseline.insightsEnabled,
     }),
-    [baseline, watched.description, watched.name, watched.tags]
+    [
+      baseline,
+      watched.description,
+      watched.insightsEnabled,
+      watched.name,
+      watched.tags,
+    ]
   )
   const submittedDraft = useMemo<FlagSettingsValues>(
     () => ({
@@ -102,15 +114,21 @@ export function SettingsTab({
         ? draft.description
         : baseline.description,
       tags: canUpdateTags ? draft.tags : baseline.tags,
+      insightsEnabled: canToggle
+        ? draft.insightsEnabled
+        : baseline.insightsEnabled,
     }),
     [
       baseline.description,
+      baseline.insightsEnabled,
       baseline.name,
       baseline.tags,
+      canToggle,
       canUpdateDescription,
       canUpdateName,
       canUpdateTags,
       draft.description,
+      draft.insightsEnabled,
       draft.name,
       draft.tags,
     ]
@@ -118,10 +136,26 @@ export function SettingsTab({
   const dirty =
     stableFlagSettings(submittedDraft) !== stableFlagSettings(baseline)
   const changes = useMemo(
-    () => flagSettingsReviewChanges(baseline, submittedDraft),
-    [baseline, submittedDraft]
+    () =>
+      flagSettingsReviewChanges(baseline, submittedDraft, (enabled) =>
+        t(
+          `featureFlags.detailsPage.settings.insightsValue.${enabled ? "enabled" : "disabled"}`
+        )
+      ),
+    [baseline, submittedDraft, t]
   )
   const archived = Boolean(flag.isArchived)
+  const runningExperimentsKey = ["flag-running-experiments", envId, flag.key]
+  // experiments need insight data: only relevant while insights are still on
+  const runningExperimentsQuery = useQuery({
+    queryKey: runningExperimentsKey,
+    queryFn: () => fetchRunningExperiments(envId, flag.key),
+    enabled: baseline.insightsEnabled && !archived,
+  })
+  const runningExperiments = baseline.insightsEnabled
+    ? (runningExperimentsQuery.data ?? [])
+    : []
+  const insightsLocked = runningExperiments.length > 0 && draft.insightsEnabled
 
   const saveMutation = useMutation({
     mutationFn: async (comment: string) => {
@@ -143,12 +177,23 @@ export function SettingsTab({
       void queryClient.invalidateQueries({ queryKey: ["feature-flags"] })
       void queryClient.invalidateQueries({ queryKey: ["flag-audit-logs"] })
     },
-    onError: (error) =>
+    onError: (error) => {
+      if (error instanceof ApiRequestError && error.status === 409) {
+        // an experiment started since the page loaded: refresh the list shown next to the checkbox
+        void queryClient.invalidateQueries({ queryKey: runningExperimentsKey })
+        toast.error(
+          t("featureFlags.detailsPage.settings.insightsBlockedByExperiments", {
+            names: runningExperiments.map((x) => x.name).join(", "),
+          })
+        )
+        return
+      }
       toast.error(
         error instanceof ApiRequestError && error.status === 403
           ? t("featureFlags.permissionDenied")
           : t("featureFlags.operationFailed")
-      ),
+      )
+    },
   })
 
   const lifecycleMutation = useMutation({
@@ -243,6 +288,38 @@ export function SettingsTab({
             <p className="text-xs text-muted-foreground">
               {t("featureFlags.detailsPage.settings.tagsHelp")}
             </p>
+          </div>
+
+          <div className="flex items-start gap-3">
+            <Checkbox
+              id="flag-insights-enabled"
+              className="mt-0.5"
+              checked={draft.insightsEnabled}
+              disabled={archived || !canToggle || insightsLocked}
+              onCheckedChange={(checked) =>
+                form.setValue("insightsEnabled", checked === true, {
+                  shouldDirty: true,
+                })
+              }
+            />
+            <div className="space-y-1">
+              <Label htmlFor="flag-insights-enabled">
+                {t("featureFlags.detailsPage.settings.fields.insightsEnabled")}
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                {t("featureFlags.detailsPage.settings.insightsHelp")}
+              </p>
+              {runningExperiments.length > 0 ? (
+                <p className="text-xs text-destructive">
+                  {t(
+                    "featureFlags.detailsPage.settings.insightsBlockedByExperiments",
+                    {
+                      names: runningExperiments.map((x) => x.name).join(", "),
+                    }
+                  )}
+                </p>
+              ) : null}
+            </div>
           </div>
         </div>
 

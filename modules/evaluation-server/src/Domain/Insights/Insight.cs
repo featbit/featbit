@@ -30,6 +30,48 @@ public class Insight
         return true;
     }
 
+    /// <summary>
+    /// Removes evaluations of flags whose insights are disabled. Call only on a valid insight.
+    /// Does not allocate when no evaluation is dropped.
+    /// </summary>
+    public InsightFilterResult FilterDisabledFlags(Func<string, bool> isDisabled)
+    {
+        if (Variations is not { Length: > 0 })
+        {
+            return InsightFilterResult.Unchanged;
+        }
+
+        List<string>? dropped = null;
+        List<VariationInsight?>? retained = null;
+        for (var i = 0; i < Variations.Length; i++)
+        {
+            var variation = Variations[i];
+            if (isDisabled(variation!.FeatureFlagKey!))
+            {
+                if (dropped is null)
+                {
+                    dropped = [];
+                    retained = [..Variations[..i]];
+                }
+
+                dropped.Add(variation.FeatureFlagKey!);
+            }
+            else
+            {
+                retained?.Add(variation);
+            }
+        }
+
+        if (dropped is null)
+        {
+            return InsightFilterResult.Unchanged;
+        }
+
+        Variations = retained!.ToArray();
+        var skip = Variations.Length == 0 && Metrics is not { Length: > 0 };
+        return new InsightFilterResult(skip, dropped);
+    }
+
     public EndUserMessage EndUserMessage(Guid envId)
     {
         return new EndUserMessage(envId, User!);

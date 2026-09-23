@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging.Testing;
 using Moq;
 using Streaming.Connections;
 using Streaming.Consumers;
+using Streaming.Insights;
 using Streaming.Services;
 
 namespace Streaming.UnitTests.Consumers;
@@ -13,6 +14,7 @@ public class FeatureFlagChangeMessageConsumerTests
 {
     private readonly Mock<IConnectionManager> _connectionManager = new();
     private readonly Mock<IDataSyncService> _dataSyncService = new();
+    private readonly Mock<IInsightsSettingCache> _insightsSettingCache = new();
     private readonly FakeLogger<FeatureFlagChangeMessageConsumer> _logger = new();
     private readonly FeatureFlagChangeMessageConsumer _consumer;
 
@@ -20,13 +22,28 @@ public class FeatureFlagChangeMessageConsumerTests
 
     public FeatureFlagChangeMessageConsumerTests()
     {
-        _consumer = new FeatureFlagChangeMessageConsumer(_connectionManager.Object, _dataSyncService.Object, _logger);
+        _consumer = new FeatureFlagChangeMessageConsumer(
+            _connectionManager.Object, _dataSyncService.Object, _insightsSettingCache.Object, _logger);
     }
 
     [Fact]
     public void Topic_IsFeatureFlagChange()
     {
         Assert.Equal("featbit-feature-flag-change", _consumer.Topic);
+    }
+
+    [Fact]
+    public async Task HandleAsync_NoConnectionsForEnv_StillAppliesInsightSetting()
+    {
+        _connectionManager.Setup(c => c.GetEnvConnections(EnvId)).Returns(Array.Empty<Connection>());
+        var appliedEnvIds = new List<Guid>();
+        _insightsSettingCache
+            .Setup(c => c.Apply(It.IsAny<JsonElement>()))
+            .Callback<JsonElement>(flag => appliedEnvIds.Add(flag.GetProperty("envId").GetGuid()));
+
+        await _consumer.HandleAsync(BuildMessage(EnvId), CancellationToken.None);
+
+        Assert.Equal([EnvId], appliedEnvIds);
     }
 
     [Fact]

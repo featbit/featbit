@@ -2,6 +2,7 @@ using System.Text.Json;
 using Domain.Messages;
 using Microsoft.Extensions.Logging;
 using Streaming.Connections;
+using Streaming.Insights;
 using Streaming.Protocol;
 using Streaming.Services;
 
@@ -10,6 +11,7 @@ namespace Streaming.Consumers;
 public class FeatureFlagChangeMessageConsumer(
     IConnectionManager connectionManager,
     IDataSyncService dataSyncService,
+    IInsightsSettingCache insightsSettingCache,
     ILogger<FeatureFlagChangeMessageConsumer> logger)
     : IMessageConsumer
 {
@@ -21,6 +23,8 @@ public class FeatureFlagChangeMessageConsumer(
         var flag = document.RootElement;
 
         var envId = flag.GetProperty("envId").GetGuid();
+
+        insightsSettingCache.Apply(flag);
 
         var connections = connectionManager.GetEnvConnections(envId);
         foreach (var connection in connections)
