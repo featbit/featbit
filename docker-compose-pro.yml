@@ -1,7 +1,7 @@
 name: featbit-pro
 services:
   ui:
-    image: featbit/featbit-ui:5.4.10
+    image: featbit/featbit-ui:${FEATBIT_VERSION:?FEATBIT_VERSION is required}
     environment:
       - API_URL=http://localhost:5000
       - DEMO_URL=https://featbit-samples.vercel.app
@@ -15,7 +15,7 @@ services:
       - featbit-network
 
   api-server:
-    image: featbit/featbit-api-server:5.4.10
+    image: featbit/featbit-api-server:${FEATBIT_VERSION:?FEATBIT_VERSION is required}
     environment:
       - DbProvider=Postgres
       - MqProvider=Kafka
@@ -38,7 +38,7 @@ services:
       - featbit-network
 
   evaluation-server:
-    image: featbit/featbit-evaluation-server:5.4.10
+    image: featbit/featbit-evaluation-server:${FEATBIT_VERSION:?FEATBIT_VERSION is required}
     environment:
       - DbProvider=Postgres
       - MqProvider=Kafka
@@ -57,7 +57,7 @@ services:
       - featbit-network
 
   da-server:
-    image: featbit/featbit-data-analytics-server:5.4.10
+    image: featbit/featbit-data-analytics-server:${FEATBIT_VERSION:?FEATBIT_VERSION is required}
     depends_on:
       - kafka
       - clickhouse-server
