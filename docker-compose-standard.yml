@@ -1,7 +1,7 @@
 name: featbit
 services:
   ui:
-    image: featbit/featbit-ui:latest
+    image: featbit/featbit-ui:5.4.10
     environment:
       - API_URL=http://localhost:5000
       - DEMO_URL=https://featbit-samples.vercel.app
@@ -15,7 +15,7 @@ services:
       - featbit-network
 
   api-server:
-    image: featbit/featbit-api-server:latest
+    image: featbit/featbit-api-server:5.4.10
     environment:
       - DbProvider=Postgres
       - MqProvider=Redis
@@ -35,7 +35,7 @@ services:
       - featbit-network
 
   evaluation-server:
-    image: featbit/featbit-evaluation-server:latest
+    image: featbit/featbit-evaluation-server:5.4.10
     environment:
       - DbProvider=Postgres
       - MqProvider=Redis
@@ -51,7 +51,7 @@ services:
       - featbit-network
 
   da-server:
-    image: featbit/featbit-data-analytics-server:latest
+    image: featbit/featbit-data-analytics-server:5.4.10
     depends_on:
       - postgresql
     ports:

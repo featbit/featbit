@@ -84,7 +84,7 @@ https://github.com/featbit/featbit/assets/68597908/d836702d-6096-4025-9b9e-5128a
 To self-host FeatBit with Docker, Run this script:
 
 ```
-git clone https://github.com/featbit/featbit
+git clone --branch 5.4.10 --depth 1 https://github.com/featbit/featbit.git
 cd featbit
 docker compose up -d
 ```
