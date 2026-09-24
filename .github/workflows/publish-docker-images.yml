@@ -4,92 +4,87 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Image version (For example: 1.0.0)"
+        description: "Release tag to build (for example, 6.0.0 or 6.0.0-preview)"
         required: true
-      build-latest:
-        description: "Build and publish latest image"
-        type: boolean
-        default: false
-        required: false
-      debug:
-        description: "Debug mode"
-        type: boolean
-        default: false
-        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-images-${{ inputs.version }}
+  cancel-in-progress: false
 
 env:
-  LATEST_TAG: latest
-  VERSION_TAG: ${{ github.event.inputs.version }}
+  VERSION: ${{ inputs.version }}
 
 jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ inputs.version }}
+          persist-credentials: false
+      - name: Validate release source and reject existing image tags
+        run: python3 .github/scripts/release_images.py preflight
+
   build-publish:
-    name: Build and publish image to Docker Hub
+    needs: validate
     runs-on: ubuntu-latest
     environment: Production
     strategy:
+      fail-fast: false
       matrix:
         include:
           - app: featbit-ui
-            build-dir: modules/front-end
-            file: ./Dockerfile
+            context: modules/front-end
+            file: modules/front-end/Dockerfile
           - app: featbit-api-server
-            build-dir: modules/back-end
-            file: ./deploy/Dockerfile
+            context: modules/back-end
+            file: modules/back-end/deploy/Dockerfile
           - app: featbit-control-plane
-            # Because the control-plane has dependencies on the back-end module, the build-dir will need to be modules.
-            build-dir: modules/
-            file: ./control-plane/deploy/Dockerfile
+            context: modules
+            file: modules/control-plane/deploy/Dockerfile
           - app: featbit-evaluation-server
-            build-dir: modules/evaluation-server
-            file: ./deploy/Dockerfile
+            context: modules/evaluation-server
+            file: modules/evaluation-server/deploy/Dockerfile
     steps:
-      - name: Dump GitHub context (run if debug is true)
-        if: ${{ github.event.inputs.debug == 'true' }}
-        run: echo "${{ toJson(github) }}"
-
-      - name: Normal (run if debug is true)
-        if: ${{ github.event.inputs.debug == 'true' }}
-        run: echo "debug is true"
-
-      - name: Conditional (run if debug and build-latest is true)
-        if: ${{ github.event.inputs.debug == 'true' && github.event.inputs.build-latest == 'true' }}
-        run: echo "debug and build-latest is true"
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ inputs.version }}
+          persist-credentials: false
+      - name: Validate source and reject overwrites on job retries
+        env:
+          APP: ${{ matrix.app }}
+        run: python3 .github/scripts/release_images.py preflight-app
+      - uses: docker/setup-qemu-action@v4
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-
-      - name: Build and push - ${{ matrix.app }} (${{ env.VERSION_TAG }})
+      - name: Build and push version image
+        id: build
         uses: docker/build-push-action@v7
         with:
-          context: "{{defaultContext}}:${{ matrix.build-dir }}"
+          context: ${{ matrix.context }}
           file: ${{ matrix.file }}
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.app }}:${{ env.VERSION_TAG }}
+          tags: featbit/${{ matrix.app }}:${{ inputs.version }}
           build-args: |
-            VERSION=${{ env.VERSION_TAG }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Build and push - ${{ matrix.app }} (${{ env.LATEST_TAG }})
-        if: ${{ github.event.inputs.build-latest == 'true' }}
-        uses: docker/build-push-action@v7
+            VERSION=${{ inputs.version }}
+          cache-from: type=gha,scope=${{ matrix.app }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.app }}
+      - name: Record and verify published digest
+        env:
+          APP: ${{ matrix.app }}
+          IMAGE_DIGEST: ${{ steps.build.outputs.digest }}
+        run: python3 .github/scripts/release_images.py record
+      - uses: actions/upload-artifact@v4
         with:
-          context: "{{defaultContext}}:${{ matrix.build-dir }}"
-          file: ${{ matrix.file }}
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.app }}:${{ env.LATEST_TAG }}
-          build-args: |
-            VERSION=${{ env.VERSION_TAG }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          name: release-image-${{ matrix.app }}
+          path: release-images/*.json
+          if-no-files-found: error
+          retention-days: 90
