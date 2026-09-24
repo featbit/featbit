@@ -13,6 +13,7 @@ using Infrastructure.Store;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.OpenApi;
 using Serilog;
 using Streaming;
 using Streaming.Connections;
@@ -33,9 +34,18 @@ public static class ServicesRegister
         // serilog
         builder.Services.AddSerilog((_, lc) => ConfigureSerilog.Configure(lc, builder.Configuration));
 
-        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-        services.AddEndpointsApiExplorer();
-        services.AddSwaggerGen();
+        services.AddOpenApi("v1", options =>
+        {
+            options.AddDocumentTransformer((document, _, _) =>
+            {
+                document.Info = new OpenApiInfo
+                {
+                    Title = "FeatBit Evaluation Server Api",
+                    Version = "v1"
+                };
+                return Task.CompletedTask;
+            });
+        });
 
         // health check dependencies
         var healthChecks = services.AddHealthChecks().AddReadinessChecks(configuration);

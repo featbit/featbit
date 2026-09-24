@@ -2,6 +2,7 @@ using Api.Cors;
 using Streaming;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Infrastructure;
+using Scalar.AspNetCore;
 
 namespace Api.Setup;
 
@@ -17,11 +18,12 @@ public static class MiddlewaresRegister
             Predicate = registration => registration.Tags.Contains(HealthCheckBuilderExtensions.ReadinessTag)
         }).AllowAnonymous();
 
-        // enable swagger in dev mode
+        // enable openapi/scalar in dev mode
         if (app.Environment.IsDevelopment())
         {
-            app.UseSwagger();
-            app.UseSwaggerUI();
+            app.MapOpenApi().AllowAnonymous();
+
+            app.MapScalarApiReference().AllowAnonymous();
         }
 
         // enable rate limiting (before streaming so WebSocket upgrades are covered)
