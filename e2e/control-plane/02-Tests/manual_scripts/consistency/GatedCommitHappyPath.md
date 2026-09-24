@@ -39,7 +39,7 @@ Validate that under `ConsistencyMode=GatedCommit` a flag change is **staged** to
 ### Phase 3: Observe Commit and Convergence
 1. **Action:** Observe the commit coordinator (interval ~5s) promote the staged version once both live DCs have `v{ts}`.
 2. **Action:** Confirm `featbit:flag-committed:{id}` advances to the new `{ts}` in **both** Redis instances.
-3. **Action:** Confirm `commits` increments by one and `time_to_commit_ms` records a sample; `pending_backlog` returns to 0.
+3. **Action:** Confirm `commits` increments by one and `time_to_commit` records a sample; `pending_backlog` returns to 0.
 4. **Action:** Observe the withheld downstream featbit-feature-flag-change records now published in the aggregate topics for both west and east.
 5. **Action:** Via an SDK client (or the eval-server evaluation endpoint) in each DC, confirm the flag now evaluates to true in both west and east.
 
@@ -53,7 +53,7 @@ Validate that under `ConsistencyMode=GatedCommit` a flag change is **staged** to
 - The committed pointer `featbit:flag-committed:{id}` advances **only after** all live DCs hold the staged version.
 - Evaluation servers never serve the staged-but-uncommitted value; the new value becomes visible to SDK clients only after the pointer advances.
 - The downstream evaluation-server publish is withheld until commit.
-- `control_plane.consistency.commits` increments per commit, `time_to_commit_ms` records latency, and `pending_backlog` returns to 0 after each commit.
+- `featbit.control_plane.consistency.commits` increments per commit, `time_to_commit` records latency, and `pending_backlog` returns to 0 after each commit.
 - Both DCs converge to the same committed value with no divergence.
 
 ## Post-conditions

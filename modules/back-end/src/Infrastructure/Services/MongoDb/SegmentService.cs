@@ -13,7 +13,7 @@ using Environment = Domain.Environments.Environment;
 
 namespace Infrastructure.Services.MongoDb;
 
-public class SegmentService(MongoDbClient mongoDb, ILogger<SegmentService> logger)
+public partial class SegmentService(MongoDbClient mongoDb, ILogger<SegmentService> logger)
     : MongoDbService<Segment>(mongoDb), ISegmentService
 {
     public async Task<PagedResult<Segment>> GetListAsync(Guid workspaceId, string rn, SegmentFilter userFilter)
@@ -290,7 +290,7 @@ public class SegmentService(MongoDbClient mongoDb, ILogger<SegmentService> logge
     {
         if (!RN.TryParse(scope, out var props))
         {
-            logger.LogError("Segment scope '{Scope}' is not a valid RN.", scope);
+            Log.InvalidScope(logger, scope);
 
             return (scope, []);
         }

@@ -1,3 +1,4 @@
+using Api.Application.ControlPlane;
 using Application.Caches;
 using Domain.ControlPlane;
 using Domain.Environments;
@@ -15,7 +16,7 @@ namespace Api.Infrastructure.Caches;
 /// </summary>
 public record DcCacheService(string DcId, ICacheService Service);
 
-public class CompositeRedisCacheService(
+public partial class CompositeRedisCacheService(
     IEnumerable<DcCacheService> cacheServices,
     ILogger<CompositeRedisCacheService> logger) : ICacheService
 {
@@ -127,12 +128,12 @@ public class CompositeRedisCacheService(
             }
             catch (Exception ex)
             {
-                logger.LogError(
-                    ex,
-                    "Redis cache operation '{Operation}' failed for DC {DcId} (implementation {CacheService}). Trying next instance.",
+                Log.ErrorCacheOperationTryingNext(
+                    logger,
                     nameof(GetOrSetLicenseAsync),
                     dc.DcId,
-                    dc.Service.GetType().FullName);
+                    dc.Service.GetType().FullName,
+                    ex);
             }
         }
 
@@ -334,10 +335,7 @@ public class CompositeRedisCacheService(
         var dc = cacheServices.FirstOrDefault(c => c.DcId == dcId);
         if (dc == null)
         {
-            logger.LogWarning(
-                "Targeted cache operation '{Operation}' requested for unknown DC {DcId}; no matching cache instance. No-op.",
-                operationName,
-                dcId);
+            Log.UnknownDcForTargetedOperation(logger, operationName, dcId);
             return;
         }
 
@@ -346,7 +344,7 @@ public class CompositeRedisCacheService(
 
     /// <summary>
     /// #105: bool-returning counterpart of <see cref="TargetedAsync(string,Func{ICacheService,Task},string)"/>
-    /// for the accept-signalling targeted writes (Stage/Commit/UpsertIfNewer). A no-matching-DC
+    /// for the accept-signaling targeted writes (Stage/Commit/UpsertIfNewer). A no-matching-DC
     /// no-op returns <c>false</c> (same as a guard-rejected or swallowed-failure write) — callers
     /// cannot distinguish "no DC configured" from "guard rejected" from this return value alone,
     /// but both are correctly excluded from an "accepted" count either way.
@@ -356,10 +354,7 @@ public class CompositeRedisCacheService(
         var dc = cacheServices.FirstOrDefault(c => c.DcId == dcId);
         if (dc == null)
         {
-            logger.LogWarning(
-                "Targeted cache operation '{Operation}' requested for unknown DC {DcId}; no matching cache instance. No-op.",
-                operationName,
-                dcId);
+            Log.UnknownDcForTargetedOperation(logger, operationName, dcId);
             return false;
         }
 
@@ -383,12 +378,7 @@ public class CompositeRedisCacheService(
         }
         catch (Exception ex)
         {
-            logger.LogError(
-                ex,
-                "{ProbeName} probe failed for DC {DcId} (implementation {CacheService}). Reporting not-staged.",
-                probeName,
-                dc.DcId,
-                dc.Service.GetType().FullName);
+            Log.ErrorProbe(logger, probeName, dc.DcId, dc.Service.GetType().FullName, ex);
             return false;
         }
     }
@@ -398,9 +388,15 @@ public class CompositeRedisCacheService(
         Func<ICacheService, Task> action,
         string operationName)
     {
+        // The failure below is swallowed so one DC's outage does not fail the others — which means
+        // a permanently unreachable DC produces no error anywhere. This scope is what makes that
+        // visible, per DC.
+        using var broadcast = ControlPlaneMetrics.Current.BeginBroadcast(dc.DcId, operationName);
+
         try
         {
             await action(dc.Service);
+            broadcast.Succeeded();
             return true;
         }
         catch (OperationCanceledException)
@@ -409,19 +405,14 @@ public class CompositeRedisCacheService(
         }
         catch (Exception ex)
         {
-            logger.LogError(
-                ex,
-                "Redis cache broadcast operation '{Operation}' failed for DC {DcId} (implementation {CacheService}). Continuing.",
-                operationName,
-                dc.DcId,
-                dc.Service.GetType().FullName);
+            Log.ErrorBroadcastOperation(logger, operationName, dc.DcId, dc.Service.GetType().FullName, ex);
             return false;
         }
     }
 
     /// <summary>
     /// #105: bool-returning counterpart of <see cref="ExecuteSafelyAsync(DcCacheService,Func{ICacheService,Task},string)"/>
-    /// for the accept-signalling targeted writes — returns the underlying call's own accept result
+    /// for the accept-signaling targeted writes — returns the underlying call's own accept result
     /// instead of a fixed "did not throw" <c>true</c>, and <c>false</c> (not merely swallowed) on a
     /// thrown exception, so a genuine failure is never counted as accepted.
     /// </summary>
@@ -430,9 +421,20 @@ public class CompositeRedisCacheService(
         Func<ICacheService, Task<bool>> action,
         string operationName)
     {
+        using var broadcast = ControlPlaneMetrics.Current.BeginBroadcast(dc.DcId, operationName);
+
         try
         {
-            return await action(dc.Service);
+            var accepted = await action(dc.Service);
+
+            // The call's own accept result, not merely "did not throw" — a rejected write is a
+            // failed fan-out for this DC even though no exception was raised.
+            if (accepted)
+            {
+                broadcast.Succeeded();
+            }
+
+            return accepted;
         }
         catch (OperationCanceledException)
         {
@@ -440,12 +442,7 @@ public class CompositeRedisCacheService(
         }
         catch (Exception ex)
         {
-            logger.LogError(
-                ex,
-                "Redis cache targeted operation '{Operation}' failed for DC {DcId} (implementation {CacheService}).",
-                operationName,
-                dc.DcId,
-                dc.Service.GetType().FullName);
+            Log.ErrorTargetedOperation(logger, operationName, dc.DcId, dc.Service.GetType().FullName, ex);
             return false;
         }
     }

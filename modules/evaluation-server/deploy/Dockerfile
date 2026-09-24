@@ -6,26 +6,48 @@ FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG TARGETARCH
 WORKDIR /source
 
-# copy sln
-COPY *.slnx .
+# The build context is `modules/`, not `modules/evaluation-server/`, because this module references
+# the shared observability projects under `modules/shared/`. The control-plane image has always
+# built this way for the same reason (it references back-end projects), so the pattern is not new
+# here.
+#
+# Copy only project files first, for better Docker layer caching. Important: don't use wildcards
+# that flatten paths; copy into the actual project folders. The old flattening `mv` loop cannot be
+# used now that the context spans two module directories, because it would collide the shared
+# projects with the module's own.
+COPY evaluation-server/*.slnx ./evaluation-server/
 
-# copy src project files
-COPY src/*/*.csproj ./
-RUN for file in $(ls *.csproj); do mkdir -p src/${file%.*}/ && mv $file src/${file%.*}/; done
+# Applies to every project under evaluation-server/src, so restore needs it before the sources.
+COPY evaluation-server/src/Directory.Build.props ./evaluation-server/src/
+COPY evaluation-server/src/icon.png ./evaluation-server/src/
 
-# copy test project files
-COPY tests/*/*.csproj ./
-RUN for file in $(ls *.csproj); do mkdir -p tests/${file%.*}/ && mv $file tests/${file%.*}/; done
+COPY evaluation-server/src/Api/Api.csproj ./evaluation-server/src/Api/
+COPY evaluation-server/src/Domain/Domain.csproj ./evaluation-server/src/Domain/
+COPY evaluation-server/src/Infrastructure/Infrastructure.csproj ./evaluation-server/src/Infrastructure/
+COPY evaluation-server/src/Streaming/Streaming.csproj ./evaluation-server/src/Streaming/
 
-RUN dotnet restore -a $TARGETARCH
+COPY evaluation-server/tests/Application.IntegrationTests/Application.IntegrationTests.csproj ./evaluation-server/tests/Application.IntegrationTests/
+COPY evaluation-server/tests/Domain.UnitTests/Domain.UnitTests.csproj ./evaluation-server/tests/Domain.UnitTests/
+COPY evaluation-server/tests/Infrastructure.IntegrationTests/Infrastructure.IntegrationTests.csproj ./evaluation-server/tests/Infrastructure.IntegrationTests/
+COPY evaluation-server/tests/Infrastructure.UnitTests/Infrastructure.UnitTests.csproj ./evaluation-server/tests/Infrastructure.UnitTests/
+COPY evaluation-server/tests/Streaming.UnitTests/Streaming.UnitTests.csproj ./evaluation-server/tests/Streaming.UnitTests/
+COPY evaluation-server/tests/TestBase/TestBase.csproj ./evaluation-server/tests/TestBase/
+
+COPY shared/Observability/Observability.csproj ./shared/Observability/
+COPY shared/Observability.AspNetCore/Observability.AspNetCore.csproj ./shared/Observability.AspNetCore/
+COPY shared/Observability.TestKit/Observability.TestKit.csproj ./shared/Observability.TestKit/
+COPY shared/Observability.Tests/Observability.Tests.csproj ./shared/Observability.Tests/
+
+RUN dotnet restore ./evaluation-server/EvaluationServer.slnx -a $TARGETARCH
 
 # copy everything else
-COPY . .
+COPY evaluation-server/. ./evaluation-server/
+COPY shared/. ./shared/
 
 # publish stage
 FROM build AS publish
 ARG INSTALL_DIR
-WORKDIR /source/src/Api
+WORKDIR /source/evaluation-server/src/Api
 RUN dotnet publish -a $TARGETARCH --no-restore -o $INSTALL_DIR
 
 # final stage/image
@@ -60,7 +82,7 @@ ENV VERSION=$VERSION
 
 WORKDIR $INSTALL_DIR
 COPY --from=publish $INSTALL_DIR ./
-COPY --from=build /source/start.sh ./start.sh
+COPY --from=build /source/evaluation-server/start.sh ./start.sh
 RUN chmod +x ./start.sh
 EXPOSE 5100
 

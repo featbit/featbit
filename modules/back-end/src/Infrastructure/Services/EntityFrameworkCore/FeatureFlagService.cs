@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Services.EntityFrameworkCore;
 
-public class FeatureFlagService(AppDbContext dbContext, ILogger<FeatureFlagService> logger)
+public partial class FeatureFlagService(AppDbContext dbContext, ILogger<FeatureFlagService> logger)
     : EntityFrameworkCoreService<FeatureFlag>(dbContext), IFeatureFlagService
 {
     public async Task<PagedResult<FeatureFlag>> GetListAsync(Guid envId, FeatureFlagFilter userFilter)
@@ -192,12 +192,8 @@ public class FeatureFlagService(AppDbContext dbContext, ILogger<FeatureFlagServi
                 // by the next edit of this flag, or reaped by StagedFlagGc. Log loudly before the
                 // rethrow (callers' semantics unchanged) so this is diagnosable instead of a silent
                 // Kafka-offset-committed loss.
-                logger.LogError(
-                    ex,
-                    "SetPendingAsync exhausted {MaxRetries} retries for FeatureFlag {EnvId}/{Key} " +
-                    "at version {Version} (attempt {Attempt}); the Redis stage for this change may " +
-                    "now be orphaned until superseded by the next edit or reaped by StagedFlagGc.",
-                    PendingOpRetryPolicy.MaxRetries, envId, key, version, attempt + 1);
+                Log.SetPendingRetriesExhausted(
+                    logger, PendingOpRetryPolicy.MaxRetries, envId, key, version, attempt + 1, ex);
                 throw;
             }
         }
@@ -242,11 +238,8 @@ public class FeatureFlagService(AppDbContext dbContext, ILogger<FeatureFlagServi
                 // orphan a Redis stage (PromotePendingAsync is driven by the coordinator, which
                 // retries on its own next tick) — but this is still pathological contention worth
                 // surfacing loudly rather than as a silent thrown exception.
-                logger.LogError(
-                    ex,
-                    "PromotePendingAsync exhausted {MaxRetries} retries for FeatureFlag {EnvId}/{Key} " +
-                    "at expected version {ExpectedVersion} (attempt {Attempt}).",
-                    PendingOpRetryPolicy.MaxRetries, envId, key, expectedVersion, attempt + 1);
+                Log.PromotePendingRetriesExhausted(
+                    logger, PendingOpRetryPolicy.MaxRetries, envId, key, expectedVersion, attempt + 1, ex);
                 throw;
             }
         }

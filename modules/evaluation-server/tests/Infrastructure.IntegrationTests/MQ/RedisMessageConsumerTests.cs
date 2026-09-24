@@ -1,6 +1,7 @@
 using Domain.Messages;
 using Infrastructure.Caches.Redis;
 using Infrastructure.IntegrationTests.Fixtures;
+using Infrastructure.IntegrationTests.Support;
 using Infrastructure.MQ.Redis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -11,7 +12,7 @@ using StackExchange.Redis;
 namespace Infrastructure.IntegrationTests.MQ;
 
 [Collection(RedisCollection.Name)]
-public class RedisMessageConsumerTests(RedisFixture fixture)
+public class RedisMessageConsumerTests(RedisFixture fixture) : IntegrationTestBase
 {
     [DockerTheory]
     [InlineData(Topics.FeatureFlagChange, "{\"id\":\"flag-1\"}", true)]

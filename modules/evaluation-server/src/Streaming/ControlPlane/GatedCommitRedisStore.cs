@@ -7,7 +7,7 @@ using StackExchange.Redis;
 
 namespace Streaming.ControlPlane;
 
-public class GatedCommitRedisStore(
+public partial class GatedCommitRedisStore(
     IRedisClient redisClient,
     ILogger<GatedCommitRedisStore> logger) : IDbStore
 {
@@ -182,17 +182,13 @@ public class GatedCommitRedisStore(
 
         if (envId.HasValue)
         {
-            logger.LogWarning(
-                "Orphan {EntityName} index members in env {EnvId}: {OrphanCount} of {TotalCount}. Missing keys: {MissingKeys}",
-                entityName, envId.Value, orphans.Count, totalCount, string.Join(", ", orphans)
-            );
+            Log.OrphanIndexMembers(
+                logger, entityName, envId.Value, orphans.Count, totalCount, string.Join(", ", orphans));
         }
         else
         {
-            logger.LogWarning(
-                "Orphan {EntityName} ids requested: {OrphanCount} of {TotalCount}. Missing keys: {MissingKeys}",
-                entityName, orphans.Count, totalCount, string.Join(", ", orphans)
-            );
+            Log.OrphanIdsRequested(
+                logger, entityName, orphans.Count, totalCount, string.Join(", ", orphans));
         }
     }
 }

@@ -6,12 +6,14 @@ on:
       - main
     paths:
       - 'modules/back-end/**'
+      - 'modules/shared/**'
       - '.github/build-and-test-api.yml'
   pull_request:
     branches:
       - main
     paths:
       - 'modules/back-end/**'
+      - 'modules/shared/**'
       - '.github/build-and-test-api.yml'
 
 jobs:

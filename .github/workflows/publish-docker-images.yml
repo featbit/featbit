@@ -41,13 +41,15 @@ jobs:
             context: modules/front-end
             file: modules/front-end/Dockerfile
           - app: featbit-api-server
-            context: modules/back-end
+            # Every .NET module depends on the shared projects under modules/shared, so the
+            # context has to be modules for all three of them, not the service directory.
+            context: modules
             file: modules/back-end/deploy/Dockerfile
           - app: featbit-control-plane
             context: modules
             file: modules/control-plane/deploy/Dockerfile
           - app: featbit-evaluation-server
-            context: modules/evaluation-server
+            context: modules
             file: modules/evaluation-server/deploy/Dockerfile
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
