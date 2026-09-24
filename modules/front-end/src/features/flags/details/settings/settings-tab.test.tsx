@@ -329,9 +329,12 @@ describe("SettingsTab", () => {
     ).toHaveAttribute("aria-disabled", "true")
   })
 
-  it("explains a 409 from save as a running-experiment conflict", async () => {
+  it("names the experiments returned by a 409 from save", async () => {
     vi.mocked(updateFeatureFlagGeneral).mockRejectedValue(
-      new ApiRequestError(409, "insights_required_by_running_experiment")
+      new ApiRequestError(409, "Conflict", {
+        errors: ["insights_required_by_running_experiment"],
+        data: { experiments: [{ id: "expt-9", name: "Late starter" }] },
+      })
     )
     renderSettings()
 
@@ -341,9 +344,25 @@ describe("SettingsTab", () => {
 
     await waitFor(() =>
       expect(toast.error).toHaveBeenCalledWith(
-        expect.stringContaining("Insights cannot be disabled")
+        expect.stringContaining("Late starter")
       )
     )
     expect(fetchRunningExperiments).toHaveBeenCalledTimes(2)
+  })
+
+  it("shows the generic error for an unrelated 409", async () => {
+    vi.mocked(updateFeatureFlagGeneral).mockRejectedValue(
+      new ApiRequestError(409, "Conflict", { errors: ["Conflict"] })
+    )
+    renderSettings()
+
+    fireEvent.click(screen.getByRole("checkbox", { name: "Insights enabled" }))
+    fireEvent.click(screen.getByRole("button", { name: "Review & save" }))
+    fireEvent.click(await screen.findByRole("button", { name: "Save changes" }))
+
+    await waitFor(() => expect(toast.error).toHaveBeenCalled())
+    expect(toast.error).not.toHaveBeenCalledWith(
+      expect.stringContaining("Insights cannot be disabled")
+    )
   })
 })

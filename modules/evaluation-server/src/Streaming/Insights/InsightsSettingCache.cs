@@ -37,19 +37,39 @@ public sealed class InsightsSettingCache(
 
     private sealed record EnvState(FrozenSet<string> Disabled, DateTimeOffset LoadedAt);
 
-    private readonly ConcurrentDictionary<Guid, EnvState> _states = new();
+    private sealed class EnvEntry
+    {
+        public readonly object Lock = new();
+
+        // read without the lock on the hot path; always replaced, never mutated
+        public volatile EnvState? State;
+
+        public DateTimeOffset? FailedAt;
+
+        // flag changes received while a load is reading the store; replayed on top of its snapshot
+        public Dictionary<string, bool>? ChangesDuringLoad;
+    }
+
+    private readonly ConcurrentDictionary<Guid, EnvEntry> _entries = new();
     private readonly ConcurrentDictionary<Guid, Lazy<Task>> _loads = new();
-    private readonly ConcurrentDictionary<Guid, DateTimeOffset> _failedAt = new();
 
     private TimeSpan Ttl => TimeSpan.FromSeconds(Math.Max(1, options.Value.SettingCacheTtlSeconds));
 
     public ValueTask EnsureLoadedAsync(Guid envId)
     {
         var now = timeProvider.GetUtcNow();
+        var entry = _entries.GetOrAdd(envId, _ => new EnvEntry());
 
-        if (_states.TryGetValue(envId, out var state))
+        // after a failed load, wait out the backoff before hitting the store again, whether or not a set is loaded
+        bool backingOff;
+        lock (entry.Lock)
         {
-            if (now - state.LoadedAt >= Ttl)
+            backingOff = entry.FailedAt is { } failedAt && now - failedAt < FailureBackoff;
+        }
+
+        if (entry.State is { } state)
+        {
+            if (now - state.LoadedAt >= Ttl && !backingOff)
             {
                 // serve the current set while the refresh runs
                 _ = LoadOnceAsync(envId);
@@ -58,40 +78,35 @@ public sealed class InsightsSettingCache(
             return ValueTask.CompletedTask;
         }
 
-        if (_failedAt.TryGetValue(envId, out var failedAt) && now - failedAt < FailureBackoff)
-        {
-            return ValueTask.CompletedTask;
-        }
-
-        return new ValueTask(LoadOnceAsync(envId));
+        return backingOff ? ValueTask.CompletedTask : new ValueTask(LoadOnceAsync(envId));
     }
 
     public bool IsDisabled(Guid envId, string flagKey) =>
-        _states.TryGetValue(envId, out var state) && state.Disabled.Contains(flagKey);
+        _entries.TryGetValue(envId, out var entry) &&
+        entry.State is { } state &&
+        state.Disabled.Contains(flagKey);
 
     public void Apply(JsonElement flag)
     {
         if (!flag.TryGetProperty("envId", out var envIdProp) || !envIdProp.TryGetGuid(out var envId) ||
-            !flag.TryGetProperty("key", out var keyProp) || keyProp.GetString() is not { } key)
+            !flag.TryGetProperty("key", out var keyProp) || keyProp.GetString() is not { } key ||
+            !_entries.TryGetValue(envId, out var entry))
         {
+            // environment never requested: its first load reads the store after this change
             return;
         }
 
         var disabled = IsInsightsDisabled(flag);
-        while (_states.TryGetValue(envId, out var state))
+        lock (entry.Lock)
         {
-            if (state.Disabled.Contains(key) == disabled)
+            if (entry.ChangesDuringLoad is { } changes)
             {
-                return;
+                changes[key] = disabled;
             }
 
-            var keys = disabled
-                ? state.Disabled.Append(key)
-                : state.Disabled.Where(x => x != key);
-            var updated = state with { Disabled = keys.ToFrozenSet(StringComparer.Ordinal) };
-            if (_states.TryUpdate(envId, updated, state))
+            if (entry.State is { } state && state.Disabled.Contains(key) != disabled)
             {
-                return;
+                entry.State = state with { Disabled = WithKey(state.Disabled, key, disabled) };
             }
         }
     }
@@ -104,11 +119,17 @@ public sealed class InsightsSettingCache(
 
     private async Task LoadAsync(Guid envId)
     {
+        var entry = _entries.GetOrAdd(envId, _ => new EnvEntry());
+        lock (entry.Lock)
+        {
+            entry.ChangesDuringLoad = new Dictionary<string, bool>(StringComparer.Ordinal);
+        }
+
         try
         {
             var flags = await store.GetFlagsAsync(envId, 0);
 
-            var disabled = new List<string>();
+            var disabled = new HashSet<string>(StringComparer.Ordinal);
             foreach (var bytes in flags)
             {
                 using var document = JsonDocument.Parse(bytes);
@@ -119,13 +140,35 @@ public sealed class InsightsSettingCache(
                 }
             }
 
-            _states[envId] = new EnvState(disabled.ToFrozenSet(StringComparer.Ordinal), timeProvider.GetUtcNow());
-            _failedAt.TryRemove(envId, out _);
+            lock (entry.Lock)
+            {
+                // changes received during the read may be newer than the snapshot: they win
+                foreach (var (key, isDisabled) in entry.ChangesDuringLoad!)
+                {
+                    if (isDisabled)
+                    {
+                        disabled.Add(key);
+                    }
+                    else
+                    {
+                        disabled.Remove(key);
+                    }
+                }
+
+                entry.State = new EnvState(disabled.ToFrozenSet(StringComparer.Ordinal), timeProvider.GetUtcNow());
+                entry.FailedAt = null;
+                entry.ChangesDuringLoad = null;
+            }
         }
         catch (Exception ex)
         {
             // fail open: until a load succeeds, insights are recorded for every flag in this environment
-            _failedAt[envId] = timeProvider.GetUtcNow();
+            lock (entry.Lock)
+            {
+                entry.FailedAt = timeProvider.GetUtcNow();
+                entry.ChangesDuringLoad = null;
+            }
+
             logger.LogWarning(
                 ex,
                 "Failed to load insight settings for env {EnvId}; recording insights for all flags until the next retry.",
@@ -137,6 +180,9 @@ public sealed class InsightsSettingCache(
             _loads.TryRemove(envId, out _);
         }
     }
+
+    private static FrozenSet<string> WithKey(FrozenSet<string> keys, string key, bool present) =>
+        (present ? keys.Append(key) : keys.Where(x => x != key)).ToFrozenSet(StringComparer.Ordinal);
 
     // a flag without the field (stored before the setting existed) collects insights; archived flags are ignored
     private static bool IsInsightsDisabled(JsonElement flag) =>

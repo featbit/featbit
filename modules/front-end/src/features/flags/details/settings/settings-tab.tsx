@@ -18,7 +18,7 @@ import {
   restoreFeatureFlag,
   updateFeatureFlagGeneral,
 } from "../../flags-api"
-import type { FeatureFlag } from "../../flags-types"
+import type { FeatureFlag, RunningExperiment } from "../../flags-types"
 import {
   FlagConfirmDialog,
   type FlagConfirmation,
@@ -45,6 +45,28 @@ type Props = {
   canDelete: boolean
   onSaved: (flag: FeatureFlag) => void
   onRemoved: () => void
+}
+
+const INSIGHTS_CONFLICT = "insights_required_by_running_experiment"
+
+// the experiments named by a 409 that rejected disabling insights; null for any other error
+function insightsConflictExperiments(error: unknown) {
+  if (
+    !(error instanceof ApiRequestError) ||
+    error.status !== 409 ||
+    !error.errors.includes(INSIGHTS_CONFLICT)
+  ) {
+    return null
+  }
+
+  const experiments = (error.data as { experiments?: unknown } | undefined)
+    ?.experiments
+  return Array.isArray(experiments)
+    ? experiments.filter(
+        (x): x is RunningExperiment =>
+          typeof x?.id === "string" && typeof x?.name === "string"
+      )
+    : []
 }
 
 export function SettingsTab({
@@ -178,12 +200,13 @@ export function SettingsTab({
       void queryClient.invalidateQueries({ queryKey: ["flag-audit-logs"] })
     },
     onError: (error) => {
-      if (error instanceof ApiRequestError && error.status === 409) {
+      const blocking = insightsConflictExperiments(error)
+      if (blocking) {
         // an experiment started since the page loaded: refresh the list shown next to the checkbox
         void queryClient.invalidateQueries({ queryKey: runningExperimentsKey })
         toast.error(
           t("featureFlags.detailsPage.settings.insightsBlockedByExperiments", {
-            names: runningExperiments.map((x) => x.name).join(", "),
+            names: blocking.map((x) => x.name).join(", "),
           })
         )
         return

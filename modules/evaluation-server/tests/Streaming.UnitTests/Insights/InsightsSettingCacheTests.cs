@@ -128,6 +128,62 @@ public class InsightsSettingCacheTests
     }
 
     [Fact]
+    public async Task EnsureLoadedAsync_RefreshFails_BacksOffBeforeRetrying()
+    {
+        StoreReturns(FlagBytes("off", false));
+        await _cache.EnsureLoadedAsync(EnvId);
+        _store.Setup(x => x.GetFlagsAsync(EnvId, 0)).ThrowsAsync(new InvalidOperationException("store down"));
+        _time.Advance(TimeSpan.FromSeconds(300));
+
+        await _cache.EnsureLoadedAsync(EnvId);
+        await WaitUntilAsync(() => _logger.Collector.Count > 0);
+        await _cache.EnsureLoadedAsync(EnvId);
+        _time.Advance(TimeSpan.FromSeconds(29));
+        await _cache.EnsureLoadedAsync(EnvId);
+
+        _store.Verify(x => x.GetFlagsAsync(EnvId, 0), Times.Exactly(2));
+        Assert.True(_cache.IsDisabled(EnvId, "off"));
+
+        _time.Advance(TimeSpan.FromSeconds(1));
+        await _cache.EnsureLoadedAsync(EnvId);
+
+        _store.Verify(x => x.GetFlagsAsync(EnvId, 0), Times.Exactly(3));
+    }
+
+    [Fact]
+    public async Task Apply_DuringFirstLoad_IsKeptOverOlderSnapshot()
+    {
+        var pending = new TaskCompletionSource<IEnumerable<byte[]>>();
+        _store.Setup(x => x.GetFlagsAsync(EnvId, 0)).Returns(pending.Task);
+
+        var load = _cache.EnsureLoadedAsync(EnvId).AsTask();
+        _cache.Apply(FlagJson("f", false));
+        pending.SetResult([FlagBytes("f", true)]);
+        await load;
+
+        Assert.True(_cache.IsDisabled(EnvId, "f"));
+    }
+
+    [Fact]
+    public async Task Apply_DuringRefresh_IsKeptOverOlderSnapshot()
+    {
+        StoreReturns(FlagBytes("f", false));
+        await _cache.EnsureLoadedAsync(EnvId);
+        var refresh = new TaskCompletionSource<IEnumerable<byte[]>>();
+        _store.Setup(x => x.GetFlagsAsync(EnvId, 0)).Returns(refresh.Task);
+        _time.Advance(TimeSpan.FromSeconds(300));
+
+        await _cache.EnsureLoadedAsync(EnvId);
+        _cache.Apply(FlagJson("f", true));
+        Assert.False(_cache.IsDisabled(EnvId, "f"));
+        // the refreshed snapshot predates the change; "marker" shows when it has been published
+        refresh.SetResult([FlagBytes("f", false), FlagBytes("marker", false)]);
+        await WaitUntilAsync(() => _cache.IsDisabled(EnvId, "marker"));
+
+        Assert.False(_cache.IsDisabled(EnvId, "f"));
+    }
+
+    [Fact]
     public async Task Apply_LoadedEnv_AddsAndRemovesKey()
     {
         StoreReturns();
