@@ -25,8 +25,11 @@ public static class OpenApiSetup
         {
             var groupName = description.GroupName;
             var info = CreateOpenApiInfo(
-                "FeatBit Backend Api",
+                "FeatBit Backend",
                 description.ApiVersion.ToString(),
+                "The full internal Backend API, used by the FeatBit UI and other internal callers. " +
+                "For the smaller public API surface intended for external integrations, see the " +
+                $"\"{OpenApiConstants.ApiGroupName}\" document.",
                 description.IsDeprecated
             );
 
@@ -40,7 +43,13 @@ public static class OpenApiSetup
         services.AddOpenApi(OpenApiConstants.ApiGroupName, options =>
         {
             options.ShouldInclude = IsPublicOpenApiAction;
-            ConfigureCommon(options, CreateOpenApiInfo("FeatBit Open Api", "1.0"));
+            ConfigureCommon(options, CreateOpenApiInfo(
+                "FeatBit Open Api",
+                "1.0",
+                "The public API surface intended for external integrations authenticated via Access Token. " +
+                "This is a filtered subset of the versioned Backend API (v1/v2) — only endpoints explicitly " +
+                "marked for public use appear here."
+            ));
         });
 
         return services;
@@ -70,12 +79,14 @@ public static class OpenApiSetup
         options.CreateSchemaReferenceId = SchemaIdHelper.GetSchemaId;
     }
 
-    private static OpenApiInfo CreateOpenApiInfo(string title, string version, bool isDeprecated = false)
+    private static OpenApiInfo CreateOpenApiInfo(
+        string title, string version, string? description = null, bool isDeprecated = false)
     {
         var info = new OpenApiInfo
         {
             Title = title,
             Version = version,
+            Description = description,
             Contact = new OpenApiContact
             {
                 Name = "FeatBit",

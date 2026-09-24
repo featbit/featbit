@@ -40,7 +40,7 @@ public static class ServicesRegister
             {
                 document.Info = new OpenApiInfo
                 {
-                    Title = "FeatBit Evaluation Server Api",
+                    Title = "FeatBit Evaluation Server",
                     Version = "v1"
                 };
                 return Task.CompletedTask;
