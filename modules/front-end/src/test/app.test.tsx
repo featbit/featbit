@@ -1294,7 +1294,7 @@ describe("App shell", () => {
       await screen.findByRole("heading", { name: "Get started" })
     ).toBeInTheDocument()
     expect(window.location.pathname).toBe("/en/get-started")
-    expect(window.location.search).toBe("?status=init")
+    expect(window.location.search).toBe("")
     await waitFor(() => {
       expect(screen.getByText("New Org")).toBeInTheDocument()
       expect(screen.getByText("Example project")).toBeInTheDocument()

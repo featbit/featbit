@@ -97,7 +97,7 @@ The first answer remains owned by the unchanged context bar. The Get Started pag
 - Route family: `/:lang/get-started`.
 - First entry is used after login or organization onboarding when the unscoped `get-started` local-storage marker is absent.
 - Set the marker to `true` when Step 1 initializes so merely leaving the flow does not force it again on every login.
-- `?status=init` may be present after onboarding. It must not create a second page layout or duplicate shell context.
+- Onboarding completion navigates to the localized landing page without additional query parameters.
 
 ### Step 1: Create a Feature Flag
 
