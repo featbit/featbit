@@ -3,18 +3,15 @@ using Api.Authentication.OAuth;
 using Api.Authentication.OpenIdConnect;
 using Api.Authorization;
 using Api.Mcp;
-using Api.Swagger;
+using Api.Setup.OpenApi;
 using Application.Services;
 using Domain.Workspaces;
 using Domain.Policies;
 using Infrastructure;
 using Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
-using Swashbuckle.AspNetCore.Filters;
-using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace Api.Setup;
 
@@ -22,9 +19,6 @@ public static class ServicesRegister
 {
     public static WebApplicationBuilder RegisterServices(this WebApplicationBuilder builder)
     {
-        // serilog
-        builder.Services.AddSerilog((_, lc) => ConfigureSerilog.Configure(lc, builder.Configuration));
-
         // add services for controllers
         builder.Services.AddControllers();
 
@@ -62,10 +56,14 @@ public static class ServicesRegister
                 .AllowCredentials();
         }));
 
-        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-        builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
-        builder.Services.AddSwaggerGen(options => options.CustomSchemaIds(type => SwashbuckleSchemaHelper.GetSchemaId(type)));
-        builder.Services.AddSwaggerExamplesFromAssemblyOf<Program>();
+        // OpenApi: one document per discovered API version, plus a filtered public "OpenApi" document.
+        // Must run before AddSerilog below: it builds a throwaway ServiceProvider from `builder.Services`
+        // to resolve IApiVersionDescriptionProvider, and doing that after Serilog is registered freezes
+        // its reloadable logger prematurely, which then throws when the real host builds.
+        builder.Services.AddBackendOpenApi();
+
+        // serilog
+        builder.Services.AddSerilog((_, lc) => ConfigureSerilog.Configure(lc, builder.Configuration));
 
         // health check dependencies
         builder.Services.AddHealthChecks().AddReadinessChecks(builder.Configuration);
