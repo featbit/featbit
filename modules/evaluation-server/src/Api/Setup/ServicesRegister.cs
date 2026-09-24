@@ -41,7 +41,10 @@ public static class ServicesRegister
                 document.Info = new OpenApiInfo
                 {
                     Title = "FeatBit Evaluation Server",
-                    Version = "v1"
+                    Version = "v1",
+                    Description = "Serves feature flag/segment evaluations to client SDKs over streaming " +
+                                  "and polling connections. Consumes flag and segment changes published by " +
+                                  "the API server via the message queue to keep its local store in sync."
                 };
                 return Task.CompletedTask;
             });

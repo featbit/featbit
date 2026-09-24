@@ -23,7 +23,7 @@ public static class MiddlewaresRegister
         {
             app.MapOpenApi().AllowAnonymous();
 
-            app.MapScalarApiReference().AllowAnonymous();
+            app.MapScalarApiReference(options => options.Title = "FeatBit Evaluation Server").AllowAnonymous();
         }
 
         // enable rate limiting (before streaming so WebSocket upgrades are covered)

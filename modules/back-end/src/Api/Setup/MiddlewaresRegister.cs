@@ -31,6 +31,8 @@ public static class MiddlewaresRegister
 
             app.MapScalarApiReference(options =>
             {
+                options.Title = "FeatBit Backend";
+
                 var versionProvider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
                 foreach (var description in versionProvider.ApiVersionDescriptions)
                 {

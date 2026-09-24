@@ -29,7 +29,11 @@ public static class ServicesRegister
                 document.Info = new OpenApiInfo
                 {
                     Title = "Featbit Control Plane",
-                    Version = "v1"
+                    Version = "v1",
+                    Description = "An optional broker between the API server and Evaluation Servers, used " +
+                                  "for multi-datacenter deployments. Propagates feature flag/segment changes " +
+                                  "to each DC's Redis and reconciles caches across DCs; the API server calls " +
+                                  "this instead of writing directly to per-DC Redis when Control Plane is enabled."
                 };
                 return Task.CompletedTask;
             });
