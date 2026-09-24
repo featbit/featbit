@@ -65,6 +65,42 @@ public class RowSerializerTests
     }
 
     [Fact]
+    public void SerializeFlag_InsightsDisabled_WritesFalse()
+    {
+        var row = NewFlagRow();
+        row["insights_enabled"] = false;
+
+        var bytes = RowSerializer.SerializeFlag(row);
+        var element = JsonSerializer.Deserialize<JsonElement>(bytes);
+
+        Assert.False(element.GetProperty("insightsEnabled").GetBoolean());
+    }
+
+    [Fact]
+    public void SerializeFlag_InsightsColumnMissing_WritesTrue()
+    {
+        var row = NewFlagRow();
+        row.Remove("insights_enabled");
+
+        var bytes = RowSerializer.SerializeFlag(row);
+        var element = JsonSerializer.Deserialize<JsonElement>(bytes);
+
+        Assert.True(element.GetProperty("insightsEnabled").GetBoolean());
+    }
+
+    [Fact]
+    public void SerializeFlag_InsightsColumnNull_WritesTrue()
+    {
+        var row = NewFlagRow();
+        row["insights_enabled"] = DBNull.Value;
+
+        var bytes = RowSerializer.SerializeFlag(row);
+        var element = JsonSerializer.Deserialize<JsonElement>(bytes);
+
+        Assert.True(element.GetProperty("insightsEnabled").GetBoolean());
+    }
+
+    [Fact]
     public void SerializeSegment_FullRow_ProducesExpectedJson()
     {
         var id = Guid.Parse("33333333-3333-3333-3333-333333333333");

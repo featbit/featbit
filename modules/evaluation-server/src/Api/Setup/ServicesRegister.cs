@@ -17,6 +17,7 @@ using Serilog;
 using Streaming;
 using Streaming.Connections;
 using Streaming.DependencyInjection;
+using Streaming.Insights;
 using Streaming.ControlPlane;
 
 namespace Api.Setup;
@@ -58,6 +59,7 @@ public static class ServicesRegister
 
         // add bounded memory cache
         services.AddSingleton<BoundedMemoryCache>();
+        services.Configure<InsightsOptions>(configuration.GetSection(InsightsOptions.Insights));
 
         // streaming services
         services

@@ -49,6 +49,22 @@ public static class ApiExceptionMiddlewareExtension
             return;
         }
 
+        // Insights required by a running experiment: 409 that names the experiments
+        if (ex is InsightsRequiredByExperimentException insightsException)
+        {
+            httpResponse.StatusCode = StatusCodes.Status409Conflict;
+
+            var insightsError = new ApiResponse<object>
+            {
+                Success = false,
+                Errors = [ErrorCodes.InsightsRequiredByRunningExperiment],
+                Data = new { experiments = insightsException.Experiments }
+            };
+            await httpResponse.WriteAsJsonAsync(insightsError);
+
+            return;
+        }
+
         // Conflict exception
         if (ex is ConflictException)
         {

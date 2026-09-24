@@ -25,6 +25,7 @@ const flagSettingsKinds = new Set([
   "UpdateDescription",
   "AddTags",
   "RemoveTags",
+  "UpdateInsightsEnabled",
 ])
 const flagVariationKinds = new Set([
   "UpdateVariationType",
@@ -324,6 +325,13 @@ function flagState(flag: FeatureFlag, t: TFunction) {
   return undefined
 }
 
+// snapshots written before the setting existed have no field: they collected insights
+function insightsState(flag: FeatureFlag, t: TFunction) {
+  return t(
+    `featureFlags.detailsPage.settings.insightsValue.${flag.insightsEnabled === false ? "disabled" : "enabled"}`
+  )
+}
+
 function boundedValue(value: string) {
   return value.length > 120 ? `${value.slice(0, 117)}…` : value
 }
@@ -364,6 +372,11 @@ function flagSnapshotChanges(
       t("featureFlags.variationsEditor.type"),
       previous.variationType?.toUpperCase(),
       current.variationType?.toUpperCase()
+    ),
+    flagFieldChange(
+      t("featureFlags.detailsPage.settings.fields.insightsEnabled"),
+      insightsState(previous, t),
+      insightsState(current, t)
     ),
   ]
   changes.push(...fields.filter((change) => change !== null))

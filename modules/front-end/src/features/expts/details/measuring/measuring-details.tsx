@@ -54,6 +54,7 @@ import { fetchFeatureFlagById } from "@/features/flags/flags-api"
 import type { FlagVariation } from "@/features/flags/flags-types"
 import { fetchLayers } from "@/features/expt-layers/layers-api"
 import type { Layer } from "@/features/expt-layers/layers-types"
+import { ApiRequestError } from "@/lib/api/authenticated-api"
 import { cn } from "@/lib/utils"
 import { ExperimentRunTabs } from "../components/experiment-run-tabs"
 import type { ExperimentDetail } from "../experiment-details-types"
@@ -739,6 +740,8 @@ export function MeasuringDetails({
     [selected?.variations]
   )
   const flagVariations = flagQuery.data?.variations ?? []
+  // runs need insight data, so none can start while the bound flag has insights disabled
+  const flagInsightsDisabled = flagQuery.data?.insightsEnabled === false
   const createMutation = useMutation({
     mutationFn: async ({
       setup,
@@ -762,6 +765,14 @@ export function MeasuringDetails({
       toast.success(
         t("releaseDecision.experiments.detailsPage.measuring.runCreated")
       )
+    },
+    onError: (error) => {
+      // insights may have been disabled on the flag since it was loaded
+      if (error instanceof ApiRequestError && error.status === 422) {
+        void queryClient.invalidateQueries({
+          queryKey: ["experiment-feature-flag", envId, experiment.flagId],
+        })
+      }
     },
   })
   const deleteMutation = useMutation({
@@ -939,13 +950,20 @@ export function MeasuringDetails({
             variant="outline"
             size="sm"
             className="shrink-0"
-            disabled={createMutation.isPending}
+            disabled={createMutation.isPending || flagInsightsDisabled}
             onClick={openNewRunDialog}
           >
             <Plus />
             {t("releaseDecision.experiments.detailsPage.measuring.newRun")}
           </Button>
         </div>
+        {flagInsightsDisabled ? (
+          <p className="mt-2 text-sm text-muted-foreground">
+            {t(
+              "releaseDecision.experiments.detailsPage.measuring.insightsDisabled"
+            )}
+          </p>
+        ) : null}
         {runs.length ? (
           <ExperimentRunTabs
             runs={runs}
@@ -967,7 +985,7 @@ export function MeasuringDetails({
           <Button
             type="button"
             className="mt-4"
-            disabled={createMutation.isPending}
+            disabled={createMutation.isPending || flagInsightsDisabled}
             onClick={openNewRunDialog}
           >
             <Plus />

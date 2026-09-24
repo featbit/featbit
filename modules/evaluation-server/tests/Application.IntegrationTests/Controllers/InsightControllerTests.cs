@@ -13,7 +13,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 namespace Application.IntegrationTests.Controllers;
 
 [Collection(nameof(TestApp))]
-public class InsightControllerTests(TestApp app)
+public partial class InsightControllerTests(TestApp app)
 {
     [Fact]
     public async Task TrackAsync_WithoutAuth_Returns401()

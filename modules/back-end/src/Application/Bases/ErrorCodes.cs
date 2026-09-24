@@ -33,6 +33,8 @@ public static class ErrorCodes
 
     // feature flag
     public const string CannotDeleteUnarchivedFeatureFlag = nameof(CannotDeleteUnarchivedFeatureFlag);
+    public const string InsightsRequiredByRunningExperiment = "insights_required_by_running_experiment";
+    public const string InsightsDisabled = "insights_disabled";
 
     // triggers
     public const string InvalidTriggerToken = nameof(InvalidTriggerToken);

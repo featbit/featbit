@@ -581,7 +581,11 @@ export function FlagDetailsPage() {
         {activeTab === "history" ? (
           <HistoryTab envId={envId} flagId={saved.id} lang={lang} />
         ) : activeTab === "insights" ? (
-          <InsightsTab envId={envId} flag={saved} />
+          <InsightsTab
+            envId={envId}
+            flag={saved}
+            settingsPath={`${basePath}/${encodeURIComponent(saved.key)}/settings`}
+          />
         ) : activeTab === "settings" ? (
           <SettingsTab
             envId={envId}
@@ -590,6 +594,7 @@ export function FlagDetailsPage() {
             canUpdateName={can("UpdateFlagName")}
             canUpdateDescription={can("UpdateFlagDescription")}
             canUpdateTags={can("UpdateFlagTags")}
+            canToggle={can("ToggleFlag")}
             canArchive={can("ArchiveFlag")}
             canRestore={can("RestoreFlag")}
             canDelete={can("DeleteFlag")}

@@ -1,4 +1,5 @@
 using Application.Bases.Exceptions;
+using Application.Experiments;
 using Application.FeatureFlags;
 using Application.Policies;
 using Application.Services;
@@ -47,7 +48,8 @@ public class UpdateGeneralHandlerTests
         PolicyStatement[] permissions,
         string? name = null,
         string? description = null,
-        string[]? tags = null) =>
+        string[]? tags = null,
+        bool? insightsEnabled = null) =>
         new(
             flag.EnvId,
             flag.Key,
@@ -56,6 +58,7 @@ public class UpdateGeneralHandlerTests
                 Name = name ?? flag.Name,
                 Description = description ?? flag.Description,
                 Tags = tags ?? flag.Tags,
+                InsightsEnabled = insightsEnabled,
                 Comment = "General settings update"
             },
             permissions);
@@ -64,7 +67,8 @@ public class UpdateGeneralHandlerTests
         FeatureFlag flag,
         Mock<IFeatureFlagService> flagService,
         Mock<IResourceService> resourceService,
-        Mock<IPublisher> publisher)
+        Mock<IPublisher> publisher,
+        IFlagInsightsGuard? insightsGuard = null)
     {
         flagService.Setup(x => x.GetAsync(flag.EnvId, flag.Key)).ReturnsAsync(flag);
         resourceService.Setup(x => x.GetFlagRnAsync(flag.EnvId, flag.Key)).ReturnsAsync("flag/*");
@@ -76,6 +80,7 @@ public class UpdateGeneralHandlerTests
             flagService.Object,
             new PermissionGuard(resourceService.Object),
             currentUser.Object,
+            insightsGuard ?? Mock.Of<IFlagInsightsGuard>(),
             publisher.Object);
     }
 
@@ -182,6 +187,79 @@ public class UpdateGeneralHandlerTests
         resourceService.Verify(
             x => x.GetFlagRnAsync(It.IsAny<Guid>(), It.IsAny<string>()),
             Times.Never);
+        flagService.Verify(x => x.UpdateAsync(It.IsAny<FeatureFlag>()), Times.Never);
+        publisher.Verify(
+            x => x.Publish(It.IsAny<OnFeatureFlagChanged>(), It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    [Fact]
+    public async Task Handle_OnlyInsightsDisabledWithTogglePermission_UpdatesAndPublishes()
+    {
+        var flag = NewFlag();
+        var flagService = new Mock<IFeatureFlagService>();
+        var resourceService = new Mock<IResourceService>();
+        var publisher = new Mock<IPublisher>();
+        var sut = BuildSut(flag, flagService, resourceService, publisher);
+        var request = NewRequest(flag, Allow(Permissions.ToggleFlag), insightsEnabled: false);
+
+        await sut.Handle(request, CancellationToken.None);
+
+        Assert.False(flag.InsightsEnabled);
+        flagService.Verify(x => x.UpdateAsync(flag), Times.Once);
+        publisher.Verify(
+            x => x.Publish(
+                It.Is<OnFeatureFlagChanged>(n => FlagComparer.Compare(n.DataChange)
+                    .Select(i => i.Kind)
+                    .SequenceEqual(new[] { FlagInstructionKind.UpdateInsightsEnabled })),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task Handle_OnlyInsightsDisabledWithoutTogglePermission_ThrowsForbidden()
+    {
+        var flag = NewFlag();
+        var flagService = new Mock<IFeatureFlagService>();
+        var sut = BuildSut(flag, flagService, new Mock<IResourceService>(), new Mock<IPublisher>());
+        var request = NewRequest(flag, Allow(Permissions.UpdateFlagName), insightsEnabled: false);
+
+        await Assert.ThrowsAsync<ForbiddenException>(() => sut.Handle(request, CancellationToken.None));
+
+        flagService.Verify(x => x.UpdateAsync(It.IsAny<FeatureFlag>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task Handle_InsightsOmitted_LeavesInsightsUnchanged()
+    {
+        var flag = NewFlag();
+        flag.InsightsEnabled = false;
+        var flagService = new Mock<IFeatureFlagService>();
+        var sut = BuildSut(flag, flagService, new Mock<IResourceService>(), new Mock<IPublisher>());
+        var request = NewRequest(flag, Allow(Permissions.UpdateFlagName), name: "Renamed");
+
+        await sut.Handle(request, CancellationToken.None);
+
+        Assert.False(flag.InsightsEnabled);
+        Assert.Equal("Renamed", flag.Name);
+    }
+
+    [Fact]
+    public async Task Handle_DisableInsightsWithRunningExperiment_ThrowsAndSavesNothing()
+    {
+        var flag = NewFlag();
+        var flagService = new Mock<IFeatureFlagService>();
+        var publisher = new Mock<IPublisher>();
+        var insightsGuard = new Mock<IFlagInsightsGuard>();
+        insightsGuard
+            .Setup(x => x.EnsureCanDisableInsightsAsync(true, flag))
+            .ThrowsAsync(new InsightsRequiredByExperimentException([new ExperimentRef(Guid.NewGuid(), "expt")]));
+        var sut = BuildSut(flag, flagService, new Mock<IResourceService>(), publisher, insightsGuard.Object);
+        var request = NewRequest(
+            flag, Allow(Permissions.ToggleFlag, Permissions.UpdateFlagName), name: "Renamed", insightsEnabled: false);
+
+        await Assert.ThrowsAsync<InsightsRequiredByExperimentException>(() => sut.Handle(request, CancellationToken.None));
+
         flagService.Verify(x => x.UpdateAsync(It.IsAny<FeatureFlag>()), Times.Never);
         publisher.Verify(
             x => x.Publish(It.IsAny<OnFeatureFlagChanged>(), It.IsAny<CancellationToken>()),

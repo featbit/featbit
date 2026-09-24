@@ -206,4 +206,36 @@ describe("authenticated api", () => {
       message: "Forbidden",
     } satisfies Partial<ApiRequestError>)
   })
+
+  it("keeps the error codes and data from a failed response envelope", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+      jsonResponse(
+        {
+          success: false,
+          errors: ["insights_required_by_running_experiment"],
+          data: { experiments: [{ id: "expt-1", name: "Checkout test" }] },
+        },
+        { status: 409, statusText: "Conflict" }
+      )
+    )
+
+    await expect(fetchApi("/api/v1/workspaces")).rejects.toMatchObject({
+      status: 409,
+      message: "Conflict",
+      errors: ["insights_required_by_running_experiment"],
+      data: { experiments: [{ id: "expt-1", name: "Checkout test" }] },
+    })
+  })
+
+  it("tolerates a failed response without a JSON body", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+      new Response("", { status: 500, statusText: "Server Error" })
+    )
+
+    await expect(fetchApi("/api/v1/workspaces")).rejects.toMatchObject({
+      status: 500,
+      errors: [],
+      data: undefined,
+    })
+  })
 })

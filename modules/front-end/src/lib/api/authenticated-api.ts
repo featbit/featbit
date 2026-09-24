@@ -13,11 +13,31 @@ type ApiEnvelope<T> = {
 
 export class ApiRequestError extends Error {
   readonly status: number
+  /** Error codes from the API response envelope, when the body had one. */
+  readonly errors: string[]
+  /** `data` from the API response envelope, when the body had one. */
+  readonly data: unknown
 
-  constructor(status: number, message: string) {
+  constructor(
+    status: number,
+    message: string,
+    envelope?: Pick<ApiEnvelope<unknown>, "errors" | "data">
+  ) {
     super(message)
     this.name = "ApiRequestError"
     this.status = status
+    this.errors = envelope?.errors ?? []
+    this.data = envelope?.data
+  }
+}
+
+async function readErrorEnvelope(response: Response) {
+  try {
+    const body = (await response.json()) as ApiEnvelope<unknown> | null
+    return body && typeof body === "object" ? body : undefined
+  } catch {
+    // empty or non-JSON error body
+    return undefined
   }
 }
 
@@ -171,7 +191,8 @@ export async function fetchApi<T>(
   if (!response.ok) {
     throw new ApiRequestError(
       response.status,
-      response.statusText || "Request failed"
+      response.statusText || "Request failed",
+      await readErrorEnvelope(response)
     )
   }
 

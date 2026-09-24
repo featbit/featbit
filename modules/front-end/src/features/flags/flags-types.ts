@@ -34,6 +34,8 @@ export type FeatureFlag = {
   envId?: string
   revision?: string
   isArchived?: boolean
+  /** Missing on flags from older API versions; treat as enabled. */
+  insightsEnabled?: boolean
   creatorId?: string
   updatorId?: string
   variations?: FlagVariation[]
@@ -92,11 +94,21 @@ export type FlagTargeting = {
   exptIncludeAllTargets: boolean
 }
 
+export type RunningExperiment = {
+  id: string
+  name: string
+}
+
 export type PendingFlagChange = {
   id: string
   type: "Schedule" | "ChangeRequest"
   status:
-    "PendingReview" | "PendingExecution" | "Approved" | "Declined" | "Applied"
+    | "PendingReview"
+    | "PendingExecution"
+    | "Approved"
+    | "Declined"
+    | "Applied"
+    | "Failed"
   flagId: string
   creatorId: string
   creatorName: string

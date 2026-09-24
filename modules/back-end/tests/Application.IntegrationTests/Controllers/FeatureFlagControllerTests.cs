@@ -3,7 +3,9 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Api.Controllers;
 using Application.Bases;
+using Application.Bases.Exceptions;
 using Application.Bases.Models;
+using Application.Experiments;
 using Application.FeatureFlags;
 using MediatR;
 using Moq;
@@ -136,6 +138,80 @@ public class FeatureFlagControllerTests : IClassFixture<PermissionCheckTestApp>
                     r.Tags.SequenceEqual(new[] { "checkout", "release" }) &&
                     r.Comment == "Update general settings"),
                 It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task PatchAsync_InsightsRequiredByExperiment_Returns409NamingExperiments()
+    {
+        var experiment = new ExperimentRef(Guid.NewGuid(), "Checkout copy test");
+        _app.Sender
+            .Setup(s => s.Send(It.IsAny<PatchFeatureFlag>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new InsightsRequiredByExperimentException([experiment]));
+
+        var client = await _app.CreateAuthenticatedClientAsync();
+        var response = await client.PatchAsync(
+            $"/api/v1/envs/{EnvId}/feature-flags/checkout",
+            JsonContent.Create(new[] { new { op = "replace", path = "/insightsEnabled", value = false } }));
+
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+        var body = await response.Content.ReadFromJsonAsync<JsonElement>(JsonOptions);
+        Assert.False(body.GetProperty("success").GetBoolean());
+        Assert.Equal(
+            ErrorCodes.InsightsRequiredByRunningExperiment,
+            body.GetProperty("errors")[0].GetString());
+        var returned = body.GetProperty("data").GetProperty("experiments")[0];
+        Assert.Equal(experiment.Id, returned.GetProperty("id").GetGuid());
+        Assert.Equal(experiment.Name, returned.GetProperty("name").GetString());
+    }
+
+    [Fact]
+    public async Task GetRunningExperimentsAsync_PermissionGranted_ReturnsExperiments()
+    {
+        var experiment = new ExperimentRef(Guid.NewGuid(), "Checkout copy test");
+        _app.Sender
+            .Setup(s => s.Send(It.IsAny<GetRunningExperiments>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([experiment]);
+
+        var client = await _app.CreateAuthenticatedClientAsync();
+        var response = await client.GetAsync($"/api/v1/envs/{EnvId}/feature-flags/checkout/running-experiments");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var body = await response.Content.ReadFromJsonAsync<ApiResponse<ExperimentRef[]>>(JsonOptions);
+        Assert.Equal([experiment], body!.Data);
+        _app.Sender.Verify(
+            s => s.Send(
+                It.Is<GetRunningExperiments>(r => r.EnvId == EnvId && r.Key == "checkout"),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task GetRunningExperimentsAsync_PermissionDenied_Returns403()
+    {
+        _app.PermissionChecker.Grant = false;
+
+        var client = await _app.CreateAuthenticatedClientAsync();
+        var response = await client.GetAsync($"/api/v1/envs/{EnvId}/feature-flags/checkout/running-experiments");
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task UpdateGeneralAsync_WithInsightsEnabled_PassesValueToRequest()
+    {
+        _app.Sender
+            .Setup(s => s.Send(It.IsAny<UpdateGeneral>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Guid.NewGuid());
+
+        var client = await _app.CreateAuthenticatedClientAsync();
+        var response = await client.PutAsJsonAsync(
+            $"/api/v1/envs/{EnvId}/feature-flags/checkout/general",
+            new { name = "Checkout", description = "", tags = Array.Empty<string>(), insightsEnabled = false });
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        _app.Sender.Verify(
+            s => s.Send(It.Is<UpdateGeneral>(r => r.InsightsEnabled == false), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 }

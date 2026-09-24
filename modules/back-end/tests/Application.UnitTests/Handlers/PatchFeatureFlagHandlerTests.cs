@@ -1,3 +1,5 @@
+using Application.Bases.Exceptions;
+using Application.Experiments;
 using Application.FeatureFlags;
 using Application.Policies;
 using Application.Services;
@@ -54,7 +56,7 @@ public class PatchFeatureFlagHandlerTests
         var publisher = new Mock<IPublisher>();
         var resourceService = new Mock<IResourceService>();
         resourceService.Setup(x => x.GetFlagRnAsync(It.IsAny<Guid>(), It.IsAny<string>())).ReturnsAsync("flag/*");
-        var sut = new PatchFeatureFlagHandler(service.Object, new PermissionGuard(resourceService.Object), currentUser.Object, publisher.Object);
+        var sut = new PatchFeatureFlagHandler(service.Object, new PermissionGuard(resourceService.Object), currentUser.Object, Mock.Of<IFlagInsightsGuard>(), publisher.Object);
 
         var patch = new JsonPatchDocument<FeatureFlag>();
         patch.Replace(x => x.Description, "patched");
@@ -82,7 +84,7 @@ public class PatchFeatureFlagHandlerTests
         var service = new Mock<IFeatureFlagService>();
         service.Setup(x => x.GetAsync(It.IsAny<Guid>(), It.IsAny<string>())).ReturnsAsync(flag);
         var publisher = new Mock<IPublisher>();
-        var sut = new PatchFeatureFlagHandler(service.Object, new PermissionGuard(Mock.Of<IResourceService>()), Mock.Of<ICurrentUser>(), publisher.Object);
+        var sut = new PatchFeatureFlagHandler(service.Object, new PermissionGuard(Mock.Of<IResourceService>()), Mock.Of<ICurrentUser>(), Mock.Of<IFlagInsightsGuard>(), publisher.Object);
 
         // op against a non-existent path produces a JsonPatchError when applied
         var patch = new JsonPatchDocument<FeatureFlag>();
@@ -101,5 +103,60 @@ public class PatchFeatureFlagHandlerTests
         publisher.Verify(
             x => x.Publish(It.IsAny<OnFeatureFlagChanged>(), It.IsAny<CancellationToken>()),
             Times.Never);
+    }
+
+    [Fact]
+    public async Task Handle_DisableInsightsWithRunningExperiment_ThrowsWithoutPersisting()
+    {
+        var flag = NewFlag();
+        var service = new Mock<IFeatureFlagService>();
+        service.Setup(x => x.GetAsync(It.IsAny<Guid>(), It.IsAny<string>())).ReturnsAsync(flag);
+        var resourceService = new Mock<IResourceService>();
+        resourceService.Setup(x => x.GetFlagRnAsync(It.IsAny<Guid>(), It.IsAny<string>())).ReturnsAsync("flag/*");
+        var insightsGuard = new Mock<IFlagInsightsGuard>();
+        insightsGuard
+            .Setup(x => x.EnsureCanDisableInsightsAsync(true, flag))
+            .ThrowsAsync(new InsightsRequiredByExperimentException([new ExperimentRef(Guid.NewGuid(), "expt")]));
+        var publisher = new Mock<IPublisher>();
+        var sut = new PatchFeatureFlagHandler(service.Object, new PermissionGuard(resourceService.Object), Mock.Of<ICurrentUser>(), insightsGuard.Object, publisher.Object);
+
+        var patch = new JsonPatchDocument<FeatureFlag>();
+        patch.Replace(x => x.InsightsEnabled, false);
+        var request = new PatchFeatureFlag { EnvId = Guid.NewGuid(), Key = "flag", Patch = patch, Permissions = AllowAll() };
+
+        await Assert.ThrowsAsync<InsightsRequiredByExperimentException>(() => sut.Handle(request, CancellationToken.None));
+
+        service.Verify(x => x.UpdateAsync(It.IsAny<FeatureFlag>()), Times.Never);
+        publisher.Verify(
+            x => x.Publish(It.IsAny<OnFeatureFlagChanged>(), It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    [Fact]
+    public async Task Handle_DisableInsightsWithoutTogglePermission_ThrowsForbidden()
+    {
+        var flag = NewFlag();
+        var service = new Mock<IFeatureFlagService>();
+        service.Setup(x => x.GetAsync(It.IsAny<Guid>(), It.IsAny<string>())).ReturnsAsync(flag);
+        var resourceService = new Mock<IResourceService>();
+        resourceService.Setup(x => x.GetFlagRnAsync(It.IsAny<Guid>(), It.IsAny<string>())).ReturnsAsync("flag/*");
+        var sut = new PatchFeatureFlagHandler(service.Object, new PermissionGuard(resourceService.Object), Mock.Of<ICurrentUser>(), Mock.Of<IFlagInsightsGuard>(), Mock.Of<IPublisher>());
+        PolicyStatement[] descriptionOnly =
+        [
+            new PolicyStatement
+            {
+                Effect = EffectType.Allow,
+                Actions = [Permissions.UpdateFlagDescription],
+                Resources = ["*"]
+            }
+        ];
+
+        var patch = new JsonPatchDocument<FeatureFlag>();
+        patch.Replace(x => x.InsightsEnabled, false);
+        var request = new PatchFeatureFlag { EnvId = Guid.NewGuid(), Key = "flag", Patch = patch, Permissions = descriptionOnly };
+
+        await Assert.ThrowsAsync<ForbiddenException>(() => sut.Handle(request, CancellationToken.None));
+
+        service.Verify(x => x.UpdateAsync(It.IsAny<FeatureFlag>()), Times.Never);
     }
 }
