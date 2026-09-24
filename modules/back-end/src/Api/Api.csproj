@@ -8,6 +8,17 @@
         <NoWarn>$(NoWarn);1591</NoWarn>
     </PropertyGroup>
 
+    <PropertyGroup>
+        <!--
+          Referencing Microsoft.Extensions.ApiDescription.Server defaults this to true, which would
+          make every build boot the full app (including its hosted services) just to export docs.
+          Keep it off by default; the release documentation workflow
+          (.github/workflows/update-api-reference.yml) opts back in with
+          -p:OpenApiGenerateDocumentsOnBuild=true for its dedicated export step.
+        -->
+        <OpenApiGenerateDocumentsOnBuild>false</OpenApiGenerateDocumentsOnBuild>
+    </PropertyGroup>
+
     <ItemGroup>
         <!-- Api Versioning -->
         <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="10.0.0" />
@@ -15,6 +26,10 @@
         <!-- OpenApi -->
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
         <PackageReference Include="Scalar.AspNetCore" Version="2.17.9" />
+        <PackageReference Include="Microsoft.Extensions.ApiDescription.Server" Version="10.0.12">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
 
         <!-- Serilog -->
         <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />

@@ -24,11 +24,23 @@ public static class MiddlewaresRegister
             Predicate = registration => registration.Tags.Contains(HealthCheckBuilderExtensions.ReadinessTag)
         });
 
-        // enable openapi/scalar in development environment
+        // OpenAPI JSON endpoints (all versions + the public doc): available in every environment,
+        // matching the old Swashbuckle setup where app.UseSwagger() (the JSON endpoints) ran
+        // unconditionally and only the interactive SwaggerUI was dev-gated.
+        app.MapOpenApi().AllowAnonymous();
+
+        // A reference scoped to just the public "OpenApi" doc: available in every environment too,
+        // matching the old app.UseReDoc(), which was likewise unconditional.
+        app.MapScalarApiReference("/docs", options =>
+        {
+            options.Title = "FeatBit Open Api";
+            options.AddDocument(OpenApiConstants.ApiGroupName, OpenApiConstants.ApiGroupName);
+        }).AllowAnonymous();
+
+        // The full multi-document interactive reference (every API version + the public doc):
+        // development-only, matching the old dev-only SwaggerUI.
         if (app.Environment.IsDevelopment())
         {
-            app.MapOpenApi().AllowAnonymous();
-
             app.MapScalarApiReference(options =>
             {
                 options.Title = "FeatBit Backend";
