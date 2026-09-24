@@ -1,0 +1,111 @@
+services:
+  postgres:
+    profiles: [postgres]
+    image: ${POSTGRES_IMAGE:-postgres:15.10}
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: local-stack-only
+    volumes: [postgres-data:/var/lib/postgresql/data]
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U postgres -d postgres']
+      interval: 2s
+      timeout: 5s
+      retries: 60
+  mongodb:
+    profiles: [mongo]
+    image: ${MONGO_IMAGE:-mongo:7.0}
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: local-stack-only
+    volumes: [mongo-data:/data/db]
+    healthcheck:
+      test: [CMD, mongosh, --quiet, --eval, 'quit(db.adminCommand({ping:1}).ok ? 0 : 1)']
+      interval: 2s
+      timeout: 5s
+      retries: 60
+  redis:
+    profiles: [redis]
+    image: ${REDIS_IMAGE:-redis:7.2.5-alpine}
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 2s
+      timeout: 5s
+      retries: 60
+  kafka:
+    profiles: [kafka]
+    image: ${KAFKA_IMAGE:-bitnamilegacy/kafka:3.5}
+    environment:
+      KAFKA_CFG_NODE_ID: 0
+      KAFKA_CFG_PROCESS_ROLES: controller,broker
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 0@kafka:9093
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      ALLOW_PLAINTEXT_LISTENER: 'true'
+    volumes: [kafka-data:/bitnami/kafka]
+    healthcheck:
+      test: [CMD, /opt/bitnami/kafka/bin/kafka-topics.sh, --list, --bootstrap-server, kafka:9092]
+      interval: 5s
+      timeout: 10s
+      retries: 60
+  clickhouse:
+    profiles: [clickhouse]
+    image: ${CLICKHOUSE_IMAGE:-clickhouse/clickhouse-server:23.7}
+    environment:
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: local-stack-only
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    volumes: [clickhouse-data:/var/lib/clickhouse]
+    healthcheck:
+      test: [CMD, clickhouse-client, --password, local-stack-only, --query, 'SELECT 1']
+      interval: 2s
+      timeout: 5s
+      retries: 60
+  api:
+    image: ${STACK_PROJECT}-api:local
+    build:
+      context: ../../modules/back-end
+      dockerfile: deploy/Dockerfile
+    environment: &backend-env
+      ASPNETCORE_URLS: http://+:5000
+      DbProvider: ${DB_PROVIDER}
+      MqProvider: ${MQ_PROVIDER}
+      CacheProvider: ${CACHE_PROVIDER}
+      OLAPProvider: ${OLAP_PROVIDER}
+      Postgres__ConnectionString: Host=postgres;Port=5432;Username=postgres;Password=local-stack-only;Database=featbit
+      MongoDb__ConnectionString: mongodb://admin:local-stack-only@mongodb:27017
+      MongoDb__Database: featbit
+      Redis__ConnectionString: redis:6379
+      Kafka__Producer__bootstrap.servers: kafka:9092
+      Kafka__Consumer__bootstrap.servers: kafka:9092
+      ClickHouse__HttpEndpoint: http://clickhouse:8123
+      ClickHouse__Password: local-stack-only
+      Jwt__Key: local-stack-only-signing-key-at-least-32-characters
+    ports: ['127.0.0.1:${API_PORT}:5000']
+  els:
+    image: ${STACK_PROJECT}-els:local
+    build:
+      context: ../../modules/evaluation-server
+      dockerfile: deploy/Dockerfile
+    environment:
+      <<: *backend-env
+      ASPNETCORE_URLS: http://+:5100
+    ports: ['127.0.0.1:${ELS_PORT}:5100']
+  ui:
+    image: ${STACK_PROJECT}-ui:local
+    build:
+      context: ../../modules/front-end
+      dockerfile: Dockerfile
+    environment:
+      API_URL: http://localhost:${API_PORT}
+      EVALUATION_URL: http://localhost:${ELS_PORT}
+      BASE_HREF: /
+      DEMO_URL: ''
+    ports: ['127.0.0.1:${UI_PORT}:80']
+volumes:
+  postgres-data:
+  mongo-data:
+  kafka-data:
+  clickhouse-data:
