@@ -44,7 +44,7 @@ public static class MiddlewareRegister
         {
             app.MapOpenApi().AllowAnonymous();
 
-            app.MapScalarApiReference(options => options.Title = "Featbit Control Plane");
+            app.MapScalarApiReference(options => options.Title = "FeatBit Control Plane");
         }
 
         app.UseHttpsRedirection();

@@ -28,7 +28,7 @@ public static class ServicesRegister
             {
                 document.Info = new OpenApiInfo
                 {
-                    Title = "Featbit Control Plane",
+                    Title = "FeatBit Control Plane",
                     Version = "v1",
                     Description = "An optional broker between the API server and Evaluation Servers, used " +
                                   "for multi-datacenter deployments. Propagates feature flag/segment changes " +
