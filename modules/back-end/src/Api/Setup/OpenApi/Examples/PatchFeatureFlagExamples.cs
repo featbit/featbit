@@ -1,13 +1,12 @@
 using Microsoft.AspNetCore.JsonPatch.SystemTextJson.Operations;
-using Swashbuckle.AspNetCore.Filters;
 
-namespace Api.Swagger.Examples;
+namespace Api.Setup.OpenApi.Examples;
 
-public class PatchFeatureFlagExamples : IMultipleExamplesProvider<List<Operation>>
+public class PatchFeatureFlagExamples : IOpenApiExamplesProvider
 {
-    public IEnumerable<SwaggerExample<List<Operation>>> GetExamples()
+    public IEnumerable<(string Name, object Value)> GetExamples()
     {
-        yield return SwaggerExample.Create(
+        yield return (
             "Update name and description",
             new List<Operation>
             {
@@ -26,7 +25,7 @@ public class PatchFeatureFlagExamples : IMultipleExamplesProvider<List<Operation
             }
         );
 
-        yield return SwaggerExample.Create(
+        yield return (
             "Archive the flag",
             new List<Operation>
             {
@@ -39,7 +38,7 @@ public class PatchFeatureFlagExamples : IMultipleExamplesProvider<List<Operation
             }
         );
 
-        yield return SwaggerExample.Create(
+        yield return (
             "Restore the flag",
             new List<Operation>
             {
@@ -52,7 +51,7 @@ public class PatchFeatureFlagExamples : IMultipleExamplesProvider<List<Operation
             }
         );
 
-        yield return SwaggerExample.Create(
+        yield return (
             "Enable the flag",
             new List<Operation>
             {
@@ -65,7 +64,7 @@ public class PatchFeatureFlagExamples : IMultipleExamplesProvider<List<Operation
             }
         );
 
-        yield return SwaggerExample.Create(
+        yield return (
             "Disable the flag",
             new List<Operation>
             {
@@ -78,7 +77,7 @@ public class PatchFeatureFlagExamples : IMultipleExamplesProvider<List<Operation
             }
         );
 
-        yield return SwaggerExample.Create(
+        yield return (
             "Add target user when the targeting variation has no users",
             new List<Operation>
             {
@@ -95,7 +94,7 @@ public class PatchFeatureFlagExamples : IMultipleExamplesProvider<List<Operation
             }
         );
 
-        yield return SwaggerExample.Create(
+        yield return (
             "Add target user to the first targeting variation",
             new List<Operation>
             {
@@ -108,7 +107,7 @@ public class PatchFeatureFlagExamples : IMultipleExamplesProvider<List<Operation
             }
         );
 
-        yield return SwaggerExample.Create(
+        yield return (
             "Add rule",
             new List<Operation>
             {
@@ -159,7 +158,7 @@ public class PatchFeatureFlagExamples : IMultipleExamplesProvider<List<Operation
             }
         );
 
-        yield return SwaggerExample.Create(
+        yield return (
             "Remove the first rule",
             new List<Operation>
             {
@@ -171,7 +170,7 @@ public class PatchFeatureFlagExamples : IMultipleExamplesProvider<List<Operation
             }
         );
 
-        yield return SwaggerExample.Create(
+        yield return (
             "Add a new variation", new List<Operation>
             {
                 new()
@@ -188,7 +187,7 @@ public class PatchFeatureFlagExamples : IMultipleExamplesProvider<List<Operation
             }
         );
 
-        yield return SwaggerExample.Create(
+        yield return (
             "Update the first variation value",
             new List<Operation>
             {

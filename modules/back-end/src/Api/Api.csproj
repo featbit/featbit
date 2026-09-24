@@ -12,11 +12,9 @@
         <!-- Api Versioning -->
         <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="10.0.0" />
 
-        <!-- Swagger -->
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.7" />
-        <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="10.1.7" />
-        <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="10.0.1" />
-        <PackageReference Include="Swashbuckle.AspNetCore.ReDoc" Version="10.1.7" />
+        <!-- OpenApi -->
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
+        <PackageReference Include="Scalar.AspNetCore" Version="2.17.9" />
 
         <!-- Serilog -->
         <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />

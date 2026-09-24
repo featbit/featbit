@@ -1,9 +1,10 @@
 using Api.Middlewares;
+using Asp.Versioning.ApiExplorer;
 using Infrastructure;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Scalar.AspNetCore;
 using Serilog;
 using Serilog.Events;
-using Swashbuckle.AspNetCore.SwaggerUI;
 using OpenApiConstants = Api.Authentication.OpenApiConstants;
 
 namespace Api.Setup;
@@ -23,40 +24,22 @@ public static class MiddlewaresRegister
             Predicate = registration => registration.Tags.Contains(HealthCheckBuilderExtensions.ReadinessTag)
         });
 
-        // enable swagger
-        app.UseSwagger();
-
-        // enable swagger UI in development environment
+        // enable openapi/scalar in development environment
         if (app.Environment.IsDevelopment())
         {
-            app.UseSwaggerUI(options =>
-            {
-                options.EnableFilter();
-                options.DisplayRequestDuration();
-                options.DocExpansion(DocExpansion.List);
+            app.MapOpenApi().AllowAnonymous();
 
-                // build a swagger endpoint for each discovered API version
-                var descriptions = app.DescribeApiVersions();
-                foreach (var description in descriptions)
+            app.MapScalarApiReference(options =>
+            {
+                var versionProvider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
+                foreach (var description in versionProvider.ApiVersionDescriptions)
                 {
-                    var url = $"/swagger/{description.GroupName}/swagger.json";
-                    var name = description.GroupName.ToUpperInvariant();
-                    options.SwaggerEndpoint(url, name);
+                    options.AddDocument(description.GroupName, description.GroupName.ToUpperInvariant());
                 }
 
-                const string openApiGroup = OpenApiConstants.ApiGroupName;
-                options.SwaggerEndpoint($"/swagger/{openApiGroup}/swagger.json", openApiGroup);
-            });
+                options.AddDocument(OpenApiConstants.ApiGroupName, OpenApiConstants.ApiGroupName);
+            }).AllowAnonymous();
         }
-
-        // enable ReDoc
-        app.UseReDoc(options =>
-        {
-            options.RoutePrefix = "docs";
-            options.DocumentTitle = "FeatBit OpenApi Doc";
-            options.SpecUrl = $"/swagger/{OpenApiConstants.ApiGroupName}/swagger.json";
-            options.ExpandResponses("200");
-        });
 
         // enable cors
         app.UseCors();
