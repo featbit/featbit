@@ -40,8 +40,8 @@ import {
 import { PayloadPreviewDialog } from "./payload-preview-dialog"
 import {
   previewStoreKey,
-  removePreviewWebhook,
-  savePreviewWebhook,
+  removeReleaseHealthWebhook,
+  saveReleaseHealthWebhook,
   useReleaseHealthWebhooks,
   type ReleaseHealthWebhook,
 } from "./preview-store"
@@ -61,6 +61,7 @@ export function ReleaseHealthWebhooksContent() {
   const [environmentId, setEnvironmentId] = useState("all")
   const [preview, setPreview] = useState<ReleaseHealthWebhook | null>(null)
   const [remove, setRemove] = useState<ReleaseHealthWebhook | null>(null)
+  const [removing, setRemoving] = useState(false)
   useEffect(() => {
     if (params.get("create") !== "1") return
     const next = new URLSearchParams(params)
@@ -303,7 +304,12 @@ export function ReleaseHealthWebhooksContent() {
               })
             )
               throw new Error("scope-unavailable")
-            savePreviewWebhook(owner, draft, sheet.webhook?.id)
+            await saveReleaseHealthWebhook(
+              owner,
+              draft,
+              sheet.webhook ?? undefined
+            )
+            await catalogue.refetch()
             setSheet(null)
             toast.success(h("saved"))
           }}
@@ -317,7 +323,7 @@ export function ReleaseHealthWebhooksContent() {
       )}
       <AlertDialog
         open={Boolean(remove)}
-        onOpenChange={(open) => !open && setRemove(null)}
+        onOpenChange={(open) => !open && !removing && setRemove(null)}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -329,20 +335,29 @@ export function ReleaseHealthWebhooksContent() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <Button variant="outline" onClick={() => setRemove(null)}>
+            <Button
+              variant="outline"
+              disabled={removing}
+              onClick={() => setRemove(null)}
+            >
               {t("webhooks.cancel")}
             </Button>
             <Button
               variant="destructive"
-              onClick={() => {
+              disabled={removing}
+              onClick={async () => {
+                setRemoving(true)
                 try {
                   if (!owner || !remove || owner !== previewStoreKey())
                     throw new Error("missing-context")
-                  removePreviewWebhook(owner, remove.id)
+                  await removeReleaseHealthWebhook(owner, remove)
+                  await catalogue.refetch()
                   setRemove(null)
                   toast.success(t("webhooks.removed"))
                 } catch {
                   toast.error(t("webhooks.removeFailed"))
+                } finally {
+                  setRemoving(false)
                 }
               }}
             >

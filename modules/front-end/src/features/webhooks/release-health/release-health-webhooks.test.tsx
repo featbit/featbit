@@ -9,6 +9,7 @@ import {
 } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { fetchApi, ApiRequestError } from "@/lib/api/authenticated-api"
 import { i18n } from "@/lib/i18n/i18n"
 import { webhookHeadersSchema } from "./webhook-authentication"
 import { WebhooksPage } from "../webhooks-page"
@@ -23,12 +24,88 @@ import {
 import {
   availableAlertWebhooks,
   previewStoreKey,
-  readPreviewWebhooks,
-  removePreviewWebhook,
-  savePreviewWebhook,
+  fetchReleaseHealthWebhooks,
+  removeReleaseHealthWebhook,
+  saveReleaseHealthWebhook,
   useReleaseHealthWebhooks,
   type ReleaseHealthWebhookDraft,
+  type ReleaseHealthWebhook,
 } from "./preview-store"
+
+vi.mock("@/lib/api/authenticated-api", async (original) => ({
+  ...(await original<typeof import("@/lib/api/authenticated-api")>()),
+  fetchApi: vi.fn(),
+}))
+const catalogues = new Map<string, ReleaseHealthWebhook[]>()
+const serverItems = () => catalogues.get(identity.org) ?? []
+function installServer() {
+  vi.mocked(fetchApi).mockImplementation(async (path, init) => {
+    const items = serverItems()
+    if (!init?.method || init.method === "GET") return structuredClone(items)
+    const id = path.split("/").at(-1)!.split("?")[0]
+    const previous = items.find((item) => item.id === id)
+    if (init.method === "DELETE") {
+      if (
+        Number(
+          new URLSearchParams(path.split("?")[1]).get("expectedVersion")
+        ) !== previous?.version
+      )
+        throw new ApiRequestError(409, "Conflict")
+      catalogues.set(
+        identity.org,
+        items.filter((item) => item.id !== id)
+      )
+      return true
+    }
+    const write = JSON.parse(String(init.body)) as ReleaseHealthWebhook & {
+      expectedVersion: number | null
+      headersUpdate: { operation: string; headers?: unknown[] }
+      secretUpdate: { operation: string; secret?: string }
+    }
+    if (init.method === "PUT" && write.expectedVersion !== previous?.version)
+      throw new ApiRequestError(409, "Conflict")
+    const item: ReleaseHealthWebhook = {
+      id: previous?.id ?? crypto.randomUUID(),
+      purpose: "release-health",
+      name: write.name,
+      url: write.url,
+      isActive: write.isActive,
+      scopes: write.scopes,
+      scopeNames: write.scopes.flatMap((scope) => {
+        const [pid, ids] = scope.split("/")
+        return ids
+          .split(",")
+          .map(
+            (env) =>
+              `${pid === "project" ? "Storefront" : "API"}/${env === "dev" ? "Development" : "Production"}`
+          )
+      }),
+      payloadTemplate: write.payloadTemplate,
+      payloadTemplateType: write.payloadTemplateType,
+      version: (previous?.version ?? 0) + 1,
+      canManage: true,
+      hasHeaders:
+        write.headersUpdate.operation === "keep"
+          ? (previous?.hasHeaders ?? false)
+          : write.headersUpdate.operation === "replace" &&
+            Boolean(write.headersUpdate.headers?.length),
+      hasSecret:
+        write.secretUpdate.operation === "keep"
+          ? (previous?.hasSecret ?? false)
+          : write.secretUpdate.operation === "replace" &&
+            Boolean(write.secretUpdate.secret),
+      headers: [],
+      secret: "",
+    }
+    catalogues.set(
+      identity.org,
+      previous
+        ? items.map((row) => (row.id === id ? item : row))
+        : [...items, item]
+    )
+    return structuredClone(item)
+  })
+}
 
 const identity = vi.hoisted(() => ({
   user: "tester",
@@ -140,6 +217,8 @@ function provider(entry = "/en/webhooks?category=release-health&create=1") {
 beforeEach(async () => {
   localStorage.clear()
   vi.clearAllMocks()
+  catalogues.clear()
+  installServer()
   identity.org = "org"
   identity.user = "tester"
   identity.workspace = "workspace"
@@ -195,92 +274,93 @@ describe("Release Health webhook payloads", () => {
   })
 })
 
-describe("preview destination lifecycle", () => {
-  it("shows the current default for saved destinations without rewriting custom templates or storage on read", () => {
-    const key = previewStoreKey()!
-    const legacy = '{"evaluation": {{json evaluation}} }'
-    const stored = JSON.stringify([
-      {
-        ...draft(),
-        id: "default",
-        purpose: "release-health",
-        payloadTemplate: legacy,
-      },
-      {
-        ...draft("Custom"),
-        id: "custom",
-        purpose: "release-health",
-        payloadTemplateType: "custom",
-        payloadTemplate: legacy,
-      },
-    ])
-    localStorage.setItem(key, stored)
-    const [standard, custom] = readPreviewWebhooks(key)
-    expect(standard.payloadTemplate).toBe(ALERT_PAYLOAD_TEMPLATE)
-    expect(custom.payloadTemplate).toBe(legacy)
-    expect(localStorage.getItem(key)).toBe(stored)
+describe("server destination lifecycle", () => {
+  it("reads server state after remount without reading or uploading legacy browser data", async () => {
+    localStorage.setItem(
+      "featbit:release-health-webhooks-preview:v1:tester:workspace:org",
+      JSON.stringify([{ ...draft("Old local"), secret: "local-sensitive" }])
+    )
+    const saved = await saveReleaseHealthWebhook(previewStoreKey()!, draft())
+    const first = renderHook(() => useReleaseHealthWebhooks(), {
+      wrapper: provider(),
+    })
+    await waitFor(() =>
+      expect(first.result.current.data?.[0].id).toBe(saved.id)
+    )
+    first.unmount()
+    const second = renderHook(() => useReleaseHealthWebhooks(), {
+      wrapper: provider(),
+    })
+    await waitFor(() =>
+      expect(second.result.current.data?.[0].id).toBe(saved.id)
+    )
+    expect(JSON.stringify(vi.mocked(fetchApi).mock.calls)).not.toContain(
+      "local-sensitive"
+    )
   })
-  it("keeps organization, workspace and user catalogues isolated and excludes credentials", () => {
-    const key = previewStoreKey()!
-    const saved = savePreviewWebhook(key, {
+  it("persists credential update operations but never returns them or writes browser storage", async () => {
+    const owner = previewStoreKey()!
+    const saved = await saveReleaseHealthWebhook(owner, {
       ...draft(),
-      secret: "must-not-persist",
-      headers: [{ key: "Authorization", value: "must-not-persist" }],
-    } as ReleaseHealthWebhookDraft)
-    expect(readPreviewWebhooks(key)).toEqual([saved])
-    expect(saved.secret).toBe("must-not-persist")
-    expect(saved.headers).toEqual([
-      { key: "Authorization", value: "must-not-persist" },
-    ])
-    expect(localStorage.getItem(key)).not.toContain("must-not-persist")
-    identity.org = "another-org"
-    expect(readPreviewWebhooks(previewStoreKey()!)).toEqual([])
-    identity.org = "org"
-    identity.workspace = "another-workspace"
-    expect(readPreviewWebhooks(previewStoreKey()!)).toEqual([])
-    identity.workspace = "workspace"
-    identity.user = "another-user"
-    expect(readPreviewWebhooks(previewStoreKey()!)).toEqual([])
+      headers: [{ key: "Authorization", value: "secret-token" }],
+      secret: "signing-token",
+    })
+    expect(saved).toMatchObject({
+      hasHeaders: true,
+      hasSecret: true,
+      headers: [],
+      secret: "",
+    })
+    expect(localStorage.length).toBe(0)
+    const kept = await saveReleaseHealthWebhook(owner, draft(), saved)
+    expect(
+      JSON.parse(String(vi.mocked(fetchApi).mock.calls.at(-1)?.[1]?.body))
+    ).toMatchObject({
+      expectedVersion: 1,
+      headersUpdate: { operation: "keep" },
+      secretUpdate: { operation: "keep" },
+    })
+    expect(kept).toMatchObject({ hasHeaders: true, hasSecret: true })
+    const cleared = await saveReleaseHealthWebhook(
+      owner,
+      { ...draft(), removeSavedHeaders: true, removeSavedSecret: true },
+      kept
+    )
+    expect(cleared).toMatchObject({ hasHeaders: false, hasSecret: false })
   })
-  it("filters exact scopes and active purpose, preserves identity on edits, and rejects duplicates or stale edits", () => {
-    const key = previewStoreKey()!
-    const saved = savePreviewWebhook(key, draft())
+  it("filters exact scopes, reads a fresh organization and rejects stale mutations", async () => {
+    const owner = previewStoreKey()!
+    const saved = await saveReleaseHealthWebhook(owner, draft())
     expect(availableAlertWebhooks([saved], "project", "prod")).toHaveLength(1)
-    expect(availableAlertWebhooks([saved], "other", "other-prod")).toHaveLength(
-      1
-    )
     expect(availableAlertWebhooks([saved], "project", "pro")).toEqual([])
-    expect(
-      availableAlertWebhooks([{ ...saved, isActive: false }], "project", "prod")
-    ).toEqual([])
-    expect(() => savePreviewWebhook(key, draft(" operations "))).toThrow(
-      "duplicate"
+    const changed = await saveReleaseHealthWebhook(
+      owner,
+      { ...draft(), isActive: false },
+      saved
     )
-    expect(
-      savePreviewWebhook(key, { ...draft(), isActive: false }, saved.id).id
-    ).toBe(saved.id)
-    removePreviewWebhook(key, saved.id)
-    expect(() => savePreviewWebhook(key, draft(), saved.id)).toThrow("missing")
+    expect(availableAlertWebhooks([changed], "project", "prod")).toEqual([])
+    await expect(
+      saveReleaseHealthWebhook(owner, draft(), saved)
+    ).rejects.toMatchObject({ status: 409 })
+    await removeReleaseHealthWebhook(owner, changed)
+    expect(await fetchReleaseHealthWebhooks()).toEqual([])
+    identity.org = "other"
+    await expect(saveReleaseHealthWebhook(owner, draft())).rejects.toThrow(
+      "missing-context"
+    )
+    expect(await fetchReleaseHealthWebhooks()).toEqual([])
   })
-  it("refreshes the catalogue when another tab saves and reports malformed storage without overwriting it", async () => {
-    const key = previewStoreKey()!
+  it("refetches server changes on return from another tab and exposes load failures", async () => {
     const { result } = renderHook(() => useReleaseHealthWebhooks(), {
       wrapper: provider(),
     })
     await waitFor(() => expect(result.current.data).toEqual([]))
-    localStorage.setItem(
-      key,
-      JSON.stringify([
-        { ...draft(), id: "from-other-tab", purpose: "release-health" },
-      ])
-    )
-    window.dispatchEvent(new StorageEvent("storage", { key }))
-    await waitFor(() =>
-      expect(result.current.data?.[0].id).toBe("from-other-tab")
-    )
-    localStorage.setItem(key, "broken")
-    expect(() => savePreviewWebhook(key, draft())).toThrow()
-    expect(localStorage.getItem(key)).toBe("broken")
+    const saved = await saveReleaseHealthWebhook(previewStoreKey()!, draft())
+    fireEvent(window, new Event("focus"))
+    await waitFor(() => expect(result.current.data?.[0].id).toBe(saved.id))
+    vi.mocked(fetchApi).mockRejectedValue(new Error("offline"))
+    const failed = await result.current.refetch()
+    expect(failed.isError).toBe(true)
   })
 })
 
@@ -417,13 +497,13 @@ describe("Release Health webhook UI", () => {
   })
   it("combines project, environment and name filters and clears the environment when the project changes", async () => {
     const key = previewStoreKey()!
-    savePreviewWebhook(key, draft("Shared production"))
-    savePreviewWebhook(key, {
+    await saveReleaseHealthWebhook(key, draft("Shared production"))
+    await saveReleaseHealthWebhook(key, {
       ...draft("Storefront development"),
       scopes: ["project/dev"],
       scopeNames: ["Storefront/Development"],
     })
-    savePreviewWebhook(key, {
+    await saveReleaseHealthWebhook(key, {
       ...draft("API production"),
       scopes: ["other/other-prod"],
       scopeNames: ["API/Production"],
@@ -539,7 +619,7 @@ describe("Release Health webhook UI", () => {
     await waitFor(() =>
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
     )
-    expect(readPreviewWebhooks(previewStoreKey()!)[0].scopes).toEqual([
+    expect(serverItems()[0].scopes).toEqual([
       "project/prod",
       "other/other-prod",
     ])
@@ -561,80 +641,24 @@ describe("Release Health webhook UI", () => {
     expect(createWebhook).not.toHaveBeenCalled()
     expect(sendTestWebhook).not.toHaveBeenCalled()
   })
-  it("edits authentication, validates duplicate headers, retains saved values on reopen, and discards unsaved changes", async () => {
-    render(<WebhooksPage />, { wrapper: provider() })
-    const dialog = within(
-      await screen.findByRole("dialog", { name: "New Release Health webhook" })
-    )
-    await waitFor(() =>
-      expect(
-        dialog.getByRole("button", { name: "Create webhook" })
-      ).toBeEnabled()
-    )
-    fireEvent.change(dialog.getByRole("textbox", { name: "Name" }), {
-      target: { value: "Authenticated" },
+  it("keeps saved authentication write-only on reopen, supports explicit removal and discards unsaved changes", async () => {
+    await saveReleaseHealthWebhook(previewStoreKey()!, {
+      ...draft("Authenticated"),
+      headers: [{ key: "Authorization", value: "sample-token" }],
+      secret: "sample-signing",
     })
-    fireEvent.change(dialog.getByLabelText("Endpoint"), {
-      target: { value: "https://example.com/alerts" },
+    render(<WebhooksPage />, {
+      wrapper: provider("/en/webhooks?category=release-health"),
     })
-    fireEvent.change(dialog.getByLabelText("Header 1 name"), {
-      target: { value: "Authorization" },
-    })
-    fireEvent.change(dialog.getByLabelText("Header 1 value"), {
-      target: { value: "Bearer sample-only" },
-    })
-    fireEvent.change(dialog.getByLabelText("Secret", { exact: true }), {
-      target: { value: "sample-signing-only" },
-    })
-    expect(dialog.getByLabelText("Secret", { exact: true })).toHaveAttribute(
-      "type",
-      "password"
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Edit Authenticated" })
     )
-    fireEvent.click(dialog.getByRole("button", { name: "Show or hide secret" }))
-    expect(dialog.getByLabelText("Secret", { exact: true })).toHaveAttribute(
-      "type",
-      "text"
-    )
-    fireEvent.click(dialog.getByRole("button", { name: "Add header" }))
-    fireEvent.change(dialog.getByLabelText("Header 2 name"), {
-      target: { value: "authorization" },
-    })
-    fireEvent.click(dialog.getByRole("button", { name: "Create webhook" }))
-    expect(await dialog.findByRole("alert")).toHaveTextContent(
-      "Header names must be unique"
-    )
-    expect(readPreviewWebhooks(previewStoreKey()!)).toEqual([])
-    fireEvent.change(dialog.getByLabelText("Header 2 name"), {
-      target: { value: "X-Service" },
-    })
-    fireEvent.change(dialog.getByLabelText("Header 2 value"), {
-      target: { value: "checkout" },
-    })
-    fireEvent.click(dialog.getByRole("button", { name: "Create webhook" }))
-    await waitFor(() =>
-      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
-    )
-    expect(localStorage.getItem(previewStoreKey()!)).not.toContain(
-      "sample-only"
-    )
-    expect(localStorage.getItem(previewStoreKey()!)).not.toContain(
-      "sample-signing-only"
-    )
-    fireEvent.click(screen.getByRole("button", { name: "Edit Authenticated" }))
     const edit = within(
       await screen.findByRole("dialog", { name: "Edit Release Health webhook" })
     )
-    expect(edit.getByLabelText("Header 1 value")).toHaveValue(
-      "Bearer sample-only"
-    )
-    expect(edit.getByLabelText("Header 2 value")).toHaveValue("checkout")
-    expect(edit.getByLabelText("Secret", { exact: true })).toHaveValue(
-      "sample-signing-only"
-    )
-    expect(edit.getByLabelText("Secret", { exact: true })).toHaveAttribute(
-      "type",
-      "password"
-    )
+    expect(edit.getByLabelText("Header 1 value")).toHaveValue("")
+    expect(edit.getByLabelText("Secret", { exact: true })).toHaveValue("")
+    expect(edit.getByText(/A signing secret is configured/)).toBeVisible()
     fireEvent.change(edit.getByLabelText("Secret", { exact: true }), {
       target: { value: "unsaved" },
     })
@@ -646,25 +670,29 @@ describe("Release Health webhook UI", () => {
     await waitFor(() =>
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
     )
-    expect(readPreviewWebhooks(previewStoreKey()!)[0].secret).toBe(
-      "sample-signing-only"
-    )
+    expect(serverItems()[0].hasSecret).toBe(true)
     fireEvent.click(screen.getByRole("button", { name: "Edit Authenticated" }))
     const reopened = within(
       await screen.findByRole("dialog", { name: "Edit Release Health webhook" })
     )
-    fireEvent.click(reopened.getByRole("button", { name: "Remove header 2" }))
-    fireEvent.click(reopened.getByRole("button", { name: "Remove header 1" }))
-    fireEvent.change(reopened.getByLabelText("Secret", { exact: true }), {
-      target: { value: "" },
-    })
+    fireEvent.click(
+      reopened.getByRole("button", { name: "Remove saved headers" })
+    )
+    fireEvent.click(
+      reopened.getByRole("button", { name: "Remove saved secret" })
+    )
+    await waitFor(() =>
+      expect(
+        reopened.getByRole("button", { name: "Save changes" })
+      ).toBeEnabled()
+    )
     fireEvent.click(reopened.getByRole("button", { name: "Save changes" }))
     await waitFor(() =>
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
     )
-    expect(readPreviewWebhooks(previewStoreKey()!)[0]).toMatchObject({
-      headers: [],
-      secret: "",
+    expect(serverItems()[0]).toMatchObject({
+      hasHeaders: false,
+      hasSecret: false,
     })
     expect(sendTestWebhook).not.toHaveBeenCalled()
     expect(createWebhook).not.toHaveBeenCalled()
@@ -712,6 +740,6 @@ describe("Release Health webhook UI", () => {
       "both alert events"
     )
     expect(dialog.getByRole("textbox", { name: "Name" })).toHaveValue("Draft")
-    expect(readPreviewWebhooks(previewStoreKey()!)).toEqual([])
+    expect(serverItems()).toEqual([])
   })
 })

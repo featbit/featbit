@@ -13,6 +13,7 @@ import { i18n } from "@/lib/i18n/i18n"
 import type { FeatureFlag } from "@/features/flags/flags-types"
 import { SourceConnectionsPage } from "./connections/source-connections-page"
 import { FlagReleaseHealthTab } from "./flag/flag-release-health-tab"
+import { monitorApi } from "./flag/monitor-api"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { releaseHealthApi } from "./release-health-api"
 import { ReleaseMetricDetailsPage } from "./metrics/release-metric-details-page"
@@ -20,6 +21,27 @@ import { MetricDetailEditor } from "./metrics/metric-detail-editor"
 import { ReleaseMetricSourceBindingPage } from "./metrics/release-metric-source-binding-page"
 import { ReleaseHealthOverviewPage } from "./overview/release-health-overview-page"
 
+vi.mock("./flag/monitor-api", async (original) => ({
+  ...(await original<typeof import("./flag/monitor-api")>()),
+  monitorApi: {
+    get: vi.fn(),
+    metrics: vi.fn(),
+    add: vi.fn(),
+    edit: vi.fn(),
+    toggleBinding: vi.fn(),
+    remove: vi.fn(),
+    toggle: vi.fn(),
+  },
+}))
+vi.mock("./flag/binding-webhooks", () => ({
+  useBindingWebhooks: () => ({
+    data: [],
+    isPending: false,
+    isLoading: false,
+    isError: false,
+    refetch: async () => ({ data: [], isError: false }),
+  }),
+}))
 vi.mock("./release-health-api", async (original) => ({
   ...(await original<typeof import("./release-health-api")>()),
   releaseHealthApi: {
@@ -57,10 +79,10 @@ const contract = {
 }
 function renderLive(ui: React.ReactNode) {
   const client = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
+    defaultOptions: { queries: { retry: false, staleTime: Infinity } },
   })
   client.setQueryData(
-    ["current-user-policies", ""],
+    ["current-user-policies", "organization-1"],
     [
       {
         type: "custom",
@@ -96,6 +118,14 @@ describe("Release Health design pages", () => {
     localStorage.setItem(
       "auth",
       JSON.stringify({ id: "user-1", name: "Designer" })
+    )
+    localStorage.setItem(
+      "current-workspace_user-1",
+      JSON.stringify({ id: "workspace-1", name: "Workspace" })
+    )
+    localStorage.setItem(
+      "current-organization_user-1",
+      JSON.stringify({ id: "organization-1", name: "Organization" })
     )
     localStorage.setItem(
       "current-project_user-1",
@@ -158,6 +188,18 @@ describe("Release Health design pages", () => {
     })
     vi.mocked(releaseHealthApi.binding).mockResolvedValue(null)
     vi.mocked(releaseHealthApi.connections).mockResolvedValue([])
+    vi.mocked(monitorApi.get).mockResolvedValue({
+      flagId: flag.id,
+      enabled: true,
+      revision: 0,
+      bindings: [],
+    })
+    vi.mocked(monitorApi.metrics).mockImplementation(async () =>
+      (await releaseHealthApi.metrics("project-commerce")).map((metric) => ({
+        ...metric,
+        sourceConnected: true,
+      }))
+    )
     await i18n.changeLanguage("en")
   })
 
@@ -490,7 +532,34 @@ describe("Release Health design pages", () => {
     expect(screen.queryByText("> 800 ms for 10 min")).not.toBeInTheDocument()
   })
 
-  it("shows ongoing monitoring and configures it without starting an observation session", async () => {
+  it("loads an empty server monitor and adds a real metric without resuming paused monitoring", async () => {
+    const metric = (await releaseHealthApi.metrics("project-commerce"))[0]
+    vi.mocked(monitorApi.toggle).mockResolvedValue({
+      flagId: flag.id,
+      enabled: false,
+      revision: 1,
+      bindings: [],
+    })
+    vi.mocked(monitorApi.add).mockResolvedValue({
+      flagId: flag.id,
+      enabled: false,
+      revision: 2,
+      bindings: [
+        {
+          id: "binding-new",
+          metricId: metric.id,
+          metricVersionId: metric.metricVersionId,
+          metricVersion: metric.version,
+          revision: 1,
+          createdAt: "2026-09-24T00:00:00Z",
+          enabled: true,
+          observationMode: "environment",
+          purpose: "trend",
+          metric,
+          sourceConnected: true,
+        },
+      ],
+    })
     renderLive(
       <MemoryRouter
         initialEntries={["/en/feature-flags/search-ranking-v3/release-health"]}
@@ -498,80 +567,49 @@ describe("Release Health design pages", () => {
         <FlagReleaseHealthTab envId="env-production" flag={flag} lang="en" />
       </MemoryRouter>
     )
-
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Add binding" })).toBeEnabled()
+    )
+    expect(screen.getByText("Monitor metric bindings")).toBeVisible()
+    expect(screen.getByText("Search ranking v3 · Health Monitor")).toBeVisible()
+    expect(screen.getByText("0 Guard · 0 Trend")).toBeVisible()
+    expect(screen.queryByText("Design preview")).not.toBeInTheDocument()
+    expect(screen.queryByText("Checkout error rate")).not.toBeInTheDocument()
     expect(
       screen.queryByRole("button", { name: "Monitor this change" })
     ).not.toBeInTheDocument()
-    expect(
-      screen.queryByRole("button", { name: "Quick observation" })
-    ).not.toBeInTheDocument()
-    expect(screen.getByText("Monitor metric bindings")).toBeVisible()
-    expect(
-      screen.queryByText(/They are not causal attribution/)
-    ).not.toBeInTheDocument()
-    expect(
-      screen.queryByRole("heading", { name: "Release Health" })
-    ).not.toBeInTheDocument()
-    expect(screen.queryByText("Monitoring triggers")).not.toBeInTheDocument()
-    expect(screen.getByText("Design preview")).toBeVisible()
-    expect(screen.getByText("Search ranking v3 · Health Monitor")).toBeVisible()
-    expect(screen.queryByText("Checkout redesign")).not.toBeInTheDocument()
-    expect(
-      screen.queryByText("Checkout safety monitor")
-    ).not.toBeInTheDocument()
-
-    expect(screen.queryByText("Current gate")).not.toBeInTheDocument()
-    expect(screen.queryByText("Response")).not.toBeInTheDocument()
-    expect(screen.queryByText("Approval required")).not.toBeInTheDocument()
-    expect(screen.getByText("3 Guard · 1 Trend")).toBeVisible()
-    const table = within(screen.getByRole("table"))
-    expect(
-      table.getByRole("columnheader", { name: "Latest rule check" })
-    ).toBeVisible()
-    const errorRate = within(
-      table.getByRole("row", { name: /Checkout error rate/ })
-    )
-    expect(errorRate.getByText("Critical")).toBeVisible()
-    expect(errorRate.getByText(/2.6%/)).toBeVisible()
-    const observe = within(
-      table.getByRole("row", { name: /Checkout completion/ })
-    )
-    expect(observe.getByText("Not applicable")).toBeVisible()
-    expect(observe.queryByText("Healthy")).not.toBeInTheDocument()
-    const stale = within(
-      table.getByRole("row", { name: /Service memory saturation/ })
-    )
-    expect(stale.getByText("Not evaluated")).toBeVisible()
-    expect(stale.queryByText("76%")).not.toBeInTheDocument()
-
-    // Editing a paused monitor must not resume it or create a one-off observation.
     const toggle = screen.getByRole("switch", {
       name: "Toggle monitoring for all bound metrics",
     })
     fireEvent.click(toggle)
-    expect(toggle).toHaveAttribute("aria-checked", "false")
+    await waitFor(() => expect(toggle).toHaveAttribute("aria-checked", "false"))
     fireEvent.click(screen.getByRole("button", { name: "Add binding" }))
     const dialog = within(await screen.findByRole("dialog"))
     expect(dialog.getByText(/Monitoring is paused/)).toBeVisible()
-    expect(dialog.queryByText("Gate")).not.toBeInTheDocument()
-    expect(dialog.queryByText("Response")).not.toBeInTheDocument()
     fireEvent.click(dialog.getByLabelText("Metric"))
-    expect(
-      screen.queryByRole("option", { name: /Checkout error rate/ })
-    ).not.toBeInTheDocument()
     fireEvent.click(
-      await screen.findByRole("option", { name: /Crash-free sessions/ })
+      await screen.findByRole("option", { name: /Checkout error rate/ })
     )
     fireEvent.click(dialog.getByRole("button", { name: "Add binding" }))
     await waitFor(() =>
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
     )
-    expect(screen.getByText("3 Guard · 2 Trend")).toBeVisible()
+    expect(screen.getByText("0 Guard · 1 Trend")).toBeVisible()
     expect(toggle).toHaveAttribute("aria-checked", "false")
     expect(
       within(screen.getByRole("table")).getByRole("row", {
-        name: /Crash-free sessions/,
+        name: /Checkout error rate/,
       })
     ).toBeVisible()
+    expect(monitorApi.add).toHaveBeenCalledWith(
+      { projectId: "project-commerce", envId: "env-production" },
+      flag.id,
+      expect.objectContaining({
+        expectedRevision: 1,
+        metricId: metric.id,
+        metricVersionId: metric.metricVersionId,
+        purpose: "trend",
+      })
+    )
   })
 })

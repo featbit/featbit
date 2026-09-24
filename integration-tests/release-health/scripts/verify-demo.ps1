@@ -32,6 +32,8 @@ foreach ($mode in @('basic', 'bearer')) {
 $started = [DateTimeOffset]::UtcNow
 $samples = [Collections.Generic.List[object]]::new()
 $phases = [Collections.Generic.List[object]]::new()
+$originalMode = (Invoke-RestMethod -Uri 'http://127.0.0.1:19180/health' -TimeoutSec 10).scenario
+if ($originalMode -notin @('healthy', 'regression', 'recovery', 'flag', 'cycle')) { throw 'Cannot safely restore the original demo scenario.' }
 try {
     foreach ($mode in @('healthy', 'regression', 'recovery')) {
         Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:19180/scenario/$mode" | Out-Null
@@ -53,7 +55,8 @@ try {
         Write-Host "$mode observed: error=$($last.errorRate)%, p95=$($last.p95Ms)ms; passed=$passed"
     }
 } finally {
-    Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:19180/scenario/recovery' | Out-Null
+    Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:19180/scenario/$originalMode" -TimeoutSec 10 | Out-Null
+    Write-Host "Restored demo scenario: $originalMode"
 }
 $reportDir = Join-Path $demoRoot 'reports'
 $report = @{ startedAt = $started; endedAt = [DateTimeOffset]::UtcNow; phases = $phases; samples = $samples; queries = $queries; authVerified = @('none','basic','bearer') }

@@ -105,8 +105,20 @@ public sealed partial class ReleaseHealthService
     public async Task<IReadOnlyList<MetricMonitorBindingView>> MonitorBindings(Guid projectId, Guid envId, Guid metricId, CancellationToken ct)
     {
         await Required(projectId, "metric", metricId, ct);
-        return (await store.ListAsync(envId, "monitor_binding", ct)).Select(Read<MetricMonitorBindingView>)
-            .Where(x => x.MetricId == metricId).ToArray();
+        var monitors = (await store.ListAsync(envId, MonitorKind, ct)).Where(x => x.ProjectId == projectId)
+            .Select(Read<MonitorState>).ToArray();
+        var legacy = (await store.ListAsync(envId, "monitor_binding", ct)).Where(x => x.ProjectId == projectId)
+            .Select(Read<MetricMonitorBindingView>)
+            .Where(x => x.MetricId == metricId && !monitors.Any(m => m.Current.FlagId == x.FlagId));
+        var current = monitors.SelectMany(m => m.Current.Bindings.Where(x => x.MetricId == metricId).Select(binding =>
+            new MetricMonitorBindingView(binding.Id, binding.MetricId, binding.MetricVersionId, binding.MetricVersion,
+                m.Current.FlagId, m.FlagKey, m.FlagName + " · Health Monitor",
+                m.Current.Enabled && binding.Enabled ? "monitoring" : "paused", binding.Purpose,
+                binding.Purpose == "trend" ? "" : string.Join(" / ", binding.Rules!.Select(r => r.Lookback + " min").Distinct()),
+                binding.Purpose == "trend" ? "Trend only" : string.Join("; ", binding.Rules!.Select(r =>
+                    r.Name + ": " + r.Operator + " " + r.Threshold.ToString(System.Globalization.CultureInfo.InvariantCulture))),
+                CreatedAt: binding.CreatedAt)));
+        return current.Concat(legacy).ToArray();
     }
 
     public static void ValidateRange(DateTimeOffset from, DateTimeOffset to)

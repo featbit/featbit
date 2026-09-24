@@ -40,6 +40,13 @@ public class OpenApiHandler(
 
             // set workspace, organization id header & store permissions
             var org = await organizationService.GetAsync(accessToken.OrganizationId);
+            // Access-token permissions belong to one organization. Never let a supplied
+            // header apply those permissions to another organization or workspace.
+            if (!MatchesScopeHeader(ApiConstants.OrgIdHeaderKey, org.Id) ||
+                !MatchesScopeHeader(ApiConstants.WorkspaceHeaderKey, org.WorkspaceId))
+            {
+                return AuthenticateResult.Fail("access-token-scope-mismatch");
+            }
             Context.Request.Headers.TryAdd(ApiConstants.WorkspaceHeaderKey, org.WorkspaceId.ToString());
             Context.Request.Headers.TryAdd(ApiConstants.OrgIdHeaderKey, org.Id.ToString());
 
@@ -75,4 +82,8 @@ public class OpenApiHandler(
             return AuthenticateResult.Fail(ex);
         }
     }
+
+    private bool MatchesScopeHeader(string name, Guid expected) =>
+        !Request.Headers.TryGetValue(name, out var value) ||
+        (value.Count == 1 && Guid.TryParse(value[0], out var actual) && actual == expected);
 }

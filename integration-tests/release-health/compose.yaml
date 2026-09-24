@@ -1,23 +1,29 @@
 name: featbit-release-health-demo
 services:
   demo:
+    restart: unless-stopped
     build: { context: ., args: { PROJECT: Demo.Api } }
     environment:
       OTEL_EXPORTER_OTLP_ENDPOINT: http://collector:4317
       OTEL_METRIC_EXPORT_INTERVAL: "2000"
+      Demo__Scenario: ${FEATBIT_DEMO_SCENARIO:-cycle}
+      Demo__PhaseSeconds: ${FEATBIT_DEMO_PHASE_SECONDS:-60}
       FeatBit__EnvSecret: ${FEATBIT_DEMO_ENV_SECRET:-}
       FeatBit__EventUrl: ${FEATBIT_DEMO_EVENT_URL:-http://host.docker.internal:5100}
       FeatBit__StreamingUrl: ${FEATBIT_DEMO_STREAMING_URL:-ws://host.docker.internal:5100}
     ports: ["127.0.0.1:19180:8080"]
     depends_on: [collector]
   load:
+    restart: unless-stopped
     build: { context: ., args: { PROJECT: LoadGenerator } }
     environment: { DEMO_URL: "http://demo:8080" }
     depends_on: [demo]
   collector:
+    restart: unless-stopped
     image: otel/opentelemetry-collector-contrib:0.159.0
     volumes: ["./infrastructure/collector.yaml:/etc/otelcol-contrib/config.yaml:ro"]
   prometheus:
+    restart: unless-stopped
     image: prom/prometheus:v3.5.5
     command: ["--config.file=/etc/prometheus/prometheus.yml", "--storage.tsdb.retention.time=24h"]
     volumes:
@@ -25,6 +31,7 @@ services:
       - prometheus-data:/prometheus
     ports: ["127.0.0.1:19090:9090"]
   gateway:
+    restart: unless-stopped
     build: { context: ., args: { PROJECT: AuthGateway } }
     secrets: [provider-token, provider-password]
     ports: ["127.0.0.1:19181:8080"]

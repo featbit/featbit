@@ -1,16 +1,29 @@
 export const enWebhooks = {
   tabs: { resourceChanges: "Resource changes" },
   releaseHealth: {
+    conflict:
+      "This webhook was changed elsewhere. Reopen it to load the current version before saving.",
+    headersConfigured:
+      "Saved headers are configured. Leave these fields empty to keep them, or enter the complete replacement headers.",
+    secretConfigured:
+      "A signing secret is configured. Its value cannot be read.",
+    headersWillRemove: "Saved headers will be removed when you save.",
+    secretWillRemove: "The saved secret will be removed when you save.",
+    removeSavedHeaders: "Remove saved headers",
+    removeSavedSecret: "Remove saved secret",
+    keepSavedHeaders: "Keep saved headers",
+    keepSavedSecret: "Keep saved secret",
+    noDeliveries: "Not connected",
     environment: "Environment",
     allEnvironments: "All environments",
     selectProjectFirst: "Select a project to filter by environment.",
     title: "Reusable alert destinations",
     description:
       "Choose a destination for each alert rule. Share the same webhook across flags and projects in this organization.",
-    previewBadge: "Design preview",
+    previewBadge: "Configuration saved on server",
     previewNotice:
-      "Saved in this browser for this organization. No notifications are sent.",
-    previewShort: "Saved in this browser · No deliveries",
+      "Saved for this organization. Alert evaluation and delivery are not connected yet.",
+    previewShort: "Saved on server · No deliveries",
     new: "New Release Health webhook",
     newTitle: "New Release Health webhook",
     editTitle: "Edit Release Health webhook",
@@ -165,7 +178,7 @@ export const enWebhooks = {
     authenticationHelp:
       "Add request headers for the receiving endpoint and an optional signing secret.",
     authenticationPreviewHelp:
-      "In this design preview, headers and secret are kept only in this tab until you refresh or close it. No notifications are sent.",
+      "Headers and secret are encrypted on the server and are never returned. Saving does not send a request.",
     noCustomHeaders:
       "No custom headers. Add a header if your endpoint requires one.",
     headerNameLabel: "Header {{number}} name",
@@ -177,7 +190,7 @@ export const enWebhooks = {
     headerValueInvalid:
       "Header values cannot contain line breaks or null characters.",
     secretHelp:
-      "Optional. Used to sign webhook requests. Clear this field to remove the secret.",
+      "Enter a new secret to replace the saved value. Leave empty to keep it, or explicitly remove the saved secret.",
     endpointInvalid:
       "Enter an absolute HTTP or HTTPS URL without embedded username or password.",
     lastDelivery: "Last delivery",
@@ -189,7 +202,7 @@ export const enWebhooks = {
       "Create a shared alert destination, then select it in a Guard binding’s alert rule.",
     usageNotice:
       "Rule usage and delivery history will be available when alert delivery is connected.",
-    saved: "Preview webhook saved",
+    saved: "Webhook saved",
     removeHelp:
       "Remove “{{name}}”? Rules that use this destination will need another webhook. Rule checks are not removed or paused.",
   },
@@ -388,9 +401,20 @@ export const zhWebhooks = {
     title: "可复用的告警通知目标",
     description:
       "每条告警规则选择一个通知目标，同一 Webhook 可供当前组织内多个 Flag 和项目复用。",
-    previewBadge: "设计预览",
-    previewNotice: "按组织保存在当前浏览器中，不会发送通知。",
-    previewShort: "保存在当前浏览器 · 不会投递",
+    previewBadge: "配置保存在服务端",
+    previewNotice: "配置按组织保存在服务端，指标检查与通知投递尚未接入。",
+    previewShort: "保存在服务端 · 尚未接入投递",
+    conflict: "此 Webhook 已被其他操作修改，请重新打开最新配置后再保存。",
+    headersConfigured:
+      "已配置 Header。留空可保留原值，也可填写完整的新 Header 替换。",
+    secretConfigured: "已配置签名 Secret，无法读取原值。",
+    headersWillRemove: "保存后将移除原有 Header。",
+    secretWillRemove: "保存后将移除原有 Secret。",
+    removeSavedHeaders: "移除已保存的 Header",
+    removeSavedSecret: "移除已保存的 Secret",
+    keepSavedHeaders: "保留已保存的 Header",
+    keepSavedSecret: "保留已保存的 Secret",
+    noDeliveries: "尚未接入",
     new: "新建 Release Health Webhook",
     newTitle: "新建 Release Health Webhook",
     editTitle: "编辑 Release Health Webhook",
@@ -529,7 +553,7 @@ export const zhWebhooks = {
     authentication: "请求头与认证",
     authenticationHelp: "配置接收端所需的请求头，以及可选的签名 Secret。",
     authenticationPreviewHelp:
-      "此设计预览仅在当前标签页内保留 Header 和 Secret，刷新或关闭后清除，不发送通知。",
+      "Header 和 Secret 在服务端加密保存，读取时不返回原值。保存不会发送请求。",
     noCustomHeaders: "未配置自定义 Header。接收端需要时可添加。",
     headerNameLabel: "Header {{number}} 名称",
     headerValueLabel: "Header {{number}} 值",
@@ -538,7 +562,8 @@ export const zhWebhooks = {
       "请输入合法的 HTTP Header 名称，不包含空格或冒号等分隔符。",
     headerDuplicate: "Header 名称不能重复，不区分大小写。",
     headerValueInvalid: "Header 值不能包含换行或空字符。",
-    secretHelp: "可选，用于对 Webhook 请求签名。清空此字段可移除 Secret。",
+    secretHelp:
+      "填写新 Secret 可替换已保存的值，留空保留原值；也可明确选择移除已保存的 Secret。",
     endpointInvalid: "请输入不含用户名或密码的完整 HTTP / HTTPS 地址。",
     lastDelivery: "最近投递",
     previewFor: "预览 {{name}} 的 Payload",
@@ -548,7 +573,7 @@ export const zhWebhooks = {
     emptyHelp:
       "创建可复用的告警通知目标，然后在 Guard binding 的告警规则中选择它。",
     usageNotice: "规则引用与投递记录将在告警投递接入后提供。",
-    saved: "已保存预览 Webhook",
+    saved: "Webhook 已保存",
     removeHelp:
       "移除“{{name}}”？使用此通知目标的规则需要重新选择 Webhook，规则检查不会被删除或暂停。",
   },

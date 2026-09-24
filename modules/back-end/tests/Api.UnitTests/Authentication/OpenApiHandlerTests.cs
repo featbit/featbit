@@ -7,6 +7,8 @@ using Application;
 using Application.Services;
 using Domain.AccessTokens;
 using Domain.Organizations;
+using Domain.Policies;
+using Domain.Resources;
 using Domain.Users;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
@@ -124,5 +126,59 @@ public class OpenApiHandlerTests
 
         Assert.False(result.Succeeded);
         Assert.NotNull(result.Failure);
+    }
+
+    [Theory]
+    [InlineData(AccessTokenTypes.Service, ApiConstants.OrgIdHeaderKey, "foreign")]
+    [InlineData(AccessTokenTypes.Personal, ApiConstants.OrgIdHeaderKey, "foreign")]
+    [InlineData(AccessTokenTypes.Service, ApiConstants.WorkspaceHeaderKey, "foreign")]
+    [InlineData(AccessTokenTypes.Personal, ApiConstants.WorkspaceHeaderKey, "foreign")]
+    [InlineData(AccessTokenTypes.Service, ApiConstants.OrgIdHeaderKey, "malformed")]
+    [InlineData(AccessTokenTypes.Service, ApiConstants.WorkspaceHeaderKey, "malformed")]
+    [InlineData(AccessTokenTypes.Service, ApiConstants.OrgIdHeaderKey, "")]
+    [InlineData(AccessTokenTypes.Service, ApiConstants.WorkspaceHeaderKey, "")]
+    public async Task Authenticate_SuppliedScopeCannotRetargetTokenPermissions(string type, string header, string value)
+    {
+        var token = new AccessToken(Guid.NewGuid(), Guid.NewGuid(), "Wildcard token", type,
+            [new PolicyStatement { Id = "allow-all", ResourceType = ResourceTypes.All,
+                Effect = EffectType.Allow, Actions = ["*"], Resources = ["*"] }]);
+        var org = new Organization(Guid.NewGuid(), "Token organization", "token-org") { Id = token.OrganizationId };
+        var tokenSvc = new Mock<IAccessTokenService>();
+        tokenSvc.Setup(x => x.FindOneAsync(It.IsAny<Expression<Func<AccessToken, bool>>>())).ReturnsAsync(token);
+        var orgSvc = new Mock<IOrganizationService>();
+        orgSvc.Setup(x => x.GetAsync(token.OrganizationId)).ReturnsAsync(org);
+        var (handler, ctx) = await BuildHandlerAsync(tokenSvc, orgSvc, token.Token);
+        ctx.Request.Headers[header] = value == "foreign" ? Guid.NewGuid().ToString() : value;
+
+        var result = await handler.AuthenticateAsync();
+
+        Assert.False(result.Succeeded);
+        Assert.Equal("access-token-scope-mismatch", result.Failure?.Message);
+        Assert.Null(result.Principal);
+        Assert.False(ctx.Items.ContainsKey(ApplicationConsts.AccessTokenItem));
+        tokenSvc.Verify(x => x.RefreshLastUsedAtAsync(It.IsAny<Guid>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task Authenticate_MatchingScopeHeadersRemainValidAndArePreserved()
+    {
+        var token = new AccessToken(Guid.NewGuid(), Guid.NewGuid(), "Valid token", AccessTokenTypes.Service, []);
+        var org = new Organization(Guid.NewGuid(), "Organization", "org") { Id = token.OrganizationId };
+        var tokenSvc = new Mock<IAccessTokenService>();
+        tokenSvc.Setup(x => x.FindOneAsync(It.IsAny<Expression<Func<AccessToken, bool>>>())).ReturnsAsync(token);
+        var orgSvc = new Mock<IOrganizationService>();
+        orgSvc.Setup(x => x.GetAsync(token.OrganizationId)).ReturnsAsync(org);
+        var (handler, ctx) = await BuildHandlerAsync(tokenSvc, orgSvc, token.Token);
+        var organizationHeader = org.Id.ToString("D").ToUpperInvariant();
+        var workspaceHeader = org.WorkspaceId.ToString("D").ToUpperInvariant();
+        ctx.Request.Headers[ApiConstants.OrgIdHeaderKey] = organizationHeader;
+        ctx.Request.Headers[ApiConstants.WorkspaceHeaderKey] = workspaceHeader;
+
+        var result = await handler.AuthenticateAsync();
+
+        Assert.True(result.Succeeded);
+        Assert.Equal(organizationHeader, ctx.Request.Headers[ApiConstants.OrgIdHeaderKey]);
+        Assert.Equal(workspaceHeader, ctx.Request.Headers[ApiConstants.WorkspaceHeaderKey]);
+        Assert.Same(token, ctx.Items[ApplicationConsts.AccessTokenItem]);
     }
 }

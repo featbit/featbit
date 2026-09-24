@@ -14,11 +14,23 @@ export function WebhookAuthenticationFields({
   onSecretChange,
   errors,
   disabled,
+  hasHeaders,
+  hasSecret,
+  removeSavedHeaders,
+  removeSavedSecret,
+  onRemoveSavedHeaders,
+  onRemoveSavedSecret,
 }: WebhookAuthentication & {
   onHeadersChange: (headers: WebhookAuthentication["headers"]) => void
   onSecretChange: (secret: string) => void
   errors: FieldErrors<WebhookAuthentication>
   disabled: boolean
+  hasHeaders: boolean
+  hasSecret: boolean
+  removeSavedHeaders: boolean
+  removeSavedSecret: boolean
+  onRemoveSavedHeaders: (remove: boolean) => void
+  onRemoveSavedSecret: (remove: boolean) => void
 }) {
   const { t } = useTranslation()
   const id = useId()
@@ -41,6 +53,25 @@ export function WebhookAuthenticationFields({
       <fieldset disabled={disabled} className="space-y-5">
         <div className="space-y-3">
           <Label>{t("webhooks.sheet.customHeaders")}</Label>
+          {hasHeaders && (
+            <div className="space-y-2 text-xs text-muted-foreground">
+              <p>
+                {t(
+                  `webhooks.releaseHealth.${removeSavedHeaders ? "headersWillRemove" : "headersConfigured"}`
+                )}
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => onRemoveSavedHeaders(!removeSavedHeaders)}
+              >
+                {t(
+                  `webhooks.releaseHealth.${removeSavedHeaders ? "keepSavedHeaders" : "removeSavedHeaders"}`
+                )}
+              </Button>
+            </div>
+          )}
           <div className="space-y-3 rounded-lg border p-3">
             {headers.length === 0 && (
               <p className="text-sm text-muted-foreground">
@@ -124,6 +155,25 @@ export function WebhookAuthenticationFields({
         </div>
         <div className="space-y-2">
           <Label htmlFor={`${id}-secret`}>{t("webhooks.sheet.secret")}</Label>
+          {hasSecret && (
+            <div className="space-y-2 text-xs text-muted-foreground">
+              <p>
+                {t(
+                  `webhooks.releaseHealth.${removeSavedSecret ? "secretWillRemove" : "secretConfigured"}`
+                )}
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => onRemoveSavedSecret(!removeSavedSecret)}
+              >
+                {t(
+                  `webhooks.releaseHealth.${removeSavedSecret ? "keepSavedSecret" : "removeSavedSecret"}`
+                )}
+              </Button>
+            </div>
+          )}
           <div className="flex gap-2">
             <Input
               id={`${id}-secret`}

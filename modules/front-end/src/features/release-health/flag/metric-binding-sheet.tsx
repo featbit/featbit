@@ -1,3 +1,4 @@
+import { BindingMetricStatus } from "./binding-metric-status"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Save } from "lucide-react"
 import { useState } from "react"
@@ -14,10 +15,9 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import type { Lang } from "@/features/layout/layout-types"
-import { DataStatusBadge } from "../components/status-badges"
+import type { BindingMetric } from "./monitor-data"
 import { metricUnitLabel } from "../metrics/metric-contract"
-import { metricSampleText } from "../release-health-display"
-import type { MonitorBinding, ReleaseMetric } from "../release-health-types"
+import type { MonitorBinding } from "../release-health-types"
 import {
   bindingDefaults,
   bindingFromForm,
@@ -46,7 +46,7 @@ export function MetricBindingSheet({
 }: {
   binding?: MonitorBinding
   bindings: MonitorBinding[]
-  metrics: ReleaseMetric[]
+  metrics: BindingMetric[]
   monitoringEnabled: boolean
   flagName: string
   flagKey: string
@@ -56,7 +56,7 @@ export function MetricBindingSheet({
   lang: Lang
   webhooks: ReturnType<typeof useBindingWebhooks>
   onClose: () => void
-  onSave: (binding: MonitorBinding) => void
+  onSave: (binding: MonitorBinding) => Promise<void>
 }) {
   const { t } = useTranslation()
   const b = (key: string) => t("releaseHealth.binding." + key)
@@ -71,7 +71,8 @@ export function MetricBindingSheet({
       bindingSchema(
         t,
         metrics,
-        available.map((item) => item.id)
+        available.map((item) => item.id),
+        binding?.enabled ?? true
       )
     ),
     defaultValues: bindingDefaults(
@@ -114,7 +115,7 @@ export function MetricBindingSheet({
       })
       if (unavailable) return
     }
-    onSave(bindingFromForm(values, binding))
+    await onSave(bindingFromForm(values, binding))
   }
 
   return (
@@ -163,11 +164,8 @@ export function MetricBindingSheet({
                       invalid={Boolean(errors.metricId)}
                       options={available.map((metric) => ({
                         value: metric.id,
-                        label:
-                          metricSampleText(t, metric, "name") +
-                          " · v" +
-                          metric.version,
-                        disabled: !metric.environment.sourceBinding,
+                        label: metric.name + " · v" + metric.version,
+                        disabled: !binding && !metric.sourceConnected,
                       }))}
                     />
                   )}
@@ -192,7 +190,7 @@ export function MetricBindingSheet({
                     <Badge variant="outline">
                       {t("releaseHealth.scope.environment")}
                     </Badge>
-                    <DataStatusBadge status={selected.environment.dataStatus} />
+                    <BindingMetricStatus metric={selected} />
                   </div>
                 )}
               </section>
@@ -248,7 +246,7 @@ export function MetricBindingSheet({
             </fieldset>
             <SheetFooter className="border-t px-4 py-4 sm:px-6">
               <p className="mb-2 text-xs text-muted-foreground">
-                {b("previewNotice")}
+                {b("serverNotice")}
               </p>
               <div className="flex justify-end gap-2">
                 <Button

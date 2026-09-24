@@ -39,6 +39,7 @@ export function ReleaseHealthWebhooksTable({
         <div className="min-w-40">
           <button
             className="text-left font-medium hover:underline"
+            disabled={!row.original.canManage}
             onClick={() => onEdit(row.original)}
           >
             {row.original.name}
@@ -104,7 +105,7 @@ export function ReleaseHealthWebhooksTable({
       header: t("webhooks.releaseHealth.lastDelivery"),
       cell: () => (
         <span className="text-xs text-muted-foreground">
-          {t("webhooks.releaseHealth.previewBadge")}
+          {t("webhooks.releaseHealth.noDeliveries")}
         </span>
       ),
     },
@@ -129,6 +130,7 @@ export function ReleaseHealthWebhooksTable({
             size="icon-sm"
             variant="ghost"
             onClick={() => onEdit(row.original)}
+            disabled={!row.original.canManage}
             aria-label={t("webhooks.releaseHealth.editFor", {
               name: row.original.name,
             })}
@@ -139,6 +141,7 @@ export function ReleaseHealthWebhooksTable({
             size="icon-sm"
             variant="ghost"
             onClick={() => onRemove(row.original)}
+            disabled={!row.original.canManage}
             aria-label={t("webhooks.releaseHealth.removeFor", {
               name: row.original.name,
             })}

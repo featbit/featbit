@@ -14,14 +14,26 @@ Requires Docker Compose and PowerShell 7. Run from the repository root:
 
 ```powershell
 pwsh -File integration-tests/release-health/scripts/start.ps1
+pwsh -File integration-tests/release-health/scripts/verify-continuous.ps1
+# Optional controlled phases and authentication checks:
 pwsh -File integration-tests/release-health/scripts/verify-demo.ps1
 ```
 
-The first command builds and starts the Docker Compose containers. It generates random local test credentials in `.local/provider-token` and `.local/provider-password` (gitignored) **only when the corresponding file is missing**. Existing credentials are reused across restarts, stop/start cycles and container rebuilds, so saved FeatBit connections using those credentials do not need to be reconfigured.
+The first command builds and starts the Docker Compose containers with continuous traffic and a repeating **healthy → regression → recovery** scenario. Each phase lasts 60 seconds by default. Leave Docker running to keep all three metrics populated and their trends changing; no browser or verification script needs to stay open. The services use `restart: unless-stopped`, so they resume when Docker restarts unless explicitly stopped. This does not generate samples while Docker or the computer is off.
+
+`start.ps1` accepts `-Scenario cycle|healthy|regression|recovery` (default `cycle`) and `-PhaseSeconds` (default `60`, allowed `45`–`3600`). Running it again starts any missing services and applies the selected mode; a manual scenario stays selected until changed or the cycle is resumed.
+
+```powershell
+pwsh -File integration-tests/release-health/scripts/start.ps1 -Scenario cycle -PhaseSeconds 60
+```
+
+Startup generates random local test credentials in `.local/provider-token` and `.local/provider-password` (gitignored) **only when the corresponding file is missing**. Existing credentials are reused across restarts, stop/start cycles and container rebuilds, so saved FeatBit connections using those credentials do not need to be reconfigured.
 
 If you delete these files or start from a fresh checkout on another machine without them, new credentials are generated. Update the corresponding Token / Password in FeatBit if you want existing connections to use that new fixture.
 
-The verifier runs healthy, regression and recovery phases, checks authentication, queries actual Prometheus samples and writes `reports/demo-latest.json`, `reports/demo-latest.md` and `reports/demo-latest.html` (actual curves). Allow about three minutes after image downloads/builds.
+`verify-continuous.ps1` checks automatic phase changes and actual Prometheus values for error rate, p95 latency and throughput over a complete cycle. It verifies that samples continue arriving, with finite values and visible regression and recovery. It writes `reports/continuous-latest.json` and `reports/continuous-latest.md`. Allow several minutes at the default phase duration.
+
+`verify-demo.ps1` temporarily selects healthy, regression and recovery phases, checks authentication, queries actual Prometheus samples and writes `reports/demo-latest.json`, `reports/demo-latest.md` and `reports/demo-latest.html` (actual curves). It restores the previous scenario after verification, including continuous cycling when that was selected. Allow about three minutes after image downloads/builds.
 
 ## Connect FeatBit
 
@@ -49,13 +61,29 @@ Copy the exact expressions from [queries/queries.json](queries/queries.json):
 
 The expressions deliberately aggregate to **one series**, matching the initial FeatBit result contract. Labels are bounded (`service`, `environment`, `status`); users and request IDs are not metric labels. An empty result is missing data, not a successful release.
 
+The default cycle keeps the HTTP load generator running through all phases. Healthy and recovery produce 0% errors; a flat line at zero with `Ready` and a positive sample count is valid data. Regression introduces approximately 25% errors and 400–520 ms request latency, while throughput decreases. The histogram p95 is a bucket-based estimate, not the exact request latency. The 30-second query windows make transitions gradual, and the FeatBit metric detail page refreshes every 30 seconds.
+
+Inspect the current mode and phase:
+
+```powershell
+Invoke-RestMethod http://127.0.0.1:19180/health
+```
+
+The response includes `scenario` (selected mode), `activePhase` (current healthy, regression or recovery phase in cycle mode), `phaseSeconds` (configured duration), and `phaseRemainingSeconds` (time until the next automatic transition, or null in a manual mode), alongside service and SDK status.
+
+Selecting a manual scenario pauses automatic phase changes while traffic continues. API selections are in-memory; a container restart uses the scenario configured at startup:
+
 ```powershell
 Invoke-RestMethod -Method Post http://127.0.0.1:19180/scenario/healthy
 Invoke-RestMethod -Method Post http://127.0.0.1:19180/scenario/regression
 Invoke-RestMethod -Method Post http://127.0.0.1:19180/scenario/recovery
 ```
 
-Keep each phase running at least 45 seconds. Regression introduces approximately 25% errors and 400–520 ms request latency. The histogram p95 is a bucket-based estimate, not the exact request latency. Recovery removes the fault; rate windows mean the graph settles gradually rather than instantly. The verifier restores recovery even if a check fails.
+Keep a manual phase running at least 45 seconds to cover the query window and export delay. Resume the continuous cycle when finished:
+
+```powershell
+Invoke-RestMethod -Method Post http://127.0.0.1:19180/scenario/cycle
+```
 
 ## Optional real feature flag
 

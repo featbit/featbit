@@ -2,7 +2,8 @@ import { Pause, Pencil, Play, Trash2 } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import { formatMetricValue } from "../metrics/metric-contract"
-import type { MonitorBinding, ReleaseMetric } from "../release-health-types"
+import type { MonitorBinding } from "../release-health-types"
+import type { BindingMetric } from "./monitor-data"
 import type { BindingWebhook } from "./binding-webhooks"
 
 export function BindingActions({
@@ -65,7 +66,7 @@ export function BindingRuleSummary({
   webhooks,
 }: {
   binding: MonitorBinding
-  metric: ReleaseMetric
+  metric: BindingMetric
   webhooks: BindingWebhook[]
 }) {
   const { t } = useTranslation()

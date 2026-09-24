@@ -45,6 +45,8 @@ import { WebhookAuthenticationFields } from "./webhook-authentication-fields"
 const schema = z.object({
   headers: webhookHeadersSchema,
   secret: z.string(),
+  removeSavedHeaders: z.boolean(),
+  removeSavedSecret: z.boolean(),
   name: z.string().trim().min(1, "webhooks.validation.nameRequired").max(100),
   url: z
     .string()
@@ -98,6 +100,8 @@ export function ReleaseHealthWebhookSheet({
         ? webhook.headers.map((header) => ({ ...header }))
         : [{ key: "", value: "" }],
       secret: webhook?.secret ?? "",
+      removeSavedHeaders: false,
+      removeSavedSecret: false,
       name: webhook?.name ?? "",
       url: webhook?.url ?? "",
       isActive: webhook?.isActive ?? true,
@@ -151,6 +155,8 @@ export function ReleaseHealthWebhookSheet({
       await onSave({
         headers: data.headers.filter((header) => header.key),
         secret: data.secret,
+        removeSavedHeaders: data.removeSavedHeaders,
+        removeSavedSecret: data.removeSavedSecret,
         name: data.name,
         url: data.url,
         isActive: data.isActive,
@@ -164,8 +170,18 @@ export function ReleaseHealthWebhookSheet({
         payloadTemplate: data.payloadTemplate,
       })
     } catch (error) {
-      if (error instanceof Error && error.message === "duplicate")
+      if (
+        error instanceof Error &&
+        (error.message === "duplicate" ||
+          error.message.includes("webhook_name_used"))
+      )
         form.setError("name", { message: "webhooks.validation.nameDuplicate" })
+      else if (
+        error instanceof Error &&
+        "status" in error &&
+        error.status === 409
+      )
+        form.setError("root", { message: "webhooks.releaseHealth.conflict" })
       else form.setError("root", { message: "webhooks.saveFailed" })
     }
   })
@@ -354,6 +370,20 @@ export function ReleaseHealthWebhookSheet({
                 secret={values.secret ?? ""}
                 onHeadersChange={headersField.onChange}
                 onSecretChange={secretField.onChange}
+                hasHeaders={webhook?.hasHeaders ?? false}
+                hasSecret={webhook?.hasSecret ?? false}
+                removeSavedHeaders={values.removeSavedHeaders ?? false}
+                removeSavedSecret={values.removeSavedSecret ?? false}
+                onRemoveSavedHeaders={(value) =>
+                  form.setValue("removeSavedHeaders", value, {
+                    shouldDirty: true,
+                  })
+                }
+                onRemoveSavedSecret={(value) =>
+                  form.setValue("removeSavedSecret", value, {
+                    shouldDirty: true,
+                  })
+                }
                 errors={errors}
                 disabled={isSubmitting}
               />

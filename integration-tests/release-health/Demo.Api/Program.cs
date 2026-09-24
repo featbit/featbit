@@ -15,7 +15,23 @@ var app = builder.Build();
 using var meter = new Meter("ReleaseHealth.Checkout", "1.0.0");
 var requests = meter.CreateCounter<long>("checkout_requests", "{request}");
 var duration = meter.CreateHistogram<double>("checkout_request_duration", "s");
-var scenario = "healthy";
+var phaseSeconds = builder.Configuration.GetValue("Demo:PhaseSeconds", 60);
+if (phaseSeconds is < 45 or > 3600)
+    throw new InvalidOperationException("Demo:PhaseSeconds must be between 45 and 3600 seconds.");
+var initialScenario = builder.Configuration["Demo:Scenario"] ?? "cycle";
+if (initialScenario is not ("cycle" or "healthy" or "regression" or "recovery"))
+    throw new InvalidOperationException("Demo:Scenario must be cycle, healthy, regression or recovery.");
+var selection = new ScenarioSelection(initialScenario, Stopwatch.GetTimestamp());
+string[] phases = ["healthy", "regression", "recovery"];
+
+(string Phase, double? Remaining) ActiveScenario(ScenarioSelection selected)
+{
+    if (selected.Mode != "cycle") return (selected.Mode, null);
+    // Use monotonic elapsed time: wall-clock adjustments cannot stall the demo cycle.
+    var elapsed = Stopwatch.GetElapsedTime(selected.StartedAt).TotalSeconds;
+    return (phases[(int)(elapsed / phaseSeconds % phases.Length)],
+        Math.Round(phaseSeconds - elapsed % phaseSeconds, 1));
+}
 long sequence = 0;
 FbClient? flags = null;
 var sdkSecret = builder.Configuration["FeatBit:EnvSecret"];
@@ -27,18 +43,25 @@ if (!string.IsNullOrWhiteSpace(sdkSecret))
         .StartWaitTime(TimeSpan.FromSeconds(10)).Build());
 }
 var user = FbUser.Builder("release-health-demo").Build();
-app.MapGet("/health", () => Results.Ok(new { status = "ok", scenario = Volatile.Read(ref scenario), sdkInitialized = flags?.Initialized ?? false }));
+app.MapGet("/health", () =>
+{
+    var selected = Volatile.Read(ref selection);
+    var active = ActiveScenario(selected);
+    return Results.Ok(new { status = "ok", scenario = selected.Mode, activePhase = active.Phase,
+        phaseSeconds, phaseRemainingSeconds = active.Remaining, sdkInitialized = flags?.Initialized ?? false });
+});
 app.MapPost("/scenario/{mode}", (string mode) =>
 {
-    if (mode is not ("healthy" or "regression" or "recovery" or "flag")) return Results.BadRequest();
+    if (mode is not ("cycle" or "healthy" or "regression" or "recovery" or "flag")) return Results.BadRequest();
     if (mode == "flag" && flags?.Initialized != true)
         return Results.Problem("Configure the local FeatBit SDK before selecting flag mode.", statusCode: 409);
-    Volatile.Write(ref scenario, mode);
+    // A manual mode stays selected until explicitly changed; verification owns its phase.
+    Volatile.Write(ref selection, new ScenarioSelection(mode, Stopwatch.GetTimestamp()));
     return Results.Ok(new { scenario = mode, changedAt = DateTimeOffset.UtcNow });
 });
 app.MapGet("/checkout", async (CancellationToken ct) =>
 {
-    var current = Volatile.Read(ref scenario);
+    var current = ActiveScenario(Volatile.Read(ref selection)).Phase;
     var bad = current == "regression" || (current == "flag" && flags!.BoolVariation(
         builder.Configuration["FeatBit:FlagKey"] ?? "release-health-regression", user, false));
     var number = Interlocked.Increment(ref sequence);
@@ -53,3 +76,5 @@ app.MapGet("/checkout", async (CancellationToken ct) =>
 });
 try { await app.RunAsync(); }
 finally { if (flags is not null) await flags.CloseAsync(); }
+
+sealed record ScenarioSelection(string Mode, long StartedAt);

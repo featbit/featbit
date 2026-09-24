@@ -1,4 +1,6 @@
+import { BindingMetricStatus } from "./binding-metric-status"
 import { Plus } from "lucide-react"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link, useLocation } from "react-router-dom"
@@ -32,25 +34,26 @@ import { MetricBindingSheet } from "./metric-binding-sheet"
 import { BindingConfirmation } from "./binding-confirmation"
 import { BindingActions, BindingRuleSummary } from "./binding-row-content"
 import { useBindingWebhooks } from "./binding-webhooks"
+import { ApiRequestError } from "@/lib/api/authenticated-api"
 import {
-  DataStatusBadge,
+  monitorApi,
+  monitorBindingWrite,
+  type LiveMonitor,
+  type LiveMonitorBinding,
+} from "./monitor-api"
+import {
+  monitorQueryKey,
+  useMonitorMetrics,
+  type BindingMetric,
+} from "./monitor-data"
+import {
   HealthStatusBadge,
   ObservationModeBadge,
   PurposeBadge,
 } from "../components/status-badges"
-import { metricSampleText } from "../release-health-display"
-import {
-  checkoutMonitor,
-  metricById,
-  releaseMetrics,
-} from "../release-health-mock-data"
 
 import { formatMetricValue } from "../metrics/metric-contract"
-import type {
-  BindingAlertRule,
-  MonitorBinding,
-  ReleaseMetric,
-} from "../release-health-types"
+import type { BindingAlertRule, MonitorBinding } from "../release-health-types"
 
 type FlagHealthProps = {
   envId: string
@@ -63,7 +66,10 @@ export function FlagReleaseHealthTab(props: FlagHealthProps) {
   const projectId = getCurrentProjectEnv()?.projectId ?? ""
   return (
     <FlagBindingsContent
-      key={projectId + ":" + props.envId + ":" + props.flag.id}
+      key={monitorQueryKey(
+        { projectId, envId: props.envId },
+        props.flag.id
+      ).join(":")}
       {...props}
     />
   )
@@ -84,28 +90,71 @@ function FlagBindingsContent({
       bindingsSection.current?.scrollIntoView?.({ block: "start" })
     }
   }, [hash, flag.id])
-  const [monitorEnabled, setMonitorEnabled] = useState(checkoutMonitor.enabled)
-  const [bindings, setBindings] = useState<MonitorBinding[]>(
-    () => checkoutMonitor.bindings
-  )
-  const [editor, setEditor] = useState<MonitorBinding | "add" | null>(null)
-  const [removeTarget, setRemoveTarget] = useState<MonitorBinding | null>(null)
+  const scope = { projectId: context?.projectId ?? "", envId }
+  const client = useQueryClient()
+  const queryKey = monitorQueryKey(scope, flag.id)
+  const monitor = useQuery({
+    queryKey,
+    queryFn: () => monitorApi.get(scope, flag.id),
+    enabled: Boolean(scope.projectId && envId && flag.id),
+    retry: false,
+  })
+  const monitorEnabled = monitor.data?.enabled ?? false
+  const bindings = monitor.data?.bindings ?? []
+  const catalog = useMonitorMetrics(scope, flag.id, bindings)
+  const metricById = (id: string) =>
+    catalog.metrics.find((metric) => metric.id === id)
+  const [editor, setEditor] = useState<{
+    binding: LiveMonitorBinding | "add"
+    revision: number
+  } | null>(null)
+  const [removeTarget, setRemoveTarget] = useState<{
+    binding: LiveMonitorBinding
+    revision: number
+  } | null>(null)
   const webhooks = useBindingWebhooks(context?.projectId ?? "", envId)
   const b = (key: string) => t("releaseHealth.binding." + key)
-  const actions = (binding: MonitorBinding, metric: ReleaseMetric) => (
+  const mutation = useMutation({
+    mutationFn: (save: () => Promise<LiveMonitor>) => save(),
+    onMutate: () => client.cancelQueries({ queryKey, exact: true }),
+    onSuccess: async (saved) => {
+      await client.cancelQueries({ queryKey, exact: true })
+      client.setQueryData(queryKey, saved)
+      void client.invalidateQueries({
+        queryKey: ["release-health", scope.projectId, envId],
+      })
+    },
+    onError: (error) => {
+      const conflict = error instanceof ApiRequestError && error.status === 409
+      toast.error(b(conflict ? "conflict" : "serverSaveError"))
+      if (conflict) void monitor.refetch()
+    },
+  })
+  const writable = canManage && monitor.isSuccess && !mutation.isPending
+  async function persist(save: () => Promise<LiveMonitor>) {
+    if (!writable) return false
+    try {
+      await mutation.mutateAsync(save)
+      return true
+    } catch {
+      return false
+    }
+  }
+  const actions = (binding: LiveMonitorBinding, metric: BindingMetric) => (
     <BindingActions
-      disabled={!canManage}
+      disabled={!writable}
       binding={binding}
-      metricName={metricSampleText(t, metric, "name")}
-      onEdit={() => setEditor(binding)}
-      onRemove={() => setRemoveTarget(binding)}
+      metricName={metric.name}
+      onEdit={() => setEditor({ binding, revision: monitor.data!.revision })}
+      onRemove={() =>
+        setRemoveTarget({ binding, revision: monitor.data!.revision })
+      }
       onToggle={() =>
-        setBindings((current) =>
-          current.map((item) =>
-            item.metricId === binding.metricId
-              ? { ...item, enabled: !item.enabled }
-              : item
-          )
+        void persist(() =>
+          monitorApi.toggleBinding(scope, flag.id, binding.id, {
+            expectedRevision: monitor.data!.revision,
+            enabled: !binding.enabled,
+          })
         )
       }
     />
@@ -114,35 +163,48 @@ function FlagBindingsContent({
     !monitorEnabled || !binding.enabled ? (
       <Badge variant="outline">{t("releaseHealth.flag.paused")}</Badge>
     ) : null
-  function saveBinding(next: MonitorBinding) {
+  async function saveBinding(next: MonitorBinding) {
+    if (!editor) return
     if (
-      editor === "add" &&
+      editor.binding === "add" &&
       bindings.some((item) => item.metricId === next.metricId)
     ) {
       toast.error(b("duplicate"))
       return
     }
-    setBindings((current) =>
-      editor === "add"
-        ? [...current, next]
-        : current.map((item) => (item.metricId === next.metricId ? next : item))
+    const metricVersionId =
+      editor.binding === "add"
+        ? metricById(next.metricId)?.metricVersionId
+        : editor.binding.metricVersionId
+    if (!metricVersionId) return
+    const write = monitorBindingWrite(next, metricVersionId, editor.revision)
+    const target = editor.binding
+    if (
+      !(await persist(() =>
+        target === "add"
+          ? monitorApi.add(scope, flag.id, write)
+          : monitorApi.edit(scope, flag.id, target.id, write)
+      ))
     )
+      return
     setEditor(null)
-    toast.success(b("savedPreview"))
+    toast.success(b("savedServer"))
   }
   const monitorName = t("releaseHealth.flag.monitorName", {
     flag: flag.name,
   })
 
-  function toggleMonitor(enabled: boolean) {
-    setMonitorEnabled(enabled)
-    toast.success(
-      t(
-        enabled
-          ? "releaseHealth.flag.monitorResumed"
-          : "releaseHealth.flag.monitorPaused"
-      )
+  async function toggleMonitor(enabled: boolean) {
+    if (
+      !(await persist(() =>
+        monitorApi.toggle(scope, flag.id, {
+          expectedRevision: monitor.data!.revision,
+          enabled,
+        })
+      ))
     )
+      return
+    toast.success(b(enabled ? "monitorEnabled" : "monitorPaused"))
   }
 
   return (
@@ -151,7 +213,6 @@ function FlagBindingsContent({
         <CardHeader>
           <CardTitle className="flex flex-wrap items-center gap-2">
             {monitorName}
-            <Badge variant="outline">{t("releaseHealth.designPreview")}</Badge>
           </CardTitle>
           <CardDescription>
             {t("releaseHealth.flag.monitorDescription")}
@@ -164,7 +225,7 @@ function FlagBindingsContent({
             </span>
             <Switch
               checked={monitorEnabled}
-              disabled={!canManage}
+              disabled={!writable}
               aria-label={t("releaseHealth.flag.toggleMonitor")}
               onCheckedChange={toggleMonitor}
             />
@@ -172,8 +233,10 @@ function FlagBindingsContent({
               type="button"
               variant="outline"
               size="sm"
-              disabled={!canManage}
-              onClick={() => setEditor("add")}
+              disabled={!writable || !catalog.isSuccess}
+              onClick={() =>
+                setEditor({ binding: "add", revision: monitor.data!.revision })
+              }
             >
               <Plus />
               {b("add")}
@@ -197,9 +260,28 @@ function FlagBindingsContent({
             </span>
           </div>
           <p className="mt-2 text-xs text-muted-foreground">
-            {b("previewNotice")}
+            {b("serverNotice")}
           </p>
-          {!monitorEnabled ? (
+          {monitor.isPending && (
+            <p className="mt-3 text-sm text-muted-foreground">{b("loading")}</p>
+          )}
+          {(monitor.isError || catalog.isError) && (
+            <div role="alert" className="mt-3 text-sm text-destructive">
+              <p>{b(monitor.isError ? "serverLoadError" : "catalogError")}</p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-2"
+                onClick={() => {
+                  void monitor.refetch()
+                  void catalog.refetch()
+                }}
+              >
+                {b("retry")}
+              </Button>
+            </div>
+          )}
+          {monitor.isSuccess && !monitorEnabled ? (
             <div className="mt-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100">
               {t("releaseHealth.flag.pauseNotice")}
             </div>
@@ -220,7 +302,7 @@ function FlagBindingsContent({
             </CardDescription>
           </CardHeader>
           <CardContent className="px-0">
-            {bindings.length === 0 && (
+            {monitor.isSuccess && bindings.length === 0 && (
               <div className="px-4 py-8 text-center text-sm text-muted-foreground">
                 {b("empty")}
               </div>
@@ -240,7 +322,7 @@ function FlagBindingsContent({
                           )}
                           className="font-medium hover:underline"
                         >
-                          {metricSampleText(t, metric, "name")}
+                          {metric.name}
                         </Link>
                         <p className="truncate font-mono text-xs text-muted-foreground">
                           {metric.key} · v{metric.version}
@@ -256,7 +338,7 @@ function FlagBindingsContent({
                       <ObservationModeBadge mode={binding.observationMode} />
                       <PurposeBadge purpose={binding.purpose} />
                       {status(binding)}
-                      <DataStatusBadge status={metric.environment.dataStatus} />
+                      <BindingMetricStatus metric={metric} />
                     </div>
                     <div className="mt-3 border-t pt-3 text-sm">
                       <BindingRuleSummary
@@ -309,7 +391,7 @@ function FlagBindingsContent({
                             )}
                             className="font-medium hover:underline"
                           >
-                            {metricSampleText(t, metric, "name")}
+                            {metric.name}
                           </Link>
                           <p className="font-mono text-xs text-muted-foreground">
                             {metric.key} · v{metric.version}
@@ -332,9 +414,7 @@ function FlagBindingsContent({
                           />
                         </TableCell>
                         <TableCell>
-                          <DataStatusBadge
-                            status={metric.environment.dataStatus}
-                          />
+                          <BindingMetricStatus metric={metric} />
                         </TableCell>
                         <TableCell>
                           <LatestRuleCheck
@@ -358,9 +438,9 @@ function FlagBindingsContent({
 
       {editor !== null && (
         <MetricBindingSheet
-          binding={editor === "add" ? undefined : editor}
+          binding={editor.binding === "add" ? undefined : editor.binding}
           bindings={bindings}
-          metrics={releaseMetrics}
+          metrics={catalog.metrics}
           monitoringEnabled={monitorEnabled}
           flagName={flag.name}
           flagKey={flag.key}
@@ -377,18 +457,25 @@ function FlagBindingsContent({
         open={removeTarget !== null}
         title={b("removeTitle")}
         description={t("releaseHealth.binding.removeDescription", {
-          metric: removeTarget
-            ? metricSampleText(t, metricById(removeTarget.metricId)!, "name")
-            : "",
+          metric: removeTarget ? removeTarget.binding.metric.name : "",
         })}
         confirm={b("remove")}
+        pending={mutation.isPending}
         onCancel={() => setRemoveTarget(null)}
         onConfirm={() => {
-          setBindings((current) =>
-            current.filter((item) => item.metricId !== removeTarget?.metricId)
-          )
-          setRemoveTarget(null)
-          toast.success(b("removedPreview"))
+          if (!removeTarget) return
+          void persist(() =>
+            monitorApi.remove(
+              scope,
+              flag.id,
+              removeTarget.binding.id,
+              removeTarget.revision
+            )
+          ).then((saved) => {
+            if (!saved) return
+            setRemoveTarget(null)
+            toast.success(b("removedServer"))
+          })
         }}
       />
     </div>
@@ -401,7 +488,7 @@ function LatestRuleCheck({
   lang,
 }: {
   binding: MonitorBinding
-  metric: ReleaseMetric
+  metric: BindingMetric
   lang: Lang
 }) {
   const { t } = useTranslation()
@@ -438,7 +525,7 @@ function RuleCheck({
   lang,
 }: {
   rule: BindingAlertRule
-  metric: ReleaseMetric
+  metric: BindingMetric
   lang: Lang
 }) {
   const { t } = useTranslation()

@@ -6,6 +6,7 @@ import {
   getCurrentOrganization,
   getCurrentWorkspace,
 } from "@/features/layout/layout-context"
+import { fetchApi } from "@/lib/api/authenticated-api"
 import { ALERT_PAYLOAD_TEMPLATE, validateAlertTemplate } from "./alert-payload"
 import {
   webhookHeadersSchema,
@@ -18,133 +19,137 @@ export function isPreviewEndpoint(value: string) {
     return (
       ["https:", "http:"].includes(url.protocol) &&
       !url.username &&
-      !url.password
+      !url.password &&
+      !url.hash
     )
   } catch {
     return false
   }
 }
 
-const storedHookSchema = z.object({
+const webhookSchema = z.object({
   id: z.string().min(1),
   purpose: z.literal("release-health"),
-  name: z.string().trim().min(1).max(100),
-  url: z.string().trim().refine(isPreviewEndpoint),
+  name: z.string(),
+  url: z.string(),
   isActive: z.boolean(),
-  scopes: z.array(z.string().min(1)).min(1),
+  scopes: z.array(z.string()),
   scopeNames: z.array(z.string()),
   payloadTemplateType: z.enum(["default", "custom"]),
-  payloadTemplate: z.string().min(1),
+  payloadTemplate: z.string(),
+  version: z.number().int().positive(),
+  hasHeaders: z.boolean(),
+  hasSecret: z.boolean(),
+  canManage: z.boolean(),
 })
-const hookSchema = storedHookSchema.extend({
-  headers: webhookHeadersSchema.default([]),
-  secret: z.string().default(""),
-})
-export type ReleaseHealthWebhook = z.infer<typeof hookSchema>
+export type ReleaseHealthWebhook = z.infer<typeof webhookSchema> &
+  WebhookAuthentication
 export type ReleaseHealthWebhookDraft = Omit<
   ReleaseHealthWebhook,
-  "id" | "purpose" | "headers" | "secret"
+  | "id"
+  | "purpose"
+  | "version"
+  | "hasHeaders"
+  | "hasSecret"
+  | "canManage"
+  | "headers"
+  | "secret"
 > &
-  Partial<WebhookAuthentication>
-const catalogueSchema = z.array(storedHookSchema)
-// Credentials are editable in the preview, but never persisted to browser storage.
-const authentication = new Map<string, Map<string, WebhookAuthentication>>()
-const changed = "featbit:release-health-webhooks-preview-changed"
+  Partial<WebhookAuthentication> & {
+    removeSavedHeaders?: boolean
+    removeSavedSecret?: boolean
+  }
 
+const basePath = "/api/v1/webhooks/release-health"
+// Retained export for consumers' React/query identity; it is never a browser storage key.
 export function previewStoreKey() {
   const userId = getStoredUserProfile().id
   const workspaceId = getCurrentWorkspace()?.id
-  const organizationId = getCurrentOrganization()?.id
-  if (!userId || !workspaceId || !organizationId) return null
-  return [
-    "featbit:release-health-webhooks-preview:v1",
-    userId,
-    workspaceId,
-    organizationId,
-  ]
-    .map(encodeURIComponent)
-    .join(":")
+  const orgId = getCurrentOrganization()?.id
+  return userId && workspaceId && orgId
+    ? ["release-health-webhooks", userId, workspaceId, orgId]
+        .map(encodeURIComponent)
+        .join(":")
+    : null
 }
-
-export function readPreviewWebhooks(key: string): ReleaseHealthWebhook[] {
-  const value = localStorage.getItem(key)
-  return value
-    ? catalogueSchema.parse(JSON.parse(value)).map((item) => ({
-        ...item,
-        payloadTemplate:
-          item.payloadTemplateType === "default"
-            ? ALERT_PAYLOAD_TEMPLATE
-            : item.payloadTemplate,
-        headers: (authentication.get(key)?.get(item.id)?.headers ?? []).map(
-          (header) => ({ ...header })
-        ),
-        secret: authentication.get(key)?.get(item.id)?.secret ?? "",
-      }))
-    : []
+function readView(value: unknown): ReleaseHealthWebhook {
+  return { ...webhookSchema.parse(value), headers: [], secret: "" }
 }
-
-function writePreviewWebhooks(key: string, items: ReleaseHealthWebhook[]) {
-  // An allowlist schema prevents credentials or delivery data from entering this preview store.
-  const safe = catalogueSchema.parse(items)
-  localStorage.setItem(key, JSON.stringify(safe))
-  authentication.set(
-    key,
-    new Map(
-      items.map((item) => [
-        item.id,
-        {
-          headers: item.headers.map((header) => ({ ...header })),
-          secret: item.secret,
-        },
-      ])
-    )
-  )
-  window.dispatchEvent(new CustomEvent(changed, { detail: key }))
-}
-
-export function savePreviewWebhook(
-  key: string,
-  draft: ReleaseHealthWebhookDraft,
-  id?: string
-) {
-  const items = readPreviewWebhooks(key)
-  if (id && !items.some((item) => item.id === id)) throw new Error("missing")
-  if (
-    items.some(
-      (item) =>
-        item.id !== id &&
-        item.name.toLowerCase() === draft.name.trim().toLowerCase()
-    )
-  ) {
-    throw new Error("duplicate")
+function contextHeaders(owner: string | null) {
+  if (!owner || owner !== previewStoreKey()) throw new Error("missing-context")
+  return {
+    Organization: getCurrentOrganization()!.id,
+    Workspace: getCurrentWorkspace()!.id,
   }
-  const item = hookSchema.parse({
-    ...draft,
-    payloadTemplate:
-      draft.payloadTemplateType === "default"
-        ? ALERT_PAYLOAD_TEMPLATE
-        : draft.payloadTemplate,
-    id: id ?? crypto.randomUUID(),
-    purpose: "release-health",
-  })
-  if (validateAlertTemplate(item.payloadTemplate)) throw new Error("template")
-  item.headers = item.headers.filter((header) => header.key)
-  writePreviewWebhooks(
-    key,
-    id
-      ? items.map((current) => (current.id === id ? item : current))
-      : [...items, item]
-  )
-  return item
 }
-
-export function removePreviewWebhook(key: string, id: string) {
-  writePreviewWebhooks(
-    key,
-    readPreviewWebhooks(key).filter((item) => item.id !== id)
+export async function fetchReleaseHealthWebhooks(): Promise<
+  ReleaseHealthWebhook[]
+> {
+  return z
+    .array(webhookSchema)
+    .parse(
+      await fetchApi<unknown>(basePath, {
+        headers: contextHeaders(previewStoreKey()),
+      })
+    )
+    .map(readView)
+}
+export async function saveReleaseHealthWebhook(
+  owner: string,
+  draft: ReleaseHealthWebhookDraft,
+  previous?: ReleaseHealthWebhook
+) {
+  if (owner !== previewStoreKey()) throw new Error("missing-context")
+  const payloadTemplate =
+    draft.payloadTemplateType === "default"
+      ? ALERT_PAYLOAD_TEMPLATE
+      : draft.payloadTemplate
+  if (validateAlertTemplate(payloadTemplate)) throw new Error("template")
+  const headers = webhookHeadersSchema
+    .parse(draft.headers ?? [])
+    .filter((header) => header.key)
+  const secret = draft.secret ?? ""
+  const payload = {
+    name: draft.name.trim(),
+    url: draft.url.trim(),
+    isActive: draft.isActive,
+    scopes: draft.scopes,
+    payloadTemplateType: draft.payloadTemplateType,
+    payloadTemplate,
+    expectedVersion: previous?.version ?? null,
+    headersUpdate: headers.length
+      ? { operation: "replace", headers }
+      : {
+          operation: draft.removeSavedHeaders || !previous ? "remove" : "keep",
+        },
+    secretUpdate: secret
+      ? { operation: "replace", secret }
+      : { operation: draft.removeSavedSecret || !previous ? "remove" : "keep" },
+  }
+  return readView(
+    await fetchApi<unknown>(
+      previous ? `${basePath}/${encodeURIComponent(previous.id)}` : basePath,
+      {
+        method: previous ? "PUT" : "POST",
+        headers: {
+          ...contextHeaders(owner),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      }
+    )
   )
 }
-
+export async function removeReleaseHealthWebhook(
+  owner: string,
+  webhook: ReleaseHealthWebhook
+) {
+  if (owner !== previewStoreKey()) throw new Error("missing-context")
+  return fetchApi<boolean>(
+    `${basePath}/${encodeURIComponent(webhook.id)}?expectedVersion=${webhook.version}`,
+    { method: "DELETE", headers: contextHeaders(owner) }
+  )
+}
 export function availableAlertWebhooks(
   items: ReleaseHealthWebhook[],
   projectId: string,
@@ -160,38 +165,24 @@ export function availableAlertWebhooks(
       })
   )
 }
-
 export function useReleaseHealthWebhooks<T = ReleaseHealthWebhook[]>(
   select?: (data: ReleaseHealthWebhook[]) => T
 ) {
   const key = previewStoreKey()
   const client = useQueryClient()
   useEffect(() => {
-    const refresh = (event: Event) => {
-      if (
-        event instanceof StorageEvent &&
-        event.key !== key &&
-        event.key !== null
-      )
-        return
-      if (event instanceof CustomEvent && event.detail !== key) return
+    const refresh = () => {
       void client.invalidateQueries({
-        queryKey: ["release-health-webhooks-preview", key],
+        queryKey: ["release-health-webhooks", key],
       })
     }
-    window.addEventListener("storage", refresh)
-    window.addEventListener(changed, refresh)
-    return () => {
-      window.removeEventListener("storage", refresh)
-      window.removeEventListener(changed, refresh)
-    }
+    window.addEventListener("focus", refresh)
+    return () => window.removeEventListener("focus", refresh)
   }, [client, key])
   return useQuery({
-    queryKey: ["release-health-webhooks-preview", key],
-    queryFn: () => {
-      if (!key) throw new Error("missing-context")
-      return readPreviewWebhooks(key)
-    },
+    queryKey: ["release-health-webhooks", key],
+    queryFn: fetchReleaseHealthWebhooks,
+    enabled: Boolean(key),
     retry: false,
     select,
   })

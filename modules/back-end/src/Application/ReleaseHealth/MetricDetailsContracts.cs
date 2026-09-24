@@ -14,4 +14,5 @@ public sealed record MetricChangeView(Guid Id, Guid MetricId, Guid? EnvironmentI
 
 public sealed record MetricMonitorBindingView(Guid Id, Guid MetricId, Guid MetricVersionId,
     int MetricVersion, Guid FlagId, string FlagKey, string MonitorName, string Status,
-    string Use, string Window, string Rule, string? LatestCheck = null, DateTimeOffset? CheckedAt = null);
+    string Use, string Window, string Rule, string? LatestCheck = null, DateTimeOffset? CheckedAt = null,
+    DateTimeOffset? CreatedAt = null);

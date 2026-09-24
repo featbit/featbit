@@ -4,8 +4,8 @@ import type {
   BindingAlertRule,
   GuardAlertRule,
   MonitorBinding,
-  ReleaseMetric,
 } from "../release-health-types"
+import type { BindingMetric } from "./monitor-data"
 
 export const defaultAlertRule: GuardAlertRule = {
   operator: ">",
@@ -62,8 +62,9 @@ export type BindingFormValues = ReturnType<typeof bindingDefaults>
 
 export function bindingSchema(
   t: TFunction,
-  metrics: ReleaseMetric[],
-  availableIds: string[]
+  metrics: BindingMetric[],
+  availableIds: string[],
+  enabled = true
 ) {
   return z
     .object({
@@ -97,7 +98,7 @@ export function bindingSchema(
       const metric = metrics.find((item) => item.id === value.metricId)
       if (!metric || !availableIds.includes(value.metricId))
         fail(["metricId"], "metricRequired")
-      else if (!metric.environment.sourceBinding)
+      else if (enabled && !metric.sourceConnected)
         fail(["metricId"], "sourceRequired")
       if (value.purpose !== "guard") return
       if (!value.rules.length) fail(["rules", "root"], "ruleRequired")

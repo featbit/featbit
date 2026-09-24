@@ -16,6 +16,7 @@ export function BindingConfirmation({
   confirm,
   onCancel,
   onConfirm,
+  pending = false,
 }: {
   open: boolean
   title: string
@@ -23,20 +24,24 @@ export function BindingConfirmation({
   confirm: string
   onCancel: () => void
   onConfirm: () => void
+  pending?: boolean
 }) {
   const { t } = useTranslation()
   return (
-    <AlertDialog open={open} onOpenChange={(next) => !next && onCancel()}>
+    <AlertDialog
+      open={open}
+      onOpenChange={(next) => !next && !pending && onCancel()}
+    >
       <AlertDialogContent role="alertdialog">
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <Button variant="outline" onClick={onCancel}>
+          <Button variant="outline" disabled={pending} onClick={onCancel}>
             {t("releaseHealth.common.cancel")}
           </Button>
-          <Button variant="destructive" onClick={onConfirm}>
+          <Button variant="destructive" disabled={pending} onClick={onConfirm}>
             {confirm}
           </Button>
         </AlertDialogFooter>

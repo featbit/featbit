@@ -130,7 +130,10 @@ export function metricResultProfileLabel(
   )} · ${metricUnitLabel(t, metric.resultContract.unit)}`
 }
 
-export function formatMetricValue(metric: ReleaseMetric, value: number) {
+export function formatMetricValue(
+  metric: Pick<ReleaseMetric, "resultContract" | "fractionDigits">,
+  value: number
+) {
   const unit = metric.resultContract.unit
   const formatted = new Intl.NumberFormat(undefined, {
     maximumFractionDigits: metric.fractionDigits,
