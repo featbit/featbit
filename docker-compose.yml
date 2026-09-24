@@ -21,12 +21,10 @@ services:
       - MqProvider=Postgres
       - CacheProvider=None
       - Postgres__ConnectionString=Host=postgresql;Port=5432;Username=postgres;Password=please_change_me;Database=featbit
-      - UseControlPlane=true
       - Jwt__Algorithm=HS256
       - Jwt__Key=please_change_me_to_a_secure_secret_key
     depends_on:
       - postgresql
-      - control-plane
     ports:
       - "5000:5000"
     networks:
@@ -43,20 +41,6 @@ services:
       - postgresql
     ports:
       - "5100:5100"
-    networks:
-      - featbit-network
-
-  control-plane:
-    image: featbit/featbit-control-plane:${FEATBIT_VERSION:?FEATBIT_VERSION is required}
-    environment:
-      - DbProvider=Postgres
-      - MqProvider=Postgres
-      - CacheProvider=None
-      - Postgres__ConnectionString=Host=postgresql;Port=5432;Username=postgres;Password=please_change_me;Database=featbit
-    depends_on:
-      - postgresql
-    ports:
-      - "5200:5200"
     networks:
       - featbit-network
 

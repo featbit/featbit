@@ -22,13 +22,11 @@ services:
       - CacheProvider=Redis
       - Postgres__ConnectionString=Host=postgresql;Port=5432;Username=postgres;Password=please_change_me;Database=featbit
       - Redis__ConnectionString=redis:6379
-      - UseControlPlane=true
       - Jwt__Algorithm=HS256
       - Jwt__Key=please_change_me_to_a_secure_secret_key
     depends_on:
       - postgresql
       - redis
-      - control-plane
     ports:
       - "5000:5000"
     networks:
@@ -47,23 +45,6 @@ services:
       - redis
     ports:
       - "5100:5100"
-    networks:
-      - featbit-network
-
-  control-plane:
-    image: featbit/featbit-control-plane:${FEATBIT_VERSION:?FEATBIT_VERSION is required}
-    environment:
-      - DbProvider=Postgres
-      - MqProvider=Redis
-      - CacheProvider=Redis
-      - Postgres__ConnectionString=Host=postgresql;Port=5432;Username=postgres;Password=please_change_me;Database=featbit
-      - Redis__Instances__0__DcId=dc-local
-      - Redis__Instances__0__ConnectionString=redis:6379
-    depends_on:
-      - postgresql
-      - redis
-    ports:
-      - "5200:5200"
     networks:
       - featbit-network
 

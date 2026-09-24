@@ -26,14 +26,12 @@ services:
       - Redis__ConnectionString=redis:6379
       - OLAPProvider=ClickHouse
       - ClickHouse__HttpEndpoint=http://clickhouse-server:8123
-      - UseControlPlane=true
       - Jwt__Algorithm=HS256
       - Jwt__Key=please_change_me_to_a_secure_secret_key
     depends_on:
       - postgresql
       - redis
       - kafka
-      - control-plane
       - clickhouse-server
     ports:
       - "5000:5000"
@@ -56,26 +54,6 @@ services:
       - redis
     ports:
       - "5100:5100"
-    networks:
-      - featbit-network
-
-  control-plane:
-    image: featbit/featbit-control-plane:${FEATBIT_VERSION:?FEATBIT_VERSION is required}
-    environment:
-      - DbProvider=Postgres
-      - MqProvider=Kafka
-      - CacheProvider=Redis
-      - Postgres__ConnectionString=Host=postgresql;Port=5432;Username=postgres;Password=please_change_me;Database=featbit
-      - Kafka__Producer__bootstrap.servers=kafka:9092
-      - Kafka__Consumer__bootstrap.servers=kafka:9092
-      - Redis__Instances__0__DcId=dc-local
-      - Redis__Instances__0__ConnectionString=redis:6379
-    depends_on:
-      - postgresql
-      - redis
-      - kafka
-    ports:
-      - "5200:5200"
     networks:
       - featbit-network
 
@@ -145,12 +123,6 @@ services:
         /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-segment-change;
         /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-endusers;
         /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-insights;
-        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-control-plane-feature-flag-change;
-        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-control-plane-segment-change;
-        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-control-plane-secret-change;
-        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-control-plane-license-change;
-        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-control-plane-command;
-        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-control-plane-web-hooks;
         echo "Seed kafka topic finished."
 
   clickhouse-server:

@@ -5,7 +5,8 @@
 For `6.0.0-preview`, merge the migration and deployment changes first, then
 create the `6.0.0-preview` tag from the tested commit. Dispatch the build from
 that tag with `version=6.0.0-preview`. The four published images are UI, API,
-control-plane, and ELS. Review their recorded digests and run a fresh install
+control-plane, and ELS. Control-plane is optional and is not started by the
+root Compose files. Review their recorded digests and run a fresh install
 plus an upgrade using the deployment files from the same tag. Publish a GitHub
 Pre-release with the supported upgrade path and database migration instructions.
 Do not run **Promote Docker Images to Latest** for a preview release; the
