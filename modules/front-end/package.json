@@ -23,7 +23,7 @@
     "@codemirror/lang-json": "^6.0.2",
     "@codemirror/lint": "^6.9.7",
     "@codemirror/merge": "^6.12.2",
-    "@codemirror/search": "^6.7.1",
+    "@codemirror/search": "^6.7.2",
     "@lezer/highlight": "^1.2.3",
     "@fontsource-variable/inter": "^5.2.8",
     "@hookform/resolvers": "^5.4.0",
