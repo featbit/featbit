@@ -199,7 +199,7 @@ export function OnboardingPage() {
       completedHereRef.current = true
       const landingPath = getAuthenticatedLandingPath()
 
-      navigate(`${localizedPath(lang, landingPath)}?status=init`, {
+      navigate(localizedPath(lang, landingPath), {
         replace: true,
       })
     } catch (submitError) {

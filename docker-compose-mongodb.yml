@@ -1,7 +1,7 @@
 name: featbit
 services:
   ui:
-    image: featbit/featbit-ui:latest
+    image: featbit/featbit-ui:${FEATBIT_VERSION:?FEATBIT_VERSION is required}
     environment:
       - API_URL=http://localhost:5000
       - DEMO_URL=http://localhost:5173
@@ -16,7 +16,7 @@ services:
       - featbit-network
 
   api-server:
-    image: featbit/featbit-api-server:latest
+    image: featbit/featbit-api-server:${FEATBIT_VERSION:?FEATBIT_VERSION is required}
     environment:
       - SSOEnabled=true
       - DbProvider=MongoDb
@@ -29,14 +29,13 @@ services:
     depends_on:
       - mongodb
       - redis
-      - da-server
     ports:
       - "5000:5000"
     networks:
       - featbit-network
 
   evaluation-server:
-    image: featbit/featbit-evaluation-server:latest
+    image: featbit/featbit-evaluation-server:${FEATBIT_VERSION:?FEATBIT_VERSION is required}
     environment:
       - DbProvider=MongoDb
       - MqProvider=Redis
@@ -50,21 +49,6 @@ services:
       - "5100:5100"
     networks:
       - featbit-network
-
-  # Deprecated: da-server remains for backward compatibility and will be removed in the official v6.0 release.
-  da-server:
-    image: featbit/featbit-data-analytics-server:latest
-    depends_on:
-      - mongodb
-    ports:
-      - "8200:80"
-    networks:
-      - featbit-network
-    environment:
-      DB_PROVIDER: MongoDb
-      MONGO_URI: mongodb://admin:password@mongodb:27017
-      MONGO_INITDB_DATABASE: featbit
-      MONGO_HOST: mongodb
 
   mongodb:
     image: mongo:5.0.32
