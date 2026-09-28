@@ -78,4 +78,48 @@ public class RuleOrderDraftTests
         instruction.Apply(flag);
         Assert.Equal(new[] { "c", "b", "a" }, flag.Rules.Select(rule => rule.Id));
     }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ApplyDraft_AdditionAndReorderAcceptsOriginalOrDesiredLiveOrder(bool alreadyReordered)
+    {
+        var flag = Flag();
+        flag.Rules = flag.Rules.Take(2).ToList();
+        var desired = flag.Clone();
+        desired.Rules = [new TargetRule { Id = "c", Name = "c", Conditions = [], Variations = [] },
+            desired.Rules.Last(), desired.Rules.First()];
+        var draft = new FlagDraft(Guid.NewGuid(), flag.Id, new DataChange(flag).To(desired), Guid.NewGuid());
+        var a = flag.Rules.First();
+        a.Name = "Live edit";
+        if (alreadyReordered) flag.Rules = flag.Rules.Reverse().ToList();
+
+        flag.ApplyDraft(draft);
+
+        Assert.Equal(new[] { "c", "b", "a" }, flag.Rules.Select(rule => rule.Id));
+        Assert.Same(a, flag.Rules.Last());
+        Assert.Equal("Live edit", a.Name);
+    }
+
+    [Fact]
+    public void ReorderWithAddition_RoundTripsAndRejectsConflictingRetainedOrder()
+    {
+        var original = Flag();
+        var desired = original.Clone();
+        desired.Rules = desired.Rules.Reverse().ToList();
+        desired.Rules = [new TargetRule { Id = "d", Name = "d", Conditions = [], Variations = [] }, .. desired.Rules];
+        var json = JsonSerializer.SerializeToElement(FlagComparer.Compare(original, desired), ReusableJsonSerializerOptions.Web);
+        var instructions = new FlagInstructions(json).ToArray();
+        var reorder = Assert.Single(instructions.OfType<ReorderRulesInstruction>());
+        var order = Assert.IsType<RuleOrder>(reorder.Value);
+        Assert.Equal(new[] { "a", "b", "c" }, order.Previous);
+
+        var conflicting = original.Clone();
+        conflicting.Rules = [conflicting.Rules.ElementAt(1), conflicting.Rules.First(), conflicting.Rules.Last()];
+        Assert.Throws<RuleOrderConflictException>(() => reorder.Apply(conflicting));
+
+        original.Rules = original.Rules.Reverse().ToList();
+        foreach (var instruction in instructions) instruction.Apply(original);
+        Assert.Equal(new[] { "d", "c", "b", "a" }, original.Rules.Select(rule => rule.Id));
+    }
 }

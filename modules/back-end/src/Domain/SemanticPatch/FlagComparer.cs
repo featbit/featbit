@@ -321,7 +321,8 @@ public static class FlagComparer
         var currentOrder = current.Select(rule => rule.Id).ToArray();
         if (!incrementalOrder.SequenceEqual(currentOrder))
         {
-            instructions.Add(new ReorderRulesInstruction(new RuleOrder(incrementalOrder, currentOrder)));
+            instructions.Add(new ReorderRulesInstruction(new RuleOrder(
+                commonRules.Select(rule => rule.Id).ToArray(), currentOrder)));
         }
 
         return instructions;

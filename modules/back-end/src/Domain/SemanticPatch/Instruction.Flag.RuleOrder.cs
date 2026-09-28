@@ -2,6 +2,7 @@ using Domain.FeatureFlags;
 
 namespace Domain.SemanticPatch;
 
+// Previous contains only retained rules from the draft baseline; Current also includes draft additions.
 public record RuleOrder(string[] Previous, string[] Current);
 
 public class RuleOrderConflictException() : InvalidOperationException("The targeting rule order has changed since this draft was created.");
@@ -11,7 +12,10 @@ public class ReorderRulesInstruction(RuleOrder value) : FlagInstruction(FlagInst
     public void EnsureCompatible(FeatureFlag flag)
     {
         var order = (RuleOrder)Value;
-        var liveOrder = flag.Rules.Where(rule => order.Current.Contains(rule.Id)).Select(rule => rule.Id).ToArray();
+        // Draft additions are appended before this instruction runs. Their intermediate positions
+        // are not concurrent edits and must not participate in the compatibility check.
+        var retained = order.Previous.Intersect(order.Current).ToHashSet();
+        var liveOrder = flag.Rules.Where(rule => retained.Contains(rule.Id)).Select(rule => rule.Id).ToArray();
         var existing = liveOrder.ToHashSet();
         if (!liveOrder.SequenceEqual(order.Previous.Where(existing.Contains)) &&
             !liveOrder.SequenceEqual(order.Current.Where(existing.Contains)))
