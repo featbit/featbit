@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Domain.AuditLogs;
 using Domain.FlagDrafts;
+using Domain.SemanticPatch;
 using Domain.Targeting;
 
 namespace Domain.FeatureFlags;
@@ -326,7 +327,12 @@ public class FeatureFlag : FullAuditedEntity
     {
         var dataChange = new DataChange(this);
 
-        var instructions = draft.GetInstructions();
+        var instructions = draft.GetInstructions().ToArray();
+        // Detect order conflicts before any other draft instruction mutates the flag.
+        foreach (var reorder in instructions.OfType<ReorderRulesInstruction>())
+        {
+            reorder.EnsureCompatible(this);
+        }
         foreach (var instruction in instructions)
         {
             instruction.Apply(this);

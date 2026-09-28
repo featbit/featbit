@@ -26,6 +26,7 @@ public class FlagInstructionKindTests
     [InlineData(FlagInstructionKind.AddRule)]
     [InlineData(FlagInstructionKind.RemoveRule)]
     [InlineData(FlagInstructionKind.SetRules)]
+    [InlineData(FlagInstructionKind.ReorderRules)]
     [InlineData(FlagInstructionKind.UpdateRuleName)]
     [InlineData(FlagInstructionKind.UpdateRuleDispatchKey)]
     [InlineData(FlagInstructionKind.AddRuleConditions)]
@@ -69,13 +70,14 @@ public class FlagInstructionKindTests
     [Fact]
     public void UpdateRuleKinds_ContainsAllRuleMutationKinds()
     {
-        Assert.Equal(11, FlagInstructionKind.UpdateRuleKinds.Length);
+        Assert.Equal(12, FlagInstructionKind.UpdateRuleKinds.Length);
+        Assert.Contains(FlagInstructionKind.ReorderRules, FlagInstructionKind.UpdateRuleKinds);
     }
 
     [Fact]
     public void All_ListsEveryDefinedKind()
     {
-        Assert.Equal(30, FlagInstructionKind.All.Length);
+        Assert.Equal(31, FlagInstructionKind.All.Length);
         Assert.Contains(FlagInstructionKind.Noop, FlagInstructionKind.All);
     }
 }

@@ -44,6 +44,7 @@ public static class InstructionDescriptor
                 or FlagInstructionKind.SetTargetUsers => TargetUserChangedDescription(),
 
             // TargetingRulesChanged
+            FlagInstructionKind.ReorderRules => "Reorder targeting rules",
             FlagInstructionKind.AddRule => instruction.Value is TargetRule rule
                 ? $"Add rule: {rule.Name}"
                 : string.Empty,

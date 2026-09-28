@@ -201,7 +201,9 @@ export function FlagDifferencesSheet({
   })
   const detail = comparisonQuery.data ?? null
   const canAppendRules = Boolean(
-    detail?.diff.targetingRule.some((item) => item.source && item.isDifferent)
+    detail?.diff.targetingRule.some(
+      (item) => item.source && (item.canAppend ?? item.isDifferent)
+    )
   )
   const effectiveModes = {
     ...modes,

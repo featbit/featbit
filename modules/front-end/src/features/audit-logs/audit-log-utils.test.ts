@@ -40,7 +40,12 @@ describe("audit log presentation", () => {
         previous: JSON.stringify({ rules }),
         current: JSON.stringify({ rules: [...rules].reverse() }),
       },
-      instructions: [{ kind: "SetRules", value: [...rules].reverse() }],
+      instructions: [
+        {
+          kind: "ReorderRules",
+          value: { previous: ["a", "b"], current: ["b", "a"] },
+        },
+      ],
     })
     expect(auditEventTitle(entry, i18n.t)).toBe(
       i18n.t("auditLogs.updatedTargeting")

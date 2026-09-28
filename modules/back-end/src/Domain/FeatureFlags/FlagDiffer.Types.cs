@@ -25,7 +25,8 @@ public record TargetingRuleDiff(
     bool IsDifferent
 )
 {
-    // Content differences drive append; position differences only affect overall comparison.
+    // Pairing differences and append eligibility have separate semantics.
+    public bool CanAppend { get; init; }
     public bool IsOrderDifferent { get; init; }
 }
 

@@ -556,10 +556,10 @@ export function FlagDifferenceValue({
     )
 
   if (setting === "targetingRule") {
-    const appendedRules = source.rules.filter(
-      (rule) =>
-        ruleDiffs.find((diff) => diff.source?.id === rule.id)?.isDifferent
-    )
+    const appendedRules = source.rules.filter((rule) => {
+      const diff = ruleDiffs.find((item) => item.source?.id === rule.id)
+      return diff?.canAppend ?? diff?.isDifferent
+    })
     return (
       <div className="space-y-3">
         <RulesValue flag={flag} lang={lang} segmentNames={segmentNames} />

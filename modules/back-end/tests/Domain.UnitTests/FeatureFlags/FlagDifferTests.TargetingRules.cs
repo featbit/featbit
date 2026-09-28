@@ -519,9 +519,12 @@ public class TargetingRulesDifferTests
 
         var diffs = FlagDiffer.CompareRules(sourceFlag, targetFlag, []);
 
-        Assert.Equal(2, diffs.Count);
+        Assert.Equal(3, diffs.Count);
         Assert.True(diffs[0].IsDifferent);
+        Assert.Null(diffs[0].Target);
         Assert.False(diffs[1].IsDifferent);
+        Assert.Null(diffs[2].Source);
+        Assert.Same(targetFlag.Rules.First(), diffs[2].Target);
     }
 
     [Fact]

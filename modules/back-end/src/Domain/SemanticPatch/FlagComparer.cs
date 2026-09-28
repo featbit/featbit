@@ -296,12 +296,7 @@ public static class FlagComparer
         var removedRules = original.ExceptBy(current.Select(v => v.Id), v => v.Id).ToArray();
         var commonRules = original.IntersectBy(current.Select(v => v.Id), v => v.Id).ToArray();
 
-        // AddRule appends. Use SetRules when incremental edits cannot reproduce the new order.
-        var incrementalOrder = commonRules.Concat(addedRules).Select(rule => rule.Id);
-        if (!incrementalOrder.SequenceEqual(current.Select(rule => rule.Id)))
-        {
-            return new FlagInstruction[] { new SetRulesInstruction(current) };
-        }
+        var incrementalOrder = commonRules.Concat(addedRules).Select(rule => rule.Id).ToArray();
 
         foreach (var rule in addedRules)
         {
@@ -320,6 +315,13 @@ public static class FlagComparer
 
             var ruleInstructions = CompareRule(rule1, rule2);
             instructions.AddRange(ruleInstructions);
+        }
+
+        // Reorder after content edits, retaining the live rule objects rather than the draft snapshot.
+        var currentOrder = current.Select(rule => rule.Id).ToArray();
+        if (!incrementalOrder.SequenceEqual(currentOrder))
+        {
+            instructions.Add(new ReorderRulesInstruction(new RuleOrder(incrementalOrder, currentOrder)));
         }
 
         return instructions;

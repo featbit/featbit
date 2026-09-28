@@ -303,11 +303,12 @@ public class FlagComparerTests
             ? [Rule("c"), Rule("a"), Rule("b")]
             : [Rule("b"), Rule("a")];
 
-        var instruction = Assert.IsType<SetRulesInstruction>(
-            Assert.Single(FlagComparer.Compare(new DataChange(original).To(current))));
+        var instructions = FlagComparer.Compare(new DataChange(original).To(current)).ToArray();
+        var instruction = Assert.Single(instructions.OfType<ReorderRulesInstruction>());
+        Assert.DoesNotContain(instructions, item => item is SetRulesInstruction);
 
         Assert.Equal(Domain.Policies.Permissions.UpdateFlagTargetingRules, instruction.Permission);
-        instruction.Apply(original);
+        foreach (var item in instructions) item.Apply(original);
         Assert.Equal(current.Rules.Select(rule => rule.Id), original.Rules.Select(rule => rule.Id));
         Assert.Empty(FlagComparer.Compare(original, current));
     }

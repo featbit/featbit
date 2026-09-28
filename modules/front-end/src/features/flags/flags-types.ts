@@ -214,6 +214,7 @@ export type FlagComparisonDetail = {
       target: FlagComparisonRule | null
       isDifferent: boolean
       isOrderDifferent?: boolean
+      canAppend?: boolean
     }>
     defaultRule: { isDifferent: boolean }
     offVariation: { isDifferent: boolean }

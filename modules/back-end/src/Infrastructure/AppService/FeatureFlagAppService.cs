@@ -1,7 +1,9 @@
 using Application.Caches;
+using Application.Bases.Exceptions;
 using Application.FeatureFlags;
 using Domain.AuditLogs;
 using Domain.Segments;
+using Domain.SemanticPatch;
 using MediatR;
 
 namespace Infrastructure.AppService;
@@ -39,7 +41,15 @@ public class FeatureFlagAppService : IFeatureFlagAppService
 
         // apply flag draft
         var flag = await _flagService.GetAsync(draft.FlagId);
-        var dataChange = flag.ApplyDraft(draft);
+        DataChange dataChange;
+        try
+        {
+            dataChange = flag.ApplyDraft(draft);
+        }
+        catch (RuleOrderConflictException)
+        {
+            throw new ConflictException(nameof(Domain.FeatureFlags.FeatureFlag), flag.Id);
+        }
         await _flagService.UpdateAsync(flag);
 
         // update draft status
