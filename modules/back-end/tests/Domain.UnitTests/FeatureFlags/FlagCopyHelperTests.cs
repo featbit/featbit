@@ -150,6 +150,24 @@ public class FlagCopyHelperTests
     }
 
     [Fact]
+    public void CopySettings_AllOptions_LeavesTargetInsightsSettingUnchanged()
+    {
+        var source = MakeSource(isEnabled: true);
+        source.InsightsEnabled = false;
+        var target = MakeTarget(isEnabled: false);
+
+        FlagCopyHelper.CopySettings(new FlagCopyContext(source, target, Array.Empty<Segment>(),
+            new FlagSettingCopyOptions(
+                OnOffState: true,
+                IndividualTargeting: new CopyIndividualTargetingOption(true, CopyModes.Overwrite),
+                TargetingRule: new CopyTargetingRuleOption(true, CopyModes.Overwrite),
+                DefaultRule: true,
+                OffVariation: true)));
+
+        Assert.True(target.InsightsEnabled);
+    }
+
+    [Fact]
     public void CopySettings_MissingSourceVariation_GetsAppendedToTarget()
     {
         var source = MakeSource();

@@ -104,6 +104,7 @@ export function statusClassName(status: PendingStatus) {
     case "PendingExecution":
       return "border-sky-200 bg-sky-50 text-sky-800 dark:border-sky-900 dark:bg-sky-950 dark:text-sky-300"
     case "Declined":
+    case "Failed":
       return "border-red-200 bg-red-50 text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-300"
     case "Applied":
       return "border-border bg-muted text-muted-foreground"

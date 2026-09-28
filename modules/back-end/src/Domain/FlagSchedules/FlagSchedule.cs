@@ -69,4 +69,11 @@ public class FlagSchedule : FullAuditedEntity
 
         MarkAsUpdated(memberId);
     }
+
+    public void Failed(Guid memberId)
+    {
+        Status = FlagScheduleStatus.Failed;
+
+        MarkAsUpdated(memberId);
+    }
 }

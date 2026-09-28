@@ -66,6 +66,12 @@ public interface IExperimentService
         Guid envId,
         string nameSearchText = null);
 
+    /// <summary>
+    /// Experiments bound to the flag that have at least one run whose observation window has not ended at
+    /// <paramref name="now"/>, including runs scheduled to start later.
+    /// </summary>
+    Task<IReadOnlyList<ExperimentRef>> GetRunningForFlagAsync(Guid envId, Guid flagId, DateTime now);
+
     Task<PagedResult<ExperimentVm>> GetListAsync(
         Guid envId,
         ExperimentFilter filter);

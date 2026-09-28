@@ -41,6 +41,7 @@ public static class FlagComparer
         instructions.AddRange(CompareVariations(original.Variations, current.Variations));
 
         instructions.Add(CompareDisabledVariation(original.DisabledVariationId, current.DisabledVariationId));
+        instructions.Add(CompareInsightsEnabled(original.InsightsEnabled, current.InsightsEnabled));
 
         instructions.AddRange(CompareFallthrough(original.Fallthrough, current.Fallthrough));
         instructions.AddRange(CompareTargetUsers(current.Variations, original.TargetUsers, current.TargetUsers));
@@ -159,6 +160,17 @@ public static class FlagComparer
         }
 
         var instruction = new DisabledVariationInstruction(current);
+        return instruction;
+    }
+
+    public static FlagInstruction CompareInsightsEnabled(bool original, bool current)
+    {
+        if (original == current)
+        {
+            return NoopFlagInstruction.Instance;
+        }
+
+        var instruction = new InsightsEnabledInstruction(current);
         return instruction;
     }
 

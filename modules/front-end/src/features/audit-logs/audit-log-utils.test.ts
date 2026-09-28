@@ -89,6 +89,26 @@ describe("audit log presentation", () => {
     ).toBe("Updated targeting")
   })
 
+  it("shows an insights toggle as a settings change with old and new values", () => {
+    const before = { id: "flag-1", name: "Checkout", key: "checkout" }
+    const insightsLog = log({
+      instructions: [{ kind: "UpdateInsightsEnabled", value: false }],
+      dataChange: {
+        previous: JSON.stringify(before),
+        current: JSON.stringify({ ...before, insightsEnabled: false }),
+      },
+    })
+
+    expect(auditEventTitle(insightsLog, i18n.t)).toBe("Updated settings")
+    expect(auditHistoryChanges(insightsLog, i18n.t)).toEqual([
+      expect.objectContaining({
+        label: "Insights enabled",
+        previous: "Enabled",
+        current: "Disabled",
+      }),
+    ])
+  })
+
   it("labels every change request decision as its own audit event", () => {
     expect(
       auditEventTitle(log({ operation: "ApproveFlagChangeRequest" }), i18n.t)

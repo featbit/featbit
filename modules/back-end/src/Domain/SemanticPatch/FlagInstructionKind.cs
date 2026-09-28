@@ -28,6 +28,8 @@ public static class FlagInstructionKind
 
     public const string UpdateDisabledVariation = nameof(UpdateDisabledVariation);
 
+    public const string UpdateInsightsEnabled = nameof(UpdateInsightsEnabled);
+
     public const string UpdateDefaultRuleVariationOrRollouts = nameof(UpdateDefaultRuleVariationOrRollouts);
 
     public const string UpdateDefaultRuleDispatchKey = nameof(UpdateDefaultRuleDispatchKey);
@@ -113,6 +115,7 @@ public static class FlagInstructionKind
         UpdateVariationType,
         UpdateVariation,
         UpdateDisabledVariation,
+        UpdateInsightsEnabled,
         UpdateDefaultRuleVariationOrRollouts,
         UpdateDefaultRuleDispatchKey,
         AddTargetUsers,

@@ -56,6 +56,21 @@ public class DescriptionInstruction : FlagInstruction
     }
 }
 
+public class InsightsEnabledInstruction : FlagInstruction
+{
+    public InsightsEnabledInstruction(bool value) : base(FlagInstructionKind.UpdateInsightsEnabled, value)
+    {
+    }
+
+    public override void Apply(FeatureFlag flag)
+    {
+        if (Value is bool insightsEnabled)
+        {
+            flag.InsightsEnabled = insightsEnabled;
+        }
+    }
+}
+
 public class TagsInstruction : FlagInstruction
 {
     public TagsInstruction(string kind, ICollection<string> value) : base(kind, value)

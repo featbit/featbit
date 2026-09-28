@@ -5,6 +5,7 @@ export type FlagSettingsValues = {
   name: string
   description: string
   tags: string[]
+  insightsEnabled: boolean
 }
 
 export type FlagSettingsField = keyof FlagSettingsValues
@@ -18,6 +19,7 @@ export function flagSettingsOf(flag: FeatureFlag): FlagSettingsValues {
     name: flag.name,
     description: flag.description ?? "",
     tags: flag.tags ?? [],
+    insightsEnabled: flag.insightsEnabled !== false,
   }
 }
 
@@ -26,12 +28,14 @@ export function stableFlagSettings(values: FlagSettingsValues) {
     name: values.name,
     description: values.description,
     tags: [...values.tags].sort(),
+    insightsEnabled: values.insightsEnabled,
   })
 }
 
 export function flagSettingsReviewChanges(
   previous: FlagSettingsValues,
-  current: FlagSettingsValues
+  current: FlagSettingsValues,
+  insightsLabel: (enabled: boolean) => string = String
 ): FlagSettingsReviewChange[] {
   const changes: FlagSettingsReviewChange[] = []
   if (previous.name !== current.name) {
@@ -67,6 +71,15 @@ export function flagSettingsReviewChanges(
           ? [{ action: "removed" as const, values: removed }]
           : []),
       ],
+    })
+  }
+  if (previous.insightsEnabled !== current.insightsEnabled) {
+    changes.push({
+      kind: "field",
+      label: "insightsEnabled",
+      action: "updated",
+      previous: insightsLabel(previous.insightsEnabled),
+      current: insightsLabel(current.insightsEnabled),
     })
   }
   return changes

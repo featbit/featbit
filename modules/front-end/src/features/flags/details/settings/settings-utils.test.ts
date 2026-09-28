@@ -51,6 +51,7 @@ describe("feature flag settings utilities", () => {
         name: "Checkout rollout",
         description: "New description",
         tags: ["growth"],
+        insightsEnabled: true,
       })
     ).toEqual([
       expect.objectContaining({
@@ -72,6 +73,32 @@ describe("feature flag settings utilities", () => {
           { action: "added", values: ["growth"] },
           { action: "removed", values: ["checkout"] },
         ],
+      }),
+    ])
+  })
+
+  it("defaults insights to enabled when the flag omits the field", () => {
+    expect(flagSettingsOf(flag).insightsEnabled).toBe(true)
+    expect(
+      flagSettingsOf({ ...flag, insightsEnabled: false }).insightsEnabled
+    ).toBe(false)
+  })
+
+  it("includes the insights setting in dirty state and review changes", () => {
+    const previous = flagSettingsOf(flag)
+    const current = { ...previous, insightsEnabled: false }
+
+    expect(stableFlagSettings(current)).not.toBe(stableFlagSettings(previous))
+    expect(
+      flagSettingsReviewChanges(previous, current, (enabled) =>
+        enabled ? "On" : "Off"
+      )
+    ).toEqual([
+      expect.objectContaining({
+        kind: "field",
+        label: "insightsEnabled",
+        previous: "On",
+        current: "Off",
       }),
     ])
   })

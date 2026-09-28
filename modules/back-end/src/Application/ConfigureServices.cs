@@ -1,11 +1,13 @@
 using System.Reflection;
 using Application;
 using Application.Bases.Behaviours;
+using Application.Experiments;
 using Application.FeatureFlags;
 using Application.Policies;
 using Application.Segments;
 using Application.Users;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 // ReSharper disable CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection;
@@ -32,6 +34,8 @@ public static class ConfigureServices
         services.AddHttpContextAccessor();
         services.AddSingleton<ICurrentUser, CurrentUser>();
         services.AddTransient<IPermissionGuard, PermissionGuard>();
+        services.TryAddSingleton(TimeProvider.System);
+        services.AddTransient<IFlagInsightsGuard, FlagInsightsGuard>();
         services.AddTransient<ISegmentMessageService, SegmentMessageService>();
         if (configuration.UseControlPlane())
         {

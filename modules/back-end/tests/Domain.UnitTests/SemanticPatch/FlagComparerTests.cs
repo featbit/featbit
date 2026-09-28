@@ -368,6 +368,43 @@ public class FlagComparerTests
         Assert.Empty(instructions);
     }
 
+    [Theory]
+    [InlineData(true, true)]
+    [InlineData(false, false)]
+    public void CompareInsightsEnabled_NoChange_ReturnsNoop(bool original, bool current)
+    {
+        var result = FlagComparer.CompareInsightsEnabled(original, current);
+
+        Assert.IsType<NoopFlagInstruction>(result);
+    }
+
+    [Theory]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    public void CompareInsightsEnabled_Changed_ReturnsInsightsEnabledInstruction(bool original, bool current)
+    {
+        var result = FlagComparer.CompareInsightsEnabled(original, current);
+
+        var instruction = Assert.IsType<InsightsEnabledInstruction>(result);
+        Assert.Equal(FlagInstructionKind.UpdateInsightsEnabled, instruction.Kind);
+        Assert.Equal(current, instruction.Value);
+    }
+
+    [Fact]
+    public void Compare_OnlyInsightsEnabledChanged_ReturnsSingleInstructionRequiringToggleFlag()
+    {
+        var original = MakeFlag();
+        var current = MakeFlag();
+        current.InsightsEnabled = false;
+        var dataChange = new DataChange(original).To(current);
+
+        var instructions = FlagComparer.Compare(dataChange).ToArray();
+
+        var instruction = Assert.Single(instructions);
+        Assert.Equal(FlagInstructionKind.UpdateInsightsEnabled, instruction.Kind);
+        Assert.Equal(Domain.Policies.Permissions.ToggleFlag, instruction.Permission);
+    }
+
     private static FeatureFlag MakeFlag(string name = "n", string description = "d") => new()
     {
         Name = name,

@@ -69,6 +69,15 @@ public class FlagInstructionsParseTests
     }
 
     [Fact]
+    public void Ctor_UpdateInsightsEnabled_YieldsInsightsEnabledInstructionWithBoolValue()
+    {
+        var instructions = Parse("[{\"kind\":\"UpdateInsightsEnabled\",\"value\":false}]").ToList();
+
+        var insights = Assert.IsType<InsightsEnabledInstruction>(instructions[0]);
+        Assert.Equal(false, insights.Value);
+    }
+
+    [Fact]
     public void Ctor_AddTags_YieldsTagsInstructionWithCollection()
     {
         var instructions = Parse("[{\"kind\":\"AddTags\",\"value\":[\"a\",\"b\"]}]").ToList();
