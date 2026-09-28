@@ -277,7 +277,7 @@ describe("FlagDifferencesSheet", () => {
     expect(onOpenChange).toHaveBeenCalledWith(false)
   })
 
-  it("enables copying order-only differences without appending existing rules", async () => {
+  it("requires overwrite for order-only differences", async () => {
     const a = { ...detail.source.rules[0], id: "a", name: "First source rule" }
     const b = {
       ...a,
@@ -321,13 +321,32 @@ describe("FlagDifferencesSheet", () => {
     expect(
       screen.getByRole("radio", { name: "Overwrite rules" })
     ).toHaveAttribute("aria-checked", "true")
-    expect(
-      screen.getByRole("button", { name: "Copy settings" })
-    ).toBeEnabled()
+    expect(screen.getByRole("button", { name: "Copy settings" })).toBeEnabled()
     fireEvent.click(screen.getByText("Append rules"))
+    expect(screen.getByRole("radio", { name: "Append rules" })).toHaveAttribute(
+      "aria-disabled",
+      "true"
+    )
+    expect(
+      screen.getByRole("radio", { name: "Overwrite rules" })
+    ).toHaveAttribute("aria-checked", "true")
+    expect(
+      screen.getByText(/All source rules already exist in the target/)
+    ).toBeVisible()
     expect(screen.queryByText("Source rules appended")).not.toBeInTheDocument()
     expect(screen.getAllByText("First source rule")).toHaveLength(3)
     expect(screen.getAllByText("Second source rule")).toHaveLength(3)
+    fireEvent.click(screen.getByRole("button", { name: "Copy settings" }))
+    await waitFor(() =>
+      expect(mocks.copy).toHaveBeenCalledWith(
+        "source-env",
+        "target-env",
+        flag.key,
+        expect.objectContaining({
+          targetingRule: { copy: true, mode: "overwrite" },
+        })
+      )
+    )
   })
 
   it("changes the targeting-rule copy mode without closing the sheet", async () => {

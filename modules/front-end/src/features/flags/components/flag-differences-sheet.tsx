@@ -200,6 +200,15 @@ export function FlagDifferencesSheet({
     retry: false,
   })
   const detail = comparisonQuery.data ?? null
+  const canAppendRules = Boolean(
+    detail?.diff.targetingRule.some((item) => item.source && item.isDifferent)
+  )
+  const effectiveModes = {
+    ...modes,
+    targetingRule: canAppendRules
+      ? modes.targetingRule
+      : ("overwrite" as const),
+  }
   const segmentNames = useMemo(
     () =>
       new Map(
@@ -246,7 +255,7 @@ export function FlagDifferencesSheet({
         envId,
         targetId,
         flag!.key,
-        getCopyOptions(selected, modes)
+        getCopyOptions(selected, effectiveModes)
       ),
     onSuccess: () => {
       toast.success(t("featureFlags.differencesSheet.copied"))
@@ -492,7 +501,7 @@ export function FlagDifferencesSheet({
                 const mode =
                   row.key === "individualTargeting" ||
                   row.key === "targetingRule"
-                    ? modes[row.key]
+                    ? effectiveModes[row.key]
                     : "overwrite"
                 const rowDisabled =
                   !different || !copyable || copyMutation.isPending
@@ -550,10 +559,24 @@ export function FlagDifferencesSheet({
                                 key={value}
                                 className="flex items-center gap-2 text-xs"
                               >
-                                <RadioGroupItem id={optionId} value={value} />
+                                <RadioGroupItem
+                                  id={optionId}
+                                  value={value}
+                                  disabled={
+                                    row.key === "targetingRule" &&
+                                    value === "append" &&
+                                    !canAppendRules
+                                  }
+                                />
                                 <label
                                   htmlFor={optionId}
-                                  className="cursor-pointer"
+                                  className={cn(
+                                    "cursor-pointer",
+                                    row.key === "targetingRule" &&
+                                      value === "append" &&
+                                      !canAppendRules &&
+                                      "cursor-not-allowed text-muted-foreground"
+                                  )}
                                 >
                                   {t(
                                     `featureFlags.differencesSheet.${
@@ -567,6 +590,13 @@ export function FlagDifferencesSheet({
                             )
                           })}
                         </RadioGroup>
+                      ) : null}
+                      {rowSelected &&
+                      row.key === "targetingRule" &&
+                      !canAppendRules ? (
+                        <p className="mt-2 pl-7 text-xs text-muted-foreground">
+                          {t("featureFlags.differencesSheet.noRulesToAppend")}
+                        </p>
                       ) : null}
                     </div>
                     {!copyable && row.key === "targetingRule" ? (
