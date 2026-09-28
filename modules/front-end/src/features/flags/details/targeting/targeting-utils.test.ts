@@ -62,6 +62,28 @@ function flag(): FeatureFlag {
 }
 
 describe("feature flag targeting utilities", () => {
+  it.each([
+    ["aaaaaaaa-1111", "bbbbbbbb-2222", "aaaaaaaa", "bbbbbbbb"],
+    ["aaaaaaaa-1111", "aaaaaaaa-2222", "aaaaaaaa-1111", "aaaaaaaa-2222"],
+  ])("distinguishes same-name rules with stable unique IDs (%s, %s)", (firstId, secondId, firstLabel, secondLabel) => {
+    const previous = flag()
+    const rule = previous.rules![0]
+    previous.rules = [
+      { ...rule, id: firstId, name: "Same name" },
+      { ...structuredClone(rule), id: secondId, name: "Same name" },
+      { ...structuredClone(rule), id: "unique-rule", name: "Unique name" },
+    ]
+    const current = structuredClone(previous)
+    current.rules = [current.rules![1], current.rules![0], current.rules![2]]
+    expect(targetingReviewChanges(previous, current, reviewLabels)).toEqual([
+      expect.objectContaining({
+        kind: "order",
+        previous: `Same name (${firstLabel}) → Same name (${secondLabel}) → Unique name`,
+        current: `Same name (${secondLabel}) → Same name (${firstLabel}) → Unique name`,
+      }),
+    ])
+  })
+
   it("reviews rule reordering and preserves the order in the save payload", () => {
     const previous = flag()
     previous.rules!.push({

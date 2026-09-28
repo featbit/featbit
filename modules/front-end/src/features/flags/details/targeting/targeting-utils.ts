@@ -290,12 +290,31 @@ export function targetingReviewChanges(
   if (
     previousOrder.some((rule, index) => rule.id !== currentOrder[index]?.id)
   ) {
+    const rules = [...(previous.rules ?? []), ...(current.rules ?? [])]
+    const idsByName = new Map<string, Set<string>>()
+    for (const rule of rules) {
+      const ids = idsByName.get(rule.name) ?? new Set<string>()
+      ids.add(rule.id)
+      idsByName.set(rule.name, ids)
+    }
+    const ambiguousIds = new Set(
+      [...idsByName.values()].filter((ids) => ids.size > 1).flatMap((ids) => [...ids])
+    )
+    const allIds = [...new Set(rules.map((rule) => rule.id))]
+    const orderLabel = (rule: FlagRule) => {
+      if (!ambiguousIds.has(rule.id)) return rule.name
+      const prefix = rule.id.slice(0, 8)
+      const id = allIds.some((other) => other !== rule.id && other.startsWith(prefix))
+        ? rule.id
+        : prefix
+      return `${rule.name} (${id})`
+    }
     changes.push({
       kind: "order",
       label: "ruleOrder",
       action: "updated",
-      previous: (previous.rules ?? []).map((rule) => rule.name).join(" → "),
-      current: (current.rules ?? []).map((rule) => rule.name).join(" → "),
+      previous: (previous.rules ?? []).map(orderLabel).join(" → "),
+      current: (current.rules ?? []).map(orderLabel).join(" → "),
     })
   }
   return changes
