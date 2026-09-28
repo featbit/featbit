@@ -294,7 +294,14 @@ public static class FlagComparer
 
         var addedRules = current.ExceptBy(original.Select(v => v.Id), v => v.Id).ToArray();
         var removedRules = original.ExceptBy(current.Select(v => v.Id), v => v.Id).ToArray();
-        var commonRules = original.IntersectBy(current.Select(v => v.Id), v => v.Id);
+        var commonRules = original.IntersectBy(current.Select(v => v.Id), v => v.Id).ToArray();
+
+        // AddRule appends. Use SetRules when incremental edits cannot reproduce the new order.
+        var incrementalOrder = commonRules.Concat(addedRules).Select(rule => rule.Id);
+        if (!incrementalOrder.SequenceEqual(current.Select(rule => rule.Id)))
+        {
+            return new FlagInstruction[] { new SetRulesInstruction(current) };
+        }
 
         foreach (var rule in addedRules)
         {

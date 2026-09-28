@@ -280,6 +280,24 @@ export function targetingReviewChanges(
       })
     }
   }
+  // Compare retained rules so adding/removing a rule alone is not a reorder.
+  const previousOrder = (previous.rules ?? []).filter((rule) =>
+    nextRules.has(rule.id)
+  )
+  const currentOrder = (current.rules ?? []).filter((rule) =>
+    oldRules.has(rule.id)
+  )
+  if (
+    previousOrder.some((rule, index) => rule.id !== currentOrder[index]?.id)
+  ) {
+    changes.push({
+      kind: "order",
+      label: "ruleOrder",
+      action: "updated",
+      previous: (previous.rules ?? []).map((rule) => rule.name).join(" → "),
+      current: (current.rules ?? []).map((rule) => rule.name).join(" → "),
+    })
+  }
   return changes
 }
 

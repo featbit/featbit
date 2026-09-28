@@ -351,6 +351,7 @@ export const enFeatureFlags = {
       applyImmediately: "Apply immediately",
       dispatchBy: "Dispatch by",
       serve: "Serve",
+      ruleOrder: "Rule order",
     },
     pending: {
       title: "Pending changes",
@@ -1026,6 +1027,7 @@ export const zhFeatureFlags: typeof enFeatureFlags = {
       applyImmediately: "立即应用",
       dispatchBy: "基于属性",
       serve: "返回",
+      ruleOrder: "规则顺序",
     },
     pending: {
       title: "待处理变更",
