@@ -614,6 +614,7 @@ export function FlagDifferencesSheet({
                                 <FlagDifferenceValue
                                   flag={detail.target}
                                   source={detail.source}
+                                  ruleDiffs={detail.diff.targetingRule}
                                   setting={row.key}
                                   previewMode={mode}
                                   lang={lang}

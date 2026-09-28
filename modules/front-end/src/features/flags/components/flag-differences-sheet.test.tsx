@@ -86,7 +86,9 @@ const detail: FlagComparisonDetail = {
   diff: {
     onOffState: { source: true, target: false, isDifferent: true },
     individualTargeting: [{ isDifferent: true }],
-    targetingRule: [{ isDifferent: true }],
+    targetingRule: [
+      { source: { id: "source-rule" }, target: null, isDifferent: true },
+    ],
     defaultRule: { isDifferent: false },
     offVariation: { isDifferent: true },
   },
@@ -301,6 +303,58 @@ describe("FlagDifferencesSheet", () => {
 
     expect(appendRules).toHaveAttribute("aria-checked", "true")
     expect(onOpenChange).not.toHaveBeenCalled()
+  })
+
+  it("previews only different source rules when appending", async () => {
+    const sourceRules = [
+      {
+        ...detail.source.rules[0],
+        id: "source-1",
+        name: "Rule 1",
+        dispatchKey: "name",
+      },
+      {
+        ...detail.source.rules[0],
+        id: "source-2",
+        name: "Rule 2",
+        dispatchKey: "keyId",
+      },
+    ]
+    const targetRules = [
+      { ...sourceRules[0], id: "target-1", dispatchKey: "keyId" },
+      { ...sourceRules[1], id: "target-2" },
+    ]
+    mocks.compare.mockResolvedValueOnce({
+      ...detail,
+      source: { ...detail.source, rules: sourceRules },
+      target: { ...detail.target, rules: targetRules },
+      diff: {
+        ...detail.diff,
+        targetingRule: [
+          { source: sourceRules[0], target: targetRules[0], isDifferent: true },
+          {
+            source: sourceRules[1],
+            target: targetRules[1],
+            isDifferent: false,
+          },
+        ],
+      },
+      isRulesCopyable: true,
+    } satisfies FlagComparisonDetail)
+    renderSheet({
+      lockedTarget: { id: "target-env", name: "Growth Platform / Staging" },
+    })
+    fireEvent.click(
+      await screen.findByRole("checkbox", { name: "Targeting rules" })
+    )
+    fireEvent.click(screen.getByText("Append rules"))
+
+    const appended = screen.getByText("Source rules appended").parentElement!
+    expect(within(appended).getByText("Rule 1")).toBeVisible()
+    expect(within(appended).queryByText("Rule 2")).not.toBeInTheDocument()
+    const preview = appended.parentElement!
+    expect(within(preview).getAllByText("Rule 1")).toHaveLength(2)
+    expect(within(preview).getAllByText("Rule 2")).toHaveLength(1)
   })
 
   it("uses related segment names in targeting rules", async () => {

@@ -102,16 +102,19 @@ public static class FlagDiffer
 
         foreach (var sourceRule in source.Rules)
         {
-            TargetingRuleDiff diff;
+            // Prefer an exact match among all rules with the same conditions.
+            // An earlier rule may have a different dispatch key or rollout.
+            var candidates = target.Rules
+                .Where(rule => IsSameConditions(sourceRule.Conditions, rule.Conditions, relatedSegments))
+                .Select(CompareTargetRule)
+                .ToArray();
+            var diff = candidates.FirstOrDefault(candidate => !candidate.IsDifferent)
+                       ?? candidates.FirstOrDefault()
+                       ?? new TargetingRuleDiff(sourceRule, null, true);
 
-            // find target rule with same conditions
-            var targetRule =
-                target.Rules.FirstOrDefault(rule => IsSameConditions(sourceRule.Conditions, rule.Conditions, relatedSegments));
-            if (targetRule == null)
-            {
-                diff = new TargetingRuleDiff(sourceRule, null, true);
-            }
-            else
+            diffs.Add(diff);
+
+            TargetingRuleDiff CompareTargetRule(TargetRule targetRule)
             {
                 var srcSvp = new CompareServeVariationsParameter(
                     source.Id,
@@ -124,11 +127,17 @@ public static class FlagDiffer
                     targetRule.Variations
                 );
 
-                var hasDiff = IsServeVariationsDifferent(srcSvp, targetSvp);
-                diff = new TargetingRuleDiff(sourceRule, targetRule, hasDiff);
-            }
+                var sourceDispatchKey = string.IsNullOrWhiteSpace(sourceRule.DispatchKey)
+                    ? "keyId"
+                    : sourceRule.DispatchKey;
+                var targetDispatchKey = string.IsNullOrWhiteSpace(targetRule.DispatchKey)
+                    ? "keyId"
+                    : targetRule.DispatchKey;
 
-            diffs.Add(diff);
+                var hasDiff = sourceDispatchKey != targetDispatchKey ||
+                              IsServeVariationsDifferent(srcSvp, targetSvp);
+                return new TargetingRuleDiff(sourceRule, targetRule, hasDiff);
+            }
         }
 
         // rules may in target flag that are not in source flag
