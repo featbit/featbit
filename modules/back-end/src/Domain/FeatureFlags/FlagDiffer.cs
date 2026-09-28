@@ -100,7 +100,7 @@ public static class FlagDiffer
     {
         var diffs = new List<TargetingRuleDiff>();
 
-        foreach (var sourceRule in source.Rules)
+        foreach (var (sourceRule, sourceIndex) in source.Rules.Select((rule, index) => (rule, index)))
         {
             // Prefer an exact match among all rules with the same conditions.
             // An earlier rule may have a different dispatch key or rollout.
@@ -111,6 +111,17 @@ public static class FlagDiffer
             var diff = candidates.FirstOrDefault(candidate => !candidate.IsDifferent)
                        ?? candidates.FirstOrDefault()
                        ?? new TargetingRuleDiff(sourceRule, null, true);
+
+            if (!diff.IsDifferent)
+            {
+                var ruleAtSamePosition = target.Rules.ElementAtOrDefault(sourceIndex);
+                diff = diff with
+                {
+                    IsOrderDifferent = ruleAtSamePosition == null ||
+                        !IsSameConditions(sourceRule.Conditions, ruleAtSamePosition.Conditions, relatedSegments) ||
+                        CompareTargetRule(ruleAtSamePosition).IsDifferent
+                };
+            }
 
             diffs.Add(diff);
 

@@ -94,7 +94,9 @@ const rows: RowDefinition[] = [
   {
     key: "targetingRule",
     different: (detail) =>
-      detail.diff.targetingRule.some((item) => item.isDifferent),
+      detail.diff.targetingRule.some(
+        (item) => item.isDifferent || item.isOrderDifferent
+      ),
     copyable: (detail) => detail.isRulesCopyable,
     supportsMode: true,
   },

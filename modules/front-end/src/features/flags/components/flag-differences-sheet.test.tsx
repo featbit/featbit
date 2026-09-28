@@ -277,6 +277,59 @@ describe("FlagDifferencesSheet", () => {
     expect(onOpenChange).toHaveBeenCalledWith(false)
   })
 
+  it("enables copying order-only differences without appending existing rules", async () => {
+    const a = { ...detail.source.rules[0], id: "a", name: "First source rule" }
+    const b = {
+      ...a,
+      id: "b",
+      name: "Second source rule",
+      variations: [{ id: "false", rollout: [0, 1] }],
+    }
+    const targetA = { ...a, id: "target-a" }
+    const targetB = { ...b, id: "target-b" }
+    mocks.compare.mockResolvedValueOnce({
+      ...detail,
+      source: { ...detail.source, rules: [a, b] },
+      target: { ...detail.target, rules: [targetB, targetA] },
+      diff: {
+        ...detail.diff,
+        targetingRule: [
+          {
+            source: a,
+            target: targetA,
+            isDifferent: false,
+            isOrderDifferent: true,
+          },
+          {
+            source: b,
+            target: targetB,
+            isDifferent: false,
+            isOrderDifferent: true,
+          },
+        ],
+      },
+      isRulesCopyable: true,
+    } satisfies FlagComparisonDetail)
+    renderSheet({
+      lockedTarget: { id: "target-env", name: "Growth Platform / Staging" },
+    })
+    const rules = await screen.findByRole("checkbox", {
+      name: "Targeting rules",
+    })
+    expect(rules).toBeEnabled()
+    fireEvent.click(rules)
+    expect(
+      screen.getByRole("radio", { name: "Overwrite rules" })
+    ).toHaveAttribute("aria-checked", "true")
+    expect(
+      screen.getByRole("button", { name: "Copy settings" })
+    ).toBeEnabled()
+    fireEvent.click(screen.getByText("Append rules"))
+    expect(screen.queryByText("Source rules appended")).not.toBeInTheDocument()
+    expect(screen.getAllByText("First source rule")).toHaveLength(3)
+    expect(screen.getAllByText("Second source rule")).toHaveLength(3)
+  })
+
   it("changes the targeting-rule copy mode without closing the sheet", async () => {
     mocks.compare.mockResolvedValueOnce({
       ...detail,

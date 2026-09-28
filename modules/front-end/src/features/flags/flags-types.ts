@@ -213,6 +213,7 @@ export type FlagComparisonDetail = {
       source: FlagComparisonRule | null
       target: FlagComparisonRule | null
       isDifferent: boolean
+      isOrderDifferent?: boolean
     }>
     defaultRule: { isDifferent: boolean }
     offVariation: { isDifferent: boolean }

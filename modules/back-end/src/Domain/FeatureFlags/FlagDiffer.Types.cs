@@ -23,7 +23,11 @@ public record TargetingRuleDiff(
     TargetRule Source,
     TargetRule Target,
     bool IsDifferent
-);
+)
+{
+    // Content differences drive append; position differences only affect overall comparison.
+    public bool IsOrderDifferent { get; init; }
+}
 
 public record DefaultRuleDiff(
     Fallthrough Source,
