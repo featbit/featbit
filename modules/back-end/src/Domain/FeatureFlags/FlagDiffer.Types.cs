@@ -25,8 +25,14 @@ public record TargetingRuleDiff(
     bool IsDifferent
 )
 {
-    // Pairing differences and append eligibility have separate semantics.
+    /// <summary>
+    /// Whether the source rule can be appended because the target flag has no equivalent rule.
+    /// </summary>
     public bool CanAppend { get; init; }
+
+    /// <summary>
+    /// Whether the source rule has an equivalent paired target rule, but no equivalent rule at the same position.
+    /// </summary>
     public bool IsOrderDifferent { get; init; }
 }
 
