@@ -1,32 +1,71 @@
 import { readdir, unlink } from 'node:fs/promises';
 import { join } from 'node:path';
-import { initDbs, logs, openStack, ready, scenarios } from './stack.mjs';
-import { testTrack } from './track.mjs';
+import { initDbs, logs, matchesImageVersion, openStack, processRun, ready, scenarios } from './stack.mjs';
+import { ensureBusinessData } from './bootstrap/index.mjs';
+import { testTrack } from './scenarios/track.mjs';
 
 const [command, ...args] = process.argv.slice(2);
-const scenarioIndex = args.indexOf('--scenario');
-const names = args.includes('--all') ? Object.keys(scenarios) : [scenarioIndex < 0 ? 'postgres' : args[scenarioIndex + 1]];
-if (!['init_dbs', 'up', 'track', 'logs', 'down'].includes(command) ||
-    (args.includes('--all') && scenarioIndex >= 0) ||
-    args.some((x, i) => x !== '--all' && x !== '--scenario' && !(scenarioIndex >= 0 && i === scenarioIndex + 1) && x !== '--no-build')) {
-  throw new Error('Usage: node cli.mjs init_dbs|up|track|logs|down [--scenario NAME | --all] [--no-build]');
+const usage = 'Usage: node cli.mjs up|test|logs|down [--stack NAME | --all] [--scenario NAME] [--image-version TAG] [--no-build]';
+let stackName, scenario, imageVersion, all = false, noBuild = false;
+if (!['up', 'test', 'logs', 'down'].includes(command)) throw new Error(usage);
+for (let i = 0; i < args.length; i++) {
+  const arg = args[i];
+  if (arg === '--stack' && !stackName && args[i + 1] && !args[i + 1].startsWith('--')) stackName = args[++i];
+  else if (arg === '--scenario' && !scenario && args[i + 1] && !args[i + 1].startsWith('--')) scenario = args[++i];
+  else if (arg === '--image-version' && !imageVersion && args[i + 1] && !args[i + 1].startsWith('--')) imageVersion = args[++i];
+  else if (arg === '--all' && !all) all = true;
+  else if (arg === '--no-build' && !noBuild) noBuild = true;
+  else throw new Error(usage);
+}
+if ((all && stackName) || (command === 'test' ? scenario !== 'track' : scenario !== undefined) ||
+    (noBuild && command !== 'up')) throw new Error(usage);
+if (imageVersion && !['up', 'test'].includes(command)) throw new Error(usage);
+if (imageVersion && !/^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$/.test(imageVersion)) {
+  throw new Error(`Invalid image version: ${imageVersion}`);
+}
+const names = all ? Object.keys(scenarios) : [stackName ?? 'postgres'];
+async function startStack(stack) {
+  await initDbs(stack);
+  if (stack.localServices.length && !noBuild) {
+    console.log(`Building local source; log: ${join(stack.artifacts, 'build.log')}`);
+    await stack.compose(['build', ...stack.localServices], { timeout: 1_800_000, quiet: true, logPath: join(stack.artifacts, 'build.log') });
+  }
+  for (const service of stack.publishedImages) {
+    const image = stack.env[`${service.toUpperCase()}_IMAGE`];
+    console.log(`Pulling ${service}: ${image}`);
+    await processRun('docker', ['pull', image]);
+  }
+  await stack.compose(['up', '-d', '--no-build', '--pull', 'never', 'api', 'els', 'ui']);
+  await ready(stack);
+  await ensureBusinessData(stack);
+  console.log(`UI: ${stack.ui}\nAPI: ${stack.api}\nELS: ${stack.els}`);
 }
 for (const name of names) {
-  const stack = await openStack(name);
-  console.log(`[${command}] ${name} (${stack.project})`);
+  let stack = await openStack(name, { imageVersion: command === 'up' ? imageVersion : undefined });
+  console.log(`[${command === 'test' ? `test:${scenario}` : command}] ${name} (${stack.project})`);
   try {
-    if (command === 'init_dbs' || command === 'up') await initDbs(stack);
-    if (command === 'up') {
-      if (!args.includes('--no-build')) {
-        console.log(`Building local source; log: ${join(stack.artifacts, 'build.log')}`);
-        await stack.compose(['build', 'api', 'els', 'ui'], { timeout: 1_800_000, quiet: true, logPath: join(stack.artifacts, 'build.log') });
+    if (command === 'up') await startStack(stack);
+    if (command === 'test' && scenario === 'track') {
+      const requiredServices = [...stack.services, 'api', 'els', 'ui'];
+      const running = await stack.compose(['ps', '--status', 'running', '-q', ...requiredServices], { quiet: true });
+      const containerIds = running.split(/\r?\n/).filter(Boolean);
+      let available = containerIds.length === requiredServices.length;
+      if (available && imageVersion) {
+        available = matchesImageVersion(stack, imageVersion);
+        if (available) {
+          const actualImages = await processRun('docker', ['inspect', '--format', '{{.Config.Image}}', ...containerIds], { quiet: true });
+          const imageSet = new Set(actualImages.split(/\r?\n/).filter(Boolean));
+          available = stack.publishedImages.every(service => imageSet.has(stack.env[`${service.toUpperCase()}_IMAGE`]));
+        }
       }
-      await stack.compose(['up', '-d', '--no-build', 'api', 'els', 'ui']);
-      await ready(stack);
-      console.log(`UI: ${stack.ui}\nAPI: ${stack.api}\nELS: ${stack.els}`);
-    }
-    if (command === 'track') {
-      await ready(stack);
+      if (!available) {
+        console.log(`[test] Preparing ${name}${imageVersion ? ` with image version ${imageVersion}` : ''}`);
+        stack = await openStack(name, { imageVersion });
+        await startStack(stack);
+      } else {
+        await ready(stack);
+        await ensureBusinessData(stack);
+      }
       await testTrack(stack);
     }
     if (command === 'logs') await logs(stack);

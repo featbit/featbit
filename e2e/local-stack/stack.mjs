@@ -14,6 +14,16 @@ export const scenarios = {
   'postgres-kafka-clickhouse': ['Postgres', 'Kafka', 'Redis', 'ClickHouse', ['postgres', 'redis', 'kafka', 'clickhouse']],
   'mongo-kafka-clickhouse': ['MongoDb', 'Kafka', 'Redis', 'ClickHouse', ['mongodb', 'redis', 'kafka', 'clickhouse']],
 };
+const applicationImages = {
+  api: 'featbit/featbit-api-server',
+  els: 'featbit/featbit-evaluation-server',
+  ui: 'featbit/featbit-ui',
+};
+
+export function matchesImageVersion(stack, version) {
+  return Object.entries(applicationImages).every(([service, repository]) =>
+    stack.env[`${service.toUpperCase()}_IMAGE`] === `${repository}:${version}`);
+}
 
 export async function processRun(command, args, { input, env, quiet = false, logPath, timeout = 600_000 } = {}) {
   return new Promise((resolve, reject) => {
@@ -36,32 +46,55 @@ export async function processRun(command, args, { input, env, quiet = false, log
   });
 }
 
-export async function openStack(name) {
-  if (!Object.hasOwn(scenarios, name)) throw new Error(`Unknown scenario ${name}; use ${Object.keys(scenarios).join(', ')}`);
+export async function openStack(name, { imageVersion } = {}) {
+  if (!Object.hasOwn(scenarios, name)) throw new Error(`Unknown stack ${name}; use ${Object.keys(scenarios).join(', ')}`);
   const [db, mq, cache, olap, services] = scenarios[name];
   const index = Object.keys(scenarios).indexOf(name);
   const project = `featbit-local-${name}`;
   const artifacts = join(directory, '.runs', name);
   await mkdir(artifacts, { recursive: true });
   const configPath = join(artifacts, 'environment.json');
-  let env;
+  let env, configChanged = false;
   try { env = JSON.parse(await readFile(configPath, 'utf8')); }
   catch (error) {
     if (error.code !== 'ENOENT') throw error;
+    configChanged = true;
     env = { STACK_PROJECT: project, DB_PROVIDER: db, MQ_PROVIDER: mq, CACHE_PROVIDER: cache,
       OLAP_PROVIDER: olap, API_PORT: String(15000 + index * 10), ELS_PORT: String(15001 + index * 10),
       UI_PORT: String(15002 + index * 10) };
     for (const key of ['API_PORT', 'ELS_PORT', 'UI_PORT', 'POSTGRES_IMAGE', 'MONGO_IMAGE', 'REDIS_IMAGE', 'KAFKA_IMAGE', 'CLICKHOUSE_IMAGE']) {
       if (process.env[key]) env[key] = process.env[key];
     }
-    await writeFile(configPath, JSON.stringify(env, null, 2));
+    if (process.env.FEATBIT_VERSION) {
+      for (const [service, repository] of Object.entries(applicationImages)) {
+        env[`${service.toUpperCase()}_IMAGE`] = `${repository}:${process.env.FEATBIT_VERSION}`;
+      }
+    }
+    for (const service of Object.keys(applicationImages)) {
+      const key = `${service.toUpperCase()}_IMAGE`;
+      if (process.env[key]) env[key] = process.env[key];
+    }
   }
+  if (imageVersion) {
+    for (const [service, repository] of Object.entries(applicationImages)) {
+      env[`${service.toUpperCase()}_IMAGE`] = `${repository}:${imageVersion}`;
+    }
+    configChanged = true;
+  }
+  if (configChanged) await writeFile(configPath, JSON.stringify(env, null, 2));
   const profiles = services.map(s => s === 'mongodb' ? 'mongo' : s).join(',');
+  const composeEnv = { ...process.env, ...env, COMPOSE_PROFILES: profiles };
+  for (const service of Object.keys(applicationImages)) {
+    const key = `${service.toUpperCase()}_IMAGE`;
+    composeEnv[key] = env[key] ?? `${project}-${service}:local`;
+  }
   const compose = (args, options = {}) => processRun('docker', ['compose', '-p', project, '-f', join(directory, 'compose.yaml'), ...args],
-    { ...options, env: { ...process.env, ...env, COMPOSE_PROFILES: profiles } });
+    { ...options, env: composeEnv });
   const exec = (service, args, input) => compose(['exec', '-T', service, ...args], { input, quiet: true, timeout: 120_000 });
   const save = (name, value) => writeFile(join(artifacts, name), typeof value === 'string' ? value : JSON.stringify(value, null, 2));
-  return { name, project, artifacts, db, mq, olap, services, env, compose, exec, save,
+  const localServices = Object.keys(applicationImages).filter(service => !env[`${service.toUpperCase()}_IMAGE`]);
+  const publishedImages = Object.keys(applicationImages).filter(service => env[`${service.toUpperCase()}_IMAGE`]);
+  return { name, project, artifacts, db, mq, olap, services, env, compose, exec, save, localServices, publishedImages,
     api: `http://127.0.0.1:${env.API_PORT}`, els: `http://127.0.0.1:${env.ELS_PORT}`, ui: `http://localhost:${env.UI_PORT}` };
 }
 
@@ -86,11 +119,11 @@ export async function initDbs(stack) {
     try { marker = JSON.parse(await readFile(markerPath, 'utf8')); } catch (e) { if (e.code !== 'ENOENT') throw e; }
     if (marker) {
       if (marker.hash === hash && marker.container === container && marker.status === 'ready') continue;
-      throw new Error(`${service} init state or scripts changed. Use npm run down -- --scenario ${stack.name}, then init_dbs. Initialization is never replayed over an existing database.`);
+      throw new Error(`${service} init state or scripts changed. Use npm run down -- --stack ${stack.name}, then up. Initialization is never replayed over an existing database.`);
     }
     await stack.save(`${service}-init.json`, { hash, container, status: 'initializing' });
     for (const script of scripts) {
-      console.log(`[init_dbs] ${service}: ${script.name}`);
+      console.log(`[up:init] ${service}: ${script.name}`);
       let output;
       if (service === 'postgres') output = await stack.exec(service, ['psql', '-X', '-v', 'ON_ERROR_STOP=1', '-U', 'postgres', '-d', script.name === 'v0.0.0.sql' ? 'postgres' : 'featbit'], script.text);
       else if (service === 'mongodb') {
@@ -112,6 +145,15 @@ export async function waitFor(label, fn, timeout = 90_000) {
     await new Promise(resolve => setTimeout(resolve, 1000));
   }
   throw new Error(`${label} timed out: ${last?.message}`);
+}
+
+export async function workspaceId(stack) {
+  if (stack.db === 'Postgres') {
+    return stack.exec('postgres', ['psql', '-X', '-v', 'ON_ERROR_STOP=1', '-U', 'postgres', '-d', 'featbit', '-At', '-c',
+      'SELECT id FROM workspaces ORDER BY created_at LIMIT 1']);
+  }
+  return stack.exec('mongodb', ['mongosh', '--quiet', '-u', 'admin', '-p', 'local-stack-only', '--authenticationDatabase', 'admin', '--eval',
+    'print(db.getSiblingDB("featbit").Workspaces.findOne()._id.toUUID().toString().match(/[0-9a-f]{8}-[0-9a-f-]{27}/i)[0])']);
 }
 
 export async function ready(stack) {

@@ -4,9 +4,8 @@
   "type": "module",
   "engines": { "node": ">=22" },
   "scripts": {
-    "init_dbs": "node cli.mjs init_dbs",
     "up": "node cli.mjs up",
-    "test:track": "node cli.mjs track",
+    "test": "node cli.mjs test",
     "logs": "node cli.mjs logs",
     "down": "node cli.mjs down"
   }
