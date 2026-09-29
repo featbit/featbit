@@ -30,6 +30,9 @@ export async function sdkFixture(stack, kind, run) {
             `${label}: ${role} variation ID`);
           assert.equal(actual[role].kind, value === 'control' ? 'Fallthrough' : 'RuleMatch',
             `${label}: ${role} evaluation reason`);
+        } else {
+          assert.equal(actual[role].reason, value === 'control' ? 'default' : 'SDK live update',
+            `${label}: ${role} evaluation reason`);
         }
       }
       evidence.steps.push({ label, at: new Date().toISOString(), actual });

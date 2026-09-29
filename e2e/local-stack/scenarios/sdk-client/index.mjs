@@ -47,8 +47,11 @@ export async function testClientSdk(stack) {
         const result = {};
         for (const [role, { page, errors }] of Object.entries(sessions)) {
           assert.deepEqual(errors, [], `${role}: browser errors`);
-          result[role] = { value: await page.evaluate(key => window.__sdk.variation(key, 'missing'), flagKey) };
+          result[role] = await page.evaluate(key => window.__sdk.stringVariationDetail(key, 'missing'), flagKey);
           assert.notEqual(result[role].value, 'missing', `${role}: fallback returned`);
+          assert.equal(result[role].flagKey, flagKey, `${role}: evaluated flag key`);
+          assert.equal(result[role].kind, 'Match', `${role}: evaluation kind`);
+          assert.ok(result[role].reason, `${role}: evaluation reason missing`);
         }
         return result;
       });
