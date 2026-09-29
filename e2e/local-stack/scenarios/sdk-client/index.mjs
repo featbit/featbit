@@ -5,8 +5,8 @@ import { chromium } from '@playwright/test';
 import { sdkFixture } from '../shared/sdk-fixture.mjs';
 
 const require = createRequire(import.meta.url);
-const sdkScript = join(dirname(require.resolve('featbit-js-client-sdk/package.json')),
-  'umd', 'featbit-js-client-sdk.js');
+const sdkScript = join(dirname(require.resolve('@featbit/js-client-sdk')),
+  '..', 'umd', 'featbit-js-client-sdk.js');
 
 export async function testClientSdk(stack) {
   await sdkFixture(stack, 'client', async ({ flagKey, users, secrets }, verify) => {
@@ -25,10 +25,19 @@ export async function testClientSdk(stack) {
         await page.goto(`${stack.ui}/__sdk_live_probe__`);
         await page.addScriptTag({ path: sdkScript });
         await page.evaluate(async ({ api, secret, user }) => {
-          window.__sdk = window.fbClient;
-          await window.__sdk.init({ api, secret, user });
+          const sdkUser = new window.UserBuilder(user.keyId)
+            .name(user.name)
+            .custom('role', user.customizedProperties.find(x => x.name === 'role').value)
+            .build();
+          window.__sdk = new window.FbClientBuilder()
+            .sdkKey(secret)
+            .streamingUri(api.replace(/^http/, 'ws'))
+            .eventsUri(api)
+            .user(sdkUser)
+            .disableEvents(true)
+            .build();
           await Promise.race([
-            window.__sdk.waitUntilReady(),
+            window.__sdk.waitForInitialization(),
             new Promise((_, reject) => setTimeout(() => reject(new Error('Client SDK ready timed out')), 30_000)),
           ]);
         }, { api: stack.els, secret: secrets.client, user: users[index] });
@@ -44,6 +53,7 @@ export async function testClientSdk(stack) {
         return result;
       });
     } finally {
+      await Promise.all(Object.values(sessions).map(({ page }) => page.evaluate(() => window.__sdk.close()).catch(() => {})));
       await Promise.all(Object.values(sessions).map(({ context }) => context.close()));
       await browser.close();
     }
