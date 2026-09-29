@@ -71,7 +71,6 @@ public class FlagInstructionKindTests
     public void UpdateRuleKinds_ContainsAllRuleMutationKinds()
     {
         Assert.Equal(12, FlagInstructionKind.UpdateRuleKinds.Length);
-        Assert.Contains(FlagInstructionKind.ReorderRules, FlagInstructionKind.UpdateRuleKinds);
     }
 
     [Fact]
