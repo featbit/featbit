@@ -15,12 +15,9 @@ namespace Domain.SemanticPatch;
 /// <param name="Current">Order the draft wants, including rules it adds; it is the reorder target.</param>
 public record RuleOrder(string[] Previous, string[] Current);
 
-public class RuleOrderConflictException()
-    : InvalidOperationException("The targeting rule order has changed since this draft was created.");
-
 public class ReorderRulesInstruction(RuleOrder value) : FlagInstruction(FlagInstructionKind.ReorderRules, value)
 {
-    public void EnsureCompatible(FeatureFlag flag)
+    public override void EnsureNoConflict(FeatureFlag flag)
     {
         var draftRuleOrder = (RuleOrder)Value;
 
@@ -39,13 +36,14 @@ public class ReorderRulesInstruction(RuleOrder value) : FlagInstruction(FlagInst
 
         if (!matchesBaseline && !alreadyInDesiredOrder)
         {
-            throw new RuleOrderConflictException();
+            throw new FlagInstructionConflictException(
+                Kind, "The targeting rule order has changed since this draft was created.");
         }
     }
 
     public override void Apply(FeatureFlag flag)
     {
-        EnsureCompatible(flag);
+        EnsureNoConflict(flag);
 
         var draftRuleOrder = (RuleOrder)Value;
 

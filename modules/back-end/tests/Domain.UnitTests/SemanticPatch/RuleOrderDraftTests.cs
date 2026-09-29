@@ -63,7 +63,8 @@ public class RuleOrderDraftTests
         var draft = new FlagDraft(Guid.NewGuid(), flag.Id, new DataChange(flag).To(desired), Guid.NewGuid());
         flag.Rules = [flag.Rules.ElementAt(1), flag.Rules.First(), flag.Rules.Last()];
         var before = JsonSerializer.Serialize(flag);
-        Assert.Throws<RuleOrderConflictException>(() => flag.ApplyDraft(draft));
+        var exception = Assert.Throws<FlagInstructionConflictException>(() => flag.ApplyDraft(draft));
+        Assert.Equal(FlagInstructionKind.ReorderRules, exception.InstructionKind);
         Assert.Equal(before, JsonSerializer.Serialize(flag));
     }
 
@@ -116,7 +117,8 @@ public class RuleOrderDraftTests
 
         var conflicting = original.Clone();
         conflicting.Rules = [conflicting.Rules.ElementAt(1), conflicting.Rules.First(), conflicting.Rules.Last()];
-        Assert.Throws<RuleOrderConflictException>(() => reorder.Apply(conflicting));
+        var exception = Assert.Throws<FlagInstructionConflictException>(() => reorder.Apply(conflicting));
+        Assert.Equal(FlagInstructionKind.ReorderRules, exception.InstructionKind);
 
         original.Rules = original.Rules.Reverse().ToList();
         foreach (var instruction in instructions) instruction.Apply(original);

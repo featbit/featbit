@@ -327,6 +327,13 @@ public class FeatureFlag : FullAuditedEntity
         var dataChange = new DataChange(this);
 
         var instructions = draft.GetInstructions().ToArray();
+
+        // Detect conflicts before any draft instruction mutates the flag.
+        foreach (var instruction in instructions)
+        {
+            instruction.EnsureNoConflict(this);
+        }
+
         foreach (var instruction in instructions)
         {
             instruction.Apply(this);
