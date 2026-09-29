@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
-import { waitFor, logs, workspaceId } from '../stack.mjs';
+import { waitFor, logs, workspaceId } from '../../stack.mjs';
 
 async function events(stack, envId, runId, kind) {
   assert.match(envId, /^[0-9a-f-]{36}$/i);

@@ -2,11 +2,17 @@
   "name": "featbit-local-stack",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "up": "node cli.mjs up",
     "test": "node cli.mjs test",
     "logs": "node cli.mjs logs",
     "down": "node cli.mjs down"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1",
+    "featbit-js-client-sdk": "1.1.0"
   }
 }

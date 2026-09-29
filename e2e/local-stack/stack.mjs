@@ -7,7 +7,7 @@ import { join } from 'node:path';
 
 export const directory = fileURLToPath(new URL('./', import.meta.url));
 const root = fileURLToPath(new URL('../../', import.meta.url));
-export const scenarios = {
+export const stacks = {
   postgres: ['Postgres', 'Postgres', 'None', 'Postgres', ['postgres']],
   'postgres-redis': ['Postgres', 'Redis', 'Redis', 'Postgres', ['postgres', 'redis']],
   'mongo-redis': ['MongoDb', 'Redis', 'Redis', 'MongoDb', ['mongodb', 'redis']],
@@ -47,9 +47,9 @@ export async function processRun(command, args, { input, env, quiet = false, log
 }
 
 export async function openStack(name, { imageVersion } = {}) {
-  if (!Object.hasOwn(scenarios, name)) throw new Error(`Unknown stack ${name}; use ${Object.keys(scenarios).join(', ')}`);
-  const [db, mq, cache, olap, services] = scenarios[name];
-  const index = Object.keys(scenarios).indexOf(name);
+  if (!Object.hasOwn(stacks, name)) throw new Error(`Unknown stack ${name}; use ${Object.keys(stacks).join(', ')}`);
+  const [db, mq, cache, olap, services] = stacks[name];
+  const index = Object.keys(stacks).indexOf(name);
   const project = `featbit-local-${name}`;
   const artifacts = join(directory, '.runs', name);
   await mkdir(artifacts, { recursive: true });

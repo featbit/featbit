@@ -1,8 +1,8 @@
 import { readdir, unlink } from 'node:fs/promises';
 import { join } from 'node:path';
-import { initDbs, logs, matchesImageVersion, openStack, processRun, ready, scenarios } from './stack.mjs';
+import { initDbs, logs, matchesImageVersion, openStack, processRun, ready, stacks } from './stack.mjs';
 import { ensureBusinessData } from './bootstrap/index.mjs';
-import { testTrack } from './scenarios/track.mjs';
+import { scenarios } from './scenarios/index.mjs';
 
 const [command, ...args] = process.argv.slice(2);
 const usage = 'Usage: node cli.mjs up|test|logs|down [--stack NAME | --all] [--scenario NAME] [--image-version TAG] [--no-build]';
@@ -17,13 +17,13 @@ for (let i = 0; i < args.length; i++) {
   else if (arg === '--no-build' && !noBuild) noBuild = true;
   else throw new Error(usage);
 }
-if ((all && stackName) || (command === 'test' ? scenario !== 'track' : scenario !== undefined) ||
+if ((all && stackName) || (command === 'test' ? !Object.hasOwn(scenarios, scenario) : scenario !== undefined) ||
     (noBuild && command !== 'up')) throw new Error(usage);
 if (imageVersion && !['up', 'test'].includes(command)) throw new Error(usage);
 if (imageVersion && !/^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$/.test(imageVersion)) {
   throw new Error(`Invalid image version: ${imageVersion}`);
 }
-const names = all ? Object.keys(scenarios) : [stackName ?? 'postgres'];
+const names = all ? Object.keys(stacks) : [stackName ?? 'postgres'];
 async function startStack(stack) {
   await initDbs(stack);
   if (stack.localServices.length && !noBuild) {
@@ -45,7 +45,7 @@ for (const name of names) {
   console.log(`[${command === 'test' ? `test:${scenario}` : command}] ${name} (${stack.project})`);
   try {
     if (command === 'up') await startStack(stack);
-    if (command === 'test' && scenario === 'track') {
+    if (command === 'test') {
       const requiredServices = [...stack.services, 'api', 'els', 'ui'];
       const running = await stack.compose(['ps', '--status', 'running', '-q', ...requiredServices], { quiet: true });
       const containerIds = running.split(/\r?\n/).filter(Boolean);
@@ -66,7 +66,7 @@ for (const name of names) {
         await ready(stack);
         await ensureBusinessData(stack);
       }
-      await testTrack(stack);
+      await scenarios[scenario](stack);
     }
     if (command === 'logs') await logs(stack);
     if (command === 'down') {
