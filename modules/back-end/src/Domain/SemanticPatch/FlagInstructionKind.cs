@@ -43,6 +43,7 @@ public static class FlagInstructionKind
     public const string RemoveRule = nameof(RemoveRule);
 
     public const string SetRules = nameof(SetRules);
+
     public const string ReorderRules = nameof(ReorderRules);
 
     public const string UpdateRuleName = nameof(UpdateRuleName);
