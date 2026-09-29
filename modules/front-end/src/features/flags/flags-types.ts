@@ -209,7 +209,13 @@ export type FlagComparisonDetail = {
       isDifferent: boolean
     }
     individualTargeting: Array<{ isDifferent: boolean }>
-    targetingRule: Array<{ isDifferent: boolean }>
+    targetingRule: Array<{
+      source: FlagComparisonRule | null
+      target: FlagComparisonRule | null
+      isDifferent: boolean
+      isOrderDifferent?: boolean
+      canAppend?: boolean
+    }>
     defaultRule: { isDifferent: boolean }
     offVariation: { isDifferent: boolean }
   }

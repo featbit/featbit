@@ -31,6 +31,7 @@ public class FlagInstructions : IEnumerable<FlagInstruction>
         { FlagInstructionKind.AddTargetUsers, (kind, value) => new TargetUsersInstruction(kind, value.Deserialize<TargetUser>(ReusableJsonSerializerOptions.Web)) },
         { FlagInstructionKind.RemoveTargetUsers, (kind, value) => new TargetUsersInstruction(kind, value.Deserialize<TargetUser>(ReusableJsonSerializerOptions.Web)) },
         { FlagInstructionKind.SetRules, (_, value) => new SetRulesInstruction(value.Deserialize<ICollection<TargetRule>>(ReusableJsonSerializerOptions.Web)) },
+        { FlagInstructionKind.ReorderRules, (_, value) => new ReorderRulesInstruction(value.Deserialize<RuleOrder>(ReusableJsonSerializerOptions.Web)) },
         { FlagInstructionKind.AddRule, (_, value) => new AddRuleInstruction( value.Deserialize<TargetRule>(ReusableJsonSerializerOptions.Web)) },
         { FlagInstructionKind.RemoveRule, (_, value) => new RemoveRuleInstruction(value.GetString()) },
         { FlagInstructionKind.UpdateRuleName, (_, value) => new RuleNameInstruction(value.Deserialize<RuleName>(ReusableJsonSerializerOptions.Web)) },

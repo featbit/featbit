@@ -42,6 +42,7 @@ const flagTargetingKinds = new Set([
   "AddRule",
   "RemoveRule",
   "SetRules",
+  "ReorderRules",
   "UpdateRuleName",
   "UpdateRuleDispatchKey",
   "AddRuleConditions",

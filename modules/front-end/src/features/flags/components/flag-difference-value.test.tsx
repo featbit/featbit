@@ -24,6 +24,48 @@ function comparisonValue(
 }
 
 describe("FlagDifferenceValue targeting rules", () => {
+  it.each([
+    ["targetingRule", undefined],
+    ["targetingRule", "overwrite"],
+    ["targetingRule", "append"],
+    ["defaultRule", undefined],
+    ["defaultRule", "overwrite"],
+    ["defaultRule", "append"],
+  ] as const)(
+    "shows interval percentages for %s in %s mode",
+    (setting, previewMode) => {
+      const flag = comparisonValue([])
+      flag.variations.push({ id: "third", name: "Third", value: "third" })
+      const variations = [
+        { id: "true", rollout: [0, 0.2] },
+        { id: "false", rollout: [0.2, 0.7] },
+        { id: "third", rollout: [0.7, 1] },
+      ]
+      flag.rules = [{ id: "rule-1", name: "Rule 1", variations }]
+      flag.fallthrough = { variations }
+
+      render(
+        <FlagDifferenceValue
+          flag={previewMode ? comparisonValue([]) : flag}
+          source={previewMode ? flag : undefined}
+          setting={setting}
+          previewMode={previewMode}
+          ruleDiffs={[
+            { source: flag.rules[0], target: null, isDifferent: true },
+          ]}
+        />
+      )
+
+      const testId =
+        setting === "targetingRule"
+          ? "targeting-variation-percentage"
+          : "default-variation-percentage"
+      expect(
+        screen.getAllByTestId(testId).map((element) => element.textContent)
+      ).toEqual(["20%", "50%", "30%"])
+    }
+  )
+
   it("lists individual users and reveals the complete list from +N", async () => {
     const flag = comparisonValue([])
     flag.targetUsers = [
@@ -143,6 +185,43 @@ describe("FlagDifferenceValue targeting rules", () => {
     expect(screen.queryByText("Source users appended")).not.toBeInTheDocument()
   })
 
+  it("does not append rules already present after a different target rule", () => {
+    const source = comparisonValue([
+      { id: "source-1", name: "Rule 1", dispatchKey: "name" },
+      { id: "source-2", name: "Rule 2", dispatchKey: "keyId" },
+    ])
+    const target = comparisonValue([
+      { id: "target-1", name: "Rule 1", dispatchKey: "keyId" },
+      { ...source.rules[1], id: "target-2" },
+      { ...source.rules[0], id: "target-3" },
+    ])
+    render(
+      <FlagDifferenceValue
+        flag={target}
+        source={source}
+        setting="targetingRule"
+        previewMode="append"
+        ruleDiffs={[
+          {
+            source: source.rules[0],
+            target: target.rules[2],
+            isDifferent: false,
+          },
+          {
+            source: source.rules[1],
+            target: target.rules[1],
+            isDifferent: false,
+          },
+          { source: null, target: target.rules[0], isDifferent: true },
+        ]}
+      />
+    )
+
+    expect(screen.queryByText("Source rules appended")).not.toBeInTheDocument()
+    expect(screen.getAllByText("Rule 1", { exact: true })).toHaveLength(2)
+    expect(screen.getAllByText("Rule 2", { exact: true })).toHaveLength(1)
+  })
+
   it("renders the appended targeting-rules preview", () => {
     const target = comparisonValue([])
     const source = comparisonValue([
@@ -160,6 +239,9 @@ describe("FlagDifferenceValue targeting rules", () => {
         source={source}
         setting="targetingRule"
         previewMode="append"
+        ruleDiffs={[
+          { source: source.rules[0], target: null, isDifferent: true },
+        ]}
       />
     )
 
@@ -335,7 +417,7 @@ describe("FlagDifferenceValue targeting rules", () => {
             ],
             variations: [
               { id: "true", rollout: [0, 0.75] },
-              { id: "false", rollout: [0.75, 0.25] },
+              { id: "false", rollout: [0.75, 1] },
             ],
             dispatchKey: "地区",
           },
@@ -369,7 +451,7 @@ describe("FlagDifferenceValue targeting rules", () => {
             conditions: [{ property: "country", op: "equals", value: "US" }],
             variations: [
               { id: "true", rollout: [0, 0.75] },
-              { id: "false", rollout: [0.75, 0.25] },
+              { id: "false", rollout: [0.75, 1] },
             ],
             dispatchKey: "keyId",
           },
@@ -404,7 +486,7 @@ describe("FlagDifferenceValue targeting rules", () => {
     rollout.fallthrough = {
       variations: [
         { id: "true", rollout: [0, 0.75] },
-        { id: "false", rollout: [0.75, 0.25] },
+        { id: "false", rollout: [0.75, 1] },
       ],
       dispatchKey: "country",
     }
@@ -412,6 +494,8 @@ describe("FlagDifferenceValue targeting rules", () => {
 
     expect(screen.getByText("Dispatch by")).toBeVisible()
     expect(screen.getByText("country")).toBeVisible()
+    expect(screen.getByText("75%")).toBeVisible()
+    expect(screen.getByText("25%")).toBeVisible()
     expect(screen.getAllByTestId("default-variation-name")[0]).toHaveClass(
       "font-normal"
     )

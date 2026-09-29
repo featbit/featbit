@@ -3,6 +3,38 @@ import { describe, expect, it, vi } from "vitest"
 import { FlagChangeReviewDialog } from "./flag-change-review-dialog"
 
 describe("FlagChangeReviewDialog save options", () => {
+  it("shows before and after rule order and allows saving an order-only change", () => {
+    const onSave = vi.fn()
+    render(
+      <FlagChangeReviewDialog
+        open
+        flagName="Checkout redesign"
+        changes={[
+          {
+            kind: "order",
+            label: "ruleOrder",
+            action: "updated",
+            previous: "Rule A → Rule B",
+            current: "Rule B → Rule A",
+          },
+        ]}
+        requireComment={false}
+        saving={false}
+        onOpenChange={vi.fn()}
+        onSave={onSave}
+        onSchedule={vi.fn()}
+        onChangeRequest={vi.fn()}
+      />
+    )
+    expect(screen.getByText("Rule order")).toBeVisible()
+    expect(screen.getByText("Rule A → Rule B")).toBeVisible()
+    expect(screen.getByText("Rule B → Rule A")).toBeVisible()
+    const save = screen.getByRole("button", { name: "Save changes" })
+    expect(save).toBeEnabled()
+    fireEvent.click(save)
+    expect(onSave).toHaveBeenCalledWith("")
+  })
+
   it("uses a split save button with only schedule and approval alternatives", async () => {
     const onSave = vi.fn()
     const onSchedule = vi.fn()

@@ -287,6 +287,32 @@ public class FlagComparerTests
         Assert.Contains(result, x => x is RuleNameInstruction);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Compare_ReorderedRules_ProducesReplayableAuditInstruction(bool insertRule)
+    {
+        TargetRule Rule(string id) => new()
+        {
+            Id = id, Name = id, Conditions = [], Variations = [Rollout("v1")]
+        };
+        var original = MakeFlag();
+        original.Rules = [Rule("a"), Rule("b")];
+        var current = MakeFlag();
+        current.Rules = insertRule
+            ? [Rule("c"), Rule("a"), Rule("b")]
+            : [Rule("b"), Rule("a")];
+
+        var instructions = FlagComparer.Compare(new DataChange(original).To(current)).ToArray();
+        var instruction = Assert.Single(instructions.OfType<ReorderRulesInstruction>());
+        Assert.DoesNotContain(instructions, item => item is SetRulesInstruction);
+
+        Assert.Equal(Domain.Policies.Permissions.UpdateFlagTargetingRules, instruction.Permission);
+        foreach (var item in instructions) item.Apply(original);
+        Assert.Equal(current.Rules.Select(rule => rule.Id), original.Rules.Select(rule => rule.Id));
+        Assert.Empty(FlagComparer.Compare(original, current));
+    }
+
     [Fact]
     public void CompareCondition_StringValueChanged_EmitsUpdateConditionInstruction()
     {
