@@ -165,7 +165,7 @@ export function AccountMenu({
             <DropdownMenuItem
               render={
                 <a
-                  href="https://support.featbit.ai"
+                  href="https://www.featbit.co/support"
                   target="_blank"
                   rel="noreferrer"
                 />
