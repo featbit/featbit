@@ -1,4 +1,3 @@
-using Dapper;
 using Domain.EndUsers;
 using Domain.Environments;
 using Domain.Organizations;
@@ -192,10 +191,6 @@ public class EnvironmentService(AppDbContext dbContext, ILogger<EnvironmentServi
 
         // delete end user properties
         await SetOf<EndUserProperty>().Where(x => x.EnvId == id).ExecuteDeleteAsync();
-
-        // delete environment events
-        var stringId = id.ToString();
-        await DbConnection.ExecuteAsync("DELETE FROM events WHERE env_id = @id", new { id = stringId });
     }
 
     public async Task DeleteManyAsync(ICollection<Guid> ids)
@@ -207,10 +202,6 @@ public class EnvironmentService(AppDbContext dbContext, ILogger<EnvironmentServi
 
         // delete end user properties
         await SetOf<EndUserProperty>().Where(x => ids.Contains(x.EnvId)).ExecuteDeleteAsync();
-
-        // delete environment events
-        var stringIds = ids.Select(id => id.ToString()).ToArray();
-        await DbConnection.ExecuteAsync("DELETE FROM events WHERE env_id = ANY(@ids)", new { ids = stringIds });
     }
 
     public async Task<bool> HasKeyBeenUsedAsync(Guid projectId, string key)
