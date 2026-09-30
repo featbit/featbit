@@ -109,7 +109,8 @@ export async function sdkFixture(stack, kind, run) {
       throw error;
     } finally {
       await stack.save(`${runId}.json`, evidence);
-      await logs(stack);
+      try { await logs(stack); }
+      catch (error) { if (evidence.success) throw error; }
     }
   }
   console.log(`[PASS] ${stack.name}: ${kind} SDK initial evaluation, flag update, segment update`);

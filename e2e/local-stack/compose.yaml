@@ -64,7 +64,7 @@ services:
       timeout: 5s
       retries: 60
   api:
-    image: ${API_IMAGE:-${STACK_PROJECT}-api:local}
+    image: ${API_IMAGE:-featbit-local-api:local}
     build:
       context: ../../modules/back-end
       dockerfile: deploy/Dockerfile
@@ -85,7 +85,7 @@ services:
       Jwt__Key: local-stack-only-signing-key-at-least-32-characters
     ports: ['127.0.0.1:${API_PORT}:5000']
   els:
-    image: ${ELS_IMAGE:-${STACK_PROJECT}-els:local}
+    image: ${ELS_IMAGE:-featbit-local-els:local}
     build:
       context: ../../modules/evaluation-server
       dockerfile: deploy/Dockerfile
@@ -94,7 +94,7 @@ services:
       ASPNETCORE_URLS: http://+:5100
     ports: ['127.0.0.1:${ELS_PORT}:5100']
   ui:
-    image: ${UI_IMAGE:-${STACK_PROJECT}-ui:local}
+    image: ${UI_IMAGE:-featbit-local-ui:local}
     build:
       context: ../../modules/front-end
       dockerfile: Dockerfile

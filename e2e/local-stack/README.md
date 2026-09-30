@@ -10,12 +10,16 @@
 
 `test` reuses a running stack or prepares one if needed. Repeated runs reuse existing business data. Runtime files are saved under `.runs/<stack>/`.
 
+All stacks share the same application images: `featbit-local-api:local`, `featbit-local-els:local`, and `featbit-local-ui:local` for local builds, or the configured published version. Stack differences are runtime configuration; containers, networks, and data volumes remain separate. A `test --all` invocation builds local images at most once.
+
 ## CLI commands
 
 Run these commands from this directory. Node.js 22+ and Docker Compose v2 are required.
 
 | Command | Description |
 | --- | --- |
+| `npm run setup -- --stack NAME --image-version TAG` | Save the current stack and published application version. Use `--local` for local builds. |
+| `npm run config` | Show the current configuration. |
 | `npm run up` | Start a stack and initialize its data. |
 | `npm run test -- --scenario NAME` | Run a test scenario, starting the stack if needed. |
 | `npm run logs` | Save service logs to `.runs/<stack>/services.log`. |
@@ -23,11 +27,17 @@ Run these commands from this directory. Node.js 22+ and Docker Compose v2 are re
 
 | Option | Commands | Description |
 | --- | --- | --- |
-| `--stack NAME` | All | Select a stack; defaults to `postgres`. Options: `postgres`, `postgres-redis`, `mongo-redis`, `postgres-kafka-clickhouse`, `mongo-kafka-clickhouse`. |
-| `--all` | All | Run the command for every stack. Cannot be combined with `--stack`. |
+| `--stack NAME` | `setup` | Select a stack; defaults to `postgres`. Options: `postgres`, `postgres-redis`, `mongo-redis`, `postgres-kafka-clickhouse`, `mongo-kafka-clickhouse`. |
+| `--all` | `test` | Run against all five stacks using the configured application version, without changing the selected stack. |
+| `--one-time` | `test` | After success or failure, run `down` for the tested stack, including its test data volumes. Preserve logs, results, and setup configuration. With `--all`, clean up each stack before moving to the next. |
 | `--scenario NAME` | `test` | Required scenario name: `track`, `sdk-server`, or `sdk-client`. |
-| `--image-version TAG` | `up`, `test` | Use published API, ELS, and UI images with this tag. By default, application images are built locally. |
+| `--image-version TAG` | `setup` | Use published API, ELS, and UI images with this tag. By default, application images are built locally. |
+| `--local` | `setup` | Select local application builds. Cannot be combined with `--image-version`. |
 | `--no-build` | `up` | Reuse existing local application images without building them. |
+
+`setup` only saves configuration in the Git-ignored `.runs/config.json`; it does not start or stop containers. Omitted fields retain their current values. Before the first setup, commands default to `postgres` with local application builds. `config` (or `setup` without options) displays the current values and identifies defaults when no configuration has been saved.
+
+`up`, `test`, `logs`, and `down` use the saved configuration. Application image environment variables (`FEATBIT_VERSION`, `API_IMAGE`, `ELS_IMAGE`, `UI_IMAGE`) do not override it. Switching stacks leaves the previous stack running. To remove it, select it with `setup` and run `down`. `down` preserves the setup configuration.
 
 ## Test scenarios
 
@@ -46,15 +56,19 @@ npm run test -- --scenario sdk-server
 ## CLI examples
 
 ```powershell
-# Start the PostgreSQL stack
-npm run up -- --stack postgres
+# Select a stack and published application version, then start it
+npm run setup -- --stack postgres --image-version 6.0.0-preview
+npm run config
+npm run up
 
-# Save logs from the MongoDB stack
-npm run logs -- --stack mongo-redis
+# Switch application images back to local builds, keeping the selected stack
+npm run setup -- --local
+npm run up
 
-# Remove one stack and its test data volumes
-npm run down -- --stack postgres
+# Select another stack and collect its logs
+npm run setup -- --stack mongo-redis
+npm run logs
 
-# Remove all stacks and their test data volumes
-npm run down -- --all
+# Remove the selected stack and its test data volumes
+npm run down
 ```

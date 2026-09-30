@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
-import { createInterface } from 'node:readline';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 import { processRun } from '../../stack.mjs';
 import { sdkFixture } from '../shared/sdk-fixture.mjs';
+import { createProbeReader } from './probe-reader.mjs';
 
 const project = fileURLToPath(new URL('./ServerSdkProbe.csproj', import.meta.url));
 const assembly = join(fileURLToPath(new URL('./', import.meta.url)),
@@ -19,20 +19,14 @@ export async function testServerSdk(stack) {
         FB_FLAG_KEY: flagKey, FB_USER_PREFIX: runId },
       stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true,
     });
-    const lines = createInterface({ input: child.stdout })[Symbol.asyncIterator]();
     let stderr = '';
+    const reader = createProbeReader(child, () => stderr);
     child.stdin.on('error', () => {});
     child.stderr.on('data', chunk => { stderr += chunk; });
     try {
       await verify(async () => {
-        child.stdin.write('evaluate\n');
-        let timer;
-        const reply = await Promise.race([
-          lines.next(),
-          new Promise((_, reject) => { timer = setTimeout(() => reject(new Error('Server SDK probe timed out')), 10_000); }),
-        ]).finally(() => clearTimeout(timer));
-        assert.ok(!reply.done, `Server SDK probe exited: ${stderr}`);
-        const state = JSON.parse(reply.value);
+        const reply = await reader.read();
+        const state = JSON.parse(reply);
         assert.equal(state.initialized, true, 'Server SDK not initialized');
         for (const user of ['tester', 'guest']) {
           assert.notEqual(state.result[user].value, 'missing', `${user}: fallback returned`);
@@ -42,12 +36,15 @@ export async function testServerSdk(stack) {
         return { tester: state.result.tester, guest: state.result.guest };
       });
     } finally {
-      child.stdin.end('close\n');
-      let timer;
-      await Promise.race([
-        new Promise(resolve => child.once('exit', resolve)),
-        new Promise(resolve => { timer = setTimeout(() => { child.kill(); resolve(); }, 5_000); }),
-      ]).finally(() => clearTimeout(timer));
+      if (child.exitCode === null) {
+        child.stdin.end('close\n');
+        let timer;
+        await Promise.race([
+          new Promise(resolve => child.once('exit', resolve)),
+          new Promise(resolve => { timer = setTimeout(() => { child.kill(); resolve(); }, 5_000); }),
+        ]).finally(() => clearTimeout(timer));
+      }
+      reader.close();
     }
   });
 }

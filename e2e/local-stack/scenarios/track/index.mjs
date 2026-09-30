@@ -116,6 +116,7 @@ export async function testTrack(stack) {
     throw error;
   } finally {
     await stack.save(`${runId}.json`, evidence);
-    await logs(stack);
+    try { await logs(stack); }
+    catch (error) { if (evidence.success) throw error; }
   }
 }

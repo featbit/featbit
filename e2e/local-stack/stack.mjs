@@ -19,28 +19,36 @@ const applicationImages = {
   els: 'featbit/featbit-evaluation-server',
   ui: 'featbit/featbit-ui',
 };
-
-export function matchesImageVersion(stack, version) {
-  return Object.entries(applicationImages).every(([service, repository]) =>
-    stack.env[`${service.toUpperCase()}_IMAGE`] === `${repository}:${version}`);
-}
+const infrastructureImageKeys = ['POSTGRES_IMAGE', 'MONGO_IMAGE', 'REDIS_IMAGE', 'KAFKA_IMAGE', 'CLICKHOUSE_IMAGE'];
 
 export async function processRun(command, args, { input, env, quiet = false, logPath, timeout = 600_000 } = {}) {
   return new Promise((resolve, reject) => {
     const log = logPath ? createWriteStream(logPath) : null;
-    log?.on('error', reject);
     const child = spawn(command, args, { cwd: directory, env: env ?? process.env, shell: false,
       windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'] });
     let stdout = '', stderr = '';
+    const outputLimit = 64 * 1024;
+    const capture = (current, value) => log ? (current + value).slice(-outputLimit) : current + value;
+    const streamOutput = (source, destination, update) => source.on('data', value => {
+      update(value);
+      if (log && !log.write(value)) {
+        source.pause();
+        log.once('drain', () => source.resume());
+      }
+      if (!quiet) destination.write(value);
+    });
     const timer = setTimeout(() => { child.kill(); reject(new Error(`${command} ${args[0]} timed out`)); }, timeout);
-    child.stdout.on('data', value => { stdout += value; log?.write(value); if (!quiet) process.stdout.write(value); });
-    child.stderr.on('data', value => { stderr += value; log?.write(value); if (!quiet) process.stderr.write(value); });
+    log?.on('error', error => { child.kill(); reject(error); });
+    streamOutput(child.stdout, process.stdout, value => { stdout = capture(stdout, value); });
+    streamOutput(child.stderr, process.stderr, value => { stderr = capture(stderr, value); });
     child.stdin.on('error', () => {});
     child.on('error', error => { clearTimeout(timer); log?.end(); reject(error); });
     child.on('close', code => {
       clearTimeout(timer);
-      log?.end();
-      code === 0 ? resolve(stdout.trim()) : reject(new Error(`${command} ${args[0]} exited ${code}\n${stderr}\n${stdout}`));
+      const finish = () => code === 0 ? resolve(stdout.trim())
+        : reject(new Error(`${command} ${args[0]} exited ${code}\n${stderr}\n${stdout}`));
+      if (log) log.end(finish);
+      else finish();
     });
     child.stdin.end(input);
   });
@@ -62,39 +70,45 @@ export async function openStack(name, { imageVersion } = {}) {
     env = { STACK_PROJECT: project, DB_PROVIDER: db, MQ_PROVIDER: mq, CACHE_PROVIDER: cache,
       OLAP_PROVIDER: olap, API_PORT: String(15000 + index * 10), ELS_PORT: String(15001 + index * 10),
       UI_PORT: String(15002 + index * 10) };
-    for (const key of ['API_PORT', 'ELS_PORT', 'UI_PORT', 'POSTGRES_IMAGE', 'MONGO_IMAGE', 'REDIS_IMAGE', 'KAFKA_IMAGE', 'CLICKHOUSE_IMAGE']) {
-      if (process.env[key]) env[key] = process.env[key];
-    }
-    if (process.env.FEATBIT_VERSION) {
-      for (const [service, repository] of Object.entries(applicationImages)) {
-        env[`${service.toUpperCase()}_IMAGE`] = `${repository}:${process.env.FEATBIT_VERSION}`;
-      }
-    }
-    for (const service of Object.keys(applicationImages)) {
-      const key = `${service.toUpperCase()}_IMAGE`;
+    for (const key of ['API_PORT', 'ELS_PORT', 'UI_PORT', ...infrastructureImageKeys]) {
       if (process.env[key]) env[key] = process.env[key];
     }
   }
-  if (imageVersion) {
-    for (const [service, repository] of Object.entries(applicationImages)) {
-      env[`${service.toUpperCase()}_IMAGE`] = `${repository}:${imageVersion}`;
+  for (const key of infrastructureImageKeys) {
+    if (process.env[key] && process.env[key] !== env[key]) {
+      throw new Error(`${key} differs from this stack's saved image setting. Remove the override to reuse the existing data volumes.`);
     }
-    configChanged = true;
   }
-  if (configChanged) await writeFile(configPath, JSON.stringify(env, null, 2));
-  const profiles = services.map(s => s === 'mongodb' ? 'mongo' : s).join(',');
-  const composeEnv = { ...process.env, ...env, COMPOSE_PROFILES: profiles };
+  // Older environment files may contain application images from --image-version.
+  // Application selection now comes from setup, separate from retained stack state.
   for (const service of Object.keys(applicationImages)) {
     const key = `${service.toUpperCase()}_IMAGE`;
-    composeEnv[key] = env[key] ?? `${project}-${service}:local`;
+    if (Object.hasOwn(env, key)) {
+      delete env[key];
+      configChanged = true;
+    }
+  }
+  if (configChanged) await writeFile(configPath, JSON.stringify(env, null, 2));
+  const runtimeEnv = { ...env };
+  for (const [service, repository] of Object.entries(applicationImages)) {
+    const key = `${service.toUpperCase()}_IMAGE`;
+    const selected = imageVersion ? `${repository}:${imageVersion}` : undefined;
+    if (selected) runtimeEnv[key] = selected;
+  }
+  const profiles = services.map(s => s === 'mongodb' ? 'mongo' : s).join(',');
+  const composeEnv = { ...process.env, ...runtimeEnv, COMPOSE_PROFILES: profiles };
+  for (const service of Object.keys(applicationImages)) {
+    const key = `${service.toUpperCase()}_IMAGE`;
+    composeEnv[key] = runtimeEnv[key] ?? `featbit-local-${service}:local`;
   }
   const compose = (args, options = {}) => processRun('docker', ['compose', '-p', project, '-f', join(directory, 'compose.yaml'), ...args],
     { ...options, env: composeEnv });
   const exec = (service, args, input) => compose(['exec', '-T', service, ...args], { input, quiet: true, timeout: 120_000 });
   const save = (name, value) => writeFile(join(artifacts, name), typeof value === 'string' ? value : JSON.stringify(value, null, 2));
-  const localServices = Object.keys(applicationImages).filter(service => !env[`${service.toUpperCase()}_IMAGE`]);
-  const publishedImages = Object.keys(applicationImages).filter(service => env[`${service.toUpperCase()}_IMAGE`]);
-  return { name, project, artifacts, db, mq, olap, services, env, compose, exec, save, localServices, publishedImages,
+  const localServices = Object.keys(applicationImages).filter(service => !runtimeEnv[`${service.toUpperCase()}_IMAGE`]);
+  const publishedImages = Object.keys(applicationImages).filter(service => runtimeEnv[`${service.toUpperCase()}_IMAGE`]);
+  return { name, project, artifacts, db, mq, olap, services, env: runtimeEnv, compose, exec, save, localServices, publishedImages,
+    expectedApplicationImages: Object.keys(applicationImages).map(service => composeEnv[`${service.toUpperCase()}_IMAGE`]),
     api: `http://127.0.0.1:${env.API_PORT}`, els: `http://127.0.0.1:${env.ELS_PORT}`, ui: `http://localhost:${env.UI_PORT}` };
 }
 
@@ -119,7 +133,7 @@ export async function initDbs(stack) {
     try { marker = JSON.parse(await readFile(markerPath, 'utf8')); } catch (e) { if (e.code !== 'ENOENT') throw e; }
     if (marker) {
       if (marker.hash === hash && marker.container === container && marker.status === 'ready') continue;
-      throw new Error(`${service} init state or scripts changed. Use npm run down -- --stack ${stack.name}, then up. Initialization is never replayed over an existing database.`);
+      throw new Error(`${service} init state or scripts changed. Select ${stack.name} with setup, then run down and up. Initialization is never replayed over an existing database.`);
     }
     await stack.save(`${service}-init.json`, { hash, container, status: 'initializing' });
     for (const script of scripts) {
@@ -141,7 +155,10 @@ export async function waitFor(label, fn, timeout = 90_000) {
   const deadline = Date.now() + timeout;
   let last;
   while (Date.now() < deadline) {
-    try { return await fn(); } catch (error) { last = error; }
+    try { return await fn(); } catch (error) {
+      if (error?.retryable === false) throw error;
+      last = error;
+    }
     await new Promise(resolve => setTimeout(resolve, 1000));
   }
   throw new Error(`${label} timed out: ${last?.message}`);
@@ -168,5 +185,5 @@ export async function ready(stack) {
 }
 
 export async function logs(stack) {
-  await stack.save('services.log', await stack.compose(['logs', '--no-color'], { quiet: true }));
+  await stack.compose(['logs', '--no-color'], { quiet: true, logPath: join(stack.artifacts, 'services.log') });
 }
