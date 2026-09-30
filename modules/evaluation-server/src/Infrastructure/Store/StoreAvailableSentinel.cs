@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using Domain.Observability;
 using Domain.Shared;
 using Infrastructure.Utils;
 using Microsoft.Extensions.DependencyInjection;
@@ -6,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Store;
 
-public class StoreAvailableSentinel : IHostedService
+public partial class StoreAvailableSentinel : IHostedService
 {
     private readonly PeriodicTimer _periodicTimer = new(TimeSpan.FromSeconds(6));
     private readonly TimeSpan _checkAvailableTimeout = TimeSpan.FromSeconds(2);
@@ -29,8 +31,22 @@ public class StoreAvailableSentinel : IHostedService
         // we assume that the first store (the highest priority store) is available by default
         StoreAvailabilityListener.Instance.SetAvailable(_dbStores[0].Name);
 
+        // M4: failover was previously invisible — a successful switch was not logged at all, so a
+        // pod silently serving from its fallback looked identical to a healthy one.
+        StoreMetrics.Current.SetAvailableStoreProvider(
+            () => StoreAvailabilityListener.Instance.AvailableStore);
+
+        // The listener is a process-wide singleton and its event is never unsubscribed, so a
+        // plain += would accumulate one handler per constructed sentinel and multiply the failover
+        // count. Removing first makes the subscription idempotent.
+        StoreAvailabilityListener.Instance.OnStoreAvailabilityChanged -= OnStoreAvailabilityChanged;
+        StoreAvailabilityListener.Instance.OnStoreAvailabilityChanged += OnStoreAvailabilityChanged;
+
         _logger = logger;
     }
+
+    private static void OnStoreAvailabilityChanged(string previous, string current)
+        => StoreMetrics.Current.RecordFailover(current);
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
@@ -41,10 +57,7 @@ public class StoreAvailableSentinel : IHostedService
         // start checking store availability loop
         _ = StartCheckLoop(cancellationToken);
 
-        _logger.LogInformation(
-            "Store availability sentinel started. Default available store: {Store}.",
-            StoreAvailabilityListener.Instance.AvailableStore
-        );
+        Log.SentinelStarted(_logger, StoreAvailabilityListener.Instance.AvailableStore);
 
         return Task.CompletedTask;
     }
@@ -64,7 +77,7 @@ public class StoreAvailableSentinel : IHostedService
             catch (Exception ex)
             {
                 // log exception
-                _logger.LogError(ex, "Error occurred while checking store availability");
+                Log.AvailabilityCheckFailed(_logger, ex);
             }
 
             await _periodicTimer.WaitForNextTickAsync(cancellationToken);
@@ -75,6 +88,8 @@ public class StoreAvailableSentinel : IHostedService
     {
         foreach (var store in _dbStores)
         {
+            var startedAt = Stopwatch.GetTimestamp();
+
             var checkAvailableTask = store.IsAvailableAsync();
             var checkAvailableTimeoutTask = Task.Delay(timeout, cancellationToken);
 
@@ -82,6 +97,12 @@ public class StoreAvailableSentinel : IHostedService
             if (completedTask == checkAvailableTask)
             {
                 var isAvailable = await checkAvailableTask;
+
+                StoreMetrics.Current.RecordAvailabilityCheck(
+                    store.Name,
+                    isAvailable ? Outcomes.Success : Outcomes.Failure,
+                    Stopwatch.GetElapsedTime(startedAt));
+
                 if (isAvailable)
                 {
                     StoreAvailabilityListener.Instance.SetAvailable(store.Name);
@@ -90,19 +111,24 @@ public class StoreAvailableSentinel : IHostedService
             }
             else
             {
-                _logger.LogDebug("Store availability check timed out for {Store}.", store.Name);
+                StoreMetrics.Current.RecordAvailabilityCheck(
+                    store.Name, Outcomes.Timeout, Stopwatch.GetElapsedTime(startedAt));
+
+                Log.AvailabilityCheckTimedOut(_logger, store.Name);
                 checkAvailableTask.Ignore();
             }
         }
 
-        _logger.LogError("No available store can be used.");
+        StoreMetrics.Current.RecordNoStoreAvailable();
+
+        Log.NoStoreAvailable(_logger);
     }
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
         _periodicTimer.Dispose();
 
-        _logger.LogInformation("Store availability sentinel stopped.");
+        Log.SentinelStopped(_logger);
 
         return Task.CompletedTask;
     }

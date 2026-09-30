@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <!--
+      Test-support only: a MeterListener harness shared by every observability test project across
+      the three modules. Deliberately BCL-only — it takes no dependency on xUnit, so it stays usable
+      from any test framework and adds nothing to a restore graph beyond the framework itself.
+
+      This project is never referenced by a runtime project and never ends up in a container image.
+    -->
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>FeatBit.Observability.TestKit</RootNamespace>
+        <AssemblyName>FeatBit.Observability.TestKit</AssemblyName>
+
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+</Project>

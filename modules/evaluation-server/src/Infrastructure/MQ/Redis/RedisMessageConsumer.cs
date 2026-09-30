@@ -1,4 +1,5 @@
 using Domain.Messages;
+using Domain.Observability;
 using Infrastructure.Caches.Redis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -13,6 +14,7 @@ public partial class RedisMessageConsumer : BackgroundService
     private readonly Dictionary<string, IMessageConsumer> _handlers;
     private readonly ILogger<RedisMessageConsumer> _logger;
     private readonly bool _useControlPlane;
+    private readonly WorkerObservability _observability = ServiceMeter.ForWorker(WorkerNames.RedisConsumer);
 
     public RedisMessageConsumer(
         IRedisClient redisClient,
@@ -35,10 +37,7 @@ public partial class RedisMessageConsumer : BackgroundService
         var queue = await subscriber.SubscribeAsync(channel);
 
         // process messages sequentially. ref: https://stackexchange.github.io/StackExchange.Redis/PubSubOrder.html
-        _logger.LogInformation(
-            "Start consuming flag & segment change messages through channel {Channel}.",
-            channel.ToString()
-        );
+        Log.StartConsumingDataChange(_logger, channel.ToString());
         queue.OnMessage(HandleMessageAsync);
 
         if (_useControlPlane)
@@ -46,18 +45,23 @@ public partial class RedisMessageConsumer : BackgroundService
             var controlPlaneCommandChannel = RedisChannel.Literal(Topics.ControlPlaneCommand);
             var controlPlaneCommandQueue = await subscriber.SubscribeAsync(controlPlaneCommandChannel);
 
-            _logger.LogInformation(
-                "Start consuming control plane command messages through channel {ControlPlaneChannel}.",
-                controlPlaneCommandChannel.ToString()
-            );
+            Log.StartConsumingControlPlaneCommand(_logger, controlPlaneCommandChannel.ToString());
             controlPlaneCommandQueue.OnMessage(HandleMessageAsync);
         }
+
+        // This consumer is push-based, so unlike the polling consumers there is no loop to
+        // heartbeat from. "Running" therefore means "subscribed", and the heartbeat advances per
+        // delivered message. A silent Redis and a healthy-but-idle Redis look the same here; that
+        // is a property of pub/sub, and pretending otherwise would be worse than admitting it.
+        _observability.Started();
 
         return;
 
         async Task HandleMessageAsync(ChannelMessage channelMessage)
         {
             var message = string.Empty;
+
+            _observability.Heartbeat();
 
             try
             {
@@ -70,6 +74,9 @@ public partial class RedisMessageConsumer : BackgroundService
                 var topic = theChannel.ToString();
                 if (!_handlers.TryGetValue(topic, out var handler))
                 {
+                    // M2: a topic nothing here handles is silent data loss; counting it makes it
+                    // alertable rather than a log line nobody reads.
+                    MessagingMetrics.Current.RecordUnroutable(MessagingSystems.Redis, topic);
                     Log.NoHandlerForTopic(_logger, topic);
                     return;
                 }
@@ -81,8 +88,22 @@ public partial class RedisMessageConsumer : BackgroundService
                 }
 
                 message = value.ToString();
+
+                // Continue the producer's trace when the payload carried one; otherwise start the
+                // root activity that lets logs from this handler be correlated.
+                using var activity = IngressActivity.StartConsume(
+                    topic,
+                    MessagingSystems.Redis,
+                    JsonTraceContext.Extract(message));
+
+                // M2: defaults to failure, so an exception escaping HandleAsync is recorded even
+                // though it is caught below.
+                using var consume = MessagingMetrics.Current.BeginConsume(MessagingSystems.Redis, topic);
+
                 await handler.HandleAsync(message, stoppingToken);
 
+                consume.Succeeded();
+                _observability.Success();
                 Log.MessageHandled(_logger, message);
             }
             catch (OperationCanceledException)
@@ -91,8 +112,15 @@ public partial class RedisMessageConsumer : BackgroundService
             }
             catch (Exception ex)
             {
+                _observability.LoopFailed(ex);
                 Log.ErrorConsumeMessage(_logger, message, ex);
             }
         }
+    }
+
+    public override async Task StopAsync(CancellationToken cancellationToken)
+    {
+        _observability.Stopped();
+        await base.StopAsync(cancellationToken);
     }
 }

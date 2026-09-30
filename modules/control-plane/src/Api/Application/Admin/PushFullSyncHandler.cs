@@ -6,7 +6,7 @@ namespace Api.Application.Admin;
 
 public class PushFullSync : IRequest<bool>;
 
-public class PushFullSyncHandler(IMessageProducer messageProducer, ILogger<PushFullSyncHandler> logger) : IRequestHandler<PushFullSync, bool>
+public partial class PushFullSyncHandler(IMessageProducer messageProducer, ILogger<PushFullSyncHandler> logger) : IRequestHandler<PushFullSync, bool>
 {
     private static readonly object EmptyMessage = new { };
 
@@ -19,7 +19,7 @@ public class PushFullSyncHandler(IMessageProducer messageProducer, ILogger<PushF
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Error occurred while handling PushFullSync request.");
+            Log.ErrorPushFullSync(logger, e);
             return false;
         }
     }

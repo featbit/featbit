@@ -16,6 +16,7 @@ public static class ConfigureSerilog
         lc
             .ReadFrom.Configuration(configuration, readerOptions)
             .Enrich.FromLogContext()
+            .Enrich.With<TraceContextEnricher>()
             .Enrich.WithClientIp("X-Forwarded-For")
             .Enrich.WithRequestHeader("User-Agent");
 
@@ -37,7 +38,11 @@ public static class ConfigureSerilog
 
                 options.ResourceAttributes = new Dictionary<string, object>
                 {
-                    ["service.name"] = "featbit-api"
+                    // Honor OTEL_SERVICE_NAME so logs carry the same service.name that the .NET
+                    // auto-instrumentation stamps on metrics and traces. Hardcoding it meant that
+                    // renaming the service split its signals in two on the backend.
+                    ["service.name"] =
+                        Environment.GetEnvironmentVariable("OTEL_SERVICE_NAME") ?? "featbit-api"
                 };
             });
         }

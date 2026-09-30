@@ -1,4 +1,10 @@
 <Solution>
+  <Folder Name="/shared/">
+    <Project Path="../shared/Observability/Observability.csproj" />
+    <Project Path="../shared/Observability.AspNetCore/Observability.AspNetCore.csproj" />
+    <Project Path="../shared/Observability.TestKit/Observability.TestKit.csproj" />
+    <Project Path="../shared/Observability.Tests/Observability.Tests.csproj" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="../back-end/src/Application/Application.csproj" />
     <Project Path="../back-end/src/Domain/Domain.csproj" />

@@ -1,4 +1,5 @@
-﻿using Domain.Shared;
+﻿using Domain.Observability;
+using Domain.Shared;
 using Domain.Shared.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Internal;
@@ -85,8 +86,12 @@ public class RequestValidatorTests
     [Fact]
     public async Task ValidateAsync_MalformedToken_FailsWithInvalidToken()
     {
+        // The reason is expressed as the redacted form rather than a literal: the raw token must
+        // never appear in a failure reason, because that reason is logged
+        // (docs/observability/index.md §7). Asserting against Redaction.Token proves the value was
+        // redacted, and would fail if the raw token were reinstated.
         await EnsureInvalidAsync(
-            expectedReason: "Invalid token: 123456",
+            expectedReason: $"Invalid token: {Redaction.Token("123456")}",
             token: "123456"
         );
     }
@@ -95,7 +100,7 @@ public class RequestValidatorTests
     public async Task ValidateAsync_TokenIssuedTooFarInPast_FailsWithExpired()
     {
         await EnsureInvalidAsync(
-            expectedReason: $"Token is expired: {TestData.ClientTokenString}",
+            expectedReason: $"Token is expired: {Redaction.Token(TestData.ClientTokenString)}",
             current: TestData.ClientToken.Timestamp + 31 * 1000
         );
     }
@@ -104,7 +109,7 @@ public class RequestValidatorTests
     public async Task ValidateAsync_TokenIssuedTooFarInFuture_FailsWithExpired()
     {
         await EnsureInvalidAsync(
-            expectedReason: $"Token is expired: {TestData.ClientTokenString}",
+            expectedReason: $"Token is expired: {Redaction.Token(TestData.ClientTokenString)}",
             current: TestData.ClientToken.Timestamp - 31 * 1000
         );
     }
@@ -116,7 +121,7 @@ public class RequestValidatorTests
         nullStore.Setup(x => x.GetSecretAsync(It.IsAny<string>())).ReturnsAsync(() => null);
 
         await EnsureInvalidAsync(
-            expectedReason: $"Secret is not found: {TestData.ClientSecretString}",
+            expectedReason: $"Secret is not found: {Redaction.Token(TestData.ClientSecretString)}",
             store: nullStore.Object
         );
     }
@@ -138,7 +143,7 @@ public class RequestValidatorTests
             .ReturnsAsync([]);
 
         await EnsureInvalidAsync(
-            expectedReason: "Invalid relay proxy token: rp-xxx",
+            expectedReason: $"Invalid relay proxy token: {Redaction.Token("rp-xxx")}",
             type: ConnectionType.RelayProxy,
             token: "rp-xxx",
             rpService: rpService.Object
@@ -162,7 +167,7 @@ public class RequestValidatorTests
     }
 
     [Fact]
-    public async Task ParseTokenThrows()
+    public async Task ValidateAsync_WhenTokenParsingThrows_IsInvalidRatherThanUnavailable()
     {
         // A throwing ITokenValidator simulates a parsing-stage failure.
         // It must produce Failed (permanent rejection / WS 4003), never Unavailable (transient / WS 1011).

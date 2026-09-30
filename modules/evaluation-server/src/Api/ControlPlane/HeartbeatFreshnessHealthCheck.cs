@@ -28,12 +28,12 @@ namespace Api.ControlPlane;
 /// rotation, not restarted; it returns to rotation once heartbeats resume.
 /// </para>
 /// <para>
-/// Also emits the <c>evaluation_server.consistency.heartbeat_staleness_seconds</c> observable gauge
+/// Also emits the <c>featbit.evaluation_server.consistency.heartbeat_staleness</c> observable gauge
 /// (seconds since last successful publish; 0 when healthy) and logs a warning on the transition into
 /// the unhealthy/fenced state.
 /// </para>
 /// </remarks>
-public sealed class HeartbeatFreshnessHealthCheck : IHealthCheck
+public sealed partial class HeartbeatFreshnessHealthCheck : IHealthCheck
 {
     /// <summary>
     /// Stable meter name for evaluation-server consistency observability. Mirrors the control
@@ -43,9 +43,10 @@ public sealed class HeartbeatFreshnessHealthCheck : IHealthCheck
 
     /// <summary>
     /// Seconds since this pod last successfully published a heartbeat (0 when fresh / healthy /
-    /// not applicable). Operators alert on a sustained non-zero value under GatedCommit.
+    /// not applicable). Operators alert on a sustained non-zero value under GatedCommit. The unit
+    /// is seconds, carried in the instrument's <c>unit</c> field rather than in its name.
     /// </summary>
-    public const string StalenessGaugeName = "evaluation_server.consistency.heartbeat_staleness_seconds";
+    public const string StalenessGaugeName = "featbit.evaluation_server.consistency.heartbeat_staleness";
 
     /// <summary>
     /// Default staleness threshold (seconds) when <c>ControlPlane:HeartbeatStalenessThresholdSeconds</c>
@@ -169,11 +170,7 @@ public sealed class HeartbeatFreshnessHealthCheck : IHealthCheck
         // Log a warning only on the transition into the fenced state to avoid log spam.
         if (Interlocked.Exchange(ref _wasDegraded, 1) == 0)
         {
-            _logger.LogWarning(
-                "Heartbeat freshness unhealthy: DcId={DcId}, StalenessSeconds={StalenessSeconds}, " +
-                "ThresholdSeconds={ThresholdSeconds}. Pod likely evicted/partitioned from the " +
-                "control plane; failing readiness to pull it from rotation.",
-                dcId, ageSeconds, thresholdSeconds);
+            Log.HeartbeatFreshnessUnhealthy(_logger, dcId, ageSeconds, thresholdSeconds);
         }
 
         return Task.FromResult(HealthCheckResult.Unhealthy(message));

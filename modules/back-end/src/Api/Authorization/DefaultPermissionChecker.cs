@@ -1,10 +1,11 @@
 using Application.Services;
+using Domain.Observability;
 using Domain.Policies;
 using Domain.Resources;
 
 namespace Api.Authorization;
 
-public class DefaultPermissionChecker(
+public partial class DefaultPermissionChecker(
     IResourceService resourceService,
     IRequestPermissions requestPermissions,
     ILogger<DefaultPermissionChecker> logger)
@@ -15,9 +16,13 @@ public class DefaultPermissionChecker(
         var permission = requirement.PermissionName;
         var resources = Permissions.ResourceMap;
 
+        var metrics = AuthMetrics.Current;
+
         if (!resources.TryGetValue(permission, out var resourceType))
         {
-            logger.LogWarning("The permission '{Permission}' has no corresponding resourceType.", permission);
+            Log.UnmappedPermission(logger, permission);
+            metrics.RecordAuthorization(
+                AuthMethods.Unknown, Outcomes.Rejected, AuthReasons.UnmappedPermission);
             return false;
         }
 
@@ -25,12 +30,20 @@ public class DefaultPermissionChecker(
         if (string.IsNullOrWhiteSpace(resourceRN))
         {
             // failed to get resource RN, return false to be safe. This usually indicates bad requests, e.g. invalid or missing route parameters.
+            metrics.RecordAuthorization(resourceType, Outcomes.Rejected, AuthReasons.InvalidResource);
             return false;
         }
 
         // check if the user has the required permission on the resource
         var statements = await requestPermissions.GetAsync(httpContext);
-        return PolicyHelper.IsAllowed(statements, resourceRN, permission);
+        var isAllowed = PolicyHelper.IsAllowed(statements, resourceRN, permission);
+
+        metrics.RecordAuthorization(
+            resourceType,
+            isAllowed ? Outcomes.Success : Outcomes.Rejected,
+            isAllowed ? AuthReasons.Granted : AuthReasons.PolicyDenied);
+
+        return isAllowed;
     }
 
     private async ValueTask<string?> GetRnAsync(string permission, string resourceType, HttpRequest request)
@@ -70,7 +83,7 @@ public class DefaultPermissionChecker(
             if (!Guid.TryParse(projectIdString, out var projectId))
             {
                 // invalid project id, return empty
-                logger.LogWarning("Invalid projectId '{ProjectId}' in route values.", projectIdString);
+                Log.InvalidProjectId(logger, projectIdString);
                 return string.Empty;
             }
 
@@ -93,7 +106,7 @@ public class DefaultPermissionChecker(
             if (!Guid.TryParse(envIdString, out var envId))
             {
                 // invalid env id, return empty
-                logger.LogWarning("Invalid envId '{EnvId}' in route values.", envIdString);
+                Log.InvalidEnvId(logger, envIdString);
                 return string.Empty;
             }
 
@@ -142,7 +155,7 @@ public class DefaultPermissionChecker(
             if (!Guid.TryParse(segmentIdRouteValue?.ToString(), out var segmentId))
             {
                 // invalid segment id, return empty
-                logger.LogWarning("Invalid segmentId '{SegmentId}' in route values.", segmentIdRouteValue);
+                Log.InvalidSegmentId(logger, segmentIdRouteValue);
                 return string.Empty;
             }
 

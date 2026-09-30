@@ -1,5 +1,6 @@
 using Confluent.Kafka;
 using Domain.Messages;
+using Domain.Observability;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -12,6 +13,7 @@ public partial class KafkaMessageConsumer : BackgroundService
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<KafkaMessageConsumer> _logger;
     private readonly string[] _topics;
+    private readonly WorkerObservability _observability = ServiceMeter.ForWorker(WorkerNames.KafkaConsumer);
 
     public KafkaMessageConsumer(
         ConsumerConfig config,
@@ -27,86 +29,129 @@ public partial class KafkaMessageConsumer : BackgroundService
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        return Task.Factory.StartNew(
-            async () => { await StartConsumerLoop(stoppingToken); },
-            TaskCreationOptions.LongRunning
-        );
+        // WorkerLoop.Run is load-bearing: it unwraps the inner loop task so the host observes the
+        // loop's real lifetime and any exception escaping it. See WorkerLoop for what breaks
+        // silently without it.
+        return WorkerLoop.Run(() => StartConsumerLoop(stoppingToken));
     }
 
     private async Task StartConsumerLoop(CancellationToken cancellationToken)
     {
-        _consumer.Subscribe(_topics);
-        _logger.LogInformation("Start consuming messages for {Topics}...", string.Join(", ", _topics));
-
         ConsumeResult<Null, string>? consumeResult = null;
         var message = string.Empty;
-        while (!cancellationToken.IsCancellationRequested)
+
+        _observability.Started();
+
+        try
         {
-            try
+            _consumer.Subscribe(_topics);
+            Log.StartConsuming(_logger, string.Join(", ", _topics));
+
+            while (!cancellationToken.IsCancellationRequested)
             {
-                consumeResult = _consumer.Consume(cancellationToken);
-                if (consumeResult.IsPartitionEOF)
-                {
-                    continue;
-                }
+                // Every loop turn, including EOF and empty polls. This is the only signal that
+                // distinguishes an idle topic from a consumer that has silently stopped.
+                _observability.Heartbeat();
 
-                message = consumeResult.Message.Value;
-                if (string.IsNullOrWhiteSpace(message))
-                {
-                    continue;
-                }
-
-                var topic = consumeResult.Topic;
-                if (string.IsNullOrWhiteSpace(topic))
-                {
-                    continue;
-                }
-
-                using var scope = _serviceProvider.CreateScope();
-
-                var handler = scope.ServiceProvider.GetKeyedService<IMessageHandler>(consumeResult.Topic);
-                if (handler == null)
-                {
-                    Log.NoHandlerForTopic(_logger, consumeResult.Topic);
-                    continue;
-                }
-
-                await handler.HandleAsync(message);
-            }
-            catch (ConsumeException ex)
-            {
-                var error = ex.Error.ToString();
-                Log.FailedConsumeMessage(_logger, message, error);
-
-                if (ex.Error.IsFatal)
-                {
-                    // https://github.com/edenhill/librdkafka/blob/master/INTRODUCTION.md#fatal-consumer-errors
-                    break;
-                }
-            }
-            catch (OperationCanceledException)
-            {
-                // ignore
-            }
-            catch (Exception ex)
-            {
-                Log.ErrorConsumeMessage(_logger, message, ex);
-            }
-            finally
-            {
                 try
                 {
-                    if (consumeResult != null)
+                    consumeResult = _consumer.Consume(cancellationToken);
+                    if (consumeResult.IsPartitionEOF)
                     {
-                        // store offset manually
-                        _consumer.StoreOffset(consumeResult);
+                        continue;
                     }
+
+                    message = consumeResult.Message.Value;
+                    if (string.IsNullOrWhiteSpace(message))
+                    {
+                        continue;
+                    }
+
+                    var topic = consumeResult.Topic;
+                    if (string.IsNullOrWhiteSpace(topic))
+                    {
+                        continue;
+                    }
+
+                    // Root activity for this message. When the producer carried trace context on
+                    // headers this continues that trace across the queue hop; when it did not, the
+                    // context is default and the message starts its own trace as before.
+                    using var activity = IngressActivity.StartConsume(
+                        topic,
+                        MessagingSystems.Kafka,
+                        KafkaTraceContext.Extract(consumeResult.Message?.Headers));
+
+                    using var scope = _serviceProvider.CreateScope();
+
+                    var handler = scope.ServiceProvider.GetKeyedService<IMessageHandler>(consumeResult.Topic);
+                    if (handler == null)
+                    {
+                        // M2: a topic being consumed with no registered handler is silent data loss.
+                        MessagingMetrics.Current.RecordUnroutable(MessagingSystems.Kafka, consumeResult.Topic);
+                        Log.NoHandlerForTopic(_logger, consumeResult.Topic);
+                        continue;
+                    }
+
+                    // M2: measures handling only, not the blocking Consume() call above — otherwise an
+                    // idle topic would report enormous "consume durations". Defaults to failure, so an
+                    // exception escaping HandleAsync is recorded even though it is caught below.
+                    using var consume = MessagingMetrics.Current.BeginConsume(MessagingSystems.Kafka, topic);
+
+                    await handler.HandleAsync(message);
+
+                    consume.Succeeded();
+                    _observability.Success();
+                }
+                catch (ConsumeException ex)
+                {
+                    _observability.LoopFailed(ex);
+
+                    var error = ex.Error.ToString();
+                    Log.FailedConsumeMessage(_logger, message, error);
+
+                    if (ex.Error.IsFatal)
+                    {
+                        // https://github.com/edenhill/librdkafka/blob/master/INTRODUCTION.md#fatal-consumer-errors
+                        break;
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    // ignore
                 }
                 catch (Exception ex)
                 {
-                    Log.ErrorStoreOffset(_logger, ex);
+                    _observability.LoopFailed(ex);
+                    Log.ErrorConsumeMessage(_logger, message, ex);
+                }
+                finally
+                {
+                    try
+                    {
+                        if (consumeResult != null)
+                        {
+                            // store offset manually
+                            _consumer.StoreOffset(consumeResult);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.ErrorStoreOffset(_logger, ex);
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            // The host observes this task now, so anything escaping the loop stops the service.
+            // Record it before it propagates, otherwise the only evidence is worker_running
+            // dropping to zero with no reason attached.
+            _observability.LoopFailed(ex);
+            throw;
+        }
+        finally
+        {
+            _observability.Stopped();
         }
     }
 

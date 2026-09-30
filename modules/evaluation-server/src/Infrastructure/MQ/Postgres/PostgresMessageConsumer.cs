@@ -1,7 +1,9 @@
 using System.Data;
+using System.Runtime.ExceptionServices;
 using System.Threading.Channels;
 using Dapper;
 using Domain.Messages;
+using Domain.Observability;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -16,15 +18,34 @@ public partial class PostgresMessageConsumer : BackgroundService
     private readonly NpgsqlDataSource _dataSource;
     private readonly Dictionary<string, IMessageConsumer> _handlers;
     private readonly ILogger<PostgresMessageConsumer> _logger;
+    private readonly WorkerObservability _observability = ServiceMeter.ForWorker(WorkerNames.PostgresConsumer);
 
     private static readonly Channel<ChannelMessage> MessageChannel = Channel.CreateBounded<ChannelMessage>(
-        new BoundedChannelOptions(1000)
+        new BoundedChannelOptions(MessageChannelCapacity)
         {
             FullMode = BoundedChannelFullMode.DropOldest,
             SingleWriter = true,
             SingleReader = true
         }
     );
+
+    private const int MessageChannelCapacity = 1000;
+
+    /// <summary>
+    /// M5 — saturation of the notification channel.
+    /// </summary>
+    /// <remarks>
+    /// This channel is <c>DropOldest</c>, so when it fills it discards notifications silently and
+    /// the affected flag change is simply never applied on this node. Occupancy alone would look
+    /// healthy at exactly the moment data is being lost, which is why a drop is counted explicitly:
+    /// the writer checks whether the channel is already at capacity, and a write in that state is
+    /// what evicts an entry. It is recorded, not prevented — changing the full-mode would be a
+    /// behavior change.
+    /// </remarks>
+    private static readonly BufferObservability ChannelObservability = ServiceMeter.ForBuffer(
+        BufferNames.PostgresNotifications,
+        MessageChannelCapacity,
+        () => MessageChannel.Reader.Count);
 
     // The interval in seconds to wait before restarting the listen task after connection closed.
     private const int RestartIntervalInSeconds = 5;
@@ -175,52 +196,97 @@ public partial class PostgresMessageConsumer : BackgroundService
 
     private async Task ConsumeAsync(CancellationToken stoppingToken)
     {
-        await foreach (var message in MessageChannel.Reader.ReadAllAsync(stoppingToken))
+        _observability.Started();
+
+        try
         {
-            var (channel, messageId) = message;
-
-            try
+            await foreach (var message in MessageChannel.Reader.ReadAllAsync(stoppingToken))
             {
-                await ConsumeCoreAsync(channel, messageId);
-                Log.MessageHandled(_logger, messageId);
+                _observability.Heartbeat();
 
-                _lastMessageId = messageId;
+                var (channel, messageId) = message;
+                _handlers.TryGetValue(channel, out var handler);
+
+                // Telemetry reports the canonical topic, not the physical LISTEN/NOTIFY channel, so
+                // that a consumer's destination reconciles against the producer's. The channel name
+                // is still what the handler lookup and the LISTEN-specific log events use.
+                var destination = Topics.FromChannel(channel);
+
+                string? payload = null;
+                string? traceParent = null;
+                string? traceState = null;
+                ExceptionDispatchInfo? readFailure = null;
+
+                if (handler is not null)
+                {
+                    try
+                    {
+                        (payload, traceParent, traceState) = await ReadRowAsync(messageId);
+                    }
+                    catch (Exception ex)
+                    {
+                        readFailure = ExceptionDispatchInfo.Capture(ex);
+                    }
+                }
+
+                // The producer's trace context is stored on the queue row, and an activity's
+                // parent is fixed at creation, so the row must be read before the ingress activity
+                // starts. Read failures are carried forward so they are still recorded against the
+                // consume metric and logged under the activity, as they were when the read happened
+                // inline.
+                using var activity = IngressActivity.StartConsume(
+                    destination,
+                    MessagingSystems.Postgres,
+                    TraceContextPropagation.Extract(traceParent, traceState));
+
+                // M2: defaults to failure, so an exception escaping the handler is recorded even though
+                // it is caught below.
+                using var consume = MessagingMetrics.Current.BeginConsume(MessagingSystems.Postgres, destination);
+
+                try
+                {
+                    readFailure?.Throw();
+
+                    if (handler is null)
+                    {
+                        MessagingMetrics.Current.RecordUnroutable(MessagingSystems.Postgres, destination);
+                        Log.NoHandlerForChannel(_logger, channel);
+                    }
+                    else if (!string.IsNullOrWhiteSpace(payload))
+                    {
+                        await handler.HandleAsync(payload, stoppingToken);
+                    }
+
+                    consume.Succeeded();
+                    _observability.Success();
+                    Log.MessageHandled(_logger, messageId);
+
+                    _lastMessageId = messageId;
+                }
+                catch (Exception ex)
+                {
+                    consume.Failed(ex);
+                    _observability.LoopFailed(ex);
+                    Log.ErrorConsumeMessage(_logger, channel, ex);
+                }
             }
-            catch (Exception ex)
-            {
-                Log.ErrorConsumeMessage(_logger, channel, ex);
-            }
+        }
+        finally
+        {
+            _observability.Stopped();
         }
 
         return;
 
-        async Task ConsumeCoreAsync(string channel, long messageId)
+        // ensure the connection is disposed after the payload is retrieved
+        async Task<(string? payload, string? trace_parent, string? trace_state)> ReadRowAsync(long messageId)
         {
-            if (!_handlers.TryGetValue(channel, out var handler))
-            {
-                Log.NoHandlerForChannel(_logger, channel);
-                return;
-            }
+            await using var connection = await _dataSource.OpenConnectionAsync(stoppingToken);
 
-            var payload = await GetPayloadAsync();
-            if (string.IsNullOrWhiteSpace(payload))
-            {
-                return;
-            }
-
-            await handler.HandleAsync(payload, stoppingToken);
-
-            return;
-
-            // ensure the connection is disposed after the payload is retrieved
-            async Task<string?> GetPayloadAsync()
-            {
-                await using var connection = await _dataSource.OpenConnectionAsync(stoppingToken);
-
-                return await connection.QueryFirstOrDefaultAsync<string>(
-                    "select payload from queue_messages where id = @Id", new { Id = messageId }
-                );
-            }
+            return await connection.QueryFirstOrDefaultAsync<(string? payload, string? trace_parent, string? trace_state)>(
+                "select payload, trace_parent, trace_state from queue_messages where id = @Id",
+                new { Id = messageId }
+            );
         }
     }
 
@@ -294,7 +360,21 @@ public partial class PostgresMessageConsumer : BackgroundService
             args.Payload
         );
 
-        MessageChannel.Writer.TryWrite(new ChannelMessage(args.Channel, messageId));
+        WriteToChannel(new ChannelMessage(args.Channel, messageId));
+    }
+
+    /// <summary>
+    /// Writes to the notification channel, recording an eviction when it is already full.
+    /// Behavior is unchanged: <c>DropOldest</c> still silently discards, it is now merely counted.
+    /// </summary>
+    private static void WriteToChannel(ChannelMessage message)
+    {
+        if (MessageChannel.Reader.Count >= MessageChannelCapacity)
+        {
+            ChannelObservability.RecordDropped();
+        }
+
+        MessageChannel.Writer.TryWrite(message);
     }
 
     private async Task AddMissedMessagesAsync(NpgsqlConnection connection)
@@ -317,7 +397,7 @@ public partial class PostgresMessageConsumer : BackgroundService
             foreach (var message in missingMessages)
             {
                 var channelMessage = new ChannelMessage(Topics.ToChannel(message.topic), message.id);
-                MessageChannel.Writer.TryWrite(channelMessage);
+                WriteToChannel(channelMessage);
             }
         }
         catch (Exception ex)

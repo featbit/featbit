@@ -1,3 +1,4 @@
+using Domain.Observability;
 using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.MQ.Postgres;
@@ -17,11 +18,22 @@ public partial class PostgresMessageConsumer
         public static partial void NoHandlerForTopic(ILogger logger, string topic);
 
         [LoggerMessage(4, LogLevel.Debug, "Message handled: {Message}", EventName = "MessageHandled")]
-        public static partial void MessageHandled(ILogger logger, string message);
+        private static partial void MessageHandledCore(ILogger logger, string message);
+
+        /// <summary>
+        /// Logs a successfully handled message. The body carries flag rules, end-user attributes, and
+        /// SDK secrets, so it is logged in full with any embedded credential hashed (<c>docs/observability/index.md</c> §7).
+        /// </summary>
+        public static void MessageHandled(ILogger logger, string message)
+            => MessageHandledCore(logger, Redaction.HideCredentials(message));
 
         [LoggerMessage(5, LogLevel.Error, "Exception occurred while consuming message: {Message}.",
             EventName = "ErrorConsumeMessage")]
-        public static partial void ErrorConsumeMessage(ILogger logger, string message, Exception exception);
+        private static partial void ErrorConsumeMessageCore(ILogger logger, string message, Exception exception);
+
+        /// <summary>Logs a failed message consume, with the body logged in full apart from any embedded credential.</summary>
+        public static void ErrorConsumeMessage(ILogger logger, string message, Exception exception)
+            => ErrorConsumeMessageCore(logger, Redaction.HideCredentials(message), exception);
 
         [LoggerMessage(6, LogLevel.Debug, "Message {Id} processed with status {Status}. {Error}",
             EventName = "MessageProcessed")]

@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Store;
 
-public class HybridStore : IStore
+public partial class HybridStore : IStore
 {
     public string Name => Stores.Hybrid;
 
@@ -23,7 +23,7 @@ public class HybridStore : IStore
         Listener.OnStoreAvailabilityChanged += (prev, current) =>
         {
             // log store availability change
-            logger.LogWarning("Store availability changed from {prev} to {current}", prev, current);
+            Log.AvailabilityChanged(logger, prev, current);
             AvailableStore = GetAvailableStore(current);
         };
 

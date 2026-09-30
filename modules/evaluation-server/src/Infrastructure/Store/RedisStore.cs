@@ -6,7 +6,7 @@ using StackExchange.Redis;
 
 namespace Infrastructure.Store;
 
-public class RedisStore(IRedisClient redisClient, ILogger<RedisStore> logger) : IDbStore
+public partial class RedisStore(IRedisClient redisClient, ILogger<RedisStore> logger) : IDbStore
 {
     public string Name => Stores.Redis;
 
@@ -168,17 +168,13 @@ public class RedisStore(IRedisClient redisClient, ILogger<RedisStore> logger) : 
 
         if (envId.HasValue)
         {
-            logger.LogWarning(
-                "Orphan {EntityName} index members in env {EnvId}: {OrphanCount} of {TotalCount}. Missing keys: {MissingKeys}",
-                entityName, envId.Value, orphans.Count, totalCount, string.Join(", ", orphans)
-            );
+            Log.OrphanIndexMembers(
+                logger, entityName, envId.Value, orphans.Count, totalCount, string.Join(", ", orphans));
         }
         else
         {
-            logger.LogWarning(
-                "Orphan {EntityName} ids requested: {OrphanCount} of {TotalCount}. Missing keys: {MissingKeys}",
-                entityName, orphans.Count, totalCount, string.Join(", ", orphans)
-            );
+            Log.OrphanIdsRequested(
+                logger, entityName, orphans.Count, totalCount, string.Join(", ", orphans));
         }
     }
 }

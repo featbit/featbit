@@ -13,6 +13,6 @@ public class PingMessageHandler : IMessageHandler
         var connection = ctx.Connection;
         var token = ctx.CancellationToken;
 
-        await connection.SendAsync(PongMessage, token);
+        await connection.SendAsync(PongMessage, MessageTypes.Pong, token);
     }
 }

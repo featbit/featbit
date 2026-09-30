@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Application.Bases;
 using Application.Identity;
+using Domain.Observability;
 using Domain.RefreshTokens;
 using Domain.Users;
 using Infrastructure.Identity;
@@ -75,19 +76,32 @@ public class IdentityService(
 
     public async Task<LoginResult> LoginByEmailAsync(string email, string password, string ipAddress)
     {
+        var metrics = AuthMetrics.Current;
+
         var user = await userService.FindOneAsync(x => x.Email == email);
         if (user == null)
         {
+            // Deliberately the same reason as a password mismatch. The response does not
+            // distinguish the two — telling an unauthenticated caller whether an account exists is
+            // a user-enumeration oracle — and a metric readable by a wider audience must not
+            // reintroduce that distinction.
+            metrics.RecordLogin(
+                AuthMethods.Password, Outcomes.Rejected, AuthReasons.InvalidCredentials);
             return LoginResult.Failed(ErrorCodes.EmailPasswordMismatch);
         }
 
         var passwordMatch = await CheckPasswordAsync(user, password);
         if (!passwordMatch)
         {
+            metrics.RecordLogin(
+                AuthMethods.Password, Outcomes.Rejected, AuthReasons.InvalidCredentials);
             return LoginResult.Failed(ErrorCodes.EmailPasswordMismatch);
         }
 
         var tokens = await IssueTokensAsync(user, ipAddress);
+
+        metrics.RecordLogin(AuthMethods.Password, Outcomes.Success, AuthReasons.Granted);
+
         return LoginResult.Ok(tokens);
     }
 

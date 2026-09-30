@@ -1,0 +1,15 @@
+# Enforce source-generated logging at build time.
+#
+# Every production logging call in this src tree must go through a source-generated
+# [LoggerMessage] method rather than a raw ILogger.Log* extension call. CA1848
+# ("Use the LoggerMessage delegates") ships with the .NET SDK analyzers (on by default
+# for net10.0) but is itself disabled by default; configuring its severity here turns it
+# on and makes any raw ILogger.LogInformation/LogWarning/LogError/LogDebug/LogTrace/
+# LogCritical call a build error. See docs/observability/index.md §6.1.
+#
+# Scope note: this file lives under src/, so it applies only to production code. Test
+# projects live in the sibling tests/ directory and are intentionally left untouched so
+# they can keep using FakeLogger and direct logging.
+
+[*.cs]
+dotnet_diagnostic.CA1848.severity = error

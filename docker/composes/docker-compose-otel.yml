@@ -23,13 +23,21 @@ services:
     image: featbit/api:dev
     container_name: api
     build:
-      context: ./modules/back-end
-      dockerfile: ./deploy/Dockerfile
+      context: ./modules
+      dockerfile: ./back-end/deploy/Dockerfile
     environment:
       - SSOEnabled=true
       - ENABLE_OPENTELEMETRY=true
       - OTEL_SERVICE_NAME=featbit-api
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+      # Required. The endpoint above is the collector's gRPC port, and both the .NET
+      # auto-instrumentation and the Serilog OTLP sink default to http/protobuf — so without this
+      # every signal is posted to a gRPC listener and silently discarded.
+      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+      # Custom spans are off by default; enable them all so this stack exercises them.
+      - Observability__Traces__Categories=all
+      # Identical across services so a hashed credential correlates across them.
+      - Observability__RedactionSalt=local-verification-salt
       - DbProvider=MongoDb
       - MqProvider=Redis
       - CacheProvider=Redis
@@ -38,6 +46,7 @@ services:
     depends_on:
       - mongodb
       - redis
+      - otel-collector
     ports:
       - "5000:5000"
     networks:
@@ -47,20 +56,55 @@ services:
     image: featbit/evaluation-server:dev
     container_name: evaluation-server
     build:
-      context: ./modules/evaluation-server
-      dockerfile: ./deploy/Dockerfile
+      context: ./modules
+      dockerfile: ./evaluation-server/deploy/Dockerfile
     depends_on:
       - mongodb
       - redis
+      - otel-collector
     environment:
       - ENABLE_OPENTELEMETRY=true
       - OTEL_SERVICE_NAME=featbit-els
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+      - Observability__Traces__Categories=all
+      - Observability__RedactionSalt=local-verification-salt
       - DbProvider=MongoDb
       - MqProvider=Redis
       - CacheProvider=Redis
     ports:
       - "5100:5100"
+    networks:
+      - featbit-network
+
+  # The collector this stack exports to. Swap OTEL_EXPORTER_OTLP_ENDPOINT above for your own
+  # collector's address to send the same signals somewhere else — nothing about the services is
+  # specific to this one.
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.109.0
+    container_name: otel-collector
+    restart: on-failure
+    command: ["--config=/etc/otel-collector-config.yml"]
+    volumes:
+      - ./infra/otel/otel-collector-verify.yml:/etc/otel-collector-config.yml:ro
+    ports:
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+      - "8889:8889"   # Prometheus scrape endpoint — FeatBit's metrics appear here
+      - "13133:13133" # health_check
+    networks:
+      - featbit-network
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    container_name: prometheus
+    restart: on-failure
+    volumes:
+      - ./infra/otel/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    depends_on:
+      - otel-collector
     networks:
       - featbit-network
 

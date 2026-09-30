@@ -1,8 +1,19 @@
+# Build context for the api-server, evaluation-server, and control-plane images is this directory
+# (`modules/`), not the individual module directories, because all three reference the shared
+# projects under `modules/shared/`. Everything excluded here is excluded from all three builds.
+
 # Folders
 **/bin/
 **/obj/
 **/deploy/
 .idea/
+
+# The UI builds from its own context (`modules/front-end`), so this one never needs it — and
+# node_modules is large enough that including it would dominate the context upload for a local
+# `docker build`. (CI sends a git-tree context, where node_modules is absent anyway.)
+front-end/
+front-end-v1/
+**/node_modules/
 
 # Files
 **/global.json

@@ -144,7 +144,7 @@ public interface IDcBackfiller
     Task<CommittedSnapshot> FetchCommittedSnapshotAsync(CancellationToken cancellationToken = default);
 }
 
-public sealed class DcBackfiller(
+public sealed partial class DcBackfiller(
     IServiceScopeFactory scopeFactory,
     [FromKeyedServices("compositeCache")] ICacheService compositeCache,
     IMessageProducer messageProducer,
@@ -200,9 +200,7 @@ public sealed class DcBackfiller(
         {
             if (!_inFlight.Add(dcId))
             {
-                logger.LogDebug(
-                    "DC backfill: a backfill for DC {DcId} is already in flight; coalescing (no-op).",
-                    dcId);
+                Log.BackfillCoalesced(logger, dcId);
                 return IDcBackfiller.Skipped;
             }
         }
@@ -307,10 +305,8 @@ public sealed class DcBackfiller(
         // #105: report ACCEPTED vs ATTEMPTED so the log is honest about how much of this backfill
         // actually changed state — a DC that was already fully synced legitimately shows 0/N
         // accepted, which is not a failure.
-        logger.LogInformation(
-            "DC backfill: repaired DC {DcId} ({Mode}) from source of truth: {AcceptedFlags}/{AttemptedFlags} " +
-            "flag(s) accepted, {AcceptedSegments}/{AttemptedSegments} segment(s) accepted, and " +
-            "{SecretCount} secret(s) upserted (unconditional, not guarded).",
+        Log.DcRepaired(
+            logger,
             dcId,
             mode,
             acceptedFlags,
@@ -384,10 +380,7 @@ public sealed class DcBackfiller(
             return true;
         }
 
-        logger.LogWarning(
-            "DC backfill requires the composite Redis cache (got {CacheType}); skipping backfill for DC {DcId}.",
-            compositeCache.GetType().FullName,
-            dcId);
+        Log.CompositeCacheRequired(logger, compositeCache.GetType().FullName, dcId);
         composite = null!;
         return false;
     }
@@ -408,11 +401,7 @@ public sealed class DcBackfiller(
         }
         catch (Exception ex)
         {
-            logger.LogError(
-                ex,
-                "DC backfill: failed to publish per-DC client refresh (PushFullSync) for DC {DcId}. " +
-                "Backfill succeeded; clients on that DC will refresh on their next reconnect.",
-                dcId);
+            Log.ErrorPublishClientRefresh(logger, dcId, ex);
         }
     }
 }

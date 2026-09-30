@@ -14,7 +14,7 @@ using Environment = Domain.Environments.Environment;
 
 namespace Infrastructure.Services.EntityFrameworkCore;
 
-public class SegmentService(AppDbContext dbContext, ILogger<SegmentService> logger)
+public partial class SegmentService(AppDbContext dbContext, ILogger<SegmentService> logger)
     : EntityFrameworkCoreService<Segment>(dbContext), ISegmentService
 {
     public async Task<PagedResult<Segment>> GetListAsync(Guid workspaceId, string rn, SegmentFilter userFilter)
@@ -251,12 +251,8 @@ public class SegmentService(AppDbContext dbContext, ILogger<SegmentService> logg
                 // by the next edit of this segment, or reaped by StagedFlagGc. Log loudly before
                 // the rethrow (callers' semantics unchanged) so this is diagnosable instead of a
                 // silent Kafka-offset-committed loss.
-                logger.LogError(
-                    ex,
-                    "SetPendingAsync exhausted {MaxRetries} retries for Segment {SegmentId} at " +
-                    "version {Version} (attempt {Attempt}); the Redis stage for this change may " +
-                    "now be orphaned until superseded by the next edit or reaped by StagedFlagGc.",
-                    PendingOpRetryPolicy.MaxRetries, id, version, attempt + 1);
+                Log.SetPendingRetriesExhausted(
+                    logger, PendingOpRetryPolicy.MaxRetries, id, version, attempt + 1, ex);
                 throw;
             }
         }
@@ -301,11 +297,8 @@ public class SegmentService(AppDbContext dbContext, ILogger<SegmentService> logg
                 // orphan a Redis stage (PromotePendingAsync is driven by the coordinator, which
                 // retries on its own next tick) — but this is still pathological contention worth
                 // surfacing loudly rather than as a silent thrown exception.
-                logger.LogError(
-                    ex,
-                    "PromotePendingAsync exhausted {MaxRetries} retries for Segment {SegmentId} at " +
-                    "expected version {ExpectedVersion} (attempt {Attempt}).",
-                    PendingOpRetryPolicy.MaxRetries, id, expectedVersion, attempt + 1);
+                Log.PromotePendingRetriesExhausted(
+                    logger, PendingOpRetryPolicy.MaxRetries, id, expectedVersion, attempt + 1, ex);
                 throw;
             }
         }
@@ -341,7 +334,7 @@ public class SegmentService(AppDbContext dbContext, ILogger<SegmentService> logg
     {
         if (!RN.TryParse(scope, out var props))
         {
-            logger.LogError("Segment scope '{Scope}' is not a valid RN.", scope);
+            Log.InvalidScope(logger, scope);
 
             return (scope, []);
         }

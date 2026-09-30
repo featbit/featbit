@@ -8,6 +8,7 @@ using Application;
 using Domain.AuditLogs;
 using Domain.ControlPlane;
 using Domain.Messages;
+using Domain.Observability;
 using Domain.Segments;
 
 namespace Api.Application.ControlPlane;
@@ -52,9 +53,9 @@ namespace Api.Application.ControlPlane;
 /// Metrics (all on <see cref="MeterName"/>): <see cref="CommitsCounterName"/>,
 /// <see cref="TimeToCommitHistogramName"/>, <see cref="PendingBacklogGaugeName"/>,
 /// <see cref="EvictedCommitCounterName"/>, and (#84) <see cref="AppliedWatermarkLagGaugeName"/> —
-/// each live DC's lag behind the most-advanced live DC's applied watermark, per env.
+/// each live DC's worst-case lag behind the most-advanced live DC's applied watermark.
 /// </summary>
-public sealed class CommitCoordinatorWorker : BackgroundService
+public sealed partial class CommitCoordinatorWorker : BackgroundService
 {
     /// <summary>
     /// Default interval between coordinator ticks when not overridden via
@@ -74,28 +75,28 @@ public sealed class CommitCoordinatorWorker : BackgroundService
     /// is committed while a configured DC is absent from the live set (its lease expired / it is
     /// down). Tagged with the evicted <c>dc_id</c>.
     /// </summary>
-    public const string EvictedCommitCounterName = "control_plane.consistency.evicted_commits";
+    public const string EvictedCommitCounterName = "featbit.control_plane.consistency.evicted_commits";
 
     /// <summary>
     /// F1 (#24): counter incremented once per successful commit (flag OR segment). Tagged
-    /// <c>resource_type</c> = <c>flag</c> | <c>segment</c> (and <c>env_id</c> on the flag path, cheaply
-    /// available from the pending flag record).
+    /// <c>resource_type</c> = <c>flag</c> | <c>segment</c>.
     /// </summary>
-    public const string CommitsCounterName = "control_plane.consistency.commits";
+    public const string CommitsCounterName = "featbit.control_plane.consistency.commits";
 
     /// <summary>
-    /// F1 (#24): histogram of the stage-to-commit latency in milliseconds, recorded at each commit as
+    /// F1 (#24): histogram of the stage-to-commit latency, recorded at each commit as
     /// <c>now - resourceUpdatedAt</c> (the resource's <c>UpdatedAt</c> is the staged version's
-    /// timestamp, so this approximates stage->commit latency). Tagged <c>resource_type</c>.
+    /// timestamp, so this approximates stage->commit latency). Tagged <c>resource_type</c>. The unit
+    /// is milliseconds, carried in the instrument's <c>unit</c> field rather than in its name.
     /// </summary>
-    public const string TimeToCommitHistogramName = "control_plane.consistency.time_to_commit_ms";
+    public const string TimeToCommitHistogramName = "featbit.control_plane.consistency.time_to_commit";
 
     /// <summary>
     /// F1 (#24): observable gauge reporting the count of currently-pending (staged-but-not-committed)
     /// items per <c>resource_type</c> = <c>flag</c> | <c>segment</c>. Backed by fields refreshed at the
     /// end of each <see cref="RunOnceAsync"/> from the latest <c>GetPendingAsync</c> reads.
     /// </summary>
-    public const string PendingBacklogGaugeName = "control_plane.consistency.pending_backlog";
+    public const string PendingBacklogGaugeName = "featbit.control_plane.consistency.pending_backlog";
 
     private static readonly Meter Meter = new(MeterName);
 
@@ -132,35 +133,44 @@ public sealed class CommitCoordinatorWorker : BackgroundService
         description: "Currently-pending (staged-but-not-committed) item count per resource_type.");
 
     /// <summary>
-    /// #84 (sub-issue of #69): observable gauge reporting each live DC's lag, in milliseconds, behind
-    /// the most-advanced live DC's applied watermark, per env. Tagged <c>dc_id</c>, <c>env_id</c>.
+    /// #84 (sub-issue of #69): observable gauge reporting each live DC's worst lag, in milliseconds,
+    /// behind the most-advanced live DC's applied watermark. Tagged <c>dc_id</c>.
     /// Backed by a snapshot refreshed at the start of each tick (see
     /// <see cref="RefreshAppliedWatermarkLagSnapshot"/>) from <see cref="ILeaseStore.GetLiveSetAsync"/>
     /// — self-contained from the live set the coordinator already loads every tick, independent of
     /// pending flags/segments and of the commit decision.
+    ///
+    /// The lag is still computed per (dc, env) internally, but is reported as the MAXIMUM across
+    /// environments for each DC. <c>env_id</c> is banned as a metric attribute by the cardinality
+    /// budget (docs/observability/index.md §4), and because this is an observable gauge, simply
+    /// dropping the attribute would leave several measurements sharing one tag set and make the
+    /// reported value arbitrary. Taking the max preserves the question the gauge exists to answer —
+    /// "is any environment falling behind in this DC?" — and keeps threshold alerts firing on the
+    /// worst case. Per-env lag belongs in logs or traces, which may carry <c>env_id</c>.
     /// </summary>
-    public const string AppliedWatermarkLagGaugeName = "control_plane.consistency.applied_watermark_lag_ms";
+    public const string AppliedWatermarkLagGaugeName = "featbit.control_plane.consistency.applied_watermark_lag";
 
     /// <summary>
-    /// One (dc_id, env_id, lag_ms) measurement captured by <see cref="RefreshAppliedWatermarkLagSnapshot"/>.
+    /// One (dc_id, lag_ms) measurement captured by <see cref="RefreshAppliedWatermarkLagSnapshot"/>,
+    /// where lag_ms is the maximum lag across that DC's environments.
     /// </summary>
-    private readonly record struct AppliedWatermarkLagMeasurement(string DcId, Guid EnvId, long LagMs);
+    private readonly record struct AppliedWatermarkLagMeasurement(string DcId, long LagMs);
 
-    // Observable applied-watermark-lag gauge: reports the per-(dc, env) lag captured at the start of
-    // the most recent tick, via the shared ObservableGaugeSnapshot helper (#108 item 5).
+    // Observable applied-watermark-lag gauge: reports the per-DC worst-case lag captured at the
+    // start of the most recent tick, via the shared ObservableGaugeSnapshot helper (#108 item 5).
     private static readonly ObservableGaugeSnapshot<AppliedWatermarkLagMeasurement> AppliedWatermarkLagSnapshot = new(
         m => new Measurement<long>(
             m.LagMs,
-            new KeyValuePair<string, object?>("dc_id", m.DcId),
-            new KeyValuePair<string, object?>("env_id", m.EnvId.ToString())));
+            new KeyValuePair<string, object?>("dc_id", m.DcId)));
 
     private static readonly ObservableGauge<long> AppliedWatermarkLagGauge = AppliedWatermarkLagSnapshot.CreateGauge(
         Meter,
         AppliedWatermarkLagGaugeName,
         unit: "ms",
         description:
-        "Per-DC lag (ms) behind the most-advanced live DC's applied watermark, per env " +
-        "(frontier(env) - dc's watermark(env)).");
+        "Per-DC worst-case lag (ms) behind the most-advanced live DC's applied watermark, " +
+        "taken as the maximum over that DC's environments (max over env of " +
+        "frontier(env) - dc's watermark(env)).");
 
     /// <summary>
     /// #84: recompute the per-(dc, env) applied-watermark-lag snapshot from this tick's live set.
@@ -192,7 +202,10 @@ public sealed class CommitCoordinatorWorker : BackgroundService
             }
         }
 
-        var snapshot = new List<AppliedWatermarkLagMeasurement>();
+        // Collapse the per-(dc, env) lags to one worst-case value per DC. env_id is banned as a
+        // metric attribute, and this is an observable gauge: emitting one measurement per env with
+        // env_id removed would produce duplicate tag sets and an arbitrary reported value.
+        var worstLagByDc = new Dictionary<string, long>();
         foreach (var lease in liveSet)
         {
             if (string.IsNullOrEmpty(lease.DcId) || lease.AppliedWatermarks is null)
@@ -203,9 +216,16 @@ public sealed class CommitCoordinatorWorker : BackgroundService
             foreach (var (envId, watermark) in lease.AppliedWatermarks)
             {
                 var lagMs = frontierByEnv[envId] - watermark;
-                snapshot.Add(new AppliedWatermarkLagMeasurement(lease.DcId, envId, lagMs));
+                if (!worstLagByDc.TryGetValue(lease.DcId, out var currentWorst) || lagMs > currentWorst)
+                {
+                    worstLagByDc[lease.DcId] = lagMs;
+                }
             }
         }
+
+        var snapshot = worstLagByDc
+            .Select(kv => new AppliedWatermarkLagMeasurement(kv.Key, kv.Value))
+            .ToList();
 
         AppliedWatermarkLagSnapshot.Update(snapshot);
     }
@@ -235,6 +255,9 @@ public sealed class CommitCoordinatorWorker : BackgroundService
     private readonly ILeaderElection _leaderElection;
     private readonly bool _enabled;
     private readonly TimeSpan _interval;
+
+    private readonly WorkerObservability _worker =
+        ServiceMeter.ForWorker(ControlPlaneWorkerNames.CommitCoordinator);
     private readonly ILogger<CommitCoordinatorWorker> _logger;
 
     public CommitCoordinatorWorker(
@@ -262,32 +285,44 @@ public sealed class CommitCoordinatorWorker : BackgroundService
     {
         if (!_enabled)
         {
-            _logger.LogInformation(
-                "Commit coordinator disabled (consistency mode is not GatedCommit).");
+            Log.WorkerDisabled(_logger);
             return;
         }
 
         using var timer = new PeriodicTimer(_interval);
-        while (await timer.WaitForNextTickAsync(stoppingToken))
+        _worker.Started();
+
+        try
         {
-            try
+            while (await timer.WaitForNextTickAsync(stoppingToken))
             {
-                var committed = await RunOnceAsync(stoppingToken);
-                if (committed > 0)
+                _worker.Heartbeat();
+
+                try
                 {
-                    _logger.LogInformation(
-                        "Commit coordinator committed {CommittedCount} pending flag/segment change(s).",
-                        committed);
+                    var committed = await RunOnceAsync(stoppingToken);
+                    if (committed > 0)
+                    {
+                        // Success means useful work, not merely "the tick ran" — a coordinator that
+                        // ticks forever without committing anything is the failure being watched for.
+                        _worker.Success();
+                        Log.Committed(_logger, committed);
+                    }
+                }
+                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                {
+                    // ignore cancellation from the timer loop itself
+                }
+                catch (Exception ex)
+                {
+                    _worker.LoopFailed(ex);
+                    Log.ErrorTick(_logger, ex);
                 }
             }
-            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
-            {
-                // ignore cancellation from the timer loop itself
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while running the commit coordinator tick.");
-            }
+        }
+        finally
+        {
+            _worker.Stopped();
         }
     }
 
@@ -374,9 +409,7 @@ public sealed class CommitCoordinatorWorker : BackgroundService
         // cache) degrades to a clear log instead of a crash loop.
         if (_compositeCache is not CompositeRedisCacheService composite)
         {
-            _logger.LogWarning(
-                "Commit coordinator requires the composite Redis cache (got {CacheType}); skipping tick.",
-                _compositeCache.GetType().FullName);
+            Log.CompositeCacheRequired(_logger, _compositeCache.GetType().FullName);
             return 0;
         }
 
@@ -429,12 +462,11 @@ public sealed class CommitCoordinatorWorker : BackgroundService
             count++;
 
             // F1 (#24): consistency metrics. Side-effect-only — must not change commit behavior.
-            // One commit increment (tagged resource_type=flag + env_id) and one stage->commit latency
+            // One commit increment (tagged resource_type=flag) and one stage->commit latency
             // sample (now - the staged value's UpdatedAt).
             CommitsCounter.Add(
                 1,
-                new KeyValuePair<string, object?>("resource_type", "flag"),
-                new KeyValuePair<string, object?>("env_id", flag.EnvId.ToString()));
+                new KeyValuePair<string, object?>("resource_type", "flag"));
             RecordTimeToCommit("flag", pendingChange.Value.UpdatedAt);
 
             // Observability (#16): the commit decision above is intentionally made on the LIVE set
@@ -452,11 +484,7 @@ public sealed class CommitCoordinatorWorker : BackgroundService
                     EvictedCommitCounter.Add(1, new KeyValuePair<string, object?>("dc_id", dc));
                 }
 
-                _logger.LogWarning(
-                    "Committed flag {FlagId} v{Version} without DC(s) {EvictedDcs} — proceeding on live set.",
-                    flag.Id,
-                    version,
-                    string.Join(", ", evictedDcs));
+                Log.FlagCommittedWithEvictedDcs(_logger, flag.Id, version, string.Join(", ", evictedDcs));
             }
         }
 
@@ -579,11 +607,8 @@ public sealed class CommitCoordinatorWorker : BackgroundService
                         EvictedCommitCounter.Add(1, new KeyValuePair<string, object?>("dc_id", dc));
                     }
 
-                    _logger.LogWarning(
-                        "Committed segment {SegmentId} v{Version} without DC(s) {EvictedDcs} — proceeding on live set.",
-                        segment.Id,
-                        version,
-                        string.Join(", ", evictedDcs));
+                    Log.SegmentCommittedWithEvictedDcs(
+                        _logger, segment.Id, version, string.Join(", ", evictedDcs));
                 }
             }
         }

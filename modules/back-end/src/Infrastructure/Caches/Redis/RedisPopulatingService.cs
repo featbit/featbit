@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Caches.Redis;
 
-public class RedisPopulatingService(
+public partial class RedisPopulatingService(
     IRedisClient redisClient,
     ICacheService cacheService,
     IFeatureFlagService flagService,
@@ -20,7 +20,7 @@ public class RedisPopulatingService(
 
     public async Task PopulateAsync(CancellationToken stoppingToken)
     {
-        logger.LogInformation("Verifying redis population status on startup...");
+        Log.VerifyingPopulationStatus(logger);
 
         var lockTtl = TimeSpan.FromSeconds(redisOptions.Value.PopulateLockTtlSeconds);
         var maxWait = TimeSpan.FromSeconds(redisOptions.Value.PopulateMaxWaitSeconds);
@@ -34,7 +34,7 @@ public class RedisPopulatingService(
         {
             if (await redis.StringGetAsync(IsPopulatedKey) == "true")
             {
-                logger.LogInformation("Redis has been populated, proceeding with service startup.");
+                Log.AlreadyPopulated(logger);
                 return;
             }
 
@@ -48,11 +48,11 @@ public class RedisPopulatingService(
                     // the previous instance just completed one.
                     if (await redis.StringGetAsync(IsPopulatedKey) == "true")
                     {
-                        logger.LogInformation("Redis populated by another instance, proceeding with service startup.");
+                        Log.PopulatedByAnotherInstance(logger);
                         return;
                     }
 
-                    logger.LogInformation("Start to populate redis. Lock TTL: {LockTtl}s.", lockTtl.TotalSeconds);
+                    Log.StartPopulate(logger, lockTtl.TotalSeconds);
 
                     var stopwatch = Stopwatch.StartNew();
                     await PopulateFlagsAsync();
@@ -62,7 +62,7 @@ public class RedisPopulatingService(
                     // mark redis as populated
                     await redis.StringSetAsync(IsPopulatedKey, "true");
 
-                    logger.LogInformation("Populate redis finished in {Elapsed} ms.", stopwatch.ElapsedMilliseconds);
+                    Log.PopulateFinished(logger, stopwatch.ElapsedMilliseconds);
                 }
                 finally
                 {
@@ -85,12 +85,7 @@ public class RedisPopulatingService(
                 );
             }
 
-            logger.LogInformation(
-                "Another instance is populating Redis. Waiting {PollIntervalSeconds}s before " +
-                "re-checking (elapsed: {ElapsedSeconds:F0}s).",
-                pollInterval.TotalSeconds,
-                waitStopwatch.Elapsed.TotalSeconds
-            );
+            Log.WaitingForAnotherInstance(logger, pollInterval.TotalSeconds, waitStopwatch.Elapsed.TotalSeconds);
 
             await Task.Delay(pollInterval, stoppingToken);
         }
@@ -103,7 +98,7 @@ public class RedisPopulatingService(
 
         await Task.WhenAll(tasks);
 
-        logger.LogInformation("Populate flag success, total count: {Total}", flags.Count);
+        Log.PopulateFlagSuccess(logger, flags.Count);
     }
 
     private async Task PopulateSegmentAsync()
@@ -113,7 +108,7 @@ public class RedisPopulatingService(
 
         await Task.WhenAll(tasks);
 
-        logger.LogInformation("Populate segment success, total count: {Total}", caches.Count);
+        Log.PopulateSegmentSuccess(logger, caches.Count);
     }
 
     private async Task PopulateSecretsAsync()
@@ -123,6 +118,6 @@ public class RedisPopulatingService(
 
         await Task.WhenAll(tasks);
 
-        logger.LogInformation("Populate secrets success, total count: {Total}", caches.Count);
+        Log.PopulateSecretsSuccess(logger, caches.Count);
     }
 }

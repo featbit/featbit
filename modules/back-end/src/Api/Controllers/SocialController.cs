@@ -2,13 +2,14 @@ using Api.Authentication.OAuth;
 using Application.Identity;
 using Application.Services;
 using Application.Workspaces;
+using Domain.Observability;
 using Domain.Users;
 
 namespace Api.Controllers;
 
 [AllowAnonymous]
 [Route("api/v{version:apiVersion}/social")]
-public class SocialController : ApiControllerBase
+public partial class SocialController : ApiControllerBase
 {
     private readonly OAuthClient _oauthClient;
     private readonly OAuthProviders _oauthProviders;
@@ -33,9 +34,15 @@ public class SocialController : ApiControllerBase
     [HttpPost("login")]
     public async Task<ApiResponse<LoginToken>> Login(LoginByOAuthCode request)
     {
+        var metrics = AuthMetrics.Current;
+
         var provider = _oauthProviders.GetProvider(request.ProviderName);
         if (provider == null)
         {
+            // request.ProviderName is unauthenticated caller input and is deliberately not tagged.
+            metrics.RecordLogin(
+                AuthMethods.OAuth, Outcomes.Rejected, AuthReasons.UnsupportedProvider);
+
             return Error<LoginToken>($"Social login for ‘{request.ProviderName}’ is not supported.");
         }
 
@@ -44,6 +51,8 @@ public class SocialController : ApiControllerBase
             var email = await _oauthClient.GetEmailAsync(request, provider);
             if (string.IsNullOrWhiteSpace(email))
             {
+                metrics.RecordLogin(AuthMethods.OAuth, Outcomes.Rejected, AuthReasons.NoEmail);
+
                 return Error<LoginToken>("Can not get email by OAuth code.");
             }
 
@@ -64,12 +73,16 @@ public class SocialController : ApiControllerBase
             var (accessToken, refreshToken) = 
                 await _identityService.IssueTokensAsync(user, Request.ClientIpAddress());
             Response.SetRefreshTokenCookie(refreshToken);
-            
+
+            metrics.RecordLogin(AuthMethods.OAuth, Outcomes.Success, AuthReasons.Granted);
+
             return Ok(new LoginToken(false, accessToken));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Exception occurred when performing OAuth login.");
+            Log.ErrorOAuthLogin(_logger, ex);
+
+            metrics.RecordLogin(AuthMethods.OAuth, Outcomes.Failure, AuthReasons.Error);
 
             return Error<LoginToken>(ex.Message);
         }

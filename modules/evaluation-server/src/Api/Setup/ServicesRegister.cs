@@ -4,9 +4,11 @@ using Api.Cors;
 using Api.RateLimiting;
 using Api.Services;
 using Domain.ControlPlane;
+using Domain.Observability;
 using Domain.Shared;
 using Domain.Shared.Authentication;
 using Domain.Workspaces;
+using FeatBit.Observability.AspNetCore;
 using Infrastructure;
 using Infrastructure.Services;
 using Infrastructure.Store;
@@ -25,6 +27,18 @@ public static class ServicesRegister
 {
     public static WebApplicationBuilder RegisterServices(this WebApplicationBuilder builder)
     {
+        // Observability: apply configured settings before anything can create a span or hash a
+        // credential, then register the propagation-only activity listener before anything can log,
+        // so that every record carries a trace id even with no exporter configured, and name the
+        // ingress activity source after this service (docs/observability/index.md §11).
+        ObservabilityConfiguration.Apply(builder.Configuration);
+        ActivityCorrelation.EnsureListener();
+        FeatBitActivitySources.ConfigureIngress(FeatBitActivitySources.EvaluationServer);
+        ServiceMeter.Configure(FeatBitMeters.EvaluationServer, FeatBitInstruments.EvaluationServerPrefix);
+        MessagingMetrics.Configure(FeatBitMeters.EvaluationServer, FeatBitInstruments.EvaluationServerPrefix);
+        PropagationMetrics.Configure(FeatBitMeters.EvaluationServer, FeatBitInstruments.EvaluationServerPrefix);
+        InsightsMetrics.Configure(FeatBitMeters.EvaluationServer, FeatBitInstruments.EvaluationServerPrefix);
+
         var services = builder.Services;
         var configuration = builder.Configuration;
 
@@ -38,7 +52,9 @@ public static class ServicesRegister
         services.AddSwaggerGen();
 
         // health check dependencies
-        var healthChecks = services.AddHealthChecks().AddReadinessChecks(configuration);
+        var healthChecks = services.AddHealthChecks()
+            .AddReadinessChecks(configuration)
+            .AddDiagnosticChecks(configuration);
 
         // cors
         builder.AddCustomCors();

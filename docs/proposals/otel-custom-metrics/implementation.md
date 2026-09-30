@@ -1,9 +1,14 @@
 # FeatBit OpenTelemetry: First Iteration
 
-> **Status: Draft proposal.** Nothing here is a ratified specification; instrument names,
-> attributes, and phasing are all open to change until the tracking issue is closed.
-> Discussion and contributions welcome — see the tracking issue linked from the
-> [proposal overview](./README.md).
+> **Status: Superseded.** Replaced by the
+> [FeatBit Observability Standard](../../observability/index.md) and its
+> [instrument registry](../../observability/instruments.md), which are the current source of truth.
+>
+> Retained for its implementation detail and code audit, which were re-verified against the
+> codebase. One correction was applied inline (the `insight` buffer — see §Buffers). The meter
+> naming proposed here (`FeatBit.Api`, `FeatBit.EvaluationServer`, `FeatBit.ControlPlane`) **was**
+> adopted; the standard additionally permits an optional `.<Area>` sub-scope to accommodate the
+> two shipped `.Consistency` meters.
 >
 > Companion to [OpenTelemetry Priorities for Operational Stability](./README.md).
 >
@@ -108,7 +113,7 @@ Detect publish/consume failures, stopped consumers, queue backlog, old messages,
 
 ### Why
 
-The current Kafka, Redis, and PostgreSQL implementations have different delivery and acknowledgement behavior. Logs alone cannot reliably show backlog or a consumer that silently stopped.
+The current Kafka, Redis, and PostgreSQL implementations have different delivery and acknowledgment behavior. Logs alone cannot reliably show backlog or a consumer that silently stopped.
 
 ### What to measure
 
@@ -236,10 +241,18 @@ Every `featbit.buffer.*` measurement must include the finite `buffer.name` attri
 |---|---|---|
 | `usage` | Bounded `Channel` with `DropOldest` in [UsageTracker](../../../modules/back-end/src/Application/Usages/UsageTracker.cs) | Full set, including capacity and drops |
 | `postgres_notification` | 1000-item bounded `Channel` with `DropOldest` in the ELS consumer | Full set |
-| `insight` | Unbounded `List<object>` behind a lock in [InsightsWriter](../../../modules/back-end/src/Infrastructure/AppService/InsightsWriter.cs) | Occupancy and flush metrics only |
+| `insight` | 10,000-item bounded `Channel` with `FullMode.Wait` in [InsightsTracker](../../../modules/back-end/src/Application/Insights/InsightsTracker.cs) | Blocked-writer and flush metrics |
 | `store_sentinel` | Worker with no buffer | Worker metrics only |
 
-`InsightsWriter` cannot drop, so it grows until the flush keeps up or the process runs out of memory. Report its occupancy and alert on sustained growth; `featbit.buffer.capacity` and `featbit.buffer.items.dropped` are undefined for it until it is given a bound, which is a code change rather than instrumentation.
+> **Correction applied when superseding.** The original text described this buffer as
+> `InsightsWriter`, an unbounded `List<object>` behind a lock. That type no longer exists. Its
+> successor, `InsightsTracker`, is a **bounded** `Channel<object>` — default capacity 10,000 via
+> `InsightsTrackingOptions.ChannelCapacity` — using `BoundedChannelFullMode.Wait`. It cannot grow
+> without bound and it never drops; when full it applies backpressure to the calling request
+> thread. Consequently `featbit.…buffer.items_dropped` is genuinely undefined for it, but the
+> primary signal is **blocked writers and write-wait duration**, not occupancy: occupancy sitting
+> at capacity is the *symptom*, whereas blocked writers is what actually degrades request latency.
+> Giving it a drop policy is a behavior and capacity decision rather than instrumentation.
 
 ### How to implement
 

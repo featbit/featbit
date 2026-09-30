@@ -1,0 +1,26 @@
+# Enforce source-generated logging at build time for the SHARED production observability
+# libraries only.
+#
+# modules/shared/Observability and modules/shared/Observability.AspNetCore are production
+# code project-referenced by all three .NET services, so they are held to the same
+# standard as the modules' own src trees: raw ILogger.Log* extension calls are a build
+# error and logging must go through source-generated [LoggerMessage] methods (CA1848).
+# See docs/observability/index.md §6.1.
+#
+# The path-scoped sections below deliberately exclude Observability.TestKit and
+# Observability.Tests: those are test-support / test projects and must stay free of this
+# rule so they can use FakeLogger and direct logging.
+#
+# Verified by probe: a raw ILogger.LogInformation call in Observability.AspNetCore fails
+# the build with error CA1848, so the path-scoped glob below genuinely matches.
+#
+# Note on Observability: that project is deliberately BCL-only and does not reference
+# Microsoft.Extensions.Logging at all, so CA1848 cannot fire there today -- an ILogger
+# call would not even compile. The rule is kept as a forward guard for the day the
+# project gains a logging reference, at which point it must not regress to raw calls.
+
+[Observability/**.cs]
+dotnet_diagnostic.CA1848.severity = error
+
+[Observability.AspNetCore/**.cs]
+dotnet_diagnostic.CA1848.severity = error

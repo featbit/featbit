@@ -104,6 +104,8 @@ public static class ServiceCollectionExtensions
             .Bind(configuration.GetSection(ClickHouseOptions.ClickHouse))
             .ValidateDataAnnotations();
 
-        services.AddHttpClient<ClickHouseClient>();
+        services.AddHttpClient<ClickHouseClient>()
+            .AddHttpMessageHandler(() => new Infrastructure.Services.DependencyMetricsHandler(
+                Domain.Observability.DependencyNames.ClickHouse));
     }
 }
