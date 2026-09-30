@@ -27,7 +27,7 @@
     "@lezer/highlight": "^1.2.3",
     "@fontsource-variable/inter": "^5.2.8",
     "@hookform/resolvers": "^5.4.0",
-    "@tanstack/react-query": "^5.101.1",
+    "@tanstack/react-query": "^5.103.1",
     "@tanstack/react-table": "^8.21.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
