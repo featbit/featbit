@@ -98,53 +98,93 @@ public static class FlagDiffer
         FeatureFlag target,
         ICollection<Segment> relatedSegments)
     {
-        var diffs = new List<TargetingRuleDiff>();
+        var sourceRules = source.Rules.ToArray();
+        var targetRules = target.Rules.ToArray();
 
-        foreach (var sourceRule in source.Rules)
+        var candidatesBySource = new TargetingRuleDiff[sourceRules.Length][];
+        for (var i = 0; i < sourceRules.Length; i++)
         {
-            TargetingRuleDiff diff;
-
-            // find target rule with same conditions
-            var targetRule =
-                target.Rules.FirstOrDefault(rule => IsSameConditions(sourceRule.Conditions, rule.Conditions, relatedSegments));
-            if (targetRule == null)
-            {
-                diff = new TargetingRuleDiff(sourceRule, null, true);
-            }
-            else
-            {
-                var srcSvp = new CompareServeVariationsParameter(
-                    source.Id,
-                    source.Variations,
-                    sourceRule.Variations
-                );
-                var targetSvp = new CompareServeVariationsParameter(
-                    target.Id,
-                    target.Variations,
-                    targetRule.Variations
-                );
-
-                var hasDiff = IsServeVariationsDifferent(srcSvp, targetSvp);
-                diff = new TargetingRuleDiff(sourceRule, targetRule, hasDiff);
-            }
-
-            diffs.Add(diff);
+            var sourceRule = sourceRules[i];
+            candidatesBySource[i] = targetRules
+                .Where(targetRule => IsSameConditions(sourceRule.Conditions, targetRule.Conditions, relatedSegments))
+                .Select(targetRule => CompareTargetRule(sourceRule, targetRule))
+                .ToArray();
         }
 
-        // rules may in target flag that are not in source flag
-        var comparedTargetRules = diffs
-            .Where(x => x.Target != null)
-            .Select(x => x.Target.Id)
-            .ToArray();
-        var newRules = target.Rules
-            .Where(tr => !comparedTargetRules.Contains(tr.Id))
-            .ToArray();
+        // Entries remain null for source rules without an exact match.
+        var exactMatchesBySource = new TargetingRuleDiff[sourceRules.Length];
+        var matchedTargetRules = new HashSet<TargetRule>();
 
-        diffs.AddRange(
-            newRules.Select(targetRule => new TargetingRuleDiff(null, targetRule, true))
-        );
+        // Reserve all exact matches first so an earlier fallback cannot consume a later exact match.
+        for (var i = 0; i < sourceRules.Length; i++)
+        {
+            var exactMatch = candidatesBySource[i].FirstOrDefault(candidate =>
+                !candidate.IsDifferent && !matchedTargetRules.Contains(candidate.Target)
+            );
+            if (exactMatch == null)
+            {
+                continue;
+            }
+
+            exactMatchesBySource[i] = exactMatch;
+            matchedTargetRules.Add(exactMatch.Target);
+        }
+
+        var diffs = new List<TargetingRuleDiff>();
+        for (var i = 0; i < sourceRules.Length; i++)
+        {
+            var sourceRule = sourceRules[i];
+            var candidates = candidatesBySource[i];
+            var selectedMatch = 
+                exactMatchesBySource[i] ?? candidates.FirstOrDefault(c => !matchedTargetRules.Contains(c.Target));
+
+            var diff = selectedMatch ?? new TargetingRuleDiff(sourceRule, null, true);
+            if (diff.Target != null)
+            {
+                matchedTargetRules.Add(diff.Target);
+            }
+
+            // An equivalent target prevents appending even if it is paired with another source rule.
+            var hasEquivalentTarget = candidates.Any(candidate => !candidate.IsDifferent);
+            var ruleAtSamePosition = targetRules.ElementAtOrDefault(i);
+            var isOrderDifferent =
+                !diff.IsDifferent &&
+                (ruleAtSamePosition == null ||
+                 !IsSameConditions(sourceRule.Conditions, ruleAtSamePosition.Conditions, relatedSegments) ||
+                 CompareTargetRule(sourceRule, ruleAtSamePosition).IsDifferent);
+
+            diffs.Add(diff with
+            {
+                CanAppend = !hasEquivalentTarget,
+                IsOrderDifferent = isOrderDifferent
+            });
+        }
+
+        var unmatchedTargetDiffs = targetRules
+            .Where(rule => !matchedTargetRules.Contains(rule))
+            .Select(rule => new TargetingRuleDiff(null, rule, true));
+
+        diffs.AddRange(unmatchedTargetDiffs);
 
         return diffs;
+
+        TargetingRuleDiff CompareTargetRule(TargetRule sourceRule, TargetRule targetRule)
+        {
+            var sourceServing =
+                new CompareServeVariationsParameter(source.Id, source.Variations, sourceRule.Variations);
+            var targetServing =
+                new CompareServeVariationsParameter(target.Id, target.Variations, targetRule.Variations);
+
+            var sourceKey = string.IsNullOrWhiteSpace(sourceRule.DispatchKey)
+                ? "keyId"
+                : sourceRule.DispatchKey;
+            var targetKey = string.IsNullOrWhiteSpace(targetRule.DispatchKey)
+                ? "keyId"
+                : targetRule.DispatchKey;
+
+            var isDifferent = sourceKey != targetKey || IsServeVariationsDifferent(sourceServing, targetServing);
+            return new TargetingRuleDiff(sourceRule, targetRule, isDifferent);
+        }
     }
 
     public static DefaultRuleDiff CompareDefaultRule(FeatureFlag source, FeatureFlag target)

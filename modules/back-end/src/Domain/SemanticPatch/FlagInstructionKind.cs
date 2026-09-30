@@ -1,4 +1,4 @@
-﻿namespace Domain.SemanticPatch;
+namespace Domain.SemanticPatch;
 
 public static class FlagInstructionKind
 {
@@ -44,6 +44,8 @@ public static class FlagInstructionKind
 
     public const string SetRules = nameof(SetRules);
 
+    public const string ReorderRules = nameof(ReorderRules);
+
     public const string UpdateRuleName = nameof(UpdateRuleName);
 
     public const string UpdateRuleDispatchKey = nameof(UpdateRuleDispatchKey);
@@ -88,6 +90,7 @@ public static class FlagInstructionKind
         AddRule,
         RemoveRule,
         SetRules,
+        ReorderRules,
         UpdateRuleName,
         UpdateRuleDispatchKey,
         AddRuleConditions,
@@ -121,6 +124,7 @@ public static class FlagInstructionKind
         AddRule,
         RemoveRule,
         SetRules,
+        ReorderRules,
         UpdateRuleName,
         UpdateRuleDispatchKey,
         AddRuleConditions,

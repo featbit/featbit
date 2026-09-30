@@ -351,6 +351,7 @@ export const enFeatureFlags = {
       applyImmediately: "Apply immediately",
       dispatchBy: "Dispatch by",
       serve: "Serve",
+      ruleOrder: "Rule order",
     },
     pending: {
       title: "Pending changes",
@@ -676,6 +677,8 @@ export const enFeatureFlags = {
     overwriteRules: "Overwrite rules",
     overwriteUsers: "Overwrite users",
     appendRules: "Append rules",
+    noRulesToAppend:
+      "All source rules already exist in the target. Use Overwrite rules to match the source order and rule list.",
     appendUsers: "Append users",
     rulesNotCopyable:
       "Targeting rules reference environment-specific or incompatible segments and cannot be copied.",
@@ -1026,6 +1029,7 @@ export const zhFeatureFlags: typeof enFeatureFlags = {
       applyImmediately: "立即应用",
       dispatchBy: "基于属性",
       serve: "返回",
+      ruleOrder: "规则顺序",
     },
     pending: {
       title: "待处理变更",
@@ -1336,6 +1340,8 @@ export const zhFeatureFlags: typeof enFeatureFlags = {
     overwriteRules: "覆盖现有规则",
     overwriteUsers: "覆盖现有用户",
     appendRules: "追加规则",
+    noRulesToAppend:
+      "目标已包含源中的所有规则。请使用覆盖规则，使规则列表及顺序与源一致。",
     appendUsers: "追加用户",
     rulesNotCopyable:
       "定向规则引用了环境特定或与目标环境不兼容的用户组，因此无法复制。",
