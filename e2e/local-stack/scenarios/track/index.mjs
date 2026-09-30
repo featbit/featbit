@@ -8,26 +8,27 @@ async function events(stack, envId, runId, kind) {
   const table = `experiment_${kind}_events`;
   if (stack.olap === 'Postgres') {
     const output = await stack.exec('postgres', ['psql', '-X', '-v', 'ON_ERROR_STOP=1', '-U', 'postgres', '-d', 'featbit', '-At', '-c',
-      `SELECT json_build_object('userKey', user_key, '${exposure ? 'variationId' : 'eventName'}', ${exposure ? 'variation_id' : 'event_name'}) FROM ${table} WHERE env_id='${envId}' AND user_key LIKE '${runId}-%'`]);
+      `SELECT json_build_object('userKey', user_key, '${exposure ? 'variationId' : 'eventName'}', ${exposure ? 'variation_id' : 'event_name'}${exposure ? '' : ", 'numericValue', numeric_value"}) FROM ${table} WHERE env_id='${envId}' AND user_key LIKE '${runId}-%'`]);
     return output ? output.split(/\r?\n/).map(JSON.parse) : [];
   }
   if (stack.olap === 'MongoDb') {
     const output = await stack.exec('mongodb', ['mongosh', '--quiet', '-u', 'admin', '-p', 'local-stack-only', '--authenticationDatabase', 'admin', '--eval',
-      `const d=db.getSiblingDB('featbit'); print(JSON.stringify(d.${exposure ? 'ExperimentExposureEvents' : 'ExperimentMetricEvents'}.find({envId:UUID('${envId}'),userKey:/^${runId}-/}).toArray().map(x=>({userKey:x.userKey,${exposure ? 'variationId:x.variationId' : 'eventName:x.eventName'}}))))`]);
+      `const d=db.getSiblingDB('featbit'); print(JSON.stringify(d.${exposure ? 'ExperimentExposureEvents' : 'ExperimentMetricEvents'}.find({envId:UUID('${envId}'),userKey:/^${runId}-/}).toArray().map(x=>({userKey:x.userKey,${exposure ? 'variationId:x.variationId' : 'eventName:x.eventName,numericValue:x.numericValue'}}))))`]);
     return JSON.parse(output);
   }
   const output = await stack.exec('clickhouse', ['clickhouse-client', '--password', 'local-stack-only', '--query',
-    `SELECT user_key AS userKey, ${exposure ? 'variation_id AS variationId' : 'event_name AS eventName'} FROM featbit.${table} WHERE env_id='${envId}' AND startsWith(user_key, '${runId}-') FORMAT JSONEachRow`]);
+    `SELECT user_key AS userKey, ${exposure ? 'variation_id AS variationId' : 'event_name AS eventName, numeric_value AS numericValue'} FROM featbit.${table} WHERE env_id='${envId}' AND startsWith(user_key, '${runId}-') FORMAT JSONEachRow`]);
   return output ? output.split(/\r?\n/).map(JSON.parse) : [];
 }
 
 export async function testTrack(stack) {
   const runId = `track-${randomUUID()}`;
-  const evidence = { runId, scenario: stack.name, startedAt: new Date().toISOString() };
+  const evidence = { runId, scenario: 'track', stack: stack.name, startedAt: new Date().toISOString() };
   const headers = { 'Content-Type': 'application/json' };
-  const api = async (path, body) => {
+  let flagBase, flag;
+  const api = async (path, body, method = body === undefined ? 'GET' : 'POST') => {
     const response = await fetch(`${stack.api}/api/v1${path}`, {
-      method: body === undefined ? 'GET' : 'POST', headers,
+      method, headers,
       body: body === undefined ? undefined : JSON.stringify(body), signal: AbortSignal.timeout(15_000),
     });
     const result = await response.json();
@@ -47,7 +48,16 @@ export async function testTrack(stack) {
     assert.ok(env, 'Integration Tests project must have a Dev environment');
     const secret = env.secrets.find(x => x.type === 'server')?.value;
     assert.ok(secret, 'Server SDK key missing');
-    const flag = await api(`/envs/${env.id}/feature-flags/boolean-flag`);
+    flagBase = `/envs/${env.id}/feature-flags`;
+    const createdVariations = [{ id: randomUUID(), name: 'Control', value: 'false' },
+      { id: randomUUID(), name: 'Treatment', value: 'true' }];
+    flag = await api(flagBase, {
+      name: runId, key: runId, description: 'Isolated Track test',
+      isEnabled: true, variationType: 'boolean',
+      variations: createdVariations, disabledVariationId: createdVariations[0].id,
+      enabledVariationId: createdVariations[0].id, tags: [],
+    });
+    evidence.flagKey = flag.key;
     const variations = ['Control', 'Treatment'].map(name => {
       const variation = flag.variations.find(x => x.name === name);
       assert.ok(variation, `${name} variation missing`);
@@ -62,8 +72,9 @@ export async function testTrack(stack) {
     const user = name => ({ keyId: `${runId}-${name}`, name: `Track ${name}`, customizedProperties: [] });
     const variation = selected => [{ featureFlagKey: flag.key,
       variation: { id: selected.id, value: selected.value }, timestamp }];
-    const metric = name => [{ type: 'Custom', eventName: `${runId.replaceAll('-', '_')}_${name}`,
-      numericValue: 1, timestamp }];
+    const metricEvent = runId.replaceAll('-', '_');
+    const metric = name => [{ type: 'Custom', eventName: metricEvent,
+      numericValue: name === 'metric' ? 11 : 7, timestamp }];
     const cases = [
       { name: 'user', insight: { user: user('user') } },
       { name: 'variation', insight: { user: user('variation'), variations: variation(variations[0]) } },
@@ -94,7 +105,7 @@ export async function testTrack(stack) {
       assert.ok(exposureRows.some(x => x.userKey === `${runId}-combined` && x.variationId === variations[1].id));
       assert.equal(metricRows.length, 2, 'Metric count');
       for (const name of ['metric', 'combined']) {
-        assert.ok(metricRows.some(x => x.userKey === `${runId}-${name}` && x.eventName === `${runId.replaceAll('-', '_')}_${name}`),
+        assert.ok(metricRows.some(x => x.userKey === `${runId}-${name}` && x.eventName === metricEvent && x.numericValue === (name === 'metric' ? 11 : 7)),
           `Stored ${name} metric missing`);
       }
     }, 120_000);
@@ -108,8 +119,28 @@ export async function testTrack(stack) {
           `Insights delta ${variation.name}`);
       }
     }, 120_000);
+    await waitFor('Experiment statistics', async () => {
+      const stats = await api(`/envs/${env.id}/experiment-stats/query`, {
+        flagKey: flag.key, metricEvent, metricType: 'numeric', metricAgg: 'sum',
+        startDate: new Date(timestamp).toISOString().slice(0, 10),
+        endDate: new Date(timestamp + 5000).toISOString().slice(0, 10),
+        startTime: new Date(timestamp - 1000).toISOString(),
+        endTime: new Date(timestamp + 5000).toISOString(),
+      });
+      evidence.statistics = stats;
+      assert.equal(stats.variants.length, 2, 'Statistics variant count');
+      for (const [index, variation] of variations.entries()) {
+        const row = stats.variants.find(x => x.variant === variation.id);
+        assert.ok(row, `Statistics missing ${variation.name}`);
+        assert.equal(row.users, 1, `${variation.name}: users`);
+        assert.equal(row.conversions, index, `${variation.name}: conversions`);
+        assert.equal(row.sumValue, index * 7, `${variation.name}: numeric sum`);
+      }
+    }, 120_000);
+    await api(`${flagBase}/${flag.key}/archive`, { comment: runId }, 'PUT');
+    await api(`${flagBase}/${flag.key}`, { comment: runId }, 'DELETE');
     evidence.success = true;
-    console.log(`[PASS] ${stack.name}: EndUser, variation, metric, and combined Track cases persisted; 2 exposures appeared in Insights.\nManual UI: ${evidence.ui}`);
+    console.log(`[PASS] ${stack.name}: EndUser, variation, metric, and combined Track cases persisted; 2 exposures appeared in Insights; experiment statistics verified.`);
   } catch (error) {
     evidence.success = false;
     evidence.error = error.stack;

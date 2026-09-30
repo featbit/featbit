@@ -170,7 +170,7 @@ export async function workspaceId(stack) {
       'SELECT id FROM workspaces ORDER BY created_at LIMIT 1']);
   }
   return stack.exec('mongodb', ['mongosh', '--quiet', '-u', 'admin', '-p', 'local-stack-only', '--authenticationDatabase', 'admin', '--eval',
-    'print(db.getSiblingDB("featbit").Workspaces.findOne()._id.toUUID().toString().match(/[0-9a-f]{8}-[0-9a-f-]{27}/i)[0])']);
+    'print(db.getSiblingDB("featbit").Workspaces.findOne()._id.toUUID().toString().match(/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}/i)[0])']);
 }
 
 export async function ready(stack) {

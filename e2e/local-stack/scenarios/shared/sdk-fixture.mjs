@@ -7,10 +7,8 @@ const condition = (property, value) => ({ id: randomUUID(), property, op: 'Equal
 
 export async function sdkFixture(stack, kind, run) {
   const runId = `sdk-${kind}-${randomUUID()}`;
-  const evidence = { runId, stack: stack.name, startedAt: new Date().toISOString(), steps: [] };
-  const { api, organization, project, environment } = await ensureOrganization(stack);
-  const flagBase = `/envs/${environment.id}/feature-flags`;
-  const segmentBase = `/envs/${environment.id}/segments`;
+  const evidence = { runId, scenario: `sdk-${kind}`, stack: stack.name, startedAt: new Date().toISOString(), steps: [] };
+  let api, organization, project, environment, flagBase, segmentBase;
   const flagKey = runId;
   const values = [{ id: randomUUID(), name: 'Control', value: 'control' },
     { id: randomUUID(), name: 'Treatment', value: 'treatment' }];
@@ -57,6 +55,9 @@ export async function sdkFixture(stack, kind, run) {
     }, 'PUT');
   };
   try {
+    ({ api, organization, project, environment } = await ensureOrganization(stack));
+    flagBase = `/envs/${environment.id}/feature-flags`;
+    segmentBase = `/envs/${environment.id}/segments`;
     flag = await api(flagBase, {
       name: runId, key: flagKey, description: 'Isolated SDK live update test',
       isEnabled: true, variationType: 'string', variations: values,
@@ -69,7 +70,7 @@ export async function sdkFixture(stack, kind, run) {
     });
     await api(`${segmentBase}/${segment.id}/targeting`, {
       included: [], excluded: [], comment: runId,
-      rules: [{ id: randomUUID(), name: 'Tester', conditions: [condition('role', 'tester')] }],
+      rules: [{ id: randomUUID(), name: 'Guest', conditions: [condition('role', 'guest')] }],
     }, 'PUT');
     const secrets = Object.fromEntries(environment.secrets.map(x => [x.type, x.value]));
     const context = { stack, runId, flagKey, values, users, secrets, evidence };
@@ -78,12 +79,12 @@ export async function sdkFixture(stack, kind, run) {
       await target(condition('role', 'tester'));
       await expected('flag update', evaluate, 'treatment', 'control');
       await target(condition('User is in segment', JSON.stringify([segment.id])));
-      await expected('segment rule', evaluate, 'treatment', 'control');
+      await expected('segment rule', evaluate, 'control', 'treatment');
       await api(`${segmentBase}/${segment.id}/targeting`, {
         included: [], excluded: [], comment: runId,
-        rules: [{ id: randomUUID(), name: 'Guest', conditions: [condition('role', 'guest')] }],
+        rules: [{ id: randomUUID(), name: 'Tester', conditions: [condition('role', 'tester')] }],
       }, 'PUT');
-      await expected('segment update', evaluate, 'control', 'treatment');
+      await expected('segment update', evaluate, 'treatment', 'control');
     });
     evidence.success = true;
   } catch (error) {
