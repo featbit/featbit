@@ -30,7 +30,7 @@ Run these commands from this directory. Node.js 22+ and Docker Compose v2 are re
 | `--stack NAME` | `setup` | Select a stack; defaults to `postgres`. Options: `postgres`, `postgres-redis`, `mongo-redis`, `postgres-kafka-clickhouse`, `mongo-kafka-clickhouse`. |
 | `--all` | `test`, `down` | Test all five stacks using the configured application version, or remove all five stacks and their test data volumes. Preserve the selected setup configuration. |
 | `--one-time` | `test` | After success or failure, run `down` for the tested stack, including its test data volumes. Preserve logs, results, and setup configuration. With `--all`, clean up each stack before moving to the next. |
-| `--scenario NAME` | `test` | Required scenario name: `track`, `sdk-server`, or `sdk-client`. |
+| `--scenario NAME` | `test` | Required scenario name: `track`, `sdk-server`, `sdk-client`, or `interactive-demo`. |
 | `--image-version TAG` | `setup` | Use published API, ELS, and UI images with this tag. By default, application images are built locally. |
 | `--local` | `setup` | Select local application builds. Cannot be combined with `--image-version`. |
 | `--build` | `up`, `test` | Explicitly rebuild local application images. Requires local image configuration. |
@@ -46,6 +46,7 @@ Scenarios are registered in [scenarios/index.mjs](./scenarios/index.mjs). Each s
 - [`track`](./scenarios/track/README.md): Track persistence and Insights aggregation.
 - [`sdk-server`](./scenarios/sdk-server/README.md): .NET Server SDK flag evaluation and live flag and segment updates. Requires the .NET 8 SDK.
 - [`sdk-client`](./scenarios/sdk-client/README.md): JS Client SDK updates in two isolated browser contexts. Requires `npm ci` and `npx playwright install chromium`.
+- [`interactive-demo`](./scenarios/interactive-demo/README.md): UI login, flag creation in an isolated project's Prod environment, and live updates in the Dino Game demo. Requires Chromium and access to the demo site.
 
 For example, run the Server SDK scenario on the default PostgreSQL stack:
 
