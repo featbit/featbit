@@ -43,8 +43,8 @@ public static class MiddlewareRegister
         if (app.Environment.IsDevelopment())
         {
             app.MapOpenApi().AllowAnonymous();
-    
-            app.MapScalarApiReference();
+
+            app.MapScalarApiReference(options => options.Title = "FeatBit Control Plane");
         }
 
         app.UseHttpsRedirection();

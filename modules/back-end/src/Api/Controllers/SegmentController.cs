@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Api.Authentication;
-using Api.Swagger.Examples;
+using Api.Setup.OpenApi;
+using Api.Setup.OpenApi.Examples;
 using Application.AuditLogs;
 using Application.Bases.Models;
 using Application.Segments;
@@ -8,7 +9,6 @@ using Domain.Policies;
 using Domain.Segments;
 using Microsoft.AspNetCore.JsonPatch.SystemTextJson;
 using Microsoft.AspNetCore.JsonPatch.SystemTextJson.Operations;
-using Swashbuckle.AspNetCore.Filters;
 
 namespace Api.Controllers;
 
@@ -174,7 +174,7 @@ public class SegmentController : ApiControllerBase
     /// Perform a partial update to a segment. The request body must be a valid JSON patch.
     /// </remarks>
     [OpenApi]
-    [SwaggerRequestExample(typeof(Operation), typeof(PatchSegmentExamples))]
+    [OpenApiRequestExamples(typeof(PatchSegmentExamples))]
     [HttpPatch("{segmentId:guid}")]
     public async Task<ApiResponse<bool>> PatchAsync(Guid segmentId, [FromBody] JsonElement jsonElement)
     {

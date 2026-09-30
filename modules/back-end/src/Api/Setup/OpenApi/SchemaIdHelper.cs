@@ -1,8 +1,10 @@
-namespace Api.Setup;
+using System.Text.Json.Serialization.Metadata;
 
-public static class SwashbuckleSchemaHelper
+namespace Api.Setup.OpenApi;
+
+public static class SchemaIdHelper
 {
-    private static readonly Dictionary<string, List<string>> _schemaNameRegistrations = [];
+    private static readonly Dictionary<string, List<string>> SchemaNameRegistrations = [];
 
     // from https://github.com/domaindrivendev/Swashbuckle.AspNetCore/blob/master/src/Swashbuckle.AspNetCore.SwaggerGen/SchemaGenerator/SchemaGeneratorOptions.cs#L43
     private static string DefaultSchemaIdSelector(Type modelType)
@@ -19,17 +21,17 @@ public static class SwashbuckleSchemaHelper
         return prefix + modelType.Name.Split('`').First();
     }
 
+    public static string GetSchemaId(JsonTypeInfo typeInfo) => GetSchemaId(typeInfo.Type);
 
     public static string GetSchemaId(Type modelType)
     {
-        string id = DefaultSchemaIdSelector(modelType);
+        var id = DefaultSchemaIdSelector(modelType);
 
-        if (!_schemaNameRegistrations.ContainsKey(id))
+        if (!SchemaNameRegistrations.TryGetValue(id, out var registrations))
         {
-            _schemaNameRegistrations[id] = [];
+            registrations = [];
+            SchemaNameRegistrations[id] = registrations;
         }
-
-        var registrations = _schemaNameRegistrations[id];
 
         var fullname = modelType.FullName ?? string.Empty;
         if (!string.IsNullOrWhiteSpace(fullname) && !registrations.Contains(fullname))
