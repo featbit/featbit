@@ -7,8 +7,7 @@ namespace Api.IntegrationTests.Fixtures;
 /// </summary>
 public sealed class MongoDbFixture : IAsyncLifetime
 {
-    private readonly MongoDbContainer _container = new MongoDbBuilder()
-        .WithImage("mongo:7.0")
+    private readonly MongoDbContainer _container = new MongoDbBuilder("mongo:7.0")
         .Build();
 
     public string ConnectionString => _container.GetConnectionString();
