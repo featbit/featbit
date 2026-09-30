@@ -6,7 +6,7 @@ import { scenarios } from './scenarios/index.mjs';
 import { readConfig, saveConfig, printConfig } from './config.mjs';
 
 const [command, ...args] = process.argv.slice(2);
-const usage = 'Usage: node cli.mjs setup [--stack NAME] [--image-version TAG | --local] | config | up [--no-build] | test --scenario NAME [--all] [--one-time] | logs | down';
+const usage = 'Usage: node cli.mjs setup [--stack NAME] [--image-version TAG | --local] | config | up [--no-build] | test --scenario NAME [--all] [--one-time] | logs | down [--all]';
 let stackName, scenario, selectedVersion, local = false, all = false, noBuild = false, oneTime = false;
 if (!['setup', 'config', 'up', 'test', 'logs', 'down'].includes(command)) throw new Error(usage);
 for (let i = 0; i < args.length; i++) {
@@ -21,7 +21,8 @@ for (let i = 0; i < args.length; i++) {
   else throw new Error(usage);
 }
 if ((command !== 'setup' && (stackName !== undefined || selectedVersion !== undefined || local)) ||
-    (local && selectedVersion !== undefined) || ((all || oneTime) && command !== 'test') ||
+    (local && selectedVersion !== undefined) || (all && !['test', 'down'].includes(command)) ||
+    (oneTime && command !== 'test') ||
     (command === 'test' ? !Object.hasOwn(scenarios, scenario) : scenario !== undefined) ||
     (noBuild && command !== 'up')) throw new Error(usage);
 if (command === 'setup' || command === 'config') {

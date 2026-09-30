@@ -28,7 +28,7 @@ Run these commands from this directory. Node.js 22+ and Docker Compose v2 are re
 | Option | Commands | Description |
 | --- | --- | --- |
 | `--stack NAME` | `setup` | Select a stack; defaults to `postgres`. Options: `postgres`, `postgres-redis`, `mongo-redis`, `postgres-kafka-clickhouse`, `mongo-kafka-clickhouse`. |
-| `--all` | `test` | Run against all five stacks using the configured application version, without changing the selected stack. |
+| `--all` | `test`, `down` | Test all five stacks using the configured application version, or remove all five stacks and their test data volumes. Preserve the selected setup configuration. |
 | `--one-time` | `test` | After success or failure, run `down` for the tested stack, including its test data volumes. Preserve logs, results, and setup configuration. With `--all`, clean up each stack before moving to the next. |
 | `--scenario NAME` | `test` | Required scenario name: `track`, `sdk-server`, or `sdk-client`. |
 | `--image-version TAG` | `setup` | Use published API, ELS, and UI images with this tag. By default, application images are built locally. |
@@ -71,4 +71,7 @@ npm run logs
 
 # Remove the selected stack and its test data volumes
 npm run down
+
+# Remove all stacks and their test data volumes, preserving logs and setup configuration
+npm run down -- --all
 ```
