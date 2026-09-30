@@ -1,0 +1,4 @@
+node_modules/
+.runs/
+scenarios/sdk-server/bin/
+scenarios/sdk-server/obj/
