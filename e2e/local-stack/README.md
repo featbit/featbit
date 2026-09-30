@@ -10,7 +10,7 @@
 
 `test` reuses a running stack or prepares one if needed. Repeated runs reuse existing business data. Runtime files are saved under `.runs/<stack>/`.
 
-All stacks share the same application images: `featbit-local-api:local`, `featbit-local-els:local`, and `featbit-local-ui:local` for local builds, or the configured published version. Stack differences are runtime configuration; containers, networks, and data volumes remain separate. A `test --all` invocation builds local images at most once.
+All stacks share the same application images: `featbit-local-api:local`, `featbit-local-els:local`, and `featbit-local-ui:local` for local builds, or the configured published version. Stack differences are runtime configuration; containers, networks, and data volumes remain separate. Existing application image tags are reused by default. Missing local images are built; missing published images are pulled. Use `--build` to rebuild local images after source changes. A `test --all --build` invocation builds local images only once, then applies them to each stack.
 
 ## CLI commands
 
@@ -33,7 +33,7 @@ Run these commands from this directory. Node.js 22+ and Docker Compose v2 are re
 | `--scenario NAME` | `test` | Required scenario name: `track`, `sdk-server`, or `sdk-client`. |
 | `--image-version TAG` | `setup` | Use published API, ELS, and UI images with this tag. By default, application images are built locally. |
 | `--local` | `setup` | Select local application builds. Cannot be combined with `--image-version`. |
-| `--no-build` | `up` | Reuse existing local application images without building them. |
+| `--build` | `up`, `test` | Explicitly rebuild local application images. Requires local image configuration. |
 
 `setup` only saves configuration in the Git-ignored `.runs/config.json`; it does not start or stop containers. Omitted fields retain their current values. Before the first setup, commands default to `postgres` with local application builds. `config` (or `setup` without options) displays the current values and identifies defaults when no configuration has been saved.
 

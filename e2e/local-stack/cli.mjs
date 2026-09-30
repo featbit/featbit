@@ -6,8 +6,8 @@ import { scenarios } from './scenarios/index.mjs';
 import { readConfig, saveConfig, printConfig } from './config.mjs';
 
 const [command, ...args] = process.argv.slice(2);
-const usage = 'Usage: node cli.mjs setup [--stack NAME] [--image-version TAG | --local] | config | up [--no-build] | test --scenario NAME [--all] [--one-time] | logs | down [--all]';
-let stackName, scenario, selectedVersion, local = false, all = false, noBuild = false, oneTime = false;
+const usage = 'Usage: node cli.mjs setup [--stack NAME] [--image-version TAG | --local] | config | up [--build] | test --scenario NAME [--all] [--one-time] [--build] | logs | down [--all]';
+let stackName, scenario, selectedVersion, local = false, all = false, forceBuild = false, oneTime = false;
 if (!['setup', 'config', 'up', 'test', 'logs', 'down'].includes(command)) throw new Error(usage);
 for (let i = 0; i < args.length; i++) {
   const arg = args[i];
@@ -17,14 +17,14 @@ for (let i = 0; i < args.length; i++) {
   else if (arg === '--local' && !local) local = true;
   else if (arg === '--all' && !all) all = true;
   else if (arg === '--one-time' && !oneTime) oneTime = true;
-  else if (arg === '--no-build' && !noBuild) noBuild = true;
+  else if (arg === '--build' && !forceBuild) forceBuild = true;
   else throw new Error(usage);
 }
 if ((command !== 'setup' && (stackName !== undefined || selectedVersion !== undefined || local)) ||
     (local && selectedVersion !== undefined) || (all && !['test', 'down'].includes(command)) ||
     (oneTime && command !== 'test') ||
     (command === 'test' ? !Object.hasOwn(scenarios, scenario) : scenario !== undefined) ||
-    (noBuild && command !== 'up')) throw new Error(usage);
+    (forceBuild && !['up', 'test'].includes(command))) throw new Error(usage);
 if (command === 'setup' || command === 'config') {
   const changes = {};
   if (stackName !== undefined) changes.stack = stackName;
@@ -34,17 +34,23 @@ if (command === 'setup' || command === 'config') {
 }
 const { config } = await readConfig();
 const imageVersion = config.imageVersion;
+if (forceBuild && imageVersion) throw new Error('--build requires local images; run npm run setup -- --local first.');
 const names = all ? Object.keys(stacks) : [config.stack];
 let localImagesBuilt = false;
 async function startStack(stack) {
   await initDbs(stack);
-  if (stack.localServices.length && !noBuild && !localImagesBuilt) {
+  const imageList = await processRun('docker', ['image', 'ls', '--format', '{{.Repository}}:{{.Tag}}'], { quiet: true });
+  const existingImages = new Set(imageList.split(/\r?\n/).filter(Boolean));
+  const servicesToBuild = stack.localServices.filter(service =>
+    (forceBuild && !localImagesBuilt) || !existingImages.has(`featbit-local-${service}:local`));
+  if (servicesToBuild.length) {
     console.log(`Building local source; log: ${join(stack.artifacts, 'build.log')}`);
-    await stack.compose(['build', ...stack.localServices], { timeout: 1_800_000, quiet: true, logPath: join(stack.artifacts, 'build.log') });
+    await stack.compose(['build', ...servicesToBuild], { timeout: 1_800_000, quiet: true, logPath: join(stack.artifacts, 'build.log') });
     localImagesBuilt = true;
   }
   for (const service of stack.publishedImages) {
     const image = stack.env[`${service.toUpperCase()}_IMAGE`];
+    if (existingImages.has(image)) continue;
     console.log(`Pulling ${service}: ${image}`);
     await processRun('docker', ['pull', image]);
   }
@@ -78,7 +84,7 @@ for (const name of names) {
         const imageSet = new Set(actualImages.split(/\r?\n/).filter(Boolean));
         available = stack.expectedApplicationImages.every(image => imageSet.has(image));
       }
-      if (!available) {
+      if (!available || forceBuild) {
         console.log(`[test] Preparing ${name}${imageVersion ? ` with image version ${imageVersion}` : ''}`);
         await startStack(stack);
       } else {
