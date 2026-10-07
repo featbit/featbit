@@ -1,15 +1,28 @@
+import psycopg
 import psycopg_pool
 import sqlparse
-from time import perf_counter
+from time import perf_counter, sleep
 from typing import Any, Dict, List, Optional, Tuple, Union
 from flask import current_app
 
 from app.setting import SHELL_PLUS_PRINT_SQL, POSTGRES_CONNECTION_STRING, POSTGRES_DATABASE, POSTGRES_USER, \
-    POSTGRES_PASSWORD, POSTGRES_HOST, POSTGRES_PORT
+    POSTGRES_PASSWORD, POSTGRES_HOST, POSTGRES_PORT, POSTGRES_POOL_MIN_SIZE, POSTGRES_POOL_MAX_SIZE, \
+    POSTGRES_POOL_MAX_IDLE
 
 InsertParams = Union[List, Tuple]
 NonInsertParams = Dict[str, Any]
 QueryArgs = Optional[Union[InsertParams, NonInsertParams]]
+
+PG_QUERY_MAX_ATTEMPTS = 2
+PG_QUERY_RETRY_DELAY = 0.2
+
+PG_CONNECT_KWARGS = {
+    "connect_timeout": 10,
+    "keepalives": 1,
+    "keepalives_idle": 60,
+    "keepalives_interval": 10,
+    "keepalives_count": 3,
+}
 
 # Global connection pool
 __pg_pool: Optional[psycopg_pool.ConnectionPool] = None
@@ -27,33 +40,47 @@ def create_pg_pool():
 
         __pg_pool = psycopg_pool.ConnectionPool(
             conninfo=conninfo,
-            min_size=10,
-            max_size=100,
+            kwargs=PG_CONNECT_KWARGS,
+            min_size=POSTGRES_POOL_MIN_SIZE,
+            max_size=POSTGRES_POOL_MAX_SIZE,
+            # Recycle idle connections before network middleboxes silently drop them
+            max_idle=POSTGRES_POOL_MAX_IDLE,
+            # Verify a connection is alive before handing it out
+            check=psycopg_pool.ConnectionPool.check_connection,
+            open=True,
         )
 
     return __pg_pool
 
 
 def execute_query(query: str, args: QueryArgs = None, fetch_all=True):
-    """Execute a SQL query using psycopg"""
+    """Execute a read-only SQL query using psycopg.
+
+    A dropped connection (e.g. 'SSL error: unexpected eof') is retried once on a fresh
+    connection. This is safe because every caller only issues SELECT statements.
+    """
     pool = create_pg_pool()
+    prepared_sql, prepared_args = _prepare_query(query, args)
 
-    with pool.connection() as conn:
-        with conn.cursor() as cur:
-            prepared_sql, prepared_args = _prepare_query(query, args)
-            start_time = perf_counter()
-
-            try:
-                cur.execute(prepared_sql, prepared_args)
-                result = cur.fetchall() if fetch_all else cur.fetchone()
-            except Exception as err:
-                raise err
-            finally:
-                execution_time = perf_counter() - start_time
-                if SHELL_PLUS_PRINT_SQL:
-                    current_app.logger.info("SQL execution time: %.6fs" % execution_time)
-
-    return result
+    for attempt in range(1, PG_QUERY_MAX_ATTEMPTS + 1):
+        start_time = perf_counter()
+        try:
+            with pool.connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(prepared_sql, prepared_args)
+                    return cur.fetchall() if fetch_all else cur.fetchone()
+        except psycopg.OperationalError as err:
+            if attempt >= PG_QUERY_MAX_ATTEMPTS:
+                raise
+            current_app.logger.warning(
+                "PostgreSQL connection error (%s), attempt %d/%d, retrying: %s",
+                type(err).__name__, attempt, PG_QUERY_MAX_ATTEMPTS, err
+            )
+            sleep(PG_QUERY_RETRY_DELAY)
+        finally:
+            execution_time = perf_counter() - start_time
+            if SHELL_PLUS_PRINT_SQL:
+                current_app.logger.info("SQL execution time: %.6fs" % execution_time)
 
 
 def _prepare_query(query: str, args: QueryArgs):
