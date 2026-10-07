@@ -42,6 +42,10 @@ POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "please_change_me")
 POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
 POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5432")
 POSTGRES_DATABASE = os.getenv("POSTGRES_DATABASE", "featbit")
+POSTGRES_POOL_MIN_SIZE = get_from_env("POSTGRES_POOL_MIN_SIZE", 2, type_cast=int)
+POSTGRES_POOL_MAX_SIZE = get_from_env("POSTGRES_POOL_MAX_SIZE", 20, type_cast=int)
+# Must be shorter than the idle timeout of the network path between the service and PostgreSQL
+POSTGRES_POOL_MAX_IDLE = get_from_env("POSTGRES_POOL_MAX_IDLE", 120, type_cast=float)
 
 CACHE_KEY_PREFIX = "featbit:das:"
 
