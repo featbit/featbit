@@ -1,5 +1,3 @@
-using Application.Experiments;
-
 namespace Application.FeatureFlags;
 
 /// <summary>
@@ -12,17 +10,17 @@ public class GetRunningExperiments : IRequest<IReadOnlyList<ExperimentReference>
     public string Key { get; set; }
 }
 
-public class GetRunningExperimentsHandler(IFeatureFlagService flagService, IExperimentService experimentService)
+public class GetRunningExperimentsHandler(IFeatureFlagService service)
     : IRequestHandler<GetRunningExperiments, IReadOnlyList<ExperimentReference>>
 {
     public async Task<IReadOnlyList<ExperimentReference>> Handle(
         GetRunningExperiments request,
         CancellationToken cancellationToken)
     {
-        var flag = await flagService.GetAsync(request.EnvId, request.Key);
+        var flag = await service.GetAsync(request.EnvId, request.Key);
 
         var experiments =
-            await experimentService.GetRunningExperimentsAsync(request.EnvId, flag.Id);
+            await service.GetRunningExperimentsAsync(request.EnvId, flag.Id);
 
         return experiments;
     }

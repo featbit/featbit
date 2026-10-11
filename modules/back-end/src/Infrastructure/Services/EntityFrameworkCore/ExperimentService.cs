@@ -548,34 +548,6 @@ public class ExperimentService(
             .ToArray();
     }
 
-    public async Task<IReadOnlyList<ExperimentReference>> GetRunningExperimentsAsync(Guid envId, Guid flagId)
-    {
-        var now = DateTime.UtcNow;
-
-        var experiments = await dbContext.Set<Experiment>()
-            .AsNoTracking()
-            .Where(x => x.EnvId == envId && x.FlagId == flagId)
-            .Select(x => new { x.Id, x.Name })
-            .ToListAsync();
-        if (experiments.Count == 0)
-        {
-            return [];
-        }
-
-        var experimentIds = experiments.Select(x => x.Id).ToArray();
-        var runningIds = await dbContext.Set<ExperimentRun>()
-            .AsNoTracking()
-            .Where(x => experimentIds.Contains(x.ExperimentId) && (x.ObservationEnd == null || x.ObservationEnd > now))
-            .Select(x => x.ExperimentId)
-            .Distinct()
-            .ToListAsync();
-
-        return experiments
-            .Where(x => runningIds.Contains(x.Id))
-            .Select(x => new ExperimentReference(x.Id, x.Name))
-            .ToArray();
-    }
-
     public async Task<PagedResult<ExperimentVm>> GetListAsync(
         Guid envId,
         ExperimentFilter filter)

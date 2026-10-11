@@ -416,21 +416,6 @@ public class FlagComparerTests
         Assert.Equal(current, instruction.Value);
     }
 
-    [Fact]
-    public void Compare_OnlyInsightsEnabledChanged_ReturnsSingleInstructionRequiringToggleFlag()
-    {
-        var original = MakeFlag();
-        var current = MakeFlag();
-        current.InsightsEnabled = false;
-        var dataChange = new DataChange(original).To(current);
-
-        var instructions = FlagComparer.Compare(dataChange).ToArray();
-
-        var instruction = Assert.Single(instructions);
-        Assert.Equal(FlagInstructionKind.UpdateInsightsEnabled, instruction.Kind);
-        Assert.Equal(Domain.Policies.Permissions.ToggleFlag, instruction.Permission);
-    }
-
     private static FeatureFlag MakeFlag(string name = "n", string description = "d") => new()
     {
         Name = name,

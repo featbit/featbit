@@ -552,32 +552,6 @@ public class ExperimentService(
             .ToArray();
     }
 
-    public async Task<IReadOnlyList<ExperimentReference>> GetRunningExperimentsAsync(Guid envId, Guid flagId)
-    {
-        var now = DateTime.UtcNow;
-
-        var experiments = await mongoDb.CollectionOf<Experiment>()
-            .Find(x => x.EnvId == envId && x.FlagId == flagId)
-            .ToListAsync();
-        if (experiments.Count == 0)
-        {
-            return [];
-        }
-
-        var experimentIds = experiments.Select(x => x.Id).ToArray();
-        var runningIds = await mongoDb.CollectionOf<ExperimentRun>()
-            .Distinct(
-                x => x.ExperimentId,
-                x => experimentIds.Contains(x.ExperimentId) && (x.ObservationEnd == null || x.ObservationEnd > now)
-            )
-            .ToListAsync();
-
-        return experiments
-            .Where(x => runningIds.Contains(x.Id))
-            .Select(x => new ExperimentReference(x.Id, x.Name))
-            .ToArray();
-    }
-
     public async Task<PagedResult<ExperimentVm>> GetListAsync(
         Guid envId,
         ExperimentFilter filter)

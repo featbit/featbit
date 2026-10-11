@@ -2,6 +2,7 @@ using System.Text.Json;
 using Application.Bases.Exceptions;
 using Application.Bases.Models;
 using Application.FeatureFlags;
+using Domain.Experiments;
 using Domain.FeatureFlags;
 using Domain.Segments;
 using MongoDB.Driver;
@@ -123,6 +124,32 @@ public class FeatureFlagService : MongoDbService<FeatureFlag>, IFeatureFlagServi
             .ToListAsync();
 
         return segments;
+    }
+
+    public async Task<IReadOnlyList<ExperimentReference>> GetRunningExperimentsAsync(Guid envId, Guid flagId)
+    {
+        var now = DateTime.UtcNow;
+
+        var experiments = await MongoDb.CollectionOf<Experiment>()
+            .Find(x => x.EnvId == envId && x.FlagId == flagId)
+            .ToListAsync();
+        if (experiments.Count == 0)
+        {
+            return [];
+        }
+
+        var experimentIds = experiments.Select(x => x.Id).ToArray();
+        var runningIds = await MongoDb.CollectionOf<ExperimentRun>()
+            .Distinct(
+                x => x.ExperimentId,
+                x => experimentIds.Contains(x.ExperimentId) && (x.ObservationEnd == null || x.ObservationEnd > now)
+            )
+            .ToListAsync();
+
+        return experiments
+            .Where(x => runningIds.Contains(x.Id))
+            .Select(x => new ExperimentReference(x.Id, x.Name))
+            .ToArray();
     }
 
     public async Task MarkAsUpdatedAsync(ICollection<Guid> flagIds, Guid operatorId)

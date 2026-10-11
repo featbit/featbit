@@ -69,7 +69,7 @@ public class FlagInsightsPersistenceTests(ExperimentProviderParityFixture fixtur
         await service.CreateRunAsync(envId, ended.Id, Run(now.AddDays(-2), now.AddDays(-1)));
         await service.CreateRunAsync(envId, otherFlagOpen.Id, Run(now.AddDays(-1), null));
 
-        var running = await service.GetRunningExperimentsAsync(envId, flag.Id);
+        var running = await flags.GetRunningExperimentsAsync(envId, flag.Id);
 
         Assert.Equal(
             new[] { open.Id, future.Id }.OrderBy(x => x),

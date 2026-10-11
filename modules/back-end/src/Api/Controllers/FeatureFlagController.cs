@@ -3,7 +3,6 @@ using Api.Authentication;
 using Api.Swagger.Examples;
 using Application.AuditLogs;
 using Application.Bases.Models;
-using Application.Experiments;
 using Application.FeatureFlags;
 using Domain.Workspaces;
 using Domain.FeatureFlags;
@@ -295,6 +294,7 @@ public class FeatureFlagController : ApiControllerBase
     /// </summary>
     [OpenApi]
     [HttpPut("{key}/insight-collection")]
+    [Authorize(Permissions.CanAccessEnv)]
     public async Task<ApiResponse<Guid>> UpdateInsightCollectionAsync(Guid envId, string key, UpdateInsightCollectionPayload payload)
     {
         var request = new UpdateInsightCollection

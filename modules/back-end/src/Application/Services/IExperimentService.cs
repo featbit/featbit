@@ -66,8 +66,6 @@ public interface IExperimentService
         Guid envId,
         string nameSearchText = null);
 
-    Task<IReadOnlyList<ExperimentReference>> GetRunningExperimentsAsync(Guid envId, Guid flagId);
-
     Task<PagedResult<ExperimentVm>> GetListAsync(
         Guid envId,
         ExperimentFilter filter);

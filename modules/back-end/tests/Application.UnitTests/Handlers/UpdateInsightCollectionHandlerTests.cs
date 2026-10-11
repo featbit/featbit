@@ -1,6 +1,5 @@
 using Application.Bases;
 using Application.Bases.Exceptions;
-using Application.Experiments;
 using Application.FeatureFlags;
 using Application.Services;
 using Application.Users;
@@ -13,7 +12,6 @@ namespace Application.UnitTests.Handlers;
 public class UpdateInsightCollectionHandlerTests
 {
     private readonly Mock<IFeatureFlagService> _flags = new();
-    private readonly Mock<IExperimentService> _experiments = new();
     private readonly Mock<IPublisher> _publisher = new();
     private readonly Guid _userId = Guid.NewGuid();
     private readonly FeatureFlag _flag;
@@ -26,10 +24,10 @@ public class UpdateInsightCollectionHandlerTests
         _flag = new FeatureFlag(Guid.NewGuid(), "Flag", "Description", "flag", true,
             VariationTypes.Boolean, [on, off], off.Id, on.Id, [], Guid.NewGuid());
         _flags.Setup(x => x.GetAsync(_flag.EnvId, _flag.Key)).ReturnsAsync(_flag);
-        _experiments.Setup(x => x.GetRunningExperimentsAsync(_flag.EnvId, _flag.Id)).ReturnsAsync([]);
+        _flags.Setup(x => x.GetRunningExperimentsAsync(_flag.EnvId, _flag.Id)).ReturnsAsync([]);
         var user = new Mock<ICurrentUser>();
         user.SetupGet(x => x.Id).Returns(_userId);
-        _sut = new UpdateInsightCollectionHandler(_flags.Object, _experiments.Object, user.Object, _publisher.Object);
+        _sut = new UpdateInsightCollectionHandler(_flags.Object, user.Object, _publisher.Object);
     }
 
     private UpdateInsightCollection Request(bool enabled) => new()
@@ -49,7 +47,7 @@ public class UpdateInsightCollectionHandlerTests
         Assert.True(_flag.InsightsEnabled);
         Assert.NotEqual(previousRevision, revision);
         Assert.Equal(_flag.Revision, revision);
-        _experiments.Verify(x => x.GetRunningExperimentsAsync(It.IsAny<Guid>(), It.IsAny<Guid>()), Times.Never);
+        _flags.Verify(x => x.GetRunningExperimentsAsync(It.IsAny<Guid>(), It.IsAny<Guid>()), Times.Never);
         AssertUpdatedAndPublished(request);
     }
 
@@ -64,14 +62,14 @@ public class UpdateInsightCollectionHandlerTests
         Assert.False(_flag.InsightsEnabled);
         Assert.NotEqual(previousRevision, revision);
         Assert.Equal(_flag.Revision, revision);
-        _experiments.Verify(x => x.GetRunningExperimentsAsync(_flag.EnvId, _flag.Id), Times.Once);
+        _flags.Verify(x => x.GetRunningExperimentsAsync(_flag.EnvId, _flag.Id), Times.Once);
         AssertUpdatedAndPublished(request);
     }
 
     [Fact]
     public async Task Handle_DisableInsightsWithRunningExperiments_ThrowsWithoutChangingFlag()
     {
-        _experiments.Setup(x => x.GetRunningExperimentsAsync(_flag.EnvId, _flag.Id))
+        _flags.Setup(x => x.GetRunningExperimentsAsync(_flag.EnvId, _flag.Id))
             .ReturnsAsync([new ExperimentReference(Guid.NewGuid(), "Experiment")]);
         var previousRevision = _flag.Revision;
         var previousUpdatedAt = _flag.UpdatedAt;
@@ -85,7 +83,7 @@ public class UpdateInsightCollectionHandlerTests
         Assert.Equal(previousRevision, _flag.Revision);
         Assert.Equal(previousUpdatedAt, _flag.UpdatedAt);
         Assert.Equal(previousUpdatorId, _flag.UpdatorId);
-        _experiments.Verify(x => x.GetRunningExperimentsAsync(_flag.EnvId, _flag.Id), Times.Once);
+        _flags.Verify(x => x.GetRunningExperimentsAsync(_flag.EnvId, _flag.Id), Times.Once);
         AssertNotPersistedOrPublished();
     }
 
@@ -106,7 +104,7 @@ public class UpdateInsightCollectionHandlerTests
         Assert.Equal(enabled, _flag.InsightsEnabled);
         Assert.Equal(previousUpdatedAt, _flag.UpdatedAt);
         Assert.Equal(previousUpdatorId, _flag.UpdatorId);
-        _experiments.Verify(x => x.GetRunningExperimentsAsync(It.IsAny<Guid>(), It.IsAny<Guid>()), Times.Never);
+        _flags.Verify(x => x.GetRunningExperimentsAsync(It.IsAny<Guid>(), It.IsAny<Guid>()), Times.Never);
         AssertNotPersistedOrPublished();
     }
 

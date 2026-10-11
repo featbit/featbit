@@ -19,14 +19,13 @@ public class UpdateInsightCollection : UpdateInsightCollectionPayload, IRequest<
 }
 
 public class UpdateInsightCollectionHandler(
-    IFeatureFlagService flagService,
-    IExperimentService experimentService,
+    IFeatureFlagService service,
     ICurrentUser currentUser,
     IPublisher publisher) : IRequestHandler<UpdateInsightCollection, Guid>
 {
     public async Task<Guid> Handle(UpdateInsightCollection request, CancellationToken cancellationToken)
     {
-        var flag = await flagService.GetAsync(request.EnvId, request.Key);
+        var flag = await service.GetAsync(request.EnvId, request.Key);
 
         // if state is unchanged, we don't need to do anything
         if (flag.InsightsEnabled == request.Enabled)
@@ -38,7 +37,7 @@ public class UpdateInsightCollectionHandler(
         if (flag.InsightsEnabled && !request.Enabled)
         {
             var runningExperiments =
-                await experimentService.GetRunningExperimentsAsync(request.EnvId, flag.Id);
+                await service.GetRunningExperimentsAsync(request.EnvId, flag.Id);
             if (runningExperiments.Any())
             {
                 throw new BusinessException(ErrorCodes.BusinessRuleViolation);
@@ -46,7 +45,7 @@ public class UpdateInsightCollectionHandler(
         }
 
         var dataChange = flag.UpdateInsightCollection(request.Enabled, currentUser.Id);
-        await flagService.UpdateAsync(flag);
+        await service.UpdateAsync(flag);
 
         var notification = new OnFeatureFlagChanged(
             flag, Operations.Update, dataChange, currentUser.Id, comment: request.Comment

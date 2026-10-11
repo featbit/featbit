@@ -30,8 +30,7 @@ public class FlagScheduleWorker(IServiceProvider serviceProvider, ILogger<FlagSc
         return base.StopAsync(cancellationToken);
     }
 
-    // internal for unit tests: the 45s timer is not driven in tests
-    internal async Task DoWorkAsync(CancellationToken cancellationToken)
+    private async Task DoWorkAsync(CancellationToken cancellationToken)
     {
         using var scope = serviceProvider.CreateScope();
         var flagScheduleService = scope.ServiceProvider.GetRequiredService<IFlagScheduleService>();
