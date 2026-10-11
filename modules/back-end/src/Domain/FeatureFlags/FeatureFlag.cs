@@ -203,11 +203,7 @@ public class FeatureFlag : FullAuditedEntity
         return dataChange.To(this);
     }
 
-    public DataChange UpdateGeneral(
-        string name,
-        string description,
-        string[] tags,
-        Guid currentUserId)
+    public DataChange UpdateGeneral(string name, string description, string[] tags, Guid currentUserId)
     {
         var dataChange = new DataChange(this);
 

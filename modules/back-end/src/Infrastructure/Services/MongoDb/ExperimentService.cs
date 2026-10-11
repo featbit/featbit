@@ -95,11 +95,7 @@ public class ExperimentService(
         SetIfNotNull(updates, x => x.Stage, update.Stage);
         if (update.FlagId.HasValue)
         {
-            var boundFlag = await ExperimentFlagBinding.ValidateAsync(featureFlagService, envId, update.FlagId);
-            if (boundFlag != null && await HasUnendedRunAsync(id))
-            {
-                ExperimentFlagBinding.EnsureInsightsEnabled(boundFlag);
-            }
+            await ExperimentFlagBinding.ValidateAsync(featureFlagService, envId, update.FlagId);
             updates.Add(Builders<Experiment>.Update.Set(x => x.FlagId, update.FlagId));
         }
         SetIfNotNull(updates, x => x.Hypothesis, update.Hypothesis);
@@ -195,10 +191,6 @@ public class ExperimentService(
             throw new BusinessException(ErrorCodes.Required("primaryMetric"));
         }
         var flag = await ExperimentFlagBinding.RequireAsync(featureFlagService, envId, experiment.FlagId);
-        if (ExperimentFlagBinding.IsUnended(run, now))
-        {
-            ExperimentFlagBinding.EnsureInsightsEnabled(flag);
-        }
         run.Variations = RunVariationSnapshot.Copy(flag.Variations);
         RunVariationSnapshot.ValidateSelection(run);
 
@@ -255,7 +247,6 @@ public class ExperimentService(
         RunVariationSnapshot.EnsureSelectionCanChange(run, update.ControlVariant, update.TreatmentVariants);
         var selection = RunVariationSnapshot.Selection(run);
         ApplyRunUpdate(run, update);
-        await EnsureUnendedRunCollectsInsightsAsync(envId, id, run);
         await NormalizeAndValidateLayerAssignmentAsync(envId, run);
         if (update.ControlVariant != null || update.TreatmentVariants != null)
         {
@@ -341,7 +332,6 @@ public class ExperimentService(
         var run = await GetRunAsync(id, runId);
         run.ObservationStart = update.ObservationStart;
         run.ObservationEnd = update.ObservationEnd;
-        await EnsureUnendedRunCollectsInsightsAsync(envId, id, run);
         await NormalizeAndValidateLayerAssignmentAsync(envId, run);
         run.UpdatedAt = DateTime.UtcNow;
 
@@ -895,29 +885,6 @@ public class ExperimentService(
         }
 
         return experiment;
-    }
-
-    private async Task<bool> HasUnendedRunAsync(Guid experimentId)
-    {
-        var now = DateTime.UtcNow;
-        return await mongoDb.CollectionOf<ExperimentRun>()
-            .Find(x => x.ExperimentId == experimentId && (x.ObservationEnd == null || x.ObservationEnd > now))
-            .AnyAsync();
-    }
-
-    private async Task EnsureUnendedRunCollectsInsightsAsync(Guid envId, Guid experimentId, ExperimentRun run)
-    {
-        if (!ExperimentFlagBinding.IsUnended(run, DateTime.UtcNow))
-        {
-            return;
-        }
-
-        var flagId = await mongoDb.CollectionOf<Experiment>()
-            .Find(x => x.Id == experimentId && x.EnvId == envId)
-            .Project(x => x.FlagId)
-            .FirstOrDefaultAsync();
-        ExperimentFlagBinding.EnsureInsightsEnabled(
-            await ExperimentFlagBinding.FindAsync(featureFlagService, envId, flagId));
     }
 
     private async Task EnsureExperimentExistsAsync(Guid envId, Guid id)

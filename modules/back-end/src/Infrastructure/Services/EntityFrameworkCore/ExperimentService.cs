@@ -98,11 +98,7 @@ public class ExperimentService(
             throw new EntityNotFoundException(nameof(Experiment), $"{envId}-{id}");
         }
 
-        var boundFlag = await ExperimentFlagBinding.ValidateAsync(featureFlagService, envId, update.FlagId);
-        if (boundFlag != null && boundFlag.Id != experiment.FlagId && await HasUnendedRunAsync(id))
-        {
-            ExperimentFlagBinding.EnsureInsightsEnabled(boundFlag);
-        }
+        await ExperimentFlagBinding.ValidateAsync(featureFlagService, envId, update.FlagId);
         ApplyUpdate(experiment, update);
         experiment.UpdatedAt = DateTime.UtcNow;
 
@@ -199,10 +195,6 @@ public class ExperimentService(
             throw new BusinessException(ErrorCodes.Required("primaryMetric"));
         }
         var flag = await ExperimentFlagBinding.RequireAsync(featureFlagService, envId, experiment.FlagId);
-        if (ExperimentFlagBinding.IsUnended(run, now))
-        {
-            ExperimentFlagBinding.EnsureInsightsEnabled(flag);
-        }
         run.Variations = RunVariationSnapshot.Copy(flag.Variations);
         RunVariationSnapshot.ValidateSelection(run);
 
@@ -267,7 +259,6 @@ public class ExperimentService(
         RunVariationSnapshot.EnsureSelectionCanChange(run, update.ControlVariant, update.TreatmentVariants);
         var selection = RunVariationSnapshot.Selection(run);
         ApplyRunUpdate(run, update);
-        await EnsureUnendedRunCollectsInsightsAsync(envId, id, run);
         await NormalizeAndValidateLayerAssignmentAsync(envId, run);
         if (update.ControlVariant != null || update.TreatmentVariants != null)
         {
@@ -351,7 +342,6 @@ public class ExperimentService(
         var run = await GetTrackedRunAsync(id, runId);
         run.ObservationStart = update.ObservationStart;
         run.ObservationEnd = update.ObservationEnd;
-        await EnsureUnendedRunCollectsInsightsAsync(envId, id, run);
         await NormalizeAndValidateLayerAssignmentAsync(envId, run);
         run.UpdatedAt = DateTime.UtcNow;
 
@@ -913,28 +903,6 @@ public class ExperimentService(
         }
 
         return experiment;
-    }
-
-    private async Task<bool> HasUnendedRunAsync(Guid experimentId)
-    {
-        var now = DateTime.UtcNow;
-        return await dbContext.Set<ExperimentRun>()
-            .AnyAsync(x => x.ExperimentId == experimentId && (x.ObservationEnd == null || x.ObservationEnd > now));
-    }
-
-    private async Task EnsureUnendedRunCollectsInsightsAsync(Guid envId, Guid experimentId, ExperimentRun run)
-    {
-        if (!ExperimentFlagBinding.IsUnended(run, DateTime.UtcNow))
-        {
-            return;
-        }
-
-        var flagId = await dbContext.Set<Experiment>()
-            .Where(x => x.Id == experimentId && x.EnvId == envId)
-            .Select(x => x.FlagId)
-            .FirstOrDefaultAsync();
-        ExperimentFlagBinding.EnsureInsightsEnabled(
-            await ExperimentFlagBinding.FindAsync(featureFlagService, envId, flagId));
     }
 
     private async Task EnsureExperimentExistsAsync(Guid envId, Guid id)
