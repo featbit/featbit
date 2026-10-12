@@ -24,6 +24,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -54,7 +55,6 @@ import { fetchFeatureFlagById } from "@/features/flags/flags-api"
 import type { FlagVariation } from "@/features/flags/flags-types"
 import { fetchLayers } from "@/features/expt-layers/layers-api"
 import type { Layer } from "@/features/expt-layers/layers-types"
-import { ApiRequestError } from "@/lib/api/authenticated-api"
 import { cn } from "@/lib/utils"
 import { ExperimentRunTabs } from "../components/experiment-run-tabs"
 import type { ExperimentDetail } from "../experiment-details-types"
@@ -740,7 +740,6 @@ export function MeasuringDetails({
     [selected?.variations]
   )
   const flagVariations = flagQuery.data?.variations ?? []
-  // runs need insight data, so none can start while the bound flag has insights disabled
   const flagInsightsDisabled = flagQuery.data?.insightsEnabled === false
   const createMutation = useMutation({
     mutationFn: async ({
@@ -765,14 +764,6 @@ export function MeasuringDetails({
       toast.success(
         t("releaseDecision.experiments.detailsPage.measuring.runCreated")
       )
-    },
-    onError: (error) => {
-      // insights may have been disabled on the flag since it was loaded
-      if (error instanceof ApiRequestError && error.status === 422) {
-        void queryClient.invalidateQueries({
-          queryKey: ["experiment-feature-flag", envId, experiment.flagId],
-        })
-      }
     },
   })
   const deleteMutation = useMutation({
@@ -950,7 +941,7 @@ export function MeasuringDetails({
             variant="outline"
             size="sm"
             className="shrink-0"
-            disabled={createMutation.isPending || flagInsightsDisabled}
+            disabled={createMutation.isPending}
             onClick={openNewRunDialog}
           >
             <Plus />
@@ -958,11 +949,19 @@ export function MeasuringDetails({
           </Button>
         </div>
         {flagInsightsDisabled ? (
-          <p className="mt-2 text-sm text-muted-foreground">
-            {t(
-              "releaseDecision.experiments.detailsPage.measuring.insightsDisabled"
-            )}
-          </p>
+          <Alert className="mt-3 border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-50">
+            <AlertTriangle />
+            <AlertTitle>
+              {t(
+                "releaseDecision.experiments.detailsPage.measuring.insightsDisabledTitle"
+              )}
+            </AlertTitle>
+            <AlertDescription className="text-inherit">
+              {t(
+                "releaseDecision.experiments.detailsPage.measuring.insightsDisabled"
+              )}
+            </AlertDescription>
+          </Alert>
         ) : null}
         {runs.length ? (
           <ExperimentRunTabs
@@ -985,7 +984,7 @@ export function MeasuringDetails({
           <Button
             type="button"
             className="mt-4"
-            disabled={createMutation.isPending || flagInsightsDisabled}
+            disabled={createMutation.isPending}
             onClick={openNewRunDialog}
           >
             <Plus />

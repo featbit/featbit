@@ -164,7 +164,6 @@ export function PendingChangesSheet({
                       "Approved",
                       "PendingExecution",
                       "Declined",
-                      "Failed",
                       "Applied",
                     ] as PendingStatus[]
                   ).map((status) => (

@@ -103,12 +103,7 @@ export type PendingFlagChange = {
   id: string
   type: "Schedule" | "ChangeRequest"
   status:
-    | "PendingReview"
-    | "PendingExecution"
-    | "Approved"
-    | "Declined"
-    | "Applied"
-    | "Failed"
+    "PendingReview" | "PendingExecution" | "Approved" | "Declined" | "Applied"
   flagId: string
   creatorId: string
   creatorName: string

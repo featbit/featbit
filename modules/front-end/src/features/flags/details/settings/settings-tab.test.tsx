@@ -299,7 +299,7 @@ describe("SettingsTab", () => {
       "No running experiments are linked to this flag. You can enable or disable insight collection."
     )
     fireEvent.click(screen.getByRole("button", { name: "Disable insights" }))
-    fireEvent.click(await screen.findByRole("button", { name: "Save changes" }))
+    fireEvent.click(await screen.findByRole("button", { name: "Disable collection" }))
     await waitFor(() =>
       expect(updateFeatureFlagInsightCollection).toHaveBeenCalledWith(
         "env-1",
@@ -340,7 +340,7 @@ describe("SettingsTab", () => {
       "No running experiments are linked to this flag. You can enable or disable insight collection."
     )
     fireEvent.click(screen.getByRole("button", { name: "Disable insights" }))
-    fireEvent.click(await screen.findByRole("button", { name: "Save changes" }))
+    fireEvent.click(await screen.findByRole("button", { name: "Disable collection" }))
     await waitFor(() =>
       expect(fetchRunningExperiments).toHaveBeenCalledTimes(2)
     )

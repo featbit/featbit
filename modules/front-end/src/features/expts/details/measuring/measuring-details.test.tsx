@@ -125,7 +125,7 @@ describe("creating an experiment run", () => {
     queryClient.clear()
   })
 
-  it("blocks new runs while the bound flag has insights disabled", () => {
+  it("allows new runs and shows a warning when collection is disabled", async () => {
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false, staleTime: Infinity } },
     })
@@ -169,11 +169,13 @@ describe("creating an experiment run", () => {
     )
 
     for (const button of screen.getAllByRole("button", { name: "New run" })) {
-      expect(button).toBeDisabled()
+      expect(button).toBeEnabled()
     }
-    expect(
-      screen.getByText(/Enable insights on the flag before starting/)
-    ).toBeInTheDocument()
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Evaluation data collection is turned off"
+    )
+    fireEvent.click(screen.getAllByRole("button", { name: "New run" })[0])
+    expect(await screen.findByRole("dialog")).toBeVisible()
     queryClient.clear()
   })
 })

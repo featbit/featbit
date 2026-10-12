@@ -8,7 +8,7 @@ import {
   updateFeatureFlagInsightCollection,
 } from "../../flags-api"
 import { ApiRequestError } from "@/lib/api/authenticated-api"
-import { SettingsReviewDialog } from "./settings-review-dialog"
+import { InsightCollectionDialog } from "./insight-collection-dialog"
 import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -151,27 +151,16 @@ export function InsightsSettingsSection({
           </p>
         )}
       </div>
-      <SettingsReviewDialog
-        open={reviewOpen}
-        flagName={flag.name}
-        changes={[
-          {
-            kind: "field",
-            label: "insightsEnabled",
-            action: "updated",
-            previous: t(
-              `featureFlags.detailsPage.settings.insightsValue.${enabled ? "enabled" : "disabled"}`
-            ),
-            current: t(
-              `featureFlags.detailsPage.settings.insightsValue.${enabled ? "disabled" : "enabled"}`
-            ),
-          },
-        ]}
-        requireComment={requireComment}
-        saving={mutation.isPending}
-        onOpenChange={setReviewOpen}
-        onSave={(comment) => mutation.mutate(comment)}
-      />
+      {reviewOpen ? (
+        <InsightCollectionDialog
+          enabled={!enabled}
+          flagName={flag.name}
+          requireComment={requireComment}
+          saving={mutation.isPending}
+          onClose={() => setReviewOpen(false)}
+          onConfirm={(comment) => mutation.mutate(comment)}
+        />
+      ) : null}
     </section>
   )
 }
