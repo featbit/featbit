@@ -1,7 +1,9 @@
 <!--
 # Instructions
 
-1. Pick a meaningful and result oriented title for your pull request. (Use sentence case, don't include any words indicating the way you achived this result, we just want the result. Keep it short < 70 characters)
+1. Pick a meaningful and result-oriented title for your pull request. Describe the result and keep the full title under 70 characters.
+  - Use the format `<emoji> <type>: <description>` with a lowercase conventional prefix and description, for example: `✨ feat: isolate malformed flag and segment evaluation errors`.
+  - Choose a conventional prefix that matches the change, such as `feat`, `fix`, `style`, `refactor`, `docs`, `test`, `perf`, `build`, `ci`, `chore`, or `revert`. An optional scope is allowed: `<emoji> <type>(<scope>): <description>`.
   - Prefix the title with an emoji to categorize what is being done. (Copy-paste the emoji from the list below.)
   - Assign the appropriate label(s) to the pull request. (Use one of the labels from the list below.)
   

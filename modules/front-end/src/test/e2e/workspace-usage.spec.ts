@@ -140,6 +140,58 @@ async function setupUsagePage(
 }
 
 test.describe("workspace usage", () => {
+  for (const failure of [
+    {
+      source: "billing cycle",
+      endpoint: "**/api/v1/billing/current-cycle",
+      message: "Failed to load the current billing cycle.",
+      otherMessage: "Failed to load usage data.",
+    },
+    {
+      source: "usage data",
+      endpoint: "**/api/v1/workspaces/usages**",
+      message: "Failed to load usage data.",
+      otherMessage: "Failed to load the current billing cycle.",
+    },
+  ]) {
+    test(`identifies ${failure.source} failures and recovers after Retry`, async ({
+      page,
+    }) => {
+      await setupUsagePage(page)
+      let shouldFail = true
+      let recoveredRequests = 0
+      await page.route(failure.endpoint, async (route) => {
+        if (shouldFail) {
+          await route.fulfill({ status: 500, body: "Internal Server Error" })
+        } else {
+          recoveredRequests += 1
+          await route.fallback()
+        }
+      })
+
+      await page.goto("/en/workspace/usage")
+
+      const alert = page.getByRole("alert")
+      await expect(alert).toContainText(failure.message, { timeout: 15000 })
+      await expect(
+        page.getByText(failure.otherMessage, { exact: true })
+      ).toHaveCount(0)
+
+      shouldFail = false
+      await alert.getByRole("button", { name: "Retry", exact: true }).click()
+
+      await expect(alert).toHaveCount(0)
+      await expect(page.getByText("18.4K", { exact: true })).toBeVisible()
+      await expect(
+        page.getByRole("row", { name: /Production Acme Corp/ })
+      ).toBeVisible()
+      await expect(
+        page.getByRole("combobox", { name: "Current billing cycle" })
+      ).toBeVisible()
+      expect(recoveredRequests).toBeGreaterThan(0)
+    })
+  }
+
   test("renders usage metrics, trend controls, and environment table", async ({
     page,
   }) => {
