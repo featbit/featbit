@@ -124,4 +124,58 @@ describe("creating an experiment run", () => {
     )
     queryClient.clear()
   })
+
+  it("allows new runs and shows a warning when collection is disabled", async () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false, staleTime: Infinity } },
+    })
+    queryClient.setQueryData(["experiment-feature-flag", "env-1", "flag-1"], {
+      insightsEnabled: false,
+      variations: [],
+    })
+    queryClient.setQueryData(
+      ["experiment-layers", "env-1", "active", "measuring-assignment"],
+      { items: [], totalCount: 0 }
+    )
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MeasuringDetails
+          experiment={{
+            id: "experiment-1",
+            name: "Checkout",
+            description: null,
+            stage: "measuring",
+            flagId: "flag-1",
+            flagKey: "checkout",
+            flagName: null,
+            envId: "env-1",
+            runCount: 0,
+            hypothesis: null,
+            goal: null,
+            intent: null,
+            change: null,
+            constraints: null,
+            conflictAnalysis: null,
+            lastLearning: null,
+            primaryMetric: null,
+            guardrailMetrics: null,
+            experimentRuns: [],
+            createdAt: "2026-09-10T00:00:00Z",
+            updatedAt: "2026-09-10T00:00:00Z",
+          }}
+          envId="env-1"
+        />
+      </QueryClientProvider>
+    )
+
+    for (const button of screen.getAllByRole("button", { name: "New run" })) {
+      expect(button).toBeEnabled()
+    }
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Evaluation data collection is turned off"
+    )
+    fireEvent.click(screen.getAllByRole("button", { name: "New run" })[0])
+    expect(await screen.findByRole("dialog")).toBeVisible()
+    queryClient.clear()
+  })
 })

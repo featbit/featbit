@@ -17,6 +17,11 @@ public interface IFeatureFlagService : IService<FeatureFlag>
 
     Task<ICollection<Segment>> GetRelatedSegmentsAsync(ICollection<FeatureFlag> flags);
 
+    /// <summary>
+    /// Returns related experiments with an observation window that has not ended, including future runs.
+    /// </summary>
+    Task<IReadOnlyList<ExperimentReference>> GetRunningExperimentsAsync(Guid envId, Guid flagId);
+
     Task MarkAsUpdatedAsync(ICollection<Guid> flagIds, Guid operatorId);
 
     /// <summary>

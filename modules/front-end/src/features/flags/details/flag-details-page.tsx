@@ -581,7 +581,11 @@ export function FlagDetailsPage() {
         {activeTab === "history" ? (
           <HistoryTab envId={envId} flagId={saved.id} lang={lang} />
         ) : activeTab === "insights" ? (
-          <InsightsTab envId={envId} flag={saved} />
+          <InsightsTab
+            envId={envId}
+            flag={saved}
+            settingsPath={`${basePath}/${encodeURIComponent(saved.key)}/settings`}
+          />
         ) : activeTab === "settings" ? (
           <SettingsTab
             envId={envId}

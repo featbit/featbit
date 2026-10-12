@@ -61,6 +61,27 @@ public class FeatureFlagController : ApiControllerBase
     }
 
     /// <summary>
+    /// Get the running experiments of a feature flag
+    /// </summary>
+    /// <remarks>
+    /// Experiments bound to the flag with a run whose observation window has not ended. Insights cannot be
+    /// disabled on the flag while this list is non-empty.
+    /// </remarks>
+    [HttpGet("{key}/running-experiments")]
+    [Authorize(Permissions.CanAccessEnv)]
+    public async Task<ApiResponse<IReadOnlyList<ExperimentReference>>> GetRunningExperimentsAsync(Guid envId, string key)
+    {
+        var request = new GetRunningExperiments
+        {
+            EnvId = envId,
+            Key = key
+        };
+
+        var experiments = await Mediator.Send(request);
+        return Ok(experiments);
+    }
+
+    /// <summary>
     /// Get a feature flag by id within an environment
     /// </summary>
     [OpenApi]
@@ -266,6 +287,25 @@ public class FeatureFlagController : ApiControllerBase
 
         var revision = await Mediator.Send(request);
         return Ok(revision);
+    }
+
+    /// <summary>
+    /// Enable or disable insight collection for a feature flag
+    /// </summary>
+    [OpenApi]
+    [HttpPut("{key}/insight-collection")]
+    [Authorize(Permissions.CanAccessEnv)]
+    public async Task<ApiResponse<Guid>> UpdateInsightCollectionAsync(Guid envId, string key, UpdateInsightCollectionPayload payload)
+    {
+        var request = new UpdateInsightCollection
+        {
+            EnvId = envId,
+            Key = key,
+            Enabled = payload.Enabled,
+            Comment = payload.Comment
+        };
+
+        return Ok(await Mediator.Send(request));
     }
 
     /// <summary>

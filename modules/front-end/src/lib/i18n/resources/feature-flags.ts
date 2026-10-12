@@ -239,6 +239,10 @@ export const enFeatureFlags = {
       loadFailed: "Event triggers could not be loaded.",
     },
     insights: {
+      collectionDisabled: "Insight collection is turned off",
+      collectionDisabledDescription:
+        "You can still view previously collected data. To collect new evaluations, enable insights in settings.",
+      openSettings: "Open settings",
       periods: {
         "30m": "Last 30 minutes",
         "2H": "Last 2 hours",
@@ -281,10 +285,41 @@ export const enFeatureFlags = {
         name: "Name",
         description: "Description",
         tags: "Tags",
+        insightsEnabled: "Insights enabled",
+      },
+      insightsValue: {
+        enabled: "Enabled",
+        disabled: "Disabled",
       },
       nameRequired: "Enter a feature flag name.",
       nameHelp: "A human-friendly name for this feature flag.",
       tagsHelp: "Use tags to organize and filter feature flags.",
+      enableCollectionTitle: "Enable evaluation data collection?",
+      disableCollectionTitle: "Disable evaluation data collection?",
+      enableCollectionDescription: "Enable collection for {{name}}.",
+      disableCollectionDescription: "Disable collection for {{name}}.",
+      enableCollectionImpact:
+        "New evaluation results and related end-user data will be collected to support evaluation analysis and experiments.",
+      disableCollectionImpact:
+        "New evaluation results and related end-user data will no longer be collected, but previously collected data remains available.",
+      collectionImpactTitle: "What changes",
+      collectionEvaluationUnchanged:
+        "Flag targeting and evaluation results stay unchanged.",
+      enableCollectionAction: "Enable collection",
+      disableCollectionAction: "Disable collection",
+      insightCollection: "Insight collection",
+      insightCollectionHelp:
+        "Collect evaluation data for this flag to support insights and experiments.",
+      enableInsights: "Enable insights",
+      disableInsights: "Disable insights",
+      runningExperiments: "Running experiments",
+      runningExperimentsHelp:
+        "These experiments depend on this flag’s insight data. Stop them before disabling insights.",
+      noRunningExperiments:
+        "No running experiments are linked to this flag. You can enable or disable insight collection.",
+      experimentsLoadFailed: "Running experiments could not be loaded.",
+      insightsBlocked:
+        "Insights cannot be disabled while linked experiments require insight data. Stop them first.",
       lifecycle: "Lifecycle",
       archiveTitle: "Archive feature flag",
       archiveHelp:
@@ -786,7 +821,7 @@ export const zhFeatureFlags: typeof enFeatureFlags = {
       targeting: "定向",
       variations: "变体",
       triggers: "触发器",
-      insights: "洞察",
+      insights: "评估数据",
       settings: "设置",
       history: "历史",
     },
@@ -922,6 +957,10 @@ export const zhFeatureFlags: typeof enFeatureFlags = {
       loadFailed: "无法加载事件触发器。",
     },
     insights: {
+      collectionDisabled: "评估数据收集已关闭",
+      collectionDisabledDescription:
+        "你仍可以查看此前采集的数据。如需采集新的评估数据，请在设置中启用评估数据收集。",
+      openSettings: "打开设置",
       periods: {
         "30m": "最近 30 分钟",
         "2H": "最近 2 小时",
@@ -964,10 +1003,39 @@ export const zhFeatureFlags: typeof enFeatureFlags = {
         name: "名称",
         description: "描述",
         tags: "标签",
+        insightsEnabled: "启用评估数据收集",
+      },
+      insightsValue: {
+        enabled: "已启用",
+        disabled: "已禁用",
       },
       nameRequired: "请输入功能开关名称。",
       nameHelp: "便于识别此功能开关的名称。",
       tagsHelp: "使用标签整理和筛选功能开关。",
+      enableCollectionTitle: "启用评估数据收集？",
+      disableCollectionTitle: "关闭评估数据收集？",
+      enableCollectionDescription: "为 {{name}} 启用评估数据收集。",
+      disableCollectionDescription: "为 {{name}} 关闭评估数据收集。",
+      enableCollectionImpact:
+        "开始收集新的评估结果及相关终端用户数据，用于评估数据分析和实验。",
+      disableCollectionImpact:
+        "停止收集新的评估结果及相关终端用户数据，已收集的历史数据仍可查看。",
+      collectionImpactTitle: "操作影响",
+      collectionEvaluationUnchanged: "开关的定向配置和评估结果保持不变。",
+      enableCollectionAction: "启用收集",
+      disableCollectionAction: "关闭收集",
+      insightCollection: "评估数据收集",
+      insightCollectionHelp: "收集此开关的评估数据，用于数据分析和实验。",
+      enableInsights: "启用评估数据收集",
+      disableInsights: "关闭评估数据收集",
+      runningExperiments: "正在运行的实验",
+      runningExperimentsHelp:
+        "以下实验依赖此开关的评估数据。请先停止实验，再关闭评估数据收集。",
+      noRunningExperiments:
+        "此开关没有关联的运行中实验，你可以启用或关闭评估数据收集。",
+      experimentsLoadFailed: "无法加载运行中的实验。",
+      insightsBlocked:
+        "关联实验仍需要评估数据，无法关闭评估数据收集。请先停止实验。",
       lifecycle: "生命周期",
       archiveTitle: "归档功能开关",
       archiveHelp: "归档后将不再显示在活动列表中，之后仍可恢复。",

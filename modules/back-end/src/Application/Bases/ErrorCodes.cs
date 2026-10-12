@@ -12,6 +12,7 @@ public static class ErrorCodes
     public const string Conflict = nameof(Conflict);
     public const string NameHasBeenUsed = nameof(NameHasBeenUsed);
     public const string KeyHasBeenUsed = nameof(KeyHasBeenUsed);
+    public const string BusinessRuleViolation = nameof(BusinessRuleViolation);
 
     // end user
     public const string EndUserLimitExceeded = nameof(EndUserLimitExceeded);
