@@ -146,5 +146,6 @@ public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
     private static void AddFilters(SwaggerGenOptions options)
     {
         options.ExampleFilters();
+        options.SchemaFilter<CreateSegmentSchemaFilter>();
     }
 }

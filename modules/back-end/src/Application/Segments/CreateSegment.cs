@@ -40,8 +40,15 @@ public class CreateSegment : IRequest<Segment>
     public string Description { get; set; }
 
     /// <summary>
-    /// The scopes where the segment is applicable.
+    /// The scopes where the segment is applicable. Required, with at least one scope. Scopes use keys, not IDs.
+    /// For an <c>environment-specific</c> segment, provide exactly one scope: the current environment's scope,
+    /// <c>organization/{orgKey}:project/{projectKey}:env/{envKey}</c>.
+    /// For a <c>shared</c> segment, provide one or more scopes; shared segments can be used across multiple
+    /// environments and require the ShareableSegment license feature. Besides an environment, a shared scope can
+    /// target an organization (<c>organization/{orgKey}</c>) or a project (<c>organization/{orgKey}:project/{projectKey}</c>).
+    /// Wildcards (<c>*</c>) are not allowed.
     /// </summary>
+    /// <example>["organization/playground:project/example-project:env/dev"]</example>
     public string[] Scopes { get; set; } = [];
 
     public Segment AsSegment()
