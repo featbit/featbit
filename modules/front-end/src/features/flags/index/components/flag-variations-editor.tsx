@@ -350,7 +350,7 @@ export function FlagVariationsEditor({
                           type="button"
                           size="icon-sm"
                           variant="ghost"
-                          className="self-center"
+                          className="mt-0.5 self-start"
                           disabled={disabled}
                           aria-label={t("featureFlags.variationsEditor.delete")}
                           onClick={() => requestRemoveVariation(index)}
