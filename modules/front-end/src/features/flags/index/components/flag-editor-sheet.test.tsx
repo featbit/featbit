@@ -81,6 +81,7 @@ describe("FlagEditorSheet", () => {
   })
 
   it("shows and clears variation errors before submit", async () => {
+    const onCreate = vi.fn().mockResolvedValue(undefined)
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false } },
     })
@@ -93,7 +94,7 @@ describe("FlagEditorSheet", () => {
           saving={false}
           onOpenChange={vi.fn()}
           onValidateKey={vi.fn().mockResolvedValue(false)}
-          onCreate={vi.fn()}
+          onCreate={onCreate}
           onClone={vi.fn()}
         />
       </QueryClientProvider>
@@ -120,12 +121,23 @@ describe("FlagEditorSheet", () => {
       target: { value: "abc" },
     })
     expect(await screen.findByText("Enter a valid number")).toBeVisible()
+    fireEvent.change(screen.getByLabelText(/^Name/), {
+      target: { value: "Number flag" },
+    })
+    await screen.findByText("Key is available")
+    expect(screen.getByRole("button", { name: "Create flag" })).toBeDisabled()
     fireEvent.change(screen.getAllByPlaceholderText("Value")[0], {
       target: { value: "42" },
     })
     await waitFor(() =>
       expect(screen.queryByText("Enter a valid number")).not.toBeInTheDocument()
     )
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Create flag" })).toBeEnabled()
+    )
+    fireEvent.click(screen.getByRole("button", { name: "Create flag" }))
+    await waitFor(() => expect(onCreate).toHaveBeenCalledOnce())
+    expect(onCreate.mock.calls[0][0].variations[0].value).toBe("42")
   })
 
   it.each([true, false])(

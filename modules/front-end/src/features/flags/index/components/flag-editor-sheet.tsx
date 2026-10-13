@@ -594,6 +594,7 @@ export function FlagEditorSheet({
                   form.setValue("isEnabled", nextValue.isEnabled, {
                     shouldDirty: true,
                   })
+                  void form.trigger()
                 }}
               />
             </div>
