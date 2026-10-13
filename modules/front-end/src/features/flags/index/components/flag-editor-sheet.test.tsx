@@ -28,6 +28,147 @@ describe("FlagEditorSheet", () => {
     vi.mocked(fetchFeatureFlagTags).mockResolvedValue(["current", "release"])
   })
 
+  it("validates fields and duplicate keys before submit", async () => {
+    const onValidateKey = vi.fn().mockResolvedValue(true)
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    })
+    render(
+      <QueryClientProvider client={queryClient}>
+        <FlagEditorSheet
+          envId="env-1"
+          open
+          source={null}
+          saving={false}
+          onOpenChange={vi.fn()}
+          onValidateKey={onValidateKey}
+          onCreate={vi.fn()}
+          onClone={vi.fn()}
+        />
+      </QueryClientProvider>
+    )
+    fireEvent.change(screen.getByLabelText(/^Name/), { target: { value: " " } })
+    expect(await screen.findByText("Enter a valid name")).toBeVisible()
+    fireEvent.change(screen.getByLabelText(/^Name/), {
+      target: { value: "Flag" },
+    })
+    await waitFor(() =>
+      expect(screen.queryByText("Enter a valid name")).not.toBeInTheDocument()
+    )
+    fireEvent.change(screen.getByLabelText(/^Key/), {
+      target: { value: "invalid key" },
+    })
+    expect(
+      await screen.findByText(
+        "Use letters, numbers, dots, underscores, or hyphens"
+      )
+    ).toBeVisible()
+    fireEvent.change(screen.getByLabelText(/^Key/), {
+      target: { value: "used-key" },
+    })
+    expect(await screen.findByText("This key is already in use")).toBeVisible()
+    expect(onValidateKey).toHaveBeenCalledWith("used-key")
+    expect(screen.getByRole("button", { name: "Create flag" })).toBeDisabled()
+    onValidateKey.mockResolvedValue(false)
+    fireEvent.change(screen.getByLabelText(/^Key/), {
+      target: { value: "available-key" },
+    })
+    expect(screen.getByRole("button", { name: "Create flag" })).toBeDisabled()
+    expect(await screen.findByText("Key is available")).toBeVisible()
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Create flag" })).toBeEnabled()
+    )
+  })
+
+  it("shows and clears variation errors before submit", async () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    })
+    render(
+      <QueryClientProvider client={queryClient}>
+        <FlagEditorSheet
+          envId="env-1"
+          open
+          source={null}
+          saving={false}
+          onOpenChange={vi.fn()}
+          onValidateKey={vi.fn().mockResolvedValue(false)}
+          onCreate={vi.fn()}
+          onClone={vi.fn()}
+        />
+      </QueryClientProvider>
+    )
+    expect(screen.queryByText("Enter a variation name")).not.toBeInTheDocument()
+    fireEvent.change(screen.getAllByPlaceholderText("Name")[0], {
+      target: { value: "" },
+    })
+    expect(await screen.findByText("Enter a variation name")).toBeVisible()
+    fireEvent.change(screen.getAllByPlaceholderText("Name")[0], {
+      target: { value: "Control" },
+    })
+    await waitFor(() =>
+      expect(
+        screen.queryByText("Enter a variation name")
+      ).not.toBeInTheDocument()
+    )
+    fireEvent.click(screen.getAllByRole("combobox")[0])
+    const numberOption = await screen.findByRole("option", { name: "NUMBER" })
+    fireEvent.pointerDown(numberOption, { pointerType: "mouse" })
+    fireEvent.click(numberOption)
+    fireEvent.click(await screen.findByRole("button", { name: "Change type" }))
+    fireEvent.change(screen.getAllByPlaceholderText("Value")[0], {
+      target: { value: "abc" },
+    })
+    expect(await screen.findByText("Enter a valid number")).toBeVisible()
+    fireEvent.change(screen.getAllByPlaceholderText("Value")[0], {
+      target: { value: "42" },
+    })
+    await waitFor(() =>
+      expect(screen.queryByText("Enter a valid number")).not.toBeInTheDocument()
+    )
+  })
+
+  it.each([true, false])(
+    "submits insight collection as %s",
+    async (enabled) => {
+      const onCreate = vi.fn().mockResolvedValue(undefined)
+      const queryClient = new QueryClient({
+        defaultOptions: { queries: { retry: false } },
+      })
+      render(
+        <QueryClientProvider client={queryClient}>
+          <FlagEditorSheet
+            envId="env-1"
+            open
+            source={null}
+            saving={false}
+            onOpenChange={vi.fn()}
+            onValidateKey={vi.fn().mockResolvedValue(false)}
+            onCreate={onCreate}
+            onClone={vi.fn()}
+          />
+        </QueryClientProvider>
+      )
+      const toggle = screen.getByRole("switch", { name: "Insight collection" })
+      expect(toggle).toBeChecked()
+      if (!enabled) fireEvent.click(toggle)
+      fireEvent.change(screen.getByLabelText(/^Name/), {
+        target: { value: "Insights flag" },
+      })
+      await waitFor(() =>
+        expect(
+          screen.getByRole("button", { name: "Create flag" })
+        ).toBeEnabled()
+      )
+      fireEvent.click(screen.getByRole("button", { name: "Create flag" }))
+      await waitFor(() =>
+        expect(onCreate).toHaveBeenCalledWith(
+          expect.objectContaining({ insightsEnabled: enabled })
+        )
+      )
+    }
+  )
+
   it("opens the tag picker without closing the clone sheet", async () => {
     const onOpenChange = vi.fn()
     const queryClient = new QueryClient({
@@ -172,7 +313,7 @@ describe("FlagEditorSheet", () => {
     )
   })
 
-  it("shows the selected variation type in uppercase with a wider trigger", () => {
+  it("shows the selected variation type in uppercase with a full-width trigger", () => {
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false } },
     })
@@ -194,7 +335,7 @@ describe("FlagEditorSheet", () => {
 
     const typeSelect = screen.getAllByRole("combobox")[0]
     expect(typeSelect).toHaveTextContent("BOOLEAN")
-    expect(typeSelect).toHaveClass("w-full", "sm:max-w-[280px]")
+    expect(typeSelect).toHaveClass("w-44")
   })
 
   it("uses the tag picker when creating a feature flag", async () => {
@@ -225,6 +366,9 @@ describe("FlagEditorSheet", () => {
       screen.getByRole("button", { name: /Search or create tag/ })
     )
     fireEvent.click(await screen.findByRole("option", { name: "release" }))
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Create flag" })).toBeEnabled()
+    )
     fireEvent.click(screen.getByRole("button", { name: "Create flag" }))
 
     await waitFor(() =>
@@ -282,6 +426,9 @@ describe("FlagEditorSheet", () => {
     fireEvent.pointerDown(experimentOption, { pointerType: "mouse" })
     fireEvent.click(experimentOption)
     expect(serveWhenOn).toHaveTextContent("Experiment")
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Create flag" })).toBeEnabled()
+    )
     fireEvent.click(screen.getByRole("button", { name: "Create flag" }))
 
     await waitFor(() => expect(onCreate).toHaveBeenCalledOnce())
@@ -420,7 +567,7 @@ describe("FlagEditorSheet", () => {
       name: /Edit JSON for/,
     })
     expect(editButtons).toHaveLength(2)
-    expect(editButtons[0]).toHaveClass("h-10")
+    expect(editButtons[0]).toHaveClass("h-8")
     expect(editButtons[0]).not.toHaveClass("min-h-16")
     fireEvent.click(editButtons[0])
 
@@ -456,6 +603,9 @@ describe("FlagEditorSheet", () => {
     expect(screen.getByLabelText(/^Name/)).toBeDisabled()
     expect(screen.getByLabelText(/^Key/)).toBeDisabled()
     expect(screen.getByLabelText("Description")).toBeDisabled()
+    expect(
+      screen.getByRole("switch", { name: "Insight collection" })
+    ).toHaveAttribute("aria-disabled", "true")
     expect(screen.getAllByPlaceholderText("Name")[0]).toBeDisabled()
     expect(
       screen.getByRole("button", { name: /Search or create tag/ })
@@ -488,6 +638,7 @@ describe("FlagEditorSheet", () => {
     fireEvent.change(screen.getByLabelText(/^Name/), {
       target: { value: "Unsaved flag" },
     })
+    await screen.findByText("Key is available")
     fireEvent.click(screen.getByRole("button", { name: "Cancel" }))
 
     expect(onOpenChange).not.toHaveBeenCalled()

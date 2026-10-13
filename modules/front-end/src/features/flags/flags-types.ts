@@ -168,6 +168,7 @@ export type FlagCreationPayload = {
   enabledVariationId: string
   disabledVariationId: string
   variations: Array<{ id: string; name: string; value: string }>
+  insightsEnabled?: boolean
 }
 
 export type FlagComparisonVariation = {

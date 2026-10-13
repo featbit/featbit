@@ -284,7 +284,7 @@ export function EditAssignmentSheet({
           </SheetDescription>
         </SheetHeader>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-2">
           <div className="space-y-5 divide-y">
             <section className="space-y-4 pb-5">
               <div className="space-y-1">

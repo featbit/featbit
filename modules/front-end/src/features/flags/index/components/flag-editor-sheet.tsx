@@ -31,6 +31,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { Textarea } from "@/components/ui/textarea"
+import { Switch } from "@/components/ui/switch"
 import { getCurrentProjectEnv } from "@/features/layout/layout-context"
 import { slugify } from "@/lib/slugify"
 import type { FeatureFlag, FlagCreationPayload } from "../../flags-types"
@@ -65,6 +66,7 @@ const schema = z
     enabledVariationId: z.string().min(1),
     disabledVariationId: z.string().min(1),
     isEnabled: z.boolean(),
+    insightsEnabled: z.boolean(),
   })
   .superRefine((values, context) => {
     values.variations.forEach((variation, index) => {
@@ -123,21 +125,63 @@ export function FlagEditorSheet({
   const [tagPickerOpen, setTagPickerOpen] = useState(false)
   const [variationDialogOpen, setVariationDialogOpen] = useState(false)
   const [discardOpen, setDiscardOpen] = useState(false)
+  const [keyValidation, setKeyValidation] = useState<{
+    key: string
+    envId: string
+    state: "valid" | "duplicate" | "error"
+  } | null>(null)
   const [initialVariationSettings] = useState(() =>
     createDefaultFlagVariationSettings()
   )
   const form = useForm<Values>({
     resolver: zodResolver(schema),
+    mode: "onChange",
     defaultValues: {
       name: "",
       key: "",
       description: "",
       tags: "",
+      insightsEnabled: true,
       ...initialVariationSettings,
     },
   })
   const type = useWatch({ control: form.control, name: "variationType" })
+  const key = useWatch({ control: form.control, name: "key" }).trim()
+  const keyValidFormat =
+    key.length > 0 && key.length <= 200 && /^[A-Za-z0-9._-]+$/.test(key)
+  const keyState = !keyValidFormat
+    ? "idle"
+    : keyValidation?.key === key && keyValidation.envId === envId
+      ? keyValidation.state
+      : "validating"
+
+  useEffect(() => {
+    if (!open || !keyValidFormat) return
+    let active = true
+    const timeout = window.setTimeout(() => {
+      onValidateKey(key)
+        .then((used) => {
+          if (active)
+            setKeyValidation({
+              key,
+              envId,
+              state: used ? "duplicate" : "valid",
+            })
+        })
+        .catch(() => {
+          if (active) setKeyValidation({ key, envId, state: "error" })
+        })
+    }, 300)
+    return () => {
+      active = false
+      window.clearTimeout(timeout)
+    }
+  }, [open, key, keyValidFormat, envId, onValidateKey])
   const isEnabled = useWatch({ control: form.control, name: "isEnabled" })
+  const insightsEnabled = useWatch({
+    control: form.control,
+    name: "insightsEnabled",
+  })
   const tags = useWatch({ control: form.control, name: "tags" })
   const variations = useWatch({ control: form.control, name: "variations" })
   const enabledVariationId = useWatch({
@@ -152,6 +196,7 @@ export function FlagEditorSheet({
 
   useEffect(() => {
     if (!open) return
+    setKeyValidation(null)
     const cloneName = source
       ? t("featureFlags.editor.copyName", { name: source.name })
       : ""
@@ -163,6 +208,7 @@ export function FlagEditorSheet({
             key: slugify(cloneName),
             description: source.description ?? "",
             tags: source.tags.join(", "),
+            insightsEnabled: true,
             ...variationSettings,
           }
         : {
@@ -170,6 +216,7 @@ export function FlagEditorSheet({
             key: "",
             description: "",
             tags: "",
+            insightsEnabled: true,
             ...variationSettings,
           }
     )
@@ -187,6 +234,7 @@ export function FlagEditorSheet({
   }
 
   const submit = form.handleSubmit(async (values) => {
+    if (saving || keyState !== "valid") return
     const keyUsed = await onValidateKey(values.key)
     if (keyUsed) {
       form.setError("key", {
@@ -213,6 +261,7 @@ export function FlagEditorSheet({
       description: values.description,
       tags,
       isEnabled: values.isEnabled,
+      insightsEnabled: values.insightsEnabled,
       variationType: values.variationType,
       enabledVariationId: values.enabledVariationId,
       disabledVariationId: values.disabledVariationId,
@@ -234,15 +283,17 @@ export function FlagEditorSheet({
         </Label>
         <Input
           id="flag-name"
+          placeholder={t("featureFlags.editor.namePlaceholder")}
           disabled={saving}
           required
           aria-required="true"
+          aria-invalid={Boolean(form.formState.errors.name)}
           {...nameField}
           onChange={(event) => {
             nameField.onChange(event)
             form.setValue("key", slugify(event.target.value), {
               shouldDirty: true,
-              shouldValidate: Boolean(form.formState.errors.key),
+              shouldValidate: true,
             })
           }}
         />
@@ -262,16 +313,45 @@ export function FlagEditorSheet({
         </Label>
         <Input
           id="flag-key"
+          placeholder={t("featureFlags.editor.keyPlaceholder")}
           disabled={saving}
           className="font-mono"
+          aria-invalid={
+            Boolean(form.formState.errors.key) ||
+            keyState === "duplicate" ||
+            keyState === "error"
+          }
           required
           aria-required="true"
           {...form.register("key")}
         />
+        <p className="text-xs text-muted-foreground">
+          {t("featureFlags.editor.keyHelp")}
+        </p>
         {form.formState.errors.key ? (
           <p className="text-xs text-destructive">
-            {form.formState.errors.key.message ||
-              t("featureFlags.editor.invalidKey")}
+            {form.formState.errors.key.type === "manual"
+              ? form.formState.errors.key.message
+              : t("featureFlags.editor.invalidKey")}
+          </p>
+        ) : null}
+        {!form.formState.errors.key && keyState !== "idle" ? (
+          <p
+            className={
+              keyState === "duplicate" || keyState === "error"
+                ? "text-xs text-destructive"
+                : "text-xs text-muted-foreground"
+            }
+          >
+            {t(
+              keyState === "duplicate"
+                ? "featureFlags.editor.keyInUse"
+                : keyState === "error"
+                  ? "featureFlags.editor.keyValidationFailed"
+                  : keyState === "validating"
+                    ? "featureFlags.editor.validatingKey"
+                    : "featureFlags.editor.keyAvailable"
+            )}
           </p>
         ) : null}
       </div>
@@ -282,7 +362,7 @@ export function FlagEditorSheet({
         <Textarea
           id="flag-description"
           disabled={saving}
-          rows={3}
+          rows={2}
           {...form.register("description")}
         />
       </div>
@@ -316,7 +396,11 @@ export function FlagEditorSheet({
       >
         {t("featureFlags.editor.cancel")}
       </Button>
-      <Button type="button" disabled={saving} onClick={() => void submit()}>
+      <Button
+        type="button"
+        disabled={saving || !form.formState.isValid || keyState !== "valid"}
+        onClick={() => void submit()}
+      >
         {saving ? <Loader2 className="animate-spin" /> : null}
         {source
           ? t("featureFlags.editor.clone")
@@ -427,14 +511,13 @@ export function FlagEditorSheet({
             <SheetTitle>{t("featureFlags.editor.newTitle")}</SheetTitle>
           </SheetHeader>
           <form
-            className="min-h-0 flex-1 overflow-y-auto px-6 py-5"
+            className="min-h-0 flex-1 overflow-y-auto px-6 py-2"
             onSubmit={submit}
           >
             <div className="space-y-5">
-              <div className="space-y-5">{commonFields}</div>
+              <div className="space-y-4">{commonFields}</div>
               <FlagVariationsEditor
                 disabled={saving}
-                showErrors={form.formState.submitCount > 0}
                 onNestedSurfaceOpenChange={setVariationDialogOpen}
                 value={{
                   variationType: type,
@@ -443,6 +526,54 @@ export function FlagEditorSheet({
                   disabledVariationId,
                   isEnabled,
                 }}
+                behaviorSettings={
+                  <div className="space-y-5 pt-1">
+                    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-6">
+                      <div className="space-y-1">
+                        <Label htmlFor="flag-enabled">
+                          {t("featureFlags.variationsEditor.turnOn")}
+                        </Label>
+                        <p className="text-xs text-muted-foreground">
+                          {t("featureFlags.editor.turnOnHelp")}
+                        </p>
+                      </div>
+                      <Switch
+                        id="flag-enabled"
+                        className="mt-0.5"
+                        checked={isEnabled}
+                        disabled={saving}
+                        onCheckedChange={(checked) =>
+                          form.setValue("isEnabled", checked, {
+                            shouldDirty: true,
+                          })
+                        }
+                      />
+                    </div>
+                    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-6">
+                      <div className="space-y-1">
+                        <Label htmlFor="flag-insights-enabled">
+                          {t(
+                            "featureFlags.detailsPage.settings.insightCollection"
+                          )}
+                        </Label>
+                        <p className="text-xs text-muted-foreground">
+                          {t("featureFlags.editor.insightsHelp")}
+                        </p>
+                      </div>
+                      <Switch
+                        id="flag-insights-enabled"
+                        className="mt-0.5"
+                        checked={insightsEnabled}
+                        disabled={saving}
+                        onCheckedChange={(checked) =>
+                          form.setValue("insightsEnabled", checked, {
+                            shouldDirty: true,
+                          })
+                        }
+                      />
+                    </div>
+                  </div>
+                }
                 onChange={(nextValue) => {
                   form.setValue("variationType", nextValue.variationType, {
                     shouldDirty: true,
