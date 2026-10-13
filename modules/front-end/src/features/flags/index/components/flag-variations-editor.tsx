@@ -42,7 +42,9 @@ export function FlagVariationsEditor({
   onChange,
   onNestedSurfaceOpenChange,
   behaviorSettings,
+  showErrors,
 }: {
+  showErrors: boolean
   behaviorSettings: ReactNode
   value: FlagVariationSettingsDraft
   disabled: boolean
@@ -128,10 +130,6 @@ export function FlagVariationsEditor({
 
   function addVariation() {
     const id = crypto.randomUUID()
-    setEditedFields((fields) => ({
-      ...fields,
-      [id]: { name: true, value: true },
-    }))
     onChange({
       ...value,
       variations: [
@@ -244,19 +242,19 @@ export function FlagVariationsEditor({
           </div>
 
           <div className="space-y-2">
-            <div className="overflow-hidden">
+            <div className="overflow-hidden rounded-md border">
               <div
                 className={
                   value.variationType === "boolean"
-                    ? "grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-2 px-2 py-1.5 text-xs font-medium text-muted-foreground"
-                    : "grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_2rem] gap-2 px-2 py-1.5 text-xs font-medium text-muted-foreground"
+                    ? "grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-2 bg-muted/40 px-2 py-1.5 text-xs font-medium text-muted-foreground"
+                    : "grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_2rem] gap-2 bg-muted/40 px-2 py-1.5 text-xs font-medium text-muted-foreground"
                 }
               >
                 <span>{t("featureFlags.variationsEditor.name")}</span>
                 <span>{t("featureFlags.variationsEditor.value")}</span>
                 {value.variationType === "boolean" ? null : <span />}
               </div>
-              <div className="space-y-1">
+              <div className="divide-y">
                 {value.variations.map((variation, index) => {
                   const nameInvalid = !variation.name.trim()
                   const valueError = getFlagVariationValueError(
@@ -285,7 +283,8 @@ export function FlagVariationsEditor({
                             updateVariation(index, "name", event.target.value)
                           }
                         />
-                        {editedFields[variation.id]?.name && nameInvalid ? (
+                        {(showErrors || editedFields[variation.id]?.name) &&
+                        nameInvalid ? (
                           <p className="text-xs text-destructive">
                             {t("featureFlags.variationsEditor.nameRequired")}
                           </p>
@@ -310,7 +309,8 @@ export function FlagVariationsEditor({
                               )
                             }
                           />
-                          {editedFields[variation.id]?.value && valueError ? (
+                          {(showErrors || editedFields[variation.id]?.value) &&
+                          valueError ? (
                             <p className="text-xs text-destructive">
                               {valueErrorMessage(valueError)}
                             </p>
@@ -338,7 +338,8 @@ export function FlagVariationsEditor({
                               {t("featureFlags.variationsEditor.editJson")}
                             </span>
                           </Button>
-                          {editedFields[variation.id]?.value && valueError ? (
+                          {(showErrors || editedFields[variation.id]?.value) &&
+                          valueError ? (
                             <p className="text-xs text-destructive">
                               {valueErrorMessage(valueError)}
                             </p>

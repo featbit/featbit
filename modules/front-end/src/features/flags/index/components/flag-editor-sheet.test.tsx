@@ -49,6 +49,17 @@ describe("FlagEditorSheet", () => {
     )
     fireEvent.change(screen.getByLabelText(/^Name/), { target: { value: " " } })
     expect(await screen.findByText("Enter a valid name")).toBeVisible()
+    expect(screen.queryByText("Enter a valid key")).not.toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText(/^Key/), {
+      target: { value: "bad key" },
+    })
+    expect(await screen.findByText("Enter a valid key")).toBeVisible()
+    fireEvent.change(screen.getByLabelText(/^Key/), { target: { value: "" } })
+    expect(await screen.findByText("Enter a valid key")).toBeVisible()
+    expect(screen.getByRole("button", { name: "Create flag" })).toBeEnabled()
+    fireEvent.click(screen.getByRole("button", { name: "Create flag" }))
+    expect(await screen.findByText("Enter a valid name")).toBeVisible()
+    expect(await screen.findByText("Enter a valid key")).toBeVisible()
     fireEvent.change(screen.getByLabelText(/^Name/), {
       target: { value: "Flag" },
     })
@@ -58,11 +69,7 @@ describe("FlagEditorSheet", () => {
     fireEvent.change(screen.getByLabelText(/^Key/), {
       target: { value: "invalid key" },
     })
-    expect(
-      await screen.findByText(
-        "Use letters, numbers, dots, underscores, or hyphens"
-      )
-    ).toBeVisible()
+    expect(await screen.findByText("Enter a valid key")).toBeVisible()
     fireEvent.change(screen.getByLabelText(/^Key/), {
       target: { value: "used-key" },
     })
@@ -74,7 +81,14 @@ describe("FlagEditorSheet", () => {
       target: { value: "available-key" },
     })
     expect(screen.getByRole("button", { name: "Create flag" })).toBeDisabled()
-    expect(await screen.findByText("Key is available")).toBeVisible()
+    await waitFor(() =>
+      expect(
+        screen
+          .getByLabelText(/^Key/)
+          .parentElement?.querySelector(".lucide-check")
+      ).not.toBeNull()
+    )
+    expect(screen.queryByText("Key is available")).not.toBeInTheDocument()
     await waitFor(() =>
       expect(screen.getByRole("button", { name: "Create flag" })).toBeEnabled()
     )
@@ -100,6 +114,15 @@ describe("FlagEditorSheet", () => {
       </QueryClientProvider>
     )
     expect(screen.queryByText("Enter a variation name")).not.toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Create flag" })).toBeEnabled()
+    fireEvent.click(screen.getAllByRole("combobox")[0])
+    const stringType = await screen.findByRole("option", { name: "STRING" })
+    fireEvent.pointerDown(stringType, { pointerType: "mouse" })
+    fireEvent.click(stringType)
+    expect(screen.getAllByRole("combobox")[0]).toHaveTextContent("STRING")
+    expect(screen.queryByText("Enter a valid name")).not.toBeInTheDocument()
+    expect(screen.queryByText("Enter a valid key")).not.toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Create flag" })).toBeEnabled()
     fireEvent.change(screen.getAllByPlaceholderText("Name")[0], {
       target: { value: "" },
     })
@@ -124,8 +147,13 @@ describe("FlagEditorSheet", () => {
     fireEvent.change(screen.getByLabelText(/^Name/), {
       target: { value: "Number flag" },
     })
-    await screen.findByText("Key is available")
-    expect(screen.getByRole("button", { name: "Create flag" })).toBeDisabled()
+    await waitFor(() =>
+      expect(
+        screen
+          .getByLabelText(/^Key/)
+          .parentElement?.querySelector(".lucide-check")
+      ).not.toBeNull()
+    )
     fireEvent.change(screen.getAllByPlaceholderText("Value")[0], {
       target: { value: "42" },
     })
@@ -424,6 +452,15 @@ describe("FlagEditorSheet", () => {
     fireEvent.change(nameInputs[0], { target: { value: "Control" } })
     fireEvent.change(valueInputs[0], { target: { value: "Welcome" } })
     fireEvent.click(screen.getByRole("button", { name: "Add variation" }))
+    expect(screen.queryByText("Enter a variation name")).not.toBeInTheDocument()
+    expect(screen.queryByText("Enter a value")).not.toBeInTheDocument()
+    fireEvent.change(screen.getAllByPlaceholderText("Name")[2], {
+      target: { value: "Experiment" },
+    })
+    fireEvent.change(screen.getAllByPlaceholderText("Name")[2], {
+      target: { value: "" },
+    })
+    expect(await screen.findByText("Enter a variation name")).toBeVisible()
     fireEvent.change(screen.getAllByPlaceholderText("Name")[2], {
       target: { value: "Experiment" },
     })
@@ -650,7 +687,13 @@ describe("FlagEditorSheet", () => {
     fireEvent.change(screen.getByLabelText(/^Name/), {
       target: { value: "Unsaved flag" },
     })
-    await screen.findByText("Key is available")
+    await waitFor(() =>
+      expect(
+        screen
+          .getByLabelText(/^Key/)
+          .parentElement?.querySelector(".lucide-check")
+      ).not.toBeNull()
+    )
     fireEvent.click(screen.getByRole("button", { name: "Cancel" }))
 
     expect(onOpenChange).not.toHaveBeenCalled()

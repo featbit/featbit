@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Box, Flag, Loader2 } from "lucide-react"
+import { Box, Check, Flag, Loader2 } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -234,7 +234,7 @@ export function FlagEditorSheet({
   }
 
   const submit = form.handleSubmit(async (values) => {
-    if (saving || keyState !== "valid") return
+    if (saving) return
     const keyUsed = await onValidateKey(values.key)
     if (keyUsed) {
       form.setError("key", {
@@ -291,9 +291,10 @@ export function FlagEditorSheet({
           {...nameField}
           onChange={(event) => {
             nameField.onChange(event)
-            form.setValue("key", slugify(event.target.value), {
+            const nextKey = slugify(event.target.value)
+            form.setValue("key", nextKey, {
               shouldDirty: true,
-              shouldValidate: true,
+              shouldValidate: nextKey !== form.getValues("key"),
             })
           }}
         />
@@ -311,20 +312,27 @@ export function FlagEditorSheet({
           </span>
           <span className="sr-only">{t("featureFlags.editor.required")}</span>
         </Label>
-        <Input
-          id="flag-key"
-          placeholder={t("featureFlags.editor.keyPlaceholder")}
-          disabled={saving}
-          className="font-mono"
-          aria-invalid={
-            Boolean(form.formState.errors.key) ||
-            keyState === "duplicate" ||
-            keyState === "error"
-          }
-          required
-          aria-required="true"
-          {...form.register("key")}
-        />
+        <div className="relative">
+          <Input
+            id="flag-key"
+            placeholder={t("featureFlags.editor.keyPlaceholder")}
+            disabled={saving}
+            className="pr-9 font-mono"
+            aria-invalid={
+              Boolean(form.formState.errors.key) ||
+              keyState === "duplicate" ||
+              keyState === "error"
+            }
+            required
+            aria-required="true"
+            {...form.register("key")}
+          />
+          {keyState === "validating" ? (
+            <Loader2 className="absolute top-1/2 right-3 size-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+          ) : keyState === "valid" ? (
+            <Check className="absolute top-1/2 right-3 size-4 -translate-y-1/2 text-teal-600" />
+          ) : null}
+        </div>
         <p className="text-xs text-muted-foreground">
           {t("featureFlags.editor.keyHelp")}
         </p>
@@ -335,22 +343,13 @@ export function FlagEditorSheet({
               : t("featureFlags.editor.invalidKey")}
           </p>
         ) : null}
-        {!form.formState.errors.key && keyState !== "idle" ? (
-          <p
-            className={
-              keyState === "duplicate" || keyState === "error"
-                ? "text-xs text-destructive"
-                : "text-xs text-muted-foreground"
-            }
-          >
+        {!form.formState.errors.key &&
+        (keyState === "duplicate" || keyState === "error") ? (
+          <p className="text-xs text-destructive">
             {t(
               keyState === "duplicate"
                 ? "featureFlags.editor.keyInUse"
-                : keyState === "error"
-                  ? "featureFlags.editor.keyValidationFailed"
-                  : keyState === "validating"
-                    ? "featureFlags.editor.validatingKey"
-                    : "featureFlags.editor.keyAvailable"
+                : "featureFlags.editor.keyValidationFailed"
             )}
           </p>
         ) : null}
@@ -398,7 +397,12 @@ export function FlagEditorSheet({
       </Button>
       <Button
         type="button"
-        disabled={saving || !form.formState.isValid || keyState !== "valid"}
+        disabled={
+          saving ||
+          keyState === "validating" ||
+          keyState === "duplicate" ||
+          keyState === "error"
+        }
         onClick={() => void submit()}
       >
         {saving ? <Loader2 className="animate-spin" /> : null}
@@ -518,6 +522,7 @@ export function FlagEditorSheet({
               <div className="space-y-4">{commonFields}</div>
               <FlagVariationsEditor
                 disabled={saving}
+                showErrors={form.formState.submitCount > 0}
                 onNestedSurfaceOpenChange={setVariationDialogOpen}
                 value={{
                   variationType: type,
@@ -594,7 +599,15 @@ export function FlagEditorSheet({
                   form.setValue("isEnabled", nextValue.isEnabled, {
                     shouldDirty: true,
                   })
-                  void form.trigger()
+                  if (form.formState.submitCount > 0) {
+                    void form.trigger([
+                      "variationType",
+                      "variations",
+                      "enabledVariationId",
+                      "disabledVariationId",
+                      "isEnabled",
+                    ])
+                  }
                 }}
               />
             </div>
