@@ -112,6 +112,10 @@ export const PERMISSION_CATEGORIES: PermissionCategory[] = [
         "accessTokens.permissionDescriptions.createEnvSecret"
       ),
       action(
+        "ViewEnvSecret",
+        "accessTokens.permissionDescriptions.viewEnvSecret"
+      ),
+      action(
         "UpdateEnvSecret",
         "accessTokens.permissionDescriptions.updateEnvSecret"
       ),

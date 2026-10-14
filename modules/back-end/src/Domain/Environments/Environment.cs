@@ -1,3 +1,5 @@
+using Domain.Policies;
+
 namespace Domain.Environments;
 
 public class Environment : AuditedEntity
@@ -29,6 +31,16 @@ public class Environment : AuditedEntity
         };
 
         Settings = settings ?? new EnvironmentSettings();
+    }
+
+    public Environment Sanitize(string rn, PolicyStatement[] permissions)
+    {
+        if (!PolicyHelper.IsAllowed(permissions, rn, Permissions.ViewEnvSecret))
+        {
+            Secrets = [];
+        }
+
+        return this;
     }
 
     public void Update(string name, string description, EnvironmentSettings settings = null)

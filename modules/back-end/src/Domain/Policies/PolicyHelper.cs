@@ -17,6 +17,11 @@ public static class PolicyHelper
 
     public static bool IsAllowed(PolicyStatement[] statements, string resourceRN, string permission)
     {
+        if (string.IsNullOrWhiteSpace(resourceRN))
+        {
+            return false;
+        }
+
         var matchedStatements = statements
             .Where(statement => IsMatch(statement, resourceRN, permission))
             .ToArray();
