@@ -14,5 +14,5 @@ public class Variation
 
     public static readonly Variation Empty = new(string.Empty, string.Empty);
 
-    public bool IsValid() => Guid.TryParse(Id, out _) && Value is not null;
+    public bool IsValid() => !string.IsNullOrWhiteSpace(Id) && Value is not null;
 }
