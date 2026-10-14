@@ -62,9 +62,11 @@ Use the portal to release the feature to a small group of users, observe the res
 
 Run FeatBit on your own infrastructure, on premises or in the cloud. Choose the setup that fits your environment:
 
-- [Docker Compose](https://docs.featbit.co/installation/docker-compose): deployment options and configuration for FeatBit and its dependencies.
-- Kubernetes: deploy with [Helm charts](https://github.com/featbit/featbit-charts) or the [manifest files](kubernetes).
-- [FeatBit Agents](https://docs.featbit.co/relay-proxy/overview#understanding-agents): serve feature flags closer to your applications or inside private environments.
+- **Kubernetes**: deploy with the official [Helm charts](https://github.com/featbit/featbit-charts) or the [manifest files](kubernetes).
+- **AWS**: deploy with [FeatBit's Terraform project](https://github.com/featbit/featbit-terraform-aws).
+- **Azure Container Apps**: deploy with [FeatBit's Terraform project](https://github.com/featbit/azure-container-apps).
+- **Microsoft Aspire**: deploy to Azure Container Apps with [FeatBit Aspire](https://github.com/featbit/featbit-aspire).
+- **Docker Compose**: follow the [self-hosting guide](https://docs.featbit.co/installation/docker-compose) to run FeatBit and its dependencies.
 
 ## Contribute
 
