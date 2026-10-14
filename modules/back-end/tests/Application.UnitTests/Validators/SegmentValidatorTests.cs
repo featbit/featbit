@@ -68,6 +68,21 @@ public class SegmentValidatorTests
     }
 
     [Fact]
+    public void CreateSegment_ScopesOmitted_ScopesInvalidError()
+    {
+        var req = new CreateSegment
+        {
+            Type = SegmentType.EnvironmentSpecific,
+            Name = "seg",
+            Key = "seg-key"
+        };
+
+        var result = new CreateSegmentValidator().Validate(req);
+
+        Assert.Contains(result.Errors, e => e.ErrorCode == ErrorCodes.Invalid("scopes"));
+    }
+
+    [Fact]
     public void CreateSegment_WildcardScope_ScopesInvalidError()
     {
         var req = ValidCreate();
