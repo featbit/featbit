@@ -5,7 +5,7 @@ import type {
 } from "./billing-api"
 
 export const HOSTING_MODE_SAAS = "saas"
-export const FINE_GRAINED_ACCESS = "Fine-grained Access Control"
+export const FINE_GRAINED_ACCESS = "fine-grained-ac"
 export const ENTERPRISE_YEARLY_PRICE = 4490
 
 export const planMeta = {

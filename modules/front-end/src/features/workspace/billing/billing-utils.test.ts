@@ -6,6 +6,23 @@ import {
 } from "./billing-utils"
 
 describe("subscription pricing", () => {
+  it("recognizes the API fine-grained access feature key", () => {
+    expect(FINE_GRAINED_ACCESS).toBe("fine-grained-ac")
+    expect(
+      planPriceBreakdown({
+        plan: "growth",
+        billingCycle: "month",
+        mau: 40000,
+        addOnFeatures: ["fine-grained-ac"],
+      })
+    ).toEqual({
+      basePrice: 149,
+      extraMau: 0,
+      extraMauPrice: 0,
+      addOnPrice: 60,
+    })
+  })
+
   it("uses the API total in cents, including string amounts and zero", () => {
     expect(currentTotal({ plan: "pro", unitAmount: "6900" })).toBe(69)
     expect(currentTotal({ plan: "pro", unitAmount: 0 })).toBe(0)
