@@ -7,7 +7,8 @@ public class EvaluationScopeTests
 {
     [Theory]
     [InlineData(null, "value")]
-    [InlineData("not-a-guid", "value")]
+    [InlineData("", "value")]
+    [InlineData("   ", "value")]
     [InlineData("550e8400-e29b-41d4-a716-446655440000", null)]
     public void Constructor_InvalidVariation_Throws(string? id, string? value)
     {
@@ -26,6 +27,18 @@ public class EvaluationScopeTests
         Assert.Throws<MalformedDataException>(() =>
             new EvaluationScope(default, new EndUser(), [null!])
         );
+    }
+
+    [Theory]
+    [InlineData("not-a-guid")]
+    [InlineData("12345")]
+    [InlineData("variation-a")]
+    public void Constructor_CustomVariationId_CanRetrieveVariation(string id)
+    {
+        var variation = new Variation(id, "value");
+        var scope = new EvaluationScope(default, new EndUser(), [variation]);
+
+        Assert.Same(variation, scope.GetVariation(id));
     }
 
     [Fact]
