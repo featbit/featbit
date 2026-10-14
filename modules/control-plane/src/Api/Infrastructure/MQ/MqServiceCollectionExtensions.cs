@@ -89,13 +89,12 @@ public static class MqServiceCollectionExtensions
     public static void AddMq(this IServiceCollection services, IConfiguration configuration)
     {
         var mqProvider = configuration.GetMqProvider();
-        
-        var topics = new[]
-        {
-            ControlPlaneTopics.ControlPlaneFeatureFlagChange, ControlPlaneTopics.ControlPlaneLicenseChange,
-            ControlPlaneTopics.ControlPlaneSecretChange, ControlPlaneTopics.ControlPlaneSegmentChange,
-            ControlPlaneTopics.ConnectionMade, ControlPlaneTopics.ConnectionClosed, ControlPlaneTopics.PodHeartbeat,
-        };
+
+        // Transport-agnostic, and deliberately not a local array: under MqProvider=Redis this same
+        // list is what tells the producer to reach these topics with RPUSH rather than PUBLISH.
+        // A local copy here would drain topics the producer publishes to pub/sub, which delivers
+        // nothing. See RedisConsumerTopics.
+        var topics = ControlPlaneTopics.Consumed;
         
         services.AddKeyedTransient<IMessageHandler, FeatureFlagChangeMessageHandler>(
             ControlPlaneTopics.ControlPlaneFeatureFlagChange);
@@ -220,22 +219,13 @@ public static class MqServiceCollectionExtensions
 /// Deliberately NOT a <see cref="BackgroundService"/> loop; only registered when the risky shape is
 /// actually detected, so it costs nothing on every other deployment.
 /// </summary>
-internal sealed class KafkaConsumerGroupIdCollisionGuard(
+internal sealed partial class KafkaConsumerGroupIdCollisionGuard(
     ILogger<KafkaConsumerGroupIdCollisionGuard> logger,
     string groupId) : IHostedService
 {
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        logger.LogWarning(
-            "Kafka consumer group.id is still the shipped default ('{GroupId}') on a multi-instance " +
-            "deployment (Redis:Instances has more than one entry, i.e. at least one peer DC is " +
-            "configured) whose LOCAL DC id (Redis:Instances:0:DcId) is EMPTY. Every control plane " +
-            "deployed this way resolves the SAME group.id, so Kafka hands each topic-partition to " +
-            "only ONE of them while the others silently idle (#100) -- this will NOT self-resolve by " +
-            "suffixing on Redis instance index, since each peer's own local instance is always index " +
-            "0 in ITS OWN configuration. Set Redis:Instances:0:DcId (or an explicit " +
-            "Kafka:Consumer:group.id) to a distinct value on every cluster.",
-            groupId);
+        Log.KafkaGroupIdCollision(logger, groupId);
 
         return Task.CompletedTask;
     }

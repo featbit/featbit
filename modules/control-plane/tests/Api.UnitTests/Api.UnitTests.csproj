@@ -18,10 +18,12 @@
 
     <ItemGroup>
         <Using Include="Xunit"/>
+        <Using Include="FeatBit.Observability.TestKit"/>
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\..\src\Api\Api.csproj" />
+      <ProjectReference Include="..\..\..\shared\Observability.TestKit\Observability.TestKit.csproj" />
     </ItemGroup>
 
     <ItemGroup>

@@ -1,4 +1,5 @@
 using Domain.Messages;
+using Domain.Observability;
 using Infrastructure.Caches.Redis;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -13,6 +14,8 @@ public partial class RedisMessageConsumer(
     string[] topics)
     : BackgroundService
 {
+    private readonly WorkerObservability _observability = ServiceMeter.ForWorker(WorkerNames.RedisConsumer);
+
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var tasks = topics.Select(topic => ConsumeAsync(topic, stoppingToken));
@@ -24,53 +27,82 @@ public partial class RedisMessageConsumer(
     {
         var redis = redisClient.GetDatabase();
 
-        logger.LogInformation("Start consuming {Topic} messages...", topic);
+        Log.StartConsuming(logger, topic);
 
-        while (!cancellationToken.IsCancellationRequested)
+        _observability.Started();
+
+        try
         {
-            try
+            while (!cancellationToken.IsCancellationRequested)
             {
-                // LPop json message from topic list
-                var rawMessage = await redis.ListLeftPopAsync(topic);
-                if (!rawMessage.HasValue)
-                {
-                    // If the topic doesn't exist yet or there are no messages, delay the consumer by 1 second
-                    await Task.Delay(1000, cancellationToken);
-                    continue;
-                }
+                // Every poll, including the ones that find nothing. A fresh heartbeat with a stale
+                // last_success is how an idle queue is told apart from a stopped consumer.
+                _observability.Heartbeat();
 
-                using var scope = serviceProvider.CreateScope();
-                var sp = scope.ServiceProvider;
-
-                var handler = sp.GetKeyedService<IMessageHandler>(topic);
-                if (handler == null)
-                {
-                    Log.NoHandlerForTopic(logger, topic);
-                    continue;
-                }
-
-                var message = rawMessage.ToString();
                 try
                 {
-                    await handler.HandleAsync(message);
-                    Log.MessageHandled(logger, message);
+                    // LPop json message from topic list
+                    var rawMessage = await redis.ListLeftPopAsync(topic);
+                    if (!rawMessage.HasValue)
+                    {
+                        // If the topic doesn't exist yet or there are no messages, delay the consumer by 1 second
+                        await Task.Delay(1000, cancellationToken);
+                        continue;
+                    }
+
+                    var message = rawMessage.ToString();
+
+                    // Root activity for this message. When the payload carries trace context this
+                    // continues the producer's trace; otherwise it starts a new trace as before.
+                    using var activity = IngressActivity.StartConsume(
+                        topic,
+                        MessagingSystems.Redis,
+                        JsonTraceContext.Extract(message));
+
+                    using var scope = serviceProvider.CreateScope();
+                    var sp = scope.ServiceProvider;
+
+                    var handler = sp.GetKeyedService<IMessageHandler>(topic);
+                    if (handler == null)
+                    {
+                        // A topic being consumed with no registered handler is silent data loss.
+                        MessagingMetrics.Current.RecordUnroutable(MessagingSystems.Redis, topic);
+                        Log.NoHandlerForTopic(logger, topic);
+                        continue;
+                    }
+
+                    using var consume = MessagingMetrics.Current.BeginConsume(MessagingSystems.Redis, topic);
+
+                    try
+                    {
+                        await handler.HandleAsync(message);
+                        consume.Succeeded();
+                        _observability.Success();
+                        Log.MessageHandled(logger, message);
+                    }
+                    catch (Exception ex)
+                    {
+                        consume.Failed(ex);
+                        Log.ErrorConsumeMessage(logger, message, ex);
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    // ignore
                 }
                 catch (Exception ex)
                 {
-                    Log.ErrorConsumeMessage(logger, message, ex);
+                    _observability.LoopFailed(ex);
+                    Log.ErrorConsumeTopic(logger, topic, ex);
+
+                    // Exception occurred while consuming topic, delay consumer by 1 second
+                    await Task.Delay(1000, cancellationToken);
                 }
             }
-            catch (OperationCanceledException)
-            {
-                // ignore
-            }
-            catch (Exception ex)
-            {
-                Log.ErrorConsumeTopic(logger, topic, ex);
-
-                // Exception occurred while consuming topic, delay consumer by 1 second
-                await Task.Delay(1000, cancellationToken);
-            }
+        }
+        finally
+        {
+            _observability.Stopped();
         }
     }
 }

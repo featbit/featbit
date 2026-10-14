@@ -1,10 +1,11 @@
 using Domain.ControlPlane;
 using Domain.Messages;
+using Domain.Observability;
 using Streaming.ControlPlane;
 
 namespace Api.ControlPlane;
 
-public class HeartbeatService(
+public partial class HeartbeatService(
     IMessageProducer messageProducer,
     ILogger<HeartbeatService> logger,
     IConfiguration configuration,
@@ -12,6 +13,8 @@ public class HeartbeatService(
     IHeartbeatPublishStatus publishStatus) : BackgroundService
 {
     private readonly Guid _podId = InfrastructureInfo.Id;
+
+    private readonly WorkerObservability _observability = ServiceMeter.ForWorker(WorkerNames.Heartbeat);
 
     /// <summary>
     /// Fallback heartbeat interval used when ControlPlane:HeartbeatIntervalSeconds is unset or
@@ -25,37 +28,50 @@ public class HeartbeatService(
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        logger.LogInformation("HeartbeatService started with PodId: {PodId}", _podId);
+        Log.Started(logger, _podId);
 
         var heartbeatTimeSpan = TimeSpan.FromSeconds(ResolveHeartbeatIntervalSeconds(configuration));
 
-        while (!stoppingToken.IsCancellationRequested)
+        _observability.Started();
+
+        try
         {
-            try
+            while (!stoppingToken.IsCancellationRequested)
             {
-                await messageProducer.PublishAsync(Topics.PodHeartbeat, await BuildHeartbeatAsync(stoppingToken));
+                _observability.Heartbeat();
 
-                // D5 (#22): record a successful publish so HeartbeatFreshnessHealthCheck can detect
-                // when this pod can no longer reach the control plane.
-                publishStatus.MarkSuccess(DateTimeOffset.UtcNow);
-            }
-            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
-            {
-                // Shutdown — stop the loop without recording a failure.
-                break;
-            }
-            catch (Exception ex)
-            {
-                // Leave LastSuccessfulPublishAt unchanged: the freshness check measures age since the
-                // last successful publish, which is exactly what should grow while publishing fails.
-                publishStatus.MarkFailure(DateTimeOffset.UtcNow);
-                logger.LogWarning(ex, "HeartbeatService failed to publish heartbeat for PodId: {PodId}", _podId);
-            }
+                try
+                {
+                    await messageProducer.PublishAsync(Topics.PodHeartbeat, await BuildHeartbeatAsync(stoppingToken));
 
-            await Task.Delay(heartbeatTimeSpan, stoppingToken);
+                    // D5 (#22): record a successful publish so HeartbeatFreshnessHealthCheck can detect
+                    // when this pod can no longer reach the control plane.
+                    publishStatus.MarkSuccess(DateTimeOffset.UtcNow);
+                    _observability.Success();
+                }
+                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                {
+                    // Shutdown — stop the loop without recording a failure.
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    // Leave LastSuccessfulPublishAt unchanged: the freshness check measures age since the
+                    // last successful publish, which is exactly what should grow while publishing fails.
+                    publishStatus.MarkFailure(DateTimeOffset.UtcNow);
+                    _observability.LoopFailed(ex);
+                    Log.PublishFailed(logger, _podId, ex);
+                }
+
+                await Task.Delay(heartbeatTimeSpan, stoppingToken);
+            }
+        }
+        finally
+        {
+            _observability.Stopped();
         }
 
-        logger.LogInformation("HeartbeatService stopping with PodId: {PodId}", _podId);
+        Log.Stopping(logger, _podId);
     }
 
     /// <summary>

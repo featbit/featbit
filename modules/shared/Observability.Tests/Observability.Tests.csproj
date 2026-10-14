@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <!--
+      Tests for the primitives in modules/shared/Observability. They live here, not in a module's
+      test project, for the same reason the code does: there is exactly one implementation, so
+      there should be exactly one set of tests for it.
+
+      The project is listed in all three module solutions on purpose. Every module depends on these
+      primitives, so every module's build-and-test workflow should fail if one of them breaks. The
+      tests are fast, in-process, and dependency-free, so running them three times costs seconds and
+      buys each workflow a complete picture of what it depends on.
+    -->
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>FeatBit.Observability.Tests</RootNamespace>
+        <AssemblyName>FeatBit.Observability.Tests</AssemblyName>
+
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.5.1" />
+        <PackageReference Include="xunit" Version="2.9.3" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="coverlet.collector" Version="10.0.0">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Observability\Observability.csproj" />
+        <ProjectReference Include="..\Observability.AspNetCore\Observability.AspNetCore.csproj" />
+        <ProjectReference Include="..\Observability.TestKit\Observability.TestKit.csproj" />
+    </ItemGroup>
+
+</Project>

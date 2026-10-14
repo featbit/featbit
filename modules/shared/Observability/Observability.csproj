@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <!--
+      Shared observability primitives for the API server, the evaluation server, and the control
+      plane. BCL-only by policy (System.Diagnostics.Metrics / System.Diagnostics.ActivitySource):
+      adding a package reference here would push that dependency into all three runtime images.
+
+      The assembly is named FeatBit.Observability but its types live in the Domain.Observability
+      namespace. That mismatch is deliberate — the namespace is what every call site in all three
+      modules already uses, so keeping it means this project can be introduced without editing a
+      single using directive.
+    -->
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>Domain.Observability</RootNamespace>
+        <AssemblyName>FeatBit.Observability</AssemblyName>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
+
+</Project>

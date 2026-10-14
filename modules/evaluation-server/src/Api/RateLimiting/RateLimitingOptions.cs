@@ -213,6 +213,12 @@ public sealed class EndpointRateLimitOptions
 /// </summary>
 public sealed class EffectiveOptions
 {
+    /// <summary>
+    /// The policy these options were resolved for. Retained so instrumentation can attribute a
+    /// decision to a policy without ever touching the partition key, which embeds an environment id.
+    /// </summary>
+    public string PolicyName { get; }
+
     public RateLimiterType Type { get; set; }
     public int PermitLimit { get; set; }
     public int WindowSeconds { get; set; }
@@ -224,6 +230,7 @@ public sealed class EffectiveOptions
 
     public EffectiveOptions(string policyName, RateLimitingOptions global)
     {
+        PolicyName = policyName;
         Type = global.Type;
         PermitLimit = global.PermitLimit;
         WindowSeconds = global.WindowSeconds;

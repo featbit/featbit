@@ -53,6 +53,11 @@ exporters:
     endpoint: "0.0.0.0:8889"
     const_labels:
       label1: featbit
+    # Required for exemplars to survive the Prometheus path. FeatBit defaults
+    # OTEL_METRICS_EXEMPLAR_FILTER=trace_based, so metric points arrive carrying a trace/span id,
+    # but plain Prometheus exposition has nowhere to put them and silently drops them. OpenMetrics
+    # does. Your scraper must also request OpenMetrics for the exemplars to reach Grafana.
+    enable_open_metrics: true
 
   otlp/jaeger:
     endpoint: "jaeger:4317"

@@ -1,4 +1,5 @@
 using Application.Usages;
+using Domain.Observability;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -6,7 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace Infrastructure.AppService;
 
-public class UsageFlushWorker(
+public partial class UsageFlushWorker(
     UsageTracker usageTracker,
     IOptions<UsageTrackingOptions> options,
     IServiceProvider serviceProvider,
@@ -14,35 +15,53 @@ public class UsageFlushWorker(
 {
     private readonly PeriodicTimer _timer = new(TimeSpan.FromMilliseconds(options.Value.FlushIntervalMs));
 
+    private readonly WorkerObservability _observability = ServiceMeter.ForWorker(WorkerNames.UsageFlush);
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        while (await _timer.WaitForNextTickAsync(stoppingToken))
+        _observability.Started();
+
+        try
         {
-            var records = new List<UsageRecord>();
-
-            try
+            while (await _timer.WaitForNextTickAsync(stoppingToken))
             {
-                // Drain everything currently available
-                while (usageTracker.Reader.TryRead(out var record))
+                // Every tick, including the ones that find nothing to do. A fresh heartbeat with a
+                // stale last_success is how "idle" is told apart from "stuck".
+                _observability.Heartbeat();
+
+                var records = new List<UsageRecord>();
+
+                try
                 {
-                    records.Add(record);
-                }
+                    // Drain everything currently available
+                    while (usageTracker.Reader.TryRead(out var record))
+                    {
+                        records.Add(record);
+                    }
 
-                if (records.Count == 0)
+                    if (records.Count == 0)
+                    {
+                        continue;
+                    }
+
+                    await FlushCoreAsync(records);
+
+                    _observability.Success();
+                }
+                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
                 {
-                    continue;
+                    // ignore cancellation from the timer loop itself
                 }
-
-                await FlushCoreAsync(records);
+                catch (Exception ex)
+                {
+                    _observability.LoopFailed(ex);
+                    Log.ErrorFlushUsageRecords(logger, ex);
+                }
             }
-            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
-            {
-                // ignore cancellation from the timer loop itself
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Exception occurred while flushing usage records.");
-            }
+        }
+        finally
+        {
+            _observability.Stopped();
         }
     }
 

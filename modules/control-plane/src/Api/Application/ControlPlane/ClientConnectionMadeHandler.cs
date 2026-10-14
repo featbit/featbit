@@ -1,10 +1,11 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using Application.Caches;
 using Domain.Messages;
+using Domain.Observability;
 
 namespace Api.Application.ControlPlane;
 
-public class ClientConnectionMadeHandler(ICacheService cacheService, ILogger<ClientConnectionMadeHandler> logger) : IMessageHandler
+public partial class ClientConnectionMadeHandler(ICacheService cacheService, ILogger<ClientConnectionMadeHandler> logger) : IMessageHandler
 {
     private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
 
@@ -12,7 +13,10 @@ public class ClientConnectionMadeHandler(ICacheService cacheService, ILogger<Cli
 
     public async Task HandleAsync(string message)
     {
-        logger.LogInformation("Handling connection made message: {Message}", message);
+        // Logged in full apart from the client's SDK secret, which Redaction.HideCredentials
+        // hashes in place (docs/observability/index.md §7). Without that this handler would be
+        // the back door through which every credential protected elsewhere still reached the log.
+        Log.HandlingConnectionMade(logger, message);
 
         ConnectionMessage? connectionInfo;
         try
@@ -21,12 +25,18 @@ public class ClientConnectionMadeHandler(ICacheService cacheService, ILogger<Cli
         }
         catch (JsonException ex)
         {
-            logger.LogError(ex, "Failed to deserialize connection message: {Message}", message);
+            // Caught and not rethrown, so the consumer records this message as successfully
+            // consumed. Without this counter the failure is invisible at every layer.
+            ControlPlaneMetrics.Current.RecordSuppressedFailure(
+                HandlerNames.ClientConnectionMade, SuppressedFailureReasons.DeserializationFailed);
+            Log.ErrorDeserializeConnection(logger, message, ex);
             return;
         }
 
         if (!TryValidate(connectionInfo, message))
         {
+            ControlPlaneMetrics.Current.RecordSuppressedFailure(
+                HandlerNames.ClientConnectionMade, SuppressedFailureReasons.ValidationFailed);
             return;
         }
 
@@ -37,25 +47,25 @@ public class ClientConnectionMadeHandler(ICacheService cacheService, ILogger<Cli
     {
         if (connectionInfo is null)
         {
-            logger.LogError("Connection message is null after deserialization: {Message}", rawMessage);
+            Log.ConnectionNull(logger, rawMessage);
             return false;
         }
         
         if (string.IsNullOrWhiteSpace(connectionInfo.Id))
         {
-            logger.LogError("Connection id is null or empty: {Message}", rawMessage);
+            Log.ConnectionIdMissing(logger, rawMessage);
             return false;
         }
 
         if (string.IsNullOrWhiteSpace(connectionInfo.Secret))
         {
-            logger.LogError("Connection secret is null or empty: {Message}", rawMessage);
+            Log.ConnectionSecretMissing(logger, connectionInfo.Id);
             return false;
         }
 
         if (connectionInfo.EnvId == Guid.Empty)
         {
-            logger.LogError("Connection env id is empty: {Message}", rawMessage);
+            Log.ConnectionEnvIdMissing(logger, connectionInfo.Id);
             return false;
         }
         

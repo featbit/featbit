@@ -28,6 +28,11 @@ public static class ConfigureServices
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
 
+        // Registered AFTER ValidationBehaviour on purpose: MediatR runs behaviors in registration
+        // order, so validation rejections are observed here as an outcome rather than being timed
+        // as handler work. See ObservabilityBehaviour's remarks.
+        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ObservabilityBehaviour<,>));
+
         // custom services
         services.AddHttpContextAccessor();
         services.AddSingleton<ICurrentUser, CurrentUser>();

@@ -9,7 +9,7 @@ using Environment = Domain.Environments.Environment;
 
 namespace Infrastructure.Services.MongoDb;
 
-public class EnvironmentService(MongoDbClient mongoDb, ILogger<EnvironmentService> logger)
+public partial class EnvironmentService(MongoDbClient mongoDb, ILogger<EnvironmentService> logger)
     : MongoDbService<Environment>(mongoDb), IEnvironmentService
 {
     public async Task<string[]> GetServesAsync(string[] scopes)
@@ -159,10 +159,7 @@ public class EnvironmentService(MongoDbClient mongoDb, ILogger<EnvironmentServic
             }
             else
             {
-                logger.LogWarning(
-                    "Data inconsistency detected: Resource descriptor not found for environment with ID {EnvId}. Please verify the integrity of the environment data in the database.",
-                    env.Id
-                );
+                Log.ResourceDescriptorNotFound(logger, env.Id);
             }
         }
 

@@ -23,8 +23,8 @@ services:
     image: featbit/api:dev
     container_name: api
     build:
-      context: ./modules/back-end
-      dockerfile: ./deploy/Dockerfile
+      context: ./modules
+      dockerfile: ./back-end/deploy/Dockerfile
     environment:
       - SSOEnabled=true
       - DbProvider=Postgres
@@ -47,8 +47,8 @@ services:
     image: featbit/evaluation-server:dev
     container_name: evaluation-server
     build:
-      context: ./modules/evaluation-server
-      dockerfile: ./deploy/Dockerfile
+      context: ./modules
+      dockerfile: ./evaluation-server/deploy/Dockerfile
     environment:
       - DbProvider=Postgres
       - MqProvider=Kafka

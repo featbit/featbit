@@ -9,7 +9,7 @@ using Action = Domain.ControlPlane.Action;
 
 namespace Streaming.Consumers;
 
-public class ControlPlaneCommandMessageConsumer(
+public partial class ControlPlaneCommandMessageConsumer(
     IAdminService adminService,
     IConfiguration configuration,
     ILogger<ControlPlaneCommandMessageConsumer> logger) : IMessageConsumer
@@ -23,7 +23,7 @@ public class ControlPlaneCommandMessageConsumer(
             var command = JsonSerializer.Deserialize<ControlPlaneCommand>(message, ReusableJsonSerializerOptions.Web);
             if (command == null)
             {
-                logger.LogWarning("Invalid control plane command message format: {Message}", message);
+                Log.InvalidMessageFormat(logger, message);
                 return;
             }
 
@@ -37,10 +37,7 @@ public class ControlPlaneCommandMessageConsumer(
                 var localDcId = configuration.GetValue<string>("ControlPlane:DcId");
                 if (!string.Equals(command.TargetDcId, localDcId, StringComparison.Ordinal))
                 {
-                    logger.LogDebug(
-                        "Ignoring control plane command targeted at DC '{TargetDcId}' (local DC is '{LocalDcId}').",
-                        command.TargetDcId,
-                        localDcId);
+                    Log.IgnoringTargetedCommand(logger, command.TargetDcId, localDcId);
                     return;
                 }
             }
@@ -56,11 +53,7 @@ public class ControlPlaneCommandMessageConsumer(
         }
         catch (Exception ex)
         {
-            logger.LogError(
-                ex,
-                "Exception occurred while processing control plane command message: {Message}",
-                message
-            );
+            Log.ProcessingFailed(logger, message, ex);
         }
     }
 }

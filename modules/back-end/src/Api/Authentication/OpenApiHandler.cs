@@ -9,7 +9,7 @@ using Microsoft.Extensions.Options;
 
 namespace Api.Authentication;
 
-public class OpenApiHandler(
+public partial class OpenApiHandler(
     IOptionsMonitor<OpenApiOptions> options,
     ILoggerFactory logger,
     UrlEncoder encoder,
@@ -57,7 +57,7 @@ public class OpenApiHandler(
                 catch (Exception ex)
                 {
                     // a transient DB error here shouldn't reject valid access token
-                    Logger.LogWarning(ex, "Failed to refresh LastUsedAt for access token {AccessTokenId}", accessToken.Id);
+                    Log.ErrorRefreshLastUsedAt(Logger, accessToken.Id, ex);
                 }
             }
 

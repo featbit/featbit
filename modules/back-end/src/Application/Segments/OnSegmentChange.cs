@@ -1,5 +1,6 @@
 using Application.Caches;
 using Domain.AuditLogs;
+using Domain.Observability;
 using Domain.Segments;
 using Microsoft.Extensions.Configuration;
 
@@ -54,16 +55,35 @@ public class OnSegmentChangeHandler(
 {
     public async Task Handle(OnSegmentChange notification, CancellationToken cancellationToken)
     {
-        // write audit log
-        await auditLogService.AddOneAsync(notification.GetAuditLog());
-
         var segment = notification.Segment;
-        var envIds = await segmentService.GetEnvironmentIdsAsync(segment);
 
-        // update cache
-        await cache.UpsertSegmentAsync(envIds, segment);
+        // Tag this change so every stage below and every service that later consumes the message can
+        // be tied to one logical change (docs/observability/index.md §7).
+        ActivityCorrelation.SetChangeId(
+            ChangeId.For(ChangeId.SegmentResource, segment.EnvId, segment.Key, segment.UpdatedAt));
 
-        await segmentChangePublisher.PublishAsync(notification);
+        ICollection<Guid> envIds;
+
+        using (var persist = PropagationMetrics.Current.BeginStage(
+                   ChangeId.SegmentResource, PropagationStages.Persist))
+        {
+            // write audit log
+            await auditLogService.AddOneAsync(notification.GetAuditLog());
+
+            envIds = await segmentService.GetEnvironmentIdsAsync(segment);
+
+            // update cache
+            await cache.UpsertSegmentAsync(envIds, segment);
+
+            persist.Succeeded();
+        }
+
+        using (var publish = PropagationMetrics.Current.BeginStage(
+                   ChangeId.SegmentResource, PropagationStages.Publish))
+        {
+            await segmentChangePublisher.PublishAsync(notification);
+            publish.Succeeded();
+        }
 
         if (!configuration.UseControlPlane())
         {

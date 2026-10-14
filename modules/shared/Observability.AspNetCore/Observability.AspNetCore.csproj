@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <!--
+      Shared ASP.NET-facing observability plumbing. Kept separate from shared/Observability so that
+      the Domain-level primitives stay free of a Microsoft.AspNetCore.App framework reference —
+      Domain projects in all three modules reference that one, and pulling ASP.NET Core into them
+      would be a real architectural regression for the sake of one file.
+    -->
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>FeatBit.Observability.AspNetCore</RootNamespace>
+        <AssemblyName>FeatBit.Observability.AspNetCore</AssemblyName>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <NoWarn>$(NoWarn);1591</NoWarn>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+
+    <!--
+      Depends on the Domain-level primitives, never the other way round: this project applies
+      configuration to them (TraceGate, Redaction) and serialises health-check results.
+    -->
+    <ItemGroup>
+        <ProjectReference Include="..\Observability\Observability.csproj" />
+    </ItemGroup>
+
+</Project>

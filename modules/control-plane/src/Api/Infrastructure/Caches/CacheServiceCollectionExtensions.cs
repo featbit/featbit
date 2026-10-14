@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Api.Infrastructure.Caches;
 
-public static class CacheServiceCollectionExtensions
+public static partial class CacheServiceCollectionExtensions
 {
     /// <summary>
     /// Default StackExchange.Redis <c>connectTimeout</c>/<c>syncTimeout</c> (ms) applied to every
@@ -128,12 +128,7 @@ public static class CacheServiceCollectionExtensions
                     {
                         if (string.IsNullOrWhiteSpace(redisInstances[i].DcId))
                         {
-                            logger.LogWarning(
-                                "Redis:Instances[{Index}] has no DcId configured; " +
-                                "falling back to ordinal index '{Index}' as the DC key. " +
-                                "Configure a DcId per instance for stable per-DC broadcast results.",
-                                i,
-                                i);
+                            Log.InstanceMissingDcId(logger, i);
                         }
                     }
 

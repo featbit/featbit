@@ -1,5 +1,6 @@
 ﻿{
   Status: 403 Forbidden,
+  Headers: {},
   Content: {
     Headers: {
       Content-Length: 52,

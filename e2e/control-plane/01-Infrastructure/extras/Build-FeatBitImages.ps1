@@ -86,8 +86,10 @@ $modulesDir = Join-Path $repoRoot "modules"
 $imageDefs = [ordered]@{
     "api-server" = @{
         ImageName  = "featbit-api-server"
+        # The Dockerfile COPYs from both back-end/ and shared/, so the build
+        # context must be the modules/ directory.
         Dockerfile = "modules/back-end/deploy/Dockerfile"
-        Context    = "modules/back-end"
+        Context    = "modules"
     }
     "ui" = @{
         ImageName  = "featbit-ui"
@@ -96,8 +98,10 @@ $imageDefs = [ordered]@{
     }
     "evaluation-server" = @{
         ImageName  = "featbit-evaluation-server"
+        # The Dockerfile COPYs from both evaluation-server/ and shared/, so the
+        # build context must be the modules/ directory.
         Dockerfile = "modules/evaluation-server/deploy/Dockerfile"
-        Context    = "modules/evaluation-server"
+        Context    = "modules"
     }
     "control-plane" = @{
         ImageName  = "featbit-control-plane"

@@ -9,7 +9,6 @@ namespace Application.IntegrationTests.WebSockets;
 
 [Trait("Category", "Host")]
 [Collection(nameof(TestApp))]
-[Trait("Category", "Integration")]
 public class DataSyncTests(TestApp app)
 {
     // 2023-01-28T05:55:00.000Z, filter out 4 feature flags and 1 segment

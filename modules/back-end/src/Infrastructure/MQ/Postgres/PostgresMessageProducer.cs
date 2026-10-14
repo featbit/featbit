@@ -1,6 +1,8 @@
+using System.Diagnostics;
 using System.Text.Json;
 using Dapper;
 using Domain.Messages;
+using Domain.Observability;
 using Domain.Utils;
 using Microsoft.Extensions.Logging;
 using Npgsql;
@@ -15,23 +17,38 @@ public partial class PostgresMessageProducer(NpgsqlDataSource dataSource, ILogge
 
     public async Task PublishAsync<TMessage>(string topic, TMessage message) where TMessage : class
     {
-        var isNotificationTopic = topic is Topics.FeatureFlagChange or Topics.SegmentChange;
+        // Pub/sub topics must be delivered by pg_notify; anything else is left Pending for the
+        // polling consumer to pick up. The control plane publishes ControlPlaneCommand and the
+        // evaluation server subscribes to it over LISTEN, so omitting it here meant the row was
+        // written as Pending, no notification was ever issued, and — because the consumer's
+        // catch-up sweep only runs on reconnect — the command was never delivered under Postgres
+        // at all, while working normally on Redis and Kafka.
+        var isNotificationTopic = topic is Topics.FeatureFlagChange
+            or Topics.SegmentChange
+            or ControlPlaneTopics.ControlPlaneCommand;
+
+        // M2: instrumented at the adapter. The exception below is swallowed (unchanged behavior),
+        // so counting the failure here is the only way it becomes visible.
+        using var publish = MessagingMetrics.Current.BeginPublish(MessagingSystems.Postgres, topic);
 
         try
         {
             var jsonMessage = JsonSerializer.Serialize(message, ReusableJsonSerializerOptions.Web);
+            TraceContextPropagation.TryInject(Activity.Current, out var traceParent, out var traceState);
 
             await using var connection = await dataSource.OpenConnectionAsync();
 
             var messageId = await connection.ExecuteScalarAsync<string>(
-                "insert into queue_messages (topic, status, payload) values (@Topic, @Status, @Message) returning id",
+                "insert into queue_messages (topic, status, payload, trace_parent, trace_state) values (@Topic, @Status, @Message, @TraceParent, @TraceState) returning id",
                 new
                 {
                     Topic = topic,
                     Status = isNotificationTopic
                         ? QueueMessageStatus.Notified
                         : QueueMessageStatus.Pending,
-                    Message = jsonMessage
+                    Message = jsonMessage,
+                    TraceParent = traceParent.Length == 0 ? null : traceParent,
+                    TraceState = traceState
                 }
             );
 
@@ -52,10 +69,12 @@ public partial class PostgresMessageProducer(NpgsqlDataSource dataSource, ILogge
                 }
             }
 
+            publish.Enqueued();
             Log.MessagePublished(logger, topic, messageId!, jsonMessage);
         }
         catch (Exception ex)
         {
+            publish.Failed(ex);
             Log.ErrorPublishMessage(logger, ex);
         }
 

@@ -4,7 +4,6 @@ namespace Application.IntegrationTests.Controllers;
 
 [Trait("Category", "Host")]
 [Collection(nameof(TestApp))]
-[Trait("Category", "Integration")]
 public class BasicControllerTests
 {
     private readonly TestApp _app;

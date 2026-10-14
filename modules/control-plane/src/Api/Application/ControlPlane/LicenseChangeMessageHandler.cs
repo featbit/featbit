@@ -6,7 +6,7 @@ using Domain.Workspaces;
 
 namespace Api.Application.ControlPlane;
 
-public class LicenseChangeMessageHandler([FromKeyedServices("compositeCache")] ICacheService cacheService, ILogger<LicenseChangeMessageHandler> logger) : IMessageHandler
+public partial class LicenseChangeMessageHandler([FromKeyedServices("compositeCache")] ICacheService cacheService, ILogger<LicenseChangeMessageHandler> logger) : IMessageHandler
 {
     public string Topic => ControlPlaneTopics.ControlPlaneLicenseChange;
 
@@ -22,7 +22,7 @@ public class LicenseChangeMessageHandler([FromKeyedServices("compositeCache")] I
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Error handling license change message");
+            Log.ErrorHandleLicenseChange(logger, e);
             throw;
         }
 

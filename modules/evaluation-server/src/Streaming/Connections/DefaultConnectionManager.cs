@@ -1,11 +1,24 @@
 using System.Collections.Concurrent;
+using Domain.Observability;
 using Microsoft.Extensions.Logging;
 
 namespace Streaming.Connections;
 
-public sealed partial class DefaultConnectionManager(ILogger<DefaultConnectionManager> logger) : IConnectionManager
+public sealed partial class DefaultConnectionManager : IConnectionManager
 {
+    private readonly ILogger<DefaultConnectionManager> _logger;
+
     internal readonly ConcurrentDictionary<string, Connection> Connections = new(StringComparer.Ordinal);
+
+    public DefaultConnectionManager(ILogger<DefaultConnectionManager> logger)
+    {
+        _logger = logger;
+
+        // M1: the gauge reads ConcurrentDictionary.Count, which is O(1) and lock-free here. It is
+        // deliberately not a scan of the dictionary — a callback that enumerated connections would
+        // run on every collection interval and contend with the streaming hot path.
+        StreamingMetrics.Current.SetSubscriptionCountProvider(() => Connections.Count);
+    }
 
     public Task Add(ConnectionContext context)
     {
@@ -21,7 +34,7 @@ public sealed partial class DefaultConnectionManager(ILogger<DefaultConnectionMa
             Connections.TryAdd(context.Connection.Id, context.Connection);
         }
 
-        Log.ConnectionAdded(logger, context);
+        Log.ConnectionAdded(_logger, context);
 
         return Task.CompletedTask;
     }
@@ -42,7 +55,7 @@ public sealed partial class DefaultConnectionManager(ILogger<DefaultConnectionMa
 
         context.MarkAsClosed();
 
-        Log.ConnectionRemoved(logger, context);
+        Log.ConnectionRemoved(_logger, context);
 
         return Task.CompletedTask;
     }

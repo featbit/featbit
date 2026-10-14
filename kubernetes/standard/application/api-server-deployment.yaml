@@ -25,10 +25,61 @@ spec:
               value: featbit
             - name: Redis__ConnectionString
               value: redis:6379
+            # --- OpenTelemetry export (opt-in) ---------------------------------
+            # Off by default. Enabling it starts exporting ~80 custom instruments,
+            # which is an ingest-volume and cost decision rather than just a config
+            # change. To enable:
+            #   1. Deploy an OTLP collector reachable at the endpoint below.
+            #   2. Set ENABLE_OPENTELEMETRY to "true".
+            # See docs/observability/exporting.md.
+            - name: ENABLE_OPENTELEMETRY
+              value: "false"
+            - name: OTEL_SERVICE_NAME
+              value: featbit-api
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://otel-collector:4317
+            # Required. The endpoint above is a gRPC port, and both the .NET
+            # auto-instrumentation and the Serilog OTLP sink default to
+            # http/protobuf — without this every signal is posted to a gRPC
+            # listener and silently discarded.
+            - name: OTEL_EXPORTER_OTLP_PROTOCOL
+              value: grpc
+            # Optional. Left unset, the redaction salt is random per process, so a
+            # hashed credential will not correlate across replicas or services. Set
+            # the same value everywhere (ideally from a Secret) if you need that.
+            # - name: Observability__RedactionSalt
+            #   value: change_me
           image: featbit/featbit-api-server:latest
           name: api-server
           ports:
             - containerPort: 5000
+          # Liveness answers "is this process still serving HTTP?" and nothing else. The endpoint is
+          # mapped with Predicate = _ => false, so it evaluates ZERO health checks and cannot fail
+          # because Postgres, Kafka, or Redis is down. That is precisely what makes it safe to
+          # restart on: a dependency outage must never restart pods, it must only take them out of
+          # rotation — which is readiness' job, below.
+          livenessProbe:
+            httpGet:
+              path: /health/liveness
+              port: 5000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 6
+          # Readiness DOES evaluate the datastore, message-queue, and cache checks. Those
+          # dependencies are shared, so an outage in one takes every replica out of rotation at
+          # once rather than shifting traffic to a healthy pod — that is inherent to the dependency
+          # being shared, not a probe defect. failureThreshold x periodSeconds gives a 30s
+          # ride-through before that happens; raise failureThreshold if your datastore is prone to
+          # brief stalls. Individual checks time out after 5s in code, which timeoutSeconds matches.
+          readinessProbe:
+            httpGet:
+              path: /health/readiness
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
           resources:
             limits:
               memory: 512Mi

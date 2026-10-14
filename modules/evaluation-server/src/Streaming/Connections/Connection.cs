@@ -1,6 +1,7 @@
 ﻿using System.Net.WebSockets;
 using Domain.ControlPlane;
 using Domain.EndUsers;
+using Domain.Observability;
 using Domain.Shared;
 using Streaming.Protocol;
 
@@ -32,7 +33,14 @@ public class Connection
     }
 
     public async Task SendAsync(ServerMessage message, CancellationToken cancellationToken)
-        => await WebSocket.SendAsync(message.GetBytes(), WebSocketMessageType.Text, true, cancellationToken);
+    {
+        // Serialize once and measure the same buffer the socket writes, so the size is exact and
+        // instrumentation adds no work beyond a length read.
+        var bytes = message.GetBytes();
+        StreamingMetrics.Current.RecordSentMessage(message.MessageType, bytes.Length);
+
+        await WebSocket.SendAsync(bytes, WebSocketMessageType.Text, true, cancellationToken);
+    }
 
     /// <summary>
     /// attach client-side sdk EndUser

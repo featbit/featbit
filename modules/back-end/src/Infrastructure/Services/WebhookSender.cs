@@ -1,18 +1,27 @@
 using System.Net;
 using System.Net.Mime;
+using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Domain.Utils;
 using Domain.Webhooks;
+using Domain.Observability;
 using HandlebarsDotNet;
 using Microsoft.Extensions.Logging;
 using Microsoft.Security.AntiSSRF;
 
 namespace Infrastructure.Services;
 
-public class WebhookSender : IWebhookSender
+public partial class WebhookSender : IWebhookSender
 {
+    /// <summary>
+    /// Duration at or above which a webhook attempt span is always retained. The client timeout is
+    /// 10 seconds, so this retains anything in the slowest part of the range without retaining
+    /// healthy deliveries.
+    /// </summary>
+    private const double SlowAttemptThresholdMs = 5_000d;
+
     private readonly HttpClient _client;
     private readonly IWebhookService _webhookService;
     private readonly ILogger<WebhookSender> _logger;
@@ -32,6 +41,7 @@ public class WebhookSender : IWebhookSender
 
     public async Task<WebhookDelivery> SendAsync(Webhook webhook, Dictionary<string, object> dataObject)
     {
+        var metrics = WebhookMetrics.Current;
         var events = dataObject["events"].ToString()!;
 
         string payload;
@@ -54,12 +64,16 @@ public class WebhookSender : IWebhookSender
             };
             delivery.SetError(error);
 
+            metrics.RecordDelivery(Outcomes.Failure, WebhookReasons.TemplateError);
+
             await AddDeliveryAsync(delivery);
             return delivery;
         }
 
         if (webhook.PreventEmptyPayloads && jsonDocument.RootElement.IsEmptyObject())
         {
+            metrics.RecordDelivery(Outcomes.Dropped, WebhookReasons.EmptyPayload);
+
             return WebhookDelivery.Ignored("Not allowed to send an empty JSON object", webhook.Url, payload);
         }
 
@@ -84,6 +98,10 @@ public class WebhookSender : IWebhookSender
             }
         }
 
+        metrics.RecordDelivery(
+            lastDelivery.Success ? Outcomes.Success : Outcomes.Failure,
+            lastDelivery.Success ? WebhookReasons.Delivered : WebhookReasons.HttpError);
+
         return lastDelivery;
     }
 
@@ -92,6 +110,17 @@ public class WebhookSender : IWebhookSender
         var delivery = new WebhookDelivery(request.Id, request.Events);
         delivery.Started();
 
+        var start = Stopwatch.GetTimestamp();
+        var reason = WebhookReasons.Delivered;
+
+        // T5 — one span per HTTP attempt. The URL is deliberately not a tag: it is
+        // customer-supplied and frequently carries a secret in its path or query.
+        using var trace = TailSampledTrace.Start(
+            TraceCategories.ScheduledWork,
+            "webhook.attempt",
+            ActivityKind.Client,
+            SlowAttemptThresholdMs);
+
         try
         {
             var httpRequest = CreateWebhookHttpRequest();
@@ -99,27 +128,45 @@ public class WebhookSender : IWebhookSender
 
             var response = await _client.SendAsync(httpRequest);
             await delivery.AddResponseAsync(response);
+
+            reason = response.IsSuccessStatusCode
+                ? WebhookReasons.Delivered
+                : WebhookReasons.HttpError;
+
+            trace.SetTag("http.response.status_code", (int)response.StatusCode);
         }
         catch (AntiSSRFException ex)
         {
-            _logger.LogWarning("Blocked webhook request to '{Url}' due to AntiSSRF policy: {Message}", request.Url, ex.Message);
+            Log.BlockedByAntiSsrf(_logger, request.Url, ex.Message);
 
             var error = new
             {
                 message = "Webhook target is not allowed. The URL must be an absolute http/https URL that resolves to a public IP address."
             };
             delivery.SetError(error);
+
+            reason = WebhookReasons.Blocked;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Exception occurred while sending webhook '{Name}'", request.Name);
+            Log.ErrorSendWebhook(_logger, request.Name, ex);
 
             var error = new
             {
                 message = ex.Message
             };
             delivery.SetError(error);
+
+            reason = WebhookReasons.TransportError;
         }
+
+        WebhookMetrics.Current.RecordAttempt(
+            reason == WebhookReasons.Delivered ? Outcomes.Success : Outcomes.Failure,
+            reason,
+            Stopwatch.GetElapsedTime(start));
+
+        trace.Ended(
+            reason == WebhookReasons.Delivered ? Outcomes.Success : Outcomes.Failure, reason);
 
         delivery.Ended();
         return delivery;
@@ -191,7 +238,7 @@ public class WebhookSender : IWebhookSender
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to add webhook delivery log");
+            Log.ErrorAddDeliveryLog(_logger, ex);
         }
     }
 }

@@ -293,8 +293,9 @@ public sealed class ConsistencyMetricsTests : IntegrationTestBase, IAsyncLifetim
         var segCommit = Assert.Single(commits.Measurements, m => (string?)m.Tags["resource_type"] == "segment");
         Assert.Equal(1, segCommit.Value);
 
-        // env_id tag present on the flag commit (cheap to add from the pending flag record)
-        Assert.Equal(_envId.ToString(), (string?)flagCommit.Tags["env_id"]);
+        // No env_id tag: banned by the cardinality budget (docs/observability/index.md §4).
+        Assert.DoesNotContain("env_id", flagCommit.Tags.Keys);
+        Assert.DoesNotContain("env_id", segCommit.Tags.Keys);
 
         // time-to-commit histogram: one measurement per resource_type, each a positive ms latency
         Assert.Equal(2, histogram.Measurements.Count);
@@ -397,12 +398,13 @@ public sealed class ConsistencyMetricsTests : IntegrationTestBase, IAsyncLifetim
 
     /// <summary>
     /// #84: force a single read of the observable applied-watermark-lag gauge and return every
-    /// (dc_id, env_id, lag_ms) measurement. Mirrors <see cref="ReadBacklogGauge"/>'s
-    /// on-demand-read pattern.
+    /// (dc_id, lag_ms) measurement. Mirrors <see cref="ReadBacklogGauge"/>'s on-demand-read pattern.
+    /// The gauge reports one measurement per DC — the MAXIMUM lag across that DC's environments —
+    /// because <c>env_id</c> is banned as a metric attribute (docs/observability/index.md §4).
     /// </summary>
-    private static List<(string DcId, Guid EnvId, long LagMs)> ReadAppliedWatermarkLagGauge()
+    private static List<(string DcId, long LagMs)> ReadAppliedWatermarkLagGauge()
     {
-        var values = new List<(string DcId, Guid EnvId, long LagMs)>();
+        var values = new List<(string DcId, long LagMs)>();
 
         using var listener = new MeterListener
         {
@@ -419,22 +421,19 @@ public sealed class ConsistencyMetricsTests : IntegrationTestBase, IAsyncLifetim
         listener.SetMeasurementEventCallback<long>((_, measurement, tags, _) =>
         {
             string? dcId = null;
-            string? envId = null;
             foreach (var tag in tags)
             {
                 if (tag.Key == "dc_id" && tag.Value is string dc)
                 {
                     dcId = dc;
                 }
-                else if (tag.Key == "env_id" && tag.Value is string env)
-                {
-                    envId = env;
-                }
+
+                Assert.NotEqual("env_id", tag.Key);
             }
 
-            if (dcId != null && envId != null)
+            if (dcId != null)
             {
-                values.Add((dcId, Guid.Parse(envId), measurement));
+                values.Add((dcId, measurement));
             }
         });
 
@@ -466,17 +465,18 @@ public sealed class ConsistencyMetricsTests : IntegrationTestBase, IAsyncLifetim
         var lag = ReadAppliedWatermarkLagGauge();
 
         Assert.Equal(2, lag.Count);
-        var frontier = Assert.Single(lag, m => m.DcId == DcA && m.EnvId == envId);
+        var frontier = Assert.Single(lag, m => m.DcId == DcA);
         Assert.Equal(0, frontier.LagMs);
-        var straggler = Assert.Single(lag, m => m.DcId == DcB && m.EnvId == envId);
+        var straggler = Assert.Single(lag, m => m.DcId == DcB);
         Assert.Equal(delta, straggler.LagMs);
     }
 
     [DockerFact]
     public async Task Lag_Omits_Envs_A_Dc_Does_Not_Report()
     {
-        // DC A reports {e1, e2}; DC B only reports {e1} -> no (DcB, e2) measurement should ever be
-        // emitted (inventing lag = frontier - 0 for an env a DC doesn't serve would be misleading).
+        // DC A reports {e1, e2}; DC B only reports {e1}. DcB's max lag must be computed over e1
+        // alone: inventing lag = frontier - 0 for an env a DC doesn't serve would be misleading,
+        // and after the env_id collapse it would also dominate DcB's reported maximum.
         var e1 = Guid.NewGuid();
         var e2 = Guid.NewGuid();
 
@@ -495,15 +495,16 @@ public sealed class ConsistencyMetricsTests : IntegrationTestBase, IAsyncLifetim
 
         var lag = ReadAppliedWatermarkLagGauge();
 
-        Assert.Equal(3, lag.Count); // (DcA, e1), (DcA, e2), (DcB, e1) — no (DcB, e2)
-        Assert.DoesNotContain(lag, m => m.DcId == DcB && m.EnvId == e2);
+        Assert.Equal(2, lag.Count); // one per DC, not one per (dc, env)
 
-        var dcAe1 = Assert.Single(lag, m => m.DcId == DcA && m.EnvId == e1);
-        Assert.Equal(0, dcAe1.LagMs); // DcA is the frontier for e1 (only reporter, trivially max)
-        var dcAe2 = Assert.Single(lag, m => m.DcId == DcA && m.EnvId == e2);
-        Assert.Equal(0, dcAe2.LagMs); // DcA is the only (and thus frontier) reporter for e2
-        var dcBe1 = Assert.Single(lag, m => m.DcId == DcB && m.EnvId == e1);
-        Assert.Equal(1_000, dcBe1.LagMs); // frontier(e1) = 5000 (DcA) - 4000 (DcB) = 1000
+        // DcA is the frontier for both e1 and e2, so its worst-case lag is 0.
+        var dcA = Assert.Single(lag, m => m.DcId == DcA);
+        Assert.Equal(0, dcA.LagMs);
+
+        // DcB's only env is e1: frontier(e1) = 5000 (DcA) - 4000 (DcB) = 1000. Had e2 been
+        // invented for DcB, the max would have been 8000 instead.
+        var dcB = Assert.Single(lag, m => m.DcId == DcB);
+        Assert.Equal(1_000, dcB.LagMs);
     }
 
     [DockerFact]

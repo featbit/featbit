@@ -8,7 +8,7 @@ public class GetConnections : IRequest<IReadOnlyList<ConnectionDto>>;
 
 public record ConnectionDto(string Id, string EnvId, string Secret);
 
-public class GetConnectionsHandler(IRedisClient redisClient, ILogger<GetConnectionsHandler> logger)
+public partial class GetConnectionsHandler(IRedisClient redisClient, ILogger<GetConnectionsHandler> logger)
     : IRequestHandler<GetConnections, IReadOnlyList<ConnectionDto>>
 {
     public async Task<IReadOnlyList<ConnectionDto>> Handle(GetConnections request, CancellationToken cancellationToken)
@@ -18,12 +18,12 @@ public class GetConnectionsHandler(IRedisClient redisClient, ILogger<GetConnecti
             var server = redisClient.Connection.GetServers().FirstOrDefault(s => s.IsConnected);
             if (server is null)
             {
-                logger.LogWarning("No connected Redis server found.");
+                Log.NoConnectedRedisServer(logger);
                 return [];
             }
 
             var keys = server.Keys(pattern: "featbit:connection:*").ToList();
-            logger.LogInformation("Found {Count} connection key(s) in Redis.", keys.Count);
+            Log.FoundConnectionKeys(logger, keys.Count);
 
             var db = redisClient.GetDatabase();
             var connections = new List<ConnectionDto>(keys.Count);
@@ -46,7 +46,7 @@ public class GetConnectionsHandler(IRedisClient redisClient, ILogger<GetConnecti
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error retrieving connections from Redis.");
+            Log.ErrorRetrieveConnections(logger, ex);
             return [];
         }
     }
