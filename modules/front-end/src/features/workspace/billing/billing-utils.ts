@@ -116,13 +116,16 @@ export function currentTotal(subscription?: BillingSubscription) {
   }
 
   const plan = planMeta[normalizePlan(subscription.plan)]
-  const base = subscription.unitAmount
-    ? subscription.unitAmount / 100
-    : plan.basePrice
-  const addOn = subscription.addOnFeatures?.includes(FINE_GRAINED_ACCESS)
-    ? 60
-    : 0
-  return base + addOn
+  // The API amount already includes MAU capacity and feature add-ons.
+  if (subscription.unitAmount != null) {
+    return Number(subscription.unitAmount) / 100
+  }
+  return planTotal({
+    plan: subscription.plan ?? "free",
+    billingCycle: subscription.billingCycle,
+    mau: subscription.mau ?? subscription.baseMau ?? plan.includedMau,
+    addOnFeatures: subscription.addOnFeatures ?? [],
+  })
 }
 
 export function usageStats(
@@ -146,7 +149,12 @@ export function planRank(plan: PlanKey) {
   return ["free", "pro", "growth", "enterprise"].indexOf(plan)
 }
 
-export function planTotal(
+export function planTotal(payload: Parameters<typeof planPriceBreakdown>[0]) {
+  const { basePrice, extraMauPrice, addOnPrice } = planPriceBreakdown(payload)
+  return basePrice + extraMauPrice + addOnPrice
+}
+
+export function planPriceBreakdown(
   payload: Pick<SubscriptionChangePayload, "plan" | "mau" | "addOnFeatures"> &
     Partial<Pick<SubscriptionChangePayload, "billingCycle">>
 ) {
@@ -164,5 +172,5 @@ export function planTotal(
   const basePrice = isYearlyEnterprise
     ? ENTERPRISE_YEARLY_PRICE
     : plan.basePrice
-  return basePrice + extraMauPrice + addOnPrice
+  return { basePrice, extraMau, extraMauPrice, addOnPrice }
 }
