@@ -15,7 +15,7 @@ export type BillingSubscription = {
     mau?: number
   }
   addOnFeatures?: string[]
-  unitAmount?: number
+  unitAmount?: number | string
   currentPeriodStart?: string
   currentPeriodEnd?: string
   periodStart?: string
