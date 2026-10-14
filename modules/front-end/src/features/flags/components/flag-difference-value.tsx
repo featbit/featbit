@@ -10,6 +10,7 @@ import type { Lang } from "@/features/layout/layout-types"
 import { isSegmentConditionProperty } from "@/features/targeting/segment-conditions"
 import { ChevronRight } from "lucide-react"
 import type {
+  FlagComparisonDetail,
   FlagComparisonRule,
   FlagComparisonValue,
   FlagSettingCopyMode,
@@ -125,7 +126,9 @@ function RuleServeValue({
         const rollout = item.rollout
         const percentage =
           showPercentage && Array.isArray(rollout)
-            ? Math.round(Number(rollout[1] ?? 0) * 100)
+            ? Math.round(
+                (Number(rollout[1] ?? 0) - Number(rollout[0] ?? 0)) * 100
+              )
             : null
         return (
           <span
@@ -457,7 +460,9 @@ function DefaultRuleValue({
         const rollout = item.rollout
         const percentage =
           showPercentage && Array.isArray(rollout)
-            ? Math.round(Number(rollout[1] ?? 0) * 100)
+            ? Math.round(
+                (Number(rollout[1] ?? 0) - Number(rollout[0] ?? 0)) * 100
+              )
             : null
         return (
           <p
@@ -526,9 +531,11 @@ export function FlagDifferenceValue({
   lang = "en",
   tooltipUserStyle,
   segmentNames,
+  ruleDiffs = [],
 }: {
   flag: FlagComparisonValue
   source?: FlagComparisonValue
+  ruleDiffs?: FlagComparisonDetail["diff"]["targetingRule"]
   setting: FlagDifferenceKey
   previewMode?: FlagSettingCopyMode
   lang?: Lang
@@ -548,23 +555,30 @@ export function FlagDifferenceValue({
       />
     )
 
-  if (setting === "targetingRule")
+  if (setting === "targetingRule") {
+    const appendedRules = source.rules.filter((rule) => {
+      const diff = ruleDiffs.find((item) => item.source?.id === rule.id)
+      return diff?.canAppend ?? diff?.isDifferent
+    })
     return (
       <div className="space-y-3">
         <RulesValue flag={flag} lang={lang} segmentNames={segmentNames} />
-        <div className="border-t pt-2">
-          <p className="mb-2 text-xs font-medium">
-            {t("featureFlags.differenceValue.sourceRulesAppended")}
-          </p>
-          <RulesValue
-            flag={source}
-            startAt={flag.rules.length}
-            lang={lang}
-            segmentNames={segmentNames}
-          />
-        </div>
+        {appendedRules.length > 0 ? (
+          <div className="border-t pt-2">
+            <p className="mb-2 text-xs font-medium">
+              {t("featureFlags.differenceValue.sourceRulesAppended")}
+            </p>
+            <RulesValue
+              flag={{ ...source, rules: appendedRules }}
+              startAt={flag.rules.length}
+              lang={lang}
+              segmentNames={segmentNames}
+            />
+          </div>
+        ) : null}
       </div>
     )
+  }
 
   if (setting === "individualTargeting") {
     const merged = getAppendedIndividualTargeting(flag, source)

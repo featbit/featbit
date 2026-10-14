@@ -1,4 +1,4 @@
-﻿namespace Domain.SemanticPatch;
+namespace Domain.SemanticPatch;
 
 public static class FlagInstructionKind
 {
@@ -28,6 +28,8 @@ public static class FlagInstructionKind
 
     public const string UpdateDisabledVariation = nameof(UpdateDisabledVariation);
 
+    public const string UpdateInsightsEnabled = nameof(UpdateInsightsEnabled);
+
     public const string UpdateDefaultRuleVariationOrRollouts = nameof(UpdateDefaultRuleVariationOrRollouts);
 
     public const string UpdateDefaultRuleDispatchKey = nameof(UpdateDefaultRuleDispatchKey);
@@ -43,6 +45,8 @@ public static class FlagInstructionKind
     public const string RemoveRule = nameof(RemoveRule);
 
     public const string SetRules = nameof(SetRules);
+
+    public const string ReorderRules = nameof(ReorderRules);
 
     public const string UpdateRuleName = nameof(UpdateRuleName);
 
@@ -88,6 +92,7 @@ public static class FlagInstructionKind
         AddRule,
         RemoveRule,
         SetRules,
+        ReorderRules,
         UpdateRuleName,
         UpdateRuleDispatchKey,
         AddRuleConditions,
@@ -113,6 +118,7 @@ public static class FlagInstructionKind
         UpdateVariationType,
         UpdateVariation,
         UpdateDisabledVariation,
+        UpdateInsightsEnabled,
         UpdateDefaultRuleVariationOrRollouts,
         UpdateDefaultRuleDispatchKey,
         AddTargetUsers,
@@ -121,6 +127,7 @@ public static class FlagInstructionKind
         AddRule,
         RemoveRule,
         SetRules,
+        ReorderRules,
         UpdateRuleName,
         UpdateRuleDispatchKey,
         AddRuleConditions,

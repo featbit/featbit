@@ -33,6 +33,8 @@ requests, and that it can connect to its dependencies (a database, message queue
 
 ## Environment Variables
 
+Configuration uses the standard .NET environment-variable format: use `__` for nested keys.
+
 ### General
 
 | Name            | Description                                                                 | Default Value |
@@ -41,6 +43,8 @@ requests, and that it can connect to its dependencies (a database, message queue
 | `DbProvider`    | Database provider, used to select **MongoDB** or **Postgres**               | `"Postgres"`  |
 | `MqProvider`    | Message Queue provider, used to select **Redis**, **Kafka** or **Postgres** | `"Postgres"`  |
 | `CacheProvider` | Cache provider, used to select **Redis** or **None**                        | `"None"`      |
+| `OLAPProvider`  | Insights query store: **MongoDb**, **Postgres**, or **ClickHouse**. Defaults to the selected `DbProvider` when unset. ClickHouse requires `MqProvider=Kafka`. | Same as `DbProvider` |
+| `SSOEnabled`    | Enable the SSO endpoint. | `false` (unset) |
 
 ## Logging
 
@@ -92,7 +96,7 @@ JWT (JSON Web Token) configuration for authentication and authorization.
 
 | Name                         | Description                                                                                      | Default Value                                                                            |
 |------------------------------|--------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------|
-| `Postgres__ConnectionString` | Postgres connection string                                                                       | `"Host=postgres;Port=5432;Username=postgres;Password=please_change_me;Database=featbit"` |
+| `Postgres__ConnectionString` | Postgres connection string                                                                       | `"Host=postgresql;Port=5432;Username=postgres;Password=please_change_me;Database=featbit"` |
 | `Postgres__Password`         | Postgres password (Optional). If provided, override the password specified in connection string. | `""`                                                                                     |
 
 ### Redis
@@ -103,6 +107,8 @@ JWT (JSON Web Token) configuration for authentication and authorization.
 | `Redis__Password`               | Redis Password (Optional). If provided, override the password specified in connection string                                                                                                                              | `""`           |
 | `Redis__PopulateLockTtlSeconds` | Lock TTL (seconds) for the startup Redis populate. Must exceed the expected populate duration; if the lock expires mid-populate a second instance can start a concurrent populate. Increase for large datasets.           | `60`           |
 | `Redis__PopulateMaxWaitSeconds` | Maximum seconds an instance will wait for another instance to finish populating Redis before throwing. Should be comfortably larger than `PopulateLockTtlSeconds` so a crashed instance's lock can expire and be retaken. | `90`           |
+| `Redis__ConnectTimeoutMs` | Redis connection timeout in milliseconds; an explicit `connectTimeout` in the connection string takes precedence. | `1500` |
+| `Redis__SyncTimeoutMs` | Redis synchronous command timeout in milliseconds; an explicit `syncTimeout` in the connection string takes precedence. | `1500` |
 
 ### Kafka
 
@@ -120,10 +126,17 @@ and [consumer configs](https://kafka.apache.org/documentation/#consumerconfigs) 
 | `Kafka__Consumer__auto.commit.interval.ms`  | The frequency in ms that the consumer offsets are auto-committed to Kafka           | `"5000"`        |
 | `Kafka__Consumer__enable.auto.offset.store` | Whether to automatically store the offset of the last message prior to calling poll | `false`         |
 
-### OLAP
+### ClickHouse
 
-| Name                | Description                       | Default Value        |
-|---------------------|-----------------------------------|----------------------|
+Set `OLAPProvider=ClickHouse` only with `MqProvider=Kafka`. In that mode the API queries ClickHouse
+for insights, and `ClickHouse__HttpEndpoint` is required. When `OLAPProvider` is unset, insights use `DbProvider`.
+
+| Name | Description | Default Value |
+|------|-------------|---------------|
+| `ClickHouse__HttpEndpoint` | ClickHouse HTTP URL (for example, `http://clickhouse-server:8123`); required with ClickHouse OLAP. | None |
+| `ClickHouse__Database` | ClickHouse database name. | `featbit` |
+| `ClickHouse__User` | ClickHouse user. | `default` |
+| `ClickHouse__Password` | ClickHouse password. | Empty |
 
 ### UsageTracking
 
@@ -131,3 +144,19 @@ and [consumer configs](https://kafka.apache.org/documentation/#consumerconfigs) 
 |----------------------------------|--------------------------------------------------------|---------------|
 | `UsageTracking__FlushIntervalMs` | Interval in milliseconds between usage data flushes    | `5000`        |
 | `UsageTracking__ChannelCapacity` | Maximum number of usage events buffered in the channel | `10000`       |
+
+### InsightsTracking
+
+| Name | Description | Default Value |
+|------|-------------|---------------|
+| `InsightsTracking__FlushIntervalMs` | Interval in milliseconds between insight event flushes (1–30000). | `1000` |
+| `InsightsTracking__ChannelCapacity` | Maximum number of insight events buffered in the channel (1–100000). | `10000` |
+| `InsightsTracking__MaxBatchSize` | Maximum events per flush (1–10000); cannot exceed channel capacity. | `1000` |
+
+### OAuth integrations
+
+| Name | Description | Default Value |
+|------|-------------|---------------|
+| `OAuthProviders__<index>__Name` | Social login provider name (`Google` or `GitHub`). Configure each provider as an indexed array entry. | None |
+| `OAuthProviders__<index>__ClientId` | OAuth client ID for the indexed provider. | None |
+| `OAuthProviders__<index>__ClientSecret` | OAuth client secret for the indexed provider. | None |

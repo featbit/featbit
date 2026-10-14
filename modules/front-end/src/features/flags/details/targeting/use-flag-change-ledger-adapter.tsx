@@ -13,7 +13,10 @@ export function useFlagChangeLedgerAdapter(
   const { t } = useTranslation()
   return {
     copy: {
-      label: (change: FlagTargetingReviewChange) => change.label,
+      label: (change: FlagTargetingReviewChange) =>
+        change.kind === "order"
+          ? t("featureFlags.detailsPage.review.ruleOrder")
+          : change.label,
       action: (action: NonNullable<FlagTargetingReviewChange["action"]>) =>
         t(`featureFlags.detailsPage.review.${action}`),
       actionCount: (

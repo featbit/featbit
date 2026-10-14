@@ -2,10 +2,42 @@ import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { PercentageRolloutEditor } from "./rollout-editor"
+import type { FlagRuleVariation } from "../../flags-types"
 
 window.HTMLElement.prototype.scrollIntoView = vi.fn()
 
 describe("percentage rollout editor", () => {
+  it("preserves a saved dispatch key missing from the property list when applying", () => {
+    const onApply = vi.fn()
+    const value: FlagRuleVariation[] = [
+      { id: "a", rollout: [0, 0.33] },
+      { id: "b", rollout: [0.33, 0.66] },
+      { id: "c", rollout: [0.66, 1] },
+    ]
+    render(
+      <TooltipProvider>
+        <PercentageRolloutEditor
+          variations={[
+            { id: "a", name: "Variation A", value: "a" },
+            { id: "b", name: "Variation B", value: "b" },
+            { id: "c", name: "Variation C", value: "c" },
+          ]}
+          value={value}
+          dispatchKey="location"
+          properties={[]}
+          onCancel={vi.fn()}
+          onApply={onApply}
+        />
+      </TooltipProvider>
+    )
+
+    expect(
+      screen.getByRole("combobox", { name: "Dispatch by property" })
+    ).toHaveTextContent("location")
+    fireEvent.click(screen.getByRole("button", { name: "Apply" }))
+    expect(onApply).toHaveBeenCalledWith(value, "location")
+  })
+
   it("offers built-in and custom user properties as dispatch keys", async () => {
     render(
       <TooltipProvider>

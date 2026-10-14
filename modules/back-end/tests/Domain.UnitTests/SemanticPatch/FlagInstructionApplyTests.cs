@@ -30,6 +30,19 @@ public class FlagInstructionApplyTests
         Rules = new List<TargetRule>()
     };
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void InsightsEnabledInstruction_Apply_SetsInsightsEnabled(bool value)
+    {
+        var flag = MakeFlag();
+        flag.InsightsEnabled = !value;
+
+        new InsightsEnabledInstruction(value).Apply(flag);
+
+        Assert.Equal(value, flag.InsightsEnabled);
+    }
+
     [Fact]
     public void StatusInstruction_TurnFlagOn_EnablesFlag()
     {

@@ -64,7 +64,7 @@ export function SecretsSheet({
             </SheetDescription>
           ) : null}
         </SheetHeader>
-        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-2">
           <div className="mb-4 flex justify-end">
             {environment && canCreateSecret ? (
               <Button

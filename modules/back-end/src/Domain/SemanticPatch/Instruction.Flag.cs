@@ -10,6 +10,15 @@ public abstract class FlagInstruction : Instruction
     {
     }
 
+    /// <summary>
+    /// Checks for conflicts without modifying the flag. The default implementation performs no checks.
+    /// </summary>
+    /// <remarks>Must support the flag state before any draft instructions have been applied.</remarks>
+    /// <exception cref="FlagInstructionConflictException">The instruction conflicts with the flag's current state.</exception>
+    public virtual void EnsureNoConflict(FeatureFlag flag)
+    {
+    }
+
     public abstract void Apply(FeatureFlag flag);
 
     [JsonIgnore]

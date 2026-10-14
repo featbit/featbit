@@ -183,7 +183,7 @@ public class FlagCopyHelper
         newRules.AddRange(
             from sourceRule in source.Rules
             let diff = ruleDiffs.First(x => x.Source?.Id == sourceRule.Id)
-            where diff.IsDifferent
+            where diff.CanAppend
             select MapSourceRule(sourceRule)
         );
 

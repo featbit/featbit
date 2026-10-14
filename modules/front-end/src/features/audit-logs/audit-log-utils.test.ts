@@ -30,6 +30,41 @@ function log(overrides: Partial<AuditLog> = {}): AuditLog {
 }
 
 describe("audit log presentation", () => {
+  it("shows reordered rules from audit snapshots as a targeting change", () => {
+    const rules = [
+      { id: "a", name: "Rule A", conditions: [], variations: [] },
+      { id: "b", name: "Rule B", conditions: [], variations: [] },
+    ]
+    const entry = log({
+      dataChange: {
+        previous: JSON.stringify({ rules }),
+        current: JSON.stringify({ rules: [...rules].reverse() }),
+      },
+      instructions: [
+        {
+          kind: "ReorderRules",
+          value: { previous: ["a", "b"], current: ["b", "a"] },
+        },
+      ],
+    })
+    expect(auditEventTitle(entry, i18n.t)).toBe(
+      i18n.t("auditLogs.updatedTargeting")
+    )
+    expect(auditHistoryChanges(entry, i18n.t)).toEqual([
+      {
+        kind: "order",
+        label: "ruleOrder",
+        action: "updated",
+        previous: "Rule A → Rule B",
+        current: "Rule B → Rule A",
+      },
+    ])
+    // Existing logs are also rendered from their snapshots, even with no instructions.
+    expect(auditHistoryChanges({ ...entry, instructions: [] }, i18n.t)).toEqual(
+      auditHistoryChanges(entry, i18n.t)
+    )
+  })
+
   it("uses the current snapshot for active object identity", () => {
     const identity = auditObjectIdentity(
       log({
@@ -87,6 +122,26 @@ describe("audit log presentation", () => {
         i18n.t
       )
     ).toBe("Updated targeting")
+  })
+
+  it("shows an insights toggle as a settings change with old and new values", () => {
+    const before = { id: "flag-1", name: "Checkout", key: "checkout" }
+    const insightsLog = log({
+      instructions: [{ kind: "UpdateInsightsEnabled", value: false }],
+      dataChange: {
+        previous: JSON.stringify(before),
+        current: JSON.stringify({ ...before, insightsEnabled: false }),
+      },
+    })
+
+    expect(auditEventTitle(insightsLog, i18n.t)).toBe("Updated settings")
+    expect(auditHistoryChanges(insightsLog, i18n.t)).toEqual([
+      expect.objectContaining({
+        label: "Insights enabled",
+        previous: "Enabled",
+        current: "Disabled",
+      }),
+    ])
   })
 
   it("labels every change request decision as its own audit event", () => {

@@ -1,3 +1,4 @@
+import { MemoryRouter } from "react-router-dom"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import {
   fireEvent,
@@ -10,7 +11,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n/i18n"
 import { ApiRequestError } from "@/lib/api/authenticated-api"
 import { toast } from "sonner"
-import { updateFeatureFlagGeneral } from "../../flags-api"
+import {
+  fetchRunningExperiments,
+  updateFeatureFlagGeneral,
+  updateFeatureFlagInsightCollection,
+} from "../../flags-api"
 import type { FeatureFlag } from "../../flags-types"
 import { SettingsTab } from "./settings-tab"
 
@@ -19,7 +24,9 @@ vi.mock("../../flags-api", () => ({
   removeFeatureFlag: vi.fn(),
   restoreFeatureFlag: vi.fn(),
   updateFeatureFlagGeneral: vi.fn(),
+  updateFeatureFlagInsightCollection: vi.fn(),
   fetchFeatureFlagTags: vi.fn().mockResolvedValue([]),
+  fetchRunningExperiments: vi.fn(),
 }))
 
 vi.mock("sonner", () => ({
@@ -61,21 +68,23 @@ function renderSettings(
     ...permissions,
   }
   const result = render(
-    <QueryClientProvider client={queryClient}>
-      <SettingsTab
-        envId="env-1"
-        flag={value}
-        requireComment={false}
-        canUpdateName={generalPermissions.canUpdateName}
-        canUpdateDescription={generalPermissions.canUpdateDescription}
-        canUpdateTags={generalPermissions.canUpdateTags}
-        canArchive
-        canRestore
-        canDelete
-        onSaved={onSaved}
-        onRemoved={vi.fn()}
-      />
-    </QueryClientProvider>
+    <MemoryRouter>
+      <QueryClientProvider client={queryClient}>
+        <SettingsTab
+          envId="env-1"
+          flag={value}
+          requireComment={false}
+          canUpdateName={generalPermissions.canUpdateName}
+          canUpdateDescription={generalPermissions.canUpdateDescription}
+          canUpdateTags={generalPermissions.canUpdateTags}
+          canArchive
+          canRestore
+          canDelete
+          onSaved={onSaved}
+          onRemoved={vi.fn()}
+        />
+      </QueryClientProvider>
+    </MemoryRouter>
   )
   return { ...result, onSaved }
 }
@@ -83,19 +92,29 @@ function renderSettings(
 describe("SettingsTab", () => {
   beforeEach(() => {
     vi.mocked(updateFeatureFlagGeneral).mockReset()
+    vi.mocked(updateFeatureFlagInsightCollection).mockReset()
+    vi.mocked(fetchRunningExperiments).mockReset()
+    vi.mocked(fetchRunningExperiments).mockResolvedValue([])
     vi.mocked(toast.error).mockReset()
     vi.mocked(toast.success).mockReset()
   })
 
-  it("keeps the save actions inside the General section", () => {
+  it("separates Insights from General and shares the settings save action", () => {
     renderSettings()
     const general = screen.getByRole("heading", { name: "General" })
     const generalSection = general.closest("section")
     const lifecycle = screen.getByRole("heading", { name: "Lifecycle" })
+    const insightsSection = screen
+      .getByRole("heading", { name: "Insights" })
+      .closest("section")
+    const insights = screen.getByRole("button", { name: "Disable insights" })
+    const save = screen.getByRole("button", { name: "Review & save" })
 
-    expect(generalSection).toContainElement(
-      screen.getByRole("button", { name: "Review & save" })
-    )
+    expect(insightsSection).toContainElement(insights)
+    expect(generalSection).not.toContainElement(insights)
+    expect(generalSection).not.toContainElement(save)
+    expect(insightsSection).not.toContainElement(save)
+    expect(general.closest("form")).toContainElement(save)
     expect(generalSection).not.toContainElement(lifecycle)
   })
 
@@ -257,5 +276,74 @@ describe("SettingsTab", () => {
       )
     )
     expect(onSaved).not.toHaveBeenCalled()
+  })
+
+  it("shows linked experiment links and blocks disabling insights", async () => {
+    vi.mocked(fetchRunningExperiments).mockResolvedValue([
+      { id: "expt-1", name: "Checkout conversion" },
+    ])
+    renderSettings()
+    expect(
+      await screen.findByRole("link", { name: "Checkout conversion" })
+    ).toHaveAttribute("href", "/en/experiments/expt-1")
+    expect(
+      screen.getByRole("button", { name: "Disable insights" })
+    ).toBeDisabled()
+  })
+  it("saves insights with its own API and leaves General unchanged", async () => {
+    vi.mocked(updateFeatureFlagInsightCollection).mockResolvedValue(
+      "revision-insights"
+    )
+    const { onSaved } = renderSettings()
+    await screen.findByText(
+      "No running experiments are linked to this flag. You can enable or disable insight collection."
+    )
+    fireEvent.click(screen.getByRole("button", { name: "Disable insights" }))
+    fireEvent.click(await screen.findByRole("button", { name: "Disable collection" }))
+    await waitFor(() =>
+      expect(updateFeatureFlagInsightCollection).toHaveBeenCalledWith(
+        "env-1",
+        "checkout-redesign",
+        false,
+        ""
+      )
+    )
+    expect(updateFeatureFlagGeneral).not.toHaveBeenCalled()
+    await waitFor(() =>
+      expect(onSaved).toHaveBeenCalledWith(
+        expect.objectContaining({
+          insightsEnabled: false,
+          revision: "revision-insights",
+        })
+      )
+    )
+  })
+  it("blocks disabling when the experiments query fails", async () => {
+    vi.mocked(fetchRunningExperiments).mockRejectedValue(new Error("offline"))
+    renderSettings()
+    expect(
+      await screen.findByText("Running experiments could not be loaded.")
+    ).toBeVisible()
+    expect(
+      screen.getByRole("button", { name: "Disable insights" })
+    ).toBeDisabled()
+    expect(screen.getByRole("button", { name: "Retry" })).toBeEnabled()
+  })
+  it("refreshes experiments when a new experiment blocks the update", async () => {
+    vi.mocked(updateFeatureFlagInsightCollection).mockRejectedValue(
+      new ApiRequestError(422, "Unprocessable Entity", {
+        errors: ["BusinessRuleViolation"],
+      })
+    )
+    renderSettings()
+    await screen.findByText(
+      "No running experiments are linked to this flag. You can enable or disable insight collection."
+    )
+    fireEvent.click(screen.getByRole("button", { name: "Disable insights" }))
+    fireEvent.click(await screen.findByRole("button", { name: "Disable collection" }))
+    await waitFor(() =>
+      expect(fetchRunningExperiments).toHaveBeenCalledTimes(2)
+    )
+    expect(toast.error).toHaveBeenCalled()
   })
 })

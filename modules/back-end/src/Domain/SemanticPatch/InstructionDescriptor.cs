@@ -16,6 +16,10 @@ public static class InstructionDescriptor
             FlagInstructionKind.ArchiveFlag => $"Archive flag: {current.Name}",
             FlagInstructionKind.RestoreFlag => $"Restore flag: {current.Name}",
 
+            FlagInstructionKind.UpdateInsightsEnabled => instruction.Value is true
+                ? $"Enable insights for flag: {current.Name}"
+                : $"Disable insights for flag: {current.Name}",
+
             FlagInstructionKind.UpdateDisabledVariation => instruction.Value is string disabledVariationId
                 ? $"Disabled variation updated to '{current.Variations.FirstOrDefault(v => v.Id == disabledVariationId)?.Name}'"
                 : string.Empty,
@@ -44,6 +48,7 @@ public static class InstructionDescriptor
                 or FlagInstructionKind.SetTargetUsers => TargetUserChangedDescription(),
 
             // TargetingRulesChanged
+            FlagInstructionKind.ReorderRules => "Reorder targeting rules",
             FlagInstructionKind.AddRule => instruction.Value is TargetRule rule
                 ? $"Add rule: {rule.Name}"
                 : string.Empty,

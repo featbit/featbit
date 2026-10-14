@@ -37,6 +37,18 @@ public class InstructionDescriptorTests
         Assert.Equal(expected, actual);
     }
 
+    [Theory]
+    [InlineData(true, "Enable insights for flag: flagX")]
+    [InlineData(false, "Disable insights for flag: flagX")]
+    public void Describe_Flag_UpdateInsightsEnabled_ReturnsExpected(bool value, string expected)
+    {
+        var instruction = new InsightsEnabledInstruction(value);
+
+        var actual = InstructionDescriptor.Describe(instruction, MakeFlag(), MakeFlag());
+
+        Assert.Equal(expected, actual);
+    }
+
     [Fact]
     public void Describe_Flag_UpdateDisabledVariation_NamesVariation()
     {

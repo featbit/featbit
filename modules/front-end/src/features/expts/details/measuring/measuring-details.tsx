@@ -24,6 +24,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -739,6 +740,7 @@ export function MeasuringDetails({
     [selected?.variations]
   )
   const flagVariations = flagQuery.data?.variations ?? []
+  const flagInsightsDisabled = flagQuery.data?.insightsEnabled === false
   const createMutation = useMutation({
     mutationFn: async ({
       setup,
@@ -946,6 +948,21 @@ export function MeasuringDetails({
             {t("releaseDecision.experiments.detailsPage.measuring.newRun")}
           </Button>
         </div>
+        {flagInsightsDisabled ? (
+          <Alert className="mt-3 border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-50">
+            <AlertTriangle />
+            <AlertTitle>
+              {t(
+                "releaseDecision.experiments.detailsPage.measuring.insightsDisabledTitle"
+              )}
+            </AlertTitle>
+            <AlertDescription className="text-inherit">
+              {t(
+                "releaseDecision.experiments.detailsPage.measuring.insightsDisabled"
+              )}
+            </AlertDescription>
+          </Alert>
+        ) : null}
         {runs.length ? (
           <ExperimentRunTabs
             runs={runs}
