@@ -68,6 +68,11 @@ public class FeatureFlag : FullAuditedEntity
     [JsonIgnore]
     public uint Xmin { get; private set; }
 
+    // Mongo's document concurrency token, including writes that only change Pending.
+    // It is not part of the public flag representation or the PostgreSQL schema.
+    [JsonIgnore]
+    public Guid MongoETag { get; set; }
+
     public FeatureFlag()
     {
     }
