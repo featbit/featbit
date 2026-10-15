@@ -59,6 +59,8 @@ public class InsightCollectionAuthorizationTests(TestApp app)
         var permissions = new Mock<IRequestPermissions>();
         permissions.Setup(x => x.GetAsync(It.IsAny<HttpContext>())).ReturnsAsync(policies.ToArray());
         var resources = new Mock<IResourceService>();
+        // This fixture owns its environment; vary only the field permissions below.
+        resources.SetReturnsDefault(Task.FromResult(true));
         resources.Setup(x => x.GetEnvRnAsync(envId)).ReturnsAsync("project/shop:env/prod");
         resources.Setup(x => x.GetFlagRnAsync(envId, "checkout")).ReturnsAsync(rn);
         var sender = new Mock<ISender>(MockBehavior.Strict);
