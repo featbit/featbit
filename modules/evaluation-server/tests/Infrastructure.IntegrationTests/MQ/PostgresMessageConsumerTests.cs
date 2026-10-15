@@ -150,7 +150,9 @@ public class PostgresMessageConsumerTests(FeatBitPostgresFixture fixture) : Inte
     public async Task Reconnect_RecoversRowsWithoutANotification()
     {
         var handler = new Handler();
-        using var consumer = NewConsumer(handler, out var listening);
+        var reconnected = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var notified = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        using var consumer = NewConsumer(handler, out var listening, reconnected: reconnected, notified: notified);
         await consumer.StartAsync(CancellationToken.None);
         try
         {
@@ -161,7 +163,11 @@ public class PostgresMessageConsumerTests(FeatBitPostgresFixture fixture) : Inte
                 where application_name = 'els_pg_msg_consumer_keep_alived' and wait_event = 'ClientRead';
                 """);
             await InsertAsync("during-reconnect");
+            await reconnected.Task.WaitAsync(TimeSpan.FromSeconds(15));
+            await InsertAsync("after-reconnect", notify: true);
+            await notified.Task.WaitAsync(TimeSpan.FromSeconds(10));
             Assert.Equal("during-reconnect", await handler.NextAsync());
+            Assert.Equal("after-reconnect", await handler.NextAsync());
         }
         finally { await consumer.StopAsync(CancellationToken.None); }
     }
@@ -182,14 +188,69 @@ public class PostgresMessageConsumerTests(FeatBitPostgresFixture fixture) : Inte
         finally { await consumer.StopAsync(CancellationToken.None); }
     }
 
-    private PostgresMessageConsumer NewConsumer(Handler handler, out TaskCompletionSource listening)
+    [DockerTheory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Startup_RetriesUnavailableConnectionOrBaselineQuery(bool connectionUnavailable)
+    {
+        var adminOptions = new NpgsqlConnectionStringBuilder(fixture.ConnectionString);
+        if (connectionUnavailable) adminOptions.Database = "postgres";
+        await using var admin = new NpgsqlConnection(adminOptions.ConnectionString);
+        await admin.OpenAsync();
+        var builder = new NpgsqlConnectionStringBuilder(fixture.ConnectionString) { Pooling = false };
+        var schema = "baseline_" + Guid.NewGuid().ToString("N");
+        if (connectionUnavailable) await admin.ExecuteAsync("alter database featbit allow_connections false");
+        else builder.SearchPath = schema;
+        var retry = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var handler = new Handler();
+        using var consumer = NewConsumer(handler, out var listening, builder.ConnectionString, retry);
+        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(20));
+        var starting = consumer.StartAsync(timeout.Token);
+        try
+        {
+            await retry.Task.WaitAsync(TimeSpan.FromSeconds(10));
+            Assert.False(starting.IsCompleted);
+            if (connectionUnavailable) await admin.ExecuteAsync("alter database featbit allow_connections true");
+            else await admin.ExecuteAsync($"create schema {schema}; create table {schema}.queue_messages (like public.queue_messages including all)");
+            await starting;
+            await listening.Task.WaitAsync(TimeSpan.FromSeconds(10));
+        }
+        finally
+        {
+            // Restore the disposable container even if an assertion fails.
+            if (connectionUnavailable) await admin.ExecuteAsync("alter database featbit allow_connections true");
+            timeout.Cancel();
+            try { await starting; } catch (OperationCanceledException) { }
+            await consumer.StopAsync(CancellationToken.None);
+            if (!connectionUnavailable) await admin.ExecuteAsync($"drop schema if exists {schema} cascade");
+        }
+    }
+
+    [DockerFact]
+    public async Task Startup_RetryBackoff_IsCancelledWithoutStartingTheListener()
+    {
+        var builder = new NpgsqlConnectionStringBuilder(fixture.ConnectionString)
+            { SearchPath = "absent_" + Guid.NewGuid().ToString("N") };
+        var retry = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        using var consumer = NewConsumer(new Handler(), out var listening, builder.ConnectionString, retry);
+        using var cancellation = new CancellationTokenSource();
+        var starting = consumer.StartAsync(cancellation.Token);
+        await retry.Task.WaitAsync(TimeSpan.FromSeconds(10));
+        cancellation.Cancel();
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => starting);
+        Assert.False(listening.Task.IsCompleted);
+    }
+
+    private PostgresMessageConsumer NewConsumer(Handler handler, out TaskCompletionSource listening,
+        string? connectionString = null, TaskCompletionSource? retry = null,
+        TaskCompletionSource? reconnected = null, TaskCompletionSource? notified = null)
     {
         listening = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string,string?>
         {
-            ["Postgres:ConnectionString"] = fixture.ConnectionString
+            ["Postgres:ConnectionString"] = connectionString ?? fixture.ConnectionString
         }).Build();
-        return new PostgresMessageConsumer(configuration, [handler], new SignalLogger(listening));
+        return new PostgresMessageConsumer(configuration, [handler], new SignalLogger(listening, retry, reconnected, notified));
     }
 
     private async Task InsertAsync(string payload, bool notify = false)
@@ -216,16 +277,24 @@ public class PostgresMessageConsumerTests(FeatBitPostgresFixture fixture) : Inte
             await _received.Reader.ReadAsync().AsTask().WaitAsync(TimeSpan.FromSeconds(15));
     }
 
-    private sealed class SignalLogger(TaskCompletionSource listening) : ILogger<PostgresMessageConsumer>
+    private sealed class SignalLogger(TaskCompletionSource listening, TaskCompletionSource? retry,
+        TaskCompletionSource? reconnected, TaskCompletionSource? notified) : ILogger<PostgresMessageConsumer>
     {
         private readonly FakeLogger<PostgresMessageConsumer> _inner = new();
+        private int _listenCount;
         public IDisposable? BeginScope<TState>(TState state) where TState : notnull => _inner.BeginScope(state);
         public bool IsEnabled(LogLevel level) => true;
         public void Log<TState>(LogLevel level, EventId id, TState state, Exception? exception,
             Func<TState,Exception?,string> formatter)
         {
             _inner.Log(level,id,state,exception,formatter);
-            if (id.Id == 2) listening.TrySetResult();
+            if (id.Id == 2)
+            {
+                listening.TrySetResult();
+                if (Interlocked.Increment(ref _listenCount) > 1) reconnected?.TrySetResult();
+            }
+            if (id.Id == 4) notified?.TrySetResult();
+            if (id.Id == 12) retry?.TrySetResult();
         }
     }
 }

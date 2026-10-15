@@ -54,11 +54,25 @@ public partial class PostgresMessageConsumer : BackgroundService
     {
         // Establish the baseline before the host accepts SDK connections. Old notifications
         // must not replay stale values to new connections, which obtain a full initial sync.
-        await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
-        var existing = await connection.QueryAsync<(long Id, string Topic)>(
-            new CommandDefinition(RetainedMessagesSql, new { Topics = _listeningTopics },
-                cancellationToken: cancellationToken));
-        _handled.UnionWith(existing.Select(x => x.Id));
+        while (true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            try
+            {
+                await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
+                var existing = await connection.QueryAsync<(long Id, string Topic)>(
+                    new CommandDefinition(RetainedMessagesSql, new { Topics = _listeningTopics },
+                        cancellationToken: cancellationToken));
+                _handled.UnionWith(existing.Select(x => x.Id));
+                break;
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { throw; }
+            catch (Exception ex)
+            {
+                Log.ErrorStartListening(_logger, RestartIntervalInSeconds, ex);
+                await Task.Delay(RescanInterval, cancellationToken);
+            }
+        }
         await base.StartAsync(cancellationToken);
     }
 
