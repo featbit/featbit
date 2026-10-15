@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Services.EntityFrameworkCore;
 
-public class FeatureFlagService(AppDbContext dbContext, ILogger<FeatureFlagService> logger)
+public partial class FeatureFlagService(AppDbContext dbContext, ILogger<FeatureFlagService> logger, Microsoft.Extensions.Configuration.IConfiguration? configuration = null)
     : EntityFrameworkCoreService<FeatureFlag>(dbContext), IFeatureFlagService
 {
     public async Task<PagedResult<FeatureFlag>> GetListAsync(Guid envId, FeatureFlagFilter userFilter)
@@ -156,7 +156,7 @@ public class FeatureFlagService(AppDbContext dbContext, ILogger<FeatureFlagServi
         var flag = await Queryable
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.EnvId == envId && x.Key == key);
-        if (flag == null)
+        if (flag == null || flag.Pending is { IsCreation: true, IsCommitted: false })
         {
             throw new EntityNotFoundException(nameof(FeatureFlag), $"{envId}-{key}");
         }
@@ -181,6 +181,9 @@ public class FeatureFlagService(AppDbContext dbContext, ILogger<FeatureFlagServi
         {
             // load the committed row (left otherwise untouched)
             var flag = await GetAsync(envId, key);
+
+            if (flag.Pending?.IsCommitted == true && version > flag.CommittedVersion)
+                throw new ConflictException(nameof(FeatureFlag), flag.Id);
 
             // Monotonicity guard (#34): only stage this change when its version is STRICTLY GREATER
             // than both the already-staged pending version (if any) AND the committed version. An
@@ -230,7 +233,13 @@ public class FeatureFlagService(AppDbContext dbContext, ILogger<FeatureFlagServi
         }
     }
 
-    public async Task<bool> PromotePendingAsync(Guid envId, string key, long expectedVersion)
+    public Task<bool> PromotePendingAsync(Guid envId, string key, long expectedVersion) =>
+        PromotePendingCoreAsync(envId, key, expectedVersion, false);
+
+    public Task<bool> PromotePendingForPublicationAsync(Guid envId, string key, long expectedVersion) =>
+        PromotePendingCoreAsync(envId, key, expectedVersion, true);
+
+    private async Task<bool> PromotePendingCoreAsync(Guid envId, string key, long expectedVersion, bool retainForPublication)
     {
         for (var attempt = 0; ; attempt++)
         {
@@ -239,14 +248,14 @@ public class FeatureFlagService(AppDbContext dbContext, ILogger<FeatureFlagServi
             // Version guard (#33/#34): only promote if the pending change still matches the version
             // the caller observed. If it was replaced by a racing SetPendingAsync (different version)
             // or already promoted (null), do nothing.
-            if (flag.Pending?.Version != expectedVersion)
+            if (flag.Pending?.Version != expectedVersion || flag.Pending.IsCommitted)
             {
                 return false;
             }
 
             // promote pending -> committed, then persist the full row so the committed
-            // value advances and the pending slot is cleared.
-            flag.PromotePending();
+            // value advances and its pending receipt is retained when requested.
+            flag.PromotePending(retainForPublication);
 
             try
             {
@@ -297,6 +306,7 @@ public class FeatureFlagService(AppDbContext dbContext, ILogger<FeatureFlagServi
             .AsNoTracking()
             .ToListAsync();
 
+        flags = flags.Where(x => x.Pending is not { IsCreation: true, IsCommitted: false }).ToList();
         foreach (var flag in flags)
         {
             flag.Pending = null;

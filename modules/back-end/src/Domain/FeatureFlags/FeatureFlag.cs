@@ -68,6 +68,11 @@ public class FeatureFlag : FullAuditedEntity
     [JsonIgnore]
     public uint Xmin { get; private set; }
 
+    // Mongo's document concurrency token, including writes that only change Pending.
+    // It is not part of the public flag representation or the PostgreSQL schema.
+    [JsonIgnore]
+    public Guid MongoETag { get; set; }
+
     public FeatureFlag()
     {
     }
@@ -407,9 +412,10 @@ public class FeatureFlag : FullAuditedEntity
     /// <summary>
     /// Promote the staged pending change to committed: the pending value becomes the
     /// committed value, <see cref="CommittedVersion"/> advances to the pending version,
-    /// and the pending slot is cleared. No-op when there is no pending change.
+    /// and the pending slot is cleared unless retained as a durable publication receipt.
+    /// No-op when there is no pending change.
     /// </summary>
-    public void PromotePending()
+    public void PromotePending(bool retainForPublication = false)
     {
         if (Pending == null)
         {
@@ -442,9 +448,13 @@ public class FeatureFlag : FullAuditedEntity
         // the change. The promotion is the moment this value becomes authoritative, so UpdatedAt must
         // advance to now; carry the pending author's UpdatorId.
         UpdatorId = promoted.UpdatorId;
-        UpdatedAt = DateTime.UtcNow;
+        // Gated publication and backfill must use the same timestamp as its staged wire version.
+        UpdatedAt = retainForPublication
+            ? DateTimeOffset.FromUnixTimeMilliseconds(version).UtcDateTime
+            : DateTime.UtcNow;
 
         CommittedVersion = version;
-        Pending = null;
+        if (retainForPublication) Pending.IsCommitted = true;
+        else Pending = null;
     }
 }

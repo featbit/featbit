@@ -57,6 +57,11 @@ public interface IFeatureFlagService : IService<FeatureFlag>
     /// pending change or its version no longer matched <paramref name="expectedVersion"/>.</returns>
     Task<bool> PromotePendingAsync(Guid envId, string key, long expectedVersion);
 
+    // Promote and retain the payload atomically until its publication is acknowledged.
+    Task<bool> PromotePendingForPublicationAsync(Guid envId, string key, long expectedVersion);
+
+    Task<bool> AcknowledgePublicationAsync(Guid envId, string key, long expectedVersion);
+
     /// <summary>
     /// Enumerate every flag (across all envs) that currently has a staged-but-not-committed
     /// change, i.e. <see cref="FeatureFlag.Pending"/> is not null. Used by the commit

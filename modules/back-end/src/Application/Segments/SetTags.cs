@@ -1,3 +1,4 @@
+using Application.ControlPlane;
 using Application.AuditLogs;
 using Application.Users;
 using Domain.AuditLogs;
@@ -24,7 +25,6 @@ public class SetTagsHandler(ISegmentService service, ICurrentUser currentUser, I
     {
         var segment = await service.GetAsync(request.Id);
         var dataChange = segment.SetTags(request.Tags);
-        await service.UpdateAsync(segment);
 
         // publish on segment change notification
         var notification = new OnSegmentChange(
@@ -35,6 +35,7 @@ public class SetTagsHandler(ISegmentService service, ICurrentUser currentUser, I
             comment: request.Comment,
             isTargetingChange: false
         );
+        await service.SaveChangeAsync(notification);
         await publisher.Publish(notification, cancellationToken);
 
         return true;

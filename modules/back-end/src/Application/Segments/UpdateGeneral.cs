@@ -1,3 +1,4 @@
+using Application.ControlPlane;
 using Application.AuditLogs;
 using Application.Bases;
 using Application.Users;
@@ -82,7 +83,6 @@ public class UpdateGeneralHandler(
             tagsChanged ? requestedTags : currentTags
         );
         await permissionGuard.EnsureSegmentChangeAllowedAsync(segment, dataChange, request.Permissions);
-        await service.UpdateAsync(segment);
 
         var notification = new OnSegmentChange(
             segment,
@@ -91,6 +91,7 @@ public class UpdateGeneralHandler(
             currentUser.Id,
             comment: request.Comment,
             isTargetingChange: false);
+        await service.SaveChangeAsync(notification);
         await publisher.Publish(notification, cancellationToken);
 
         return true;

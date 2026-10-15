@@ -24,6 +24,7 @@ public partial class RedisMessageProducer(IRedisClient redisClient, ILogger<Redi
         catch (Exception ex)
         {
             Log.ErrorPublishMessage(logger, ex);
+            throw;
         }
     }
 }

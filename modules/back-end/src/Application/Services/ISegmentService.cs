@@ -67,6 +67,11 @@ public interface ISegmentService : IService<Segment>
     /// pending change or its version no longer matched <paramref name="expectedVersion"/>.</returns>
     Task<bool> PromotePendingAsync(Guid id, long expectedVersion);
 
+    // Promote and retain the payload atomically until its publication is acknowledged.
+    Task<bool> PromotePendingForPublicationAsync(Guid id, long expectedVersion);
+
+    Task<bool> AcknowledgePublicationAsync(Guid id, long expectedVersion);
+
     /// <summary>
     /// Enumerate every segment that currently has a staged-but-not-committed change, i.e.
     /// <see cref="Segment.Pending"/> is not null. Used by the commit coordinator to discover

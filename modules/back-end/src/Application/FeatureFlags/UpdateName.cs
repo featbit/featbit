@@ -1,3 +1,4 @@
+using Application.ControlPlane;
 using Application.AuditLogs;
 using Application.Bases;
 using Application.Users;
@@ -48,7 +49,6 @@ public class UpdateNameHandler(
         }
 
         var dataChange = flag.UpdateName(request.Name, currentUser.Id);
-        await service.UpdateAsync(flag);
 
         // publish on feature flag change notification
         var notification = new OnFeatureFlagChanged(
@@ -58,6 +58,7 @@ public class UpdateNameHandler(
             currentUser.Id,
             comment: request.Comment
         );
+        await service.SaveChangeAsync(notification);
         await publisher.Publish(notification, cancellationToken);
 
         return flag.Revision;

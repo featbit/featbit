@@ -1,3 +1,4 @@
+using Application.ControlPlane;
 using Application.AuditLogs;
 using Application.Users;
 using Domain.AuditLogs;
@@ -36,11 +37,11 @@ public class RestoreFeatureFlagHandler : IRequestHandler<RestoreFeatureFlag, boo
         }
 
         var dataChange = flag.Restore(_currentUser.Id);
-        await _service.UpdateAsync(flag);
 
         // publish on feature flag change notification
         var notification =
             new OnFeatureFlagChanged(flag, Operations.Restore, dataChange, _currentUser.Id, request.Comment);
+        await _service.SaveChangeAsync(notification);
         await _publisher.Publish(notification, cancellationToken);
 
         return true;

@@ -1,3 +1,4 @@
+using Application.ControlPlane;
 using Application.AuditLogs;
 using Application.Users;
 using Domain.AuditLogs;
@@ -36,11 +37,11 @@ public class ArchiveFeatureFlagHandler : IRequestHandler<ArchiveFeatureFlag, boo
         }
 
         var dataChange = flag.Archive(_currentUser.Id);
-        await _service.UpdateAsync(flag);
 
         // publish on feature flag change notification
         var notification =
             new OnFeatureFlagChanged(flag, Operations.Archive, dataChange, _currentUser.Id, request.Comment);
+        await _service.SaveChangeAsync(notification);
         await _publisher.Publish(notification, cancellationToken);
 
         return true;

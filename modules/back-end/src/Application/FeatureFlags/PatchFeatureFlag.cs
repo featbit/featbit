@@ -1,3 +1,4 @@
+using Application.ControlPlane;
 using Domain.AuditLogs;
 using Application.Users;
 using Application.Bases.Models;
@@ -27,6 +28,13 @@ public class PatchFeatureFlagHandler(
 {
     public async Task<PatchResult> Handle(PatchFeatureFlag request, CancellationToken cancellationToken)
     {
+        var protectedPaths = new[] { "/pending", "/committedVersion", "/id", "/key", "/createdAt", "/updatedAt", "/envId" };
+        if (request.Patch.Operations.Any(op => Protected(op.path) || Protected(op.from)))
+            return PatchResult.Fail("Persistence metadata and resource identity are read-only.");
+        bool Protected(string path) => path != null && (path.Length == 0 || path == "/" ||
+            protectedPaths.Any(p => path.Equals(p, StringComparison.OrdinalIgnoreCase) ||
+                path.StartsWith(p + "/", StringComparison.OrdinalIgnoreCase)));
+
         var flag = await flagService.GetAsync(request.EnvId, request.Key);
         var dataChange = new DataChange(flag);
 
@@ -43,10 +51,9 @@ public class PatchFeatureFlagHandler(
 
         await permissionGuard.EnsureFlagChangeAllowedAsync(flag, dataChange, request.Permissions);
 
-        await flagService.UpdateAsync(flag);
-
         // publish on feature flag change notification
         var notification = new OnFeatureFlagChanged(flag, Operations.Update, dataChange, currentUser.Id);
+        await flagService.SaveChangeAsync(notification);
         await publisher.Publish(notification, cancellationToken);
 
         return PatchResult.Ok();

@@ -1,3 +1,4 @@
+using Application.ControlPlane;
 using Application.AuditLogs;
 using Application.Bases;
 using Application.Users;
@@ -38,7 +39,6 @@ public class UpdateNameHandler(
     {
         var segment = await service.GetAsync(request.Id);
         var dataChange = segment.UpdateName(request.Name);
-        await service.UpdateAsync(segment);
 
         // publish on segment change notification
         var notification = new OnSegmentChange(
@@ -49,6 +49,7 @@ public class UpdateNameHandler(
             comment: request.Comment,
             isTargetingChange: false
         );
+        await service.SaveChangeAsync(notification);
         await publisher.Publish(notification, cancellationToken);
 
         return true;

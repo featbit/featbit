@@ -14,6 +14,48 @@ namespace Application.UnitTests.Handlers;
 
 public class PatchFeatureFlagHandlerTests
 {
+    [Theory]
+    [InlineData("replace", "/pending", null)]
+    [InlineData("remove", "/Pending/value", null)]
+    [InlineData("replace", "/committedVersion", null)]
+    [InlineData("copy", "/name", "/pending/value/name")]
+    [InlineData("move", "/name", "/UPDATEDAT")]
+    public async Task Handle_PersistenceMetadataPatch_IsRejectedBeforeReadingOrWriting(
+        string operation, string path, string from)
+    {
+        var service = new Mock<IFeatureFlagService>(MockBehavior.Strict);
+        var guard = new Mock<IPermissionGuard>(MockBehavior.Strict);
+        var publisher = new Mock<IPublisher>(MockBehavior.Strict);
+        var patch = new JsonPatchDocument<FeatureFlag>();
+        patch.Operations.Add(new Operation<FeatureFlag> { op = operation, path = path, from = from, value = 0 });
+        var result = await new PatchFeatureFlagHandler(service.Object, guard.Object, Mock.Of<ICurrentUser>(), publisher.Object)
+            .Handle(new PatchFeatureFlag { EnvId = Guid.NewGuid(), Key = "flag", Patch = patch }, CancellationToken.None);
+        Assert.False(result.Success);
+        service.VerifyNoOtherCalls(); guard.VerifyNoOtherCalls(); publisher.VerifyNoOtherCalls();
+    }
+
+    [Fact]
+    public async Task Handle_InternalMongoTokenPatch_IsNotWritableThroughPublicJsonPatch()
+    {
+        var flag = NewFlag();
+        var token = flag.MongoETag;
+        var service = new Mock<IFeatureFlagService>();
+        service.Setup(x => x.GetAsync(flag.EnvId, flag.Key)).ReturnsAsync(flag);
+        var publisher = new Mock<IPublisher>(MockBehavior.Strict);
+        var guard = new Mock<IPermissionGuard>(MockBehavior.Strict);
+        var sut = new PatchFeatureFlagHandler(service.Object, guard.Object, Mock.Of<ICurrentUser>(), publisher.Object);
+        var patch = new JsonPatchDocument<FeatureFlag>();
+        patch.Operations.Add(new Operation<FeatureFlag> { op = "replace", path = "/mongoETag", value = Guid.NewGuid() });
+
+        var result = await sut.Handle(new PatchFeatureFlag { EnvId = flag.EnvId, Key = flag.Key, Patch = patch }, CancellationToken.None);
+
+        Assert.False(result.Success);
+        Assert.Equal(token, flag.MongoETag);
+        service.Verify(x => x.UpdateAsync(It.IsAny<FeatureFlag>()), Times.Never);
+        guard.VerifyNoOtherCalls();
+        publisher.VerifyNoOtherCalls();
+    }
+
     private static FeatureFlag NewFlag()
     {
         var on = new Variation { Id = "v-on", Name = "On", Value = "true" };

@@ -1,3 +1,4 @@
+using Application.ControlPlane;
 using Application.Users;
 using Domain.AuditLogs;
 using Domain.FeatureFlags;
@@ -31,7 +32,6 @@ public class CopyFlagSettingsHandler(
 
         var context = new FlagCopyContext(source, target, relatedSegments, request.Options);
         var dataChange = target.CopySettingsFrom(context, currentUser.Id);
-        await flagService.UpdateAsync(target);
 
         await AddNewPropertiesAsync();
 
@@ -41,6 +41,7 @@ public class CopyFlagSettingsHandler(
         var notification = new OnFeatureFlagChanged(
             target, Operations.Update, dataChange, currentUser.Id, $"Copy flag settings from \"{projectEnv}\""
         );
+        await flagService.SaveChangeAsync(notification);
         await publisher.Publish(notification, cancellationToken);
 
         return true;
