@@ -110,12 +110,14 @@ public class PostgresStoreTests : IntegrationTestBase, IAsyncLifetime
         Assert.Contains("c", result);
     }
 
-    [DockerFact]
-    public async Task GetSegmentAsync_KnownId_ReturnsSerializedSegment()
+    [DockerTheory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task GetSegmentAsync_KnownId_ReturnsSerializedSegment(bool uppercase)
     {
         var id = await InsertSegmentAsync(Guid.NewGuid(), Guid.NewGuid(), "finance", DateTimeOffset.UtcNow);
 
-        var bytes = await _sut.GetSegmentAsync(id.ToString());
+        var bytes = await _sut.GetSegmentAsync(uppercase ? id.ToString().ToUpperInvariant() : id.ToString());
 
         var json = JsonSerializer.Deserialize<JsonElement>(Encoding.UTF8.GetString(bytes));
         Assert.Equal("finance", json.GetProperty("name").GetString());
