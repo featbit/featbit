@@ -5,6 +5,8 @@ namespace Application.FeatureFlags;
 
 public class CopyToEnvPrecheck : IRequest<ICollection<CopyToEnvPrecheckResult>>
 {
+    public Guid SourceEnvId { get; set; }
+
     public Guid TargetEnvId { get; set; }
 
     public ICollection<Guid> FlagIds { get; set; } = Array.Empty<Guid>();
@@ -20,7 +22,7 @@ public class CopyToEnvPrecheckHandler(
         CopyToEnvPrecheck request,
         CancellationToken cancellationToken)
     {
-        var flags = await flagService.FindManyAsync(x => request.FlagIds.Contains(x.Id));
+        var flags = await flagService.FindManyAsync(x => x.EnvId == request.SourceEnvId && request.FlagIds.Contains(x.Id));
         var targetFlagKeys = flags.Select(x => x.Key).ToArray();
 
         var duplicateKeys =

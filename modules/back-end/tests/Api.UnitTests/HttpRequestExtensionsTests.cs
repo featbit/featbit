@@ -8,7 +8,7 @@ namespace Api.UnitTests;
 public class HttpRequestExtensionsTests
 {
     [Fact]
-    public void OrganizationId_HeaderAndClaim_UsesHeader()
+    public void OrganizationId_HeaderAndClaim_UsesTrustedClaim()
     {
         var headerOrgId = Guid.NewGuid();
         var claimOrgId = Guid.NewGuid();
@@ -19,7 +19,19 @@ public class HttpRequestExtensionsTests
             new Claim(McpClaimTypes.OrgId, claimOrgId.ToString())
         ]));
 
-        Assert.Equal(headerOrgId, context.Request.OrganizationId());
+        Assert.Equal(claimOrgId, context.Request.OrganizationId());
+    }
+
+    [Fact]
+    public void WorkspaceId_HeaderAndClaim_UsesTrustedClaim()
+    {
+        var workspaceId = Guid.NewGuid();
+        var context = new DefaultHttpContext();
+        context.Request.Headers[ApiConstants.WorkspaceHeaderKey] = Guid.NewGuid().ToString();
+        context.User = new ClaimsPrincipal(new ClaimsIdentity(
+            [new Claim(McpClaimTypes.WorkspaceId, workspaceId.ToString())]));
+
+        Assert.Equal(workspaceId, context.Request.WorkspaceId());
     }
 
     [Fact]

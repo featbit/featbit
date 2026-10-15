@@ -25,7 +25,7 @@ public class CopyToEnvHandler(
 {
     public async Task<CopyToEnvResult> Handle(CopyToEnv request, CancellationToken cancellationToken)
     {
-        var flags = await flagService.FindManyAsync(x => request.FlagIds.Contains(x.Id));
+        var flags = await flagService.FindManyAsync(x => x.EnvId == request.SourceEnvId && request.FlagIds.Contains(x.Id));
         var precheckResults = request.PrecheckResults;
 
         var projectEnv = await envService.GetProjectEnvAsync(request.SourceEnvId);

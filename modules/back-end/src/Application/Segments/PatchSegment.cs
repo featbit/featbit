@@ -26,6 +26,7 @@ public class PatchSegmentHandler(
     public async Task<PatchResult> Handle(PatchSegment request, CancellationToken cancellationToken)
     {
         var segment = await segmentService.GetAsync(request.Id);
+        var identity = (segment.Id, segment.EnvId, segment.WorkspaceId, segment.Type);
         var dataChange = new DataChange(segment);
 
         var targetingPaths = new[] { "/included", "/excluded", "/rules" };
@@ -40,6 +41,9 @@ public class PatchSegmentHandler(
         {
             return PatchResult.Fail(error);
         }
+
+        if ((segment.Id, segment.EnvId, segment.WorkspaceId, segment.Type) != identity)
+            return PatchResult.Fail("Segment identity, environment, workspace and type cannot be changed by a patch.");
 
         segment.MarkAsUpdated(currentUser.Id);
         dataChange.To(segment);

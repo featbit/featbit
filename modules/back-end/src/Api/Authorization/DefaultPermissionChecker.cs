@@ -74,6 +74,8 @@ public class DefaultPermissionChecker(
                 return string.Empty;
             }
 
+            if (!await resourceService.IsProjectInOrganizationAsync(request.OrganizationId(), projectId))
+                return null;
             var rn = await resourceService.GetProjectRnAsync(projectId);
             return permission == Permissions.CreateEnv
                 // return env level wildcard for `CreateEnv` permission
@@ -97,6 +99,8 @@ public class DefaultPermissionChecker(
                 return string.Empty;
             }
 
+            if (!await resourceService.IsEnvInOrganizationAsync(request.OrganizationId(), envId))
+                return null;
             var rn = await resourceService.GetEnvRnAsync(envId);
             return rn;
         }
@@ -110,6 +114,8 @@ public class DefaultPermissionChecker(
                 return string.Empty;
             }
 
+            if (!await resourceService.IsEnvInOrganizationAsync(request.OrganizationId(), envId))
+                return null;
             if (!routeValues.TryGetValue("key", out var keyRouteValue))
             {
                 // missing key, return env level wildcard
@@ -132,6 +138,8 @@ public class DefaultPermissionChecker(
                 return string.Empty;
             }
 
+            if (!await resourceService.IsEnvInOrganizationAsync(request.OrganizationId(), envId))
+                return null;
             if (!routeValues.TryGetValue("segmentId", out var segmentIdRouteValue))
             {
                 // missing id, return env level wildcard

@@ -1,5 +1,6 @@
 using System.Net.Http.Headers;
 using Api.Authorization;
+using Api.Filters;
 using Application.Services;
 using Application.Users;
 using Domain.Users;
@@ -43,6 +44,7 @@ public class PermissionCheckTestApp : WebApplicationFactory<Program>
             collection.Replace(ServiceDescriptor.Transient<IRefreshTokenService, TestRefreshTokenService>());
 
             collection.Replace(ServiceDescriptor.Singleton<IPermissionChecker>(PermissionChecker));
+            collection.Replace(ServiceDescriptor.Scoped<ResourceOrganizationFilter, TestResourceOrganizationFilter>());
             collection.Replace(ServiceDescriptor.Singleton<ISender>(Sender.Object));
 
             var hostedServices = collection.Where(x =>

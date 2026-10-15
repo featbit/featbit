@@ -16,4 +16,10 @@ public interface IResourceService
     Task<string?> GetFlagRnAsync(Guid envId, string key);
 
     Task<string?> GetSegmentRnAsync(Guid envId, Guid id);
+
+    Task<bool> IsProjectInOrganizationAsync(Guid organizationId, Guid projectId);
+
+    Task<bool> IsEnvInOrganizationAsync(Guid organizationId, Guid envId, Guid? projectId = null);
+
+    Task<Guid?> GetOrganizationWorkspaceIdAsync(Guid organizationId);
 }
