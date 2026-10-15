@@ -1,3 +1,4 @@
+using Application.ControlPlane;
 using Application.AuditLogs;
 using Application.Bases;
 using Application.Bases.Exceptions;
@@ -46,7 +47,6 @@ public class ArchiveSegmentHandler : IRequestHandler<ArchiveSegment, bool>
 
         var segment = await _service.GetAsync(request.Id);
         var dataChange = segment.Archive();
-        await _service.UpdateAsync(segment);
 
         // publish on segment archived notification
         var notification = new OnSegmentChange(
@@ -57,6 +57,7 @@ public class ArchiveSegmentHandler : IRequestHandler<ArchiveSegment, bool>
             comment: request.Comment,
             isTargetingChange: false
         );
+        await _service.SaveChangeAsync(notification);
         await _publisher.Publish(notification, cancellationToken);
 
         return true;

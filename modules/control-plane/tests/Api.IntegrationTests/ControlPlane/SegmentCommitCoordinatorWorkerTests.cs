@@ -256,8 +256,8 @@ public sealed class SegmentCommitCoordinatorWorkerTests : IntegrationTestBase, I
         Assert.NotNull(raw.Pending);
         Assert.Equal(v, raw.Pending!.Version);
 
-        // dc-b committed pointer never advanced
-        Assert.False(await _dcbCache.HasStagedSegmentAsync(segment.Id, v));
+        // Missing stage was repaired; this tick still left the committed database value unchanged.
+        Assert.True(await _dcbCache.HasStagedSegmentAsync(segment.Id, v));
     }
 
     [DockerFact]
@@ -532,9 +532,56 @@ public sealed class SegmentCommitCoordinatorWorkerTests : IntegrationTestBase, I
 
     // ----- test doubles -----
 
+    [DockerTheory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task FailedSegmentPublication_RestartRetriesRetainedPayloadAndAttribution(bool acceptedBeforeFailure)
+    {
+        const string key = "segment-publication-restart";
+        var actor = Guid.NewGuid();
+        var version = await SeedCommittedV1PendingV2(key, actor, Operations.Update, true);
+        var id = await PendingId(key);
+        await _composite.StageSegmentAsync((await _segmentService.GetAsync(id)).Pending.Value, version);
+        await UpsertLeaseAsync(DcA, DateTimeOffset.UtcNow.AddMinutes(5));
+        await UpsertLeaseAsync(DcB, DateTimeOffset.UtcNow.AddMinutes(5));
+        var broken = new SpySegmentMessageService { Fail = true, AcceptBeforeFailure = acceptedBeforeFailure };
+        await Assert.ThrowsAsync<IOException>(() => CreateSut(broken).RunOnceAsync());
+        var durable = await _segmentService.GetAsync(id);
+        Assert.Equal(version, durable.CommittedVersion);
+        Assert.True(durable.Pending.IsCommitted);
+        Assert.Equal(actor, durable.Pending.OperatorId);
+        Assert.Equal(acceptedBeforeFailure ? 1 : 0, broken.Published.Count);
+        var recovered = new SpySegmentMessageService();
+        Assert.Equal(1, await CreateSut(recovered).RunOnceAsync());
+        Assert.Single(recovered.Published);
+        Assert.Equal(actor, recovered.Notifications.Single().OperatorId);
+        Assert.Equal(new[] { "bob" }, recovered.Published.Single().Segment.Included);
+        Assert.Null((await _segmentService.GetAsync(id)).Pending);
+        Assert.Equal(0, await CreateSut(recovered).RunOnceAsync());
+        Assert.Single(recovered.Published);
+    }
+
+    [DockerFact]
+    public async Task DurableSegmentStage_RepairsMissingBackendNotification_OnNextTick()
+    {
+        const string key = "segment-missing-notification";
+        await SeedCommittedV1PendingV2(key);
+        var id = await PendingId(key);
+        await UpsertLeaseAsync(DcA, DateTimeOffset.UtcNow.AddMinutes(5));
+        await UpsertLeaseAsync(DcB, DateTimeOffset.UtcNow.AddMinutes(5));
+        var messages = new SpySegmentMessageService();
+        Assert.Equal(0, await CreateSut(messages).RunOnceAsync());
+        Assert.Equal(new[] { "alice" }, (await _segmentService.GetCommittedAsync(id)).Included);
+        Assert.Equal(1, await CreateSut(messages).RunOnceAsync());
+        Assert.Equal(new[] { "bob" }, (await _segmentService.GetCommittedAsync(id)).Included);
+        Assert.Single(messages.Published);
+    }
+
     private sealed class SpySegmentMessageService : ISegmentMessageService
     {
         public List<(Guid EnvId, ICollection<FlagReference> AffectedFlags, Segment Segment)> Published { get; } = new();
+        public bool Fail { get; init; }
+        public bool AcceptBeforeFailure { get; init; }
 
         /// <summary>
         /// Captures every <see cref="OnSegmentChange"/> notification the coordinator reconstructs
@@ -554,7 +601,8 @@ public sealed class SegmentCommitCoordinatorWorkerTests : IntegrationTestBase, I
 
         public Task PublishChangeMessage(Guid envId, ICollection<FlagReference> affectedFlags, Segment segment)
         {
-            Published.Add((envId, affectedFlags, segment));
+            if (!Fail || AcceptBeforeFailure) Published.Add((envId, affectedFlags, segment));
+            if (Fail) throw new IOException("segment publication interrupted");
             return Task.CompletedTask;
         }
     }

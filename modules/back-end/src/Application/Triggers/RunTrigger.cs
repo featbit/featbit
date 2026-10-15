@@ -1,3 +1,4 @@
+using Application.ControlPlane;
 using Application.Bases;
 using Application.Bases.Exceptions;
 using Application.FeatureFlags;
@@ -52,13 +53,13 @@ public class RunTriggerHandler : IRequestHandler<RunTrigger, bool>
                 return true;
             }
 
-            await _flagService.UpdateAsync(flag);
             await _triggerService.UpdateAsync(trigger);
 
             // publish on feature flag change notification
             var comment = trigger.Action == TriggerActions.TurnOff ? "Turn off by trigger" : "Turn on by trigger";
             var notification =
                 new OnFeatureFlagChanged(flag, Operations.Update, dataChange, SystemUser.Id, comment);
+            await _flagService.SaveChangeAsync(notification);
             await _publisher.Publish(notification, cancellationToken);
         }
 

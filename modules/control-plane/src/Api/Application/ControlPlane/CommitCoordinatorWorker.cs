@@ -39,8 +39,10 @@ namespace Api.Application.ControlPlane;
 /// <see cref="ISegmentMessageService.PublishSegmentChangeMessage"/> per env — exactly the
 /// BestEffort sequence, deferred to commit time.
 ///
-/// Idempotent + crash-safe: re-running a tick is a no-op once a flag/segment is committed — the
-/// commit broadcast and the version-guarded promote both no-op when already applied.
+/// Promotion retains its pending payload atomically as a durable publication receipt. A later
+/// tick retries publication after failure/restart and acknowledges the exact version only after
+/// success. Delivery is at least once: a crash after broker acceptance can repeat publication.
+/// New business writes are rejected while the previous stage/publication remains outstanding.
 ///
 /// #71b: this worker only runs its tick on the elected leader (<see cref="ILeaderElection"/>,
 /// backed by <see cref="RedisLeaderElector"/>) when leader election is enabled; non-leaders skip the
@@ -394,38 +396,27 @@ public sealed class CommitCoordinatorWorker : BackgroundService
 
             var version = pendingChange.Version;
 
-            // Monotonicity (#34): never commit a version that is not strictly newer than what is
-            // already committed. Skips stale/duplicate pending rows.
-            if (version <= flag.CommittedVersion)
+            IReadOnlyDictionary<string, bool> stagedMap = new Dictionary<string, bool>();
+            if (!pendingChange.IsCommitted)
             {
-                continue;
+                if (version <= flag.CommittedVersion) continue;
+                stagedMap = await composite.GetStagedDcsAsync(flag.Id, version);
+                if (!liveDcs.All(dc => stagedMap.TryGetValue(dc, out var staged) && staged))
+                {
+                    // A database stage survives a lost backend->control-plane notification.
+                    // Repair missing Redis stages, then probe the gate again on the next tick.
+                    await composite.StageFlagAsync(pendingChange.Value, version);
+                    continue;
+                }
+                await composite.CommitFlagAsync(flag.EnvId, flag.Id.ToString(), version);
+                if (!await featureFlagService.PromotePendingForPublicationAsync(flag.EnvId, flag.Key, version)) continue;
             }
-
-            var stagedMap = await composite.GetStagedDcsAsync(flag.Id, version);
-
-            // Gate: EVERY live DC must have this exact version staged. A DC missing from the map,
-            // or present-but-false, blocks the commit (we retry next tick once it catches up).
-            var allLiveStaged = liveDcs.All(dc => stagedMap.TryGetValue(dc, out var staged) && staged);
-            if (!allLiveStaged)
-            {
-                continue;
-            }
-
-            // Broadcast the commit to all DCs: advance the committed pointer + index everywhere.
-            await composite.CommitFlagAsync(flag.EnvId, flag.Id.ToString(), version);
-
-            // Version-guarded promote of the DB pending -> committed. If a racing SetPendingAsync
-            // replaced the pending version since GetPendingAsync read it, the guard makes this a
-            // no-op and we do NOT publish a stale value.
-            var promoted = await featureFlagService.PromotePendingAsync(flag.EnvId, flag.Key, version);
-            if (!promoted)
-            {
-                continue;
-            }
+            else if (version != flag.CommittedVersion) continue;
 
             // Publish the newly committed value to the evaluation-server topic. The pending value
             // IS the new committed state; it carries the same shape the BestEffort path publishes.
             await _messageProducer.PublishAsync(Topics.FeatureFlagChange, pendingChange.Value);
+            if (!await featureFlagService.AcknowledgePublicationAsync(flag.EnvId, flag.Key, version)) continue;
             count++;
 
             // F1 (#24): consistency metrics. Side-effect-only — must not change commit behavior.
@@ -484,38 +475,21 @@ public sealed class CommitCoordinatorWorker : BackgroundService
                 // (PendingSegmentChange.Version == ToUnixTimeMilliseconds(UpdatedAt)).
                 var version = pendingChange.Version;
 
-                // Monotonicity (#34): never commit a version that is not strictly newer than what is
-                // already committed. Skips stale/duplicate pending rows.
-                if (version <= segment.CommittedVersion)
+                var envIds = await segmentService.GetEnvironmentIdsAsync(pendingChange.Value);
+                IReadOnlyDictionary<string, bool> stagedMap = new Dictionary<string, bool>();
+                if (!pendingChange.IsCommitted)
                 {
-                    continue;
+                    if (version <= segment.CommittedVersion) continue;
+                    stagedMap = await composite.GetStagedSegmentDcsAsync(segment.Id, version);
+                    if (!liveDcs.All(dc => stagedMap.TryGetValue(dc, out var staged) && staged))
+                    {
+                        await composite.StageSegmentAsync(pendingChange.Value, version);
+                        continue;
+                    }
+                    await composite.CommitSegmentAsync(envIds, segment.Id.ToString(), version);
+                    if (!await segmentService.PromotePendingForPublicationAsync(segment.Id, version)) continue;
                 }
-
-                var stagedMap = await composite.GetStagedSegmentDcsAsync(segment.Id, version);
-
-                // Gate: EVERY live DC must have this exact version staged. A DC missing from the map,
-                // or present-but-false, blocks the commit (we retry next tick once it catches up).
-                var allLiveStaged = liveDcs.All(dc => stagedMap.TryGetValue(dc, out var staged) && staged);
-                if (!allLiveStaged)
-                {
-                    continue;
-                }
-
-                // The env set is needed both to advance the committed pointer/index in Redis and to
-                // drive the per-env affected-flags propagation below.
-                var envIds = await segmentService.GetEnvironmentIdsAsync(segment);
-
-                // Broadcast the commit to all DCs: advance the committed pointer + index everywhere.
-                await composite.CommitSegmentAsync(envIds, segment.Id.ToString(), version);
-
-                // Version-guarded promote of the DB pending -> committed. If a racing SetPendingAsync
-                // replaced the pending version since GetPendingAsync read it, the guard makes this a
-                // no-op and we do NOT publish a stale value.
-                var promoted = await segmentService.PromotePendingAsync(segment.Id, version);
-                if (!promoted)
-                {
-                    continue;
-                }
+                else if (version != segment.CommittedVersion) continue;
 
                 // Replicate SegmentChangeMessageHandler's BestEffort affected-flags propagation,
                 // deferred to commit time. Reconstruct the notification from the (now committed)
@@ -525,7 +499,7 @@ public sealed class CommitCoordinatorWorker : BackgroundService
                 // stamps the real operator. Legacy pending rows staged before #73 deserialize with
                 // OperatorId = Guid.Empty / Operation = Update / IsTargetingChange = true, which is
                 // exactly the coordinator's prior hardcoded behavior.
-                var committedSegment = await segmentService.GetCommittedAsync(segment.Id);
+                var committedSegment = pendingChange.Value;
                 var notification = new OnSegmentChange(
                     committedSegment,
                     pendingChange.Operation,
@@ -555,6 +529,7 @@ public sealed class CommitCoordinatorWorker : BackgroundService
                     await segmentMessageService.PublishChangeMessage(envId, affectedFlags, committedSegment);
                 }
 
+                if (!await segmentService.AcknowledgePublicationAsync(segment.Id, version)) continue;
                 count++;
 
                 // F1 (#24): consistency metrics, mirroring the flag path. Side-effect-only. One commit

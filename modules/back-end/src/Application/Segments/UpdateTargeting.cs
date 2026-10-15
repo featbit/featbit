@@ -1,3 +1,4 @@
+using Application.ControlPlane;
 using Application.AuditLogs;
 using Application.Bases;
 using Application.Users;
@@ -67,8 +68,6 @@ public class UpdateTargetingHandler(
 
         await permissionGuard.EnsureSegmentChangeAllowedAsync(segment, dataChange, request.Permissions);
 
-        await service.UpdateAsync(segment);
-
         // publish on segment change notification
         var notification = new OnSegmentChange(
             segment,
@@ -78,6 +77,7 @@ public class UpdateTargetingHandler(
             comment: request.Comment,
             isTargetingChange: true
         );
+        await service.SaveChangeAsync(notification);
         await publisher.Publish(notification, cancellationToken);
 
         return true;

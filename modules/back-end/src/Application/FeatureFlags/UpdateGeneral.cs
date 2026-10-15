@@ -1,3 +1,4 @@
+using Application.ControlPlane;
 using Application.AuditLogs;
 using Application.Bases;
 using Application.Users;
@@ -87,7 +88,6 @@ public class UpdateGeneralHandler(
             currentUser.Id
         );
         await permissionGuard.EnsureFlagChangeAllowedAsync(flag, dataChange, request.Permissions);
-        await service.UpdateAsync(flag);
 
         var notification = new OnFeatureFlagChanged(
             flag,
@@ -96,6 +96,7 @@ public class UpdateGeneralHandler(
             currentUser.Id,
             comment: request.Comment
         );
+        await service.SaveChangeAsync(notification);
         await publisher.Publish(notification, cancellationToken);
 
         return flag.Revision;

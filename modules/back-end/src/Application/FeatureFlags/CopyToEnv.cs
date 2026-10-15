@@ -1,3 +1,4 @@
+using Application.ControlPlane;
 using Application.Users;
 using Domain.AuditLogs;
 using Domain.FeatureFlags;
@@ -51,13 +52,14 @@ public class CopyToEnvHandler(
             }
 
             flag.CopyToEnv(request.TargetEnvId, currentUser.Id, keepRules: precheckResult.TargetRuleCheck);
-            await flagService.AddOneAsync(flag);
+            if (flag.Id == Guid.Empty) flag.Id = Guid.NewGuid();
 
             // publish on feature flag change notification
             var dataChange = new DataChange(null).To(flag);
             var notification = new OnFeatureFlagChanged(
                 flag, Operations.Create, dataChange, currentUser.Id, $"Copied from \"{projectEnv}\""
             );
+            await flagService.SaveChangeAsync(notification, isNew: true);
             await publisher.Publish(notification, cancellationToken);
         }
     }

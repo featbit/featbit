@@ -20,44 +20,39 @@ public partial class KafkaMessageProducer : IMessageProducer
         _logger = logger;
     }
 
-    public Task PublishAsync<TMessage>(string topic, TMessage? message) where TMessage : class
+    internal KafkaMessageProducer(IProducer<Null, string> producer, ILogger<KafkaMessageProducer> logger)
+    {
+        _producer = producer;
+        _logger = logger;
+    }
+
+    public async Task PublishAsync<TMessage>(string topic, TMessage? message) where TMessage : class
     {
         if (message == null)
         {
             // ignore null message
-            return Task.CompletedTask;
+            return;
         }
 
         try
         {
             var value = JsonSerializer.Serialize(message, ReusableJsonSerializerOptions.Web);
 
-            // for high throughput processing, we use Produce method, which is also asynchronous, in that it never blocks.
-            // https://docs.confluent.io/kafka-clients/dotnet/current/overview.html#producer
-            _producer.Produce(topic, new Message<Null, string>
-            {
-                Value = value
-            }, DeliveryHandler);
-
-            void DeliveryHandler(DeliveryReport<Null, string> report)
-            {
-                if (report.Error.IsError)
-                {
-                    Log.ErrorDeliveryMessage(_logger, topic, value, report.Error.ToString());
-                }
-            }
+            await _producer.ProduceAsync(topic, new Message<Null, string> { Value = value });
         }
         catch (ProduceException<Null, string> ex)
         {
             var deliveryResult = ex.DeliveryResult;
 
             Log.ErrorDeliveryMessage(_logger, deliveryResult.Topic, deliveryResult.Value, ex.Error.ToString());
+            throw;
         }
         catch (Exception ex)
         {
             Log.ErrorPublishMessage(_logger, ex);
+            throw;
         }
 
-        return Task.CompletedTask;
+        return;
     }
 }

@@ -13,7 +13,7 @@ using Environment = Domain.Environments.Environment;
 
 namespace Infrastructure.Services.MongoDb;
 
-public class SegmentService(MongoDbClient mongoDb, ILogger<SegmentService> logger)
+public partial class SegmentService(MongoDbClient mongoDb, ILogger<SegmentService> logger, Microsoft.Extensions.Configuration.IConfiguration? configuration = null)
     : MongoDbService<Segment>(mongoDb), ISegmentService
 {
     public async Task<PagedResult<Segment>> GetListAsync(Guid workspaceId, string rn, SegmentFilter userFilter)
@@ -182,6 +182,9 @@ public class SegmentService(MongoDbClient mongoDb, ILogger<SegmentService> logge
     public async Task<Segment> GetCommittedAsync(Guid id)
     {
         var segment = await GetAsync(id);
+        if (segment.Pending is { IsCreation: true, IsCommitted: false })
+            throw new Application.Bases.Exceptions.EntityNotFoundException(nameof(Segment), id.ToString());
+
 
         // The committed read must NEVER expose a pending (staged) change. The top-level
         // document is the committed value; drop the pending slot before returning it.
@@ -227,6 +230,7 @@ public class SegmentService(MongoDbClient mongoDb, ILogger<SegmentService> logge
         var filter = Builders<Segment>.Filter.And(
             Builders<Segment>.Filter.Eq(x => x.Id, id),
             Builders<Segment>.Filter.Lt(x => x.CommittedVersion, version),
+            Builders<Segment>.Filter.Ne(x => x.Pending!.IsCommitted, true),
             Builders<Segment>.Filter.Or(
                 Builders<Segment>.Filter.Eq(x => x.Pending, null),
                 Builders<Segment>.Filter.Lt(x => x.Pending!.Version, version)
@@ -234,24 +238,36 @@ public class SegmentService(MongoDbClient mongoDb, ILogger<SegmentService> logge
         );
         var update = Builders<Segment>.Update.Set(x => x.Pending, pending);
 
-        await Collection.UpdateOneAsync(filter, update);
+        var result = await Collection.UpdateOneAsync(filter, update);
+        if (result.MatchedCount == 0)
+        {
+            var current = await GetAsync(id);
+            if (version > current.CommittedVersion && (current.Pending == null || version > current.Pending.Version))
+                throw new Application.Bases.Exceptions.ConflictException(nameof(Segment), current.Id);
+        }
     }
 
-    public async Task<bool> PromotePendingAsync(Guid id, long expectedVersion)
+    public Task<bool> PromotePendingAsync(Guid id, long expectedVersion) =>
+        PromotePendingCoreAsync(id, expectedVersion, false);
+
+    public Task<bool> PromotePendingForPublicationAsync(Guid id, long expectedVersion) =>
+        PromotePendingCoreAsync(id, expectedVersion, true);
+
+    private async Task<bool> PromotePendingCoreAsync(Guid id, long expectedVersion, bool retainForPublication)
     {
         var segment = await GetAsync(id);
 
         // Version guard (#33/#34): only promote if the pending change we are about to commit is
         // still the one the caller observed. If a racing SetPendingAsync replaced it (different
         // version) or it was already promoted (null), do nothing.
-        if (segment.Pending?.Version != expectedVersion)
+        if (segment.Pending?.Version != expectedVersion || segment.Pending.IsCommitted)
         {
             return false;
         }
 
         // promote pending -> committed in-memory, then persist the full document so the
-        // committed value advances and the pending slot is cleared atomically.
-        segment.PromotePending();
+        // committed value advances atomically; retain its receipt when publication is required.
+        segment.PromotePending(retainForPublication);
 
         // Optimistic replace filtered on Pending.Version == expectedVersion: if another writer
         // staged a new pending version after our read, the filter no longer matches and the
@@ -259,7 +275,8 @@ public class SegmentService(MongoDbClient mongoDb, ILogger<SegmentService> logge
         // (#33).
         var filter = Builders<Segment>.Filter.And(
             Builders<Segment>.Filter.Eq(x => x.Id, id),
-            Builders<Segment>.Filter.Eq(x => x.Pending!.Version, expectedVersion)
+            Builders<Segment>.Filter.Eq(x => x.Pending!.Version, expectedVersion),
+            Builders<Segment>.Filter.Ne(x => x.Pending!.IsCommitted, true)
         );
 
         var result = await Collection.ReplaceOneAsync(filter, segment);
@@ -278,6 +295,7 @@ public class SegmentService(MongoDbClient mongoDb, ILogger<SegmentService> logge
         // enumerate every segment, then strip the pending slot so only the COMMITTED value is
         // exposed (mirroring GetCommittedAsync). The top-level document is the committed value.
         var segments = await FindManyAsync(_ => true);
+        segments = segments.Where(x => x.Pending is not { IsCreation: true, IsCommitted: false }).ToList();
         foreach (var segment in segments)
         {
             segment.Pending = null;

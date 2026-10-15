@@ -1,3 +1,8 @@
+using System.Text.Json;
+using Application.FeatureFlags;
+using Application.Segments;
+using Domain.AuditLogs;
+using Microsoft.Extensions.Configuration;
 using Api.Application.ControlPlane;
 using Api.Infrastructure.Caches;
 using Api.IntegrationTests.Fixtures;
@@ -170,6 +175,43 @@ public sealed class DcBackfillerOnlyAdvanceTests : IntegrationTestBase, IAsyncLi
             _composite,
             producer,
             NullLogger<DcBackfiller>.Instance);
+    }
+
+    [DockerFact]
+    public async Task BusinessMutations_KeepPendingValuesOutOfActualRedisBackfill()
+    {
+        var configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string,string?>
+        {
+            ["UseControlPlane"] = "true", ["ControlPlane:ConsistencyMode"] = "GatedCommit"
+        }).Build();
+        var flags = new FeatureFlagService(_mongoDb, configuration);
+        var segments = new SegmentService(_mongoDb, NullLogger<SegmentService>.Instance, configuration);
+        var flag = CreateFlag("pending-backfill", false);
+        flag.CommittedVersion = 1;
+        await flags.AddOneAsync(flag);
+        var segment = new Domain.Segments.Segment(Guid.NewGuid(), _envId, "segment", "pending-backfill",
+            Domain.Segments.SegmentType.EnvironmentSpecific, [], ["old-user"], [], [], "test")
+            { CommittedVersion = 1 };
+        await segments.AddOneAsync(segment);
+        var nextFlag = await flags.GetAsync(_envId, flag.Key);
+        nextFlag.Toggle(Guid.NewGuid(), true);
+        await flags.SaveChangeAsync(new OnFeatureFlagChanged(nextFlag, Operations.Update, new DataChange(), Guid.NewGuid()));
+        var nextSegment = await segments.GetAsync(segment.Id);
+        nextSegment.UpdateTargeting(["new-user"], [], []);
+        await segments.SaveChangeAsync(new OnSegmentChange(nextSegment, Operations.Update, new DataChange(), Guid.NewGuid(),
+            isTargetingChange: true));
+        var newFlag = CreateFlag("new-uncommitted", true);
+        await flags.SaveChangeAsync(new OnFeatureFlagChanged(newFlag, Operations.Create, new DataChange(), Guid.NewGuid()), true);
+
+        Assert.Equal(2, await CreateBackfiller(new NoopMessageProducer()).BackfillDcAsync(DcB, ConsistencyMode.GatedCommit));
+        var redis = _mux.GetDatabase(1);
+        Assert.Equal(1, (long)await redis.StringGetAsync(RedisKeys.FlagCommittedPointer(flag.Id)));
+        Assert.Equal(1, (long)await redis.StringGetAsync(RedisKeys.SegmentCommittedPointer(segment.Id)));
+        using var storedFlag = JsonDocument.Parse((string)(await redis.StringGetAsync(RedisKeys.FlagVersion(flag.Id, 1)))!);
+        using var storedSegment = JsonDocument.Parse((string)(await redis.StringGetAsync(RedisKeys.SegmentVersion(segment.Id, 1)))!);
+        Assert.False(storedFlag.RootElement.GetProperty("isEnabled").GetBoolean());
+        Assert.Equal("old-user", storedSegment.RootElement.GetProperty("included")[0].GetString());
+        Assert.False(await redis.KeyExistsAsync(RedisKeys.FlagCommittedPointer(newFlag.Id)));
     }
 
     // ----- acceptance -----

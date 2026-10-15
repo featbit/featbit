@@ -1,3 +1,4 @@
+using Application.ControlPlane;
 using Application.AuditLogs;
 using Application.Users;
 using Domain.AuditLogs;
@@ -29,11 +30,11 @@ public class SetTagsHandler(IFeatureFlagService service, ICurrentUser currentUse
     {
         var flag = await service.GetAsync(request.EnvId, request.Key);
         var dataChange = flag.SetTags(request.Tags, currentUser.Id);
-        await service.UpdateAsync(flag);
 
         // publish on feature flag change notification
         var notification =
             new OnFeatureFlagChanged(flag, Operations.Update, dataChange, currentUser.Id, request.Comment);
+        await service.SaveChangeAsync(notification);
         await publisher.Publish(notification, cancellationToken);
 
         return true;

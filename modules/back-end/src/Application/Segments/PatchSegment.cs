@@ -1,3 +1,4 @@
+using Application.ControlPlane;
 using Domain.AuditLogs;
 using Application.Users;
 using Application.Bases.Models;
@@ -25,6 +26,13 @@ public class PatchSegmentHandler(
 {
     public async Task<PatchResult> Handle(PatchSegment request, CancellationToken cancellationToken)
     {
+        var protectedPaths = new[] { "/pending", "/committedVersion", "/id", "/key", "/createdAt", "/updatedAt", "/envId", "/workspaceId", "/type" };
+        if (request.Patch.Operations.Any(op => Protected(op.path) || Protected(op.from)))
+            return PatchResult.Fail("Persistence metadata and resource identity are read-only.");
+        bool Protected(string path) => path != null && (path.Length == 0 || path == "/" ||
+            protectedPaths.Any(p => path.Equals(p, StringComparison.OrdinalIgnoreCase) ||
+                path.StartsWith(p + "/", StringComparison.OrdinalIgnoreCase)));
+
         var segment = await segmentService.GetAsync(request.Id);
         var dataChange = new DataChange(segment);
 
@@ -46,8 +54,6 @@ public class PatchSegmentHandler(
 
         await permissionGuard.EnsureSegmentChangeAllowedAsync(segment, dataChange, request.Permissions);
 
-        await segmentService.UpdateAsync(segment);
-
         // publish on segment change notification
         var notification = new OnSegmentChange(
             segment,
@@ -57,6 +63,7 @@ public class PatchSegmentHandler(
             comment: "Updated via patch",
             isTargetingChange: isTargetingChange
         );
+        await segmentService.SaveChangeAsync(notification);
         await publisher.Publish(notification, cancellationToken);
 
         return PatchResult.Ok();

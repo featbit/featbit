@@ -239,9 +239,10 @@ public sealed class DcBackfiller(
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            // Version token mirrors how FeatureFlagChangeMessageHandler derives the staged version
-            // from the flag's UpdatedAt.
-            var ts = new DateTimeOffset(flag.UpdatedAt).ToUnixTimeMilliseconds();
+            // Preserve the authoritative gated version; legacy rows have no committed token yet.
+            var ts = mode == ConsistencyMode.GatedCommit && flag.CommittedVersion > 0
+                ? flag.CommittedVersion
+                : new DateTimeOffset(flag.UpdatedAt).ToUnixTimeMilliseconds();
 
             bool accepted;
             if (mode == ConsistencyMode.GatedCommit)
@@ -269,7 +270,9 @@ public sealed class DcBackfiller(
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var ts = new DateTimeOffset(segment.UpdatedAt).ToUnixTimeMilliseconds();
+            var ts = mode == ConsistencyMode.GatedCommit && segment.CommittedVersion > 0
+                ? segment.CommittedVersion
+                : new DateTimeOffset(segment.UpdatedAt).ToUnixTimeMilliseconds();
             var envIds = snapshot.SegmentEnvIds[segment.Id.ToString()];
 
             bool accepted;

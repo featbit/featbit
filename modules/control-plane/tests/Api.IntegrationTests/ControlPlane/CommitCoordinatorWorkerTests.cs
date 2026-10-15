@@ -227,8 +227,8 @@ public sealed class CommitCoordinatorWorkerTests : IntegrationTestBase, IAsyncLi
         Assert.NotNull(raw.Pending);
         Assert.Equal(v, raw.Pending!.Version);
 
-        // dc-b committed pointer never advanced
-        Assert.False(await _dcbCache.HasStagedFlagAsync(flag.Id, v));
+        // Missing stage was repaired; this tick still left the committed database value unchanged.
+        Assert.True(await _dcbCache.HasStagedFlagAsync(flag.Id, v));
     }
 
     [DockerFact]
@@ -568,13 +568,58 @@ public sealed class CommitCoordinatorWorkerTests : IntegrationTestBase, IAsyncLi
         }
     }
 
+    [DockerTheory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task FailedPublication_RestartRetriesRetainedCommittedPayload(bool acceptedBeforeFailure)
+    {
+        const string key = "publication-restart";
+        var (_, _, version) = await SeedCommittedV1PendingV2(key);
+        var pending = (await _flagService.GetAsync(_envId, key)).Pending;
+        await _composite.StageFlagAsync(pending.Value, version);
+        await UpsertLeaseAsync(DcA, DateTimeOffset.UtcNow.AddMinutes(5));
+        await UpsertLeaseAsync(DcB, DateTimeOffset.UtcNow.AddMinutes(5));
+        var broken = new SpyMessageProducer { Fail = true, AcceptBeforeFailure = acceptedBeforeFailure };
+        await Assert.ThrowsAsync<IOException>(() => CreateSut(broken).RunOnceAsync());
+        var durable = await _flagService.GetAsync(_envId, key);
+        Assert.Equal(version, durable.CommittedVersion);
+        Assert.True(durable.Pending.IsCommitted);
+        Assert.True(durable.Pending.Value.IsEnabled);
+        Assert.Equal(acceptedBeforeFailure ? 1 : 0, broken.Published.Count);
+
+        var recovered = new SpyMessageProducer();
+        Assert.Equal(1, await CreateSut(recovered).RunOnceAsync());
+        Assert.Single(recovered.Published);
+        Assert.Null((await _flagService.GetAsync(_envId, key)).Pending);
+        Assert.Equal(0, await CreateSut(recovered).RunOnceAsync());
+        Assert.Single(recovered.Published);
+    }
+
+    [DockerFact]
+    public async Task DurableDatabaseStage_RepairsMissingBackendNotification_OnNextTick()
+    {
+        const string key = "missing-backend-notification";
+        await SeedCommittedV1PendingV2(key);
+        await UpsertLeaseAsync(DcA, DateTimeOffset.UtcNow.AddMinutes(5));
+        await UpsertLeaseAsync(DcB, DateTimeOffset.UtcNow.AddMinutes(5));
+        var producer = new SpyMessageProducer();
+        Assert.Equal(0, await CreateSut(producer).RunOnceAsync());
+        Assert.False((await _flagService.GetCommittedAsync(_envId, key)).IsEnabled);
+        Assert.Equal(1, await CreateSut(producer).RunOnceAsync());
+        Assert.True((await _flagService.GetCommittedAsync(_envId, key)).IsEnabled);
+        Assert.Single(producer.Published);
+    }
+
     private sealed class SpyMessageProducer : IMessageProducer
     {
         public List<(string Topic, object Message)> Published { get; } = new();
+        public bool Fail { get; init; }
+        public bool AcceptBeforeFailure { get; init; }
 
         public Task PublishAsync<TMessage>(string topic, TMessage message) where TMessage : class
         {
-            Published.Add((topic, message));
+            if (!Fail || AcceptBeforeFailure) Published.Add((topic, message));
+            if (Fail) throw new IOException("publication interrupted");
             return Task.CompletedTask;
         }
     }

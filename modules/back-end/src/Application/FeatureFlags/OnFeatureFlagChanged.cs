@@ -1,3 +1,4 @@
+using Application.ControlPlane;
 using Application.Caches;
 using Domain.AuditLogs;
 using Domain.FeatureFlags;
@@ -57,7 +58,8 @@ public class OnFeatureFlagChangedHandler(
         await auditLogService.AddOneAsync(notification.GetAuditLog());
 
         // update cache
-        await cache.UpsertFlagAsync(flag);
+        if (!configuration.UseControlPlane() || configuration.GetConsistencyMode() != ConsistencyMode.GatedCommit)
+            await cache.UpsertFlagAsync(flag);
 
         // create flag revision
         var revision = new FlagRevision(flag, notification.Comment);

@@ -78,5 +78,5 @@ public class EntityFrameworkCoreService<TEntity>(AppDbContext dbContext) : IServ
         await SaveChangesAsync();
     }
 
-    public async Task DeleteOneAsync(Guid id) => await Queryable.Where(x => x.Id == id).ExecuteDeleteAsync();
+    public virtual async Task DeleteOneAsync(Guid id) => await Queryable.Where(x => x.Id == id).ExecuteDeleteAsync();
 }

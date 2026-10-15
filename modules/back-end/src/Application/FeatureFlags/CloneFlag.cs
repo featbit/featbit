@@ -1,3 +1,4 @@
+using Application.ControlPlane;
 using Application.Bases;
 using Application.Bases.Exceptions;
 using Application.Users;
@@ -71,11 +72,12 @@ public class CloneFlagHandler(
         var flagToClone = await flagService.GetAsync(request.EnvId, request.OriginFlagKey);
 
         var clonedFlag = flagToClone.Clone(request.Name, request.Key, request.Description, request.Tags, currentUser.Id);
-        await flagService.AddOneAsync(clonedFlag);
+        if (clonedFlag.Id == Guid.Empty) clonedFlag.Id = Guid.NewGuid();
 
         // publish on feature flag change notification
         var dataChange = new DataChange(null).To(clonedFlag);
         var notification = new OnFeatureFlagChanged(clonedFlag, Operations.Create, dataChange, currentUser.Id);
+        await flagService.SaveChangeAsync(notification, isNew: true);
         await publisher.Publish(notification, cancellationToken);
 
         return true;
