@@ -173,6 +173,7 @@ export const PERMISSION_ACTIONS: PermissionAction[] = [
     false
   ),
   action("organization", "CreateOrg", "Create organizations", false),
+  action("organization", "DeleteOrg", "Delete organizations", false),
   action("iam", "CanManageIAM", "Manage IAM", false),
   action("access-token", "ListAccessTokens", "List access tokens", false),
   action(

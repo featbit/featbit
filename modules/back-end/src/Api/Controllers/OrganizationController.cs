@@ -104,6 +104,7 @@ public class OrganizationController : ApiControllerBase
     }
 
     [HttpDelete]
+    [Authorize(Permissions.DeleteOrg)]
     public async Task<ApiResponse<bool>> DeleteAsync()
     {
         var request = new DeleteOrganization
