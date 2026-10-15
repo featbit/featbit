@@ -76,6 +76,38 @@ public class ExperimentServiceTests
         Assert.Equal(-0.001, Assert.IsType<double>(row["rel_delta"]), 6);
     }
 
+    [Theory]
+    [InlineData(-10, 1)]
+    [InlineData(-10, 3)]
+    [InlineData(10, 1)]
+    [InlineData(10, 3)]
+    public void ComputeMetricSection_EqualUncertainMeans_ReportsNormalizedNormalExpectedLoss(double mean, double scale)
+    {
+        // With n=1000 and variance=5 in each arm, the relative SE is exactly 0.01.
+        // A centered normal's one-sided expected loss is SE / sqrt(2*pi).
+        var row = Treatment(Analyze(mean * scale, mean * scale, 5 * scale * scale, false));
+        var expectedRisk = 0.01 / Math.Sqrt(2 * Math.PI);
+
+        Assert.Equal(expectedRisk, Assert.IsType<double>(row["risk_ctrl"]), 6);
+        Assert.Equal(expectedRisk, Assert.IsType<double>(row["risk_trt"]), 6);
+        Assert.Equal(0.5, Assert.IsType<double>(row["p_win"]), 6);
+    }
+
+    [Theory]
+    [InlineData(-10, -9.99)]
+    [InlineData(10, 10.01)]
+    public void ComputeMetricSection_MetricUnitsRescaled_PreservesNormalizedRisk(double control, double treatment)
+    {
+        var original = Treatment(Analyze(control, treatment, 4, false));
+        var scaled = Treatment(Analyze(control * 3, treatment * 3, 4 * 9, false));
+
+        Assert.Equal(Assert.IsType<double>(original["risk_ctrl"]), Assert.IsType<double>(scaled["risk_ctrl"]), 6);
+        Assert.Equal(Assert.IsType<double>(original["risk_trt"]), Assert.IsType<double>(scaled["risk_trt"]), 6);
+        Assert.Equal(Assert.IsType<double>(original["p_win"]), Assert.IsType<double>(scaled["p_win"]), 6);
+        Assert.True(Assert.IsType<double>(original["risk_ctrl"]) > 0);
+        Assert.True(Assert.IsType<double>(original["risk_trt"]) > 0);
+    }
+
     [Fact]
     public void ComputeMetricSection_ZeroBaseline_OmitsUndefinedRelativeInference()
     {
