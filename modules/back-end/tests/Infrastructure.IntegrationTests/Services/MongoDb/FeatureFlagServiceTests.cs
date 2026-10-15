@@ -7,12 +7,105 @@ using Infrastructure.Persistence.MongoDb;
 using Infrastructure.Services.MongoDb;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
+using Application.Bases.Exceptions;
+using MongoDB.Driver;
 
 namespace Infrastructure.IntegrationTests.Services.MongoDb;
 
 [Collection(MongoCollection.Name)]
 public class FeatureFlagServiceTests : IntegrationTestBase
 {
+    [DockerFact]
+    public async Task UpdateAsync_ConcurrentWriters_OnlyOneLoadedVersionCanWin()
+    {
+        var first = NewService();
+        var flag = NewFlag(Guid.NewGuid(), "race");
+        await first.AddOneAsync(flag);
+        var second = new FeatureFlagService(first.MongoDb);
+        var firstRead = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var secondRead = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var writers = new[] { WriteAsync(first, "first", firstRead), WriteAsync(second, "second", secondRead) };
+        try
+        {
+            await Task.WhenAll(firstRead.Task, secondRead.Task).WaitAsync(TimeSpan.FromSeconds(10));
+        }
+        finally
+        {
+            release.TrySetResult();
+        }
+
+        var results = await Task.WhenAll(writers).WaitAsync(TimeSpan.FromSeconds(10));
+
+        Assert.Single(results, x => x.error == null);
+        Assert.IsType<ConflictException>(Assert.Single(results, x => x.error != null).error);
+        var stored = await first.GetAsync(flag.EnvId, flag.Key);
+        Assert.Equal(results.Single(x => x.error == null).name, stored.Name);
+        return;
+
+        async Task<(string name, Exception? error)> WriteAsync(FeatureFlagService service, string name, TaskCompletionSource read)
+        {
+            var value = await service.GetAsync(flag.EnvId, flag.Key);
+            read.SetResult();
+            await release.Task;
+            value.UpdateName(name, Guid.NewGuid());
+            return (name, await Record.ExceptionAsync(() => service.UpdateAsync(value)));
+        }
+    }
+
+    [DockerFact]
+    public async Task UpdateAsync_PendingChangedAfterRead_RejectsStaleReplacement()
+    {
+        var service = NewService();
+        var flag = NewFlag(Guid.NewGuid(), "pending-race");
+        await service.AddOneAsync(flag);
+        var stale = await service.GetAsync(flag.EnvId, flag.Key);
+        var pending = flag.Clone();
+        pending.Name = "pending";
+        await service.SetPendingAsync(flag.EnvId, flag.Key, pending, 1);
+        stale.UpdateName("stale", Guid.NewGuid());
+
+        await Assert.ThrowsAsync<ConflictException>(() => service.UpdateAsync(stale));
+
+        var stored = await service.GetAsync(flag.EnvId, flag.Key);
+        Assert.Equal(1, stored.Pending.Version);
+        Assert.Equal("pending", stored.Pending.Value.Name);
+    }
+
+    [DockerFact]
+    public async Task UpdateAsync_MetadataChangedAfterRead_RejectsStaleReplacement()
+    {
+        var service = NewService();
+        var flag = NewFlag(Guid.NewGuid(), "metadata-race");
+        await service.AddOneAsync(flag);
+        var stale = await service.GetAsync(flag.EnvId, flag.Key);
+        var updater = Guid.NewGuid();
+        await service.MarkAsUpdatedAsync([flag.Id], updater);
+        stale.UpdateName("stale", Guid.NewGuid());
+
+        await Assert.ThrowsAsync<ConflictException>(() => service.UpdateAsync(stale));
+
+        Assert.Equal(updater, (await service.GetAsync(flag.EnvId, flag.Key)).UpdatorId);
+    }
+
+    [DockerFact]
+    public async Task UpdateAsync_LegacyDocumentWithoutToken_FirstWriteUpgradesAndFencesNextWrite()
+    {
+        var service = NewService();
+        var flag = NewFlag(Guid.NewGuid(), "legacy-race");
+        await service.AddOneAsync(flag);
+        await service.Collection.UpdateOneAsync(x => x.Id == flag.Id, Builders<FeatureFlag>.Update.Unset("mongoETag"));
+        var first = await service.GetAsync(flag.EnvId, flag.Key);
+        var stale = await service.GetAsync(flag.EnvId, flag.Key);
+        first.UpdateName("first", Guid.NewGuid());
+        await service.UpdateAsync(first);
+        stale.UpdateName("stale", Guid.NewGuid());
+
+        await Assert.ThrowsAsync<ConflictException>(() => service.UpdateAsync(stale));
+
+        Assert.Equal("first", (await service.GetAsync(flag.EnvId, flag.Key)).Name);
+    }
+
     private readonly MongoDbFixture _fixture;
 
     public FeatureFlagServiceTests(MongoDbFixture fixture)
