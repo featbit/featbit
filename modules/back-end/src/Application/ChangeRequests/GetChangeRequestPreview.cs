@@ -1,3 +1,4 @@
+using Application.FeatureFlags;
 using Application.Bases.Exceptions;
 using Domain.FeatureFlags;
 using Domain.FlagChangeRequests;
@@ -56,6 +57,7 @@ public class GetChangeRequestPreviewHandler(
             {
                 throw new ConflictException(nameof(FeatureFlag), currentFlag.Id);
             }
+            FlagTargetingValidator.EnsureValid(previewFlag);
         }
 
         return new ChangeRequestPreviewVm(changeRequest, previewFlag);
