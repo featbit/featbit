@@ -232,12 +232,17 @@ public static class FlagComparer
     {
         var instructions = new List<FlagInstruction>();
 
-        foreach (var variation in flagVariations)
+        // Include removed variations so their old user assignments can be cleared.
+        var variationIds = flagVariations.Select(x => x.Id)
+            .Concat(original.Select(x => x.VariationId))
+            .Concat(current.Select(x => x.VariationId))
+            .Distinct();
+        foreach (var variationId in variationIds)
         {
-            var targetUser1 = original.FirstOrDefault(x => x.VariationId == variation.Id);
-            var targetUser2 = current.FirstOrDefault(x => x.VariationId == variation.Id);
+            var targetUser1 = original.FirstOrDefault(x => x.VariationId == variationId);
+            var targetUser2 = current.FirstOrDefault(x => x.VariationId == variationId);
 
-            var differs = CompareTargetUser(variation.Id, targetUser1, targetUser2);
+            var differs = CompareTargetUser(variationId, targetUser1, targetUser2);
             instructions.AddRange(differs);
         }
 

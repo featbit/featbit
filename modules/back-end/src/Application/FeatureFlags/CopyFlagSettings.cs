@@ -31,6 +31,7 @@ public class CopyFlagSettingsHandler(
 
         var context = new FlagCopyContext(source, target, relatedSegments, request.Options);
         var dataChange = target.CopySettingsFrom(context, currentUser.Id);
+        FlagTargetingValidator.EnsureValid(target);
         await flagService.UpdateAsync(target);
 
         await AddNewPropertiesAsync();

@@ -14,6 +14,37 @@ namespace Application.UnitTests.Handlers;
 
 public class PatchFeatureFlagHandlerTests
 {
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Handle_VariationRemoved_ValidatesFinalReferencesBeforePersisting(bool repairReferences)
+    {
+        var flag = NewFlag();
+        var service = new Mock<IFeatureFlagService>();
+        service.Setup(x => x.GetAsync(flag.EnvId, flag.Key)).ReturnsAsync(flag);
+        var publisher = new Mock<IPublisher>();
+        var resourceService = new Mock<IResourceService>();
+        resourceService.Setup(x => x.GetFlagRnAsync(flag.EnvId, flag.Key)).ReturnsAsync("flag/*");
+        var sut = new PatchFeatureFlagHandler(service.Object, new PermissionGuard(resourceService.Object),
+            Mock.Of<ICurrentUser>(), publisher.Object);
+        var patch = new JsonPatchDocument<FeatureFlag>();
+        patch.Replace(x => x.Variations, flag.Variations.Where(x => x.Id != "v-off").ToList());
+        if (repairReferences) patch.Replace(x => x.DisabledVariationId, "v-on");
+        var request = new PatchFeatureFlag { EnvId = flag.EnvId, Key = flag.Key, Patch = patch, Permissions = AllowAll() };
+
+        if (repairReferences)
+        {
+            Assert.True((await sut.Handle(request, CancellationToken.None)).Success);
+            service.Verify(x => x.UpdateAsync(flag), Times.Once);
+        }
+        else
+        {
+            await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => sut.Handle(request, CancellationToken.None));
+            service.Verify(x => x.UpdateAsync(It.IsAny<FeatureFlag>()), Times.Never);
+            publisher.Verify(x => x.Publish(It.IsAny<OnFeatureFlagChanged>(), It.IsAny<CancellationToken>()), Times.Never);
+        }
+    }
+
     private static FeatureFlag NewFlag()
     {
         var on = new Variation { Id = "v-on", Name = "On", Value = "true" };
