@@ -13,8 +13,93 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 namespace Application.IntegrationTests.Controllers;
 
 [Collection(nameof(TestApp))]
+[Trait("Category", "Host")]
 public class InsightControllerTests(TestApp app)
 {
+    [Theory]
+    [InlineData(Topics.EndUser)]
+    [InlineData(Topics.Insights)]
+    [InlineData(Topics.Usage)]
+    public async Task TrackAsync_PartialPublishFailure_Returns503AndRetriesUser(string failedTopic)
+    {
+        var producer = new Mock<IMessageProducer>();
+        var endUsers = new List<EndUserMessage[]>();
+        var usages = new List<InsightUsage>();
+        producer.Setup(x => x.PublishBatchAsync(Topics.EndUser, It.IsAny<IReadOnlyCollection<EndUserMessage>>()))
+            .Callback<string, IReadOnlyCollection<EndUserMessage>>((_, users) => endUsers.Add(users.ToArray()))
+            .Returns(Task.CompletedTask);
+        producer.Setup(x => x.PublishAsync(Topics.Usage, It.IsAny<InsightUsage>()))
+            .Callback<string, InsightUsage>((_, usage) => usages.Add(usage)).Returns(Task.CompletedTask);
+        if (failedTopic == Topics.EndUser)
+            producer.SetupSequence(x => x.PublishBatchAsync(Topics.EndUser, It.IsAny<IReadOnlyCollection<EndUserMessage>>()))
+                .ThrowsAsync(new IOException("queue unavailable")).Returns(Task.CompletedTask).Returns(Task.CompletedTask);
+        else if (failedTopic == Topics.Insights)
+            producer.SetupSequence(x => x.PublishBatchAsync(Topics.Insights, It.IsAny<IReadOnlyCollection<InsightMessage>>()))
+                .ThrowsAsync(new IOException("queue unavailable")).Returns(Task.CompletedTask).Returns(Task.CompletedTask);
+        else
+            producer.SetupSequence(x => x.PublishAsync(Topics.Usage, It.IsAny<InsightUsage>()))
+                .ThrowsAsync(new IOException("queue unavailable")).Returns(Task.CompletedTask).Returns(Task.CompletedTask);
+        using var factory = app.WithWebHostBuilder(builder => builder.ConfigureTestServices(services =>
+            services.Replace(ServiceDescriptor.Singleton(producer.Object))));
+        using var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(TestData.ClientSecretString);
+        var insights = new[] { UserVariationInsight("retry-user") };
+
+        var failed = await client.PostAsJsonAsync("/api/public/insight/track", insights);
+        var retry = await client.PostAsJsonAsync("/api/public/insight/track", insights);
+        var duplicate = await client.PostAsJsonAsync("/api/public/insight/track", insights);
+
+        Assert.Equal(HttpStatusCode.ServiceUnavailable, failed.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, retry.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, duplicate.StatusCode);
+        if (failedTopic != Topics.EndUser)
+            Assert.Equal(new[] { 1, 1, 0 }, endUsers.Select(x => x.Length));
+        else
+            producer.Verify(x => x.PublishBatchAsync(Topics.EndUser,
+                It.Is<IReadOnlyCollection<EndUserMessage>>(users => users.Count == 1)), Times.Exactly(2));
+        if (failedTopic != Topics.Usage)
+            Assert.Equal(new[] { 1, 1, 0 }, usages.Select(x => x.EndUsers.Count));
+        else
+            producer.Verify(x => x.PublishAsync(Topics.Usage,
+                It.Is<InsightUsage>(usage => usage.EndUsers.Contains("retry-user"))), Times.Exactly(2));
+    }
+
+    [Fact]
+    public async Task TrackAsync_ConcurrentSameUser_DoesNotDeduplicateUnconfirmedWrites()
+    {
+        var firstStarted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var firstPublish = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var endUsers = new System.Collections.Concurrent.ConcurrentQueue<int>();
+        var calls = 0;
+        var producer = new Mock<IMessageProducer>();
+        producer.Setup(x => x.PublishBatchAsync(Topics.EndUser, It.IsAny<IReadOnlyCollection<EndUserMessage>>()))
+            .Returns((string _, IReadOnlyCollection<EndUserMessage> users) =>
+            {
+                endUsers.Enqueue(users.Count);
+                if (Interlocked.Increment(ref calls) != 1)
+                    return Task.CompletedTask;
+                firstStarted.SetResult();
+                return firstPublish.Task;
+            });
+        using var factory = app.WithWebHostBuilder(builder => builder.ConfigureTestServices(services =>
+            services.Replace(ServiceDescriptor.Singleton(producer.Object))));
+        using var client = factory.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(TestData.ClientSecretString);
+        var insights = new[] { UserVariationInsight("concurrent-user") };
+
+        var first = client.PostAsJsonAsync("/api/public/insight/track", insights);
+        await firstStarted.Task.WaitAsync(TimeSpan.FromSeconds(10));
+        var second = await client.PostAsJsonAsync("/api/public/insight/track", insights);
+        firstPublish.SetException(new IOException("queue unavailable"));
+        var failed = await first;
+        var retry = await client.PostAsJsonAsync("/api/public/insight/track", insights);
+
+        Assert.Equal(HttpStatusCode.ServiceUnavailable, failed.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, second.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, retry.StatusCode);
+        Assert.Equal(new[] { 1, 1, 0 }, endUsers);
+    }
+
     [Fact]
     public async Task TrackAsync_WithoutAuth_Returns401()
     {
