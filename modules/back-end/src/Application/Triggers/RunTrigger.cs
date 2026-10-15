@@ -53,13 +53,13 @@ public class RunTriggerHandler : IRequestHandler<RunTrigger, bool>
                 return true;
             }
 
-            await _triggerService.UpdateAsync(trigger);
-
             // publish on feature flag change notification
             var comment = trigger.Action == TriggerActions.TurnOff ? "Turn off by trigger" : "Turn on by trigger";
             var notification =
                 new OnFeatureFlagChanged(flag, Operations.Update, dataChange, SystemUser.Id, comment);
             await _flagService.SaveChangeAsync(notification);
+            // Count a run only after the flag write/stage is accepted.
+            await _triggerService.UpdateAsync(trigger);
             await _publisher.Publish(notification, cancellationToken);
         }
 

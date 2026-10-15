@@ -49,12 +49,15 @@ public partial class FeatureFlagService : IGatedFeatureFlagStore
 
     public async Task<bool> AcknowledgePublicationAsync(Guid envId, string key, long expectedVersion)
     {
-        var stored = await GetAsync(envId, key);
-        if (stored.CommittedVersion != expectedVersion || stored.Pending?.Version != expectedVersion ||
-            !stored.Pending.IsCommitted) return false;
-        stored.Pending = null;
-        try { await base.UpdateAsync(stored); return true; }
-        catch (DbUpdateConcurrencyException) { return false; }
+        // Promotion already tracks this row in the coordinator's scope. A conditional SQL
+        // update acknowledges only this receipt without attaching a second entity instance
+        // or replacing fields concurrently changed after promotion.
+        var receipt = JsonSerializer.Serialize(new { Version = expectedVersion, IsCommitted = true },
+            ReusableJsonSerializerOptions.Web);
+        var acknowledged = await Queryable.Where(x => x.EnvId == envId && x.Key == key &&
+                x.CommittedVersion == expectedVersion && EF.Functions.JsonContains(x.Pending, receipt))
+            .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.Pending, (PendingFlagChange)null!));
+        return acknowledged > 0;
     }
 
     public override async Task DeleteOneAsync(Guid id)

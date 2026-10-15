@@ -49,12 +49,15 @@ public partial class SegmentService : IGatedSegmentStore
 
     public async Task<bool> AcknowledgePublicationAsync(Guid id, long expectedVersion)
     {
-        var stored = await GetAsync(id);
-        if (stored.CommittedVersion != expectedVersion || stored.Pending?.Version != expectedVersion ||
-            !stored.Pending.IsCommitted) return false;
-        stored.Pending = null;
-        try { await base.UpdateAsync(stored); return true; }
-        catch (DbUpdateConcurrencyException) { return false; }
+        // Promotion already tracks this row in the coordinator's scope. A conditional SQL
+        // update acknowledges only this receipt without attaching a second entity instance
+        // or replacing fields concurrently changed after promotion.
+        var receipt = JsonSerializer.Serialize(new { Version = expectedVersion, IsCommitted = true },
+            ReusableJsonSerializerOptions.Web);
+        var acknowledged = await Queryable.Where(x => x.Id == id &&
+                x.CommittedVersion == expectedVersion && EF.Functions.JsonContains(x.Pending, receipt))
+            .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.Pending, (PendingSegmentChange)null!));
+        return acknowledged > 0;
     }
 
     public override async Task DeleteOneAsync(Guid id)
