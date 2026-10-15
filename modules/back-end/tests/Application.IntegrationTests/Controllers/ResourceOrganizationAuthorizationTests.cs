@@ -6,11 +6,13 @@ using Api.Authorization;
 using Api.Filters;
 using Application.FeatureFlags;
 using Application.Services;
+using Application.Segments;
 using Domain.AccessTokens;
 using Domain.FeatureFlags;
 using Domain.Organizations;
 using Domain.Policies;
 using Domain.Resources;
+using Domain.Segments;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -33,6 +35,26 @@ public class ResourceOrganizationAuthorizationTests(TestApp app)
     private static readonly Guid EnvB = Guid.NewGuid();
     private static readonly Guid OtherEnvA = Guid.NewGuid();
     private static readonly Guid ForeignSegment = Guid.NewGuid();
+    private static readonly Guid OwnSegment = Guid.NewGuid();
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task SegmentBatch_ExistingAndDeletedIds_ReturnsExistingNames(bool openApi)
+    {
+        var deleted = Guid.NewGuid();
+        var sender = new Mock<ISender>(MockBehavior.Strict);
+        sender.Setup(x => x.Send(It.Is<GetSegmentByIds>(r => r.Ids.Contains(OwnSegment) && r.Ids.Contains(deleted)),
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync([new Segment { Id = OwnSegment, Name = "Existing audit segment", EnvId = EnvA }]);
+        using var factory = CreateFactory(sender);
+        using var client = await CreateClientAsync(factory, openApi);
+
+        using var response = await client.GetAsync($"/api/v1/envs/{EnvA}/segments/by-ids?ids={OwnSegment}&ids={deleted}");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("Existing audit segment", await response.Content.ReadAsStringAsync());
+    }
 
     [Theory]
     [InlineData(false)]
@@ -52,6 +74,7 @@ public class ResourceOrganizationAuthorizationTests(TestApp app)
             (HttpMethod.Get, $"projects/{ProjectA}/envs/{OtherEnvA}", null),
             (HttpMethod.Get, $"envs/{EnvA}/segments/{ForeignSegment}", null),
             (HttpMethod.Get, $"envs/{EnvA}/segments/by-ids?ids={ForeignSegment}", null),
+            (HttpMethod.Get, $"envs/{EnvA}/segments/by-ids?ids={OwnSegment}&ids={ForeignSegment}", null),
             (HttpMethod.Get, $"envs/{EnvA}/feature-flags/flag/compare-with/{EnvB}", null),
             (HttpMethod.Post, $"envs/{EnvA}/feature-flags/compare-overview", new { targetEnvIds = new[] { EnvB }, filter = new { } }),
             (HttpMethod.Post, $"envs/{EnvA}/feature-flags/copy-to-env-precheck/{EnvB}", Array.Empty<Guid>())
@@ -127,6 +150,8 @@ public class ResourceOrganizationAuthorizationTests(TestApp app)
         resources.Setup(x => x.GetEnvRnAsync(It.IsAny<Guid>())).ReturnsAsync("project/shared:env/dev");
         resources.Setup(x => x.GetFlagRnAsync(It.IsAny<Guid>(), It.IsAny<string>()))
             .ReturnsAsync("project/shared:env/dev:flag/flag");
+        resources.Setup(x => x.GetSegmentRnAsync(EnvA, OwnSegment)).ReturnsAsync("project/shared:env/dev:segment/own");
+        resources.Setup(x => x.SegmentExistsAsync(ForeignSegment)).ReturnsAsync(true);
         PolicyStatement[] policies = [new() { Effect = EffectType.Allow, Actions = ["*"], Resources = ["*"] }];
         var members = new Mock<IMemberService>();
         members.Setup(x => x.GetPermissionsAsync(OrganizationA, It.IsAny<Guid>())).ReturnsAsync(policies);

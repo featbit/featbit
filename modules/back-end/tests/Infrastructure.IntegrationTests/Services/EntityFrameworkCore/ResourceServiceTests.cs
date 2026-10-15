@@ -26,6 +26,8 @@ public class ResourceServiceTests(FeatBitPostgresFixture fixture) : IntegrationT
         Assert.False(await service.IsEnvInOrganizationAsync(data.FirstOrganization.Id, data.SecondEnv.Id));
         Assert.False(await service.IsEnvInOrganizationAsync(data.FirstOrganization.Id, data.FirstEnv.Id, data.SecondProject.Id));
         Assert.Equal(data.FirstOrganization.WorkspaceId, await service.GetOrganizationWorkspaceIdAsync(data.FirstOrganization.Id));
+        Assert.True(await service.SegmentExistsAsync(data.SharedSegment.Id));
+        Assert.False(await service.SegmentExistsAsync(Guid.NewGuid()));
     }
 
     [DockerTheory]

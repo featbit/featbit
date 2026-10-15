@@ -36,6 +36,8 @@ public class ResourceService(AppDbContext dbContext) : IResourceService
     public Task<bool> IsProjectInOrganizationAsync(Guid organizationId, Guid projectId) =>
         QueryableOf<Project>().AnyAsync(x => x.Id == projectId && x.OrganizationId == organizationId);
 
+    public Task<bool> SegmentExistsAsync(Guid id) => QueryableOf<Segment>().AnyAsync(x => x.Id == id);
+
     public Task<bool> IsEnvInOrganizationAsync(Guid organizationId, Guid envId, Guid? projectId = null) =>
         (from env in QueryableOf<Environment>()
          join project in QueryableOf<Project>() on env.ProjectId equals project.Id

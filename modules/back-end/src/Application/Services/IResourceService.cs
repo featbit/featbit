@@ -17,6 +17,8 @@ public interface IResourceService
 
     Task<string?> GetSegmentRnAsync(Guid envId, Guid id);
 
+    Task<bool> SegmentExistsAsync(Guid id);
+
     Task<bool> IsProjectInOrganizationAsync(Guid organizationId, Guid projectId);
 
     Task<bool> IsEnvInOrganizationAsync(Guid organizationId, Guid envId, Guid? projectId = null);

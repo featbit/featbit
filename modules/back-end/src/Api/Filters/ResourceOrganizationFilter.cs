@@ -65,11 +65,13 @@ public class ResourceOrganizationFilter(IResourceService resources, IRequestPerm
                 : ReadId("segmentId") is { } segmentId ? [segmentId] : Array.Empty<Guid>();
             foreach (var id in ids.Distinct())
             {
-                if (string.IsNullOrWhiteSpace(await resources.GetSegmentRnAsync(envId.Value, id)))
+                if (string.IsNullOrWhiteSpace(await resources.GetSegmentRnAsync(envId.Value, id)) &&
+                    await resources.SegmentExistsAsync(id))
                 {
                     context.Result = new ForbidResult();
                     return;
                 }
+                // Missing rows are ignored by batch reads (and become 404 on a single read).
             }
         }
 
