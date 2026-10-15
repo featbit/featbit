@@ -115,6 +115,34 @@ public class WebSocketSenderTests
     }
 
     [Fact]
+    public async Task SendAsync_FailureLoggerThrows_StillFailsAllWaitingSendsAndStopsWorker()
+    {
+        var time = new FakeTimeProvider();
+        var started = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var blocked = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var socket = CreateSocket((_, _) => { started.TrySetResult(); return blocked.Task; });
+        var sender = new WebSocketSender(socket.Object, time);
+        var first = sender.SendAsync(new byte[] { 1 }, CancellationToken.None);
+        await started.Task.WaitAsync(TestTimeout);
+        sender.Enqueue(new byte[] { 2 }, CancellationToken.None, _ => throw new IOException("logger failed"));
+        var last = sender.SendAsync(new byte[] { 3 }, CancellationToken.None);
+
+        time.Advance(TimeSpan.FromSeconds(10));
+
+        try
+        {
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => first.WaitAsync(TestTimeout));
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => last.WaitAsync(TestTimeout));
+            await sender.CompleteAsync().WaitAsync(TestTimeout);
+        }
+        finally
+        {
+            blocked.TrySetResult();
+        }
+        socket.Verify(x => x.Abort(), Times.Once);
+    }
+
+    [Fact]
     public async Task SendAsync_TransportFailure_AbortsAndPreservesFailure()
     {
         var failure = new WebSocketException("write failed");

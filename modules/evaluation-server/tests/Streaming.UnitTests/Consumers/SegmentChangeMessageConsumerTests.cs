@@ -149,25 +149,40 @@ public class SegmentChangeMessageConsumerTests
     }
 
     [Fact]
-    public async Task HandleAsync_StalledFirstSocket_DoesNotBlockHealthySocketOrNextMessage()
+    public async Task HandleAsync_StalledFirstSocket_DeliversBothHealthyUpdatesInOrder()
     {
         var blocked = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var entered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var firstSent = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var secondSent = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var receivedVersions = new List<int>();
         var stalled = CreateOpenWebSocketMock();
         stalled.Setup(x => x.SendAsync(It.IsAny<ArraySegment<byte>>(), WebSocketMessageType.Text, true,
             It.IsAny<CancellationToken>())).Returns(() => { entered.TrySetResult(); return blocked.Task; });
-        var healthy = CreateOpenWebSocketMock(out var sent);
+        var healthy = CreateOpenWebSocketMock();
+        healthy.Setup(x => x.SendAsync(It.IsAny<ArraySegment<byte>>(), WebSocketMessageType.Text, true,
+            It.IsAny<CancellationToken>())).Returns((ArraySegment<byte> bytes, WebSocketMessageType _, bool _, CancellationToken _) =>
+        {
+            using var response = JsonDocument.Parse(bytes);
+            receivedVersions.Add(response.RootElement.GetProperty("data").GetProperty("version").GetInt32());
+            if (receivedVersions.Count == 1) firstSent.TrySetResult();
+            if (receivedVersions.Count == 2) secondSent.TrySetResult();
+            return Task.CompletedTask;
+        });
         var first = new Connection(stalled.Object, new Secret(SecretTypes.Server, "p", EnvId, "dev"));
         var second = new Connection(healthy.Object, new Secret(SecretTypes.Server, "p", EnvId, "dev"));
         _connectionManager.Setup(x => x.GetEnvConnections(EnvId)).Returns([first, second]);
-        _dataSyncService.Setup(s => s.GetSegmentChangePayloadAsync(It.IsAny<Connection>(), It.IsAny<JsonElement>(), It.IsAny<string[]>())).ReturnsAsync(new { updated = true });
+        _dataSyncService.Setup(s => s.GetSegmentChangePayloadAsync(It.IsAny<Connection>(), It.IsAny<JsonElement>(), It.IsAny<string[]>()))
+            .ReturnsAsync((Connection _, JsonElement change, string[] _) => new { version = change.GetProperty("version").GetInt32() });
 
         try
         {
-            await _consumer.HandleAsync(BuildMessage(EnvId, ["flag-1"]), CancellationToken.None).WaitAsync(TimeSpan.FromSeconds(5));
+            await _consumer.HandleAsync(BuildMessage(EnvId, ["flag-1"], 1), CancellationToken.None).WaitAsync(TimeSpan.FromSeconds(5));
             await entered.Task.WaitAsync(TimeSpan.FromSeconds(5));
-            await sent.WaitAsync(TimeSpan.FromSeconds(5));
-            await _consumer.HandleAsync(BuildMessage(EnvId, ["flag-1"]), CancellationToken.None).WaitAsync(TimeSpan.FromSeconds(5));
+            await firstSent.Task.WaitAsync(TimeSpan.FromSeconds(5));
+            await _consumer.HandleAsync(BuildMessage(EnvId, ["flag-1"], 2), CancellationToken.None).WaitAsync(TimeSpan.FromSeconds(5));
+            await secondSent.Task.WaitAsync(TimeSpan.FromSeconds(5));
+            Assert.Equal(new[] { 1, 2 }, receivedVersions);
             Assert.False(blocked.Task.IsCompleted);
         }
         finally
@@ -178,10 +193,10 @@ public class SegmentChangeMessageConsumerTests
         }
     }
 
-    private static string BuildMessage(Guid envId, string[] affectedFlagIds) =>
+    private static string BuildMessage(Guid envId, string[] affectedFlagIds, int version = 1) =>
         JsonSerializer.Serialize(new
         {
-            segment = new { envId, id = "seg-1" },
+            segment = new { envId, id = "seg-1", version },
             affectedFlagIds
         });
 

@@ -128,7 +128,14 @@ internal sealed class WebSocketSender
         internal void Fail(Exception error)
         {
             Completion?.TrySetException(error);
-            OnFailure?.Invoke(error);
+            try
+            {
+                OnFailure?.Invoke(error);
+            }
+            catch
+            {
+                // A failed logging provider must not strand other sends or interrupt cleanup.
+            }
         }
     }
 }
