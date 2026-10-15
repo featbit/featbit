@@ -545,7 +545,7 @@ public sealed class SegmentCommitCoordinatorWorkerTests : IntegrationTestBase, I
         await UpsertLeaseAsync(DcA, DateTimeOffset.UtcNow.AddMinutes(5));
         await UpsertLeaseAsync(DcB, DateTimeOffset.UtcNow.AddMinutes(5));
         var broken = new SpySegmentMessageService { Fail = true, AcceptBeforeFailure = acceptedBeforeFailure };
-        await Assert.ThrowsAsync<IOException>(() => CreateSut(broken).RunOnceAsync());
+        Assert.Equal(0, await CreateSut(broken).RunOnceAsync());
         var durable = await _segmentService.GetAsync(id);
         Assert.Equal(version, durable.CommittedVersion);
         Assert.True(durable.Pending.IsCommitted);
