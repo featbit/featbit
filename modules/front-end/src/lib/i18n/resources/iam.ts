@@ -1060,6 +1060,7 @@ export const zhIam = {
     "details.permissionsEditor.actionLabels.UpdateOrgDefaultUserPermissions":
       "更新默认用户权限",
     "details.permissionsEditor.actionLabels.CreateOrg": "创建机构",
+    "details.permissionsEditor.actionLabels.DeleteOrg": "删除机构",
     "details.permissionsEditor.actionLabels.CanManageIAM": "管理 IAM",
     "details.permissionsEditor.actionLabels.ListAccessTokens": "查看访问令牌",
     "details.permissionsEditor.actionLabels.ManageServiceAccessTokens":

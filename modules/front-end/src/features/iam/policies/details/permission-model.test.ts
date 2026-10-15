@@ -50,6 +50,7 @@ describe("permission model", () => {
       "UpdateOrgName",
       "UpdateOrgDefaultUserPermissions",
       "CreateOrg",
+      "DeleteOrg",
     ])
   })
 

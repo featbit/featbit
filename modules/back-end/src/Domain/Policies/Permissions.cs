@@ -26,6 +26,7 @@ public static class Permissions
     public const string UpdateOrgSortFlagsBy = nameof(UpdateOrgSortFlagsBy);
     public const string UpdateOrgDefaultUserPermissions = nameof(UpdateOrgDefaultUserPermissions);
     public const string CreateOrg = nameof(CreateOrg);
+    public const string DeleteOrg = nameof(DeleteOrg);
 
     // Projects
     public const string CanAccessProject = nameof(CanAccessProject);
@@ -94,6 +95,7 @@ public static class Permissions
         { UpdateOrgSortFlagsBy, ResourceTypes.Organization },
         { UpdateOrgDefaultUserPermissions, ResourceTypes.Organization },
         { CreateOrg, ResourceTypes.Organization },
+        { DeleteOrg, ResourceTypes.Organization },
 
         // Projects
         { CanAccessProject, ResourceTypes.Project },
