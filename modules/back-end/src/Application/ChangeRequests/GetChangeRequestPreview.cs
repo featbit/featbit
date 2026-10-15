@@ -1,6 +1,7 @@
 using Application.Bases.Exceptions;
 using Domain.FeatureFlags;
 using Domain.FlagChangeRequests;
+using Domain.SemanticPatch;
 
 namespace Application.ChangeRequests;
 
@@ -47,7 +48,14 @@ public class GetChangeRequestPreviewHandler(
         var previewFlag = currentFlag.Clone();
         if (changeRequest.Status != FlagChangeRequestStatus.Applied)
         {
-            previewFlag.ApplyDraft(draft);
+            try
+            {
+                previewFlag.ApplyDraft(draft);
+            }
+            catch (FlagInstructionConflictException)
+            {
+                throw new ConflictException(nameof(FeatureFlag), currentFlag.Id);
+            }
         }
 
         return new ChangeRequestPreviewVm(changeRequest, previewFlag);

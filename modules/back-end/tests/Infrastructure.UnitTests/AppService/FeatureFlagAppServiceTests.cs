@@ -14,6 +14,31 @@ namespace Infrastructure.UnitTests.AppService;
 
 public class FeatureFlagAppServiceTests
 {
+    [Fact]
+    public async Task ApplyDraftAsync_EmptyAssignmentAndVariationRemoved_ClearsTheOldRow()
+    {
+        var flag = NewFlag();
+        flag.DisabledVariationId = "on";
+        flag.TargetUsers = new List<TargetUser> { new() { VariationId = "off", KeyIds = [] } };
+        var next = flag.Clone();
+        next.Variations = next.Variations.Where(x => x.Id != "off").ToList();
+        next.TargetUsers = [];
+        var draft = new FlagDraft(flag.EnvId, flag.Id, new DataChange(flag).To(next), Guid.NewGuid());
+        var flags = new Mock<IFeatureFlagService>();
+        flags.Setup(x => x.GetAsync(flag.Id)).ReturnsAsync(flag);
+        var drafts = new Mock<IFlagDraftService>();
+        drafts.Setup(x => x.GetAsync(draft.Id)).ReturnsAsync(draft);
+        var sut = new FeatureFlagAppService(flags.Object, drafts.Object, Mock.Of<IAuditLogService>(),
+            Mock.Of<ICacheService>(), Mock.Of<IPublisher>());
+
+        await sut.ApplyDraftAsync(draft.Id, Operations.ApplyFlagSchedule, Guid.NewGuid());
+
+        Assert.True(draft.IsApplied());
+        Assert.Empty(flag.TargetUsers);
+        Assert.DoesNotContain(flag.Variations, x => x.Id == "off");
+        flags.Verify(x => x.UpdateAsync(flag), Times.Once);
+    }
+
     [Theory]
     [InlineData(false, false)]
     [InlineData(true, false)]

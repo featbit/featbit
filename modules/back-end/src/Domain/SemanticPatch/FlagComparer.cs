@@ -253,7 +253,10 @@ public static class FlagComparer
     {
         if (TargetUser.IsNullOrEmpty(original) && TargetUser.IsNullOrEmpty(current))
         {
-            return new FlagInstruction[] { NoopFlagInstruction.Instance };
+            return original != null && current == null
+                ? [new TargetUsersInstruction(FlagInstructionKind.SetTargetUsers,
+                    new TargetUser { VariationId = variationId, KeyIds = [] })]
+                : [NoopFlagInstruction.Instance];
         }
 
         if (TargetUser.IsNullOrEmpty(original))
