@@ -27,24 +27,38 @@ public abstract class ConnectionContext
 
     public async Task CloseAsync()
     {
+        await WebSocketSender.For(WebSocket).CompleteAsync();
         var status = WebSocket.CloseStatus ?? WebSocketCloseStatus.NormalClosure;
         var description = WebSocket.CloseStatusDescription ?? string.Empty;
 
         if (WebSocket.State is WebSocketState.Open or WebSocketState.CloseReceived)
         {
-            await WebSocket.CloseOutputAsync(status, description, CancellationToken.None);
+            using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            try
+            {
+                await WebSocket.CloseOutputAsync(status, description, timeout.Token).WaitAsync(timeout.Token);
+            }
+            catch
+            {
+                WebSocket.Abort();
+                throw;
+            }
         }
 
         MarkAsClosed();
     }
 
-    public void MarkAsClosed() => ClosedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+    public void MarkAsClosed()
+    {
+        WebSocketSender.For(WebSocket).Stop();
+        ClosedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+    }
 
-    public async Task SendAsync(ReadOnlyMemory<byte> bytes, CancellationToken cancellationToken)
-        => await WebSocket.SendAsync(bytes, WebSocketMessageType.Text, true, cancellationToken);
+    public Task SendAsync(ReadOnlyMemory<byte> bytes, CancellationToken cancellationToken)
+        => WebSocketSender.For(WebSocket).SendAsync(bytes, cancellationToken);
 
-    public async Task SendAsync(ServerMessage message, CancellationToken cancellationToken)
-        => await WebSocket.SendAsync(message.GetBytes(), WebSocketMessageType.Text, true, cancellationToken);
+    public Task SendAsync(ServerMessage message, CancellationToken cancellationToken)
+        => SendAsync(message.GetBytes(), cancellationToken);
 
     public void Deconstruct(
         out WebSocket websocket,
