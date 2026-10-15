@@ -2,6 +2,7 @@ using Api.Authentication;
 using Api.Authentication.OAuth;
 using Api.Authentication.OpenIdConnect;
 using Api.Authorization;
+using Api.Filters;
 using Api.Mcp;
 using Api.Swagger;
 using Application.Services;
@@ -125,6 +126,7 @@ public static class ServicesRegister
         LicenseVerifier.ImportPublicKey(builder.Configuration["PublicKey"]);
         builder.Services.AddTransient<ILicenseService, LicenseService>();
         builder.Services.AddScoped<IRequestPermissions, RequestPermissions>();
+        builder.Services.AddScoped<ResourceOrganizationFilter>();
         builder.Services.AddScoped<IPermissionChecker, DefaultPermissionChecker>();
         builder.Services.AddScoped<IAuthorizationHandler, PermissionRequirementHandler>();
         builder.Services.AddScoped<IAuthorizationHandler, LicenseRequirementHandler>();

@@ -10,6 +10,7 @@ namespace Api.Controllers;
 [Authorize]
 [ApiController]
 [VerifyOpenApiApplicable]
+[ServiceFilter(typeof(ResourceOrganizationFilter))]
 [Produces(MediaTypeNames.Application.Json)]
 [SwaggerResponse(200)]
 [SwaggerResponse(401)]

@@ -6,30 +6,22 @@ public static class HttpRequestExtensions
 {
     public static Guid OrganizationId(this HttpRequest request)
     {
-        var orgIdHeaderValue = request.Headers[ApiConstants.OrgIdHeaderKey];
-
-        if (Guid.TryParse(orgIdHeaderValue, out var orgId))
-        {
-            return orgId;
-        }
-
         var orgIdClaim = request.HttpContext.User.Claims.FirstOrDefault(x => x.Type == McpClaimTypes.OrgId)?.Value;
-        return Guid.TryParse(orgIdClaim, out orgId)
+        if (Guid.TryParse(orgIdClaim, out var orgId))
+            return orgId;
+
+        return Guid.TryParse(request.Headers[ApiConstants.OrgIdHeaderKey], out orgId)
             ? orgId
             : Guid.Empty;
     }
 
     public static Guid WorkspaceId(this HttpRequest request)
     {
-        var workspaceIdHeaderValue = request.Headers[ApiConstants.WorkspaceHeaderKey];
-
-        if (Guid.TryParse(workspaceIdHeaderValue, out var workspaceId))
-        {
-            return workspaceId;
-        }
-
         var workspaceIdClaim = request.HttpContext.User.Claims.FirstOrDefault(x => x.Type == McpClaimTypes.WorkspaceId)?.Value;
-        return Guid.TryParse(workspaceIdClaim, out workspaceId)
+        if (Guid.TryParse(workspaceIdClaim, out var workspaceId))
+            return workspaceId;
+
+        return Guid.TryParse(request.Headers[ApiConstants.WorkspaceHeaderKey], out workspaceId)
             ? workspaceId
             : Guid.Empty;
     }
