@@ -1,5 +1,5 @@
 using Api.Middlewares;
-using Asp.Versioning.ApiExplorer;
+using Api.Setup.OpenApi;
 using Infrastructure;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Scalar.AspNetCore;
@@ -24,31 +24,27 @@ public static class MiddlewaresRegister
             Predicate = registration => registration.Tags.Contains(HealthCheckBuilderExtensions.ReadinessTag)
         });
 
-        // OpenAPI JSON endpoints (all versions + the public doc): available in every environment,
-        // matching the old Swashbuckle setup where app.UseSwagger() (the JSON endpoints) ran
-        // unconditionally and only the interactive SwaggerUI was dev-gated.
+        // OpenAPI JSON endpoints (all versions + the public doc), available in every environment
         app.MapOpenApi().AllowAnonymous();
 
-        // A reference scoped to just the public "OpenApi" doc: available in every environment too,
-        // matching the old app.UseReDoc(), which was likewise unconditional.
+        // API reference for the public "OpenApi" doc only, available in every environment
         app.MapScalarApiReference("/docs", options =>
         {
             options.Title = "FeatBit Open Api";
             options.AddDocument(OpenApiConstants.ApiGroupName, OpenApiConstants.ApiGroupName);
         }).AllowAnonymous();
 
-        // The full multi-document interactive reference (every API version + the public doc):
-        // development-only, matching the old dev-only SwaggerUI.
+        // Full API reference (every API version + the public doc), development only
         if (app.Environment.IsDevelopment())
         {
             app.MapScalarApiReference(options =>
             {
                 options.Title = "FeatBit Backend";
 
-                var versionProvider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
-                foreach (var description in versionProvider.ApiVersionDescriptions)
+                foreach (var version in OpenApiSetup.SupportedApiVersions)
                 {
-                    options.AddDocument(description.GroupName, description.GroupName.ToUpperInvariant());
+                    var groupName = version.ToString(OpenApiSetup.ApiGroupNameFormat);
+                    options.AddDocument(groupName, groupName.ToUpperInvariant());
                 }
 
                 options.AddDocument(OpenApiConstants.ApiGroupName, OpenApiConstants.ApiGroupName);

@@ -10,17 +10,19 @@ public sealed class HeaderParametersTransformer : IOpenApiOperationTransformer
     {
         operation.Parameters ??= (List<IOpenApiParameter>)[];
 
-        operation.Parameters.Add(HeaderParameter(
+        var orgIdHeader = HeaderParameter(
             ApiConstants.OrgIdHeaderKey,
             "The organization ID associated with the request. Some APIs require this header to identify the organization context. " +
             "When authenticating with an Access Token, this header is automatically populated from the token and does not need to be provided manually."
-        ));
+        );
+        operation.Parameters.Add(orgIdHeader);
 
-        operation.Parameters.Add(HeaderParameter(
+        var workspaceHeader = HeaderParameter(
             ApiConstants.WorkspaceHeaderKey,
             "The workspace ID associated with the request. Some APIs require this header to identify the workspace context. " +
             "When authenticating with an Access Token, this header is automatically populated from the token and does not need to be provided manually."
-        ));
+        );
+        operation.Parameters.Add(workspaceHeader);
 
         return Task.CompletedTask;
     }

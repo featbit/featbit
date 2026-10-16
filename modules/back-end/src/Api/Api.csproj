@@ -24,9 +24,9 @@
         <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="10.0.0" />
 
         <!-- OpenApi -->
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
-        <PackageReference Include="Scalar.AspNetCore" Version="2.17.9" />
-        <PackageReference Include="Microsoft.Extensions.ApiDescription.Server" Version="10.0.12">
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.13" />
+        <PackageReference Include="Scalar.AspNetCore" Version="2.18.0" />
+        <PackageReference Include="Microsoft.Extensions.ApiDescription.Server" Version="10.0.13">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>

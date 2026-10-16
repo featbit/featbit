@@ -19,6 +19,9 @@ public static class ServicesRegister
 {
     public static WebApplicationBuilder RegisterServices(this WebApplicationBuilder builder)
     {
+        // serilog
+        builder.Services.AddSerilog((_, lc) => ConfigureSerilog.Configure(lc, builder.Configuration));
+
         // add services for controllers
         builder.Services.AddControllers();
 
@@ -39,7 +42,7 @@ public static class ServicesRegister
             {
                 // add the versioned api explorer, which also adds IApiVersionDescriptionProvider service
                 // note: the specified format code will format the version as "'v'major[.minor][-status]"
-                options.GroupNameFormat = "'v'VVV";
+                options.GroupNameFormat = OpenApiSetup.ApiGroupNameFormat;
 
                 // note: this option is only necessary when versioning by url segment. the SubstitutionFormat
                 // can also be used to control the format of the API version in route templates
@@ -56,14 +59,8 @@ public static class ServicesRegister
                 .AllowCredentials();
         }));
 
-        // OpenApi: one document per discovered API version, plus a filtered public "OpenApi" document.
-        // Must run before AddSerilog below: it builds a throwaway ServiceProvider from `builder.Services`
-        // to resolve IApiVersionDescriptionProvider, and doing that after Serilog is registered freezes
-        // its reloadable logger prematurely, which then throws when the real host builds.
+        // OpenApi: one document per API version, plus a filtered public "OpenApi" document.
         builder.Services.AddBackendOpenApi();
-
-        // serilog
-        builder.Services.AddSerilog((_, lc) => ConfigureSerilog.Configure(lc, builder.Configuration));
 
         // health check dependencies
         builder.Services.AddHealthChecks().AddReadinessChecks(builder.Configuration);

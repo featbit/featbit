@@ -1,5 +1,5 @@
 using System.Reflection;
-using Asp.Versioning.ApiExplorer;
+using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.OpenApi;
@@ -9,28 +9,32 @@ using OpenApiAttribute = Api.Authentication.OpenApiAttribute;
 
 namespace Api.Setup.OpenApi;
 
-// mirrors Swashbuckle's former ConfigureSwaggerOptions: one OpenApi document per discovered API
-// version, plus a filtered "OpenApi" document that only exposes actions/controllers carrying the
-// [OpenApi] attribute (see Api.Authentication.OpenApiAttribute).
+/// <summary>
+/// Registers the OpenAPI documents:
+/// one full document per API version, and a public "OpenApi" document that only contains
+/// actions/controllers marked with <see cref="OpenApiAttribute"/>.
+/// </summary>
 public static class OpenApiSetup
 {
+    public const string ApiGroupNameFormat = "'v'VVV";
+
+    // Listed explicitly (instead of resolving IApiVersionDescriptionProvider) so no throwaway
+    // ServiceProvider is needed. Api.UnitTests verifies this matches the [ApiVersion]s on controllers.
+    public static readonly IReadOnlyList<ApiVersion> SupportedApiVersions = [new(1, 0), new(2, 0)];
+
     public static IServiceCollection AddBackendOpenApi(this IServiceCollection services)
     {
-        // Api versioning + ApiExplorer must already be registered on `services` at this point so
-        // the version descriptions used below are discoverable.
-        using var provider = services.BuildServiceProvider();
-        var versionProvider = provider.GetRequiredService<IApiVersionDescriptionProvider>();
-
-        foreach (var description in versionProvider.ApiVersionDescriptions)
+        foreach (var version in SupportedApiVersions)
         {
-            var groupName = description.GroupName;
+            // same format as ApiExplorer's GroupNameFormat, so it matches ApiDescription.GroupName
+            var groupName = version.ToString(ApiGroupNameFormat);
+
             var info = CreateOpenApiInfo(
                 "FeatBit Backend",
-                description.ApiVersion.ToString(),
+                version.ToString(),
                 "The full internal Backend API, used by the FeatBit UI and other internal callers. " +
                 "For the smaller public API surface intended for external integrations, see the " +
-                $"\"{OpenApiConstants.ApiGroupName}\" document.",
-                description.IsDeprecated
+                "[Open API documentation](/docs)."
             );
 
             services.AddOpenApi(groupName, options =>
