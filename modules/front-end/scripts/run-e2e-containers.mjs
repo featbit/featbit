@@ -35,13 +35,6 @@ async function loadPostgresInitSql() {
     throw new Error("No PostgreSQL initialization scripts found");
   }
   const scripts = await Promise.all(files.map((name) => readFile(new URL(name, directory), "utf8")));
-  // Match the backend integration fixture for the source being built.
-  scripts.push(
-    await readFile(
-      new URL("../../back-end/tests/Infrastructure.IntegrationTests/Fixtures/vNext.sql", import.meta.url),
-      "utf8"
-    )
-  );
   // The image entrypoint already creates POSTGRES_DB and runs SQL in that database.
   return scripts
     .join("\n")
