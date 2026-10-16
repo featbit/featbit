@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { PassThrough } from 'node:stream';
-import { waitFor } from '../../stack.mjs';
+import { waitFor } from '../../../stack.mjs';
 import { createProbeReader } from './probe-reader.mjs';
 
 test('a timed-out probe response cannot consume a later retry', async () => {

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import { chromium } from '@playwright/test';
-import { sdkFixture } from '../shared/sdk-fixture.mjs';
+import { sdkFixture } from '../fixture.mjs';
 
 const require = createRequire(import.meta.url);
 const sdkScript = join(dirname(require.resolve('@featbit/js-client-sdk')),

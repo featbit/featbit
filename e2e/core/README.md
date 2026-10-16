@@ -1,4 +1,30 @@
-# Local Stack
+# E2E Core Tests
+
+End-to-end checks for the system's core capabilities across supported deployment stacks, used locally and as PR, main-branch, and release validation. Add scenarios here when failures should block integration or release.
+
+## Automated suites and CI
+
+```powershell
+# All scenarios on all five stacks, sequentially, with cleanup after each stack
+npm run test:all -- --image-version 6.0.0
+# Build this checkout once and test every stack
+npm run test:all -- --local
+# All scenarios on Postgres only
+npm run test:all -- --local --stack postgres
+```
+
+The suite saves the existing setup configuration and restores it afterward. Scenario and preparation failures are included in `.runs/suite-results.json` and do not skip later stacks. Cleanup removes containers, networks, and test data volumes after each stack, including failed stacks; evidence is retained. Cleanup failure stops the suite to avoid accumulating running stacks. Use a dedicated test environment: an already-onboarded organization must contain the script-created `integration-tests` project with Dev and Prod. Run only one suite per Docker daemon/checkout at a time.
+
+GitHub Actions uses `.github/workflows/e2e-core.yml`:
+
+- Relevant PR updates targeting `main` build the PR merge checkout and run all three scenarios on Postgres.
+- Relevant pushes to `main` build once and run all three scenarios on each of the five stacks sequentially.
+- Manual runs select `source` mode with an optional branch/tag/commit `ref`, or `image` mode with a required `image-version`. These inputs are mutually exclusive. Both run all five stacks. The workflow ref supplies the test harness; a selected source ref supplies application code and database initialization scripts. The tested source SHA is recorded. Older sources must still be compatible with this harness and its API/UI expectations.
+- All jobs attempt final cleanup and upload evidence even on failure. A hosted Ubuntu runner provides an isolated Docker daemon. No registry credentials are used by PR tests.
+
+The release image workflow builds multi-platform candidates with a unique run/attempt tag, records their digests, and tests the three default applications on all five stacks using those exact digests on Linux amd64. Only after every test succeeds are the same multi-platform digests assigned the release version tags. A failed suite fails the release workflow and blocks formal version tagging; candidate images may remain. Existing digest-based `latest` promotion still requires a successful release build. This workflow does not publish GitHub Releases. Retries must rerun all jobs so candidate records and tags belong to the same attempt. If final tagging partially fails, inspect existing tags and digests before recovery; formal tags are never silently overwritten.
+
+Boundaries: the suite is a clean-install functional check, not a retained-data upgrade test. It does not exercise optional Control Plane or execute the arm64 variants. All scenarios also require npm/NuGet downloads and Chromium; the CI action installs Node 22, .NET 8 and Chromium.
 
 ## Data initialization
 
@@ -30,7 +56,7 @@ Run these commands from this directory. Node.js 22+ and Docker Compose v2 are re
 | `--stack NAME` | `setup` | Select a stack; defaults to `postgres`. Options: `postgres`, `postgres-redis`, `mongo-redis`, `postgres-kafka-clickhouse`, `mongo-kafka-clickhouse`. |
 | `--all` | `test`, `down` | Test all five stacks using the configured application version, or remove all five stacks and their test data volumes. Preserve the selected setup configuration. |
 | `--one-time` | `test` | After success or failure, run `down` for the tested stack, including its test data volumes. Preserve logs, results, and setup configuration. With `--all`, clean up each stack before moving to the next. |
-| `--scenario NAME` | `test` | Required scenario name: `track`, `sdk-server`, `sdk-client`, or `interactive-demo`. |
+| `--scenario NAME` | `test` | Required scenario name: `track`, `sdk-server`, or `sdk-client`. |
 | `--image-version TAG` | `setup` | Use published API, ELS, and UI images with this tag. By default, application images are built locally. |
 | `--local` | `setup` | Select local application builds. Cannot be combined with `--image-version`. |
 | `--build` | `up`, `test` | Explicitly rebuild local application images. Requires local image configuration. |
@@ -44,9 +70,8 @@ Run these commands from this directory. Node.js 22+ and Docker Compose v2 are re
 Scenarios are registered in [scenarios/index.mjs](./scenarios/index.mjs). Each scenario has its own setup and assertions:
 
 - [`track`](./scenarios/track/README.md): Track persistence and Insights aggregation.
-- [`sdk-server`](./scenarios/sdk-server/README.md): .NET Server SDK flag evaluation and live flag and segment updates. Requires the .NET 8 SDK.
-- [`sdk-client`](./scenarios/sdk-client/README.md): JS Client SDK updates in two isolated browser contexts. Requires `npm ci` and `npx playwright install chromium`.
-- [`interactive-demo`](./scenarios/interactive-demo/README.md): UI login, flag creation in an isolated project's Prod environment, and live updates in the Dino Game demo. Requires Chromium and access to the demo site.
+- [`sdk-server`](./scenarios/sdk/server/README.md): .NET Server SDK flag evaluation and live flag and segment updates. Requires the .NET 8 SDK.
+- [`sdk-client`](./scenarios/sdk/client/README.md): JS Client SDK updates in two isolated browser contexts. Requires `npm ci` and `npx playwright install chromium`.
 
 For example, run the Server SDK scenario on the default PostgreSQL stack:
 

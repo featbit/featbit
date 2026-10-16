@@ -1,6 +1,6 @@
 # Track scenario
 
-Run from `e2e/local-stack`:
+Run from `e2e/core`:
 
 ```powershell
 npm run setup -- --stack postgres

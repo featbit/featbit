@@ -1,5 +1,5 @@
 {
-  "name": "featbit-local-stack",
+  "name": "featbit-e2e-core",
   "private": true,
   "type": "module",
   "engines": {
@@ -10,6 +10,7 @@
     "config": "node cli.mjs config",
     "up": "node cli.mjs up",
     "test": "node cli.mjs test",
+    "test:all": "node suite.mjs",
     "logs": "node cli.mjs logs",
     "down": "node cli.mjs down"
   },

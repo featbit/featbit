@@ -2,8 +2,8 @@ import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
-import { processRun } from '../../stack.mjs';
-import { sdkFixture } from '../shared/sdk-fixture.mjs';
+import { processRun } from '../../../stack.mjs';
+import { sdkFixture } from '../fixture.mjs';
 import { createProbeReader } from './probe-reader.mjs';
 
 const project = fileURLToPath(new URL('./ServerSdkProbe.csproj', import.meta.url));
