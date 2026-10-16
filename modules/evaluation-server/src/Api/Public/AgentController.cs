@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.RateLimiting;
 
 namespace Api.Public;
 
+[Route("api/public/agent")]
 [AllowAnonymous]
 [EnableRateLimiting(RateLimitingPolicies.Agent)]
 public class AgentController(IRelayProxyAppService rpService, ILogger<AgentController> logger) : PublicApiControllerBase

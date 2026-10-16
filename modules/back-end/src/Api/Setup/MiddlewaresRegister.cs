@@ -1,9 +1,10 @@
 using Api.Middlewares;
+using Api.Setup.OpenApi;
 using Infrastructure;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Scalar.AspNetCore;
 using Serilog;
 using Serilog.Events;
-using Swashbuckle.AspNetCore.SwaggerUI;
 using OpenApiConstants = Api.Authentication.OpenApiConstants;
 
 namespace Api.Setup;
@@ -23,40 +24,32 @@ public static class MiddlewaresRegister
             Predicate = registration => registration.Tags.Contains(HealthCheckBuilderExtensions.ReadinessTag)
         });
 
-        // enable swagger
-        app.UseSwagger();
+        // OpenAPI JSON endpoints (all versions + the public doc), available in every environment
+        app.MapOpenApi().AllowAnonymous();
 
-        // enable swagger UI in development environment
+        // API reference for the public "OpenApi" doc only, available in every environment
+        app.MapScalarApiReference("/docs", options =>
+        {
+            options.Title = "FeatBit Open Api";
+            options.AddDocument(OpenApiConstants.ApiGroupName, OpenApiConstants.ApiGroupName);
+        }).AllowAnonymous();
+
+        // Full API reference (every API version + the public doc), development only
         if (app.Environment.IsDevelopment())
         {
-            app.UseSwaggerUI(options =>
+            app.MapScalarApiReference(options =>
             {
-                options.EnableFilter();
-                options.DisplayRequestDuration();
-                options.DocExpansion(DocExpansion.List);
+                options.Title = "FeatBit Backend";
 
-                // build a swagger endpoint for each discovered API version
-                var descriptions = app.DescribeApiVersions();
-                foreach (var description in descriptions)
+                foreach (var version in OpenApiSetup.SupportedApiVersions)
                 {
-                    var url = $"/swagger/{description.GroupName}/swagger.json";
-                    var name = description.GroupName.ToUpperInvariant();
-                    options.SwaggerEndpoint(url, name);
+                    var groupName = version.ToString(OpenApiSetup.ApiGroupNameFormat);
+                    options.AddDocument(groupName, groupName.ToUpperInvariant());
                 }
 
-                const string openApiGroup = OpenApiConstants.ApiGroupName;
-                options.SwaggerEndpoint($"/swagger/{openApiGroup}/swagger.json", openApiGroup);
-            });
+                options.AddDocument(OpenApiConstants.ApiGroupName, OpenApiConstants.ApiGroupName);
+            }).AllowAnonymous();
         }
-
-        // enable ReDoc
-        app.UseReDoc(options =>
-        {
-            options.RoutePrefix = "docs";
-            options.DocumentTitle = "FeatBit OpenApi Doc";
-            options.SpecUrl = $"/swagger/{OpenApiConstants.ApiGroupName}/swagger.json";
-            options.ExpandResponses("200");
-        });
 
         // enable cors
         app.UseCors();
