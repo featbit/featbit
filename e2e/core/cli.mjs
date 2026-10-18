@@ -1,116 +1,52 @@
-import { readdir, unlink } from 'node:fs/promises';
+import { writeFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
-import { initDbs, logs, openStack, processRun, ready, stacks } from './stack.mjs';
-import { ensureBusinessData } from './bootstrap/index.mjs';
+import { cleanupStacks, directory, stacks } from './stack.mjs';
 import { scenarios } from './scenarios/index.mjs';
-import { readConfig, saveConfig, printConfig } from './config.mjs';
+import { createRun } from './run-artifacts.mjs';
+import { runSuite } from './suite.mjs';
 
-const [command, ...args] = process.argv.slice(2);
-const usage = 'Usage: node cli.mjs setup [--stack NAME] [--image-version TAG | --local] | config | up [--build] | test --scenario NAME [--all] [--one-time] [--build] | logs | down [--all]';
-let stackName, scenario, selectedVersion, local = false, all = false, forceBuild = false, oneTime = false;
-if (!['setup', 'config', 'up', 'test', 'logs', 'down'].includes(command)) throw new Error(usage);
-for (let i = 0; i < args.length; i++) {
-  const arg = args[i];
-  if (arg === '--stack' && !stackName && args[i + 1] && !args[i + 1].startsWith('--')) stackName = args[++i];
-  else if (arg === '--scenario' && !scenario && args[i + 1] && !args[i + 1].startsWith('--')) scenario = args[++i];
-  else if (arg === '--image-version' && !selectedVersion && args[i + 1] && !args[i + 1].startsWith('--')) selectedVersion = args[++i];
-  else if (arg === '--local' && !local) local = true;
-  else if (arg === '--all' && !all) all = true;
-  else if (arg === '--one-time' && !oneTime) oneTime = true;
-  else if (arg === '--build' && !forceBuild) forceBuild = true;
-  else throw new Error(usage);
-}
-if ((command !== 'setup' && (stackName !== undefined || selectedVersion !== undefined || local)) ||
-    (local && selectedVersion !== undefined) || (all && !['test', 'down'].includes(command)) ||
-    (oneTime && command !== 'test') ||
-    (command === 'test' ? !Object.hasOwn(scenarios, scenario) : scenario !== undefined) ||
-    (forceBuild && !['up', 'test'].includes(command))) throw new Error(usage);
-if (command === 'setup' || command === 'config') {
-  const changes = {};
-  if (stackName !== undefined) changes.stack = stackName;
-  if (selectedVersion !== undefined || local) changes.imageVersion = local ? null : selectedVersion;
-  printConfig(Object.keys(changes).length ? await saveConfig(changes) : await readConfig());
-  process.exit(0);
-}
-const { config } = await readConfig();
-const imageVersion = config.imageVersion;
-if (forceBuild && imageVersion) throw new Error('--build requires local images; run npm run setup -- --local first.');
-const names = all ? Object.keys(stacks) : [config.stack];
-let localImagesBuilt = false;
-async function startStack(stack) {
-  await initDbs(stack);
-  const imageList = await processRun('docker', ['image', 'ls', '--format', '{{.Repository}}:{{.Tag}}'], { quiet: true });
-  const existingImages = new Set(imageList.split(/\r?\n/).filter(Boolean));
-  const servicesToBuild = stack.localServices.filter(service =>
-    (forceBuild && !localImagesBuilt) || !existingImages.has(`featbit-local-${service}:local`));
-  if (servicesToBuild.length) {
-    console.log(`Building local source; log: ${join(stack.artifacts, 'build.log')}`);
-    await stack.compose(['build', ...servicesToBuild], { timeout: 1_800_000, quiet: true, logPath: join(stack.artifacts, 'build.log') });
-    localImagesBuilt = true;
+export function parseArgs([command, ...args]) {
+  const usage = 'Usage: test --scenario NAME [--stack NAME] [--local | --image-version TAG] [--build] [--keep-environment] | test-all (--local | --image-version TAG) [--stack NAME] [--keep-environment] | down [--stack NAME | --all]';
+  const options = { command };
+  if (!['test', 'test-all', 'down'].includes(command)) throw Error(usage);
+  const values = { '--stack': 'stack', '--scenario': 'scenario', '--image-version': 'imageVersion' };
+  const switches = { '--local': 'local', '--build': 'build', '--keep-environment': 'keepEnvironment', '--all': 'all' };
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    const key = Object.hasOwn(values, arg) ? values[arg] : Object.hasOwn(switches, arg) ? switches[arg] : undefined;
+    if (!key || options[key] !== undefined) throw Error(usage);
+    if (values[arg]) {
+      if (!args[i + 1] || args[i + 1].startsWith('--')) throw Error(usage);
+      options[key] = args[++i];
+    } else options[key] = true;
   }
-  for (const service of stack.publishedImages) {
-    const image = stack.env[`${service.toUpperCase()}_IMAGE`];
-    if (existingImages.has(image)) continue;
-    console.log(`Pulling ${service}: ${image}`);
-    await processRun('docker', ['pull', image]);
-  }
-  await stack.compose(['up', '-d', '--no-build', '--pull', 'never', 'api', 'els', 'ui']);
-  await ready(stack);
-  await ensureBusinessData(stack);
-  console.log(`UI: ${stack.ui}\nAPI: ${stack.api}\nELS: ${stack.els}`);
+  if ((options.stack && !Object.hasOwn(stacks, options.stack)) ||
+      (options.imageVersion && !/^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$/.test(options.imageVersion)) ||
+      (options.local && options.imageVersion) || (options.build && options.imageVersion) ||
+      (options.all && (command !== 'down' || options.stack)) ||
+      (command === 'test' ? !Object.hasOwn(scenarios, options.scenario) : options.scenario !== undefined) ||
+      (command === 'test-all' && ((!options.local && !options.imageVersion) || options.build)) ||
+      (command === 'down' && (options.local || options.imageVersion || options.build || options.keepEnvironment))) throw Error(usage);
+  return options;
 }
-async function stopStack(stack) {
-  await logs(stack).catch(error => console.warn(`Could not save service logs: ${error.message}`));
-  await stack.compose(['down', '--volumes', '--remove-orphans']);
-  // Remove only this scenario's known state files; preserve test evidence and logs.
-  for (const file of await readdir(stack.artifacts)) {
-    if (['environment.json', 'postgres-init.json', 'mongodb-init.json', 'clickhouse-init.json'].includes(file)) {
-      await unlink(join(stack.artifacts, file));
-    }
+
+async function main() {
+  const options = parseArgs(process.argv.slice(2));
+  const archive = await createRun(join(directory, '.runs'), options.imageVersion);
+  console.log(`Evidence (UTC): ${archive.path}`);
+  const names = options.stack ? [options.stack] : options.command === 'test-all' || options.all ? Object.keys(stacks) : ['postgres'];
+  if (options.command === 'down') {
+    try { await cleanupStacks(names, archive.id); }
+    catch (error) { console.error(error.message); process.exitCode = 1; }
+    return;
   }
+  const results = await runSuite({ ...options, names, runId: archive.id });
+  await writeFile(join(archive.path, 'suite-results.json'), JSON.stringify(results, null, 2));
+  for (const result of results) console.log(`${result.passed ? 'PASS' : 'FAIL'} ${result.stack}/${result.scenario ?? result.phase}${result.error ? `: ${result.error}` : ''}`);
+  const failures = results.filter(result => !result.passed).length;
+  console.log(`${results.length - failures} passed, ${failures} failed`);
+  if (failures) process.exitCode = 1;
 }
-for (const name of names) {
-  let stack = await openStack(name, { imageVersion });
-  console.log(`[${command === 'test' ? `test:${scenario}` : command}] ${name} (${stack.project}) | images: ${imageVersion ? `published ${imageVersion}` : 'local'}`);
-  try {
-    if (command === 'up') await startStack(stack);
-    if (command === 'test') {
-      const requiredServices = [...stack.services, 'api', 'els', 'ui'];
-      const running = await stack.compose(['ps', '--status', 'running', '-q', ...requiredServices], { quiet: true });
-      const containerIds = running.split(/\r?\n/).filter(Boolean);
-      let available = containerIds.length === requiredServices.length;
-      if (available) {
-        const actualImages = await processRun('docker', ['inspect', '--format', '{{.Config.Image}}', ...containerIds], { quiet: true });
-        const imageSet = new Set(actualImages.split(/\r?\n/).filter(Boolean));
-        available = stack.expectedApplicationImages.every(image => imageSet.has(image));
-      }
-      if (!available || forceBuild) {
-        console.log(`[test] Preparing ${name}${imageVersion ? ` with image version ${imageVersion}` : ''}`);
-        await startStack(stack);
-      } else {
-        await ready(stack);
-        await ensureBusinessData(stack);
-      }
-      await scenarios[scenario](stack);
-    }
-    if (command === 'logs') await logs(stack);
-    if (command === 'down') await stopStack(stack);
-  } catch (error) {
-    await stack.save('failure.log', error.stack ?? String(error));
-    await logs(stack).catch(() => {});
-    console.error(error.message);
-    console.error(`${oneTime ? 'Cleanup will be attempted.' : 'Environment retained.'} Evidence: ${stack.artifacts}`);
-    process.exitCode = 1;
-  } finally {
-    if (oneTime) {
-      try {
-        await stopStack(stack);
-        console.log(`[down] ${name}: services and test data volumes removed`);
-      } catch (error) {
-        console.error(`Cleanup failed for ${name}: ${error.message}`);
-        process.exitCode = 1;
-      }
-    }
-  }
-  if (process.exitCode) break;
-}
+
+if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) await main();

@@ -6,12 +6,8 @@
     "node": ">=22"
   },
   "scripts": {
-    "setup": "node cli.mjs setup",
-    "config": "node cli.mjs config",
-    "up": "node cli.mjs up",
     "test": "node cli.mjs test",
-    "test:all": "node suite.mjs",
-    "logs": "node cli.mjs logs",
+    "test:all": "node cli.mjs test-all",
     "down": "node cli.mjs down"
   },
   "devDependencies": {

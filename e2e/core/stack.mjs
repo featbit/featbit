@@ -1,9 +1,10 @@
 import { spawn } from 'node:child_process';
 import { createWriteStream } from 'node:fs';
 import { createHash } from 'node:crypto';
-import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, readdir, rmdir, unlink, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
+import { createRun, runPath, removeEmptyDirectory } from './run-artifacts.mjs';
 
 export const directory = fileURLToPath(new URL('./', import.meta.url));
 const root = fileURLToPath(new URL('../../', import.meta.url));
@@ -54,14 +55,19 @@ export async function processRun(command, args, { input, env, quiet = false, log
   });
 }
 
-export async function openStack(name, { imageVersion } = {}) {
+export async function openStack(name, { imageVersion, runsRoot = join(directory, '.runs'),
+  runId } = {}) {
   if (!Object.hasOwn(stacks, name)) throw new Error(`Unknown stack ${name}; use ${Object.keys(stacks).join(', ')}`);
   const [db, mq, cache, olap, services] = stacks[name];
   const index = Object.keys(stacks).indexOf(name);
   const project = `featbit-local-${name}`;
-  const artifacts = join(directory, '.runs', name);
+  // Keep retained environment state independent of per-invocation evidence.
+  const state = join(runsRoot, 'state', name);
+  await mkdir(state, { recursive: true });
+  const archive = runId ? runPath(runsRoot, runId) : (await createRun(runsRoot, imageVersion)).path;
+  const artifacts = join(archive, name);
   await mkdir(artifacts, { recursive: true });
-  const configPath = join(artifacts, 'environment.json');
+  const configPath = join(state, 'environment.json');
   let env, configChanged = false;
   try { env = JSON.parse(await readFile(configPath, 'utf8')); }
   catch (error) {
@@ -80,7 +86,7 @@ export async function openStack(name, { imageVersion } = {}) {
     }
   }
   // Older environment files may contain application images from --image-version.
-  // Application selection now comes from setup, separate from retained stack state.
+  // Application selection comes from invocation options, separate from retained stack state.
   for (const service of Object.keys(applicationImages)) {
     const key = `${service.toUpperCase()}_IMAGE`;
     if (Object.hasOwn(env, key)) {
@@ -107,7 +113,8 @@ export async function openStack(name, { imageVersion } = {}) {
   const save = (name, value) => writeFile(join(artifacts, name), typeof value === 'string' ? value : JSON.stringify(value, null, 2));
   const localServices = Object.keys(applicationImages).filter(service => !runtimeEnv[`${service.toUpperCase()}_IMAGE`]);
   const publishedImages = Object.keys(applicationImages).filter(service => runtimeEnv[`${service.toUpperCase()}_IMAGE`]);
-  return { name, project, artifacts, db, mq, olap, services, env: runtimeEnv, compose, exec, save, localServices, publishedImages,
+  const saveState = (name, value) => writeFile(join(state, name), JSON.stringify(value, null, 2));
+  return { name, project, artifacts, state, saveState, db, mq, olap, services, env: runtimeEnv, compose, exec, save, localServices, publishedImages,
     expectedApplicationImages: Object.keys(applicationImages).map(service => composeEnv[`${service.toUpperCase()}_IMAGE`]),
     api: `http://127.0.0.1:${env.API_PORT}`, els: `http://127.0.0.1:${env.ELS_PORT}`, ui: `http://localhost:${env.UI_PORT}` };
 }
@@ -127,27 +134,45 @@ export async function initDbs(stack) {
     if (!names.length) throw new Error(`No versioned init scripts in ${folder}`);
     const scripts = await Promise.all(names.map(async name => ({ name, text: await readFile(join(folder, name), 'utf8') })));
     const hash = createHash('sha256').update(JSON.stringify(scripts)).digest('hex');
-    const markerPath = join(stack.artifacts, `${service}-init.json`);
+    const markerPath = join(stack.state, `${service}-init.json`);
     const container = await stack.compose(['ps', '-q', service], { quiet: true });
     let marker;
     try { marker = JSON.parse(await readFile(markerPath, 'utf8')); } catch (e) { if (e.code !== 'ENOENT') throw e; }
     if (marker) {
-      if (marker.hash === hash && marker.container === container && marker.status === 'ready') continue;
-      throw new Error(`${service} init state or scripts changed. Select ${stack.name} with setup, then run down and up. Initialization is never replayed over an existing database.`);
+      if (marker.hash === hash && marker.container === container && marker.status === 'ready') {
+        await stack.save(`${service}-init-scripts.json`, { status: 'reused', scripts: marker.scripts,
+          message: 'Existing initialized database reused; no scripts executed this time.' });
+        continue;
+      }
+      throw new Error(`${service} init state or scripts changed. Use a clean test environment. Initialization is never replayed over an existing database.`);
     }
-    await stack.save(`${service}-init.json`, { hash, container, status: 'initializing' });
+    await stack.saveState(`${service}-init.json`, { hash, container, status: 'initializing' });
+    const evidence = { status: 'running', scripts: [] };
+    const saveEvidence = () => stack.save(`${service}-init-scripts.json`, evidence);
     for (const script of scripts) {
       console.log(`[up:init] ${service}: ${script.name}`);
-      let output;
-      if (service === 'postgres') output = await stack.exec(service, ['psql', '-X', '-v', 'ON_ERROR_STOP=1', '-U', 'postgres', '-d', script.name === 'v0.0.0.sql' ? 'postgres' : 'featbit'], script.text);
-      else if (service === 'mongodb') {
-        // --file makes JavaScript exceptions fatal, unlike an interactive shell fed on stdin.
-        await stack.exec(service, ['sh', '-c', 'cat > /tmp/featbit-init.js'], script.text);
-        output = await stack.exec(service, ['mongosh', '--quiet', '-u', 'admin', '-p', 'local-stack-only', '--authenticationDatabase', 'admin', '--file', '/tmp/featbit-init.js']);
-      } else output = await stack.exec(service, ['clickhouse-client', '--password', 'local-stack-only', '--multiquery'], script.text);
-      await stack.save(`${service}-${script.name}.log`, output);
+      const entry = { name: script.name, status: 'running' };
+      evidence.scripts.push(entry);
+      await saveEvidence();
+      try {
+        if (service === 'postgres') await stack.exec(service, ['psql', '-X', '-v', 'ON_ERROR_STOP=1', '-U', 'postgres', '-d', script.name === 'v0.0.0.sql' ? 'postgres' : 'featbit'], script.text);
+        else if (service === 'mongodb') {
+          // --file makes JavaScript exceptions fatal, unlike an interactive shell fed on stdin.
+          await stack.exec(service, ['sh', '-c', 'cat > /tmp/featbit-init.js'], script.text);
+          await stack.exec(service, ['mongosh', '--quiet', '-u', 'admin', '-p', 'local-stack-only', '--authenticationDatabase', 'admin', '--file', '/tmp/featbit-init.js']);
+        } else await stack.exec(service, ['clickhouse-client', '--password', 'local-stack-only', '--multiquery'], script.text);
+        entry.status = 'passed';
+      } catch (error) {
+        entry.status = 'failed';
+        evidence.status = 'failed';
+        await saveEvidence().catch(() => {});
+        throw error;
+      }
+      await saveEvidence();
     }
-    await stack.save(`${service}-init.json`, { hash, container, status: 'ready', scripts: names });
+    await stack.saveState(`${service}-init.json`, { hash, container, status: 'ready', scripts: names });
+    evidence.status = 'ready';
+    await saveEvidence();
   }
 }
 
@@ -186,4 +211,29 @@ export async function ready(stack) {
 
 export async function logs(stack) {
   await stack.compose(['logs', '--no-color'], { quiet: true, logPath: join(stack.artifacts, 'services.log') });
+}
+
+export async function stopStack(stack) {
+  await logs(stack).catch(error => console.warn(`Could not save service logs: ${error.message}`));
+  // Preserve all state if teardown fails so cleanup can be retried.
+  await stack.compose(['down', '--volumes', '--remove-orphans']);
+  for (const file of await readdir(stack.state)) {
+    if (['environment.json', 'postgres-init.json', 'mongodb-init.json', 'clickhouse-init.json'].includes(file)) {
+      await unlink(join(stack.state, file));
+    }
+  }
+  // Preserve any unknown files or state belonging to other stacks.
+  await rmdir(stack.state).catch(error => { if (error.code !== 'ENOTEMPTY') throw error; });
+  await removeEmptyDirectory(dirname(stack.state));
+}
+
+// CI fallback also runs if the test process is interrupted before its finally block.
+export async function cleanupStacks(names = Object.keys(stacks), runId) {
+  runId ??= (await createRun(join(directory, '.runs'), null)).id;
+  const failures = [];
+  for (const name of names) {
+    try { await stopStack(await openStack(name, { runId })); }
+    catch (error) { console.error(`[down] ${name}: ${error.message}`); failures.push(error); }
+  }
+  if (failures.length) throw new AggregateError(failures, 'Could not clean all test environments');
 }

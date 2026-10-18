@@ -18,6 +18,7 @@ export async function sdkFixture(stack, kind, run) {
   }));
   let flag, segment;
   const expected = async (label, evaluate, tester, guest) => {
+    console.log(`[sdk-${kind}] Verifying ${label}`);
     await waitFor(label, async () => {
       const actual = await evaluate();
       assert.equal(actual.tester.value, tester, `${label}: tester`);
@@ -35,6 +36,7 @@ export async function sdkFixture(stack, kind, run) {
       }
       evidence.steps.push({ label, at: new Date().toISOString(), actual });
     }, 90_000);
+    console.log(`[sdk-${kind}] Passed ${label}`);
   };
   const target = async property => {
     const latest = await api(`${flagBase}/${flagKey}`);
@@ -55,6 +57,7 @@ export async function sdkFixture(stack, kind, run) {
     }, 'PUT');
   };
   try {
+    console.log(`[sdk-${kind}] Preparing flag and segment fixtures`);
     ({ api, organization, project, environment } = await ensureOrganization(stack));
     flagBase = `/envs/${environment.id}/feature-flags`;
     segmentBase = `/envs/${environment.id}/segments`;
@@ -74,6 +77,7 @@ export async function sdkFixture(stack, kind, run) {
     }, 'PUT');
     const secrets = Object.fromEntries(environment.secrets.map(x => [x.type, x.value]));
     const context = { stack, runId, flagKey, values, users, secrets, evidence };
+    console.log(`[sdk-${kind}] Fixtures ready`);
     await run(context, async evaluate => {
       await expected('initial', evaluate, 'control', 'control');
       await target(condition('role', 'tester'));
