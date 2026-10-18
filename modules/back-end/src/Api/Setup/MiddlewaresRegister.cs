@@ -24,17 +24,17 @@ public static class MiddlewaresRegister
             Predicate = registration => registration.Tags.Contains(HealthCheckBuilderExtensions.ReadinessTag)
         });
 
-        // OpenAPI JSON endpoints (all versions + the public doc), available in every environment
+        // OpenAPI JSON endpoints
         app.MapOpenApi().AllowAnonymous();
 
-        // API reference for the public "OpenApi" doc only, available in every environment
+        // API reference for the public "OpenApi" doc only
         app.MapScalarApiReference("/docs", options =>
         {
             options.Title = "FeatBit Open Api";
             options.AddDocument(OpenApiConstants.ApiGroupName, OpenApiConstants.ApiGroupName);
         }).AllowAnonymous();
 
-        // Full API reference (every API version + the public doc), development only
+        // Full API reference
         if (app.Environment.IsDevelopment())
         {
             app.MapScalarApiReference(options =>

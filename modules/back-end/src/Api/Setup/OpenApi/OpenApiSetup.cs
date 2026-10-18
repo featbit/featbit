@@ -84,7 +84,10 @@ public static class OpenApiSetup
     }
 
     private static OpenApiInfo CreateOpenApiInfo(
-        string title, string version, string? description = null, bool isDeprecated = false)
+        string title, 
+        string version, 
+        string? description = null, 
+        bool isDeprecated = false)
     {
         var info = new OpenApiInfo
         {
