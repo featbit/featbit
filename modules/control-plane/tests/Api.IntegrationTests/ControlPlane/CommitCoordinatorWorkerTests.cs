@@ -1,3 +1,7 @@
+using System.Text.Json;
+using Application.Segments;
+using Domain.Segments;
+using Domain.Utils;
 using Api.IntegrationTests.Stubs;
 using Api.Application.ControlPlane;
 using Api.Infrastructure.Caches;
@@ -163,18 +167,19 @@ public sealed class CommitCoordinatorWorkerTests : IntegrationTestBase, IAsyncLi
     }
 
     private CommitCoordinatorWorker CreateSut(
-        SpyMessageProducer producer,
+        IMessageProducer producer,
         ILogger<CommitCoordinatorWorker>? logger = null,
         bool isLeader = true)
     {
-        // Wire IFeatureFlagService + ILeaseStore through a real DI scope, matching how the worker
-        // resolves them at runtime via IServiceScopeFactory. ISegmentService is also registered
-        // (always present in the real app); these flag-only tests seed no pending segments, so the
-        // coordinator's segment loop is a no-op.
+        // Use real store/message services in DI scopes and inject publication faults only
+        // at the broker boundary. Seeded segments have no related flags.
         var services = new ServiceCollection();
-        services.AddTransient<IFeatureFlagService>(_ => _flagService);
+        services.AddTransient<IFeatureFlagService>(_ => new FeatureFlagService(_mongoDb));
         services.AddTransient<ILeaseStore>(_ => _leaseStore);
         services.AddTransient<ISegmentService>(_ => new SegmentService(_mongoDb, NullLogger<SegmentService>.Instance));
+        services.AddTransient<ISegmentMessageService>(sp =>
+            new SegmentMessageService(sp.GetRequiredService<ISegmentService>(), producer));
+        services.AddTransient<IFeatureFlagAppService>(_ => new NoAffectedFlagsAppService());
         var provider = services.BuildServiceProvider();
 
         var configuration = new ConfigurationBuilder()
@@ -227,8 +232,8 @@ public sealed class CommitCoordinatorWorkerTests : IntegrationTestBase, IAsyncLi
         Assert.NotNull(raw.Pending);
         Assert.Equal(v, raw.Pending!.Version);
 
-        // dc-b committed pointer never advanced
-        Assert.False(await _dcbCache.HasStagedFlagAsync(flag.Id, v));
+        // Missing stage was repaired; this tick still left the committed database value unchanged.
+        Assert.True(await _dcbCache.HasStagedFlagAsync(flag.Id, v));
     }
 
     [DockerFact]
@@ -543,6 +548,7 @@ public sealed class CommitCoordinatorWorkerTests : IntegrationTestBase, IAsyncLi
     private sealed class CapturingLogger : ILogger<CommitCoordinatorWorker>
     {
         public List<string> Warnings { get; } = new();
+        public List<string> Errors { get; } = new();
 
         public IDisposable BeginScope<TState>(TState state) where TState : notnull => NullScope.Instance;
 
@@ -559,6 +565,7 @@ public sealed class CommitCoordinatorWorkerTests : IntegrationTestBase, IAsyncLi
             {
                 Warnings.Add(formatter(state, exception));
             }
+            if (logLevel == LogLevel.Error) Errors.Add(formatter(state, exception));
         }
 
         private sealed class NullScope : IDisposable
@@ -568,13 +575,225 @@ public sealed class CommitCoordinatorWorkerTests : IntegrationTestBase, IAsyncLi
         }
     }
 
+    [DockerTheory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task FailedPublication_RestartRetriesRetainedCommittedPayload(bool acceptedBeforeFailure)
+    {
+        const string key = "publication-restart";
+        var (_, _, version) = await SeedCommittedV1PendingV2(key);
+        var pending = (await _flagService.GetAsync(_envId, key)).Pending;
+        await _composite.StageFlagAsync(pending.Value, version);
+        await UpsertLeaseAsync(DcA, DateTimeOffset.UtcNow.AddMinutes(5));
+        await UpsertLeaseAsync(DcB, DateTimeOffset.UtcNow.AddMinutes(5));
+        var broken = new SpyMessageProducer { Fail = true, AcceptBeforeFailure = acceptedBeforeFailure };
+        Assert.Equal(0, await CreateSut(broken).RunOnceAsync());
+        var durable = await _flagService.GetAsync(_envId, key);
+        Assert.Equal(version, durable.CommittedVersion);
+        Assert.True(durable.Pending.IsCommitted);
+        Assert.True(durable.Pending.Value.IsEnabled);
+        Assert.Equal(acceptedBeforeFailure ? 1 : 0, broken.Published.Count);
+
+        var recovered = new SpyMessageProducer();
+        Assert.Equal(1, await CreateSut(recovered).RunOnceAsync());
+        Assert.Single(recovered.Published);
+        Assert.Null((await _flagService.GetAsync(_envId, key)).Pending);
+        Assert.Equal(0, await CreateSut(recovered).RunOnceAsync());
+        Assert.Single(recovered.Published);
+    }
+
+    [DockerFact]
+    public async Task DurableDatabaseStage_RepairsMissingBackendNotification_OnNextTick()
+    {
+        const string key = "missing-backend-notification";
+        await SeedCommittedV1PendingV2(key);
+        await UpsertLeaseAsync(DcA, DateTimeOffset.UtcNow.AddMinutes(5));
+        await UpsertLeaseAsync(DcB, DateTimeOffset.UtcNow.AddMinutes(5));
+        var producer = new SpyMessageProducer();
+        Assert.Equal(0, await CreateSut(producer).RunOnceAsync());
+        Assert.False((await _flagService.GetCommittedAsync(_envId, key)).IsEnabled);
+        Assert.Equal(1, await CreateSut(producer).RunOnceAsync());
+        Assert.True((await _flagService.GetCommittedAsync(_envId, key)).IsEnabled);
+        Assert.Single(producer.Published);
+    }
+
+    [DockerTheory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task PersistentPublicationFailure_DoesNotBlockHealthyFlagsOrSegments_AndRecovers(bool segmentFails)
+    {
+        var batch = await SeedFailureBatchAsync(segmentFails);
+        await StagePendingAndLeaseAsync();
+        var logger = new CapturingLogger();
+        var producer = new FaultInjectingProducer
+        {
+            BeforePublish = (topic, message) =>
+            {
+                if (PublicationId(topic, message) == batch.BadId) throw new IOException("persistent item failure");
+            }
+        };
+        Assert.Equal(2, await CreateSut(producer, logger).RunOnceAsync());
+        await AssertHealthyCommittedAsync(batch.GoodFlag, batch.GoodSegment);
+        await AssertBadReceiptAsync(batch.BadId, segmentFails, retained: true);
+
+        // The same bad receipt must not starve new work on subsequent ticks either.
+        var (nextFlag, _, _) = await SeedCommittedV1PendingV2("new-healthy-flag");
+        var nextSegment = await SeedSegmentAsync("new-healthy-segment");
+        await StagePendingAndLeaseAsync();
+        Assert.Equal(2, await CreateSut(producer, logger).RunOnceAsync());
+        await AssertHealthyCommittedAsync(nextFlag, nextSegment);
+        await AssertBadReceiptAsync(batch.BadId, segmentFails, retained: true);
+        Assert.Contains(logger.Errors, message => message.Contains(batch.BadId.ToString()));
+
+        producer.BeforePublish = null;
+        Assert.Equal(1, await CreateSut(producer).RunOnceAsync());
+        await AssertBadReceiptAsync(batch.BadId, segmentFails, retained: false);
+        Assert.Equal(0, await CreateSut(producer).RunOnceAsync());
+        Assert.Equal(5, producer.Published.Count);
+        Assert.All(producer.Published.GroupBy(x => PublicationId(x.Topic, x.Message)), group => Assert.Single(group));
+    }
+
+    [DockerTheory]
+    [InlineData(false, 0)]
+    [InlineData(false, 1)]
+    [InlineData(false, 2)]
+    [InlineData(true, 0)]
+    [InlineData(true, 1)]
+    [InlineData(true, 2)]
+    public async Task PublicationCancellation_PropagatesAndRetainsTheReceipt(bool segmentFails, int cancellationMode)
+    {
+        var batch = await SeedFailureBatchAsync(segmentFails);
+        await StagePendingAndLeaseAsync();
+        using var cancellation = new CancellationTokenSource();
+        var producer = new FaultInjectingProducer
+        {
+            BeforePublish = (topic, message) =>
+            {
+                if (PublicationId(topic, message) != batch.BadId) return;
+                if (cancellationMode == 0) throw new OperationCanceledException(cancellation.Token);
+                cancellation.Cancel();
+                if (cancellationMode == 1) throw new IOException("cancelled while publishing");
+                // Mode 2 models broker acceptance just as the caller cancels, before acknowledgment.
+            }
+        };
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+            CreateSut(producer).RunOnceAsync(cancellation.Token));
+        await AssertBadReceiptAsync(batch.BadId, segmentFails, retained: true);
+        Assert.Equal(1, (await new SegmentService(_mongoDb, NullLogger<SegmentService>.Instance)
+            .GetAsync(batch.GoodSegment.Id)).CommittedVersion);
+        Assert.Equal(cancellationMode == 2 ? 1 : 0,
+            producer.Published.Count(x => PublicationId(x.Topic, x.Message) == batch.BadId));
+        producer.BeforePublish = null;
+        Assert.Equal(segmentFails ? 2 : 3, await CreateSut(producer).RunOnceAsync());
+        await AssertHealthyCommittedAsync(batch.GoodFlag, batch.GoodSegment);
+        await AssertBadReceiptAsync(batch.BadId, segmentFails, retained: false);
+    }
+
+    [DockerFact]
+    public async Task CancelledTick_DoesNotPublishOrPromote()
+    {
+        var batch = await SeedFailureBatchAsync(false);
+        await StagePendingAndLeaseAsync();
+        using var cancellation = new CancellationTokenSource(); cancellation.Cancel();
+        var producer = new FaultInjectingProducer();
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => CreateSut(producer).RunOnceAsync(cancellation.Token));
+        Assert.Empty(producer.Published);
+        var flag = await _flagService.GetAsync(batch.BadId);
+        Assert.Equal(1, flag.CommittedVersion);
+        Assert.False(flag.Pending.IsCommitted);
+    }
+
+    private async Task<(Guid BadId, FeatureFlag GoodFlag, Segment GoodSegment)> SeedFailureBatchAsync(bool segmentFails)
+    {
+        Guid badId;
+        if (!segmentFails)
+        {
+            var (badFlag, _, _) = await SeedCommittedV1PendingV2("bad-flag");
+            badId = badFlag.Id;
+        }
+        else badId = (await SeedSegmentAsync("bad-segment")).Id;
+        var (goodFlag, _, _) = await SeedCommittedV1PendingV2("healthy-flag");
+        var goodSegment = await SeedSegmentAsync("healthy-segment");
+        return (badId, goodFlag, goodSegment);
+    }
+
+    private async Task<Segment> SeedSegmentAsync(string key)
+    {
+        var service = new SegmentService(_mongoDb, NullLogger<SegmentService>.Instance);
+        var value = new Segment(Guid.NewGuid(), _envId, key, key, SegmentType.EnvironmentSpecific,
+            [], ["old"], [], [], "test") { CommittedVersion = 1 };
+        await service.AddOneAsync(value);
+        var next = new Segment(value.WorkspaceId, _envId, key, key, SegmentType.EnvironmentSpecific,
+            [], ["new"], [], [], "test") { Id = value.Id };
+        await service.SetPendingAsync(value.Id, next, 2);
+        return value;
+    }
+
+    private async Task StagePendingAndLeaseAsync()
+    {
+        foreach (var flag in await _flagService.GetPendingAsync())
+            await _composite.StageFlagAsync(flag.Pending.Value, flag.Pending.Version);
+        foreach (var segment in await new SegmentService(_mongoDb, NullLogger<SegmentService>.Instance).GetPendingAsync())
+            await _composite.StageSegmentAsync(segment.Pending.Value, segment.Pending.Version);
+        await UpsertLeaseAsync(DcA, DateTimeOffset.UtcNow.AddMinutes(5));
+        await UpsertLeaseAsync(DcB, DateTimeOffset.UtcNow.AddMinutes(5));
+    }
+
+    private async Task AssertHealthyCommittedAsync(FeatureFlag flag, Segment segment)
+    {
+        var storedFlag = await _flagService.GetAsync(flag.Id);
+        var storedSegment = await new SegmentService(_mongoDb, NullLogger<SegmentService>.Instance).GetAsync(segment.Id);
+        Assert.Null(storedFlag.Pending); Assert.Equal(2, storedFlag.CommittedVersion);
+        Assert.Null(storedSegment.Pending); Assert.Equal(2, storedSegment.CommittedVersion);
+    }
+
+    private async Task AssertBadReceiptAsync(Guid id, bool segment, bool retained)
+    {
+        if (segment)
+        {
+            var stored = await new SegmentService(_mongoDb, NullLogger<SegmentService>.Instance).GetAsync(id);
+            if (retained) { Assert.True(stored.Pending.IsCommitted); Assert.Equal(2, stored.CommittedVersion); }
+            else Assert.Null(stored.Pending);
+        }
+        else
+        {
+            var stored = await _flagService.GetAsync(id);
+            if (retained) { Assert.True(stored.Pending.IsCommitted); Assert.Equal(2, stored.CommittedVersion); }
+            else Assert.Null(stored.Pending);
+        }
+    }
+
+    private static Guid PublicationId(string topic, object message)
+    {
+        var value = JsonSerializer.SerializeToElement(message, ReusableJsonSerializerOptions.Web);
+        return (topic == Topics.SegmentChange ? value.GetProperty("segment") : value).GetProperty("id").GetGuid();
+    }
+
+    private sealed class FaultInjectingProducer : IMessageProducer
+    {
+        public Action<string, object>? BeforePublish { get; set; }
+        public List<(string Topic, object Message)> Published { get; } = [];
+        public Task PublishAsync<TMessage>(string topic, TMessage message) where TMessage : class
+        { BeforePublish?.Invoke(topic, message); Published.Add((topic, message)); return Task.CompletedTask; }
+    }
+
+    private sealed class NoAffectedFlagsAppService : IFeatureFlagAppService
+    {
+        public Task ApplyDraftAsync(Guid draftId, string operation, Guid operatorId) => throw new InvalidOperationException();
+        public Task OnSegmentUpdatedAsync(Segment segment, Guid operatorId, ICollection<FlagReference> flags) =>
+            throw new InvalidOperationException("The seeded segments have no related flags.");
+    }
+
     private sealed class SpyMessageProducer : IMessageProducer
     {
         public List<(string Topic, object Message)> Published { get; } = new();
+        public bool Fail { get; init; }
+        public bool AcceptBeforeFailure { get; init; }
 
         public Task PublishAsync<TMessage>(string topic, TMessage message) where TMessage : class
         {
-            Published.Add((topic, message));
+            if (!Fail || AcceptBeforeFailure) Published.Add((topic, message));
+            if (Fail) throw new IOException("publication interrupted");
             return Task.CompletedTask;
         }
     }

@@ -1,3 +1,4 @@
+using Application.ControlPlane;
 using Application.AuditLogs;
 using Application.Bases;
 using Application.Bases.Exceptions;
@@ -45,11 +46,11 @@ public class UpdateInsightCollectionHandler(
         }
 
         var dataChange = flag.UpdateInsightCollection(request.Enabled, currentUser.Id);
-        await service.UpdateAsync(flag);
 
         var notification = new OnFeatureFlagChanged(
             flag, Operations.Update, dataChange, currentUser.Id, comment: request.Comment
         );
+        await service.SaveChangeAsync(notification);
         await publisher.Publish(notification, cancellationToken);
 
         return flag.Revision;

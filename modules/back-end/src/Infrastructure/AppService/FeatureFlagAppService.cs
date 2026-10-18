@@ -1,3 +1,4 @@
+using Application.ControlPlane;
 using Application.Caches;
 using Application.Bases.Exceptions;
 using Application.FeatureFlags;
@@ -51,16 +52,14 @@ public class FeatureFlagAppService : IFeatureFlagAppService
             throw new ConflictException(nameof(Domain.FeatureFlags.FeatureFlag), flag.Id);
         }
 
-        await _flagService.UpdateAsync(flag);
+        var notification = new OnFeatureFlagChanged(flag, operation, dataChange, operatorId, draft.Comment);
+        await _flagService.SaveChangeAsync(notification);
 
         // update draft status
         draft.Applied(operatorId);
         await _flagDraftService.UpdateAsync(draft);
 
         // publish on feature flag change notification
-        var notification = new OnFeatureFlagChanged(
-            flag, operation, dataChange, operatorId, draft.Comment
-        );
         await _publisher.Publish(notification);
     }
 

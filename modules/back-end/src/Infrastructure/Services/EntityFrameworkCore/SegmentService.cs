@@ -14,7 +14,7 @@ using Environment = Domain.Environments.Environment;
 
 namespace Infrastructure.Services.EntityFrameworkCore;
 
-public class SegmentService(AppDbContext dbContext, ILogger<SegmentService> logger)
+public partial class SegmentService(AppDbContext dbContext, ILogger<SegmentService> logger, Microsoft.Extensions.Configuration.IConfiguration? configuration = null)
     : EntityFrameworkCoreService<Segment>(dbContext), ISegmentService
 {
     public async Task<PagedResult<Segment>> GetListAsync(Guid workspaceId, string rn, SegmentFilter userFilter)
@@ -182,7 +182,7 @@ public class SegmentService(AppDbContext dbContext, ILogger<SegmentService> logg
         var segment = await Queryable
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id);
-        if (segment == null)
+        if (segment == null || segment.Pending is { IsCreation: true, IsCommitted: false })
         {
             throw new EntityNotFoundException(nameof(Segment), id.ToString());
         }
@@ -213,6 +213,9 @@ public class SegmentService(AppDbContext dbContext, ILogger<SegmentService> logg
         {
             // load the committed row (left otherwise untouched)
             var segment = await GetAsync(id);
+
+            if (segment.Pending?.IsCommitted == true && version > segment.CommittedVersion)
+                throw new ConflictException(nameof(Segment), segment.Id);
 
             // Monotonicity guard (#34): only stage this change when its version is STRICTLY GREATER
             // than both the already-staged pending version (if any) AND the committed version. An
@@ -262,7 +265,13 @@ public class SegmentService(AppDbContext dbContext, ILogger<SegmentService> logg
         }
     }
 
-    public async Task<bool> PromotePendingAsync(Guid id, long expectedVersion)
+    public Task<bool> PromotePendingAsync(Guid id, long expectedVersion) =>
+        PromotePendingCoreAsync(id, expectedVersion, false);
+
+    public Task<bool> PromotePendingForPublicationAsync(Guid id, long expectedVersion) =>
+        PromotePendingCoreAsync(id, expectedVersion, true);
+
+    private async Task<bool> PromotePendingCoreAsync(Guid id, long expectedVersion, bool retainForPublication)
     {
         for (var attempt = 0; ; attempt++)
         {
@@ -271,14 +280,14 @@ public class SegmentService(AppDbContext dbContext, ILogger<SegmentService> logg
             // Version guard (#33/#34): only promote if the pending change still matches the version
             // the caller observed. If it was replaced by a racing SetPendingAsync (different version)
             // or already promoted (null), do nothing.
-            if (segment.Pending?.Version != expectedVersion)
+            if (segment.Pending?.Version != expectedVersion || segment.Pending.IsCommitted)
             {
                 return false;
             }
 
             // promote pending -> committed, then persist the full row so the committed
-            // value advances and the pending slot is cleared.
-            segment.PromotePending();
+            // value advances and its pending receipt is retained when requested.
+            segment.PromotePending(retainForPublication);
 
             try
             {
@@ -329,6 +338,7 @@ public class SegmentService(AppDbContext dbContext, ILogger<SegmentService> logg
             .AsNoTracking()
             .ToListAsync();
 
+        segments = segments.Where(x => x.Pending is not { IsCreation: true, IsCommitted: false }).ToList();
         foreach (var segment in segments)
         {
             segment.Pending = null;

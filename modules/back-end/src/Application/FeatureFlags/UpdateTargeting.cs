@@ -1,3 +1,4 @@
+using Application.ControlPlane;
 using Application.AuditLogs;
 using Application.Bases;
 using Application.Bases.Exceptions;
@@ -79,8 +80,6 @@ public class UpdateTargetingHandler(
 
         await permissionGuard.EnsureFlagChangeAllowedAsync(flag, dataChange, request.Permissions);
 
-        await flagService.UpdateAsync(flag);
-
         // publish on feature flag change notification
         var notification = new OnFeatureFlagChanged(
             flag,
@@ -89,6 +88,7 @@ public class UpdateTargetingHandler(
             currentUser.Id,
             comment: request.Comment
         );
+        await flagService.SaveChangeAsync(notification);
         await publisher.Publish(notification, cancellationToken);
 
         return flag.Revision;

@@ -1,3 +1,4 @@
+using Application.ControlPlane;
 using Application.Bases;
 using Application.Users;
 using Domain.AuditLogs;
@@ -142,11 +143,12 @@ public class CreateFeatureFlagHandler : IRequestHandler<CreateFeatureFlag, Featu
         }
 
         var flag = request.AsFeatureFlag(_currentUser.Id);
-        await _service.AddOneAsync(flag);
+        if (flag.Id == Guid.Empty) flag.Id = Guid.NewGuid();
 
         // publish on feature flag change notification
         var dataChange = new DataChange(null).To(flag);
         var notification = new OnFeatureFlagChanged(flag, Operations.Create, dataChange, _currentUser.Id);
+        await _service.SaveChangeAsync(notification, isNew: true);
         await _publisher.Publish(notification, cancellationToken);
 
         return flag;

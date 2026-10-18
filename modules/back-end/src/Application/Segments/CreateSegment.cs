@@ -1,3 +1,4 @@
+using Application.ControlPlane;
 using Application.Bases;
 using Application.Bases.Exceptions;
 using Application.Users;
@@ -104,11 +105,12 @@ public class CreateSegmentHandler : IRequestHandler<CreateSegment, Segment>
         }
 
         var segment = request.AsSegment();
-        await _segmentService.AddOneAsync(segment);
+        if (segment.Id == Guid.Empty) segment.Id = Guid.NewGuid();
 
         // publish on segment created notification
         var dataChange = new DataChange(null).To(segment);
         var notification = new OnSegmentChange(segment, Operations.Create, dataChange, _currentUser.Id);
+        await _segmentService.SaveChangeAsync(notification, isNew: true);
         await _publisher.Publish(notification, cancellationToken);
 
         return segment;

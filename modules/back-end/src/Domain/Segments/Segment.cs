@@ -244,9 +244,10 @@ public class Segment : AuditedEntity
     /// <summary>
     /// Promote the staged pending change to committed: the pending value becomes the
     /// committed value, <see cref="CommittedVersion"/> advances to the pending version,
-    /// and the pending slot is cleared. No-op when there is no pending change.
+    /// and the pending slot is cleared unless retained as a durable publication receipt.
+    /// No-op when there is no pending change.
     /// </summary>
-    public void PromotePending()
+    public void PromotePending(bool retainForPublication = false)
     {
         if (Pending == null)
         {
@@ -271,9 +272,13 @@ public class Segment : AuditedEntity
         // Refresh the audit timestamp so the committed value reflects WHEN it was promoted: the
         // promotion is the moment this value becomes authoritative. (Segment is an AuditedEntity
         // with no UpdatorId, so only UpdatedAt is carried.)
-        UpdatedAt = DateTime.UtcNow;
+        // Gated publication and backfill must use the same timestamp as its staged wire version.
+        UpdatedAt = retainForPublication
+            ? DateTimeOffset.FromUnixTimeMilliseconds(version).UtcDateTime
+            : DateTime.UtcNow;
 
         CommittedVersion = version;
-        Pending = null;
+        if (retainForPublication) Pending.IsCommitted = true;
+        else Pending = null;
     }
 }

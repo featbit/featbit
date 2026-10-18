@@ -245,11 +245,11 @@ public sealed class RecoveryWorkerTests : IntegrationTestBase, IAsyncLifetime
     /// FeatureFlagChangeMessageHandler / RecoveryWorker: unix-ms of UpdatedAt).
     /// </summary>
     private static long VersionTokenOf(FeatureFlag flag) =>
-        new DateTimeOffset(flag.UpdatedAt).ToUnixTimeMilliseconds();
+        flag.CommittedVersion > 0 ? flag.CommittedVersion : new DateTimeOffset(flag.UpdatedAt).ToUnixTimeMilliseconds();
 
     /// <summary>Segment counterpart of <see cref="VersionTokenOf(FeatureFlag)"/>.</summary>
     private static long VersionTokenOf(Segment segment) =>
-        new DateTimeOffset(segment.UpdatedAt).ToUnixTimeMilliseconds();
+        segment.CommittedVersion > 0 ? segment.CommittedVersion : new DateTimeOffset(segment.UpdatedAt).ToUnixTimeMilliseconds();
 
     // ----- acceptance -----
 
@@ -284,8 +284,8 @@ public sealed class RecoveryWorkerTests : IntegrationTestBase, IAsyncLifetime
         // ---- flag changes to v2, committed on dc-a ONLY (dc-b absent) ----
         // The committed top-level value advances to v2 with NO pending (mirrors the coordinator
         // committing on the live set while dc-b is evicted).
-        var v2 = CreateFlag(key, isEnabled: true);
-        v2.Id = v1.Id;
+        var v2 = await _flagService.GetAsync(_envId, key);
+        v2.Toggle(Guid.NewGuid(), true);
         v2.CommittedVersion = 2;
         // ensure a distinct, newer version token than v1
         v2.UpdatedAt = v1.UpdatedAt.AddSeconds(1);

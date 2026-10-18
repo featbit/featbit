@@ -1,3 +1,4 @@
+using Application.ControlPlane;
 using Application.Caches;
 using Domain.AuditLogs;
 using Domain.Segments;
@@ -61,7 +62,8 @@ public class OnSegmentChangeHandler(
         var envIds = await segmentService.GetEnvironmentIdsAsync(segment);
 
         // update cache
-        await cache.UpsertSegmentAsync(envIds, segment);
+        if (!configuration.UseControlPlane() || configuration.GetConsistencyMode() != ConsistencyMode.GatedCommit)
+            await cache.UpsertSegmentAsync(envIds, segment);
 
         await segmentChangePublisher.PublishAsync(notification);
 

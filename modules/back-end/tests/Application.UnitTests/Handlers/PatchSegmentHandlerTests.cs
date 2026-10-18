@@ -44,6 +44,26 @@ public class PatchSegmentHandlerTests
         return mock;
     }
 
+    [Theory]
+    [InlineData("replace", "/pending", null)]
+    [InlineData("remove", "/Pending/value", null)]
+    [InlineData("replace", "/committedVersion", null)]
+    [InlineData("copy", "/name", "/pending/value/name")]
+    [InlineData("move", "/name", "/UPDATEDAT")]
+    public async Task Handle_PersistenceMetadataPatch_IsRejectedBeforeReadingOrWriting(
+        string operation, string path, string from)
+    {
+        var service = new Mock<ISegmentService>(MockBehavior.Strict);
+        var guard = new Mock<IPermissionGuard>(MockBehavior.Strict);
+        var publisher = new Mock<IPublisher>(MockBehavior.Strict);
+        var patch = new JsonPatchDocument<Segment>();
+        patch.Operations.Add(new Operation<Segment> { op = operation, path = path, from = from, value = 0 });
+        var result = await new PatchSegmentHandler(service.Object, guard.Object, Mock.Of<ICurrentUser>(), publisher.Object)
+            .Handle(new PatchSegment { Id = Guid.NewGuid(), Patch = patch }, CancellationToken.None);
+        Assert.False(result.Success);
+        service.VerifyNoOtherCalls(); guard.VerifyNoOtherCalls(); publisher.VerifyNoOtherCalls();
+    }
+
     [Fact]
     public async Task Handle_NonTargetingPatch_AppliesAndPublishesAsNonTargetingChange()
     {

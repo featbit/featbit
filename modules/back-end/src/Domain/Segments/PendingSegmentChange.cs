@@ -13,6 +13,11 @@ public class PendingSegmentChange
     /// </summary>
     public long Version { get; set; }
 
+    // Durable publication receipt: retained atomically with promotion until delivery is acknowledged.
+    public bool IsCommitted { get; set; }
+
+    public bool IsCreation { get; set; }
+
     /// <summary>
     /// The staged segment value. This is NOT the authoritative value and must not be served
     /// until <see cref="Segment.PromotePending"/> makes it committed.

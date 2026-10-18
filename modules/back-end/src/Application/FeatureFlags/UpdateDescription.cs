@@ -1,3 +1,4 @@
+using Application.ControlPlane;
 using Application.AuditLogs;
 using Application.Users;
 using Domain.AuditLogs;
@@ -37,7 +38,6 @@ public class UpdateDescriptionHandler(
         }
 
         var dataChange = flag.UpdateDescription(request.Description, currentUser.Id);
-        await service.UpdateAsync(flag);
 
         // publish on feature flag change notification
         var notification = new OnFeatureFlagChanged(
@@ -47,6 +47,7 @@ public class UpdateDescriptionHandler(
             currentUser.Id,
             comment: request.Comment
         );
+        await service.SaveChangeAsync(notification);
         await publisher.Publish(notification, cancellationToken);
 
         return flag.Revision;

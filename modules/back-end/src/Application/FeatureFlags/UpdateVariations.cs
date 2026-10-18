@@ -1,3 +1,4 @@
+using Application.ControlPlane;
 using Application.AuditLogs;
 using Application.Bases;
 using Application.Bases.Exceptions;
@@ -56,7 +57,6 @@ public class UpdateVariationsHandler(
         }
 
         var dataChange = flag.UpdateVariations(request.Variations, currentUser.Id);
-        await service.UpdateAsync(flag);
 
         // publish on feature flag change notification
         var notification = new OnFeatureFlagChanged(
@@ -66,6 +66,7 @@ public class UpdateVariationsHandler(
             currentUser.Id,
             comment: request.Comment
         );
+        await service.SaveChangeAsync(notification);
         await publisher.Publish(notification, cancellationToken);
 
         return flag.Revision;

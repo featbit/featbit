@@ -1,3 +1,4 @@
+using Application.ControlPlane;
 using Application.AuditLogs;
 using Application.Users;
 using Domain.AuditLogs;
@@ -29,7 +30,6 @@ public class RestoreSegmentHandler : IRequestHandler<RestoreSegment, bool>
     {
         var segment = await _service.GetAsync(request.Id);
         var dataChange = segment.Restore();
-        await _service.UpdateAsync(segment);
 
         // publish on segment change notification
         var notification = new OnSegmentChange(
@@ -40,6 +40,7 @@ public class RestoreSegmentHandler : IRequestHandler<RestoreSegment, bool>
             comment: request.Comment,
             isTargetingChange: false
         );
+        await _service.SaveChangeAsync(notification);
         await _publisher.Publish(notification, cancellationToken);
 
         return true;
