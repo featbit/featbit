@@ -6,6 +6,7 @@ using Streaming.Services;
 
 namespace Api.Public;
 
+[Route("api/public/sdk")]
 [EnableRateLimiting(RateLimitingPolicies.Sdk)]
 public class SdkController : PublicApiControllerBase
 {
