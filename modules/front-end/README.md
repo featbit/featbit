@@ -147,9 +147,10 @@ Dockerfile runs `npm run build`, and Playwright tests the production files serve
 by Nginx. Local runs and CI use this same command. Each run builds uniquely tagged
 images and removes those test images after stopping the containers; Docker build
 cache can be reused on subsequent runs. PostgreSQL uses `postgres:16-alpine`,
-initialized with the repository's versioned SQL scripts and backend integration
-fixture `Fixtures/vNext.sql` for schema changes in the current source tree; this
-fixture is test-only and is not a production migration.
+initialized with the repository's versioned SQL scripts from
+`infra/postgresql/docker-entrypoint-initdb.d/`, matching the backend and evaluation
+server integration fixtures. Unreleased migrations belong in the next version's
+SQL script alongside the other deployment migrations.
 
 To run the stack locally, start Docker with its CLI available and run this command
 from `modules/front-end`:
