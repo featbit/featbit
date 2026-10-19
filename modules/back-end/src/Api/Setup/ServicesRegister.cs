@@ -23,7 +23,9 @@ public static class ServicesRegister
         builder.Services.AddSerilog((_, lc) => ConfigureSerilog.Configure(lc, builder.Configuration));
 
         // add services for controllers
-        builder.Services.AddControllers();
+        builder.Services.AddControllers().ConfigureApiBehaviorOptions(options =>
+            options.InvalidModelStateResponseFactory = ModelValidationResponse.Create
+        );
 
         // add mcp server & tools
         builder.Services
