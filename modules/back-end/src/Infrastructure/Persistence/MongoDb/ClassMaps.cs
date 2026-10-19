@@ -23,6 +23,7 @@ public static class ClassMaps
         {
             map.AutoMap();
             map.MapMember(x => x.Tags).SetDefaultValue(Array.Empty<string>());
+            map.MapMember(x => x.InsightsEnabled).SetDefaultValue(true);
 
             // Postgres-only concurrency token; never persisted to Mongo.
             map.UnmapMember(x => x.Xmin);

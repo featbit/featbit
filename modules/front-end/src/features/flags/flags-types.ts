@@ -34,6 +34,8 @@ export type FeatureFlag = {
   envId?: string
   revision?: string
   isArchived?: boolean
+  /** Missing on flags from older API versions; treat as enabled. */
+  insightsEnabled?: boolean
   creatorId?: string
   updatorId?: string
   variations?: FlagVariation[]
@@ -90,6 +92,11 @@ export type FlagTargeting = {
   rules: FlagRule[]
   fallthrough: FlagFallthrough
   exptIncludeAllTargets: boolean
+}
+
+export type RunningExperiment = {
+  id: string
+  name: string
 }
 
 export type PendingFlagChange = {
@@ -161,6 +168,7 @@ export type FlagCreationPayload = {
   enabledVariationId: string
   disabledVariationId: string
   variations: Array<{ id: string; name: string; value: string }>
+  insightsEnabled?: boolean
 }
 
 export type FlagComparisonVariation = {

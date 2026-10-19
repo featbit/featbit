@@ -95,6 +95,7 @@ export const PERMISSION_ACTIONS: PermissionAction[] = [
   action("env", "DeleteEnvSecret", "Delete environment secrets"),
   action("env", "CreateEnvSecret", "Create environment secrets"),
   action("env", "UpdateEnvSecret", "Update environment secrets"),
+  action("env", "ViewEnvSecret", "View environment secrets"),
   action("flag", "*", "All flag actions"),
   action("flag", "CreateFlag", "Create flags", true, true),
   action("flag", "ArchiveFlag", "Archive flags", true, true),

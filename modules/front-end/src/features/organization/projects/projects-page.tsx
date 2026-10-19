@@ -251,6 +251,15 @@ export function OrganizationProjectsPage() {
       environmentRn(project.key, environment.key),
       "DeleteEnv"
     )
+  const canViewSecret = (
+    project: OrganizationProject,
+    environment: ProjectEnvironment
+  ) =>
+    canUseAction(
+      policies,
+      environmentRn(project.key, environment.key),
+      "ViewEnvSecret"
+    )
   const canCreateSecret = (
     project: OrganizationProject,
     environment: ProjectEnvironment
@@ -754,6 +763,7 @@ export function OrganizationProjectsPage() {
         canCreateEnvironment={canCreateEnvironment}
         canUpdateEnvironment={canUpdateEnvironment}
         canDeleteEnvironment={canDeleteEnvironment}
+        canViewSecret={canViewSecret}
         canCreateSecret={canCreateSecret}
         onSearchChange={setSearch}
         onCreateProject={openCreateProject}
@@ -785,6 +795,11 @@ export function OrganizationProjectsPage() {
       />
 
       <SecretsSheet
+        canViewSecret={Boolean(
+          currentSecretsProject &&
+          currentSecretsEnvironment &&
+          canViewSecret(currentSecretsProject, currentSecretsEnvironment)
+        )}
         open={secretsSheetOpen || linkedSecretsTarget !== null}
         project={currentSecretsProject}
         environment={currentSecretsEnvironment}

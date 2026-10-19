@@ -36,6 +36,12 @@ public class FeatureFlag : FullAuditedEntity
 
     public bool ExptIncludeAllTargets { get; set; }
 
+    /// <summary>
+    /// Whether evaluation insights are collected for this flag. Defaults to true; a stored flag without
+    /// the field is treated as enabled.
+    /// </summary>
+    public bool InsightsEnabled { get; set; } = true;
+
     public string[] Tags { get; set; }
 
     public bool IsArchived { get; set; }
@@ -109,6 +115,7 @@ public class FeatureFlag : FullAuditedEntity
             }
         };
         ExptIncludeAllTargets = true;
+        InsightsEnabled = true;
 
         Tags = tags ?? [];
         IsArchived = false;
@@ -181,6 +188,16 @@ public class FeatureFlag : FullAuditedEntity
         var dataChange = new DataChange(this);
 
         Description = description;
+        MarkAsUpdated(currentUserId);
+
+        return dataChange.To(this);
+    }
+
+    public DataChange UpdateInsightCollection(bool enabled, Guid currentUserId)
+    {
+        var dataChange = new DataChange(this);
+
+        InsightsEnabled = enabled;
         MarkAsUpdated(currentUserId);
 
         return dataChange.To(this);
@@ -414,6 +431,7 @@ public class FeatureFlag : FullAuditedEntity
         DisabledVariationId = promoted.DisabledVariationId;
         Fallthrough = promoted.Fallthrough;
         ExptIncludeAllTargets = promoted.ExptIncludeAllTargets;
+        InsightsEnabled = promoted.InsightsEnabled;
         Tags = promoted.Tags;
         IsArchived = promoted.IsArchived;
         // Revision is part of the committed-relevant state (it changes on every mutation and is

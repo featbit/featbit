@@ -138,4 +138,54 @@ public class FeatureFlagControllerTests : IClassFixture<PermissionCheckTestApp>
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
+
+    [Fact]
+    public async Task GetRunningExperimentsAsync_PermissionGranted_ReturnsExperiments()
+    {
+        var experiment = new ExperimentReference(Guid.NewGuid(), "Checkout copy test");
+        _app.Sender
+            .Setup(s => s.Send(It.IsAny<GetRunningExperiments>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([experiment]);
+
+        var client = await _app.CreateAuthenticatedClientAsync();
+        var response = await client.GetAsync($"/api/v1/envs/{EnvId}/feature-flags/checkout/running-experiments");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var body = await response.Content.ReadFromJsonAsync<ApiResponse<ExperimentReference[]>>(JsonOptions);
+        Assert.Equal([experiment], body!.Data);
+        _app.Sender.Verify(
+            s => s.Send(
+                It.Is<GetRunningExperiments>(r => r.EnvId == EnvId && r.Key == "checkout"),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task GetRunningExperimentsAsync_PermissionDenied_Returns403()
+    {
+        _app.PermissionChecker.Grant = false;
+
+        var client = await _app.CreateAuthenticatedClientAsync();
+        var response = await client.GetAsync($"/api/v1/envs/{EnvId}/feature-flags/checkout/running-experiments");
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task UpdateInsightCollectionAsync_WithEnabled_PassesValueToRequest()
+    {
+        _app.Sender
+            .Setup(s => s.Send(It.IsAny<UpdateInsightCollection>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(Guid.NewGuid());
+
+        var client = await _app.CreateAuthenticatedClientAsync();
+        var response = await client.PutAsJsonAsync(
+            $"/api/v1/envs/{EnvId}/feature-flags/checkout/insight-collection",
+            new { enabled = false });
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        _app.Sender.Verify(
+            s => s.Send(It.Is<UpdateInsightCollection>(r => r.Enabled == false), It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
 }

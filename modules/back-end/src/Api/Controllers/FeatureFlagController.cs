@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Api.Authentication;
-using Api.Swagger.Examples;
+using Api.Setup.OpenApi;
+using Api.Setup.OpenApi.Examples;
 using Application.AuditLogs;
 using Application.Bases.Models;
 using Application.FeatureFlags;
@@ -9,7 +10,6 @@ using Domain.FeatureFlags;
 using Domain.Policies;
 using Microsoft.AspNetCore.JsonPatch.SystemTextJson;
 using Microsoft.AspNetCore.JsonPatch.SystemTextJson.Operations;
-using Swashbuckle.AspNetCore.Filters;
 
 namespace Api.Controllers;
 
@@ -58,6 +58,27 @@ public class FeatureFlagController : ApiControllerBase
 
         var flag = await Mediator.Send(request);
         return Ok(flag);
+    }
+
+    /// <summary>
+    /// Get the running experiments of a feature flag
+    /// </summary>
+    /// <remarks>
+    /// Experiments bound to the flag with a run whose observation window has not ended. Insights cannot be
+    /// disabled on the flag while this list is non-empty.
+    /// </remarks>
+    [HttpGet("{key}/running-experiments")]
+    [Authorize(Permissions.CanAccessEnv)]
+    public async Task<ApiResponse<IReadOnlyList<ExperimentReference>>> GetRunningExperimentsAsync(Guid envId, string key)
+    {
+        var request = new GetRunningExperiments
+        {
+            EnvId = envId,
+            Key = key
+        };
+
+        var experiments = await Mediator.Send(request);
+        return Ok(experiments);
     }
 
     /// <summary>
@@ -269,6 +290,25 @@ public class FeatureFlagController : ApiControllerBase
     }
 
     /// <summary>
+    /// Enable or disable insight collection for a feature flag
+    /// </summary>
+    [OpenApi]
+    [HttpPut("{key}/insight-collection")]
+    [Authorize(Permissions.CanAccessEnv)]
+    public async Task<ApiResponse<Guid>> UpdateInsightCollectionAsync(Guid envId, string key, UpdateInsightCollectionPayload payload)
+    {
+        var request = new UpdateInsightCollection
+        {
+            EnvId = envId,
+            Key = key,
+            Enabled = payload.Enabled,
+            Comment = payload.Comment
+        };
+
+        return Ok(await Mediator.Send(request));
+    }
+
+    /// <summary>
     /// Update the off variation of a feature flag
     /// </summary>
     /// <remarks>
@@ -294,7 +334,7 @@ public class FeatureFlagController : ApiControllerBase
     /// Perform a partial update to a feature flag. The request body must be a valid JSON patch.
     /// </remarks>
     [OpenApi]
-    [SwaggerRequestExample(typeof(Operation), typeof(PatchFeatureFlagExamples))]
+    [OpenApiRequestExamples(typeof(PatchFeatureFlagExamples))]
     [HttpPatch("{key}")]
     public async Task<ApiResponse<bool>> PatchAsync(Guid envId, string key, [FromBody] JsonElement jsonElement)
     {

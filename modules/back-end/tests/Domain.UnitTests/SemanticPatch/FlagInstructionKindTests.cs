@@ -76,7 +76,7 @@ public class FlagInstructionKindTests
     [Fact]
     public void All_ListsEveryDefinedKind()
     {
-        Assert.Equal(31, FlagInstructionKind.All.Length);
+        Assert.Equal(32, FlagInstructionKind.All.Length);
         Assert.Contains(FlagInstructionKind.Noop, FlagInstructionKind.All);
     }
 }

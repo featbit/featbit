@@ -10,6 +10,7 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace Api.Public;
 
+[Route("api/public/insight")]
 [EnableRateLimiting(RateLimitingPolicies.Insight)]
 public class InsightController : PublicApiControllerBase
 {

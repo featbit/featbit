@@ -394,6 +394,28 @@ public class FlagComparerTests
         Assert.Empty(instructions);
     }
 
+    [Theory]
+    [InlineData(true, true)]
+    [InlineData(false, false)]
+    public void CompareInsightsEnabled_NoChange_ReturnsNoop(bool original, bool current)
+    {
+        var result = FlagComparer.CompareInsightsEnabled(original, current);
+
+        Assert.IsType<NoopFlagInstruction>(result);
+    }
+
+    [Theory]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    public void CompareInsightsEnabled_Changed_ReturnsInsightsEnabledInstruction(bool original, bool current)
+    {
+        var result = FlagComparer.CompareInsightsEnabled(original, current);
+
+        var instruction = Assert.IsType<InsightsEnabledInstruction>(result);
+        Assert.Equal(FlagInstructionKind.UpdateInsightsEnabled, instruction.Kind);
+        Assert.Equal(current, instruction.Value);
+    }
+
     private static FeatureFlag MakeFlag(string name = "n", string description = "d") => new()
     {
         Name = name,
