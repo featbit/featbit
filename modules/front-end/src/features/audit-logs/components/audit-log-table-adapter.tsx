@@ -1,3 +1,5 @@
+import { IamAuditDetails } from "./iam-audit-details"
+import { iamChanges, isIamAudit } from "../iam-audit-changes"
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { ChangeLedger as SharedChangeLedger } from "@/features/change-review/change-ledger"
@@ -84,8 +86,16 @@ export function useDefaultAuditLogTableAdapter(
 
   return {
     eventTitle: (log) => auditEventTitle(log, t),
-    eventSubtitle: (log) => auditEventFragments(log, t),
+    eventSubtitle: (log) =>
+      isIamAudit(log)
+        ? t("auditLogs.changeCount", { count: iamChanges(log).length })
+        : auditEventFragments(log, t),
     changeDetails: (log) => {
+      if (isIamAudit(log))
+        return {
+          count: iamChanges(log).length,
+          content: <IamAuditDetails log={log} />,
+        }
       if (isChangeRequestDecisionOperation(log.operation)) {
         const snapshot = auditDecisionSnapshot(log)
         const proposedChanges = auditDisplayedChanges(log, t)

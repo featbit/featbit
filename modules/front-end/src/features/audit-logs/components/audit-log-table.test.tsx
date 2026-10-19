@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
-import { describe, expect, it, vi } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
+import * as layoutContext from "@/features/layout/layout-context"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import "@/lib/i18n/i18n"
 import type { AuditLog } from "../audit-logs-types"
@@ -11,6 +12,9 @@ const auditLog: AuditLog = {
   id: "audit-1",
   refId: "flag-1",
   refType: "FeatureFlag",
+  organizationName: "playground",
+  projectName: "Example project",
+  environmentName: "Dev",
   operation: "Update",
   creatorId: "user-1",
   creatorName: "Alex Chen",
@@ -33,6 +37,53 @@ const auditLog: AuditLog = {
 }
 
 describe("AuditLogTable", () => {
+  afterEach(() => vi.restoreAllMocks())
+
+  it.each([
+    ["ws-1", "Create", "Acme workspace"],
+    ["ws-1", "Delete", "Acme workspace"],
+    ["another-workspace", "Update", "Unavailable"],
+  ])(
+    "renders shared segment scope for workspace %s on %s",
+    (workspaceId, operation, name) => {
+      vi.spyOn(layoutContext, "getCurrentWorkspace").mockReturnValue({
+        id: "ws-1",
+        name: "Acme workspace",
+        key: "acme",
+      })
+      render(
+        <MemoryRouter>
+          <TooltipProvider>
+            <AuditLogTable
+              items={[
+                {
+                  ...auditLog,
+                  refType: "Segment",
+                  operation,
+                  workspaceId,
+                  envId: null,
+                  organizationName: undefined,
+                  projectName: undefined,
+                  environmentName: undefined,
+                },
+              ]}
+              lang="en"
+              locale="en"
+              loading={false}
+              filtered={false}
+              onClearFilters={vi.fn()}
+              onViewRawData={vi.fn()}
+            />
+          </TooltipProvider>
+        </MemoryRouter>
+      )
+      const cell = screen.getByText("Workspace:").closest("td")
+      expect(cell).toHaveTextContent(name)
+      expect(cell).toHaveTextContent("Shareable segment")
+      expect(screen.queryByText("Environment:")).not.toBeInTheDocument()
+    }
+  )
+
   it("renders the global columns and reuses the expandable history ledger", () => {
     render(
       <MemoryRouter>
@@ -52,7 +103,16 @@ describe("AuditLogTable", () => {
 
     expect(
       screen.getAllByRole("columnheader").map((header) => header.textContent)
-    ).toEqual(["", "Date", "User", "Type", "Name / Key", "Event", "Comment"])
+    ).toEqual([
+      "",
+      "Date",
+      "Actor",
+      "Type",
+      "Resource",
+      "Scope",
+      "Event",
+      "Comment",
+    ])
     expect(
       screen.getByRole("link", { name: "Checkout redesign" })
     ).toHaveAttribute("href", "/en/feature-flags/checkout-redesign/targeting")
@@ -62,10 +122,18 @@ describe("AuditLogTable", () => {
     )
 
     const expand = screen.getByRole("button", { name: "Expand audit log" })
+    const scopeCell = screen.getByText("Organization:").closest("td")
+    expect(scopeCell).toHaveTextContent("playground")
+    expect(scopeCell).toHaveTextContent("Project: Example project")
+    expect(scopeCell).toHaveTextContent("Environment: Dev")
     fireEvent.click(expand)
 
     expect(expand).toHaveAttribute("aria-expanded", "true")
     expect(screen.getByText("Changes")).toBeInTheDocument()
+    expect(screen.getByText("Changes").closest("td")).toHaveAttribute(
+      "colspan",
+      "8"
+    )
     expect(screen.getByText("Changes").closest("tr")).toHaveClass(
       "bg-muted/20",
       "hover:bg-muted/20"
@@ -153,7 +221,7 @@ describe("AuditLogTable", () => {
 
     expect(
       screen.getAllByRole("columnheader").map((header) => header.textContent)
-    ).toEqual(["", "Date", "User", "Event", "Comment"])
+    ).toEqual(["", "Date", "Actor", "Event", "Comment"])
     expect(screen.getByText("Updated segment settings")).toBeInTheDocument()
     expect(screen.getByText("Changed segment name")).toBeInTheDocument()
 

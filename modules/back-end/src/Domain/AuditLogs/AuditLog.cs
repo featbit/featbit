@@ -5,7 +5,9 @@ namespace Domain.AuditLogs;
 
 public class AuditLog : Entity
 {
-    public Guid EnvId { get; set; }
+    public Guid WorkspaceId { get; set; }
+    public Guid? OrganizationId { get; set; }
+    public Guid? EnvId { get; set; }
 
     public string RefId { get; set; }
 
@@ -24,7 +26,7 @@ public class AuditLog : Entity
     public DateTime CreatedAt { get; set; }
 
     public AuditLog(
-        Guid envId,
+        Guid? envId,
         string refId,
         string refType,
         string keyword,
@@ -95,6 +97,11 @@ public class AuditLog : Entity
             creatorId
         );
 
+        if (!segment.IsEnvironmentSpecific)
+        {
+            auditLog.EnvId = null;
+            auditLog.WorkspaceId = segment.WorkspaceId;
+        }
         return auditLog;
     }
 }

@@ -12,6 +12,9 @@ public static class DbServiceCollectionExtensions
 {
     public static void AddDbSpecificServices(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddTransient<Services.AuditLogEnricher>();
+        services.AddScoped<Services.AuditStore>();
+        services.AddTransient(typeof(MediatR.IPipelineBehavior<,>), typeof(Services.IamAuditBehaviour<,>));
         var dbProvider = configuration.GetDbProvider();
         switch (dbProvider.Name)
         {

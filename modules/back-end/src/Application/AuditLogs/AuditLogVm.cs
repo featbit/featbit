@@ -1,10 +1,16 @@
-using Domain.AuditLogs;
 using Domain.SemanticPatch;
 
 namespace Application.AuditLogs;
 
 public class AuditLogVm
 {
+    public string Source { get; set; }
+    public Guid WorkspaceId { get; set; }
+    public Guid? OrganizationId { get; set; }
+    public Guid? EnvId { get; set; }
+    public string OrganizationName { get; set; }
+    public string EnvironmentName { get; set; }
+    public string ProjectName { get; set; }
     public string Id { get; set; }
 
     public string RefId { get; set; }
@@ -13,7 +19,7 @@ public class AuditLogVm
 
     public string Operation { get; set; }
 
-    public DataChange DataChange { get; set; }
+    public AuditDataChangeVm DataChange { get; set; }
 
     public string Comment { get; set; }
 

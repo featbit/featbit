@@ -1,4 +1,5 @@
 import type { TFunction } from "i18next"
+import { isIamAudit } from "./iam-audit-changes"
 import type { ChangeReviewItem } from "@/features/change-review/change-review-types"
 import type { FeatureFlag } from "@/features/flags/flags-types"
 import {
@@ -86,35 +87,48 @@ export function auditObjectIdentity(
   unavailable: string
 ): AuditObjectIdentity {
   const operation = log.operation.toLowerCase()
-  const preferred =
-    operation === "remove"
-      ? recordSnapshot(log.dataChange.previous)
-      : recordSnapshot(log.dataChange.current)
-  const fallback =
-    operation === "remove"
-      ? recordSnapshot(log.dataChange.current)
-      : recordSnapshot(log.dataChange.previous)
+  const removed = [
+    "remove",
+    "deletegroup",
+    "deletepolicy",
+    "removefromorganization",
+    "removefromworkspace",
+  ].includes(operation)
+  const preferred = removed
+    ? recordSnapshot(log.dataChange.previous)
+    : recordSnapshot(log.dataChange.current)
+  const fallback = removed
+    ? recordSnapshot(log.dataChange.current)
+    : recordSnapshot(log.dataChange.previous)
   const snapshot = preferred ?? fallback
-  const name = firstString(snapshot, ["name"])
-  const key = firstString(snapshot, ["key", "keyId"])
+  const name = firstString(snapshot, ["name", "email"])
+  const key = firstString(snapshot, ["rn", "key", "keyId"])
   const id = firstString(snapshot, ["id"]) || log.refId
 
   return {
     id,
     name: name || unavailable,
     key: key || log.refId,
-    removed: operation === "remove",
-    available: Boolean(name && (key || id)) && operation !== "remove",
+    removed,
+    available: Boolean(name && (key || id)) && !removed,
   }
 }
 
 export function auditTypeLabel(refType: string, t: TFunction) {
   if (refType === "FeatureFlag") return t("auditLogs.featureFlag")
   if (refType === "Segment") return t("auditLogs.segment")
+  if (refType === "Member") return t("auditLogs.member")
+  if (refType === "Group") return t("auditLogs.group")
+  if (refType === "Policy") return t("auditLogs.policy")
   return refType || t("auditLogs.unknownType")
 }
 
 export function auditEventTitle(log: AuditLog, t: TFunction) {
+  if (isIamAudit(log)) {
+    return t(`auditLogs.iamActions.${log.operation}`, {
+      defaultValue: log.operation || t("auditLogs.unknownEvent"),
+    })
+  }
   switch (log.operation.toLowerCase()) {
     case "create":
       return t("auditLogs.created")

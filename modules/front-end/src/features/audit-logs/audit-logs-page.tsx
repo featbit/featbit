@@ -1,3 +1,4 @@
+import { ApiRequestError } from "@/lib/api/authenticated-api"
 import { useInfiniteQuery } from "@tanstack/react-query"
 import { Loader2 } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
@@ -7,7 +8,7 @@ import { useParams } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import {
-  getCurrentProjectEnv,
+  getCurrentWorkspace,
   resolveLang,
 } from "@/features/layout/layout-context"
 import { dayAfter, hasAppliedFilters, startOfDay } from "./audit-log-utils"
@@ -21,11 +22,15 @@ import { useAuditLogSegmentNames } from "./components/audit-log-table-adapter"
 const PAGE_SIZE = 10
 
 export function AuditLogsPage() {
+  return <WorkspaceAuditLogsPage key={getCurrentWorkspace()?.id ?? ""} />
+}
+
+function WorkspaceAuditLogsPage() {
   const { t, i18n } = useTranslation()
   const { lang: langParam } = useParams()
   const lang = resolveLang(langParam)
   const locale = i18n.resolvedLanguage || lang
-  const envId = getCurrentProjectEnv()?.envId ?? ""
+  const workspaceId = getCurrentWorkspace()?.id ?? ""
   const [search, setSearch] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const [user, setUser] = useState<AuditUser | null>(null)
@@ -52,7 +57,7 @@ export function AuditLogsPage() {
   const logsQuery = useInfiniteQuery({
     queryKey: [
       "audit-logs",
-      envId,
+      workspaceId,
       debouncedSearch,
       user?.id,
       refType,
@@ -61,7 +66,6 @@ export function AuditLogsPage() {
     ],
     queryFn: ({ pageParam }) =>
       fetchAuditLogs(
-        envId,
         {
           query: debouncedSearch,
           creatorId: user?.id,
@@ -72,19 +76,21 @@ export function AuditLogsPage() {
         pageParam,
         PAGE_SIZE
       ),
+    retry: (count, error) =>
+      !(error instanceof ApiRequestError && error.status === 403) && count < 2,
     initialPageParam: 0,
     getNextPageParam: (lastPage, pages) => {
       const loaded = pages.reduce((count, page) => count + page.items.length, 0)
       return loaded < lastPage.totalCount ? pages.length : undefined
     },
-    enabled: Boolean(envId),
+    enabled: Boolean(workspaceId),
   })
 
   const items = useMemo(
     () => logsQuery.data?.pages.flatMap((page) => page.items) ?? [],
     [logsQuery.data]
   )
-  const segmentNames = useAuditLogSegmentNames(envId, items)
+  const segmentNames = useAuditLogSegmentNames("", items)
 
   function clearFilters() {
     setSearch("")
@@ -94,7 +100,7 @@ export function AuditLogsPage() {
     setRange(undefined)
   }
 
-  if (!envId) {
+  if (!workspaceId) {
     return (
       <div className="-m-5 flex min-h-[calc(100vh-3.5rem)] items-center justify-center bg-background p-8">
         <p className="text-sm text-muted-foreground">
@@ -105,6 +111,8 @@ export function AuditLogsPage() {
   }
 
   const initialError = logsQuery.isError && items.length === 0
+  const forbidden =
+    logsQuery.error instanceof ApiRequestError && logsQuery.error.status === 403
   const nextPageError = logsQuery.isError && items.length > 0
 
   return (
@@ -138,15 +146,17 @@ export function AuditLogsPage() {
         <div className="overflow-x-auto rounded-md border bg-background">
           {initialError ? (
             <div className="flex min-h-40 items-center justify-between gap-4 px-5 py-4 text-sm text-destructive">
-              {t("auditLogs.loadFailed")}
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => void logsQuery.refetch()}
-              >
-                {t("auditLogs.retry")}
-              </Button>
+              {t(forbidden ? "auditLogs.forbidden" : "auditLogs.loadFailed")}
+              {!forbidden ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => void logsQuery.refetch()}
+                >
+                  {t("auditLogs.retry")}
+                </Button>
+              ) : null}
             </div>
           ) : (
             <div className="min-w-[1120px]">

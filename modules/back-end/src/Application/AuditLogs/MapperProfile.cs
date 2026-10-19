@@ -7,7 +7,9 @@ public class MapperProfile : Profile
 {
     public MapperProfile()
     {
-        CreateMap<AuditLog, AuditLogVm>();
+        CreateMap<DataChange, AuditDataChangeVm>();
+        CreateMap<AuditLog, AuditLogVm>()
+            .ForMember(dest => dest.Source, opt => opt.MapFrom(src => src.DataChange.Source));
         CreateMap<PagedResult<AuditLog>, PagedResult<AuditLogVm>>();
     }
 }

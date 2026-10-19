@@ -17,7 +17,12 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { localizedPath } from "@/features/layout/layout-context"
+import {
+  getCurrentOrganization,
+  getCurrentProjectEnv,
+  getCurrentWorkspace,
+  localizedPath,
+} from "@/features/layout/layout-context"
 import type { Lang } from "@/features/layout/layout-types"
 import { cn } from "@/lib/utils"
 import {
@@ -34,6 +39,10 @@ import {
 function ObjectIdentity({ log, lang }: { log: AuditLog; lang: Lang }) {
   const { t } = useTranslation()
   const identity = auditObjectIdentity(log, t("auditLogs.unavailable"))
+  const canLink =
+    (!log.organizationId ||
+      log.organizationId === getCurrentOrganization()?.id) &&
+    (!log.envId || log.envId === getCurrentProjectEnv()?.envId)
   const href =
     log.refType === "FeatureFlag"
       ? localizedPath(
@@ -50,7 +59,7 @@ function ObjectIdentity({ log, lang }: { log: AuditLog; lang: Lang }) {
 
   return (
     <div className="min-w-0">
-      {identity.available && href ? (
+      {identity.available && canLink && href ? (
         <Link
           to={href}
           className="block truncate text-primary underline-offset-4 hover:underline"
@@ -79,6 +88,70 @@ function ObjectIdentity({ log, lang }: { log: AuditLog; lang: Lang }) {
       >
         {identity.key}
       </span>
+    </div>
+  )
+}
+
+function AuditScope({ log }: { log: AuditLog }) {
+  const { t } = useTranslation()
+
+  if (log.refType === "Segment" && log.envId === null) {
+    const workspace = getCurrentWorkspace()
+    const workspaceName =
+      workspace?.id === log.workspaceId && workspace?.name
+        ? workspace.name
+        : t("auditLogs.unavailable")
+
+    return (
+      <div className="w-80 space-y-0.5 text-xs leading-5">
+        <p className="truncate" title={workspaceName}>
+          <span className="text-muted-foreground">
+            {t("auditLogs.scopeWorkspace")}{" "}
+          </span>
+          {workspaceName}
+        </p>
+        <p className="text-muted-foreground">{t("auditLogs.sharedSegment")}</p>
+      </div>
+    )
+  }
+
+  if (!log.organizationName && !log.projectName && !log.environmentName) {
+    return <span className="text-muted-foreground">—</span>
+  }
+
+  return (
+    <div className="w-80 space-y-0.5 text-xs leading-5">
+      {log.organizationName ? (
+        <p className="truncate" title={log.organizationName}>
+          <span className="text-muted-foreground">
+            {t("auditLogs.scopeOrganization")}{" "}
+          </span>
+          {log.organizationName}
+        </p>
+      ) : null}
+      {log.projectName || log.environmentName ? (
+        <div className="flex items-baseline gap-1 whitespace-nowrap">
+          {log.projectName ? (
+            <p className="min-w-0 truncate" title={log.projectName}>
+              <span className="text-muted-foreground">
+                {t("auditLogs.scopeProject")}{" "}
+              </span>
+              {log.projectName}
+            </p>
+          ) : null}
+          {log.projectName && log.environmentName ? (
+            <span className="text-muted-foreground">·</span>
+          ) : null}
+          {log.environmentName ? (
+            <p className="shrink-0">
+              <span className="text-muted-foreground">
+                {t("auditLogs.scopeEnvironment")}{" "}
+              </span>
+              {log.environmentName}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
     </div>
   )
 }
@@ -118,7 +191,7 @@ export function AuditLogTable({
       }),
     [locale]
   )
-  const columnCount = resourceScoped ? 5 : 7
+  const columnCount = resourceScoped ? 5 : 8
 
   function toggleExpanded(logId: string) {
     setExpanded((current) => {
@@ -140,6 +213,7 @@ export function AuditLogTable({
             <>
               <TableHead className="w-36">{t("auditLogs.type")}</TableHead>
               <TableHead className="w-64">{t("auditLogs.keyName")}</TableHead>
+              <TableHead className="w-80">{t("auditLogs.scope")}</TableHead>
             </>
           ) : null}
           <TableHead>{t("auditLogs.event")}</TableHead>
@@ -220,6 +294,9 @@ export function AuditLogTable({
                       </TableCell>
                       <TableCell className="max-w-64">
                         <ObjectIdentity log={log} lang={lang} />
+                      </TableCell>
+                      <TableCell>
+                        <AuditScope log={log} />
                       </TableCell>
                     </>
                   ) : null}

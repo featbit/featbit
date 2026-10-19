@@ -4,6 +4,9 @@ namespace Domain.AuditLogs;
 
 public class DataChange
 {
+    // IAM event metadata stays in the existing data_change JSON column.
+    public string Source { get; set; }
+
     public string Previous { get; set; }
 
     public string Current { get; set; }

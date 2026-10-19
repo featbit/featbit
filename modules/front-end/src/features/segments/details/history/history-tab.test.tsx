@@ -75,7 +75,7 @@ describe("HistoryTab", () => {
     expect(summaryComment).toHaveClass("inline-block", "max-w-full")
     expect(
       screen.getAllByRole("columnheader").map((header) => header.textContent)
-    ).toEqual(["", "Date", "User", "Event", "Comment"])
+    ).toEqual(["", "Date", "Actor", "Event", "Comment"])
     expect(screen.getByText("Updated settings")).toBeInTheDocument()
     expect(screen.getByText("Changed name")).toHaveClass(
       "inline-block",
@@ -84,11 +84,10 @@ describe("HistoryTab", () => {
 
     await waitFor(() =>
       expect(fetchAuditLogs).toHaveBeenCalledWith(
-        "env-1",
         expect.objectContaining({
           refType: "Segment",
           refId: segment.id,
-          crossEnvironment: false,
+          envId: "env-1",
         }),
         0,
         10
@@ -98,7 +97,7 @@ describe("HistoryTab", () => {
     expect(
       screen.queryByRole("button", { name: "Clear filters" })
     ).not.toBeInTheDocument()
-    const search = screen.getByPlaceholderText("Filter by key or comment")
+    const search = screen.getByPlaceholderText("Filter by resource or comment")
     fireEvent.change(search, { target: { value: "release" } })
     fireEvent.click(screen.getByRole("button", { name: "Clear filters" }))
     expect(search).toHaveValue("")
@@ -134,8 +133,7 @@ describe("HistoryTab", () => {
     expect(await screen.findByText("Across 2 scopes")).toBeInTheDocument()
     await waitFor(() =>
       expect(fetchAuditLogs).toHaveBeenCalledWith(
-        "env-1",
-        expect.objectContaining({ crossEnvironment: true }),
+        expect.objectContaining({ envId: undefined }),
         0,
         10
       )

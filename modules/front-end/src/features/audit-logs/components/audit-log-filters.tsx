@@ -1,3 +1,5 @@
+import { getCurrentWorkspace } from "@/features/layout/layout-context"
+import { auditTypeLabel } from "../audit-log-utils"
 import { useQuery } from "@tanstack/react-query"
 import {
   CalendarDays,
@@ -49,6 +51,7 @@ export function AuditLogFilters({
   range,
   filtersApplied,
   showRefType = true,
+  actorScope,
   endContent,
   onSearchChange,
   onUserChange,
@@ -63,6 +66,7 @@ export function AuditLogFilters({
   range: DateRange | undefined
   filtersApplied: boolean
   showRefType?: boolean
+  actorScope?: { envId?: string; refType?: string; refId?: string }
   endContent?: ReactNode
   onSearchChange: (value: string) => void
   onUserChange: (value: AuditUser | null) => void
@@ -86,8 +90,13 @@ export function AuditLogFilters({
   }, [userSearch])
 
   const usersQuery = useQuery({
-    queryKey: ["audit-log-users", debouncedUserSearch],
-    queryFn: () => fetchAuditUsers(debouncedUserSearch),
+    queryKey: [
+      "audit-log-users",
+      getCurrentWorkspace()?.id,
+      actorScope,
+      debouncedUserSearch,
+    ],
+    queryFn: () => fetchAuditUsers(debouncedUserSearch, actorScope),
     enabled: userOpen,
     staleTime: 30_000,
   })
@@ -179,9 +188,11 @@ export function AuditLogFilters({
                             <p className="truncate text-sm">
                               {userLabel(option)}
                             </p>
-                            {option.name && option.email ? (
+                            {option.type === "accessToken" || option.email ? (
                               <p className="truncate text-xs text-muted-foreground">
-                                {option.email}
+                                {option.type === "accessToken"
+                                  ? t("auditLogs.accessToken")
+                                  : option.email}
                               </p>
                             ) : null}
                           </div>
@@ -216,11 +227,7 @@ export function AuditLogFilters({
         >
           <SelectTrigger className="w-52">
             <SelectValue>
-              {refType === "FeatureFlag"
-                ? t("auditLogs.featureFlag")
-                : refType === "Segment"
-                  ? t("auditLogs.segment")
-                  : t("auditLogs.allTypes")}
+              {refType ? auditTypeLabel(refType, t) : t("auditLogs.allTypes")}
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
@@ -230,6 +237,9 @@ export function AuditLogFilters({
                 {t("auditLogs.featureFlag")}
               </SelectItem>
               <SelectItem value="Segment">{t("auditLogs.segment")}</SelectItem>
+              <SelectItem value="Member">{t("auditLogs.member")}</SelectItem>
+              <SelectItem value="Group">{t("auditLogs.group")}</SelectItem>
+              <SelectItem value="Policy">{t("auditLogs.policy")}</SelectItem>
             </SelectGroup>
           </SelectContent>
         </Select>

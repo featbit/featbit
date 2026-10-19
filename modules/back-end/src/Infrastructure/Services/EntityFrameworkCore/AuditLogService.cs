@@ -1,23 +1,33 @@
 using Application.AuditLogs;
 using Application.Bases.Models;
 using Dapper;
+using Domain.AccessTokens;
 using Domain.AuditLogs;
+using Domain.Users;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services.EntityFrameworkCore;
 
-public class AuditLogService(AppDbContext dbContext) : EntityFrameworkCoreService<AuditLog>(dbContext), IAuditLogService
+public class AuditLogService(AppDbContext dbContext, AuditLogEnricher enricher) : EntityFrameworkCoreService<AuditLog>(dbContext), IAuditLogService
 {
-    public async Task<PagedResult<AuditLog>> GetListAsync(Guid envId, AuditLogFilter userFilter)
+    public override async Task AddOneAsync(AuditLog log)
     {
-        var queryable = Queryable;
+        await enricher.EnrichAsync(log);
+        await base.AddOneAsync(log);
+    }
 
-        // env filter, by default we only query logs in the specified environment
-        var crossEnvironment = userFilter.CrossEnvironment ?? false;
-        if (!crossEnvironment)
-        {
-            queryable = queryable.Where(x => x.EnvId == envId);
-        }
+    public override async Task AddManyAsync(IEnumerable<AuditLog> logs)
+    {
+        var items = logs.ToArray();
+        foreach (var log in items) await enricher.EnrichAsync(log);
+        if (items.Length > 0) await base.AddManyAsync(items);
+    }
+
+    public async Task<PagedResult<AuditLog>> GetListAsync(Guid workspaceId, AuditLogFilter userFilter)
+    {
+        var queryable = Queryable.Where(x => x.WorkspaceId == workspaceId);
+        if (userFilter.EnvId.HasValue)
+            queryable = queryable.Where(x => x.EnvId == userFilter.EnvId.Value);
 
         // query(keyword/comment) filter
         var query = userFilter.Query?.ToLower();
@@ -68,6 +78,7 @@ public class AuditLogService(AppDbContext dbContext) : EntityFrameworkCoreServic
 
         var items = await queryable
             .OrderByDescending(x => x.CreatedAt)
+            .ThenByDescending(x => x.Id)
             .Skip(userFilter.PageIndex * userFilter.PageSize)
             .Take(userFilter.PageSize)
             .ToListAsync();
@@ -75,10 +86,35 @@ public class AuditLogService(AppDbContext dbContext) : EntityFrameworkCoreServic
         return new PagedResult<AuditLog>(totalCount, items);
     }
 
+    public async Task<IReadOnlyList<AuditActor>> GetActorsAsync(Guid workspaceId, AuditLogFilter filter)
+    {
+        var auditlogs = Queryable.Where(x => x.WorkspaceId == workspaceId);
+        if (filter.EnvId.HasValue) auditlogs = auditlogs.Where(x => x.EnvId == filter.EnvId.Value);
+        if (!string.IsNullOrWhiteSpace(filter.RefType)) auditlogs = auditlogs.Where(x => x.RefType == filter.RefType);
+        if (!string.IsNullOrWhiteSpace(filter.RefId)) auditlogs = auditlogs.Where(x => x.RefId == filter.RefId);
+        var creatorIds = auditlogs.Select(x => x.CreatorId).Distinct();
+
+        var userActors = dbContext.Set<User>().Where(x => creatorIds.Contains(x.Id))
+            .Select(x => new AuditActor { Id = x.Id, Type = AuditActorTypes.User, Name = x.Name, Email = x.Email });
+        var tokenActors = dbContext.Set<AccessToken>().Where(x => creatorIds.Contains(x.Id))
+            .Select(x => new AuditActor { Id = x.Id, Type = AuditActorTypes.AccessToken, Name = x.Name, Email = null });
+
+        var options = userActors.Concat(tokenActors);
+        var query = filter.Query;
+        if (!string.IsNullOrWhiteSpace(query))
+        {
+            var text = query.ToLower();
+            options = options.Where(x => x.Name.ToLower().Contains(text) || (x.Email != null && x.Email.ToLower().Contains(text)));
+        }
+        return await options
+            .OrderBy(x => x.Name).ThenBy(x => x.Id).Take(50).ToListAsync();
+    }
+
     public async Task<LastChange?> GetLastChangeAsync(Guid envId, string refType, string refId)
     {
+        var workspaceId = await enricher.WorkspaceForEnvironmentAsync(envId);
         var lastChange = await Queryable.Where(x =>
-                x.EnvId == envId &&
+                x.WorkspaceId == workspaceId && (x.EnvId == envId || x.EnvId == null) &&
                 x.RefType == refType &&
                 x.RefId == refId &&
                 x.Operation != Operations.Create
@@ -100,6 +136,7 @@ public class AuditLogService(AppDbContext dbContext) : EntityFrameworkCoreServic
         string refType,
         ICollection<string> refIds)
     {
+        var workspaceId = await enricher.WorkspaceForEnvironmentAsync(envId);
         const string sql =
             """
             SELECT ref_id AS RefId, creator_id AS OperatorId, created_at AS HappenedAt, comment AS Comment
@@ -111,13 +148,14 @@ public class AuditLogService(AppDbContext dbContext) : EntityFrameworkCoreServic
                     ref_id, 
                     row_number() over(partition by ref_id order by created_at desc) AS rn
                 FROM audit_logs
-                WHERE env_id = @envId AND ref_type = @refType AND ref_id = ANY (@refIds) AND operation != 'Create'
+                WHERE workspace_id = @workspaceId AND (env_id = @envId OR env_id IS NULL) AND ref_type = @refType AND ref_id = ANY (@refIds) AND operation != 'Create'
             ) AS ranked
             WHERE rn = 1
             """;
 
         var parameters = new
         {
+            workspaceId,
             envId,
             refType,
             refIds

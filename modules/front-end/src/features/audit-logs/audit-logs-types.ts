@@ -14,6 +14,13 @@ export type ChangeRequestDecisionAuditSnapshot = {
 }
 
 export type AuditLog = {
+  workspaceId?: string
+  organizationId?: string
+  envId?: string | null
+  organizationName?: string
+  projectName?: string
+  environmentName?: string
+  source?: string
   id: string
   refId: string
   refType: AuditLogRefType
@@ -34,8 +41,9 @@ export type PagedAuditLogs = {
 
 export type AuditUser = {
   id: string
+  type: "user" | "accessToken"
   name: string
-  email: string
+  email: string | null
 }
 
 export type AuditLogFilters = {
@@ -43,7 +51,7 @@ export type AuditLogFilters = {
   creatorId?: string
   refType?: string
   refId?: string
-  crossEnvironment?: boolean
+  envId?: string
   from?: number
   to?: number
 }

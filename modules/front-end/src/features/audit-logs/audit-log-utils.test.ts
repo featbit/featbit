@@ -30,6 +30,44 @@ function log(overrides: Partial<AuditLog> = {}): AuditLog {
 }
 
 describe("audit log presentation", () => {
+  it.each([
+    ["Group", "AddGroupMember", "Added member"],
+    ["Policy", "ClonePolicy", "Cloned policy"],
+    ["Member", "UpdateProfile", "Updated profile"],
+  ])("uses operation for %s %s event titles", (refType, operation, title) => {
+    expect(auditEventTitle(log({ refType, operation }), i18n.t)).toBe(title)
+  })
+
+  it.each([
+    ["Group", "DeleteGroup", true],
+    ["Policy", "DeletePolicy", true],
+    ["Member", "RemoveFromOrganization", true],
+    ["Member", "RemoveFromWorkspace", true],
+    ["Group", "RemoveGroupMember", false],
+    ["Group", "RemoveGroupPolicy", false],
+    ["Member", "RemoveMemberPolicy", false],
+  ])(
+    "distinguishes resource deletion from relationship removal for %s %s",
+    (refType, operation, removed) => {
+      const identity = auditObjectIdentity(
+        log({
+          refType,
+          operation,
+          dataChange: {
+            previous: JSON.stringify({ name: "Before", rn: "group/before" }),
+            current: removed
+              ? ""
+              : JSON.stringify({ name: "After", rn: "group/after" }),
+          },
+        }),
+        "Unavailable"
+      )
+      expect(identity.removed).toBe(removed)
+      expect(identity.available).toBe(!removed)
+      expect(identity.name).toBe(removed ? "Before" : "After")
+    }
+  )
+
   it("shows reordered rules from audit snapshots as a targeting change", () => {
     const rules = [
       { id: "a", name: "Rule A", conditions: [], variations: [] },

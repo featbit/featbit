@@ -65,8 +65,8 @@ export function HistoryTab({
     ],
     queryFn: ({ pageParam }) =>
       fetchAuditLogs(
-        envId,
         {
+          envId,
           query: debouncedSearch,
           creatorId: user?.id,
           refType: "FeatureFlag",
@@ -103,6 +103,7 @@ export function HistoryTab({
   return (
     <div className="space-y-5 py-5">
       <AuditLogFilters
+        actorScope={{ envId, refType: "FeatureFlag", refId: flagId }}
         locale={locale}
         search={search}
         user={user}

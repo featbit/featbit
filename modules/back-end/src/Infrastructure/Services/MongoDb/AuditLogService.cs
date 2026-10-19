@@ -9,16 +9,12 @@ namespace Infrastructure.Services.MongoDb;
 
 public class AuditLogService(MongoDbClient mongoDb) : MongoDbService<AuditLog>(mongoDb), IAuditLogService
 {
-    public async Task<PagedResult<AuditLog>> GetListAsync(Guid envId, AuditLogFilter userFilter)
+    public async Task<PagedResult<AuditLog>> GetListAsync(Guid workspaceId, AuditLogFilter userFilter)
     {
-        var queryable = Queryable;
-
-        // env filter, by default we only query logs in the specified environment
-        var crossEnvironment = userFilter.CrossEnvironment ?? false;
-        if (!crossEnvironment)
-        {
-            queryable = queryable.Where(x => x.EnvId == envId);
-        }
+        // Workspace-wide audit logs and IAM auditing currently require PostgreSQL.
+        var envId = userFilter.EnvId ?? throw new NotSupportedException(
+            "Workspace audit logs currently require PostgreSQL.");
+        var queryable = Queryable.Where(x => x.EnvId == envId);
 
         // query(keyword/comment) filter
         var query = userFilter.Query;
@@ -76,6 +72,9 @@ public class AuditLogService(MongoDbClient mongoDb) : MongoDbService<AuditLog>(m
 
         return new PagedResult<AuditLog>(totalCount, items);
     }
+
+    public Task<IReadOnlyList<AuditActor>> GetActorsAsync(Guid workspaceId, AuditLogFilter filter) =>
+        throw new NotSupportedException("Audit actor filtering currently requires PostgreSQL.");
 
     public async Task<LastChange?> GetLastChangeAsync(Guid envId, string refType, string refId)
     {

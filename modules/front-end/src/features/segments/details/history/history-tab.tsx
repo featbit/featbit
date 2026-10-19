@@ -73,13 +73,12 @@ export function HistoryTab({
     ],
     queryFn: ({ pageParam }) =>
       fetchAuditLogs(
-        envId,
         {
           query: debouncedSearch,
           creatorId: user?.id,
           refType: "Segment",
           refId: segment.id,
-          crossEnvironment: segment.type === "shared",
+          envId: segment.type === "shared" ? undefined : envId,
           from: range?.from ? startOfDay(range.from) : undefined,
           to: range?.to ? dayAfter(range.to) : undefined,
         },
@@ -111,6 +110,11 @@ export function HistoryTab({
   return (
     <div className="space-y-5 py-5">
       <AuditLogFilters
+        actorScope={{
+          envId: segment.type === "shared" ? undefined : envId,
+          refType: "Segment",
+          refId: segment.id,
+        }}
         locale={locale}
         search={search}
         user={user}

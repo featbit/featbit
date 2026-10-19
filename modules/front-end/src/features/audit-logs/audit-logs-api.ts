@@ -6,13 +6,11 @@ import type {
 } from "./audit-logs-types"
 
 export function fetchAuditLogs(
-  envId: string,
   filters: AuditLogFilters,
   pageIndex: number,
   pageSize: number
 ) {
   const params = new URLSearchParams({
-    crossEnvironment: String(filters.crossEnvironment ?? false),
     query: filters.query,
     creatorId: filters.creatorId ?? "",
     refType: filters.refType ?? "",
@@ -23,19 +21,25 @@ export function fetchAuditLogs(
     pageSize: String(pageSize),
   })
 
-  return fetchApi<PagedAuditLogs>(
-    `/api/v1/envs/${encodeURIComponent(envId)}/audit-logs?${params}`
-  )
+  if (filters.envId) params.set("envId", filters.envId)
+
+  return fetchApi<PagedAuditLogs>(`/api/v1/audit-logs?${params}`)
 }
 
-export function fetchAuditUsers(searchText: string) {
+export function fetchAuditUsers(
+  searchText: string,
+  scope?: Pick<AuditLogFilters, "envId" | "refType" | "refId">
+) {
   const params = new URLSearchParams({
-    searchText,
+    query: searchText,
     pageIndex: "0",
     pageSize: "20",
   })
 
+  if (scope?.envId) params.set("envId", scope.envId)
+  if (scope?.refType) params.set("refType", scope.refType)
+  if (scope?.refId) params.set("refId", scope.refId)
   return fetchApi<{ items: AuditUser[]; totalCount: number }>(
-    `/api/v1/members?${params}`
+    `/api/v1/audit-logs/actors?${params}`
   )
 }
