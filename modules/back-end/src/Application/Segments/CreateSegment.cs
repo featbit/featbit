@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Application.Bases;
 using Application.Bases.Exceptions;
 using Application.Users;
@@ -49,6 +50,8 @@ public class CreateSegment : IRequest<Segment>
     /// Wildcards (<c>*</c>) are not allowed.
     /// </summary>
     /// <example>["organization/playground:project/example-project:env/dev"]</example>
+    [Required(ErrorMessage = "scopes_is_invalid")]
+    [MinLength(1, ErrorMessage = "scopes_is_invalid")]
     public string[] Scopes { get; set; } = [];
 
     public Segment AsSegment()
