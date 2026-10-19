@@ -55,8 +55,19 @@ public class VariationInsightTests
         var insight = new VariationInsight
         {
             FeatureFlagKey = "valid-flag-key",
-            Variation = new Variation("not-a-guid", "value")
+            Variation = new Variation("", "value")
         };
         Assert.False(insight.IsValid());
+    }
+
+    [Fact]
+    public void IsValid_WithCustomVariationId_ReturnsTrue()
+    {
+        var insight = new VariationInsight
+        {
+            FeatureFlagKey = "valid-flag-key",
+            Variation = new Variation("variation-a", "value")
+        };
+        Assert.True(insight.IsValid());
     }
 }

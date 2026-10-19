@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.RateLimiting;
 
 namespace Api.Public;
 
+[Route("api/public/featureflag")]
 [EnableRateLimiting(RateLimitingPolicies.FeatureFlag)]
 public class FeatureFlagController(IFeatureFlagService flagService, IEvaluator evaluator) : PublicApiControllerBase
 {
