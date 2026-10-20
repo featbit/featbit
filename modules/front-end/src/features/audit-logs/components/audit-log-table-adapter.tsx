@@ -92,11 +92,7 @@ export function useDefaultAuditLogTableAdapter(
     eventTitle: (log) => auditEventTitle(log, t),
     eventSubtitle: (log) =>
       auditSnapshotKind(log)
-        ? t(
-            auditSnapshotKind(log) === "initial"
-              ? "auditLogs.initialConfiguration"
-              : "auditLogs.deletedConfiguration"
-          )
+        ? ""
         : isIamAudit(log)
           ? t("auditLogs.changeCount", { count: iamChanges(log).length })
           : auditEventFragments(log, t),

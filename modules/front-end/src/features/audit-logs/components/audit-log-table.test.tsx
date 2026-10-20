@@ -119,11 +119,14 @@ describe("AuditLogTable", () => {
   )
   it.each([
     ["FeatureFlag", "Create", false],
+    ["FeatureFlag", "Clone", false],
     ["FeatureFlag", "Remove", true],
     ["Segment", "Create", false],
+    ["Segment", "Clone", false],
     ["Segment", "Remove", true],
     ["Group", "CreateGroup", false],
     ["Group", "Create", false],
+    ["Group", "Clone", false],
     ["Group", "DeleteGroup", true],
     ["Policy", "ClonePolicy", false],
     ["Policy", "CreatePolicy", false],
@@ -218,6 +221,15 @@ describe("AuditLogTable", () => {
           ? "Configuration before deletion"
           : "Initial configuration",
       })
+      const eventRow = screen
+        .getByRole("button", { name: "Collapse audit log" })
+        .closest("tr")!
+      expect(
+        within(eventRow).queryByText("Initial configuration")
+      ).not.toBeInTheDocument()
+      expect(
+        within(eventRow).queryByText("Configuration before deletion")
+      ).not.toBeInTheDocument()
       const details = within(heading.closest("tr")!)
       expect(details.getByText("Recorded name")).toBeInTheDocument()
       expect(
