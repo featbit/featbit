@@ -17,11 +17,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import {
-  getCurrentOrganization,
-  getCurrentProjectEnv,
-  localizedPath,
-} from "@/features/layout/layout-context"
+import { localizedPath } from "@/features/layout/layout-context"
 import type { Lang } from "@/features/layout/layout-types"
 import { cn } from "@/lib/utils"
 import {
@@ -38,10 +34,6 @@ import {
 function ObjectIdentity({ log, lang }: { log: AuditLog; lang: Lang }) {
   const { t } = useTranslation()
   const identity = auditObjectIdentity(log, t("auditLogs.unavailable"))
-  const canLink =
-    (!log.organizationId ||
-      log.organizationId === getCurrentOrganization()?.id) &&
-    (!log.envId || log.envId === getCurrentProjectEnv()?.envId)
   const href =
     log.refType === "FeatureFlag"
       ? localizedPath(
@@ -58,7 +50,7 @@ function ObjectIdentity({ log, lang }: { log: AuditLog; lang: Lang }) {
 
   return (
     <div className="min-w-0">
-      {identity.available && canLink && href ? (
+      {identity.available && href ? (
         <Link
           to={href}
           className="block truncate text-primary underline-offset-4 hover:underline"

@@ -42,6 +42,35 @@ const auditLog: AuditLog = {
 
 describe("AuditLogTable", () => {
   it.each([
+    ["FeatureFlag", "/en/feature-flags/checkout-redesign/targeting"],
+    ["Segment", "/en/segments/flag-1/targeting"],
+    ["Policy", null],
+  ])("renders %s resource links without scope metadata", (refType, href) => {
+    render(
+      <MemoryRouter>
+        <TooltipProvider>
+          <AuditLogTable
+            items={[{ ...auditLog, refType }]}
+            lang="en"
+            locale="en"
+            loading={false}
+            filtered={false}
+            onClearFilters={vi.fn()}
+            onViewRawData={vi.fn()}
+          />
+        </TooltipProvider>
+      </MemoryRouter>
+    )
+    const link = screen.queryByRole("link", { name: "Checkout redesign" })
+    if (href) {
+      expect(link).toHaveAttribute("href", href)
+    } else {
+      expect(link).not.toBeInTheDocument()
+      expect(screen.getByText("Checkout redesign")).toBeInTheDocument()
+    }
+  })
+
+  it.each([
     [
       "FeatureFlag",
       "Archive",

@@ -35,9 +35,7 @@ public class AuditLogMappingTests
 
         using var json = JsonDocument.Parse(JsonSerializer.Serialize(result, new JsonSerializerOptions(JsonSerializerDefaults.Web)));
         var root = json.RootElement;
-        Assert.Equal(log.OrganizationId, root.GetProperty("organizationId").GetGuid());
-        Assert.Equal(log.EnvId, root.GetProperty("envId").GetGuid());
-        foreach (var field in new[] { "workspaceId", "organizationName", "environmentName", "projectName" })
+        foreach (var field in new[] { "workspaceId", "organizationId", "envId", "organizationName", "environmentName", "projectName" })
             Assert.False(root.TryGetProperty(field, out _));
         Assert.Equal(operation, root.GetProperty("operation").GetString());
         Assert.False(root.TryGetProperty("action", out _));
