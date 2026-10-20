@@ -312,7 +312,7 @@ describe("AuditLogTable", () => {
 
     expect(
       screen.getAllByRole("columnheader").map((header) => header.textContent)
-    ).toEqual(["", "Date", "Actor", "Type", "Resource", "Event", "Comment"])
+    ).toEqual(["", "Date", "Actor", "Type", "Resource", "Operation", "Comment"])
     expect(
       screen.getByRole("link", { name: "Checkout redesign" })
     ).toHaveAttribute("href", "/en/feature-flags/checkout-redesign/targeting")
@@ -338,7 +338,7 @@ describe("AuditLogTable", () => {
     expect(screen.getAllByText("Increase rollout after QA")).toHaveLength(2)
   })
 
-  it("keeps the Event and Comment tooltips above their cell content", async () => {
+  it("keeps the Operation and Comment tooltips above their cell content", async () => {
     render(
       <MemoryRouter>
         <TooltipProvider>
@@ -413,7 +413,7 @@ describe("AuditLogTable", () => {
 
     expect(
       screen.getAllByRole("columnheader").map((header) => header.textContent)
-    ).toEqual(["", "Date", "Actor", "Event", "Comment"])
+    ).toEqual(["", "Date", "Actor", "Operation", "Comment"])
     expect(screen.getByText("Updated segment settings")).toBeInTheDocument()
     expect(screen.getByText("Changed segment name")).toBeInTheDocument()
 
