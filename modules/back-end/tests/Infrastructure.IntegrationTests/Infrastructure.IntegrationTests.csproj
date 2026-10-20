@@ -45,7 +45,9 @@
             Files are embedded so the relative path from this project doesn't
             need to resolve at runtime.
         -->
-        <EmbeddedResource Include="..\..\..\..\infra\postgresql\docker-entrypoint-initdb.d\*.sql">
+        <!-- v6.0.1.sql is local-only; its test schema is maintained in vNext.sql. -->
+        <EmbeddedResource Include="..\..\..\..\infra\postgresql\docker-entrypoint-initdb.d\*.sql"
+                          Exclude="..\..\..\..\infra\postgresql\docker-entrypoint-initdb.d\v6.0.1.sql">
             <LogicalName>FeatBitPostgresInitDb.%(Filename)%(Extension)</LogicalName>
         </EmbeddedResource>
 

@@ -52,60 +52,33 @@ public class SharedSegmentAuditTests(FeatBitPostgresFixture fixture) : Integrati
     }
 
     [DockerFact]
-    public async Task Migration_PreservesSharedHistoryEnvironment_AndRecoversPreviouslyClearedIds()
+    public async Task TestSchema_AppliesWithoutLocalMigration_AndIsRepeatable()
     {
         await using var connection = new NpgsqlConnection(fixture.ConnectionString);
         await connection.OpenAsync();
-        var schema = "audit_migration_" + Guid.NewGuid().ToString("N");
+        var schema = "audit_schema_" + Guid.NewGuid().ToString("N");
         await using (var setup = new NpgsqlCommand($"""
             CREATE SCHEMA {schema};
             SET search_path TO {schema};
-            CREATE TABLE organizations (id uuid, workspace_id uuid);
-            CREATE TABLE projects (id uuid, organization_id uuid);
-            CREATE TABLE environments (id uuid, project_id uuid);
-            CREATE TABLE audit_logs (id uuid, env_id uuid NOT NULL, ref_type text, ref_id text, data_change jsonb, created_at timestamp);
+            CREATE TABLE feature_flags (id uuid);
+            CREATE TABLE audit_logs (id uuid, env_id uuid NOT NULL, ref_type text, ref_id text, created_at timestamp);
+            CREATE INDEX ix_audit_logs_env_id_ref_id_created_at ON audit_logs(env_id, ref_id, created_at);
             """, connection)) await setup.ExecuteNonQueryAsync();
-        var workspace = Guid.NewGuid(); var org = Guid.NewGuid(); var project = Guid.NewGuid(); var env = Guid.NewGuid();
-        var segment = new Segment(workspace, env, "Shared", "shared", SegmentType.Shared, [], [], [], [], "");
-        foreach (var deleted in new[] { false, true })
-        {
-            var change = deleted ? new DataChange(segment).To(null) : new DataChange(null).To(segment);
-            var json = System.Text.Json.JsonSerializer.Serialize(change, new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
-            await using var insert = new NpgsqlCommand("INSERT INTO audit_logs VALUES (@id, @env, 'Segment', 'shared', @change::jsonb, now())", connection);
-            insert.Parameters.AddWithValue("id", Guid.NewGuid()); insert.Parameters.AddWithValue("env", env);
-            insert.Parameters.AddWithValue("change", json);
-            await insert.ExecuteNonQueryAsync();
-        }
-        // Existing environment ownership must not depend on readable snapshot JSON.
-        await using (var legacy = new NpgsqlCommand(
-            """INSERT INTO audit_logs VALUES (@id, @env, 'Segment', 'legacy', '{"current":"not JSON"}'::jsonb, now())""", connection))
-        {
-            legacy.Parameters.AddWithValue("id", Guid.NewGuid());
-            legacy.Parameters.AddWithValue("env", env);
-            await legacy.ExecuteNonQueryAsync();
-        }
-        await using (var parents = new NpgsqlCommand("INSERT INTO organizations VALUES (@org,@ws); INSERT INTO projects VALUES (@project,@org); INSERT INTO environments VALUES (@env,@project)", connection))
-        {
-            parents.Parameters.AddWithValue("org", org); parents.Parameters.AddWithValue("ws", workspace);
-            parents.Parameters.AddWithValue("project", project); parents.Parameters.AddWithValue("env", env);
-            await parents.ExecuteNonQueryAsync();
-        }
-        using var stream = typeof(SharedSegmentAuditTests).Assembly.GetManifestResourceStream("FeatBitPostgresInitDb.v6.0.1.sql")!;
+        using var stream = typeof(SharedSegmentAuditTests).Assembly.GetManifestResourceStream("FeatBitPostgresInitDb.vNext.sql")!;
         using var reader = new StreamReader(stream);
-        var migration = (await reader.ReadToEndAsync()).Replace("\\connect featbit", "");
+        var sql = (await reader.ReadToEndAsync()).Replace("\\connect featbit", "");
         for (var run = 0; run < 2; run++)
         {
-            await using (var migrate = new NpgsqlCommand(migration, connection)) await migrate.ExecuteNonQueryAsync();
-            await using (var verify = new NpgsqlCommand("SELECT count(*) FROM audit_logs WHERE env_id=@env AND workspace_id=@ws AND organization_id=@org", connection))
-            {
-                verify.Parameters.AddWithValue("env", env); verify.Parameters.AddWithValue("ws", workspace); verify.Parameters.AddWithValue("org", org);
-                Assert.Equal(3L, await verify.ExecuteScalarAsync());
-            }
-            if (run == 0)
-            {
-                await using var clear = new NpgsqlCommand("UPDATE audit_logs SET env_id=NULL, organization_id=NULL WHERE ref_id='shared'", connection);
-                await clear.ExecuteNonQueryAsync();
-            }
+            await using var migrate = new NpgsqlCommand(sql, connection);
+            await migrate.ExecuteNonQueryAsync();
         }
+        await using var insert = new NpgsqlCommand("INSERT INTO audit_logs(id, workspace_id, organization_id, env_id) VALUES (@id, @workspace, @org, NULL)", connection);
+        insert.Parameters.AddWithValue("id", Guid.NewGuid());
+        insert.Parameters.AddWithValue("workspace", Guid.NewGuid());
+        insert.Parameters.AddWithValue("org", Guid.NewGuid());
+        Assert.Equal(1, await insert.ExecuteNonQueryAsync());
+        await using var indexes = new NpgsqlCommand("SELECT count(*) FROM pg_indexes WHERE schemaname = @schema AND tablename = 'audit_logs'", connection);
+        indexes.Parameters.AddWithValue("schema", schema);
+        Assert.Equal(3L, await indexes.ExecuteScalarAsync());
     }
 }

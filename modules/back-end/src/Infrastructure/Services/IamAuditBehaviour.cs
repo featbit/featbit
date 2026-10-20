@@ -173,13 +173,23 @@ public class IamAuditBehaviour<TRequest, TResponse>(
         };
         if (groupId != Guid.Empty)
         {
-            var group = (await store.Read<Group>(x => x.Id == groupId)).Single();
+            var group = (await store.Read<Group>(x => x.Id == groupId)).SingleOrDefault();
+            if (group == null)
+            {
+                if (r is DeleteGroup) return [];
+                throw new EntityNotFoundException(nameof(Group), groupId.ToString());
+            }
             return [new(AuditLogRefTypes.Group, groupId, group.OrganizationId)];
         }
         var policyId = r switch { UpdatePolicySetting x => x.PolicyId, UpdatePolicyStatements x => x.PolicyId, DeletePolicy x => x.PolicyId, _ => Guid.Empty };
         if (policyId != Guid.Empty)
         {
-            var policy = (await store.Read<Policy>(x => x.Id == policyId)).Single();
+            var policy = (await store.Read<Policy>(x => x.Id == policyId)).SingleOrDefault();
+            if (policy == null)
+            {
+                if (r is DeletePolicy) return [];
+                throw new EntityNotFoundException(nameof(Policy), policyId.ToString());
+            }
             if (!policy.OrganizationId.HasValue) throw new ForbiddenException();
             return [new(AuditLogRefTypes.Policy, policyId, policy.OrganizationId)];
         }
