@@ -55,6 +55,84 @@ function renderLog(item: AuditLog) {
 }
 
 describe("IAM statement audit groups", () => {
+  it("numbers replacement statements uniquely and pads only the first group", () => {
+    renderLog(log([statement], [{ ...statement, id: "replacement" }]))
+    const first = screen.getByText("Permission statement 1").closest("section")!
+    const second = screen
+      .getByText("Permission statement 2")
+      .closest("section")!
+    expect(first).toHaveClass("pt-1.5", "space-y-2")
+    expect(second).not.toHaveClass("pt-1.5")
+    expect(second).toHaveClass("space-y-2")
+    expect(first.parentElement).toHaveClass("space-y-6")
+    expect(
+      screen.getAllByText("1 statement added · 1 statement removed")
+    ).toHaveLength(2)
+  })
+
+  it.each(["CreatePolicy", "ClonePolicy", "DeletePolicy"])(
+    "uses readable statement fields and expandable lists for %s snapshots",
+    (operation) => {
+      const item = {
+        ...statement,
+        actions: [...statement.actions, "ManageServiceAccessTokens"],
+      }
+      renderLog({
+        ...log(
+          operation === "DeletePolicy" ? [item] : [],
+          operation === "DeletePolicy" ? [] : [item]
+        ),
+        operation,
+      })
+      const section = screen
+        .getByText("Permission statement 1")
+        .closest("section")!
+      expect(section).not.toHaveClass("pt-1.5")
+      expect(within(section).getByText("Access token")).toBeInTheDocument()
+      expect(within(section).getByText("Allow")).toBeInTheDocument()
+      expect(
+        within(section).getByText("List access tokens")
+      ).toBeInTheDocument()
+      expect(
+        within(section).queryByText(/^(Added|Removed|Updated)$/)
+      ).not.toBeInTheDocument()
+      fireEvent.click(
+        within(section).getByRole("button", { name: "Show 1 more" })
+      )
+      expect(
+        within(section).getByText("Manage service access tokens")
+      ).toBeInTheDocument()
+      expect(screen.queryByText(statement.id)).not.toBeInTheDocument()
+    }
+  )
+
+  it("shows the no-change message for reorder-only events", () => {
+    renderLog(
+      log(
+        [statement],
+        [{ ...statement, actions: [...statement.actions].reverse() }]
+      )
+    )
+    expect(screen.getAllByText("0 changes")).toHaveLength(2)
+    expect(
+      screen.getByText("No semantic changes available.")
+    ).toBeInTheDocument()
+  })
+
+  it.each(["invalid JSON", "", "null", "[]"])(
+    "distinguishes unreadable snapshots (%s) from no changes",
+    (raw) => {
+      const item = log([], [statement])
+      item.dataChange.previous = raw
+      renderLog(item)
+      expect(
+        screen.getAllByText("Configuration snapshot is unavailable.")
+      ).toHaveLength(3)
+      expect(screen.queryByText("0 changes")).not.toBeInTheDocument()
+      expect(screen.queryByText("1 statement added")).not.toBeInTheDocument()
+    }
+  )
+
   it.each(["added", "removed"] as const)(
     "counts an %s statement once and renders its full configuration",
     (action) => {

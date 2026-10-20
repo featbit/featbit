@@ -28,8 +28,8 @@ export function iamStatementChanges(log: AuditLog): IamStatementChange[] {
       resources: [...new Set(statement.resources ?? [])].sort(),
       actions: [...new Set(statement.actions ?? [])].sort(),
     })
-  return [...new Set([...after, ...before].map((item) => item.id))].flatMap(
-    (id) => {
+  return [...new Set([...after, ...before].map((item) => item.id))]
+    .flatMap((id) => {
       const previous = before.find((item) => item.id === id)
       const current = after.find((item) => item.id === id)
       if (previous && current && normalize(previous) === normalize(current))
@@ -37,8 +37,7 @@ export function iamStatementChanges(log: AuditLog): IamStatementChange[] {
       return [
         {
           id,
-          number:
-            (current ? after.indexOf(current) : before.indexOf(previous!)) + 1,
+          number: 0,
           action: !previous
             ? ("added" as const)
             : !current
@@ -48,11 +47,16 @@ export function iamStatementChanges(log: AuditLog): IamStatementChange[] {
           current,
         },
       ]
-    }
-  )
+    })
+    .map((change, index) => ({ ...change, number: index + 1 }))
 }
 
 export function iamChangeSummary(log: AuditLog, t: TFunction) {
+  if (
+    !iamSnapshotReadable(log.dataChange.previous) ||
+    !iamSnapshotReadable(log.dataChange.current)
+  )
+    return { count: 0, label: t("auditLogs.snapshotUnavailable") }
   const statements = iamStatementChanges(log)
   const otherCount = iamChanges(log).filter((change) => !change.label).length
   if (!statements.length)
@@ -73,6 +77,14 @@ export function iamChangeSummary(log: AuditLog, t: TFunction) {
   })
   if (otherCount) parts.push(t("auditLogs.changeCount", { count: otherCount }))
   return { count: statements.length + otherCount, label: parts.join(" · ") }
+}
+export function iamSnapshotReadable(raw?: string) {
+  try {
+    const value: unknown = raw ? JSON.parse(raw) : null
+    return !!value && typeof value === "object" && !Array.isArray(value)
+  } catch {
+    return false
+  }
 }
 type Snapshot = {
   name?: string

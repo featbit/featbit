@@ -11,8 +11,12 @@ import type { IamStatementChange } from "../iam-audit-changes"
 
 export function IamStatementChangeDetails({
   change,
+  lifecycle = false,
+  first = false,
 }: {
   change: IamStatementChange
+  lifecycle?: boolean
+  first?: boolean
 }) {
   const { t } = useTranslation()
   const snapshot = change.action !== "updated"
@@ -80,14 +84,16 @@ export function IamStatementChangeDetails({
     }
   }
   return (
-    <section className="space-y-2 pt-1.5">
+    <section className={first ? "space-y-2 pt-1.5" : "space-y-2"}>
       <div className="flex items-center gap-3 px-2">
         <h4 className="text-[13px] font-semibold">
           {t("auditLogs.permissionStatement", { number: change.number })}
         </h4>
-        <span className="text-xs text-muted-foreground">
-          {t(`featureFlags.detailsPage.review.${change.action}`)}
-        </span>
+        {!lifecycle && (
+          <span className="text-xs text-muted-foreground">
+            {t(`featureFlags.detailsPage.review.${change.action}`)}
+          </span>
+        )}
       </div>
       <ChangeLedger
         changes={fields}

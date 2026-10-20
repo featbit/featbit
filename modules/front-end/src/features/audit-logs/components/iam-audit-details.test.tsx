@@ -157,8 +157,23 @@ describe("IAM lifecycle fields", () => {
     )
     expect(screen.getByText("Description")).toBeInTheDocument()
     expect(screen.getByText("Old description")).toBeInTheDocument()
+    expect(screen.getByText("Updated")).toBeInTheDocument()
+    expect(screen.getByText("—")).toBeInTheDocument()
+    expect(screen.queryByText("Removed")).not.toBeInTheDocument()
     expect(screen.queryByText("Name")).not.toBeInTheDocument()
     expect(screen.queryByText("Members")).not.toBeInTheDocument()
+  })
+
+  it("renders filling an empty scalar as an update from an empty value", () => {
+    render(
+      <IamAuditDetails
+        log={log("Update", { description: "" }, { description: "New" })}
+      />
+    )
+    expect(screen.getByText("Updated")).toBeInTheDocument()
+    expect(screen.getByText("—")).toBeInTheDocument()
+    expect(screen.getByText("New")).toBeInTheDocument()
+    expect(screen.queryByText("Added")).not.toBeInTheDocument()
   })
 
   it("keeps an unavailable snapshot distinct from an empty field", () => {

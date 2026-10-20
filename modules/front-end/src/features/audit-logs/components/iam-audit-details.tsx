@@ -5,6 +5,7 @@ import {
   iamChanges,
   iamSnapshotFields,
   iamStatementChanges,
+  iamSnapshotReadable,
 } from "../iam-audit-changes"
 import { IamStatementChangeDetails } from "./iam-statement-change"
 import type { AuditLog } from "../audit-logs-types"
@@ -29,15 +30,27 @@ function IamReference({ value }: { value: string }) {
 export function IamAuditDetails({ log }: { log: AuditLog }) {
   const { t } = useTranslation()
   const snapshot = !!auditSnapshotKind(log)
-  const statements = snapshot ? [] : iamStatementChanges(log)
+  const displayLog = snapshot ? auditSnapshotLog(log) : log
+  const unavailable =
+    !iamSnapshotReadable(displayLog.dataChange.current) ||
+    (!snapshot && !iamSnapshotReadable(displayLog.dataChange.previous))
+  const statements = unavailable ? [] : iamStatementChanges(displayLog)
   const changes: ChangeReviewItem[] = (
-    snapshot ? iamSnapshotFields(auditSnapshotLog(log)) : iamChanges(log)
+    unavailable
+      ? []
+      : snapshot
+        ? iamSnapshotFields(displayLog)
+        : iamChanges(log)
   ).map((change) => ({
     kind: change.field,
     label: change.label ?? "",
-    action: !change.before ? "added" : !change.after ? "removed" : "updated",
-    previous: change.before || undefined,
-    current: change.after || undefined,
+    action: ["members", "groups", "policies"].includes(change.field)
+      ? !change.before
+        ? "added"
+        : "removed"
+      : "updated",
+    previous: snapshot ? undefined : change.before,
+    current: snapshot ? change.after || undefined : change.after,
     ...(change.values?.length
       ? { valueGroups: [{ action: "added" as const, values: change.values }] }
       : {}),
@@ -55,37 +68,26 @@ export function IamAuditDetails({ log }: { log: AuditLog }) {
           </span>
         </p>
       ) : null}
-      {snapshot && !changes.length ? (
+      {unavailable || (snapshot && !changes.length) ? (
         <p className="text-sm text-muted-foreground">
           {t("auditLogs.snapshotUnavailable")}
         </p>
-      ) : snapshot ? (
-        <div className="max-h-[32rem] space-y-6 overflow-y-auto">
-          <IamLedger
-            changes={changes.filter((change) => !change.label)}
-            snapshot
-          />
-          {[
-            ...new Set(changes.map((change) => change.label).filter(Boolean)),
-          ].map((id, index) => (
-            <section key={id}>
-              <h4 className="px-2 text-[13px] font-semibold text-foreground">
-                {t("auditLogs.permissionStatement", { number: index + 1 })}
-              </h4>
-              <IamLedger
-                changes={changes
-                  .filter((change) => change.label === id)
-                  .map((change) => ({ ...change, label: "" }))}
-                snapshot
-              />
-            </section>
-          ))}
-        </div>
+      ) : !fieldChanges.length && !statements.length ? (
+        <p className="py-5 text-center text-sm text-muted-foreground">
+          {t("auditLogs.noSemanticChanges")}
+        </p>
       ) : (
         <div className="max-h-[32rem] space-y-6 overflow-y-auto">
-          {fieldChanges.length > 0 ? <IamLedger changes={fieldChanges} /> : null}
-          {statements.map((change) => (
-            <IamStatementChangeDetails key={change.id} change={change} />
+          {fieldChanges.length > 0 ? (
+            <IamLedger changes={fieldChanges} snapshot={snapshot} />
+          ) : null}
+          {statements.map((change, index) => (
+            <IamStatementChangeDetails
+              key={change.id}
+              change={change}
+              lifecycle={snapshot}
+              first={index === 0 && fieldChanges.length === 0}
+            />
           ))}
         </div>
       )}
@@ -136,7 +138,7 @@ function IamLedger({
       renderValue={(value) => <IamReference value={value} />}
       renderContent={(change) =>
         ["members", "groups", "policies"].includes(change.kind) ? (
-          <IamReference value={change.current ?? change.previous ?? ""} />
+          <IamReference value={change.current || change.previous || ""} />
         ) : undefined
       }
     />
