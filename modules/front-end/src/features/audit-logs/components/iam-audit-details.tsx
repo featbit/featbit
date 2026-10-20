@@ -1,7 +1,12 @@
 import { useTranslation } from "react-i18next"
 import { ChangeLedger } from "@/features/change-review/change-ledger"
 import type { ChangeReviewItem } from "@/features/change-review/change-review-types"
-import { iamChanges, iamSnapshotFields } from "../iam-audit-changes"
+import {
+  iamChanges,
+  iamSnapshotFields,
+  iamStatementChanges,
+} from "../iam-audit-changes"
+import { IamStatementChangeDetails } from "./iam-statement-change"
 import type { AuditLog } from "../audit-logs-types"
 import { auditSnapshotKind, auditSnapshotLog } from "../audit-snapshot"
 
@@ -24,6 +29,7 @@ function IamReference({ value }: { value: string }) {
 export function IamAuditDetails({ log }: { log: AuditLog }) {
   const { t } = useTranslation()
   const snapshot = !!auditSnapshotKind(log)
+  const statements = snapshot ? [] : iamStatementChanges(log)
   const changes: ChangeReviewItem[] = (
     snapshot ? iamSnapshotFields(auditSnapshotLog(log)) : iamChanges(log)
   ).map((change) => ({
@@ -36,6 +42,9 @@ export function IamAuditDetails({ log }: { log: AuditLog }) {
       ? { valueGroups: [{ action: "added" as const, values: change.values }] }
       : {}),
   }))
+  const fieldChanges = changes.filter(
+    (change) => log.refType !== "Policy" || !change.label
+  )
   return (
     <div className="space-y-3">
       {log.dataChange.clonedFrom ? (
@@ -63,9 +72,6 @@ export function IamAuditDetails({ log }: { log: AuditLog }) {
               <h4 className="px-2 text-[13px] font-semibold text-foreground">
                 {t("auditLogs.permissionStatement", { number: index + 1 })}
               </h4>
-              <p className="mt-1 px-2 font-mono text-xs break-all text-muted-foreground">
-                {id}
-              </p>
               <IamLedger
                 changes={changes
                   .filter((change) => change.label === id)
@@ -76,7 +82,12 @@ export function IamAuditDetails({ log }: { log: AuditLog }) {
           ))}
         </div>
       ) : (
-        <IamLedger changes={changes} />
+        <div className="max-h-[32rem] space-y-6 overflow-y-auto">
+          {fieldChanges.length > 0 ? <IamLedger changes={fieldChanges} /> : null}
+          {statements.map((change) => (
+            <IamStatementChangeDetails key={change.id} change={change} />
+          ))}
+        </div>
       )}
     </div>
   )

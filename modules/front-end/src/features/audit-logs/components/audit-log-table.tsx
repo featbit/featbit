@@ -300,9 +300,10 @@ export function AuditLogTable({
                             {!changeDetails.kind ||
                             changeDetails.kind === "changes" ? (
                               <span className="text-sm text-muted-foreground">
-                                {t("auditLogs.changeCount", {
-                                  count: changeDetails.count,
-                                })}
+                                {changeDetails.countLabel ??
+                                  t("auditLogs.changeCount", {
+                                    count: changeDetails.count,
+                                  })}
                               </span>
                             ) : null}
                           </div>

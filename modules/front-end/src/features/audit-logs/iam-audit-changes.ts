@@ -1,4 +1,5 @@
 import type { AuditLog } from "./audit-logs-types"
+import type { TFunction } from "i18next"
 
 type Reference = { id: string; name: string; rn: string }
 type Statement = {
@@ -7,6 +8,71 @@ type Statement = {
   resourceType: string
   resources: string[]
   actions: string[]
+}
+export type IamStatementChange = {
+  id: string
+  number: number
+  action: "added" | "removed" | "updated"
+  previous?: Statement
+  current?: Statement
+}
+
+export function iamStatementChanges(log: AuditLog): IamStatementChange[] {
+  if (log.refType !== "Policy") return []
+  const before = snapshot(log.dataChange.previous).statements ?? []
+  const after = snapshot(log.dataChange.current).statements ?? []
+  const normalize = (statement: Statement) =>
+    JSON.stringify({
+      resourceType: statement.resourceType ?? "",
+      effect: statement.effect ?? "",
+      resources: [...new Set(statement.resources ?? [])].sort(),
+      actions: [...new Set(statement.actions ?? [])].sort(),
+    })
+  return [...new Set([...after, ...before].map((item) => item.id))].flatMap(
+    (id) => {
+      const previous = before.find((item) => item.id === id)
+      const current = after.find((item) => item.id === id)
+      if (previous && current && normalize(previous) === normalize(current))
+        return []
+      return [
+        {
+          id,
+          number:
+            (current ? after.indexOf(current) : before.indexOf(previous!)) + 1,
+          action: !previous
+            ? ("added" as const)
+            : !current
+              ? ("removed" as const)
+              : ("updated" as const),
+          previous,
+          current,
+        },
+      ]
+    }
+  )
+}
+
+export function iamChangeSummary(log: AuditLog, t: TFunction) {
+  const statements = iamStatementChanges(log)
+  const otherCount = iamChanges(log).filter((change) => !change.label).length
+  if (!statements.length)
+    return {
+      count: otherCount,
+      label: t("auditLogs.changeCount", { count: otherCount }),
+    }
+  const parts = (["added", "removed", "updated"] as const).flatMap((action) => {
+    const count = statements.filter((change) => change.action === action).length
+    return count
+      ? [
+          t(
+            `auditLogs.statements${action[0].toUpperCase()}${action.slice(1)}`,
+            { count }
+          ),
+        ]
+      : []
+  })
+  if (otherCount) parts.push(t("auditLogs.changeCount", { count: otherCount }))
+  return { count: statements.length + otherCount, label: parts.join(" · ") }
 }
 type Snapshot = {
   name?: string

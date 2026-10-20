@@ -1,6 +1,6 @@
 import { IamAuditDetails } from "./iam-audit-details"
 import { ArrowRight } from "lucide-react"
-import { iamChanges, isIamAudit } from "../iam-audit-changes"
+import { iamChanges, iamChangeSummary, isIamAudit } from "../iam-audit-changes"
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { ChangeLedger as SharedChangeLedger } from "@/features/change-review/change-ledger"
@@ -24,6 +24,7 @@ import { auditSnapshotKind } from "../audit-snapshot"
 
 export type AuditLogChangeDetails = {
   count: number
+  countLabel?: string
   content: ReactNode
   kind?: "changes" | "decision" | "initial" | "deleted" | "status"
 }
@@ -94,7 +95,7 @@ export function useDefaultAuditLogTableAdapter(
       auditSnapshotKind(log)
         ? ""
         : isIamAudit(log)
-          ? t("auditLogs.changeCount", { count: iamChanges(log).length })
+          ? iamChangeSummary(log, t).label
           : auditEventFragments(log, t),
     changeDetails: (log) => {
       const status = auditStatusChange(log, t)
@@ -117,7 +118,10 @@ export function useDefaultAuditLogTableAdapter(
       if (isIamAudit(log))
         return {
           kind: snapshotKind,
-          count: iamChanges(log).length,
+          count: snapshotKind
+            ? iamChanges(log).length
+            : iamChangeSummary(log, t).count,
+          countLabel: snapshotKind ? undefined : iamChangeSummary(log, t).label,
           content: <IamAuditDetails log={log} />,
         }
       if (isChangeRequestDecisionOperation(log.operation)) {
