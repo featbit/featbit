@@ -1,0 +1,35 @@
+name: Run E2E Core Tests
+description: Prepare dependencies and test one stack or all stacks sequentially
+inputs:
+  image-version:
+    description: Published or staged image tag; empty builds the checkout
+    default: ''
+  stack:
+    description: Stack name; empty runs all five
+    default: ''
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+    - uses: actions/setup-dotnet@v5
+      with:
+        dotnet-version: '8.0.x'
+    - shell: bash
+      working-directory: e2e/core
+      run: npm ci
+    - shell: bash
+      working-directory: e2e/core
+      run: npx playwright install --with-deps chromium
+    - name: Run suite
+      shell: bash
+      working-directory: e2e/core
+      env:
+        IMAGE_VERSION: ${{ inputs.image-version }}
+        STACK: ${{ inputs.stack }}
+      run: |
+        args=(--local)
+        if [[ -n "$IMAGE_VERSION" ]]; then args=(--image-version "$IMAGE_VERSION"); fi
+        if [[ -n "$STACK" ]]; then args+=(--stack "$STACK"); fi
+        npm run test:all -- "${args[@]}"

@@ -1,16 +1,13 @@
+using Domain.Policies;
+using Domain.Resources;
 using Application.Bases;
 using Application.Bases.Exceptions;
 using Domain.Projects;
 
 namespace Application.Projects;
 
-public class CreateProject : IRequest<ProjectWithEnvs>
+public class CreateProjectPayload
 {
-    /// <summary>
-    /// The ID of the organization the project belongs to. Retrieved from the request header.
-    /// </summary>
-    public Guid OrganizationId { get; set; }
-
     /// <summary>
     /// The name of the project
     /// </summary>
@@ -20,6 +17,27 @@ public class CreateProject : IRequest<ProjectWithEnvs>
     /// The unique key of the project
     /// </summary>
     public string Key { get; set; }
+}
+
+public class CreateProject : CreateProjectPayload, IRequest<ProjectWithEnvs>
+{
+    /// <summary>
+    /// The ID of the organization the project belongs to. Retrieved from the request header.
+    /// </summary>
+    public Guid OrganizationId { get; set; }
+
+    /// <summary>
+    /// Current request permissions
+    /// </summary>
+    public PolicyStatement[] Permissions { get; set; }
+
+    public CreateProject(Guid organizationId, CreateProjectPayload payload, PolicyStatement[] permissions)
+    {
+        OrganizationId = organizationId;
+        Name = payload.Name;
+        Key = payload.Key;
+        Permissions = permissions;
+    }
 }
 
 public class CreateProjectValidator : AbstractValidator<CreateProject>
@@ -59,6 +77,14 @@ public class CreateProjectHandler : IRequestHandler<CreateProject, ProjectWithEn
         // publish on project added notification
         await _publisher.Publish(new OnProjectAdded(projectWithEnvs), cancellationToken);
 
-        return projectWithEnvs;
+        return new ProjectWithEnvs
+        {
+            Id = projectWithEnvs.Id,
+            Key = projectWithEnvs.Key,
+            Name = projectWithEnvs.Name,
+            Environments = projectWithEnvs.Environments
+                .Select(env => env.Sanitize(RN.ForEnv(projectWithEnvs.Key, env.Key), request.Permissions))
+                .ToArray()
+        };
     }
 }

@@ -7,6 +7,75 @@ import { ContextBar } from "./context-bar"
 Element.prototype.scrollIntoView = vi.fn()
 
 describe("ContextBar", () => {
+  it("keeps endpoints available but hides the secrets section without read permission", async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText },
+    })
+    window.env = {
+      EVALUATION_URL: "https://evaluation.example.com",
+      API_URL: "https://api.example.com",
+    }
+    render(
+      <MemoryRouter>
+        <ContextBar
+          organization={null}
+          currentProjectEnv={{
+            projectId: "p",
+            projectName: "Demo",
+            projectKey: "demo",
+            envId: "e",
+            envName: "Production",
+            envKey: "prod",
+          }}
+          projects={[
+            {
+              id: "p",
+              name: "Demo",
+              key: "demo",
+              environments: [
+                {
+                  id: "e",
+                  name: "Production",
+                  secrets: [
+                    {
+                      id: "s",
+                      name: "Server SDK",
+                      type: "server",
+                      value: "secret",
+                    },
+                  ],
+                },
+              ],
+            },
+          ]}
+          canViewSecrets={false}
+          onProjectEnvChange={vi.fn()}
+        />
+      </MemoryRouter>
+    )
+    expect(screen.getByRole("button", { name: /Production/ })).toBeVisible()
+    fireEvent.click(
+      screen.getByRole("button", { name: "View and copy SDK configuration" })
+    )
+    expect(
+      await screen.findByText("https://evaluation.example.com")
+    ).toBeVisible()
+    expect(screen.getByText("https://api.example.com")).toBeVisible()
+    expect(screen.queryByText("Environment secrets")).not.toBeInTheDocument()
+    expect(screen.queryByText("Server SDK")).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("menuitem", { name: /Manage secrets/i })
+    ).not.toBeInTheDocument()
+    fireEvent.click(
+      screen.getByRole("menuitem", { name: "Copy Streaming URL" })
+    )
+    await waitFor(() =>
+      expect(writeText).toHaveBeenCalledWith("wss://evaluation.example.com")
+    )
+  })
+
   afterEach(() => {
     window.env = undefined
   })
@@ -15,6 +84,7 @@ describe("ContextBar", () => {
     render(
       <MemoryRouter initialEntries={["/en"]}>
         <ContextBar
+          canViewSecrets
           organization={{ id: "org-1", key: "acme", name: "Acme" }}
           currentProjectEnv={{
             projectId: "project-1",
@@ -75,6 +145,7 @@ describe("ContextBar", () => {
     render(
       <MemoryRouter initialEntries={["/en"]}>
         <ContextBar
+          canViewSecrets
           organization={{ id: "org-1", key: "acme", name: "Acme" }}
           currentProjectEnv={{
             projectId: "project-1",

@@ -211,7 +211,7 @@ export function SegmentSheet({
               })
             })}
           >
-            <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
+            <div className="min-h-0 flex-1 overflow-y-auto px-6 py-2">
               <section className="space-y-2">
                 <div className="flex items-center gap-1.5">
                   <Label id="segment-type-label">

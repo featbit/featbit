@@ -1,3 +1,4 @@
+using Domain.Policies;
 using Application.Bases;
 using Application.Bases.Exceptions;
 using Domain.Environments;
@@ -5,13 +6,8 @@ using Environment = Domain.Environments.Environment;
 
 namespace Application.Environments;
 
-public class CreateEnvironment : IRequest<EnvironmentVm>
+public class CreateEnvironmentPayload
 {
-    /// <summary>
-    /// The ID of the project the environment belongs to. Retrieved from the URL path.
-    /// </summary>
-    public Guid ProjectId { get; set; }
-
     /// <summary>
     /// The name of the environment.
     /// </summary>
@@ -34,6 +30,29 @@ public class CreateEnvironment : IRequest<EnvironmentVm>
     public EnvironmentSettings Settings { get; set; } = null;
 }
 
+public class CreateEnvironment : CreateEnvironmentPayload, IRequest<EnvironmentVm>
+{
+    /// <summary>
+    /// The ID of the project the environment belongs to. Retrieved from the URL path.
+    /// </summary>
+    public Guid ProjectId { get; set; }
+
+    /// <summary>
+    /// Current request permissions
+    /// </summary>
+    public PolicyStatement[] Permissions { get; set; }
+
+    public CreateEnvironment(Guid projectId, CreateEnvironmentPayload payload, PolicyStatement[] permissions)
+    {
+        ProjectId = projectId;
+        Name = payload.Name;
+        Key = payload.Key;
+        Description = payload.Description;
+        Settings = payload.Settings;
+        Permissions = permissions;
+    }
+}
+
 public class CreateEnvironmentValidator : AbstractValidator<CreateEnvironment>
 {
     public CreateEnvironmentValidator()
@@ -46,7 +65,11 @@ public class CreateEnvironmentValidator : AbstractValidator<CreateEnvironment>
     }
 }
 
-public class CreateEnvironmentHandler(IEnvironmentService service, IMapper mapper, IPublisher publisher)
+public class CreateEnvironmentHandler(
+    IEnvironmentService service,
+    IMapper mapper,
+    IPublisher publisher,
+    IResourceService resources)
     : IRequestHandler<CreateEnvironment, EnvironmentVm>
 {
     public async Task<EnvironmentVm> Handle(CreateEnvironment request, CancellationToken cancellationToken)
@@ -62,6 +85,9 @@ public class CreateEnvironmentHandler(IEnvironmentService service, IMapper mappe
 
         // publish on environment added notification
         await publisher.Publish(new OnEnvironmentAdded(env), cancellationToken);
+
+        var resourceRn = await resources.GetEnvRnAsync(env.Id);
+        env.Sanitize(resourceRn, request.Permissions);
 
         return mapper.Map<EnvironmentVm>(env);
     }

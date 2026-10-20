@@ -42,6 +42,7 @@ public static class Permissions
     public const string DeleteEnvSecret = nameof(DeleteEnvSecret);
     public const string CreateEnvSecret = nameof(CreateEnvSecret);
     public const string UpdateEnvSecret = nameof(UpdateEnvSecret);
+    public const string ViewEnvSecret = nameof(ViewEnvSecret);
 
     // Flags
     public const string CreateFlag = nameof(CreateFlag);
@@ -110,6 +111,7 @@ public static class Permissions
         { DeleteEnvSecret, ResourceTypes.Env },
         { CreateEnvSecret, ResourceTypes.Env },
         { UpdateEnvSecret, ResourceTypes.Env },
+        { ViewEnvSecret, ResourceTypes.Env },
 
         // Flags
         { CreateFlag, ResourceTypes.FeatureFlag },

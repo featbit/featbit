@@ -58,6 +58,11 @@ public class CreateFeatureFlag : IRequest<FeatureFlag>
     /// </summary>
     public string[] Tags { get; set; }
 
+    /// <summary>
+    /// Whether evaluation insights are collected for this flag. Defaults to true.
+    /// </summary>
+    public bool InsightsEnabled { get; set; } = true;
+
     public FeatureFlag AsFeatureFlag(Guid currentUserId)
     {
         var flag = new FeatureFlag(
@@ -72,7 +77,10 @@ public class CreateFeatureFlag : IRequest<FeatureFlag>
             EnabledVariationId,
             Tags,
             currentUserId
-        );
+        )
+        {
+            InsightsEnabled = InsightsEnabled
+        };
 
         return flag;
     }

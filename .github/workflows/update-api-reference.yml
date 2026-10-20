@@ -31,7 +31,6 @@ env:
   DOTNET_VERSION: 10.0.x
   NODE_VERSION: 24
   PNPM_VERSION: 9.6.0
-  SWASHBUCKLE_CLI_VERSION: 10.1.7
   CANDIDATE_VERSION: ${{ github.event_name == 'release' && github.event.release.tag_name || inputs.candidate_version }}
   SOURCE_REF: ${{ github.event_name == 'release' && github.event.release.tag_name || inputs.source_ref }}
 
@@ -172,24 +171,19 @@ jobs:
         working-directory: featbit/modules/back-end
         run: dotnet build Backend.slnx --configuration Release --no-restore
 
-      - name: Install Swagger CLI
-        run: >-
-          dotnet tool install
-          --tool-path "$RUNNER_TEMP/dotnet-tools"
-          Swashbuckle.AspNetCore.Cli
-          --version "${SWASHBUCKLE_CLI_VERSION}"
-
       - name: Export OpenAPI document
-        working-directory: featbit/modules/back-end/src/Api/bin/Release/net10.0
+        working-directory: featbit/modules/back-end
         env:
           ASPNETCORE_ENVIRONMENT: Production
           Jwt__Key: swagger-generation-only-key-at-least-32-characters
         run: |
-          mkdir -p "$RUNNER_TEMP/openapi"
-          "$RUNNER_TEMP/dotnet-tools/swagger" tofile \
-            --output "$RUNNER_TEMP/openapi/featbit.json" \
-            Api.dll \
-            OpenApi
+          mkdir -p "$RUNNER_TEMP/openapi-raw" "$RUNNER_TEMP/openapi"
+          dotnet build src/Api/Api.csproj \
+            --configuration Release \
+            --no-restore \
+            -p:OpenApiGenerateDocumentsOnBuild=true \
+            -p:OpenApiDocumentsDirectory="$RUNNER_TEMP/openapi-raw"
+          cp "$RUNNER_TEMP/openapi-raw/Api_openapi.json" "$RUNNER_TEMP/openapi/featbit.json"
 
       - name: Upload OpenAPI document
         uses: actions/upload-artifact@v4

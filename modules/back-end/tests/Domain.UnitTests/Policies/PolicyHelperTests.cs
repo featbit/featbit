@@ -5,6 +5,17 @@ namespace Domain.UnitTests.Policies;
 
 public class PolicyHelperTests
 {
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData(" \t\r\n")]
+    public void IsAllowed_BlankResourceDeniedEvenWithOwnerGrant(string? resourceRn)
+    {
+        var owner = Statement(ResourceTypes.All, EffectType.Allow, ["*"], ["*"]);
+
+        Assert.False(PolicyHelper.IsAllowed([owner], resourceRn!, Permissions.ViewEnvSecret));
+    }
+
     [Fact]
     public void IsMatch_WildcardActionAndResource_MatchesConcreteCheck()
     {

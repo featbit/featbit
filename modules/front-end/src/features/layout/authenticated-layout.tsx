@@ -9,6 +9,11 @@ import {
   authContextQueryKeys,
   projectsQueryOptions,
 } from "@/features/layout/auth-context-query"
+import {
+  canUseAction,
+  environmentRn,
+} from "@/features/iam/current-user-permissions"
+import { currentUserPoliciesQueryOptions } from "@/features/iam/current-user-policy-query"
 import { ContextBar } from "@/features/layout/components/context-bar"
 import { GlobalMessageBanner } from "@/features/layout/components/global-message-banner"
 import { buildBillingGlobalMessages } from "@/features/layout/global-message"
@@ -84,6 +89,9 @@ export function AuthenticatedLayout() {
   )
   const [organization, setOrganization] = useState<Organization | null>(() =>
     getCurrentOrganization()
+  )
+  const permissionsQuery = useQuery(
+    currentUserPoliciesQueryOptions(organization?.id ?? "")
   )
   const [currentProjectEnv, setCurrentProjectEnv] = useState<ProjectEnv | null>(
     () => getCurrentProjectEnv()
@@ -340,6 +348,17 @@ export function AuthenticatedLayout() {
               organization={organization}
               currentProjectEnv={currentProjectEnv}
               projects={projects}
+              canViewSecrets={Boolean(
+                currentProjectEnv &&
+                canUseAction(
+                  permissionsQuery.data ?? [],
+                  environmentRn(
+                    currentProjectEnv.projectKey,
+                    currentProjectEnv.envKey
+                  ),
+                  "ViewEnvSecret"
+                )
+              )}
               onProjectEnvChange={changeCurrentProjectEnv}
             />
             <SubscriptionLicenseBadge lang={lang} workspace={workspace} />
