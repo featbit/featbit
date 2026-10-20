@@ -23,6 +23,7 @@ export type IamChange = {
   before: string
   after: string
   label?: string
+  values?: string[]
 }
 
 export function isIamAudit(log: AuditLog) {
@@ -83,4 +84,50 @@ export function iamChanges(log: AuditLog): IamChange[] {
     }
   }
   return changes
+}
+
+// Lifecycle details describe a resource's configuration, not a diff from {}.
+export function iamSnapshotFields(log: AuditLog): IamChange[] {
+  const data = snapshot(log.dataChange.current)
+  if (!Object.keys(data).length) return []
+  const fields: IamChange[] = []
+  const add = (field: string, value: string | undefined, label?: string) =>
+    fields.push({ field, before: "", after: value ?? "", label })
+  add("name", data.name)
+  if (log.refType === "Member") add("email", data.email)
+  else add("description", data.description)
+  const collections =
+    log.refType === "Member"
+      ? (["groups", "policies"] as const)
+      : log.refType === "Group"
+        ? (["members", "policies"] as const)
+        : (["members", "groups"] as const)
+  for (const field of collections) {
+    fields.push({
+      field,
+      before: "",
+      after: "",
+      values: (data[field] ?? []).map((entry) => `${entry.name}\n${entry.rn}`),
+    })
+  }
+  if (log.refType === "Policy") {
+    const statements = data.statements ?? []
+    if (!statements.length) add("statements", "")
+    for (const statement of statements) {
+      for (const field of [
+        "resourceType",
+        "effect",
+        "resources",
+        "actions",
+      ] as const) {
+        const value = statement[field]
+        add(
+          field,
+          Array.isArray(value) ? [...new Set(value)].sort().join("\n") : value,
+          statement.id
+        )
+      }
+    }
+  }
+  return fields
 }

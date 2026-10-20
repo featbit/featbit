@@ -37,11 +37,14 @@ describe("IAM reference collections", () => {
         const snapshot = { [field]: references }
         render(
           <IamAuditDetails
-            log={log(
-              operation,
-              operation === "Delete" ? snapshot : {},
-              operation === "Delete" ? {} : snapshot
-            )}
+            log={{
+              ...log(
+                operation,
+                operation === "Delete" ? snapshot : {},
+                operation === "Delete" ? {} : snapshot
+              ),
+              refType: field === "groups" ? "Member" : "Group",
+            }}
           />
         )
         const items = screen.getAllByRole("listitem")
@@ -83,4 +86,84 @@ describe("IAM reference collections", () => {
       }
     })
   }
+})
+
+describe("IAM lifecycle fields", () => {
+  for (const [refType, labels, absent] of [
+    [
+      "Member",
+      ["Name", "Email", "Groups", "Policies"],
+      ["Description", "Members", "Permission statements"],
+    ],
+    [
+      "Group",
+      ["Name", "Description", "Members", "Policies"],
+      ["Email", "Groups", "Permission statements"],
+    ],
+    [
+      "Policy",
+      ["Name", "Description", "Members", "Groups", "Permission statements"],
+      ["Email", "Policies"],
+    ],
+  ] as const) {
+    it.each(["Create", "Clone", "Delete"])(
+      `${refType} %s shows applicable empty fields only`,
+      (operation) => {
+        // Include legacy irrelevant fields to ensure resource type drives the UI.
+        const data = {
+          name: "",
+          email: null,
+          description: "",
+          members: [],
+          groups: [],
+          policies: [],
+          statements: [],
+        }
+        render(
+          <IamAuditDetails
+            log={{
+              ...log(
+                operation,
+                operation === "Delete" ? data : {},
+                operation === "Delete" ? {} : data
+              ),
+              refType,
+            }}
+          />
+        )
+        for (const label of labels)
+          expect(screen.getByText(label)).toBeInTheDocument()
+        for (const label of absent)
+          expect(screen.queryByText(label)).not.toBeInTheDocument()
+        expect(screen.getAllByText("—")).toHaveLength(labels.length)
+      }
+    )
+  }
+
+  it("shows only changed fields for updates, including clearing a description", () => {
+    render(
+      <IamAuditDetails
+        log={log(
+          "Update",
+          {
+            name: "Group",
+            description: "Old description",
+            members: [],
+            policies: [],
+          },
+          { name: "Group", description: "", members: [], policies: [] }
+        )}
+      />
+    )
+    expect(screen.getByText("Description")).toBeInTheDocument()
+    expect(screen.getByText("Old description")).toBeInTheDocument()
+    expect(screen.queryByText("Name")).not.toBeInTheDocument()
+    expect(screen.queryByText("Members")).not.toBeInTheDocument()
+  })
+
+  it("keeps an unavailable snapshot distinct from an empty field", () => {
+    render(<IamAuditDetails log={log("Create", {}, {})} />)
+    expect(screen.queryByText("Description")).not.toBeInTheDocument()
+    expect(screen.queryByText("—")).not.toBeInTheDocument()
+  })
 })

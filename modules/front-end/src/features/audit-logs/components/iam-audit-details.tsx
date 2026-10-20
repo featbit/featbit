@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next"
 import { ChangeLedger } from "@/features/change-review/change-ledger"
 import type { ChangeReviewItem } from "@/features/change-review/change-review-types"
-import { iamChanges } from "../iam-audit-changes"
+import { iamChanges, iamSnapshotFields } from "../iam-audit-changes"
 import type { AuditLog } from "../audit-logs-types"
 import { auditSnapshotKind, auditSnapshotLog } from "../audit-snapshot"
 
@@ -24,34 +24,18 @@ function IamReference({ value }: { value: string }) {
 export function IamAuditDetails({ log }: { log: AuditLog }) {
   const { t } = useTranslation()
   const snapshot = !!auditSnapshotKind(log)
-  const changes: ChangeReviewItem[] = iamChanges(
-    snapshot ? auditSnapshotLog(log) : log
+  const changes: ChangeReviewItem[] = (
+    snapshot ? iamSnapshotFields(auditSnapshotLog(log)) : iamChanges(log)
   ).map((change) => ({
     kind: change.field,
     label: change.label ?? "",
     action: !change.before ? "added" : !change.after ? "removed" : "updated",
     previous: change.before || undefined,
     current: change.after || undefined,
+    ...(change.values?.length
+      ? { valueGroups: [{ action: "added" as const, values: change.values }] }
+      : {}),
   }))
-  if (snapshot) {
-    for (const field of ["members", "groups", "policies"]) {
-      const entries = changes.filter((change) => change.kind === field)
-      if (!entries.length) continue
-      const first = changes.indexOf(entries[0])
-      for (let index = changes.length - 1; index >= 0; index--)
-        if (changes[index].kind === field) changes.splice(index, 1)
-      changes.splice(first, 0, {
-        kind: field,
-        label: "",
-        valueGroups: [
-          {
-            action: "added",
-            values: entries.map((entry) => entry.current ?? ""),
-          },
-        ],
-      })
-    }
-  }
   return (
     <div className="space-y-3">
       {log.dataChange.clonedFrom ? (
