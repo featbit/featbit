@@ -11,7 +11,7 @@
     "down": "node cli.mjs down"
   },
   "devDependencies": {
-    "@featbit/js-client-sdk": "4.3.5",
+    "@featbit/js-client-sdk": "4.3.6",
     "@playwright/test": "1.56.1"
   }
 }
