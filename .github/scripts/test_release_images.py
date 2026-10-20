@@ -1,3 +1,4 @@
+import io
 import json
 import os
 from pathlib import Path
@@ -10,6 +11,130 @@ import release_images as release
 
 
 class ReleaseTests(unittest.TestCase):
+    def cleanup_environment(self):
+        self.candidates()
+        return patch.dict(os.environ, GITHUB_RUN_ID="123", GITHUB_RUN_ATTEMPT="1",
+                          CANDIDATE_TAG="candidate-123-1", DOCKER_HUB_USERNAME="test-user",
+                          DOCKER_HUB_ACCESS_TOKEN="test-secret")
+
+    @staticmethod
+    def hub_response(data=None, status=204):
+        response = io.BytesIO(json.dumps(data).encode() if data else b"")
+        response.status = status
+        return response
+
+    @patch.object(release, "validate", return_value=("5.4.10", "abc"))
+    @patch.object(release, "verify_image")
+    @patch.object(release, "manifest")
+    @patch.object(release, "urlopen")
+    def test_cleanup_only_deletes_current_candidate_tags_after_all_formal_checks(self, request, manifest, verify, _):
+        manifest.return_value = (self.digest, {})
+        events = []
+        verify.side_effect = lambda app, tag, digest: events.append(("verify", app, tag))
+
+        def respond(req, timeout):
+            events.append((req.method, req.full_url))
+            if req.method == "POST":
+                self.assertEqual(json.loads(req.data), {"identifier": "test-user", "secret": "test-secret"})
+                return self.hub_response({"access_token": "test-bearer"}, 200)
+            self.assertEqual(req.get_header("Authorization"), "Bearer test-bearer")
+            self.assertTrue(req.full_url.startswith("https://hub.docker.com/v2/repositories/featbit/"))
+            self.assertTrue(req.full_url.endswith("/tags/candidate-123-1/"))
+            return self.hub_response()
+
+        request.side_effect = respond
+        with self.cleanup_environment():
+            release.cleanup_candidates()
+        self.assertEqual([event[0] for event in events[:4]], ["verify"] * 4)
+        self.assertEqual(sum(event[0] == "DELETE" for event in events), 4)
+        self.assertEqual(verify.call_count, 8)  # Formal digests checked before and after deletion.
+
+    @patch.object(release, "validate", return_value=("5.4.10", "abc"))
+    @patch.object(release, "verify_image")
+    @patch.object(release, "manifest")
+    @patch.object(release, "urlopen")
+    def test_cleanup_rejects_changed_formal_or_candidate_digests_and_wrong_attempt(self, request, manifest, verify, _):
+        with self.cleanup_environment(), patch("sys.stdout", new_callable=io.StringIO) as output:
+            verify.side_effect = ValueError("Formal digest mismatch")
+            release.cleanup_candidates()
+            request.assert_not_called()
+            verify.side_effect = None
+            manifest.return_value = ("sha256:" + "b" * 64, {})
+            release.cleanup_candidates()
+            request.assert_not_called()
+            for tag in ("latest", "5.4.10", "candidate-999-1", "candidate-123-2"):
+                with patch.dict(os.environ, CANDIDATE_TAG=tag):
+                    release.cleanup_candidates()
+                request.assert_not_called()
+            self.assertIn("::warning::", output.getvalue())
+
+    @patch.object(release, "validate", return_value=("5.4.10", "abc"))
+    @patch.object(release, "verify_image")
+    @patch.object(release, "manifest")
+    @patch.object(release, "urlopen")
+    def test_cleanup_missing_tags_is_idempotent_and_permission_errors_are_warnings(self, request, manifest, verify, _):
+        with self.cleanup_environment(), patch("sys.stdout", new_callable=io.StringIO) as output:
+            manifest.return_value = None
+            release.cleanup_candidates()
+            request.assert_not_called()
+            manifest.return_value = (self.digest, {})
+            forbidden = HTTPError("https://hub.docker.com/", 403, "Forbidden", {}, None)
+            self.addCleanup(forbidden.close)
+            request.side_effect = forbidden
+            release.cleanup_candidates()  # Authentication failure is nonfatal.
+            self.assertIn("::warning::", output.getvalue())
+            self.assertNotIn("test-secret", output.getvalue())
+            request.reset_mock()
+
+            def deny_deletion(req, timeout):
+                if req.method == "POST":
+                    return self.hub_response({"access_token": "test-bearer"}, 200)
+                raise forbidden
+
+            request.side_effect = deny_deletion
+            release.cleanup_candidates()  # A failed delete must not skip the other repositories.
+            self.assertEqual(sum(call.args[0].method == "DELETE" for call in request.call_args_list), 4)
+            self.assertNotIn("test-bearer", output.getvalue())
+
+    def candidates(self):
+        for app in release.APPS:
+            path = Path(f"release-images/{app}.json")
+            data = json.loads(path.read_text())
+            release.save(path, {**data, "candidate": "candidate-123-1"})
+
+    @patch.object(release, "validate", return_value=("5.4.10", "abc"))
+    @patch.object(release, "verify_image")
+    @patch.object(release.subprocess, "run")
+    def test_stage_pulls_recorded_digests_and_skips_optional_control_plane(self, run, verify, _):
+        self.candidates()
+        with patch.dict(os.environ, GITHUB_RUN_ID="123", CANDIDATE_TAG="candidate-123-1"):
+            release.stage_candidates()
+        pulls = [call.args[0] for call in run.call_args_list if call.args[0][1] == "pull"]
+        self.assertEqual(len(pulls), 3)
+        self.assertTrue(all(command[2].endswith("@" + self.digest) for command in pulls))
+        self.assertEqual(verify.call_count, 4)
+
+    @patch.object(release, "validate", return_value=("5.4.10", "abc"))
+    @patch.object(release, "verify_image")
+    @patch.object(release, "preflight")
+    @patch.object(release.subprocess, "run")
+    def test_finalize_reuses_tested_digests_and_rejects_foreign_records(self, run, preflight, verify, _):
+        self.candidates()
+        with patch.dict(os.environ, GITHUB_RUN_ID="999", CANDIDATE_TAG="candidate-123-1"):
+            with self.assertRaises(ValueError):
+                release.finalize()
+        run.assert_not_called()
+        with patch.dict(os.environ, GITHUB_RUN_ID="123", CANDIDATE_TAG="candidate-123-1"):
+            preflight.side_effect = ValueError('existing formal tag')
+            with self.assertRaises(ValueError):
+                release.finalize()
+            run.assert_not_called()
+            preflight.side_effect = None
+            release.finalize()
+        self.assertEqual(run.call_count, 4)
+        self.assertTrue(all(call.args[0][-1].endswith("@" + self.digest) for call in run.call_args_list))
+        self.assertTrue(all(':5.4.10' in call.args[0][-2] for call in run.call_args_list))
+
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory()
         self.addCleanup(self.directory.cleanup)

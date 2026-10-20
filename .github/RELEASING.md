@@ -16,8 +16,13 @@
    `latest`. Authentication/network errors are failures, not evidence that a tag
    is available. Avoid other publishers writing the same tags concurrently;
    workflow checks are not a registry-level immutable-tag policy.
-4. Keep the successful run ID and its four `release-image-*` artifacts. Each
-   records the version, source commit, run ID, and multi-platform image digest.
+4. Keep the successful run ID and its `release-image-*` artifact containing the
+   four applications' version, source commit, run ID, and multi-platform image digests.
+   After all formal version digests are verified and their records are uploaded,
+   the workflow removes only the current run's candidate tags. Cleanup uses the
+   existing Docker Hub credentials, which need tag-delete permission. Cleanup
+   failures produce warnings without failing the release; failed tests or partial
+   publication leave candidate tags available for diagnosis and recovery.
 5. Validate a fresh installation and an upgrade with retained data, using these
    exact images and the release tag's deployment files. Check tag digests against
    the artifacts. Build success alone does not establish installation/upgrade success.
