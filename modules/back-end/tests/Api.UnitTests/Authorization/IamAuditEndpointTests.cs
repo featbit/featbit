@@ -20,7 +20,6 @@ using Api.Authentication;
 using Application.AuditLogs;
 using Application.Bases.Models;
 using Domain.AuditLogs;
-using System.Linq.Expressions;
 using MediatR;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -59,8 +58,6 @@ public class IamAuditEndpointTests
         var environments = new Mock<IEnvironmentService>();
         var environment = new Domain.Environments.Environment(Guid.NewGuid(), "Env", "env");
         environments.Setup(x => x.GetAsync(It.IsAny<Guid>())).ReturnsAsync(environment);
-        environments.Setup(x => x.FindManyAsync(It.IsAny<Expression<Func<Domain.Environments.Environment, bool>>>()))
-            .ReturnsAsync(Array.Empty<Domain.Environments.Environment>());
         var projects = new Mock<IProjectService>();
         projects.Setup(x => x.GetAsync(environment.ProjectId))
             .ReturnsAsync(new Domain.Projects.Project(Guid.Empty, "Project", "project"));
@@ -69,8 +66,7 @@ public class IamAuditEndpointTests
             .Returns(new PagedResult<AuditLogVm>(0, []));
         var access = Mock.Of<IAuditLogAccess>();
         var listHandler = new GetAuditLogListHandler(logs.Object, Mock.Of<IUserService>(),
-            Mock.Of<IAccessTokenService>(), mapper.Object, Mock.Of<IOrganizationService>(),
-            environments.Object, projects.Object, access);
+            Mock.Of<IAccessTokenService>(), mapper.Object, environments.Object, projects.Object, access);
         var actorsHandler = new GetAuditLogActorsHandler(logs.Object, access, environments.Object, projects.Object);
         sender.Setup(x => x.Send(It.IsAny<GetAuditLogList>(), It.IsAny<CancellationToken>()))
             .Returns((GetAuditLogList request, CancellationToken ct) => listHandler.Handle(request, ct));

@@ -75,9 +75,7 @@ test("IAM audit table renders IAM RN and readable changes without an environment
   ].map((item, index) => ({
     ...item,
     id: `log-${index}`,
-    workspaceId: "ws-1",
     organizationId: "org-1",
-    organizationName: "Platform",
     envId: null,
 
     creatorId: "admin",
@@ -310,7 +308,6 @@ test("original Audit Logs displays shared segment history in its original enviro
   }
   const row = {
     id: "shared-created",
-    workspaceId: "ws-1",
     organizationId: "org-1",
     envId: segment.envId,
     refType: "Segment",

@@ -18,12 +18,8 @@ export type ChangeRequestDecisionAuditSnapshot = {
 }
 
 export type AuditLog = {
-  workspaceId?: string
   organizationId?: string
   envId?: string | null
-  organizationName?: string
-  projectName?: string
-  environmentName?: string
   id: string
   refId: string
   refType: AuditLogRefType

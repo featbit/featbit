@@ -22,7 +22,6 @@ public class GetAuditLogListHandler : IRequestHandler<GetAuditLogList, PagedResu
     private readonly IUserService _userService;
     private readonly IAccessTokenService _accessTokenService;
     private readonly IMapper _mapper;
-    private readonly IOrganizationService _organizations;
     private readonly IEnvironmentService _environments;
     private readonly IProjectService _projects;
     private readonly IAuditLogAccess _access;
@@ -31,14 +30,13 @@ public class GetAuditLogListHandler : IRequestHandler<GetAuditLogList, PagedResu
         IAuditLogService auditLogService,
         IUserService userService,
         IAccessTokenService accessTokenService,
-        IMapper mapper, IOrganizationService organizations, IEnvironmentService environments, IProjectService projects,
+        IMapper mapper, IEnvironmentService environments, IProjectService projects,
         IAuditLogAccess access)
     {
         _auditLogService = auditLogService;
         _userService = userService;
         _accessTokenService = accessTokenService;
         _mapper = mapper;
-        _organizations = organizations;
         _environments = environments;
         _projects = projects;
         _access = access;
@@ -53,19 +51,8 @@ public class GetAuditLogListHandler : IRequestHandler<GetAuditLogList, PagedResu
         var logVms = _mapper.Map<PagedResult<AuditLogVm>>(logs);
 
         var users = await _userService.GetListAsync(logVms.Items.Select(x => x.CreatorId));
-        // Display scope is resolved at read time; these names are not audit columns.
-        var orgIds = logVms.Items.Where(x => x.OrganizationId.HasValue).Select(x => x.OrganizationId.Value).Distinct().ToArray();
-        var envIds = logVms.Items.Where(x => x.EnvId.HasValue).Select(x => x.EnvId.Value).Distinct().ToArray();
-        var orgs = await _organizations.FindManyAsync(x => orgIds.Contains(x.Id));
-        var envs = await _environments.FindManyAsync(x => envIds.Contains(x.Id));
-        var projectIds = envs.Select(x => x.ProjectId).Distinct().ToArray();
-        var projects = await _projects.FindManyAsync(x => projectIds.Contains(x.Id));
         foreach (var (log, item) in logs.Items.Zip(logVms.Items))
         {
-            item.OrganizationName = orgs.FirstOrDefault(x => x.Id == item.OrganizationId)?.Name;
-            var env = envs.FirstOrDefault(x => x.Id == item.EnvId);
-            item.EnvironmentName = env?.Name;
-            item.ProjectName = projects.FirstOrDefault(x => x.Id == env?.ProjectId)?.Name;
             item.Instructions = item.RefType switch
             {
                 AuditLogRefTypes.FeatureFlag => FlagComparer.Compare(log.DataChange),

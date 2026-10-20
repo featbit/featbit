@@ -4,12 +4,8 @@ namespace Application.AuditLogs;
 
 public class AuditLogVm
 {
-    public Guid WorkspaceId { get; set; }
     public Guid? OrganizationId { get; set; }
     public Guid? EnvId { get; set; }
-    public string OrganizationName { get; set; }
-    public string EnvironmentName { get; set; }
-    public string ProjectName { get; set; }
     public string Id { get; set; }
 
     public string RefId { get; set; }

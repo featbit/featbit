@@ -2,7 +2,6 @@ using Application.AuditLogs;
 using Application.Bases.Exceptions;
 using Application.Services;
 using AutoMapper;
-using System.Linq.Expressions;
 using Domain.AuditLogs;
 using Domain.Policies;
 using Domain.Resources;
@@ -32,7 +31,7 @@ public class AuditLogQueryTests
         var filter = new AuditLogFilter { Scope = AuditLogScope.Iam, CrossEnvironment = true, EnvId = Guid.NewGuid() };
         var list = new GetAuditLogListHandler(logs.Object, Mock.Of<IUserService>(MockBehavior.Strict),
             Mock.Of<IAccessTokenService>(MockBehavior.Strict), Mock.Of<IMapper>(MockBehavior.Strict),
-            Mock.Of<IOrganizationService>(MockBehavior.Strict), environments, projects, access);
+            environments, projects, access);
         await Assert.ThrowsAsync<ForbiddenException>(() => list.Handle(new GetAuditLogList
         {
             Filter = filter, Permissions = permissions
@@ -55,8 +54,7 @@ public class AuditLogQueryTests
         var environments = Mock.Of<IEnvironmentService>(MockBehavior.Strict);
         var projects = Mock.Of<IProjectService>(MockBehavior.Strict);
         var list = new GetAuditLogListHandler(logs.Object, Mock.Of<IUserService>(),
-            Mock.Of<IAccessTokenService>(), Mock.Of<IMapper>(), Mock.Of<IOrganizationService>(),
-            environments, projects, access);
+            Mock.Of<IAccessTokenService>(), Mock.Of<IMapper>(), environments, projects, access);
         var actors = new GetAuditLogActorsHandler(logs.Object, access, environments, projects);
 
         await Assert.ThrowsAsync<ForbiddenException>(() => list.Handle(new GetAuditLogList
@@ -86,8 +84,6 @@ public class AuditLogQueryTests
         logs.Setup(x => x.GetActorsAsync(workspaceId, orgId, filter)).ReturnsAsync(Array.Empty<AuditActor>());
         var environments = new Mock<IEnvironmentService>();
         environments.Setup(x => x.GetAsync(environment.Id)).ReturnsAsync(environment);
-        environments.Setup(x => x.FindManyAsync(It.IsAny<Expression<Func<Domain.Environments.Environment, bool>>>()))
-            .ReturnsAsync(Array.Empty<Domain.Environments.Environment>());
         var projects = new Mock<IProjectService>();
         projects.Setup(x => x.GetAsync(environment.ProjectId))
             .ReturnsAsync(new Domain.Projects.Project(orgId, "Project", "project"));
@@ -96,8 +92,7 @@ public class AuditLogQueryTests
             .Returns(new Application.Bases.Models.PagedResult<AuditLogVm>(0, []));
         var access = Mock.Of<IAuditLogAccess>();
         var list = new GetAuditLogListHandler(logs.Object, Mock.Of<IUserService>(),
-            Mock.Of<IAccessTokenService>(), mapper.Object, Mock.Of<IOrganizationService>(),
-            environments.Object, projects.Object, access);
+            Mock.Of<IAccessTokenService>(), mapper.Object, environments.Object, projects.Object, access);
 
         await list.Handle(new GetAuditLogList
         {
@@ -110,6 +105,9 @@ public class AuditLogQueryTests
             }, default);
 
         environments.Verify(x => x.GetAsync(environment.Id), iam ? Times.Never() : Times.Exactly(2));
+        environments.VerifyNoOtherCalls();
+        projects.Verify(x => x.GetAsync(environment.ProjectId), iam ? Times.Never() : Times.Exactly(2));
+        projects.VerifyNoOtherCalls();
         logs.VerifyAll();
     }
 
@@ -136,7 +134,7 @@ public class AuditLogQueryTests
         {
             var handler = new GetAuditLogListHandler(logs.Object, Mock.Of<IUserService>(MockBehavior.Strict),
                 Mock.Of<IAccessTokenService>(MockBehavior.Strict), Mock.Of<IMapper>(MockBehavior.Strict),
-                Mock.Of<IOrganizationService>(MockBehavior.Strict), Mock.Of<IEnvironmentService>(MockBehavior.Strict),
+                Mock.Of<IEnvironmentService>(MockBehavior.Strict),
                 Mock.Of<IProjectService>(MockBehavior.Strict), access.Object);
             await Assert.ThrowsAsync<ForbiddenException>(() => handler.Handle(new GetAuditLogList
             {
@@ -169,7 +167,7 @@ public class AuditLogQueryTests
             projects.Setup(x => x.GetAsync(environment.ProjectId)).ReturnsAsync(new Domain.Projects.Project(Guid.NewGuid(), "Other", "other"));
         }
         var handler = new GetAuditLogListHandler(logs.Object, Mock.Of<IUserService>(), Mock.Of<IAccessTokenService>(),
-            Mock.Of<IMapper>(), Mock.Of<IOrganizationService>(), environments.Object, projects.Object, access.Object);
+            Mock.Of<IMapper>(), environments.Object, projects.Object, access.Object);
         await Assert.ThrowsAsync<ForbiddenException>(() => handler.Handle(request, default));
         var actors = new GetAuditLogActorsHandler(logs.Object, access.Object, environments.Object, projects.Object);
         await Assert.ThrowsAsync<ForbiddenException>(() => actors.Handle(new GetAuditLogActors
