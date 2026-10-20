@@ -6,18 +6,25 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Domain.AuditLogs;
 using Microsoft.EntityFrameworkCore.Storage;
+using Infrastructure.Persistence.MongoDb;
 
 namespace Infrastructure.Services;
 
-// Scoped: nested IAM commands participate in the outer transaction.
+// Scoped: nested IAM commands participate in the outer audit operation.
 public class AuditStore(IServiceProvider services)
 {
     public bool Active { get; private set; }
 
-    public bool Supported => services.GetService<AppDbContext>() != null;
+    public bool Supported => services.GetService<AppDbContext>() != null || services.GetService<MongoDbClient>() != null;
 
-    public Task<List<T>> Read<T>(Expression<Func<T, bool>> predicate) where T : Entity =>
-        services.GetRequiredService<AppDbContext>().Set<T>().AsNoTracking().Where(predicate).ToListAsync();
+    public Task<List<T>> Read<T>(Expression<Func<T, bool>> predicate) where T : Entity
+    {
+        var db = services.GetService<AppDbContext>();
+        return db != null
+            ? db.Set<T>().AsNoTracking().Where(predicate).ToListAsync()
+            : MongoDB.Driver.Linq.MongoQueryable.ToListAsync(
+                services.GetRequiredService<MongoDbClient>().QueryableOf<T>().Where(predicate));
+    }
 
     public async Task<T> Transaction<T>(Func<Task<T>> action, CancellationToken cancellationToken)
     {
@@ -25,7 +32,15 @@ public class AuditStore(IServiceProvider services)
         Active = true;
         try
         {
-            var db = services.GetRequiredService<AppDbContext>();
+            var db = services.GetService<AppDbContext>();
+            if (db == null)
+            {
+                services.GetRequiredService<MongoDbClient>();
+                // Preserve standalone MongoDB support: business writes and audit writes
+                // are independent. A later failure does not roll back earlier writes.
+                cancellationToken.ThrowIfCancellationRequested();
+                return await action();
+            }
             // Serializable snapshots prevent concurrent relationship changes being
             // attributed to the wrong actor. Serialization failures roll back.
             T? savedResult = default;

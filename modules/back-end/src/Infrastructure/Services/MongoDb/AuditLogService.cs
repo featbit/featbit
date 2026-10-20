@@ -1,6 +1,8 @@
 using Application.AuditLogs;
 using Application.Bases.Models;
 using Domain.AuditLogs;
+using Domain.AccessTokens;
+using Domain.Users;
 using Domain.Organizations;
 using Domain.Projects;
 using Environment = Domain.Environments.Environment;
@@ -14,25 +16,7 @@ public class AuditLogService(MongoDbClient mongoDb) : MongoDbService<AuditLog>(m
 {
     public async Task<PagedResult<AuditLog>> GetListAsync(Guid workspaceId, Guid orgId, AuditLogFilter userFilter)
     {
-        if (userFilter.Scope == AuditLogScope.Iam) throw new NotSupportedException("IAM audit logs currently require PostgreSQL.");
-        if (userFilter.Scope != AuditLogScope.Environment) throw new ArgumentOutOfRangeException(nameof(AuditLogFilter.Scope));
-        var envId = userFilter.EnvId ?? throw new ArgumentException("Environment is required.");
-        // Legacy Mongo logs have no workspaceId. Resolve their environment ownership
-        // rather than dropping tenant isolation when cross-environment history is requested.
-        var orgIds = await MongoDb.QueryableOf<Organization>().Where(x => x.WorkspaceId == workspaceId)
-            .Select(x => x.Id).ToListAsync();
-        var projectIds = await MongoDb.QueryableOf<Project>().Where(x => orgIds.Contains(x.OrganizationId))
-            .Select(x => x.Id).ToListAsync();
-        var envIds = await MongoDb.QueryableOf<Environment>().Where(x => projectIds.Contains(x.ProjectId))
-            .Select(x => (Guid?)x.Id).ToListAsync();
-        var filter = Builders<AuditLog>.Filter;
-        var legacyOwner = filter.And(
-            filter.Or(filter.Exists(x => x.WorkspaceId, false), filter.Eq(x => x.WorkspaceId, Guid.Empty)),
-            filter.In(x => x.EnvId, envIds));
-        var owner = filter.Or(filter.Eq(x => x.WorkspaceId, workspaceId), legacyOwner);
-        var queryable = Queryable.Where(x => owner.Inject() &&
-            (x.RefType == AuditLogRefTypes.FeatureFlag || x.RefType == AuditLogRefTypes.Segment));
-        if (userFilter.CrossEnvironment != true) queryable = queryable.Where(x => x.EnvId == envId);
+        var queryable = await ScopedLogs(workspaceId, orgId, userFilter);
 
         // query(keyword/comment) filter
         var query = userFilter.Query;
@@ -84,6 +68,7 @@ public class AuditLogService(MongoDbClient mongoDb) : MongoDbService<AuditLog>(m
 
         var items = await queryable
             .OrderByDescending(x => x.CreatedAt)
+            .ThenByDescending(x => x.Id)
             .Skip(userFilter.PageIndex * userFilter.PageSize)
             .Take(userFilter.PageSize)
             .ToListAsync();
@@ -91,11 +76,52 @@ public class AuditLogService(MongoDbClient mongoDb) : MongoDbService<AuditLog>(m
         return new PagedResult<AuditLog>(totalCount, items);
     }
 
-    public Task<IReadOnlyList<AuditActor>> GetActorsAsync(Guid workspaceId, Guid orgId, AuditLogFilter filter)
+    public async Task<IReadOnlyList<AuditActor>> GetActorsAsync(Guid workspaceId, Guid orgId, AuditLogFilter filter)
     {
-        if (filter.Scope is not (AuditLogScope.Environment or AuditLogScope.Iam))
-            throw new ArgumentOutOfRangeException(nameof(AuditLogFilter.Scope));
-        throw new NotSupportedException("Audit actor filtering currently requires PostgreSQL.");
+        var logs = await ScopedLogs(workspaceId, orgId, filter);
+        if (!string.IsNullOrWhiteSpace(filter.RefType)) logs = logs.Where(x => x.RefType == filter.RefType);
+        if (!string.IsNullOrWhiteSpace(filter.RefId)) logs = logs.Where(x => x.RefId == filter.RefId);
+        var creatorIds = await logs.Select(x => x.CreatorId).Distinct().ToListAsync();
+        var users = MongoDb.QueryableOf<User>().Where(x => creatorIds.Contains(x.Id));
+        var tokens = MongoDb.QueryableOf<AccessToken>().Where(x => creatorIds.Contains(x.Id));
+        if (!string.IsNullOrWhiteSpace(filter.Query))
+        {
+            var query = filter.Query.ToLower();
+            users = users.Where(x => x.Name.ToLower().Contains(query) || x.Email.ToLower().Contains(query));
+            tokens = tokens.Where(x => x.Name.ToLower().Contains(query));
+        }
+        var userActors = await users.OrderBy(x => x.Name).ThenBy(x => x.Id).Take(50)
+            .Select(x => new AuditActor { Id = x.Id, Type = AuditActorTypes.User, Name = x.Name, Email = x.Email }).ToListAsync();
+        var tokenActors = await tokens.OrderBy(x => x.Name).ThenBy(x => x.Id).Take(50)
+            .Select(x => new AuditActor { Id = x.Id, Type = AuditActorTypes.AccessToken, Name = x.Name, Email = null }).ToListAsync();
+        return userActors.Concat(tokenActors).OrderBy(x => x.Name).ThenBy(x => x.Id).Take(50).ToList();
+    }
+
+    private async Task<IQueryable<AuditLog>> ScopedLogs(Guid workspaceId, Guid orgId, AuditLogFilter filter)
+    {
+        if (filter.Scope == AuditLogScope.Iam)
+            return Queryable.Where(x => x.WorkspaceId == workspaceId && x.OrganizationId == orgId &&
+                (x.RefType == AuditLogRefTypes.Member || x.RefType == AuditLogRefTypes.Group || x.RefType == AuditLogRefTypes.Policy));
+        if (filter.Scope != AuditLogScope.Environment) throw new ArgumentOutOfRangeException(nameof(filter.Scope));
+        var envId = filter.EnvId ?? throw new ArgumentException("Environment is required.");
+        // Legacy Mongo logs have no workspaceId. Resolve their environment ownership
+        // rather than dropping tenant isolation when cross-environment history is requested.
+        var orgIds = await MongoDb.QueryableOf<Organization>().Where(x => x.WorkspaceId == workspaceId)
+            .Select(x => x.Id).ToListAsync();
+        var projectIds = await MongoDb.QueryableOf<Project>().Where(x => orgIds.Contains(x.OrganizationId))
+            .Select(x => x.Id).ToListAsync();
+        var envIds = await MongoDb.QueryableOf<Environment>().Where(x => projectIds.Contains(x.ProjectId))
+            .Select(x => (Guid?)x.Id).ToListAsync();
+        var builder = Builders<AuditLog>.Filter;
+        var legacyOwner = builder.And(
+            builder.Or(builder.Exists(x => x.WorkspaceId, false), builder.Eq(x => x.WorkspaceId, Guid.Empty)),
+            builder.In(x => x.EnvId, envIds));
+        var owner = builder.Or(builder.Eq(x => x.WorkspaceId, workspaceId), legacyOwner);
+        var queryable = Queryable.Where(x => owner.Inject() &&
+            (x.RefType == AuditLogRefTypes.FeatureFlag || x.RefType == AuditLogRefTypes.Segment));
+        if (filter.CrossEnvironment != true) queryable = queryable.Where(x => x.EnvId == envId);
+
+        return queryable;
     }
 
     public async Task<LastChange?> GetLastChangeAsync(Guid envId, string refType, string refId)
