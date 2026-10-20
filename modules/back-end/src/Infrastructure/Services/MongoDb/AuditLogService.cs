@@ -12,9 +12,10 @@ namespace Infrastructure.Services.MongoDb;
 
 public class AuditLogService(MongoDbClient mongoDb) : MongoDbService<AuditLog>(mongoDb), IAuditLogService
 {
-    public async Task<PagedResult<AuditLog>> GetListAsync(Guid workspaceId, AuditLogFilter userFilter, Guid? iamOrgId = null)
+    public async Task<PagedResult<AuditLog>> GetListAsync(Guid workspaceId, Guid orgId, AuditLogFilter userFilter)
     {
-        if (iamOrgId.HasValue) throw new NotSupportedException("IAM audit logs currently require PostgreSQL.");
+        if (userFilter.Scope == AuditLogScope.Iam) throw new NotSupportedException("IAM audit logs currently require PostgreSQL.");
+        if (userFilter.Scope != AuditLogScope.Environment) throw new ArgumentOutOfRangeException(nameof(AuditLogFilter.Scope));
         var envId = userFilter.EnvId ?? throw new ArgumentException("Environment is required.");
         // Legacy Mongo logs have no workspaceId. Resolve their environment ownership
         // rather than dropping tenant isolation when cross-environment history is requested.
@@ -90,8 +91,12 @@ public class AuditLogService(MongoDbClient mongoDb) : MongoDbService<AuditLog>(m
         return new PagedResult<AuditLog>(totalCount, items);
     }
 
-    public Task<IReadOnlyList<AuditActor>> GetActorsAsync(Guid workspaceId, AuditLogFilter filter, Guid? iamOrgId = null) =>
+    public Task<IReadOnlyList<AuditActor>> GetActorsAsync(Guid workspaceId, Guid orgId, AuditLogFilter filter)
+    {
+        if (filter.Scope is not (AuditLogScope.Environment or AuditLogScope.Iam))
+            throw new ArgumentOutOfRangeException(nameof(AuditLogFilter.Scope));
         throw new NotSupportedException("Audit actor filtering currently requires PostgreSQL.");
+    }
 
     public async Task<LastChange?> GetLastChangeAsync(Guid envId, string refType, string refId)
     {

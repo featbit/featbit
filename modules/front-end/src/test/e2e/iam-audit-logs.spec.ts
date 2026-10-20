@@ -92,7 +92,7 @@ test("IAM audit table renders IAM RN and readable changes without an environment
     },
   }))
   const requests: URL[] = []
-  await page.route("**/api/v1/iam/audit-logs?*", (route) => {
+  await page.route("**/api/v1/audit-logs?*", (route) => {
     const url = new URL(route.request().url())
     requests.push(url)
     const items = records.filter(
@@ -161,7 +161,7 @@ test("IAM menu and direct audit route deny users without CanManageIAM", async ({
   )
   const requests: string[] = []
   page.on("request", (request) => {
-    if (request.url().includes("/api/v1/iam/audit-logs"))
+    if (request.url().includes("/api/v1/audit-logs"))
       requests.push(request.url())
   })
   await page.goto("/en/iam/audit-logs")
@@ -234,7 +234,7 @@ test("switching organization resets IAM filters and uses the new organization co
   await setAuthenticatedUser(page)
   await setCurrentContext(page)
   const requests: { org: string | undefined; query: string | null }[] = []
-  await page.route("**/api/v1/iam/audit-logs?*", (route) => {
+  await page.route("**/api/v1/audit-logs?*", (route) => {
     requests.push({
       org: route.request().headers()["organization"],
       query: new URL(route.request().url()).searchParams.get("query"),

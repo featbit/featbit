@@ -8,9 +8,9 @@ namespace Application.Services;
 
 public interface IAuditLogService : IService<AuditLog>
 {
-    public Task<PagedResult<AuditLog>> GetListAsync(Guid workspaceId, AuditLogFilter filter, Guid? iamOrgId = null);
+    public Task<PagedResult<AuditLog>> GetListAsync(Guid workspaceId, Guid orgId, AuditLogFilter filter);
 
-    Task<IReadOnlyList<AuditActor>> GetActorsAsync(Guid workspaceId, AuditLogFilter filter, Guid? iamOrgId = null);
+    Task<IReadOnlyList<AuditActor>> GetActorsAsync(Guid workspaceId, Guid orgId, AuditLogFilter filter);
 
     Task<LastChange?> GetLastChangeAsync(Guid envId, string refType, string refId);
 

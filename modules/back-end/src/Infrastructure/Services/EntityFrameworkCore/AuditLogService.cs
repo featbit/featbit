@@ -23,9 +23,9 @@ public class AuditLogService(AppDbContext dbContext, AuditLogEnricher enricher) 
         if (items.Length > 0) await base.AddManyAsync(items);
     }
 
-    public async Task<PagedResult<AuditLog>> GetListAsync(Guid workspaceId, AuditLogFilter userFilter, Guid? iamOrgId = null)
+    public async Task<PagedResult<AuditLog>> GetListAsync(Guid workspaceId, Guid orgId, AuditLogFilter userFilter)
     {
-        var queryable = ScopedLogs(workspaceId, userFilter, iamOrgId);
+        var queryable = ScopedLogs(workspaceId, orgId, userFilter);
 
         // query(keyword/comment) filter
         var query = userFilter.Query?.ToLower();
@@ -84,10 +84,9 @@ public class AuditLogService(AppDbContext dbContext, AuditLogEnricher enricher) 
         return new PagedResult<AuditLog>(totalCount, items);
     }
 
-    public async Task<IReadOnlyList<AuditActor>> GetActorsAsync(Guid workspaceId, AuditLogFilter filter, Guid? iamOrgId = null)
+    public async Task<IReadOnlyList<AuditActor>> GetActorsAsync(Guid workspaceId, Guid orgId, AuditLogFilter filter)
     {
-        if (!iamOrgId.HasValue) throw new ArgumentException("IAM organization is required.");
-        var auditlogs = ScopedLogs(workspaceId, filter, iamOrgId);
+        var auditlogs = ScopedLogs(workspaceId, orgId, filter);
         if (!string.IsNullOrWhiteSpace(filter.RefType)) auditlogs = auditlogs.Where(x => x.RefType == filter.RefType);
         if (!string.IsNullOrWhiteSpace(filter.RefId)) auditlogs = auditlogs.Where(x => x.RefId == filter.RefId);
         var creatorIds = auditlogs.Select(x => x.CreatorId).Distinct();
@@ -108,16 +107,21 @@ public class AuditLogService(AppDbContext dbContext, AuditLogEnricher enricher) 
             .OrderBy(x => x.Name).ThenBy(x => x.Id).Take(50).ToListAsync();
     }
 
-    private IQueryable<AuditLog> ScopedLogs(Guid workspaceId, AuditLogFilter filter, Guid? iamOrgId)
+    private IQueryable<AuditLog> ScopedLogs(Guid workspaceId, Guid orgId, AuditLogFilter filter)
     {
         var logs = Queryable.Where(x => x.WorkspaceId == workspaceId);
-        if (iamOrgId.HasValue)
-            return logs.Where(x => x.OrganizationId == iamOrgId.Value &&
-                (x.RefType == AuditLogRefTypes.Member || x.RefType == AuditLogRefTypes.Group || x.RefType == AuditLogRefTypes.Policy));
-
-        if (!filter.EnvId.HasValue) throw new ArgumentException("Environment is required.");
-        logs = logs.Where(x => x.RefType == AuditLogRefTypes.FeatureFlag || x.RefType == AuditLogRefTypes.Segment);
-        return filter.CrossEnvironment == true ? logs : logs.Where(x => x.EnvId == filter.EnvId.Value);
+        switch (filter.Scope)
+        {
+            case AuditLogScope.Iam:
+                return logs.Where(x => x.OrganizationId == orgId &&
+                    (x.RefType == AuditLogRefTypes.Member || x.RefType == AuditLogRefTypes.Group || x.RefType == AuditLogRefTypes.Policy));
+            case AuditLogScope.Environment:
+                if (!filter.EnvId.HasValue) throw new ArgumentException("Environment is required.");
+                logs = logs.Where(x => x.RefType == AuditLogRefTypes.FeatureFlag || x.RefType == AuditLogRefTypes.Segment);
+                return filter.CrossEnvironment == true ? logs : logs.Where(x => x.EnvId == filter.EnvId.Value);
+            default:
+                throw new ArgumentOutOfRangeException(nameof(AuditLogFilter.Scope));
+        }
     }
 
     public async Task<LastChange?> GetLastChangeAsync(Guid envId, string refType, string refId)

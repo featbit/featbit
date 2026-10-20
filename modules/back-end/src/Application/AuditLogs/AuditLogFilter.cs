@@ -4,6 +4,8 @@ namespace Application.AuditLogs;
 
 public class AuditLogFilter : PagedRequest
 {
+    public AuditLogScope Scope { get; set; }
+
     public bool? CrossEnvironment { get; set; }
 
     public Guid? EnvId { get; set; }

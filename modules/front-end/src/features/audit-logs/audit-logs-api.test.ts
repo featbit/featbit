@@ -59,13 +59,13 @@ describe("audit logs API", () => {
   })
 })
 
-it("queries IAM lists and actors through the protected IAM endpoints", async () => {
+it("queries IAM lists and actors through the generic endpoints with explicit IAM scope", async () => {
   await fetchIamAuditLogs({ query: "", refType: "Group" }, 0, 10)
   expect(fetchApi).toHaveBeenLastCalledWith(
-    expect.stringMatching(/^\/api\/v1\/iam\/audit-logs\?/)
+    expect.stringMatching(/^\/api\/v1\/audit-logs\?scope=iam&/)
   )
   await fetchIamAuditUsers("Alice", { refType: "Member" })
   expect(fetchApi).toHaveBeenLastCalledWith(
-    expect.stringMatching(/^\/api\/v1\/iam\/audit-logs\/actors\?/)
+    expect.stringMatching(/^\/api\/v1\/audit-logs\/actors\?scope=iam&/)
   )
 })

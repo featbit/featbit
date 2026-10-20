@@ -1,3 +1,4 @@
+using Domain.Policies;
 using Application.Bases.Models;
 using Domain.AuditLogs;
 using Domain.SemanticPatch;
@@ -10,7 +11,7 @@ public class GetAuditLogList : IRequest<PagedResult<AuditLogVm>>
 
     public Guid OrgId { get; set; }
 
-    public bool IsIam { get; set; }
+    public PolicyStatement[] Permissions { get; set; } = [];
 
     public AuditLogFilter Filter { get; set; }
 }
@@ -46,15 +47,9 @@ public class GetAuditLogListHandler : IRequestHandler<GetAuditLogList, PagedResu
     public async Task<PagedResult<AuditLogVm>> Handle(GetAuditLogList request, CancellationToken cancellationToken)
     {
         await _access.EnsureAsync(request.WorkspaceId, request.OrgId);
-        if (!request.IsIam)
-        {
-            if (!request.Filter.EnvId.HasValue) throw new Application.Bases.Exceptions.ForbiddenException();
-            var environment = await _environments.GetAsync(request.Filter.EnvId.Value);
-            var project = environment == null ? null : await _projects.GetAsync(environment.ProjectId);
-            if (project?.OrganizationId != request.OrgId) throw new Application.Bases.Exceptions.ForbiddenException();
-        }
-        var logs = await _auditLogService.GetListAsync(request.WorkspaceId, request.Filter,
-            request.IsIam ? request.OrgId : null);
+        await AuditLogScopeRules.ValidateAsync(
+            request.Filter, request.OrgId, request.Permissions, _environments, _projects);
+        var logs = await _auditLogService.GetListAsync(request.WorkspaceId, request.OrgId, request.Filter);
         var logVms = _mapper.Map<PagedResult<AuditLogVm>>(logs);
 
         var users = await _userService.GetListAsync(logVms.Items.Select(x => x.CreatorId));

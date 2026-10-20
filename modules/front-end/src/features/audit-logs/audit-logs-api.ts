@@ -46,6 +46,7 @@ export function fetchIamAuditLogs(
   pageSize: number
 ) {
   const params = new URLSearchParams({
+    scope: "iam",
     query: filters.query,
     creatorId: filters.creatorId ?? "",
     refType: filters.refType ?? "",
@@ -56,7 +57,7 @@ export function fetchIamAuditLogs(
     pageSize: String(pageSize),
   })
 
-  return fetchApi<PagedAuditLogs>(`/api/v1/iam/audit-logs?${params}`)
+  return fetchApi<PagedAuditLogs>(`/api/v1/audit-logs?${params}`)
 }
 
 export function fetchIamAuditUsers(
@@ -64,6 +65,7 @@ export function fetchIamAuditUsers(
   scope?: Pick<AuditLogFilters, "refType" | "refId">
 ) {
   const params = new URLSearchParams({
+    scope: "iam",
     query: searchText,
     pageIndex: "0",
     pageSize: "20",
@@ -72,6 +74,6 @@ export function fetchIamAuditUsers(
   if (scope?.refType) params.set("refType", scope.refType)
   if (scope?.refId) params.set("refId", scope.refId)
   return fetchApi<{ items: AuditUser[] }>(
-    `/api/v1/iam/audit-logs/actors?${params}`
+    `/api/v1/audit-logs/actors?${params}`
   )
 }

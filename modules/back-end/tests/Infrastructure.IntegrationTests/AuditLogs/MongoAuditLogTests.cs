@@ -46,22 +46,26 @@ public class MongoAuditLogTests(MongoDbFixture fixture) : IntegrationTestBase
         foreach (var entry in new[] { missingOwner, foreignMissing })
             await client.CollectionOf<AuditLog>().UpdateOneAsync(x => x.Id == entry.Id,
                 Builders<AuditLog>.Update.Unset(x => x.WorkspaceId));
-        var filter = new AuditLogFilter { EnvId = env.Id, CrossEnvironment = true, PageSize = 1 };
+        var filter = new AuditLogFilter { Scope = AuditLogScope.Environment, EnvId = env.Id, CrossEnvironment = true, PageSize = 1 };
         var ids = new List<Guid>();
         for (var page = 0; page < 3; page++)
         {
             filter.PageIndex = page;
-            var result = await service.GetListAsync(org.WorkspaceId, filter);
+            var result = await service.GetListAsync(org.WorkspaceId, org.Id, filter);
             Assert.Equal(3, result.TotalCount);
             ids.Add(Assert.Single(result.Items).Id);
         }
         Assert.Equal(new[] { missingOwner.Id, emptyOwner.Id, explicitOwner.Id }.Order(), ids.Order());
-        Assert.Equal(missingOwner.Id, Assert.Single((await service.GetListAsync(org.WorkspaceId,
-            new AuditLogFilter { EnvId = env.Id })).Items).Id);
-        Assert.Empty((await service.GetListAsync(org.WorkspaceId,
-            new AuditLogFilter { EnvId = env.Id, CrossEnvironment = true, RefId = foreignExplicit.RefId })).Items);
-        Assert.Empty((await service.GetListAsync(org.WorkspaceId,
-            new AuditLogFilter { EnvId = env.Id, CrossEnvironment = true, RefType = "Group" })).Items);
+        Assert.Equal(missingOwner.Id, Assert.Single((await service.GetListAsync(org.WorkspaceId, org.Id, new AuditLogFilter { Scope = AuditLogScope.Environment, EnvId = env.Id })).Items).Id);
+        Assert.Empty((await service.GetListAsync(org.WorkspaceId, org.Id, new AuditLogFilter { Scope = AuditLogScope.Environment, EnvId = env.Id, CrossEnvironment = true, RefId = foreignExplicit.RefId })).Items);
+        Assert.Empty((await service.GetListAsync(org.WorkspaceId, org.Id, new AuditLogFilter { Scope = AuditLogScope.Environment, EnvId = env.Id, CrossEnvironment = true, RefType = "Group" })).Items);
+        await Assert.ThrowsAsync<NotSupportedException>(() => service.GetListAsync(org.WorkspaceId, org.Id, new AuditLogFilter { Scope = AuditLogScope.Iam, EnvId = env.Id }));
+        foreach (var scope in new[] { AuditLogScope.Unspecified, (AuditLogScope)999 })
+        {
+            await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => service.GetListAsync(org.WorkspaceId, org.Id, new AuditLogFilter { Scope = scope, EnvId = filter.EnvId }));
+            await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => service.GetActorsAsync(org.WorkspaceId, org.Id, new AuditLogFilter { Scope = scope, EnvId = filter.EnvId }));
+        }
+        await Assert.ThrowsAsync<ArgumentException>(() => service.GetListAsync(org.WorkspaceId, org.Id, new AuditLogFilter { Scope = AuditLogScope.Environment }));
     }
 
     [DockerFact]
@@ -76,14 +80,11 @@ public class MongoAuditLogTests(MongoDbFixture fixture) : IntegrationTestBase
         var log = AuditLog.For(segment, Operations.Update, new DataChange(null).To(segment), "changed", Guid.NewGuid());
         await service.AddOneAsync(log);
         Assert.Equal(envId, log.EnvId);
-        Assert.Equal(log.Id, Assert.Single((await service.GetListAsync(workspaceId,
-            new AuditLogFilter { EnvId = envId })).Items).Id);
+        Assert.Equal(log.Id, Assert.Single((await service.GetListAsync(workspaceId, Guid.NewGuid(), new AuditLogFilter { Scope = AuditLogScope.Environment, EnvId = envId })).Items).Id);
         var otherEnv = Guid.NewGuid();
-        Assert.Empty((await service.GetListAsync(workspaceId, new AuditLogFilter { EnvId = otherEnv })).Items);
-        Assert.Equal(log.Id, Assert.Single((await service.GetListAsync(workspaceId,
-            new AuditLogFilter { EnvId = otherEnv, CrossEnvironment = true, RefType = "Segment", RefId = segment.Id.ToString() })).Items).Id);
-        Assert.Empty((await service.GetListAsync(Guid.NewGuid(),
-            new AuditLogFilter { EnvId = envId, CrossEnvironment = true, RefId = segment.Id.ToString() })).Items);
+        Assert.Empty((await service.GetListAsync(workspaceId, Guid.NewGuid(), new AuditLogFilter { Scope = AuditLogScope.Environment, EnvId = otherEnv })).Items);
+        Assert.Equal(log.Id, Assert.Single((await service.GetListAsync(workspaceId, Guid.NewGuid(), new AuditLogFilter { Scope = AuditLogScope.Environment, EnvId = otherEnv, CrossEnvironment = true, RefType = "Segment", RefId = segment.Id.ToString() })).Items).Id);
+        Assert.Empty((await service.GetListAsync(Guid.NewGuid(), Guid.NewGuid(), new AuditLogFilter { Scope = AuditLogScope.Environment, EnvId = envId, CrossEnvironment = true, RefId = segment.Id.ToString() })).Items);
         Assert.NotNull(await service.GetLastChangeAsync(envId, "Segment", segment.Id.ToString()));
     }
 }
