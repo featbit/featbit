@@ -1,6 +1,7 @@
 using Api.Authentication;
 using Application.AuditLogs;
 using Application.Bases.Models;
+using Domain.Policies;
 
 namespace Api.Controllers;
 
@@ -18,5 +19,26 @@ public class AuditLogController : ApiControllerBase
         {
             WorkspaceId = WorkspaceId, OrgId = OrgId, Filter = filter
         }));
+    }
+
+    [Authorize(Permissions.CanManageIAM)]
+    [HttpGet("~/api/v{version:apiVersion}/iam/audit-logs")]
+    public async Task<ApiResponse<PagedResult<AuditLogVm>>> GetIamListAsync([FromQuery] AuditLogFilter filter)
+    {
+        return Ok(await Mediator.Send(new GetAuditLogList
+        {
+            WorkspaceId = WorkspaceId, OrgId = OrgId, IsIam = true, Filter = filter
+        }));
+    }
+
+    [Authorize(Permissions.CanManageIAM)]
+    [HttpGet("~/api/v{version:apiVersion}/iam/audit-logs/actors")]
+    public async Task<ApiResponse<AuditLogActorsVm>> IamActors([FromQuery] AuditLogFilter filter)
+    {
+        var actors = await Mediator.Send(new GetAuditLogActors
+        {
+            WorkspaceId = WorkspaceId, OrgId = OrgId, Filter = filter
+        });
+        return Ok(new AuditLogActorsVm { Items = actors });
     }
 }
