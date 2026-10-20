@@ -4,7 +4,7 @@ End-to-end validation of core system capabilities across five deployment stacks,
 
 ## Getting started
 
-Requires Node.js 22+, Docker Compose v2 and the .NET 10 SDK. Start Docker, then **run from this directory**:
+Requires Node.js 22+, Docker Compose v2 and the .NET 8 SDK. Start Docker, then **run from this directory**:
 
 ```powershell
 npm ci
