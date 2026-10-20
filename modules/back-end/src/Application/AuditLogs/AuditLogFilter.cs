@@ -4,6 +4,8 @@ namespace Application.AuditLogs;
 
 public class AuditLogFilter : PagedRequest
 {
+    public bool? CrossEnvironment { get; set; }
+
     public Guid? EnvId { get; set; }
     /// <summary>
     /// The part of the keyword/comment of an audit log

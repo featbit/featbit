@@ -4,7 +4,6 @@ namespace Application.AuditLogs;
 
 public class AuditLogVm
 {
-    public string Source { get; set; }
     public Guid WorkspaceId { get; set; }
     public Guid? OrganizationId { get; set; }
     public Guid? EnvId { get; set; }

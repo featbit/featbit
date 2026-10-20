@@ -5,7 +5,7 @@ namespace Domain.AuditLogs;
 public class DataChange
 {
     // IAM event metadata stays in the existing data_change JSON column.
-    public string Source { get; set; }
+    public PolicyCloneSource ClonedFrom { get; set; }
 
     public string Previous { get; set; }
 
@@ -41,3 +41,5 @@ public class DataChange
 
     public bool IsCreationOrDeletion() => IsCreation() || IsDeletion();
 }
+
+public record PolicyCloneSource(Guid Id, string Key);

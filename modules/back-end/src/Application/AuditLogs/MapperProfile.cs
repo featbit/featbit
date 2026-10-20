@@ -8,8 +8,7 @@ public class MapperProfile : Profile
     public MapperProfile()
     {
         CreateMap<DataChange, AuditDataChangeVm>();
-        CreateMap<AuditLog, AuditLogVm>()
-            .ForMember(dest => dest.Source, opt => opt.MapFrom(src => src.DataChange.Source));
+        CreateMap<AuditLog, AuditLogVm>();
         CreateMap<PagedResult<AuditLog>, PagedResult<AuditLogVm>>();
     }
 }

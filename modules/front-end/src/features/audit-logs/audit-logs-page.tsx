@@ -1,4 +1,3 @@
-import { ApiRequestError } from "@/lib/api/authenticated-api"
 import { useInfiniteQuery } from "@tanstack/react-query"
 import { Loader2 } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
@@ -8,7 +7,7 @@ import { useParams } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import {
-  getCurrentWorkspace,
+  getCurrentProjectEnv,
   resolveLang,
 } from "@/features/layout/layout-context"
 import { dayAfter, hasAppliedFilters, startOfDay } from "./audit-log-utils"
@@ -22,15 +21,11 @@ import { useAuditLogSegmentNames } from "./components/audit-log-table-adapter"
 const PAGE_SIZE = 10
 
 export function AuditLogsPage() {
-  return <WorkspaceAuditLogsPage key={getCurrentWorkspace()?.id ?? ""} />
-}
-
-function WorkspaceAuditLogsPage() {
   const { t, i18n } = useTranslation()
   const { lang: langParam } = useParams()
   const lang = resolveLang(langParam)
   const locale = i18n.resolvedLanguage || lang
-  const workspaceId = getCurrentWorkspace()?.id ?? ""
+  const envId = getCurrentProjectEnv()?.envId ?? ""
   const [search, setSearch] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const [user, setUser] = useState<AuditUser | null>(null)
@@ -57,7 +52,7 @@ function WorkspaceAuditLogsPage() {
   const logsQuery = useInfiniteQuery({
     queryKey: [
       "audit-logs",
-      workspaceId,
+      envId,
       debouncedSearch,
       user?.id,
       refType,
@@ -66,6 +61,7 @@ function WorkspaceAuditLogsPage() {
     ],
     queryFn: ({ pageParam }) =>
       fetchAuditLogs(
+        envId,
         {
           query: debouncedSearch,
           creatorId: user?.id,
@@ -76,21 +72,19 @@ function WorkspaceAuditLogsPage() {
         pageParam,
         PAGE_SIZE
       ),
-    retry: (count, error) =>
-      !(error instanceof ApiRequestError && error.status === 403) && count < 2,
     initialPageParam: 0,
     getNextPageParam: (lastPage, pages) => {
       const loaded = pages.reduce((count, page) => count + page.items.length, 0)
       return loaded < lastPage.totalCount ? pages.length : undefined
     },
-    enabled: Boolean(workspaceId),
+    enabled: Boolean(envId),
   })
 
   const items = useMemo(
     () => logsQuery.data?.pages.flatMap((page) => page.items) ?? [],
     [logsQuery.data]
   )
-  const segmentNames = useAuditLogSegmentNames("", items)
+  const segmentNames = useAuditLogSegmentNames(envId, items)
 
   function clearFilters() {
     setSearch("")
@@ -100,7 +94,7 @@ function WorkspaceAuditLogsPage() {
     setRange(undefined)
   }
 
-  if (!workspaceId) {
+  if (!envId) {
     return (
       <div className="-m-5 flex min-h-[calc(100vh-3.5rem)] items-center justify-center bg-background p-8">
         <p className="text-sm text-muted-foreground">
@@ -111,8 +105,6 @@ function WorkspaceAuditLogsPage() {
   }
 
   const initialError = logsQuery.isError && items.length === 0
-  const forbidden =
-    logsQuery.error instanceof ApiRequestError && logsQuery.error.status === 403
   const nextPageError = logsQuery.isError && items.length > 0
 
   return (
@@ -146,17 +138,15 @@ function WorkspaceAuditLogsPage() {
         <div className="overflow-x-auto rounded-md border bg-background">
           {initialError ? (
             <div className="flex min-h-40 items-center justify-between gap-4 px-5 py-4 text-sm text-destructive">
-              {t(forbidden ? "auditLogs.forbidden" : "auditLogs.loadFailed")}
-              {!forbidden ? (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => void logsQuery.refetch()}
-                >
-                  {t("auditLogs.retry")}
-                </Button>
-              ) : null}
+              {t("auditLogs.loadFailed")}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => void logsQuery.refetch()}
+              >
+                {t("auditLogs.retry")}
+              </Button>
             </div>
           ) : (
             <div className="min-w-[1120px]">

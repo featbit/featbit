@@ -43,6 +43,32 @@ public class AuditLogQueryTests
         access.VerifyAll();
     }
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task EnvironmentQuery_RejectsMissingEnvironmentOrAnotherOrganization(bool missing)
+    {
+        var request = new GetAuditLogList
+        {
+            WorkspaceId = Guid.NewGuid(), OrgId = Guid.NewGuid(),
+            Filter = new AuditLogFilter { EnvId = missing ? null : Guid.NewGuid(), CrossEnvironment = true }
+        };
+        var access = new Mock<IAuditLogAccess>();
+        var logs = new Mock<IAuditLogService>(MockBehavior.Strict);
+        var environments = new Mock<IEnvironmentService>();
+        var projects = new Mock<IProjectService>();
+        if (!missing)
+        {
+            var environment = new Domain.Environments.Environment(Guid.NewGuid(), "Env", "env");
+            environments.Setup(x => x.GetAsync(request.Filter.EnvId!.Value)).ReturnsAsync(environment);
+            projects.Setup(x => x.GetAsync(environment.ProjectId)).ReturnsAsync(new Domain.Projects.Project(Guid.NewGuid(), "Other", "other"));
+        }
+        var handler = new GetAuditLogListHandler(logs.Object, Mock.Of<IUserService>(), Mock.Of<IAccessTokenService>(),
+            Mock.Of<IMapper>(), Mock.Of<IOrganizationService>(), environments.Object, projects.Object, access.Object);
+        await Assert.ThrowsAsync<ForbiddenException>(() => handler.Handle(request, default));
+        logs.VerifyNoOtherCalls();
+    }
+
     [Fact]
     public async Task Actors_AuthorizesBeforeQuerying_AndPreservesFilterAndResult()
     {
@@ -56,7 +82,7 @@ public class AuditLogQueryTests
         access.InSequence(sequence).Setup(x => x.EnsureAsync(request.WorkspaceId, request.OrgId))
             .Returns(Task.CompletedTask);
         var logs = new Mock<IAuditLogService>(MockBehavior.Strict);
-        logs.InSequence(sequence).Setup(x => x.GetActorsAsync(request.WorkspaceId, request.Filter)).ReturnsAsync(result);
+        logs.InSequence(sequence).Setup(x => x.GetActorsAsync(request.WorkspaceId, request.Filter, request.OrgId)).ReturnsAsync(result);
 
         var actual = await new GetAuditLogActorsHandler(logs.Object, access.Object).Handle(request, default);
 

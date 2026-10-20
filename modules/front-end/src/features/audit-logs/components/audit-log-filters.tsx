@@ -1,4 +1,7 @@
-import { getCurrentWorkspace } from "@/features/layout/layout-context"
+import {
+  getCurrentWorkspace,
+  getCurrentOrganization,
+} from "@/features/layout/layout-context"
 import { auditTypeLabel } from "../audit-log-utils"
 import { useQuery } from "@tanstack/react-query"
 import {
@@ -36,7 +39,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { fetchAuditUsers } from "../audit-logs-api"
+import { fetchAuditUsers, fetchIamAuditUsers } from "../audit-logs-api"
 import type { AuditUser } from "../audit-logs-types"
 
 function userLabel(user: AuditUser) {
@@ -51,7 +54,7 @@ export function AuditLogFilters({
   range,
   filtersApplied,
   showRefType = true,
-  actorScope,
+  iam = false,
   endContent,
   onSearchChange,
   onUserChange,
@@ -66,7 +69,7 @@ export function AuditLogFilters({
   range: DateRange | undefined
   filtersApplied: boolean
   showRefType?: boolean
-  actorScope?: { envId?: string; refType?: string; refId?: string }
+  iam?: boolean
   endContent?: ReactNode
   onSearchChange: (value: string) => void
   onUserChange: (value: AuditUser | null) => void
@@ -93,10 +96,15 @@ export function AuditLogFilters({
     queryKey: [
       "audit-log-users",
       getCurrentWorkspace()?.id,
-      actorScope,
+      getCurrentOrganization()?.id,
+      iam,
+      refType,
       debouncedUserSearch,
     ],
-    queryFn: () => fetchAuditUsers(debouncedUserSearch, actorScope),
+    queryFn: () =>
+      iam
+        ? fetchIamAuditUsers(debouncedUserSearch, { refType })
+        : fetchAuditUsers(debouncedUserSearch),
     enabled: userOpen,
     staleTime: 30_000,
   })
@@ -116,7 +124,7 @@ export function AuditLogFilters({
         <Input
           value={search}
           className="pl-9"
-          placeholder={t("auditLogs.search")}
+          placeholder={t(iam ? "auditLogs.iamSearch" : "auditLogs.search")}
           onChange={(event) => onSearchChange(event.target.value)}
         />
       </div>
@@ -227,19 +235,26 @@ export function AuditLogFilters({
         >
           <SelectTrigger className="w-52">
             <SelectValue>
-              {refType ? auditTypeLabel(refType, t) : t("auditLogs.allTypes")}
+              {refType
+                ? iam && refType === "Member"
+                  ? t("layout.nav.items.team")
+                  : auditTypeLabel(refType, t)
+                : t("auditLogs.allTypes")}
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
               <SelectItem value="all">{t("auditLogs.allTypes")}</SelectItem>
-              <SelectItem value="FeatureFlag">
-                {t("auditLogs.featureFlag")}
-              </SelectItem>
-              <SelectItem value="Segment">{t("auditLogs.segment")}</SelectItem>
-              <SelectItem value="Member">{t("auditLogs.member")}</SelectItem>
-              <SelectItem value="Group">{t("auditLogs.group")}</SelectItem>
-              <SelectItem value="Policy">{t("auditLogs.policy")}</SelectItem>
+              {(iam
+                ? ["Member", "Group", "Policy"]
+                : ["FeatureFlag", "Segment"]
+              ).map((type) => (
+                <SelectItem key={type} value={type}>
+                  {iam && type === "Member"
+                    ? t("layout.nav.items.team")
+                    : auditTypeLabel(type, t)}
+                </SelectItem>
+              ))}
             </SelectGroup>
           </SelectContent>
         </Select>

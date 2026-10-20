@@ -22,11 +22,100 @@ namespace Infrastructure.IntegrationTests.AuditLogs;
 [Collection(FeatBitPostgresCollection.Name)]
 public class IamAuditTests(FeatBitPostgresFixture fixture) : IntegrationTestBase
 {
+    [DockerTheory]
+    [InlineData(PolicyTypes.CustomerManaged)]
+    [InlineData(PolicyTypes.SysManaged)]
+    public async Task ClonePolicy_PersistsOriginalIdAndKey_ForSelectedPolicyType(string sourceType)
+    {
+        await using var db = AppDbContextFactory.Create(fixture.ConnectionString);
+        var org = new Organization(Guid.NewGuid(), "Clone audit", Guid.NewGuid().ToString()) { Id = Guid.NewGuid() };
+        var key = $"source-{Guid.NewGuid():N}";
+        var customer = new Policy(org.Id, "Customer source", key, "") { Id = Guid.NewGuid() };
+        var system = new Policy(org.Id, "System source", key, "")
+        {
+            Id = Guid.NewGuid(), OrganizationId = null, Type = PolicyTypes.SysManaged
+        };
+        db.AddRange(org, customer, system);
+        await db.SaveChangesAsync();
+        var sourceId = sourceType == PolicyTypes.CustomerManaged ? customer.Id : system.Id;
+        using var services = new ServiceCollection().AddSingleton(db).BuildServiceProvider();
+        var store = new AuditStore(services);
+        var organizations = new Mock<IOrganizationService>();
+        organizations.Setup(x => x.GetAsync(org.Id)).ReturnsAsync(org);
+        var logs = new Infrastructure.Services.EntityFrameworkCore.AuditLogService(db,
+            new AuditLogEnricher(Mock.Of<IEnvironmentService>(), Mock.Of<IProjectService>(), organizations.Object));
+        var http = new DefaultHttpContext();
+        http.Request.Headers["Organization"] = org.Id.ToString();
+        http.Request.Headers["Workspace"] = org.WorkspaceId.ToString();
+        var mapper = new AutoMapper.MapperConfiguration(config => config.AddProfile<Application.Policies.MapperProfile>())
+            .CreateMapper();
+        var handler = new ClonePolicyHandler(new Infrastructure.Services.EntityFrameworkCore.PolicyService(db), mapper);
+        var request = new ClonePolicy
+        {
+            OrgId = org.Id, OriginPolicyKey = key, OriginPolicyType = sourceType,
+            Name = "Cloned", Key = $"clone-{Guid.NewGuid():N}", Description = ""
+        };
+        var result = await new IamAuditBehaviour<ClonePolicy, PolicyVm>(store, logs, Mock.Of<ICurrentUser>(),
+                new HttpContextAccessor { HttpContext = http })
+            .Handle(request, ct => handler.Handle(request, ct), CancellationToken.None);
+
+        db.ChangeTracker.Clear();
+        var log = await db.Set<AuditLog>().SingleAsync(x => x.RefId == result.Id);
+        Assert.Equal(Operations.ClonePolicy, log.Operation);
+        Assert.Equal(new PolicyCloneSource(sourceId, key), log.DataChange.ClonedFrom);
+        Assert.NotEqual(sourceId.ToString(), result.Id);
+        Assert.Empty(log.DataChange.Previous);
+        Assert.Contains(request.Key, log.DataChange.Current);
+        var storedJson = await db.Database.SqlQuery<string>(
+            $"SELECT data_change::text AS \"Value\" FROM audit_logs WHERE id = {log.Id}").SingleAsync();
+        using var json = System.Text.Json.JsonDocument.Parse(storedJson);
+        Assert.False(json.RootElement.TryGetProperty("source", out _));
+        Assert.Equal(sourceId, json.RootElement.GetProperty("clonedFrom").GetProperty("id").GetGuid());
+        Assert.Equal(key, json.RootElement.GetProperty("clonedFrom").GetProperty("key").GetString());
+    }
+
+    [DockerFact]
+    public async Task Queries_IsolateIamOrganizations_Actors_AndEnvironmentHistory()
+    {
+        await using var db = AppDbContextFactory.Create(fixture.ConnectionString);
+        var workspaceId = Guid.NewGuid();
+        var orgId = Guid.NewGuid();
+        var envId = Guid.NewGuid();
+        var actor = new User(Guid.NewGuid(), "allowed@example.com", "password", "Allowed");
+        var otherActor = new User(Guid.NewGuid(), "hidden@example.com", "password", "Hidden");
+        db.AddRange(actor, otherActor);
+        AuditLog Entry(Guid workspace, Guid? org, Guid? env, string type, Guid creator) =>
+            new(env, Guid.NewGuid().ToString(), type, "entry", Operations.Create,
+                new DataChange(null).To(new { Name = "entry" }), "", creator)
+            { WorkspaceId = workspace, OrganizationId = org };
+        var allowed = Entry(workspaceId, orgId, null, AuditLogRefTypes.Group, actor.Id);
+        var flag = Entry(workspaceId, orgId, envId, AuditLogRefTypes.FeatureFlag, otherActor.Id);
+        var shared = Entry(workspaceId, null, null, AuditLogRefTypes.Segment, otherActor.Id);
+        db.AddRange(allowed, flag, shared,
+            Entry(workspaceId, Guid.NewGuid(), null, AuditLogRefTypes.Member, otherActor.Id),
+            Entry(workspaceId, null, null, AuditLogRefTypes.Member, otherActor.Id),
+            Entry(Guid.NewGuid(), orgId, null, AuditLogRefTypes.Policy, otherActor.Id));
+        await db.SaveChangesAsync();
+        var logs = new Infrastructure.Services.EntityFrameworkCore.AuditLogService(db,
+            new AuditLogEnricher(Mock.Of<IEnvironmentService>(), Mock.Of<IProjectService>(), Mock.Of<IOrganizationService>()));
+        var page = await logs.GetListAsync(workspaceId, new AuditLogFilter { PageSize = 1 }, orgId);
+        Assert.Equal(1, page.TotalCount);
+        Assert.Equal(allowed.Id, Assert.Single(page.Items).Id);
+        Assert.Equal(actor.Id, Assert.Single(await logs.GetActorsAsync(workspaceId, new AuditLogFilter(), orgId)).Id);
+        Assert.Empty(await logs.GetActorsAsync(workspaceId, new AuditLogFilter { Query = "Hidden" }, orgId));
+        Assert.Empty((await logs.GetListAsync(workspaceId, new AuditLogFilter { RefType = "FeatureFlag", CrossEnvironment = true, EnvId = envId }, orgId)).Items);
+        Assert.Equal(flag.Id, Assert.Single((await logs.GetListAsync(workspaceId, new AuditLogFilter { EnvId = envId })).Items).Id);
+        Assert.Empty((await logs.GetListAsync(workspaceId, new AuditLogFilter { EnvId = envId, CrossEnvironment = true, RefType = "Group" })).Items);
+        Assert.Equal(shared.Id, Assert.Single((await logs.GetListAsync(workspaceId,
+            new AuditLogFilter { EnvId = envId, CrossEnvironment = true, RefType = "Segment", RefId = shared.RefId })).Items).Id);
+    }
+
     [DockerFact]
     public async Task Actors_ReturnExplicitTypes_AndSearchTokensWithNullEmail()
     {
         await using var db = AppDbContextFactory.Create(fixture.ConnectionString);
         var workspaceId = Guid.NewGuid();
+        var orgId = Guid.NewGuid();
         var user = new User(Guid.NewGuid(), "actor@example.com", "password", "Alice");
         var token = new Domain.AccessTokens.AccessToken(Guid.NewGuid(), user.Id, "Deploy bot",
             Domain.AccessTokens.AccessTokenTypes.Service, []);
@@ -36,7 +125,7 @@ public class IamAuditTests(FeatBitPostgresFixture fixture) : IntegrationTestBase
             db.Add(new AuditLog(null, Guid.NewGuid().ToString(), AuditLogRefTypes.Group, "group",
                 Operations.Create, new DataChange(null).To(new { Name = "group" }), "", creatorId)
             {
-                WorkspaceId = workspaceId
+                WorkspaceId = workspaceId, OrganizationId = orgId
             });
         }
         await db.SaveChangesAsync();
@@ -44,7 +133,7 @@ public class IamAuditTests(FeatBitPostgresFixture fixture) : IntegrationTestBase
             Mock.Of<IOrganizationService>());
         var logs = new Infrastructure.Services.EntityFrameworkCore.AuditLogService(db, enricher);
 
-        var actors = await logs.GetActorsAsync(workspaceId, new AuditLogFilter());
+        var actors = await logs.GetActorsAsync(workspaceId, new AuditLogFilter(), orgId);
         Assert.Equal(2, actors.Count);
         var userActor = Assert.Single(actors, x => x.Id == user.Id);
         Assert.Equal(AuditActorTypes.User, userActor.Type);
@@ -54,9 +143,9 @@ public class IamAuditTests(FeatBitPostgresFixture fixture) : IntegrationTestBase
         Assert.Equal(token.Name, tokenActor.Name);
         Assert.Null(tokenActor.Email);
         Assert.Equal(token.Id, Assert.Single(await logs.GetActorsAsync(workspaceId,
-            new AuditLogFilter { Query = "deploy" })).Id);
+            new AuditLogFilter { Query = "deploy" }, orgId)).Id);
         Assert.Equal(user.Id, Assert.Single(await logs.GetActorsAsync(workspaceId,
-            new AuditLogFilter { Query = "actor@example.com" })).Id);
+            new AuditLogFilter { Query = "actor@example.com" }, orgId)).Id);
     }
 
     [DockerFact]
@@ -106,7 +195,9 @@ public class IamAuditTests(FeatBitPostgresFixture fixture) : IntegrationTestBase
         await using var db = AppDbContextFactory.Create(fixture.ConnectionString);
         var definitions = await db.Database.SqlQueryRaw<string>(
             "SELECT indexdef AS \"Value\" FROM pg_indexes WHERE schemaname = 'public' AND tablename = 'audit_logs' AND indexname <> 'pk_audit_logs'").ToListAsync();
-        Assert.Equal(2, definitions.Count);
+        Assert.Equal(3, definitions.Count);
+        Assert.Contains(definitions, x => x.Contains("ix_audit_logs_workspace_org_created ") &&
+            x.EndsWith("(workspace_id, organization_id, created_at DESC, id DESC)"));
         Assert.Contains(definitions, x => x.Contains("ix_audit_logs_workspace_created ") &&
             x.EndsWith("(workspace_id, created_at DESC, id DESC)"));
         Assert.Contains(definitions, x => x.Contains("ix_audit_logs_workspace_resource_created ") &&
@@ -153,17 +244,17 @@ public class IamAuditTests(FeatBitPostgresFixture fixture) : IntegrationTestBase
         var command = new AddGroupMember { GroupId = group.Id, MemberId = user.Id, OrganizationId = org.Id };
         await pipeline.Handle(command, ct => handler.Handle(command, ct), CancellationToken.None);
         await pipeline.Handle(command, ct => handler.Handle(command, ct), CancellationToken.None);
-        var page = await logs.GetListAsync(org.WorkspaceId, new AuditLogFilter());
+        var page = await logs.GetListAsync(org.WorkspaceId, new AuditLogFilter(), org.Id);
         var log = Assert.Single(page.Items);
         Assert.Null(log.EnvId); Assert.Equal(org.Id, log.OrganizationId);
         Assert.Equal(user.Id, log.CreatorId); Assert.Equal("AddGroupMember", log.Operation);
         Assert.Contains("group/Engineering", log.DataChange.Current);
         Assert.Contains("member/audit@example.com", log.DataChange.Current);
         Assert.DoesNotContain("secret-password", log.DataChange.Current);
-        Assert.Empty((await logs.GetListAsync(Guid.NewGuid(), new AuditLogFilter())).Items);
+        Assert.Empty((await logs.GetListAsync(Guid.NewGuid(), new AuditLogFilter(), org.Id)).Items);
         Assert.Empty((await logs.GetListAsync(org.WorkspaceId, new AuditLogFilter { EnvId = Guid.NewGuid() })).Items);
-        Assert.Empty((await logs.GetListAsync(org.WorkspaceId, new AuditLogFilter { RefType = "Policy" })).Items);
-        Assert.Single(await logs.GetActorsAsync(org.WorkspaceId, new AuditLogFilter { Query = "Alice" }));
+        Assert.Empty((await logs.GetListAsync(org.WorkspaceId, new AuditLogFilter { RefType = "Policy" }, org.Id)).Items);
+        Assert.Single(await logs.GetActorsAsync(org.WorkspaceId, new AuditLogFilter { Query = "Alice" }, org.Id));
 
         // A policy change records the semantic before/after and survives deletion
         // with the removed assignments preserved in the snapshot.
@@ -180,7 +271,7 @@ public class IamAuditTests(FeatBitPostgresFixture fixture) : IntegrationTestBase
         var deleteHandler = new DeletePolicyHandler(policyService);
         await new IamAuditBehaviour<DeletePolicy, bool>(store, logs, current.Object, access)
             .Handle(deletion, ct => deleteHandler.Handle(deletion, ct), CancellationToken.None);
-        var policyLogs = (await logs.GetListAsync(org.WorkspaceId, new AuditLogFilter { RefType = "Policy" })).Items;
+        var policyLogs = (await logs.GetListAsync(org.WorkspaceId, new AuditLogFilter { RefType = "Policy" }, org.Id)).Items;
         Assert.Equal(2, policyLogs.Count());
         var removed = Assert.Single(policyLogs, x => x.Operation == Operations.DeletePolicy);
         Assert.Contains("group/Engineering", removed.DataChange.Previous);

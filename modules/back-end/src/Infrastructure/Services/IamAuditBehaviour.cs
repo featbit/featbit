@@ -65,6 +65,15 @@ public class IamAuditBehaviour<TRequest, TResponse>(
             }
             await ValidateReferences(request, contextOrg);
 
+            PolicyCloneSource? clonedFrom = null;
+            if (request is ClonePolicy clone)
+            {
+                Guid? sourceOrg = clone.OriginPolicyType == PolicyTypes.CustomerManaged ? clone.OrgId : null;
+                var source = (await store.Read<Policy>(x =>
+                    x.OrganizationId == sourceOrg && x.Key == clone.OriginPolicyKey)).SingleOrDefault();
+                if (source != null) clonedFrom = new PolicyCloneSource(source.Id, source.Key);
+            }
+
             var result = await next();
             if (result is GroupVm group && request is CreateGroup)
                 targets.Add(new Target(AuditLogRefTypes.Group, Guid.Parse(group.Id), ((CreateGroup)(object)request).OrganizationId));
@@ -90,7 +99,7 @@ public class IamAuditBehaviour<TRequest, TResponse>(
                 {
                     WorkspaceId = contextWorkspace, OrganizationId = target.OrgId
                 };
-                if (request is ClonePolicy clone) change.Source = $"policy/{clone.OriginPolicyKey}";
+                change.ClonedFrom = clonedFrom;
                 await logs.AddOneAsync(log);
             }
             return result;

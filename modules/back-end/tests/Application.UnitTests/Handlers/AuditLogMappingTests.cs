@@ -11,12 +11,12 @@ public class AuditLogMappingTests
     [Theory]
     [InlineData(Operations.ClonePolicy, "policy/developer")]
     [InlineData(Operations.AddGroupPolicy, null)]
-    public void Response_PreservesMetadataAtTopLevel_AndOnlySnapshotsInDataChange(
+    public void Response_PreservesCloneSourceInsideDataChange(
         string operation, string? source)
     {
         var change = new DataChange
         {
-            Source = source,
+            ClonedFrom = source == null ? null : new PolicyCloneSource(Guid.NewGuid(), "developer"),
             Previous = "{\"name\":\"before\"}",
             Current = "{\"name\":\"after\"}"
         };
@@ -28,18 +28,25 @@ public class AuditLogMappingTests
         var page = mapper.Map<PagedResult<AuditLogVm>>(new PagedResult<AuditLog>(1, [log]));
         var result = Assert.Single(page.Items);
         Assert.Equal(operation, result.Operation);
-        Assert.Equal(source, result.Source);
+        Assert.Equal(change.ClonedFrom, result.DataChange.ClonedFrom);
 
         using var json = JsonDocument.Parse(JsonSerializer.Serialize(result, new JsonSerializerOptions(JsonSerializerDefaults.Web)));
         var root = json.RootElement;
         Assert.Equal(operation, root.GetProperty("operation").GetString());
         Assert.False(root.TryGetProperty("action", out _));
         Assert.False(root.TryGetProperty("assignmentSource", out _));
-        Assert.Equal(source, root.GetProperty("source").GetString());
+        Assert.False(root.TryGetProperty("source", out _));
         var dataChange = root.GetProperty("dataChange");
-        Assert.Equal(new[] { "previous", "current" }, dataChange.EnumerateObject().Select(x => x.Name));
+        Assert.False(dataChange.TryGetProperty("source", out _));
+        var clonedFrom = dataChange.GetProperty("clonedFrom");
+        if (change.ClonedFrom == null)
+            Assert.Equal(JsonValueKind.Null, clonedFrom.ValueKind);
+        else
+        {
+            Assert.Equal(change.ClonedFrom.Id, clonedFrom.GetProperty("id").GetGuid());
+            Assert.Equal("developer", clonedFrom.GetProperty("key").GetString());
+        }
         Assert.Equal(change.Previous, dataChange.GetProperty("previous").GetString());
         Assert.Equal(change.Current, dataChange.GetProperty("current").GetString());
-        Assert.Equal(source, change.Source);
     }
 }

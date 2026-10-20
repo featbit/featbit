@@ -99,7 +99,6 @@ public class AuditLog : Entity
 
         if (!segment.IsEnvironmentSpecific)
         {
-            auditLog.EnvId = null;
             auditLog.WorkspaceId = segment.WorkspaceId;
         }
         return auditLog;

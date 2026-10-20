@@ -16,6 +16,10 @@ public class AuditLogConfiguration : IEntityTypeConfiguration<AuditLog>
             .HasDatabaseName("ix_audit_logs_workspace_resource_created")
             .IsDescending(false, false, false, true, true);
 
+        builder.HasIndex(x => new { x.WorkspaceId, x.OrganizationId, x.CreatedAt, x.Id })
+            .HasDatabaseName("ix_audit_logs_workspace_org_created")
+            .IsDescending(false, false, true, true);
+
         builder.Property(x => x.RefId).IsRequired();
         builder.Property(x => x.RefType).HasMaxLength(64).IsRequired();
         builder.Property(x => x.Keyword).HasMaxLength(512).IsRequired();

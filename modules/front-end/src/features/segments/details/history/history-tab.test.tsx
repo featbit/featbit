@@ -84,10 +84,11 @@ describe("HistoryTab", () => {
 
     await waitFor(() =>
       expect(fetchAuditLogs).toHaveBeenCalledWith(
+        "env-1",
         expect.objectContaining({
           refType: "Segment",
           refId: segment.id,
-          envId: "env-1",
+          crossEnvironment: false,
         }),
         0,
         10
@@ -97,7 +98,7 @@ describe("HistoryTab", () => {
     expect(
       screen.queryByRole("button", { name: "Clear filters" })
     ).not.toBeInTheDocument()
-    const search = screen.getByPlaceholderText("Filter by resource or comment")
+    const search = screen.getByPlaceholderText("Filter by key or comment")
     fireEvent.change(search, { target: { value: "release" } })
     fireEvent.click(screen.getByRole("button", { name: "Clear filters" }))
     expect(search).toHaveValue("")
@@ -133,7 +134,8 @@ describe("HistoryTab", () => {
     expect(await screen.findByText("Across 2 scopes")).toBeInTheDocument()
     await waitFor(() =>
       expect(fetchAuditLogs).toHaveBeenCalledWith(
-        expect.objectContaining({ envId: undefined }),
+        "env-1",
+        expect.objectContaining({ crossEnvironment: true }),
         0,
         10
       )

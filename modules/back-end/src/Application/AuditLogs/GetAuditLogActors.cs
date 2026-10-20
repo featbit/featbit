@@ -17,6 +17,6 @@ public class GetAuditLogActorsHandler(IAuditLogService logs, IAuditLogAccess acc
     public async Task<IReadOnlyList<AuditActor>> Handle(GetAuditLogActors request, CancellationToken cancellationToken)
     {
         await access.EnsureAsync(request.WorkspaceId, request.OrgId);
-        return await logs.GetActorsAsync(request.WorkspaceId, request.Filter);
+        return await logs.GetActorsAsync(request.WorkspaceId, request.Filter, request.OrgId);
     }
 }

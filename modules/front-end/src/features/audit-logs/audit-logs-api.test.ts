@@ -1,6 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { fetchApi } from "@/lib/api/authenticated-api"
-import { fetchAuditLogs, fetchAuditUsers } from "./audit-logs-api"
+import {
+  fetchAuditLogs,
+  fetchAuditUsers,
+  fetchIamAuditLogs,
+  fetchIamAuditUsers,
+} from "./audit-logs-api"
 
 vi.mock("@/lib/api/authenticated-api", () => ({
   fetchApi: vi.fn(),
@@ -15,8 +20,8 @@ describe("audit logs API", () => {
     vi.mocked(fetchApi).mockResolvedValue({ items: [], totalCount: 0 })
 
     await fetchAuditLogs(
+      "env / 1",
       {
-        envId: "env / 1",
         query: "checkout",
         creatorId: "user-1",
         refType: "FeatureFlag",
@@ -29,9 +34,9 @@ describe("audit logs API", () => {
 
     const url = vi.mocked(fetchApi).mock.calls[0]?.[0] as string
     const parsed = new URL(url, "https://featbit.test")
-    expect(parsed.pathname).toBe("/api/v1/audit-logs")
+    expect(parsed.pathname).toBe("/api/v1/envs/env%20%2F%201/audit-logs")
     expect(Object.fromEntries(parsed.searchParams)).toEqual({
-      envId: "env / 1",
+      crossEnvironment: "false",
       query: "checkout",
       creatorId: "user-1",
       refType: "FeatureFlag",
@@ -43,13 +48,24 @@ describe("audit logs API", () => {
     })
   })
 
-  it("uses workspace audit actors for searchable users", async () => {
+  it("uses the shared members endpoint for searchable users", async () => {
     vi.mocked(fetchApi).mockResolvedValue({ items: [], totalCount: 0 })
 
     await fetchAuditUsers("alex chen")
 
     expect(fetchApi).toHaveBeenCalledWith(
-      "/api/v1/audit-logs/actors?query=alex+chen&pageIndex=0&pageSize=20"
+      "/api/v1/members?searchText=alex+chen&pageIndex=0&pageSize=20"
     )
   })
+})
+
+it("queries IAM lists and actors through the protected IAM endpoints", async () => {
+  await fetchIamAuditLogs({ query: "", refType: "Group" }, 0, 10)
+  expect(fetchApi).toHaveBeenLastCalledWith(
+    expect.stringMatching(/^\/api\/v1\/iam\/audit-logs\?/)
+  )
+  await fetchIamAuditUsers("Alice", { refType: "Member" })
+  expect(fetchApi).toHaveBeenLastCalledWith(
+    expect.stringMatching(/^\/api\/v1\/iam\/audit-logs\/actors\?/)
+  )
 })

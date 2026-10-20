@@ -20,7 +20,6 @@ import {
 import {
   getCurrentOrganization,
   getCurrentProjectEnv,
-  getCurrentWorkspace,
   localizedPath,
 } from "@/features/layout/layout-context"
 import type { Lang } from "@/features/layout/layout-types"
@@ -92,70 +91,6 @@ function ObjectIdentity({ log, lang }: { log: AuditLog; lang: Lang }) {
   )
 }
 
-function AuditScope({ log }: { log: AuditLog }) {
-  const { t } = useTranslation()
-
-  if (log.refType === "Segment" && log.envId === null) {
-    const workspace = getCurrentWorkspace()
-    const workspaceName =
-      workspace?.id === log.workspaceId && workspace?.name
-        ? workspace.name
-        : t("auditLogs.unavailable")
-
-    return (
-      <div className="w-80 space-y-0.5 text-xs leading-5">
-        <p className="truncate" title={workspaceName}>
-          <span className="text-muted-foreground">
-            {t("auditLogs.scopeWorkspace")}{" "}
-          </span>
-          {workspaceName}
-        </p>
-        <p className="text-muted-foreground">{t("auditLogs.sharedSegment")}</p>
-      </div>
-    )
-  }
-
-  if (!log.organizationName && !log.projectName && !log.environmentName) {
-    return <span className="text-muted-foreground">—</span>
-  }
-
-  return (
-    <div className="w-80 space-y-0.5 text-xs leading-5">
-      {log.organizationName ? (
-        <p className="truncate" title={log.organizationName}>
-          <span className="text-muted-foreground">
-            {t("auditLogs.scopeOrganization")}{" "}
-          </span>
-          {log.organizationName}
-        </p>
-      ) : null}
-      {log.projectName || log.environmentName ? (
-        <div className="flex items-baseline gap-1 whitespace-nowrap">
-          {log.projectName ? (
-            <p className="min-w-0 truncate" title={log.projectName}>
-              <span className="text-muted-foreground">
-                {t("auditLogs.scopeProject")}{" "}
-              </span>
-              {log.projectName}
-            </p>
-          ) : null}
-          {log.projectName && log.environmentName ? (
-            <span className="text-muted-foreground">·</span>
-          ) : null}
-          {log.environmentName ? (
-            <p className="shrink-0">
-              <span className="text-muted-foreground">
-                {t("auditLogs.scopeEnvironment")}{" "}
-              </span>
-              {log.environmentName}
-            </p>
-          ) : null}
-        </div>
-      ) : null}
-    </div>
-  )
-}
-
 export function AuditLogTable({
   items,
   lang,
@@ -163,6 +98,7 @@ export function AuditLogTable({
   loading,
   filtered,
   resourceScoped = false,
+  iam = false,
   adapter,
   segmentNames,
   onClearFilters,
@@ -174,6 +110,7 @@ export function AuditLogTable({
   loading: boolean
   filtered: boolean
   resourceScoped?: boolean
+  iam?: boolean
   adapter?: AuditLogTableAdapter
   segmentNames?: ReadonlyMap<string, string>
   onClearFilters: () => void
@@ -191,7 +128,7 @@ export function AuditLogTable({
       }),
     [locale]
   )
-  const columnCount = resourceScoped ? 5 : 8
+  const columnCount = resourceScoped ? 5 : 7
 
   function toggleExpanded(logId: string) {
     setExpanded((current) => {
@@ -208,12 +145,15 @@ export function AuditLogTable({
         <TableRow className="hover:bg-transparent">
           <TableHead className="w-12" />
           <TableHead className="w-52">{t("auditLogs.date")}</TableHead>
-          <TableHead className="w-56">{t("auditLogs.user")}</TableHead>
+          <TableHead className="w-56">
+            {t(iam ? "auditLogs.iamActor" : "auditLogs.user")}
+          </TableHead>
           {!resourceScoped ? (
             <>
               <TableHead className="w-36">{t("auditLogs.type")}</TableHead>
-              <TableHead className="w-64">{t("auditLogs.keyName")}</TableHead>
-              <TableHead className="w-80">{t("auditLogs.scope")}</TableHead>
+              <TableHead className="w-64">
+                {t(iam ? "auditLogs.iamResource" : "auditLogs.keyName")}
+              </TableHead>
             </>
           ) : null}
           <TableHead>{t("auditLogs.event")}</TableHead>
@@ -294,9 +234,6 @@ export function AuditLogTable({
                       </TableCell>
                       <TableCell className="max-w-64">
                         <ObjectIdentity log={log} lang={lang} />
-                      </TableCell>
-                      <TableCell>
-                        <AuditScope log={log} />
                       </TableCell>
                     </>
                   ) : null}
@@ -440,7 +377,11 @@ export function AuditLogTable({
                 <p className="text-sm text-muted-foreground">
                   {filtered
                     ? t("auditLogs.filteredEmptyDescription")
-                    : t("auditLogs.emptyDescription")}
+                    : t(
+                        iam
+                          ? "auditLogs.iamEmptyDescription"
+                          : "auditLogs.emptyDescription"
+                      )}
                 </p>
                 {filtered ? (
                   <Button

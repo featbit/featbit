@@ -55,6 +55,9 @@ function getEnvironmentReloadPath(pathname: string, baseHref: string) {
   const segments = pathname.split("/").filter(Boolean)
   const [lang, featureSegment] = segments
 
+  if (lang && featureSegment === "iam")
+    return getBrowserPath(pathname, baseHref)
+
   if (lang && featureSegment) {
     return getBrowserPath(`/${lang}/${featureSegment}`, baseHref)
   }
