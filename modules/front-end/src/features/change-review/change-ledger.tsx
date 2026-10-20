@@ -49,6 +49,7 @@ export type ChangeLedgerProps<TChange extends ChangeReviewItem> = {
   snapshot?: boolean
   renderLabel?: (change: TChange) => ReactNode | undefined
   renderContent?: (change: TChange) => ReactNode | undefined
+  renderValue?: (value: string, change: TChange) => ReactNode
 }
 
 export function ChangePair({
@@ -74,6 +75,7 @@ export function ChangeLedger<TChange extends ChangeReviewItem>({
   className,
   renderLabel,
   renderContent,
+  renderValue,
   snapshot = false,
 }: ChangeLedgerProps<TChange>) {
   const columns = layoutColumns[layout]
@@ -84,12 +86,20 @@ export function ChangeLedger<TChange extends ChangeReviewItem>({
     {}
   )
 
-  function valuesContent(values: string[], key: string) {
+  function valuesContent(values: string[], key: string, change: TChange) {
     const expanded = expandedValues[key]
     const visible = expanded ? values : values.slice(0, previewLimit)
     return (
       <div className="min-w-0 text-sm">
-        <span className="break-words">{visible.join(", ") || "—"}</span>
+        {renderValue ? (
+          <ul className="space-y-3">
+            {visible.map((value, index) => (
+              <li key={index}>{renderValue(value, change)}</li>
+            ))}
+          </ul>
+        ) : (
+          <span className="break-words">{visible.join(", ") || "—"}</span>
+        )}
         {values.length > previewLimit ? (
           <Button
             type="button"
@@ -171,7 +181,11 @@ export function ChangeLedger<TChange extends ChangeReviewItem>({
                         {copy.actionCount(group.action, group.values.length)}
                       </span>
                     )}
-                    {valuesContent(group.values, `${key}-${groupIndex}`)}
+                    {valuesContent(
+                      group.values,
+                      `${key}-${groupIndex}`,
+                      change
+                    )}
                   </div>
                 ))}
               </div>
@@ -230,7 +244,7 @@ export function ChangeLedger<TChange extends ChangeReviewItem>({
               {customContent !== undefined ? (
                 customContent
               ) : change.values?.length ? (
-                valuesContent(change.values, key)
+                valuesContent(change.values, key, change)
               ) : !snapshot &&
                 change.previous !== undefined &&
                 change.current !== undefined ? (

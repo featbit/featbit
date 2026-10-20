@@ -5,6 +5,22 @@ import { iamChanges } from "../iam-audit-changes"
 import type { AuditLog } from "../audit-logs-types"
 import { auditSnapshotKind, auditSnapshotLog } from "../audit-snapshot"
 
+function IamReference({ value }: { value: string }) {
+  const separator = value.lastIndexOf("\n")
+  const name = separator < 0 ? value : value.slice(0, separator)
+  const rn = separator < 0 ? "" : value.slice(separator + 1)
+  return (
+    <div className="min-w-0 space-y-0.5">
+      <p className="text-sm break-words text-foreground">{name || rn || "—"}</p>
+      {name && rn ? (
+        <p className="font-mono text-xs break-all text-muted-foreground">
+          {rn}
+        </p>
+      ) : null}
+    </div>
+  )
+}
+
 export function IamAuditDetails({ log }: { log: AuditLog }) {
   const { t } = useTranslation()
   const snapshot = !!auditSnapshotKind(log)
@@ -122,6 +138,12 @@ function IamLedger({
           ) : null}
         </>
       )}
+      renderValue={(value) => <IamReference value={value} />}
+      renderContent={(change) =>
+        ["members", "groups", "policies"].includes(change.kind) ? (
+          <IamReference value={change.current ?? change.previous ?? ""} />
+        ) : undefined
+      }
     />
   )
 }
