@@ -251,6 +251,13 @@ public class IamAuditTests(FeatBitPostgresFixture fixture) : IntegrationTestBase
         Assert.Contains("group/Engineering", log.DataChange.Current);
         Assert.Contains("member/audit@example.com", log.DataChange.Current);
         Assert.DoesNotContain("secret-password", log.DataChange.Current);
+        foreach (var raw in new[] { log.DataChange.Previous, log.DataChange.Current })
+        {
+            using var snapshot = System.Text.Json.JsonDocument.Parse(raw);
+            Assert.Equal(new[] { "description", "id", "members", "name", "policies", "rn" },
+                snapshot.RootElement.EnumerateObject().Select(x => x.Name).Order().ToArray());
+            Assert.Equal(System.Text.Json.JsonValueKind.Array, snapshot.RootElement.GetProperty("policies").ValueKind);
+        }
         Assert.Empty((await logs.GetListAsync(Guid.NewGuid(), new AuditLogFilter(), org.Id)).Items);
         Assert.Empty((await logs.GetListAsync(org.WorkspaceId, new AuditLogFilter { EnvId = Guid.NewGuid() })).Items);
         Assert.Empty((await logs.GetListAsync(org.WorkspaceId, new AuditLogFilter { RefType = "Policy" }, org.Id)).Items);

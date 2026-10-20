@@ -22,6 +22,46 @@ function log(previous: object, current: object): AuditLog {
   }
 }
 describe("IAM audit changes", () => {
+  it.each([
+    [
+      "Member",
+      { email: "alice@example.com", groups: [], policies: [] },
+      { description: null, members: [], statements: [] },
+    ],
+    [
+      "Group",
+      { description: "", members: [], policies: [] },
+      { email: null, groups: [], statements: [] },
+    ],
+    [
+      "Policy",
+      { description: "", members: [], groups: [], statements: [] },
+      { email: null, policies: [] },
+    ],
+  ])(
+    "reads legacy and resource-specific %s snapshots identically",
+    (refType, relevant, unused) => {
+      const previous = {
+        id: "resource",
+        name: "Before",
+        rn: "resource/test",
+        ...relevant,
+      }
+      const current = { ...previous, name: "After" }
+      const modern = { ...log(previous, current), refType }
+      const legacy = {
+        ...log({ ...previous, ...unused }, { ...current, ...unused }),
+        refType,
+      }
+      expect(iamChanges(modern)).toEqual(iamChanges(legacy))
+      expect(iamChanges(modern)).toEqual([
+        { field: "name", before: "Before", after: "After" },
+      ])
+      expect(auditObjectIdentity(modern, "Unknown")).toEqual(
+        auditObjectIdentity(legacy, "Unknown")
+      )
+    }
+  )
   it("shows IAM RN instead of key and distinguishes relation additions/removals", () => {
     const event = log(
       { members: [{ id: "a", name: "Alice", rn: "member/alice@example.com" }] },

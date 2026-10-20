@@ -7,8 +7,13 @@ using Domain.Users;
 namespace Infrastructure.Services;
 
 public record IamAuditReference(Guid Id, string Name, string Rn);
-public record IamAuditSnapshot(Guid Id, string Name, string Rn, string? Email, string? Description,
-    IamAuditReference[] Members, IamAuditReference[] Groups, IamAuditReference[] Policies, PolicyStatement[] Statements);
+public abstract record IamAuditSnapshot(Guid Id, string Name, string Rn);
+public record MemberAuditSnapshot(Guid Id, string Name, string Rn, string? Email,
+    IamAuditReference[] Groups, IamAuditReference[] Policies) : IamAuditSnapshot(Id, Name, Rn);
+public record GroupAuditSnapshot(Guid Id, string Name, string Rn, string? Description,
+    IamAuditReference[] Members, IamAuditReference[] Policies) : IamAuditSnapshot(Id, Name, Rn);
+public record PolicyAuditSnapshot(Guid Id, string Name, string Rn, string? Description,
+    PolicyStatement[] Statements, IamAuditReference[] Members, IamAuditReference[] Groups) : IamAuditSnapshot(Id, Name, Rn);
 
 // Whitelisted snapshots: never serialize a User (which contains credentials).
 public class IamAuditSnapshots(AuditStore store)
@@ -57,6 +62,14 @@ public class IamAuditSnapshots(AuditStore store)
         if (memberIds.Length > 0) members = (await store.Read<User>(x => memberIds.Contains(x.Id))).Select(x => new IamAuditReference(x.Id, x.Name, $"member/{x.Email}")).ToList();
         if (groupIds.Length > 0) groups = (await store.Read<Group>(x => groupIds.Contains(x.Id))).Select(x => new IamAuditReference(x.Id, x.Name, $"group/{x.Name}")).ToList();
         if (policyIds.Length > 0) policies = (await store.Read<Policy>(x => policyIds.Contains(x.Id))).Select(x => new IamAuditReference(x.Id, x.Name, $"policy/{x.Key}")).ToList();
-        return new(id, name, rn, email, description, members.OrderBy(x => x.Id).ToArray(), groups.OrderBy(x => x.Id).ToArray(), policies.OrderBy(x => x.Id).ToArray(), statements);
+        var sortedMembers = members.OrderBy(x => x.Id).ToArray();
+        var sortedGroups = groups.OrderBy(x => x.Id).ToArray();
+        var sortedPolicies = policies.OrderBy(x => x.Id).ToArray();
+        return type switch
+        {
+            "Group" => new GroupAuditSnapshot(id, name, rn, description, sortedMembers, sortedPolicies),
+            "Policy" => new PolicyAuditSnapshot(id, name, rn, description, statements, sortedMembers, sortedGroups),
+            _ => new MemberAuditSnapshot(id, name, rn, email, sortedGroups, sortedPolicies)
+        };
     }
 }

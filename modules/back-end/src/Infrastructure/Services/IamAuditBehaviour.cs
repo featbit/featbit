@@ -93,7 +93,7 @@ public class IamAuditBehaviour<TRequest, TResponse>(
                 if (change.Previous == change.Current) continue;
                 var identity = (IamAuditSnapshot?)(current ?? previous);
                 var operation = target.OrgId == null ? Operations.RemoveFromWorkspace : request.GetType().Name;
-                var keyword = $"{identity?.Name} {identity?.Rn} {identity?.Email}";
+                var keyword = $"{identity?.Name} {identity?.Rn} {(identity as MemberAuditSnapshot)?.Email}";
                 var log = new AuditLog(null, target.Id.ToString(), target.Type,
                     keyword[..Math.Min(keyword.Length, 512)], operation, change, "", actor.Id)
                 {
@@ -137,8 +137,8 @@ public class IamAuditBehaviour<TRequest, TResponse>(
             return result;
         }, ct);
 
-    private static IamAuditSnapshot ProfileSnapshot(User user) =>
-        new(user.Id, user.Name, $"member/{user.Email}", user.Email, null, [], [], [], []);
+    private static MemberAuditSnapshot ProfileSnapshot(User user) =>
+        new(user.Id, user.Name, $"member/{user.Email}", user.Email, [], []);
 
     private async Task ValidateReferences(object request, Guid orgId)
     {
