@@ -78,6 +78,14 @@ public class SharedSegmentAuditTests(FeatBitPostgresFixture fixture) : Integrati
             insert.Parameters.AddWithValue("change", json);
             await insert.ExecuteNonQueryAsync();
         }
+        // Existing environment ownership must not depend on readable snapshot JSON.
+        await using (var legacy = new NpgsqlCommand(
+            """INSERT INTO audit_logs VALUES (@id, @env, 'Segment', 'legacy', '{"current":"not JSON"}'::jsonb, now())""", connection))
+        {
+            legacy.Parameters.AddWithValue("id", Guid.NewGuid());
+            legacy.Parameters.AddWithValue("env", env);
+            await legacy.ExecuteNonQueryAsync();
+        }
         await using (var parents = new NpgsqlCommand("INSERT INTO organizations VALUES (@org,@ws); INSERT INTO projects VALUES (@project,@org); INSERT INTO environments VALUES (@env,@project)", connection))
         {
             parents.Parameters.AddWithValue("org", org); parents.Parameters.AddWithValue("ws", workspace);
@@ -93,11 +101,11 @@ public class SharedSegmentAuditTests(FeatBitPostgresFixture fixture) : Integrati
             await using (var verify = new NpgsqlCommand("SELECT count(*) FROM audit_logs WHERE env_id=@env AND workspace_id=@ws AND organization_id=@org", connection))
             {
                 verify.Parameters.AddWithValue("env", env); verify.Parameters.AddWithValue("ws", workspace); verify.Parameters.AddWithValue("org", org);
-                Assert.Equal(2L, await verify.ExecuteScalarAsync());
+                Assert.Equal(3L, await verify.ExecuteScalarAsync());
             }
             if (run == 0)
             {
-                await using var clear = new NpgsqlCommand("UPDATE audit_logs SET env_id=NULL, organization_id=NULL", connection);
+                await using var clear = new NpgsqlCommand("UPDATE audit_logs SET env_id=NULL, organization_id=NULL WHERE ref_id='shared'", connection);
                 await clear.ExecuteNonQueryAsync();
             }
         }
