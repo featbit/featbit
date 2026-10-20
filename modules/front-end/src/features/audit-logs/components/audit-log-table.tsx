@@ -279,14 +279,26 @@ export function AuditLogTable({
                       <div>
                         <div className="mb-3 flex items-center justify-between">
                           <div className="flex items-baseline gap-2">
-                            <h3 className="text-sm font-medium">
+                            <h3
+                              className={cn(
+                                "text-sm text-foreground",
+                                "font-semibold"
+                              )}
+                            >
                               {t(
                                 decisionDetails
                                   ? "auditLogs.decision"
-                                  : "auditLogs.changes"
+                                  : changeDetails.kind === "initial"
+                                    ? "auditLogs.initialConfiguration"
+                                    : changeDetails.kind === "deleted"
+                                      ? "auditLogs.deletedConfiguration"
+                                      : changeDetails.kind === "status"
+                                        ? "auditLogs.statusChange"
+                                        : "auditLogs.changes"
                               )}
                             </h3>
-                            {!decisionDetails ? (
+                            {!changeDetails.kind ||
+                            changeDetails.kind === "changes" ? (
                               <span className="text-sm text-muted-foreground">
                                 {t("auditLogs.changeCount", {
                                   count: changeDetails.count,

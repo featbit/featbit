@@ -1,4 +1,15 @@
 export const enAuditLogs = {
+  statusChange: "Status change",
+  archiveStatus: "Archive status",
+  flagState: "Flag state",
+  activeState: "Active",
+  archivedState: "Archived",
+  insights: "Insights",
+  initialConfiguration: "Initial configuration",
+  deletedConfiguration: "Configuration before deletion",
+  defaultServing: "Default serving",
+  permissionStatement: "Permission statement {{number}}",
+  snapshotUnavailable: "Configuration snapshot is unavailable.",
   accessToken: "Access token",
   member: "Team member",
   group: "Group",
@@ -119,6 +130,17 @@ export const enAuditLogs = {
 }
 
 export const zhAuditLogs: typeof enAuditLogs = {
+  statusChange: "状态变化",
+  archiveStatus: "归档状态",
+  flagState: "开关状态",
+  activeState: "未归档",
+  archivedState: "已归档",
+  insights: "数据洞察",
+  initialConfiguration: "创建时配置",
+  deletedConfiguration: "删除前配置",
+  defaultServing: "默认返回",
+  permissionStatement: "权限语句 {{number}}",
+  snapshotUnavailable: "配置快照不可用。",
   accessToken: "访问令牌",
   member: "团队成员",
   group: "成员组",
