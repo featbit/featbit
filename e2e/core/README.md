@@ -1,6 +1,6 @@
 # E2E Core Tests
 
-End-to-end validation of core system capabilities across five deployment stacks, for local development, CI and release checks.
+End-to-end validation of core system capabilities across five deployment stacks, for local development and CI.
 
 ## Getting started
 
@@ -61,5 +61,3 @@ Each invocation prints its archive path, such as `.runs/6.0.1-20261018-073618/` 
 ## GitHub Actions
 
 [E2E Core Tests](../../.github/workflows/e2e-core.yml) runs Postgres on relevant PR updates and all five stacks on relevant `main` pushes. Manual runs support either a source branch/tag/commit or a published image version. Test evidence is retained for 7 days.
-
-The [release workflow](../../.github/workflows/publish-docker-images.yml) tests candidate image digests on all five stacks before assigning formal version tags. Retry all jobs together. These checks cover clean-install functionality on amd64; upgrade testing, arm64 execution and optional Control Plane are outside the suite's scope.

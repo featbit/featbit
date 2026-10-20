@@ -10,45 +10,6 @@ import release_images as release
 
 
 class ReleaseTests(unittest.TestCase):
-    def candidates(self):
-        for app in release.APPS:
-            path = Path(f"release-images/{app}.json")
-            data = json.loads(path.read_text())
-            release.save(path, {**data, "candidate": "candidate-123-1"})
-
-    @patch.object(release, "validate", return_value=("5.4.10", "abc"))
-    @patch.object(release, "verify_image")
-    @patch.object(release.subprocess, "run")
-    def test_stage_pulls_recorded_digests_and_skips_optional_control_plane(self, run, verify, _):
-        self.candidates()
-        with patch.dict(os.environ, GITHUB_RUN_ID="123", CANDIDATE_TAG="candidate-123-1"):
-            release.stage_candidates()
-        pulls = [call.args[0] for call in run.call_args_list if call.args[0][1] == "pull"]
-        self.assertEqual(len(pulls), 3)
-        self.assertTrue(all(command[2].endswith("@" + self.digest) for command in pulls))
-        self.assertEqual(verify.call_count, 4)
-
-    @patch.object(release, "validate", return_value=("5.4.10", "abc"))
-    @patch.object(release, "verify_image")
-    @patch.object(release, "preflight")
-    @patch.object(release.subprocess, "run")
-    def test_finalize_reuses_tested_digests_and_rejects_foreign_records(self, run, preflight, verify, _):
-        self.candidates()
-        with patch.dict(os.environ, GITHUB_RUN_ID="999", CANDIDATE_TAG="candidate-123-1"):
-            with self.assertRaises(ValueError):
-                release.finalize()
-        run.assert_not_called()
-        with patch.dict(os.environ, GITHUB_RUN_ID="123", CANDIDATE_TAG="candidate-123-1"):
-            preflight.side_effect = ValueError('existing formal tag')
-            with self.assertRaises(ValueError):
-                release.finalize()
-            run.assert_not_called()
-            preflight.side_effect = None
-            release.finalize()
-        self.assertEqual(run.call_count, 4)
-        self.assertTrue(all(call.args[0][-1].endswith("@" + self.digest) for call in run.call_args_list))
-        self.assertTrue(all(':5.4.10' in call.args[0][-2] for call in run.call_args_list))
-
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory()
         self.addCleanup(self.directory.cleanup)

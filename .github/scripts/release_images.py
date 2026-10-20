@@ -102,50 +102,13 @@ def record():
     version, commit = validate()
     app, digest = os.environ["APP"], os.environ["IMAGE_DIGEST"]
     require(app in APPS, "Unknown application")
-    reference = os.environ.get("CANDIDATE_TAG", version)
-    verify_image(app, reference, digest)
+    verify_image(app, version, digest)
     save(f"release-images/{app}.json", {
         "app": app, "version": version, "commit": commit, "digest": digest,
         "run_id": os.environ["GITHUB_RUN_ID"],
-        "candidate": reference,
     })
     with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as summary:
-        summary.write(f"- `featbit/{app}:{reference}`: `{digest}`\n")
-
-
-def candidate_records():
-    version, commit = validate()
-    paths = list(Path("release-images").glob("*.json"))
-    require({path.stem for path in paths} == set(APPS), "Incomplete candidate records")
-    records = [json.loads(path.read_text()) for path in paths]
-    for data in records:
-        require(data["app"] in APPS and data["version"] == version
-                and data["commit"] == commit and data["run_id"] == os.environ["GITHUB_RUN_ID"]
-                and data["candidate"] == os.environ["CANDIDATE_TAG"], "Candidate record mismatch")
-        verify_image(data["app"], data["candidate"], data["digest"])
-    require({data["app"] for data in records} == set(APPS), "Duplicate candidate records")
-    return records
-
-
-def stage_candidates():
-    # Test exact build digests; never resolve a mutable tag during the suite.
-    for data in candidate_records():
-        if data["app"] == "featbit-control-plane":
-            continue
-        source = f"featbit/{data['app']}@{data['digest']}"
-        subprocess.run(["docker", "pull", source], check=True)
-        subprocess.run(["docker", "tag", source,
-                        f"featbit/{data['app']}:{data['candidate']}"], check=True)
-
-
-def finalize():
-    records = candidate_records()
-    preflight()  # Reject every existing formal tag before mutating any image.
-    for data in records:
-        subprocess.run(["docker", "buildx", "imagetools", "create", "--tag",
-                        f"featbit/{data['app']}:{data['version']}",
-                        f"featbit/{data['app']}@{data['digest']}"], check=True)
-        verify_image(data["app"], data["version"], data["digest"])
+        summary.write(f"- `featbit/{app}:{version}`: `{digest}`\n")
 
 
 def validate_promotion():
@@ -199,7 +162,6 @@ def promote():
 
 if __name__ == "__main__":
     commands = {"validate": validate, "preflight": preflight, "record": record,
-                "stage-candidates": stage_candidates, "finalize": finalize,
                 "preflight-app": preflight_app,
                 "validate-promotion": validate_promotion, "promote": promote}
     commands[sys.argv[1]]()

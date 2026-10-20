@@ -12,8 +12,6 @@ on:
       - 'e2e/core/**'
       - '.github/actions/e2e-core/**'
       - '.github/workflows/e2e-core.yml'
-      - '.github/workflows/publish-docker-images.yml'
-      - '.github/scripts/release_images.py'
       - '.env'
       - 'docker-compose*.yml'
   push:
