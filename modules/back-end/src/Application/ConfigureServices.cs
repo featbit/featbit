@@ -1,6 +1,5 @@
 using System.Reflection;
 using Application;
-using Application.AccessTokens;
 using Application.AuditLogs;
 using Application.Bases.Behaviours;
 using Application.FeatureFlags;
@@ -33,7 +32,6 @@ public static class ConfigureServices
         // custom services
         services.AddHttpContextAccessor();
         services.AddSingleton<ICurrentUser, CurrentUser>();
-        services.AddSingleton<ICurrentAccessToken, CurrentAccessToken>();
         services.AddScoped<Application.Services.IAuditLogAccess, AuditLogAccess>();
         services.AddTransient<IPermissionGuard, PermissionGuard>();
         services.AddTransient<ISegmentMessageService, SegmentMessageService>();
