@@ -47,12 +47,12 @@ public class GetAuditLogListHandler : IRequestHandler<GetAuditLogList, PagedResu
         var logVms = _mapper.Map<PagedResult<AuditLogVm>>(logs);
 
         var users = await _userService.GetListAsync(logVms.Items.Select(x => x.CreatorId));
-        foreach (var (log, item) in logs.Items.Zip(logVms.Items))
+        foreach (var item in logVms.Items)
         {
             item.Instructions = item.RefType switch
             {
-                AuditLogRefTypes.FeatureFlag => FlagComparer.Compare(log.DataChange),
-                AuditLogRefTypes.Segment => SegmentComparer.Compare(log.DataChange),
+                AuditLogRefTypes.FeatureFlag => FlagComparer.Compare(item.DataChange),
+                AuditLogRefTypes.Segment => SegmentComparer.Compare(item.DataChange),
                 _ => Array.Empty<Instruction>()
             };
 

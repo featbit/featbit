@@ -1,3 +1,4 @@
+using Domain.AuditLogs;
 using Domain.SemanticPatch;
 
 namespace Application.AuditLogs;
@@ -12,7 +13,7 @@ public class AuditLogVm
 
     public string Operation { get; set; }
 
-    public AuditDataChangeVm DataChange { get; set; }
+    public DataChange DataChange { get; set; }
 
     public string Comment { get; set; }
 

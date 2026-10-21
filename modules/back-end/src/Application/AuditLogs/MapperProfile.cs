@@ -7,7 +7,6 @@ public class MapperProfile : Profile
 {
     public MapperProfile()
     {
-        CreateMap<DataChange, AuditDataChangeVm>();
         CreateMap<AuditLog, AuditLogVm>();
         CreateMap<PagedResult<AuditLog>, PagedResult<AuditLogVm>>();
     }
