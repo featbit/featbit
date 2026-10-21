@@ -14,7 +14,7 @@ public class FeatureFlagValidatorTests
     {
         var on = V("v-on");
         var off = V("v-off");
-        return new CreateFeatureFlag
+        return new CreateFeatureFlag(Guid.NewGuid(), Guid.NewGuid(), new CreateFeatureFlagPayload
         {
             Name = "Flag",
             Key = "flag.key-1",
@@ -23,7 +23,7 @@ public class FeatureFlagValidatorTests
             EnabledVariationId = on.Id,
             DisabledVariationId = off.Id,
             Tags = Array.Empty<string>()
-        };
+        });
     }
 
     [Fact]
@@ -177,7 +177,7 @@ public class FeatureFlagValidatorTests
     [Fact]
     public void CloneFlag_InvalidKeyChars_KeyInvalidError()
     {
-        var req = new CloneFlag { Name = "n", Key = "bad key" };
+        var req = new CloneFlag(Guid.NewGuid(), Guid.NewGuid(), new CloneFlagPayload { Name = "n", Key = "bad key" });
 
         var result = new CloneFlagValidator().Validate(req);
 

@@ -94,11 +94,8 @@ public class IamAuditBehaviour<TRequest, TResponse>(
                 var identity = (IamAuditSnapshot?)(current ?? previous);
                 var operation = target.OrgId == null ? Operations.RemoveFromWorkspace : request.GetType().Name;
                 var keyword = $"{identity?.Name} {identity?.Rn} {(identity as MemberAuditSnapshot)?.Email}";
-                var log = new AuditLog(null, target.Id.ToString(), target.Type,
-                    keyword[..Math.Min(keyword.Length, 512)], operation, change, "", actor.Id)
-                {
-                    WorkspaceId = contextWorkspace, OrganizationId = target.OrgId
-                };
+                var log = new AuditLog(owner.WorkspaceId, target.OrgId, null, target.Id.ToString(), target.Type,
+                    keyword[..Math.Min(keyword.Length, 512)], operation, change, "", actor.Id);
                 change.ClonedFrom = clonedFrom;
                 await logs.AddOneAsync(log);
             }
@@ -130,9 +127,8 @@ public class IamAuditBehaviour<TRequest, TResponse>(
             foreach (var owner in owners)
             {
                 var keyword = $"{after.Name} {after.Rn} {after.Email}";
-                await logs.AddOneAsync(new AuditLog(null, actor.Id.ToString(), AuditLogRefTypes.Member,
-                    keyword[..Math.Min(keyword.Length, 512)], Operations.UpdateProfile, change, "", actor.Id)
-                { WorkspaceId = owner.WorkspaceId, OrganizationId = owner.OrganizationId });
+                await logs.AddOneAsync(new AuditLog(owner.WorkspaceId, owner.OrganizationId, null, actor.Id.ToString(), AuditLogRefTypes.Member,
+                    keyword[..Math.Min(keyword.Length, 512)], Operations.UpdateProfile, change, "", actor.Id));
             }
             return result;
         }, ct);

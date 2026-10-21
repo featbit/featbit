@@ -258,7 +258,7 @@ public abstract class IamMemberAuditParityTests : IntegrationTestBase
             Workspaces = db != null ? new Pg.WorkspaceService(db) : new Mongo.WorkspaceService(mongo!);
             Users = db != null ? new Pg.UserService(db) : new Mongo.UserService(mongo!);
             Members = db != null ? new Pg.MemberService(db) : new Mongo.MemberService(mongo!);
-            AuditLogs = db != null ? new Pg.AuditLogService(db, new AuditLogEnricher(Mock.Of<IEnvironmentService>(), Mock.Of<IProjectService>(), Organizations)) : new Mongo.AuditLogService(mongo!);
+            AuditLogs = db != null ? new Pg.AuditLogService(db) : new Mongo.AuditLogService(mongo!);
             var collection = new ServiceCollection().AddSingleton(Members);
             if (db != null) collection.AddSingleton(db); else collection.AddSingleton(mongo!);
             services = collection.BuildServiceProvider();

@@ -8,21 +8,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services.EntityFrameworkCore;
 
-public class AuditLogService(AppDbContext dbContext, AuditLogEnricher enricher) : EntityFrameworkCoreService<AuditLog>(dbContext), IAuditLogService
+public class AuditLogService(AppDbContext dbContext) : EntityFrameworkCoreService<AuditLog>(dbContext), IAuditLogService
 {
-    public override async Task AddOneAsync(AuditLog log)
-    {
-        await enricher.EnrichAsync(log);
-        await base.AddOneAsync(log);
-    }
-
-    public override async Task AddManyAsync(IEnumerable<AuditLog> logs)
-    {
-        var items = logs.ToArray();
-        foreach (var log in items) await enricher.EnrichAsync(log);
-        if (items.Length > 0) await base.AddManyAsync(items);
-    }
-
     public async Task<PagedResult<AuditLog>> GetListAsync(Guid workspaceId, Guid orgId, Guid? envId, AuditLogFilter userFilter)
     {
         var queryable = ScopedLogs(workspaceId, orgId, envId, userFilter);
@@ -124,9 +111,8 @@ public class AuditLogService(AppDbContext dbContext, AuditLogEnricher enricher) 
         }
     }
 
-    public async Task<LastChange?> GetLastChangeAsync(Guid envId, string refType, string refId)
+    public async Task<LastChange?> GetLastChangeAsync(Guid workspaceId, Guid envId, string refType, string refId)
     {
-        var workspaceId = await enricher.WorkspaceForEnvironmentAsync(envId);
         var lastChange = await Queryable.Where(x =>
                 x.WorkspaceId == workspaceId && (x.EnvId == envId || x.EnvId == null) &&
                 x.RefType == refType &&
@@ -146,20 +132,20 @@ public class AuditLogService(AppDbContext dbContext, AuditLogEnricher enricher) 
     }
 
     public async Task<ICollection<LastChange>> GetLastChangesAsync(
+        Guid workspaceId,
         Guid envId,
         string refType,
         ICollection<string> refIds)
     {
-        var workspaceId = await enricher.WorkspaceForEnvironmentAsync(envId);
         const string sql =
             """
             SELECT ref_id AS RefId, creator_id AS OperatorId, created_at AS HappenedAt, comment AS Comment
             FROM (
-                SELECT 
-                    creator_id, 
-                    created_at, 
-                    comment, 
-                    ref_id, 
+                SELECT
+                    creator_id,
+                    created_at,
+                    comment,
+                    ref_id,
                     row_number() over(partition by ref_id order by created_at desc) AS rn
                 FROM audit_logs
                 WHERE workspace_id = @workspaceId AND (env_id = @envId OR env_id IS NULL) AND ref_type = @refType AND ref_id = ANY (@refIds) AND operation != 'Create'

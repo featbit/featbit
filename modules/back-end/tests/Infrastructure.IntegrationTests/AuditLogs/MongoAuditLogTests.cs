@@ -32,9 +32,14 @@ public class MongoAuditLogTests(MongoDbFixture fixture) : IntegrationTestBase
         await client.CollectionOf<Organization>().InsertManyAsync([org, otherOrg]);
         await client.CollectionOf<Project>().InsertManyAsync([project, otherProject]);
         await client.CollectionOf<Environment>().InsertManyAsync([env, secondEnv, foreignEnv]);
+        var environmentService = new EnvironmentService(client,
+            Microsoft.Extensions.Logging.Abstractions.NullLogger<EnvironmentService>.Instance);
+        var owner = await environmentService.GetOrganizationAsync(env.Id);
+        Assert.Equal(org.Id, owner.Id);
+        Assert.Equal(org.WorkspaceId, owner.WorkspaceId);
         AuditLog Log(Guid? environment, Guid workspace, string type = AuditLogRefTypes.FeatureFlag) =>
-            new(environment, Guid.NewGuid().ToString(), type, "entry", Operations.Create,
-                new DataChange(null).To(new { Name = "entry" }), "", Guid.NewGuid()) { Id = Guid.NewGuid(), WorkspaceId = workspace };
+            new(workspace, null, environment, Guid.NewGuid().ToString(), type, "entry", Operations.Create,
+                new DataChange(null).To(new { Name = "entry" }), "", Guid.NewGuid()) { Id = Guid.NewGuid() };
         var missingOwner = Log(env.Id, Guid.Empty);
         var emptyOwner = Log(secondEnv.Id, Guid.Empty);
         var explicitOwner = Log(secondEnv.Id, org.WorkspaceId);
@@ -78,7 +83,7 @@ public class MongoAuditLogTests(MongoDbFixture fixture) : IntegrationTestBase
         var workspaceId = Guid.NewGuid();
         var envId = Guid.NewGuid();
         var segment = new Segment(workspaceId, envId, "Shared", "shared", SegmentType.Shared, [], [], [], [], "") { Id = Guid.NewGuid() };
-        var log = AuditLog.For(segment, Operations.Update, new DataChange(null).To(segment), "changed", Guid.NewGuid());
+        var log = AuditLog.For(segment, workspaceId, Guid.NewGuid(), Operations.Update, new DataChange(null).To(segment), "changed", Guid.NewGuid());
         await service.AddOneAsync(log);
         Assert.Equal(envId, log.EnvId);
         Assert.Equal(log.Id, Assert.Single((await service.GetListAsync(workspaceId, Guid.NewGuid(), envId, new AuditLogFilter { Scope = AuditLogScope.Environment })).Items).Id);
@@ -86,7 +91,14 @@ public class MongoAuditLogTests(MongoDbFixture fixture) : IntegrationTestBase
         Assert.Empty((await service.GetListAsync(workspaceId, Guid.NewGuid(), otherEnv, new AuditLogFilter { Scope = AuditLogScope.Environment })).Items);
         Assert.Equal(log.Id, Assert.Single((await service.GetListAsync(workspaceId, Guid.NewGuid(), otherEnv, new AuditLogFilter { Scope = AuditLogScope.Environment, CrossEnvironment = true, RefType = "Segment", RefId = segment.Id.ToString() })).Items).Id);
         Assert.Empty((await service.GetListAsync(Guid.NewGuid(), Guid.NewGuid(), envId, new AuditLogFilter { Scope = AuditLogScope.Environment, CrossEnvironment = true, RefId = segment.Id.ToString() })).Items);
-        Assert.NotNull(await service.GetLastChangeAsync(envId, "Segment", segment.Id.ToString()));
+        Assert.NotNull(await service.GetLastChangeAsync(workspaceId, envId, "Segment", segment.Id.ToString()));
+        Assert.Single(await service.GetLastChangesAsync(workspaceId, envId, "Segment", [segment.Id.ToString()]));
+        Assert.Null(await service.GetLastChangeAsync(Guid.NewGuid(), envId, "Segment", segment.Id.ToString()));
+        Assert.Empty(await service.GetLastChangesAsync(Guid.NewGuid(), envId, "Segment", [segment.Id.ToString()]));
+        await client.CollectionOf<AuditLog>().UpdateOneAsync(x => x.Id == log.Id,
+            Builders<AuditLog>.Update.Unset(x => x.WorkspaceId));
+        Assert.NotNull(await service.GetLastChangeAsync(workspaceId, envId, "Segment", segment.Id.ToString()));
+        Assert.Single(await service.GetLastChangesAsync(workspaceId, envId, "Segment", [segment.Id.ToString()]));
     }
     [DockerFact]
     public async Task Queries_IsolateIamOrganizations_Actors_AndEnvironmentHistory()
@@ -100,9 +112,8 @@ public class MongoAuditLogTests(MongoDbFixture fixture) : IntegrationTestBase
         var otherActor = new User(Guid.NewGuid(), "hidden@example.com", "password", "Hidden");
         await client.CollectionOf<User>().InsertManyAsync([actor, otherActor]);
         AuditLog Entry(Guid workspace, Guid? org, Guid? env, string type, Guid creator) =>
-            new(env, Guid.NewGuid().ToString(), type, "entry", Operations.Create,
-                new DataChange(null).To(new { Name = "entry" }), "", creator)
-            { WorkspaceId = workspace, OrganizationId = org };
+            new(workspace, org, env, Guid.NewGuid().ToString(), type, "entry", Operations.Create,
+                new DataChange(null).To(new { Name = "entry" }), "", creator);
         var allowed = Entry(workspaceId, orgId, null, AuditLogRefTypes.Group, actor.Id);
         var flag = Entry(workspaceId, orgId, envId, AuditLogRefTypes.FeatureFlag, otherActor.Id);
         var shared = Entry(workspaceId, null, null, AuditLogRefTypes.Segment, otherActor.Id);
@@ -154,11 +165,8 @@ public class MongoAuditLogTests(MongoDbFixture fixture) : IntegrationTestBase
         await client.CollectionOf<Domain.AccessTokens.AccessToken>().InsertOneAsync(token);
         foreach (var creatorId in new[] { user.Id, token.Id })
         {
-            await client.CollectionOf<AuditLog>().InsertOneAsync(new AuditLog(null, Guid.NewGuid().ToString(), AuditLogRefTypes.Group, "group",
-                Operations.Create, new DataChange(null).To(new { Name = "group" }), "", creatorId)
-            {
-                WorkspaceId = workspaceId, OrganizationId = orgId
-            });
+            await client.CollectionOf<AuditLog>().InsertOneAsync(new AuditLog(workspaceId, orgId, null, Guid.NewGuid().ToString(), AuditLogRefTypes.Group, "group",
+                Operations.Create, new DataChange(null).To(new { Name = "group" }), "", creatorId));
         }
         var logs = new AuditLogService(client);
 

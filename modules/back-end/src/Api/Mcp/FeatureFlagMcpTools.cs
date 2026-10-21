@@ -52,7 +52,7 @@ public class FeatureFlagMcpTools(
         var envId = await ResolveAuthorizedEnvIdAsync(experimentId);
         await EnsurePermissionAsync(envId, Permissions.CreateFlag);
 
-        return await mediator.Send(request.ToCreateFeatureFlag(envId));
+        return await mediator.Send(request.ToCreateFeatureFlag(GetHttpContext().Request.WorkspaceId(), GetHttpContext().Request.OrganizationId(), envId));
     }
 
     [McpServerTool(Name = "featbit_experiment_toggle_feature_flag")]
@@ -72,6 +72,8 @@ public class FeatureFlagMcpTools(
 
         var revision = await mediator.Send(new ToggleFeatureFlag
         {
+            WorkspaceId = GetHttpContext().Request.WorkspaceId(),
+            OrgId = GetHttpContext().Request.OrganizationId(),
             EnvId = envId,
             Key = key,
             Status = request.IsEnabled!.Value,
@@ -115,7 +117,7 @@ public class FeatureFlagMcpTools(
                 key,
                 payload,
                 await requestPermissions.GetAsync(GetHttpContext())
-            ));
+            ) { WorkspaceId = GetHttpContext().Request.WorkspaceId() });
 
             return new FeatureFlagTargetingUpdateResult
             {
@@ -413,7 +415,7 @@ public class FeatureFlagMcpCreateRequest
     [Description("Feature flag tags.")]
     public string[] Tags { get; set; } = [];
 
-    public CreateFeatureFlag ToCreateFeatureFlag(Guid envId)
+    public CreateFeatureFlag ToCreateFeatureFlag(Guid workspaceId, Guid orgId, Guid envId)
     {
         Validate();
 
@@ -427,7 +429,7 @@ public class FeatureFlagMcpCreateRequest
             ];
         }
 
-        return new CreateFeatureFlag
+        return new CreateFeatureFlag(workspaceId, orgId, new CreateFeatureFlagPayload
         {
             EnvId = envId,
             Name = Name,
@@ -439,7 +441,7 @@ public class FeatureFlagMcpCreateRequest
             DisabledVariationId = ResolveVariationId(DisabledVariationId, variations, "false", first: true),
             EnabledVariationId = ResolveVariationId(EnabledVariationId, variations, "true", first: false),
             Tags = Tags ?? []
-        };
+        });
     }
 
     private void Validate()

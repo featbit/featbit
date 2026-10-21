@@ -12,7 +12,7 @@ public interface IAuditLogService : IService<AuditLog>
 
     Task<IReadOnlyList<AuditActor>> GetActorsAsync(Guid workspaceId, Guid orgId, Guid? envId, AuditLogFilter filter);
 
-    Task<LastChange?> GetLastChangeAsync(Guid envId, string refType, string refId);
+    Task<LastChange?> GetLastChangeAsync(Guid workspaceId, Guid envId, string refType, string refId);
 
-    Task<ICollection<LastChange>> GetLastChangesAsync(Guid envId, string refType, ICollection<string> refIds);
+    Task<ICollection<LastChange>> GetLastChangesAsync(Guid workspaceId, Guid envId, string refType, ICollection<string> refIds);
 }

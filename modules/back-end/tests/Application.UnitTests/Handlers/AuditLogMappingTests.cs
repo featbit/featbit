@@ -20,11 +20,8 @@ public class AuditLogMappingTests
             Previous = "{\"name\":\"before\"}",
             Current = "{\"name\":\"after\"}"
         };
-        var log = new AuditLog(Guid.NewGuid(), "resource-1", operation == Operations.ClonePolicy ? AuditLogRefTypes.Policy : AuditLogRefTypes.Group, "resource", operation,
-            change, "", Guid.NewGuid())
-        {
-            WorkspaceId = Guid.NewGuid(), OrganizationId = Guid.NewGuid()
-        };
+        var log = new AuditLog(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "resource-1", operation == Operations.ClonePolicy ? AuditLogRefTypes.Policy : AuditLogRefTypes.Group, "resource", operation,
+            change, "", Guid.NewGuid());
         var mapper = new MapperConfiguration(config => config.AddProfile<Application.AuditLogs.MapperProfile>())
             .CreateMapper();
 

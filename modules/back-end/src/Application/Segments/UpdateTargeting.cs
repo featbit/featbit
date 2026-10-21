@@ -27,6 +27,10 @@ public class UpdateTargetingPayload : ResourceChangeRequest
 
 public class UpdateTargeting : UpdateTargetingPayload, IRequest<bool>
 {
+    public Guid WorkspaceId { get; set; }
+
+    public Guid OrgId { get; set; }
+
     public Guid Id { get; set; }
 
     public PolicyStatement[] Permissions { get; set; }
@@ -72,6 +76,8 @@ public class UpdateTargetingHandler(
         // publish on segment change notification
         var notification = new OnSegmentChange(
             segment,
+            request.WorkspaceId,
+            request.OrgId,
             Operations.Update,
             dataChange,
             currentUser.Id,

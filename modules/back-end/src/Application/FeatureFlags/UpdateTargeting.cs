@@ -24,6 +24,8 @@ public class UpdateTargetingPayload : ResourceChangeRequest
 
 public class UpdateTargeting : UpdateTargetingPayload, IRequest<Guid>
 {
+    public Guid WorkspaceId { get; set; }
+
     public Guid OrgId { get; set; }
 
     public Guid EnvId { get; set; }
@@ -84,6 +86,8 @@ public class UpdateTargetingHandler(
         // publish on feature flag change notification
         var notification = new OnFeatureFlagChanged(
             flag,
+            request.WorkspaceId,
+            request.OrgId,
             Operations.Update,
             dataChange,
             currentUser.Id,

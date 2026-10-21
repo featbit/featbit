@@ -124,9 +124,12 @@ public class AuditLogService(MongoDbClient mongoDb) : MongoDbService<AuditLog>(m
         return queryable;
     }
 
-    public async Task<LastChange?> GetLastChangeAsync(Guid envId, string refType, string refId)
+    public async Task<LastChange?> GetLastChangeAsync(Guid workspaceId, Guid envId, string refType, string refId)
     {
-        var lastChange = await Queryable.Where(x =>
+        var builder = Builders<AuditLog>.Filter;
+        var owner = builder.Or(builder.Eq(x => x.WorkspaceId, workspaceId),
+            builder.Eq(x => x.WorkspaceId, Guid.Empty), builder.Exists(x => x.WorkspaceId, false));
+        var lastChange = await Queryable.Where(x => owner.Inject()).Where(x =>
                 x.EnvId == envId &&
                 x.RefType == refType &&
                 x.RefId == refId &&
@@ -145,6 +148,7 @@ public class AuditLogService(MongoDbClient mongoDb) : MongoDbService<AuditLog>(m
     }
 
     public async Task<ICollection<LastChange>> GetLastChangesAsync(
+        Guid workspaceId,
         Guid envId,
         string refType,
         ICollection<string> refIds)
@@ -154,6 +158,13 @@ public class AuditLogService(MongoDbClient mongoDb) : MongoDbService<AuditLog>(m
             new BsonDocument("$match", new BsonDocument
             {
                 { "envId", new BsonBinaryData(envId, GuidRepresentation.Standard) },
+                { "$or", new BsonArray
+                    {
+                        new BsonDocument("workspaceId", new BsonBinaryData(workspaceId, GuidRepresentation.Standard)),
+                        new BsonDocument("workspaceId", new BsonBinaryData(Guid.Empty, GuidRepresentation.Standard)),
+                        new BsonDocument("workspaceId", new BsonDocument("$exists", false))
+                    }
+                },
                 { "refType", refType },
                 { "refId", new BsonDocument("$in", new BsonArray(refIds)) },
                 { "operation", new BsonDocument("$ne", Operations.Create) }

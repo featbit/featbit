@@ -27,7 +27,10 @@ public class DirectSegmentChangePublisher(
             var affectedFlags = await segmentMessageService.GetAffectedFlagsAsync(envId, notification);
             if (affectedFlags.Count > 0)
             {
-                await featureFlagAppService.OnSegmentUpdatedAsync(segment, notification.OperatorId, affectedFlags);
+                await featureFlagAppService.OnSegmentUpdatedAsync(
+                    notification.WorkspaceId,
+                    segment.IsEnvironmentSpecific ? notification.OrganizationId : null,
+                    segment, notification.OperatorId, affectedFlags);
             }
 
             // publish segment change message

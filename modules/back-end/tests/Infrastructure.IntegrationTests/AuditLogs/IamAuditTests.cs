@@ -40,10 +40,7 @@ public class IamAuditTests(FeatBitPostgresFixture fixture) : IntegrationTestBase
         var sourceId = sourceType == PolicyTypes.CustomerManaged ? customer.Id : system.Id;
         using var services = new ServiceCollection().AddSingleton(db).BuildServiceProvider();
         var store = new AuditStore(services);
-        var organizations = new Mock<IOrganizationService>();
-        organizations.Setup(x => x.GetAsync(org.Id)).ReturnsAsync(org);
-        var logs = new Infrastructure.Services.EntityFrameworkCore.AuditLogService(db,
-            new AuditLogEnricher(Mock.Of<IEnvironmentService>(), Mock.Of<IProjectService>(), organizations.Object));
+        var logs = new Infrastructure.Services.EntityFrameworkCore.AuditLogService(db);
         var http = new DefaultHttpContext();
         http.Request.Headers["Organization"] = org.Id.ToString();
         http.Request.Headers["Workspace"] = org.WorkspaceId.ToString();
@@ -85,9 +82,8 @@ public class IamAuditTests(FeatBitPostgresFixture fixture) : IntegrationTestBase
         var otherActor = new User(Guid.NewGuid(), "hidden@example.com", "password", "Hidden");
         db.AddRange(actor, otherActor);
         AuditLog Entry(Guid workspace, Guid? org, Guid? env, string type, Guid creator) =>
-            new(env, Guid.NewGuid().ToString(), type, "entry", Operations.Create,
-                new DataChange(null).To(new { Name = "entry" }), "", creator)
-            { WorkspaceId = workspace, OrganizationId = org };
+            new(workspace, org, env, Guid.NewGuid().ToString(), type, "entry", Operations.Create,
+                new DataChange(null).To(new { Name = "entry" }), "", creator);
         var allowed = Entry(workspaceId, orgId, null, AuditLogRefTypes.Group, actor.Id);
         var flag = Entry(workspaceId, orgId, envId, AuditLogRefTypes.FeatureFlag, otherActor.Id);
         var shared = Entry(workspaceId, null, null, AuditLogRefTypes.Segment, otherActor.Id);
@@ -96,8 +92,7 @@ public class IamAuditTests(FeatBitPostgresFixture fixture) : IntegrationTestBase
             Entry(workspaceId, null, null, AuditLogRefTypes.Member, otherActor.Id),
             Entry(Guid.NewGuid(), orgId, null, AuditLogRefTypes.Policy, otherActor.Id));
         await db.SaveChangesAsync();
-        var logs = new Infrastructure.Services.EntityFrameworkCore.AuditLogService(db,
-            new AuditLogEnricher(Mock.Of<IEnvironmentService>(), Mock.Of<IProjectService>(), Mock.Of<IOrganizationService>()));
+        var logs = new Infrastructure.Services.EntityFrameworkCore.AuditLogService(db);
         var page = await logs.GetListAsync(workspaceId, orgId, null, new AuditLogFilter { Scope = AuditLogScope.Iam, PageSize = 1 });
         Assert.Equal(1, page.TotalCount);
         Assert.Equal(allowed.Id, Assert.Single(page.Items).Id);
@@ -139,16 +134,11 @@ public class IamAuditTests(FeatBitPostgresFixture fixture) : IntegrationTestBase
         db.AddRange(user, token);
         foreach (var creatorId in new[] { user.Id, token.Id })
         {
-            db.Add(new AuditLog(null, Guid.NewGuid().ToString(), AuditLogRefTypes.Group, "group",
-                Operations.Create, new DataChange(null).To(new { Name = "group" }), "", creatorId)
-            {
-                WorkspaceId = workspaceId, OrganizationId = orgId
-            });
+            db.Add(new AuditLog(workspaceId, orgId, null, Guid.NewGuid().ToString(), AuditLogRefTypes.Group, "group",
+                Operations.Create, new DataChange(null).To(new { Name = "group" }), "", creatorId));
         }
         await db.SaveChangesAsync();
-        var enricher = new AuditLogEnricher(Mock.Of<IEnvironmentService>(), Mock.Of<IProjectService>(),
-            Mock.Of<IOrganizationService>());
-        var logs = new Infrastructure.Services.EntityFrameworkCore.AuditLogService(db, enricher);
+        var logs = new Infrastructure.Services.EntityFrameworkCore.AuditLogService(db);
 
         var actors = await logs.GetActorsAsync(workspaceId, orgId, null, new AuditLogFilter { Scope = AuditLogScope.Iam });
         Assert.Equal(2, actors.Count);
@@ -174,11 +164,7 @@ public class IamAuditTests(FeatBitPostgresFixture fixture) : IntegrationTestBase
         await db.SaveChangesAsync();
         using var services = new ServiceCollection().AddSingleton(db).BuildServiceProvider();
         var store = new AuditStore(services);
-        var orgs = new Mock<IOrganizationService>();
-        orgs.Setup(x => x.GetAsync(org.Id)).ReturnsAsync(org);
-        orgs.Setup(x => x.GetAsync(other.Id)).ReturnsAsync(other);
-        var enricher = new AuditLogEnricher(Mock.Of<IEnvironmentService>(), Mock.Of<IProjectService>(), orgs.Object);
-        var logs = new Infrastructure.Services.EntityFrameworkCore.AuditLogService(db, enricher);
+        var logs = new Infrastructure.Services.EntityFrameworkCore.AuditLogService(db);
         var current = new Mock<ICurrentUser>(); current.SetupGet(x => x.Id).Returns(user.Id);
         var handler = new UpdateProfileHandler(new Infrastructure.Services.EntityFrameworkCore.UserService(db), current.Object);
         var pipeline = new IamAuditBehaviour<UpdateProfile, Application.Users.Profile>(store, logs, current.Object, new HttpContextAccessor());
@@ -246,10 +232,8 @@ public class IamAuditTests(FeatBitPostgresFixture fixture) : IntegrationTestBase
         await db.SaveChangesAsync();
         using var services = new ServiceCollection().AddSingleton(db).BuildServiceProvider();
         var store = new AuditStore(services);
-        var orgs = new Mock<IOrganizationService>(); orgs.Setup(x => x.GetAsync(org.Id)).ReturnsAsync(org);
         var users = new Mock<IUserService>(); users.Setup(x => x.FindOneAsync(It.IsAny<System.Linq.Expressions.Expression<Func<User, bool>>>())).ReturnsAsync(user);
-        var enricher = new AuditLogEnricher(Mock.Of<IEnvironmentService>(), Mock.Of<IProjectService>(), orgs.Object);
-        var logs = new Infrastructure.Services.EntityFrameworkCore.AuditLogService(db, enricher);
+        var logs = new Infrastructure.Services.EntityFrameworkCore.AuditLogService(db);
         var current = new Mock<ICurrentUser>(); current.SetupGet(x => x.Id).Returns(user.Id);
         var context = new DefaultHttpContext();
         context.Request.Headers["Organization"] = org.Id.ToString(); context.Request.Headers["Workspace"] = org.WorkspaceId.ToString();
