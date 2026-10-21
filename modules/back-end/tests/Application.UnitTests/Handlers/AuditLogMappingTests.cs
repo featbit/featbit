@@ -16,7 +16,7 @@ public class AuditLogMappingTests
     {
         var change = new DataChange
         {
-            ClonedFrom = source == null ? null : new PolicyCloneSource(Guid.NewGuid(), "developer"),
+            ClonedFrom = source == null ? null : new AuditResourceReference(Guid.NewGuid(), "developer"),
             Previous = "{\"name\":\"before\"}",
             Current = "{\"name\":\"after\"}"
         };

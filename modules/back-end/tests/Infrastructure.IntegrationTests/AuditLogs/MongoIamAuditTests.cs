@@ -61,7 +61,7 @@ public class MongoIamAuditTests(MongoDbFixture fixture) : IntegrationTestBase
 
         var log = await db.QueryableOf<AuditLog>().SingleAsync(x => x.RefId == result.Id);
         Assert.Equal(Operations.ClonePolicy, log.Operation);
-        Assert.Equal(new PolicyCloneSource(sourceId, key), log.DataChange.ClonedFrom);
+        Assert.Equal(new AuditResourceReference(sourceId, key), log.DataChange.ClonedFrom);
         Assert.NotEqual(sourceId.ToString(), result.Id);
         Assert.Empty(log.DataChange.Previous);
         Assert.Contains(request.Key, log.DataChange.Current);

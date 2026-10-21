@@ -65,13 +65,13 @@ public class IamAuditBehaviour<TRequest, TResponse>(
             }
             await ValidateReferences(request, contextOrg);
 
-            PolicyCloneSource? clonedFrom = null;
+            AuditResourceReference? clonedFrom = null;
             if (request is ClonePolicy clone)
             {
                 Guid? sourceOrg = clone.OriginPolicyType == PolicyTypes.CustomerManaged ? clone.OrgId : null;
                 var source = (await store.Read<Policy>(x =>
                     x.OrganizationId == sourceOrg && x.Key == clone.OriginPolicyKey)).SingleOrDefault();
-                if (source != null) clonedFrom = new PolicyCloneSource(source.Id, source.Key);
+                if (source != null) clonedFrom = new AuditResourceReference(source.Id, source.Key);
             }
 
             var result = await next();

@@ -4,7 +4,7 @@ namespace Application.AuditLogs;
 
 public class AuditDataChangeVm
 {
-    public PolicyCloneSource ClonedFrom { get; set; }
+    public AuditResourceReference ClonedFrom { get; set; }
 
     public string Previous { get; set; }
 
