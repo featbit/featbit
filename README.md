@@ -9,11 +9,13 @@
 
 ## About FeatBit
 
-AI helps teams ship more code and features faster. More changes also mean more opportunities for bugs and poor business decisions to affect users. Observing each feature release and limiting its blast radius matters more than ever.
+We code faster with AI. More code, more features—**but also more bugs**. Work gets harder, with more pressure and unpredictable overtime. Customer churn and financial losses become harder to control.
 
-FeatBit is an open-source feature flag platform that helps you manage that risk. Roll out features gradually, observe their technical and business impact, and turn them off without redeploying when something goes wrong.
+So we hesitate to move at AI speed, and fall behind the competition.
 
-Visit [www.featbit.co](https://www.featbit.co).
+FeatBit helps you manage that risk. Roll out features gradually, monitor their technical and business impact, and roll back problematic features immediately when something goes wrong.
+
+For more inforamtion, visit [www.featbit.co](https://www.featbit.co).
 
 ![FeatBit release control: production monitoring, targeted rollouts, instant rollback, Bayesian A/B testing, and AI agent workflows](.github/assets/featbit-release-control.png)
 
