@@ -14,15 +14,12 @@ public class GetAuditLogActors : IRequest<IReadOnlyList<AuditActor>>
     public AuditLogFilter Filter { get; set; }
 }
 
-public class GetAuditLogActorsHandler(IAuditLogService logs, IAuditLogAccess access,
-    IEnvironmentService environments, IProjectService projects)
+public class GetAuditLogActorsHandler(IAuditLogService logs, IAuditLogAccess access)
     : IRequestHandler<GetAuditLogActors, IReadOnlyList<AuditActor>>
 {
     public async Task<IReadOnlyList<AuditActor>> Handle(GetAuditLogActors request, CancellationToken cancellationToken)
     {
-        await access.EnsureAsync(request.WorkspaceId, request.OrgId);
-        await AuditLogScopeRules.ValidateAsync(
-            request.Filter, request.OrgId, request.Permissions, environments, projects);
+        await access.EnsureAsync(request.Filter, request.Permissions);
         return await logs.GetActorsAsync(request.WorkspaceId, request.OrgId, request.Filter);
     }
 }

@@ -36,12 +36,12 @@ public class IamAuditEndpointTests
     [InlineData(false, "/api/v1/envs/11111111-1111-1111-1111-111111111111/audit-logs")]
     [InlineData(true, "/api/v1/envs/11111111-1111-1111-1111-111111111111/audit-logs")]
     [InlineData(false, "/api/v1/envs/11111111-1111-1111-1111-111111111111/audit-logs", "", 200)]
-    [InlineData(true, "/api/v1/audit-logs", "", 403)]
-    [InlineData(true, "/api/v1/audit-logs/actors", "", 403)]
+    [InlineData(true, "/api/v1/audit-logs", "", 200)]
+    [InlineData(true, "/api/v1/audit-logs/actors", "", 200)]
     [InlineData(true, "/api/v1/audit-logs", "unknown", 400)]
     [InlineData(true, "/api/v1/audit-logs/actors", "999", 400)]
-    [InlineData(true, "/api/v1/audit-logs", "unspecified", 403)]
-    [InlineData(true, "/api/v1/audit-logs/actors", "unspecified", 403)]
+    [InlineData(true, "/api/v1/audit-logs", "unspecified", 200)]
+    [InlineData(true, "/api/v1/audit-logs/actors", "unspecified", 200)]
     [InlineData(false, "/api/v1/audit-logs", "environment", 200)]
     [InlineData(false, "/api/v1/audit-logs/actors", "environment", 200)]
     [InlineData(true, "/api/v1/audit-logs", "iam", 401, false)]
@@ -55,19 +55,13 @@ public class IamAuditEndpointTests
             .ReturnsAsync(new PagedResult<AuditLog>(0, []));
         logs.Setup(x => x.GetActorsAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<AuditLogFilter>()))
             .ReturnsAsync(Array.Empty<AuditActor>());
-        var environments = new Mock<IEnvironmentService>();
-        var environment = new Domain.Environments.Environment(Guid.NewGuid(), "Env", "env");
-        environments.Setup(x => x.GetAsync(It.IsAny<Guid>())).ReturnsAsync(environment);
-        var projects = new Mock<IProjectService>();
-        projects.Setup(x => x.GetAsync(environment.ProjectId))
-            .ReturnsAsync(new Domain.Projects.Project(Guid.Empty, "Project", "project"));
         var mapper = new Mock<AutoMapper.IMapper>();
         mapper.Setup(x => x.Map<PagedResult<AuditLogVm>>(It.IsAny<object>()))
             .Returns(new PagedResult<AuditLogVm>(0, []));
-        var access = Mock.Of<IAuditLogAccess>();
+        var access = new AuditLogAccess();
         var listHandler = new GetAuditLogListHandler(logs.Object, Mock.Of<IUserService>(),
-            Mock.Of<IAccessTokenService>(), mapper.Object, environments.Object, projects.Object, access);
-        var actorsHandler = new GetAuditLogActorsHandler(logs.Object, access, environments.Object, projects.Object);
+            Mock.Of<IAccessTokenService>(), mapper.Object, access);
+        var actorsHandler = new GetAuditLogActorsHandler(logs.Object, access);
         sender.Setup(x => x.Send(It.IsAny<GetAuditLogList>(), It.IsAny<CancellationToken>()))
             .Returns((GetAuditLogList request, CancellationToken ct) => listHandler.Handle(request, ct));
         sender.Setup(x => x.Send(It.IsAny<GetAuditLogActors>(), It.IsAny<CancellationToken>()))
@@ -122,7 +116,7 @@ public class IamAuditEndpointTests
         {
             var isEnvironmentRoute = path.Contains("/envs/");
             var expectedScope = isEnvironmentRoute ? AuditLogScope.Environment :
-                Enum.Parse<AuditLogScope>(scope, ignoreCase: true);
+                scope == "" ? AuditLogScope.Unspecified : Enum.Parse<AuditLogScope>(scope, ignoreCase: true);
             if (path.EndsWith("/actors"))
                 sender.Verify(x => x.Send(It.Is<GetAuditLogActors>(q => q.Filter.Scope == expectedScope),
                     It.IsAny<CancellationToken>()), Times.Once);

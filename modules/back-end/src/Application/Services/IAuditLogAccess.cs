@@ -1,6 +1,9 @@
+using Application.AuditLogs;
+using Domain.Policies;
+
 namespace Application.Services;
 
 public interface IAuditLogAccess
 {
-    Task EnsureAsync(Guid workspaceId, Guid orgId);
+    Task EnsureAsync(AuditLogFilter filter, PolicyStatement[] permissions);
 }

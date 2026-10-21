@@ -22,31 +22,25 @@ public class GetAuditLogListHandler : IRequestHandler<GetAuditLogList, PagedResu
     private readonly IUserService _userService;
     private readonly IAccessTokenService _accessTokenService;
     private readonly IMapper _mapper;
-    private readonly IEnvironmentService _environments;
-    private readonly IProjectService _projects;
     private readonly IAuditLogAccess _access;
 
     public GetAuditLogListHandler(
         IAuditLogService auditLogService,
         IUserService userService,
         IAccessTokenService accessTokenService,
-        IMapper mapper, IEnvironmentService environments, IProjectService projects,
+        IMapper mapper,
         IAuditLogAccess access)
     {
         _auditLogService = auditLogService;
         _userService = userService;
         _accessTokenService = accessTokenService;
         _mapper = mapper;
-        _environments = environments;
-        _projects = projects;
         _access = access;
     }
 
     public async Task<PagedResult<AuditLogVm>> Handle(GetAuditLogList request, CancellationToken cancellationToken)
     {
-        await _access.EnsureAsync(request.WorkspaceId, request.OrgId);
-        await AuditLogScopeRules.ValidateAsync(
-            request.Filter, request.OrgId, request.Permissions, _environments, _projects);
+        await _access.EnsureAsync(request.Filter, request.Permissions);
         var logs = await _auditLogService.GetListAsync(request.WorkspaceId, request.OrgId, request.Filter);
         var logVms = _mapper.Map<PagedResult<AuditLogVm>>(logs);
 
