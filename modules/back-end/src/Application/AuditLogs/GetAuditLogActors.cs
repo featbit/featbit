@@ -9,6 +9,8 @@ public class GetAuditLogActors : IRequest<IReadOnlyList<AuditActor>>
 
     public Guid OrgId { get; set; }
 
+    public Guid? EnvId { get; set; }
+
     public PolicyStatement[] Permissions { get; set; } = [];
 
     public AuditLogFilter Filter { get; set; }
@@ -20,6 +22,6 @@ public class GetAuditLogActorsHandler(IAuditLogService logs, IAuditLogAccess acc
     public async Task<IReadOnlyList<AuditActor>> Handle(GetAuditLogActors request, CancellationToken cancellationToken)
     {
         await access.EnsureAsync(request.Filter, request.Permissions);
-        return await logs.GetActorsAsync(request.WorkspaceId, request.OrgId, request.Filter);
+        return await logs.GetActorsAsync(request.WorkspaceId, request.OrgId, request.EnvId, request.Filter);
     }
 }

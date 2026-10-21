@@ -14,32 +14,31 @@ public class AuditLogController : ApiControllerBase
         [FromRoute] Guid envId, [FromQuery] AuditLogFilter filter)
     {
         filter.Scope = AuditLogScope.Environment;
-        filter.EnvId = envId;
         return Ok(await Mediator.Send(new GetAuditLogList
         {
-            WorkspaceId = WorkspaceId, OrgId = OrgId, Filter = filter,
+            WorkspaceId = WorkspaceId, OrgId = OrgId, EnvId = envId, Filter = filter,
             Permissions = await GetRequestPermissionsAsync()
         }));
     }
 
     [HttpGet("~/api/v{version:apiVersion}/audit-logs")]
     public async Task<ApiResponse<PagedResult<AuditLogVm>>> QueryAsync(
-        [FromQuery] AuditLogFilter filter)
+        [FromQuery] AuditLogFilter filter, [FromQuery] Guid? envId = null)
     {
         return Ok(await Mediator.Send(new GetAuditLogList
         {
-            WorkspaceId = WorkspaceId, OrgId = OrgId, Filter = filter,
+            WorkspaceId = WorkspaceId, OrgId = OrgId, EnvId = envId, Filter = filter,
             Permissions = await GetRequestPermissionsAsync()
         }));
     }
 
     [HttpGet("~/api/v{version:apiVersion}/audit-logs/actors")]
     public async Task<ApiResponse<AuditLogActorsVm>> Actors(
-        [FromQuery] AuditLogFilter filter)
+        [FromQuery] AuditLogFilter filter, [FromQuery] Guid? envId = null)
     {
         var actors = await Mediator.Send(new GetAuditLogActors
         {
-            WorkspaceId = WorkspaceId, OrgId = OrgId, Filter = filter,
+            WorkspaceId = WorkspaceId, OrgId = OrgId, EnvId = envId, Filter = filter,
             Permissions = await GetRequestPermissionsAsync()
         });
         return Ok(new AuditLogActorsVm { Items = actors });

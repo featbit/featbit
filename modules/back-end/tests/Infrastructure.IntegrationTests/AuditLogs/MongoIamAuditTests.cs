@@ -130,7 +130,7 @@ public class MongoIamAuditTests(MongoDbFixture fixture) : IntegrationTestBase
         var command = new AddGroupMember { GroupId = group.Id, MemberId = user.Id, OrganizationId = org.Id };
         await pipeline.Handle(command, ct => handler.Handle(command, ct), CancellationToken.None);
         await pipeline.Handle(command, ct => handler.Handle(command, ct), CancellationToken.None);
-        var page = await logs.GetListAsync(org.WorkspaceId, org.Id, new AuditLogFilter { Scope = AuditLogScope.Iam });
+        var page = await logs.GetListAsync(org.WorkspaceId, org.Id, null, new AuditLogFilter { Scope = AuditLogScope.Iam });
         var log = Assert.Single(page.Items);
         Assert.Null(log.EnvId); Assert.Equal(org.Id, log.OrganizationId);
         Assert.Equal(user.Id, log.CreatorId); Assert.Equal("AddGroupMember", log.Operation);
@@ -144,10 +144,10 @@ public class MongoIamAuditTests(MongoDbFixture fixture) : IntegrationTestBase
                 snapshot.RootElement.EnumerateObject().Select(x => x.Name).Order().ToArray());
             Assert.Equal(System.Text.Json.JsonValueKind.Array, snapshot.RootElement.GetProperty("policies").ValueKind);
         }
-        Assert.Empty((await logs.GetListAsync(Guid.NewGuid(), org.Id, new AuditLogFilter { Scope = AuditLogScope.Iam })).Items);
-        Assert.Empty((await logs.GetListAsync(org.WorkspaceId, org.Id, new AuditLogFilter { Scope = AuditLogScope.Environment, EnvId = Guid.NewGuid() })).Items);
-        Assert.Empty((await logs.GetListAsync(org.WorkspaceId, org.Id, new AuditLogFilter { Scope = AuditLogScope.Iam, RefType = "Policy" })).Items);
-        Assert.Single(await logs.GetActorsAsync(org.WorkspaceId, org.Id, new AuditLogFilter { Scope = AuditLogScope.Iam, Query = "Alice" }));
+        Assert.Empty((await logs.GetListAsync(Guid.NewGuid(), org.Id, null, new AuditLogFilter { Scope = AuditLogScope.Iam })).Items);
+        Assert.Empty((await logs.GetListAsync(org.WorkspaceId, org.Id, Guid.NewGuid(), new AuditLogFilter { Scope = AuditLogScope.Environment })).Items);
+        Assert.Empty((await logs.GetListAsync(org.WorkspaceId, org.Id, null, new AuditLogFilter { Scope = AuditLogScope.Iam, RefType = "Policy" })).Items);
+        Assert.Single(await logs.GetActorsAsync(org.WorkspaceId, org.Id, null, new AuditLogFilter { Scope = AuditLogScope.Iam, Query = "Alice" }));
 
         // A policy change records the semantic before/after and survives deletion
         // with the removed assignments preserved in the snapshot.
@@ -165,7 +165,7 @@ public class MongoIamAuditTests(MongoDbFixture fixture) : IntegrationTestBase
         var deleteHandler = new DeletePolicyHandler(policyService);
         await new IamAuditBehaviour<DeletePolicy, bool>(store, logs, current.Object, access)
             .Handle(deletion, ct => deleteHandler.Handle(deletion, ct), CancellationToken.None);
-        var policyLogs = (await logs.GetListAsync(org.WorkspaceId, org.Id, new AuditLogFilter { Scope = AuditLogScope.Iam, RefType = "Policy" })).Items;
+        var policyLogs = (await logs.GetListAsync(org.WorkspaceId, org.Id, null, new AuditLogFilter { Scope = AuditLogScope.Iam, RefType = "Policy" })).Items;
         Assert.Equal(2, policyLogs.Count());
         var removed = Assert.Single(policyLogs, x => x.Operation == Operations.DeletePolicy);
         Assert.Contains("group/Engineering", removed.DataChange.Previous);

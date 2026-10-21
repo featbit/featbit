@@ -23,9 +23,9 @@ public class AuditLogService(AppDbContext dbContext, AuditLogEnricher enricher) 
         if (items.Length > 0) await base.AddManyAsync(items);
     }
 
-    public async Task<PagedResult<AuditLog>> GetListAsync(Guid workspaceId, Guid orgId, AuditLogFilter userFilter)
+    public async Task<PagedResult<AuditLog>> GetListAsync(Guid workspaceId, Guid orgId, Guid? envId, AuditLogFilter userFilter)
     {
-        var queryable = ScopedLogs(workspaceId, orgId, userFilter);
+        var queryable = ScopedLogs(workspaceId, orgId, envId, userFilter);
 
         // query(keyword/comment) filter
         var query = userFilter.Query?.ToLower();
@@ -84,9 +84,9 @@ public class AuditLogService(AppDbContext dbContext, AuditLogEnricher enricher) 
         return new PagedResult<AuditLog>(totalCount, items);
     }
 
-    public async Task<IReadOnlyList<AuditActor>> GetActorsAsync(Guid workspaceId, Guid orgId, AuditLogFilter filter)
+    public async Task<IReadOnlyList<AuditActor>> GetActorsAsync(Guid workspaceId, Guid orgId, Guid? envId, AuditLogFilter filter)
     {
-        var auditlogs = ScopedLogs(workspaceId, orgId, filter);
+        var auditlogs = ScopedLogs(workspaceId, orgId, envId, filter);
         if (!string.IsNullOrWhiteSpace(filter.RefType)) auditlogs = auditlogs.Where(x => x.RefType == filter.RefType);
         if (!string.IsNullOrWhiteSpace(filter.RefId)) auditlogs = auditlogs.Where(x => x.RefId == filter.RefId);
         var creatorIds = auditlogs.Select(x => x.CreatorId).Distinct();
@@ -107,7 +107,7 @@ public class AuditLogService(AppDbContext dbContext, AuditLogEnricher enricher) 
             .OrderBy(x => x.Name).ThenBy(x => x.Id).Take(50).ToListAsync();
     }
 
-    private IQueryable<AuditLog> ScopedLogs(Guid workspaceId, Guid orgId, AuditLogFilter filter)
+    private IQueryable<AuditLog> ScopedLogs(Guid workspaceId, Guid orgId, Guid? envId, AuditLogFilter filter)
     {
         var logs = Queryable.Where(x => x.WorkspaceId == workspaceId);
         switch (filter.Scope)
@@ -116,9 +116,9 @@ public class AuditLogService(AppDbContext dbContext, AuditLogEnricher enricher) 
                 return logs.Where(x => x.OrganizationId == orgId &&
                     (x.RefType == AuditLogRefTypes.Member || x.RefType == AuditLogRefTypes.Group || x.RefType == AuditLogRefTypes.Policy));
             case AuditLogScope.Environment:
-                if (!filter.EnvId.HasValue) throw new ArgumentException("Environment is required.");
+                if (!envId.HasValue) throw new ArgumentException("Environment is required.");
                 logs = logs.Where(x => x.RefType == AuditLogRefTypes.FeatureFlag || x.RefType == AuditLogRefTypes.Segment);
-                return filter.CrossEnvironment == true ? logs : logs.Where(x => x.EnvId == filter.EnvId.Value);
+                return filter.CrossEnvironment == true ? logs : logs.Where(x => x.EnvId == envId.Value);
             default:
                 throw new ArgumentOutOfRangeException(nameof(AuditLogFilter.Scope));
         }

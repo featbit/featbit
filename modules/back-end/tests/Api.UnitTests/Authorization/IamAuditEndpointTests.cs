@@ -51,9 +51,9 @@ public class IamAuditEndpointTests
     {
         var sender = new Mock<ISender>();
         var logs = new Mock<IAuditLogService>();
-        logs.Setup(x => x.GetListAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<AuditLogFilter>()))
+        logs.Setup(x => x.GetListAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<Guid?>(), It.IsAny<AuditLogFilter>()))
             .ReturnsAsync(new PagedResult<AuditLog>(0, []));
-        logs.Setup(x => x.GetActorsAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<AuditLogFilter>()))
+        logs.Setup(x => x.GetActorsAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<Guid?>(), It.IsAny<AuditLogFilter>()))
             .ReturnsAsync(Array.Empty<AuditActor>());
         var mapper = new Mock<AutoMapper.IMapper>();
         mapper.Setup(x => x.Map<PagedResult<AuditLogVm>>(It.IsAny<object>()))
@@ -118,11 +118,12 @@ public class IamAuditEndpointTests
             var expectedScope = isEnvironmentRoute ? AuditLogScope.Environment :
                 scope == "" ? AuditLogScope.Unspecified : Enum.Parse<AuditLogScope>(scope, ignoreCase: true);
             if (path.EndsWith("/actors"))
-                sender.Verify(x => x.Send(It.Is<GetAuditLogActors>(q => q.Filter.Scope == expectedScope),
+                sender.Verify(x => x.Send(It.Is<GetAuditLogActors>(q => q.Filter.Scope == expectedScope &&
+                    q.EnvId == Guid.Parse("22222222-2222-2222-2222-222222222222")),
                     It.IsAny<CancellationToken>()), Times.Once);
             else
                 sender.Verify(x => x.Send(It.Is<GetAuditLogList>(q => q.Filter.Scope == expectedScope &&
-                    (!isEnvironmentRoute || q.Filter.EnvId == Guid.Parse("11111111-1111-1111-1111-111111111111"))),
+                    q.EnvId == Guid.Parse(isEnvironmentRoute ? "11111111-1111-1111-1111-111111111111" : "22222222-2222-2222-2222-222222222222")),
                     It.IsAny<CancellationToken>()), Times.Once);
         }
     }
@@ -158,11 +159,11 @@ public class IamAuditEndpointTests
         var workspaceId = Guid.NewGuid();
         var orgId = Guid.NewGuid();
         var envId = Guid.NewGuid();
-        var filter = new AuditLogFilter { Scope = AuditLogScope.Iam, EnvId = Guid.NewGuid(), CrossEnvironment = true };
+        var filter = new AuditLogFilter { Scope = AuditLogScope.Iam, CrossEnvironment = true };
         var sender = new Mock<ISender>(MockBehavior.Strict);
         sender.Setup(x => x.Send(It.Is<GetAuditLogList>(q =>
                 q.WorkspaceId == workspaceId && q.OrgId == orgId && q.Filter.Scope == (iam ? AuditLogScope.Iam : AuditLogScope.Environment) &&
-                q.Permissions == TestPermissions && q.Filter == filter && (iam || q.Filter.EnvId == envId)), It.IsAny<CancellationToken>()))
+                q.Permissions == TestPermissions && q.Filter == filter && (iam || q.EnvId == envId)), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new PagedResult<AuditLogVm>(0, []));
         using var services = new ServiceCollection().AddSingleton(sender.Object)
             .AddSingleton(Mock.Of<IRequestPermissions>(x => x.GetAsync(It.IsAny<HttpContext>()) == Task.FromResult(TestPermissions)))
@@ -173,9 +174,8 @@ public class IamAuditEndpointTests
             await controller.QueryAsync(filter);
         else if (genericEnvironment)
         {
-            filter.EnvId = envId;
             filter.Scope = AuditLogScope.Environment;
-            await controller.QueryAsync(filter);
+            await controller.QueryAsync(filter, envId);
         }
         else
             await controller.GetListAsync(envId, filter);

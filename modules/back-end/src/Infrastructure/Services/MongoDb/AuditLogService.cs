@@ -14,9 +14,9 @@ namespace Infrastructure.Services.MongoDb;
 
 public class AuditLogService(MongoDbClient mongoDb) : MongoDbService<AuditLog>(mongoDb), IAuditLogService
 {
-    public async Task<PagedResult<AuditLog>> GetListAsync(Guid workspaceId, Guid orgId, AuditLogFilter userFilter)
+    public async Task<PagedResult<AuditLog>> GetListAsync(Guid workspaceId, Guid orgId, Guid? envId, AuditLogFilter userFilter)
     {
-        var queryable = await ScopedLogs(workspaceId, orgId, userFilter);
+        var queryable = await ScopedLogs(workspaceId, orgId, envId, userFilter);
 
         // query(keyword/comment) filter
         var query = userFilter.Query;
@@ -76,9 +76,9 @@ public class AuditLogService(MongoDbClient mongoDb) : MongoDbService<AuditLog>(m
         return new PagedResult<AuditLog>(totalCount, items);
     }
 
-    public async Task<IReadOnlyList<AuditActor>> GetActorsAsync(Guid workspaceId, Guid orgId, AuditLogFilter filter)
+    public async Task<IReadOnlyList<AuditActor>> GetActorsAsync(Guid workspaceId, Guid orgId, Guid? envId, AuditLogFilter filter)
     {
-        var logs = await ScopedLogs(workspaceId, orgId, filter);
+        var logs = await ScopedLogs(workspaceId, orgId, envId, filter);
         if (!string.IsNullOrWhiteSpace(filter.RefType)) logs = logs.Where(x => x.RefType == filter.RefType);
         if (!string.IsNullOrWhiteSpace(filter.RefId)) logs = logs.Where(x => x.RefId == filter.RefId);
         var creatorIds = await logs.Select(x => x.CreatorId).Distinct().ToListAsync();
@@ -97,13 +97,13 @@ public class AuditLogService(MongoDbClient mongoDb) : MongoDbService<AuditLog>(m
         return userActors.Concat(tokenActors).OrderBy(x => x.Name).ThenBy(x => x.Id).Take(50).ToList();
     }
 
-    private async Task<IQueryable<AuditLog>> ScopedLogs(Guid workspaceId, Guid orgId, AuditLogFilter filter)
+    private async Task<IQueryable<AuditLog>> ScopedLogs(Guid workspaceId, Guid orgId, Guid? envId, AuditLogFilter filter)
     {
         if (filter.Scope == AuditLogScope.Iam)
             return Queryable.Where(x => x.WorkspaceId == workspaceId && x.OrganizationId == orgId &&
                 (x.RefType == AuditLogRefTypes.Member || x.RefType == AuditLogRefTypes.Group || x.RefType == AuditLogRefTypes.Policy));
         if (filter.Scope != AuditLogScope.Environment) throw new ArgumentOutOfRangeException(nameof(filter.Scope));
-        var envId = filter.EnvId ?? throw new ArgumentException("Environment is required.");
+        if (!envId.HasValue) throw new ArgumentException("Environment is required.");
         // Legacy Mongo logs have no workspaceId. Resolve their environment ownership
         // rather than dropping tenant isolation when cross-environment history is requested.
         var orgIds = await MongoDb.QueryableOf<Organization>().Where(x => x.WorkspaceId == workspaceId)

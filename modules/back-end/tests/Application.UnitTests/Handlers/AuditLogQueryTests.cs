@@ -26,7 +26,7 @@ public class AuditLogQueryTests
         if (scenario == "wrong-action") permissions[0].Actions = [Permissions.CanAccessEnv];
         var logs = new Mock<IAuditLogService>(MockBehavior.Strict);
         var access = new AuditLogAccess();
-        var filter = new AuditLogFilter { Scope = AuditLogScope.Iam, CrossEnvironment = true, EnvId = Guid.NewGuid() };
+        var filter = new AuditLogFilter { Scope = AuditLogScope.Iam, CrossEnvironment = true };
         var list = new GetAuditLogListHandler(logs.Object, Mock.Of<IUserService>(MockBehavior.Strict),
             Mock.Of<IAccessTokenService>(MockBehavior.Strict), Mock.Of<IMapper>(MockBehavior.Strict),
             access);
@@ -50,12 +50,12 @@ public class AuditLogQueryTests
         var workspaceId = Guid.NewGuid();
         var orgId = Guid.NewGuid();
         var environment = new Domain.Environments.Environment(Guid.NewGuid(), "Env", "env");
-        var filter = new AuditLogFilter { EnvId = environment.Id, CrossEnvironment = true };
+        var filter = new AuditLogFilter { CrossEnvironment = true };
         filter.Scope = iam ? AuditLogScope.Iam : AuditLogScope.Environment;
         var logs = new Mock<IAuditLogService>(MockBehavior.Strict);
         var result = new Application.Bases.Models.PagedResult<AuditLog>(0, []);
-        logs.Setup(x => x.GetListAsync(workspaceId, orgId, filter)).ReturnsAsync(result);
-        logs.Setup(x => x.GetActorsAsync(workspaceId, orgId, filter)).ReturnsAsync(Array.Empty<AuditActor>());
+        logs.Setup(x => x.GetListAsync(workspaceId, orgId, environment.Id, filter)).ReturnsAsync(result);
+        logs.Setup(x => x.GetActorsAsync(workspaceId, orgId, environment.Id, filter)).ReturnsAsync(Array.Empty<AuditActor>());
         var mapper = new Mock<IMapper>();
         mapper.Setup(x => x.Map<Application.Bases.Models.PagedResult<AuditLogVm>>(result))
             .Returns(new Application.Bases.Models.PagedResult<AuditLogVm>(0, []));
@@ -65,12 +65,12 @@ public class AuditLogQueryTests
 
         await list.Handle(new GetAuditLogList
         {
-            WorkspaceId = workspaceId, OrgId = orgId, Filter = filter, Permissions = iam ? IamPermissions() : []
+            WorkspaceId = workspaceId, OrgId = orgId, EnvId = environment.Id, Filter = filter, Permissions = iam ? IamPermissions() : []
         }, default);
         await new GetAuditLogActorsHandler(logs.Object, access)
             .Handle(new GetAuditLogActors
             {
-                WorkspaceId = workspaceId, OrgId = orgId, Filter = filter, Permissions = iam ? IamPermissions() : []
+                WorkspaceId = workspaceId, OrgId = orgId, EnvId = environment.Id, Filter = filter, Permissions = iam ? IamPermissions() : []
             }, default);
 
         logs.VerifyAll();
@@ -123,7 +123,7 @@ public class AuditLogQueryTests
         access.InSequence(sequence).Setup(x => x.EnsureAsync(request.Filter, request.Permissions))
             .Returns(Task.CompletedTask);
         var logs = new Mock<IAuditLogService>(MockBehavior.Strict);
-        logs.InSequence(sequence).Setup(x => x.GetActorsAsync(request.WorkspaceId, request.OrgId, request.Filter)).ReturnsAsync(result);
+        logs.InSequence(sequence).Setup(x => x.GetActorsAsync(request.WorkspaceId, request.OrgId, request.EnvId, request.Filter)).ReturnsAsync(result);
 
         var actual = await new GetAuditLogActorsHandler(logs.Object, access.Object).Handle(request, default);
 

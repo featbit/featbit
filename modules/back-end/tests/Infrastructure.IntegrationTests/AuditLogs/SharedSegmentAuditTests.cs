@@ -41,14 +41,14 @@ public class SharedSegmentAuditTests(FeatBitPostgresFixture fixture) : Integrati
             AuditLog.For(segment, Operations.Remove, new DataChange(segment).To(null), "deleted", Guid.NewGuid())
         };
         await service.AddManyAsync(logs);
-        var originalPage = await service.GetListAsync(org.WorkspaceId, org.Id, new AuditLogFilter { Scope = AuditLogScope.Environment, EnvId = env.Id });
+        var originalPage = await service.GetListAsync(org.WorkspaceId, org.Id, env.Id, new AuditLogFilter { Scope = AuditLogScope.Environment });
         Assert.Equal(3, originalPage.TotalCount);
         Assert.All(originalPage.Items, x => { Assert.Equal(env.Id, x.EnvId); Assert.Equal(org.Id, x.OrganizationId); });
         var otherEnv = Guid.NewGuid();
-        Assert.Empty((await service.GetListAsync(org.WorkspaceId, org.Id, new AuditLogFilter { Scope = AuditLogScope.Environment, EnvId = otherEnv })).Items);
-        var history = await service.GetListAsync(org.WorkspaceId, org.Id, new AuditLogFilter { Scope = AuditLogScope.Environment, EnvId = otherEnv, CrossEnvironment = true, RefType = "Segment", RefId = segment.Id.ToString() });
+        Assert.Empty((await service.GetListAsync(org.WorkspaceId, org.Id, otherEnv, new AuditLogFilter { Scope = AuditLogScope.Environment })).Items);
+        var history = await service.GetListAsync(org.WorkspaceId, org.Id, otherEnv, new AuditLogFilter { Scope = AuditLogScope.Environment, CrossEnvironment = true, RefType = "Segment", RefId = segment.Id.ToString() });
         Assert.Equal(logs.Select(x => x.Id).Order(), history.Items.Select(x => x.Id).Order());
-        Assert.Empty((await service.GetListAsync(Guid.NewGuid(), org.Id, new AuditLogFilter { Scope = AuditLogScope.Environment, EnvId = env.Id, CrossEnvironment = true, RefId = segment.Id.ToString() })).Items);
+        Assert.Empty((await service.GetListAsync(Guid.NewGuid(), org.Id, env.Id, new AuditLogFilter { Scope = AuditLogScope.Environment, CrossEnvironment = true, RefId = segment.Id.ToString() })).Items);
     }
 
     [DockerFact]

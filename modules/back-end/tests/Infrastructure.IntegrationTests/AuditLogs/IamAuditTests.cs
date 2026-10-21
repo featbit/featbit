@@ -98,33 +98,33 @@ public class IamAuditTests(FeatBitPostgresFixture fixture) : IntegrationTestBase
         await db.SaveChangesAsync();
         var logs = new Infrastructure.Services.EntityFrameworkCore.AuditLogService(db,
             new AuditLogEnricher(Mock.Of<IEnvironmentService>(), Mock.Of<IProjectService>(), Mock.Of<IOrganizationService>()));
-        var page = await logs.GetListAsync(workspaceId, orgId, new AuditLogFilter { Scope = AuditLogScope.Iam, PageSize = 1 });
+        var page = await logs.GetListAsync(workspaceId, orgId, null, new AuditLogFilter { Scope = AuditLogScope.Iam, PageSize = 1 });
         Assert.Equal(1, page.TotalCount);
         Assert.Equal(allowed.Id, Assert.Single(page.Items).Id);
-        Assert.Equal(actor.Id, Assert.Single(await logs.GetActorsAsync(workspaceId, orgId, new AuditLogFilter { Scope = AuditLogScope.Iam })).Id);
-        Assert.Empty(await logs.GetActorsAsync(workspaceId, orgId, new AuditLogFilter { Scope = AuditLogScope.Iam, Query = "Hidden" }));
-        Assert.Empty((await logs.GetListAsync(workspaceId, orgId, new AuditLogFilter { Scope = AuditLogScope.Iam, RefType = "FeatureFlag", CrossEnvironment = true, EnvId = envId })).Items);
-        Assert.Equal(flag.Id, Assert.Single((await logs.GetListAsync(workspaceId, orgId, new AuditLogFilter { Scope = AuditLogScope.Environment, EnvId = envId })).Items).Id);
-        Assert.Empty((await logs.GetListAsync(workspaceId, orgId, new AuditLogFilter { Scope = AuditLogScope.Environment, EnvId = envId, CrossEnvironment = true, RefType = "Group" })).Items);
-        Assert.Equal(shared.Id, Assert.Single((await logs.GetListAsync(workspaceId, orgId, new AuditLogFilter { Scope = AuditLogScope.Environment, EnvId = envId, CrossEnvironment = true, RefType = "Segment", RefId = shared.RefId })).Items).Id);
-        Assert.Equal(otherActor.Id, Assert.Single(await logs.GetActorsAsync(workspaceId, orgId, new AuditLogFilter { Scope = AuditLogScope.Environment, EnvId = envId })).Id);
-        Assert.Empty(await logs.GetActorsAsync(workspaceId, orgId, new AuditLogFilter { Scope = AuditLogScope.Environment, EnvId = envId, CrossEnvironment = true, RefType = "Group" }));
-        Assert.Empty(await logs.GetActorsAsync(workspaceId, orgId, new AuditLogFilter { Scope = AuditLogScope.Iam, EnvId = envId, CrossEnvironment = true, RefType = "FeatureFlag" }));
-        Assert.Empty(await logs.GetActorsAsync(Guid.NewGuid(), orgId, new AuditLogFilter { Scope = AuditLogScope.Environment, EnvId = envId, CrossEnvironment = true }));
-        Assert.Equal(otherActor.Id, Assert.Single(await logs.GetActorsAsync(workspaceId, orgId, new AuditLogFilter { Scope = AuditLogScope.Environment, EnvId = envId, CrossEnvironment = true,
+        Assert.Equal(actor.Id, Assert.Single(await logs.GetActorsAsync(workspaceId, orgId, null, new AuditLogFilter { Scope = AuditLogScope.Iam })).Id);
+        Assert.Empty(await logs.GetActorsAsync(workspaceId, orgId, null, new AuditLogFilter { Scope = AuditLogScope.Iam, Query = "Hidden" }));
+        Assert.Empty((await logs.GetListAsync(workspaceId, orgId, envId, new AuditLogFilter { Scope = AuditLogScope.Iam, RefType = "FeatureFlag", CrossEnvironment = true})).Items);
+        Assert.Equal(flag.Id, Assert.Single((await logs.GetListAsync(workspaceId, orgId, envId, new AuditLogFilter { Scope = AuditLogScope.Environment })).Items).Id);
+        Assert.Empty((await logs.GetListAsync(workspaceId, orgId, envId, new AuditLogFilter { Scope = AuditLogScope.Environment, CrossEnvironment = true, RefType = "Group" })).Items);
+        Assert.Equal(shared.Id, Assert.Single((await logs.GetListAsync(workspaceId, orgId, envId, new AuditLogFilter { Scope = AuditLogScope.Environment, CrossEnvironment = true, RefType = "Segment", RefId = shared.RefId })).Items).Id);
+        Assert.Equal(otherActor.Id, Assert.Single(await logs.GetActorsAsync(workspaceId, orgId, envId, new AuditLogFilter { Scope = AuditLogScope.Environment })).Id);
+        Assert.Empty(await logs.GetActorsAsync(workspaceId, orgId, envId, new AuditLogFilter { Scope = AuditLogScope.Environment, CrossEnvironment = true, RefType = "Group" }));
+        Assert.Empty(await logs.GetActorsAsync(workspaceId, orgId, envId, new AuditLogFilter { Scope = AuditLogScope.Iam, CrossEnvironment = true, RefType = "FeatureFlag" }));
+        Assert.Empty(await logs.GetActorsAsync(Guid.NewGuid(), orgId, envId, new AuditLogFilter { Scope = AuditLogScope.Environment, CrossEnvironment = true }));
+        Assert.Equal(otherActor.Id, Assert.Single(await logs.GetActorsAsync(workspaceId, orgId, envId, new AuditLogFilter { Scope = AuditLogScope.Environment, CrossEnvironment = true,
                 RefType = "Segment", RefId = shared.RefId })).Id);
 
         foreach (var scope in new[] { AuditLogScope.Unspecified, (AuditLogScope)999 })
         {
             await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
-                logs.GetListAsync(workspaceId, orgId, new AuditLogFilter { Scope = scope, EnvId = envId }));
+                logs.GetListAsync(workspaceId, orgId, envId, new AuditLogFilter { Scope = scope }));
             await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
-                logs.GetActorsAsync(workspaceId, orgId, new AuditLogFilter { Scope = scope, EnvId = envId }));
+                logs.GetActorsAsync(workspaceId, orgId, envId, new AuditLogFilter { Scope = scope }));
         }
         await Assert.ThrowsAsync<ArgumentException>(() =>
-            logs.GetListAsync(workspaceId, orgId, new AuditLogFilter { Scope = AuditLogScope.Environment }));
+            logs.GetListAsync(workspaceId, orgId, null, new AuditLogFilter { Scope = AuditLogScope.Environment }));
         await Assert.ThrowsAsync<ArgumentException>(() =>
-            logs.GetActorsAsync(workspaceId, orgId, new AuditLogFilter { Scope = AuditLogScope.Environment }));
+            logs.GetActorsAsync(workspaceId, orgId, null, new AuditLogFilter { Scope = AuditLogScope.Environment }));
     }
 
     [DockerFact]
@@ -150,7 +150,7 @@ public class IamAuditTests(FeatBitPostgresFixture fixture) : IntegrationTestBase
             Mock.Of<IOrganizationService>());
         var logs = new Infrastructure.Services.EntityFrameworkCore.AuditLogService(db, enricher);
 
-        var actors = await logs.GetActorsAsync(workspaceId, orgId, new AuditLogFilter { Scope = AuditLogScope.Iam });
+        var actors = await logs.GetActorsAsync(workspaceId, orgId, null, new AuditLogFilter { Scope = AuditLogScope.Iam });
         Assert.Equal(2, actors.Count);
         var userActor = Assert.Single(actors, x => x.Id == user.Id);
         Assert.Equal(AuditActorTypes.User, userActor.Type);
@@ -159,8 +159,8 @@ public class IamAuditTests(FeatBitPostgresFixture fixture) : IntegrationTestBase
         Assert.Equal(AuditActorTypes.AccessToken, tokenActor.Type);
         Assert.Equal(token.Name, tokenActor.Name);
         Assert.Null(tokenActor.Email);
-        Assert.Equal(token.Id, Assert.Single(await logs.GetActorsAsync(workspaceId, orgId, new AuditLogFilter { Scope = AuditLogScope.Iam, Query = "deploy" })).Id);
-        Assert.Equal(user.Id, Assert.Single(await logs.GetActorsAsync(workspaceId, orgId, new AuditLogFilter { Scope = AuditLogScope.Iam, Query = "actor@example.com" })).Id);
+        Assert.Equal(token.Id, Assert.Single(await logs.GetActorsAsync(workspaceId, orgId, null, new AuditLogFilter { Scope = AuditLogScope.Iam, Query = "deploy" })).Id);
+        Assert.Equal(user.Id, Assert.Single(await logs.GetActorsAsync(workspaceId, orgId, null, new AuditLogFilter { Scope = AuditLogScope.Iam, Query = "actor@example.com" })).Id);
     }
 
     [DockerFact]
@@ -259,7 +259,7 @@ public class IamAuditTests(FeatBitPostgresFixture fixture) : IntegrationTestBase
         var command = new AddGroupMember { GroupId = group.Id, MemberId = user.Id, OrganizationId = org.Id };
         await pipeline.Handle(command, ct => handler.Handle(command, ct), CancellationToken.None);
         await pipeline.Handle(command, ct => handler.Handle(command, ct), CancellationToken.None);
-        var page = await logs.GetListAsync(org.WorkspaceId, org.Id, new AuditLogFilter { Scope = AuditLogScope.Iam });
+        var page = await logs.GetListAsync(org.WorkspaceId, org.Id, null, new AuditLogFilter { Scope = AuditLogScope.Iam });
         var log = Assert.Single(page.Items);
         Assert.Null(log.EnvId); Assert.Equal(org.Id, log.OrganizationId);
         Assert.Equal(user.Id, log.CreatorId); Assert.Equal("AddGroupMember", log.Operation);
@@ -273,10 +273,10 @@ public class IamAuditTests(FeatBitPostgresFixture fixture) : IntegrationTestBase
                 snapshot.RootElement.EnumerateObject().Select(x => x.Name).Order().ToArray());
             Assert.Equal(System.Text.Json.JsonValueKind.Array, snapshot.RootElement.GetProperty("policies").ValueKind);
         }
-        Assert.Empty((await logs.GetListAsync(Guid.NewGuid(), org.Id, new AuditLogFilter { Scope = AuditLogScope.Iam })).Items);
-        Assert.Empty((await logs.GetListAsync(org.WorkspaceId, org.Id, new AuditLogFilter { Scope = AuditLogScope.Environment, EnvId = Guid.NewGuid() })).Items);
-        Assert.Empty((await logs.GetListAsync(org.WorkspaceId, org.Id, new AuditLogFilter { Scope = AuditLogScope.Iam, RefType = "Policy" })).Items);
-        Assert.Single(await logs.GetActorsAsync(org.WorkspaceId, org.Id, new AuditLogFilter { Scope = AuditLogScope.Iam, Query = "Alice" }));
+        Assert.Empty((await logs.GetListAsync(Guid.NewGuid(), org.Id, null, new AuditLogFilter { Scope = AuditLogScope.Iam })).Items);
+        Assert.Empty((await logs.GetListAsync(org.WorkspaceId, org.Id, Guid.NewGuid(), new AuditLogFilter { Scope = AuditLogScope.Environment })).Items);
+        Assert.Empty((await logs.GetListAsync(org.WorkspaceId, org.Id, null, new AuditLogFilter { Scope = AuditLogScope.Iam, RefType = "Policy" })).Items);
+        Assert.Single(await logs.GetActorsAsync(org.WorkspaceId, org.Id, null, new AuditLogFilter { Scope = AuditLogScope.Iam, Query = "Alice" }));
 
         // A policy change records the semantic before/after and survives deletion
         // with the removed assignments preserved in the snapshot.
@@ -293,7 +293,7 @@ public class IamAuditTests(FeatBitPostgresFixture fixture) : IntegrationTestBase
         var deleteHandler = new DeletePolicyHandler(policyService);
         await new IamAuditBehaviour<DeletePolicy, bool>(store, logs, current.Object, access)
             .Handle(deletion, ct => deleteHandler.Handle(deletion, ct), CancellationToken.None);
-        var policyLogs = (await logs.GetListAsync(org.WorkspaceId, org.Id, new AuditLogFilter { Scope = AuditLogScope.Iam, RefType = "Policy" })).Items;
+        var policyLogs = (await logs.GetListAsync(org.WorkspaceId, org.Id, null, new AuditLogFilter { Scope = AuditLogScope.Iam, RefType = "Policy" })).Items;
         Assert.Equal(2, policyLogs.Count());
         var removed = Assert.Single(policyLogs, x => x.Operation == Operations.DeletePolicy);
         Assert.Contains("group/Engineering", removed.DataChange.Previous);

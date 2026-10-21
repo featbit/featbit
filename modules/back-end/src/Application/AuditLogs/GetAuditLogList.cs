@@ -11,6 +11,8 @@ public class GetAuditLogList : IRequest<PagedResult<AuditLogVm>>
 
     public Guid OrgId { get; set; }
 
+    public Guid? EnvId { get; set; }
+
     public PolicyStatement[] Permissions { get; set; } = [];
 
     public AuditLogFilter Filter { get; set; }
@@ -41,7 +43,7 @@ public class GetAuditLogListHandler : IRequestHandler<GetAuditLogList, PagedResu
     public async Task<PagedResult<AuditLogVm>> Handle(GetAuditLogList request, CancellationToken cancellationToken)
     {
         await _access.EnsureAsync(request.Filter, request.Permissions);
-        var logs = await _auditLogService.GetListAsync(request.WorkspaceId, request.OrgId, request.Filter);
+        var logs = await _auditLogService.GetListAsync(request.WorkspaceId, request.OrgId, request.EnvId, request.Filter);
         var logVms = _mapper.Map<PagedResult<AuditLogVm>>(logs);
 
         var users = await _userService.GetListAsync(logVms.Items.Select(x => x.CreatorId));
