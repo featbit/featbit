@@ -228,9 +228,6 @@ describe("AuditLogTable", () => {
                   dataChange: {
                     previous: deleted ? snapshot : "",
                     current: deleted ? "" : snapshot,
-                    ...(operation === "ClonePolicy"
-                      ? { clonedFrom: { id: "source-id", key: "source-key" } }
-                      : {}),
                   },
                 },
               ]}
@@ -282,7 +279,7 @@ describe("AuditLogTable", () => {
         expect(details.getByText("first, second, third")).toBeInTheDocument()
       }
       if (operation === "ClonePolicy")
-        expect(details.getByText("policy/source-key")).toBeInTheDocument()
+        expect(details.queryByText("policy/source-key")).not.toBeInTheDocument()
     }
   )
 

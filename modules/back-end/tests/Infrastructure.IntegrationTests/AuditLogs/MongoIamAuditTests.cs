@@ -27,7 +27,7 @@ public class MongoIamAuditTests(MongoDbFixture fixture) : IntegrationTestBase
     [DockerTheory]
     [InlineData(PolicyTypes.CustomerManaged)]
     [InlineData(PolicyTypes.SysManaged)]
-    public async Task ClonePolicy_PersistsOriginalIdAndKey_ForSelectedPolicyType(string sourceType)
+    public async Task ClonePolicy_PersistsSourceInComment_ForSelectedPolicyType(string sourceType)
     {
         var db = new MongoDbClient(Options.Create(new MongoDbOptions
         { ConnectionString = fixture.ConnectionString, Database = $"iam-write-{Guid.NewGuid():N}" }));
@@ -61,7 +61,8 @@ public class MongoIamAuditTests(MongoDbFixture fixture) : IntegrationTestBase
 
         var log = await db.QueryableOf<AuditLog>().SingleAsync(x => x.RefId == result.Id);
         Assert.Equal(Operations.ClonePolicy, log.Operation);
-        Assert.Equal(new AuditResourceReference(sourceId, key), log.DataChange.ClonedFrom);
+        var sourceLabel = sourceType == PolicyTypes.SysManaged ? "system-managed" : "customer-managed";
+        Assert.Equal($"Cloned from: {sourceLabel} policy/{key}", log.Comment);
         Assert.NotEqual(sourceId.ToString(), result.Id);
         Assert.Empty(log.DataChange.Previous);
         Assert.Contains(request.Key, log.DataChange.Current);

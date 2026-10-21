@@ -25,7 +25,7 @@ public class IamAuditTests(FeatBitPostgresFixture fixture) : IntegrationTestBase
     [DockerTheory]
     [InlineData(PolicyTypes.CustomerManaged)]
     [InlineData(PolicyTypes.SysManaged)]
-    public async Task ClonePolicy_PersistsOriginalIdAndKey_ForSelectedPolicyType(string sourceType)
+    public async Task ClonePolicy_PersistsSourceInComment_ForSelectedPolicyType(string sourceType)
     {
         await using var db = AppDbContextFactory.Create(fixture.ConnectionString);
         var org = new Organization(Guid.NewGuid(), "Clone audit", Guid.NewGuid().ToString()) { Id = Guid.NewGuid() };
@@ -59,7 +59,8 @@ public class IamAuditTests(FeatBitPostgresFixture fixture) : IntegrationTestBase
         db.ChangeTracker.Clear();
         var log = await db.Set<AuditLog>().SingleAsync(x => x.RefId == result.Id);
         Assert.Equal(Operations.ClonePolicy, log.Operation);
-        Assert.Equal(new AuditResourceReference(sourceId, key), log.DataChange.ClonedFrom);
+        var sourceLabel = sourceType == PolicyTypes.SysManaged ? "system-managed" : "customer-managed";
+        Assert.Equal($"Cloned from: {sourceLabel} policy/{key}", log.Comment);
         Assert.NotEqual(sourceId.ToString(), result.Id);
         Assert.Empty(log.DataChange.Previous);
         Assert.Contains(request.Key, log.DataChange.Current);
@@ -67,8 +68,7 @@ public class IamAuditTests(FeatBitPostgresFixture fixture) : IntegrationTestBase
             $"SELECT data_change::text AS \"Value\" FROM audit_logs WHERE id = {log.Id}").SingleAsync();
         using var json = System.Text.Json.JsonDocument.Parse(storedJson);
         Assert.False(json.RootElement.TryGetProperty("source", out _));
-        Assert.Equal(sourceId, json.RootElement.GetProperty("clonedFrom").GetProperty("id").GetGuid());
-        Assert.Equal(key, json.RootElement.GetProperty("clonedFrom").GetProperty("key").GetString());
+        Assert.False(json.RootElement.TryGetProperty("clonedFrom", out _));
     }
 
     [DockerFact]

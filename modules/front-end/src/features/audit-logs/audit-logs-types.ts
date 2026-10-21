@@ -8,7 +8,6 @@ export type AuditInstruction = {
 export type AuditDataChange = {
   previous?: string
   current?: string
-  clonedFrom?: { id: string; key: string } | null
 }
 
 export type ChangeRequestDecisionAuditSnapshot = {

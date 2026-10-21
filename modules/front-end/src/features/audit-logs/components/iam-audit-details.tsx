@@ -60,14 +60,6 @@ export function IamAuditDetails({ log }: { log: AuditLog }) {
   )
   return (
     <div className="space-y-3">
-      {log.dataChange.clonedFrom ? (
-        <p className="text-sm text-muted-foreground">
-          {t("auditLogs.clonedFrom")}:{" "}
-          <span className="font-mono">
-            policy/{log.dataChange.clonedFrom.key}
-          </span>
-        </p>
-      ) : null}
       {unavailable || (snapshot && !changes.length) ? (
         <p className="text-sm text-muted-foreground">
           {t("auditLogs.snapshotUnavailable")}

@@ -21,7 +21,6 @@ export const enAuditLogs = {
   group: "Group",
   policy: "Policy",
   field: "Field",
-  clonedFrom: "Cloned from",
   iamFields: {
     name: "Name",
     email: "Email",
@@ -159,7 +158,6 @@ export const zhAuditLogs: typeof enAuditLogs = {
   group: "成员组",
   policy: "策略",
   field: "字段",
-  clonedFrom: "克隆来源",
   iamFields: {
     name: "名称",
     email: "邮箱",
