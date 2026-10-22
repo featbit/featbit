@@ -54,16 +54,7 @@ const legacyAuditOwner = { $or: [
 ] };
 
 function resolveAuditOwnership(log) {
-    let envId = log.envId;
-    if (envId == null && log.refType === "Segment") {
-        const json = log.dataChange && (log.dataChange.current || log.dataChange.previous);
-        if (json) {
-            const snapshot = JSON.parse(json);
-            if (snapshot && snapshot.type === "shared" && snapshot.envId) {
-                envId = UUID(snapshot.envId);
-            }
-        }
-    }
+    const envId = log.envId;
     const environment = envId == null ? null : db.Environments.findOne({ _id: envId });
     const project = environment ? db.Projects.findOne({ _id: environment.projectId }) : null;
     const organization = project ? db.Organizations.findOne({ _id: project.organizationId }) : null;
@@ -72,7 +63,7 @@ function resolveAuditOwnership(log) {
         throw new Error("Unresolved audit log ownership for " + EJSON.stringify(log._id)
             + ". Restore verified environment/project/organization ownership and rerun v6.1.0; no audit history was removed.");
     }
-    return { envId, workspaceId: organization.workspaceId, organizationId: organization._id };
+    return { workspaceId: organization.workspaceId, organizationId: organization._id };
 }
 
 db.AuditLogs.find(legacyAuditOwner).forEach(log => resolveAuditOwnership(log));

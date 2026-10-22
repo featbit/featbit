@@ -63,18 +63,6 @@ ALTER TABLE audit_logs
     ADD COLUMN IF NOT EXISTS organization_id uuid;
 ALTER TABLE audit_logs ALTER COLUMN env_id DROP NOT NULL;
 
--- Recover the original environment for legacy shared-segment records if needed.
--- Existing workspace-scoped records already carry their explicit ownership.
-WITH snapshots AS (
-    SELECT id, COALESCE(NULLIF(data_change->>'current', ''), NULLIF(data_change->>'previous', ''))::jsonb AS value
-    FROM audit_logs
-    WHERE workspace_id IS NULL AND ref_type = 'Segment' AND env_id IS NULL
-)
-UPDATE audit_logs a SET env_id = NULLIF(s.value->>'envId', '')::uuid
-FROM snapshots s
-WHERE a.id = s.id AND s.value->>'type' = 'shared'
-    AND NULLIF(s.value->>'envId', '') IS NOT NULL;
-
 -- Resolve historical ownership from the environment, never from request context.
 -- Do not overwrite explicit ownership (shared segments can have a null organization).
 UPDATE audit_logs a SET workspace_id = o.workspace_id, organization_id = o.id

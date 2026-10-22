@@ -35,7 +35,8 @@ public class AuditOwnershipMigrationTests(FeatBitPostgresFixture fixture) : Inte
         await Execute(connection, sql);
         await using var command = new NpgsqlCommand("""
             SELECT count(*) = 2 AND bool_and(workspace_id = '00000000-0000-0000-0000-000000000001'::uuid
-                AND organization_id = '00000000-0000-0000-0000-000000000002'::uuid)
+                AND organization_id = '00000000-0000-0000-0000-000000000002'::uuid
+                AND env_id = '00000000-0000-0000-0000-000000000004'::uuid)
             FROM audit_logs WHERE ref_id = 'legacy'
             """, connection);
         Assert.Equal(true, await command.ExecuteScalarAsync());
@@ -86,13 +87,13 @@ public class AuditOwnershipMigrationTests(FeatBitPostgresFixture fixture) : Inte
             CREATE TABLE organizations (id uuid, workspace_id uuid);
             CREATE TABLE projects (id uuid, organization_id uuid);
             CREATE TABLE environments (id uuid, project_id uuid);
-            CREATE TABLE audit_logs (id uuid, env_id uuid, ref_type text, ref_id text, created_at timestamp, data_change jsonb);
+            CREATE TABLE audit_logs (id uuid, env_id uuid NOT NULL, ref_type text, ref_id text, created_at timestamp, data_change jsonb);
             INSERT INTO organizations VALUES ('00000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000001');
             INSERT INTO projects VALUES ('00000000-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000002');
             INSERT INTO environments VALUES ('00000000-0000-0000-0000-000000000004', '00000000-0000-0000-0000-000000000003');
             INSERT INTO audit_logs VALUES (gen_random_uuid(), '00000000-0000-0000-0000-000000000004', 'FeatureFlag', 'legacy', now(), NULL);
-            INSERT INTO audit_logs VALUES (gen_random_uuid(), NULL, 'Segment', 'legacy', now(),
-                jsonb_build_object('previous', jsonb_build_object('type', 'shared', 'envId', '00000000-0000-0000-0000-000000000004')::text, 'current', ''));
+            INSERT INTO audit_logs VALUES (gen_random_uuid(), '00000000-0000-0000-0000-000000000004', 'Segment', 'legacy', now(),
+                jsonb_build_object('previous', jsonb_build_object('type', 'shared')::text, 'current', ''));
             """);
         if (existingColumns)
         {
