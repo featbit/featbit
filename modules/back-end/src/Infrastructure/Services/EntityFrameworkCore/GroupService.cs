@@ -1,4 +1,3 @@
-using Domain.Members;
 using Domain.AuditLogs;
 using Application.Bases.Models;
 using Application.Groups;

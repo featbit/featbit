@@ -4,7 +4,6 @@ namespace Domain.Policies;
 
 public static class Permissions
 {
-
     // Workspaces
     public const string UpdateWorkspaceGeneralSettings = nameof(UpdateWorkspaceGeneralSettings);
     public const string UpdateWorkspaceLicense = nameof(UpdateWorkspaceLicense);

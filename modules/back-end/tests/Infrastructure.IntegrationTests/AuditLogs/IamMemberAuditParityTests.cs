@@ -19,9 +19,7 @@ using Infrastructure.IntegrationTests.Fixtures;
 using Infrastructure.IntegrationTests.Support;
 using Infrastructure.Persistence.EntityFrameworkCore;
 using Infrastructure.Persistence.MongoDb;
-using Infrastructure.Services;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
@@ -419,7 +417,6 @@ public abstract class IamMemberAuditParityTests : IntegrationTestBase
                 .AddSingleton(Mock.Of<IIdentityService>());
             collection.AddAutoMapper(typeof(Application.Groups.MapperProfile).Assembly);
             collection.AddMediatR(c => c.RegisterServicesFromAssembly(typeof(OnIamResourceChanged).Assembly));
-            if (db != null) collection.AddSingleton(db); else collection.AddSingleton(mongo!);
             services = collection.BuildServiceProvider();
             Publisher = services.GetRequiredService<IPublisher>();
         }

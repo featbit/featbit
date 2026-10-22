@@ -1,21 +1,9 @@
 using Application.AuditLogs;
-using Application.Groups;
-using Application.Policies;
-using Application.Services;
-using Application.Users;
 using Domain.AuditLogs;
-using Domain.Groups;
-using Domain.Organizations;
 using Domain.Users;
-using Domain.Policies;
-using Domain.Members;
 using Infrastructure.IntegrationTests.Fixtures;
 using Infrastructure.IntegrationTests.Support;
-using Infrastructure.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Moq;
 
 namespace Infrastructure.IntegrationTests.AuditLogs;
 

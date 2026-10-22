@@ -1,6 +1,5 @@
 using System.Text.Json;
 using Domain.AuditLogs;
-using Infrastructure.Services;
 
 namespace Infrastructure.IntegrationTests.AuditLogs;
 
@@ -12,7 +11,7 @@ public class IamAuditSnapshotSerializationTests
     [InlineData("Policy", "description,groups,id,members,name,rn,statements", "groups,members,statements")]
     public void DataChange_PreservesOnlyResourceFields_AndEmptyArrays(string type, string fields, string arrays)
     {
-        // Exercise the same base-type/object boundary used by the audit pipeline.
+        // Exercise the same base-type/object boundary used when constructing audit changes from resource snapshots.
         IamAuditSnapshot snapshot = type switch
         {
             "Member" => new MemberAuditSnapshot(Guid.NewGuid(), "Member", "member/test@example.com", "test@example.com", [], []),
