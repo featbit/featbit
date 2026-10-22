@@ -39,13 +39,13 @@ public class EntityFrameworkCoreService<TEntity>(AppDbContext dbContext) : IServ
         return entity;
     }
 
-    public virtual async Task AddOneAsync(TEntity segment)
+    public async Task AddOneAsync(TEntity segment)
     {
         await Set.AddAsync(segment);
         await SaveChangesAsync();
     }
 
-    public virtual async Task AddManyAsync(IEnumerable<TEntity> entities)
+    public async Task AddManyAsync(IEnumerable<TEntity> entities)
     {
         Set.AddRange(entities);
         await SaveChangesAsync();
