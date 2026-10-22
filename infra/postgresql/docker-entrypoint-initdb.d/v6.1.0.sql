@@ -71,6 +71,12 @@ JOIN projects p ON p.id = e.project_id
 JOIN organizations o ON o.id = p.organization_id
 WHERE a.workspace_id IS NULL AND a.env_id = e.id;
 
+-- Shared segments belong to the workspace, including records already backfilled.
+-- Deleted segments retain their type in the previous snapshot.
+UPDATE audit_logs SET organization_id = NULL
+WHERE ref_type = 'Segment' AND organization_id IS NOT NULL
+    AND COALESCE(NULLIF(data_change->>'current', ''), NULLIF(data_change->>'previous', ''))::jsonb->>'type' = 'shared';
+
 DO $$ BEGIN
     IF EXISTS (SELECT 1 FROM audit_logs WHERE workspace_id IS NULL) THEN
         RAISE EXCEPTION 'Audit logs have unresolved workspace ownership. Restore verified environment/project/organization ownership before rerunning v6.1.0; no audit history was removed.';

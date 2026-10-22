@@ -98,7 +98,7 @@ public class AuditLog : Entity
     {
         var auditLog = new AuditLog(
             workspaceId,
-            organizationId,
+            segment.IsEnvironmentSpecific ? organizationId : null,
             segment.EnvId,
             segment.Id.ToString(),
             AuditLogRefTypes.Segment,

@@ -86,6 +86,8 @@ public class MongoAuditLogTests(MongoDbFixture fixture) : IntegrationTestBase
         var log = AuditLog.For(segment, workspaceId, Guid.NewGuid(), Operations.Update, new DataChange(null).To(segment), "changed", Guid.NewGuid());
         await service.AddOneAsync(log);
         Assert.Equal(envId, log.EnvId);
+        Assert.Equal(workspaceId, log.WorkspaceId);
+        Assert.Null(log.OrganizationId);
         Assert.Equal(log.Id, Assert.Single((await service.GetListAsync(workspaceId, Guid.NewGuid(), envId, new AuditLogFilter { Scope = AuditLogScope.Environment })).Items).Id);
         var otherEnv = Guid.NewGuid();
         Assert.Empty((await service.GetListAsync(workspaceId, Guid.NewGuid(), otherEnv, new AuditLogFilter { Scope = AuditLogScope.Environment })).Items);

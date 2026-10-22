@@ -42,7 +42,12 @@ public class SharedSegmentAuditTests(FeatBitPostgresFixture fixture) : Integrati
         await service.AddManyAsync(logs);
         var originalPage = await service.GetListAsync(org.WorkspaceId, org.Id, env.Id, new AuditLogFilter { Scope = AuditLogScope.Environment });
         Assert.Equal(3, originalPage.TotalCount);
-        Assert.All(originalPage.Items, x => { Assert.Equal(env.Id, x.EnvId); Assert.Equal(org.Id, x.OrganizationId); });
+        Assert.All(originalPage.Items, x =>
+        {
+            Assert.Equal(org.WorkspaceId, x.WorkspaceId);
+            Assert.Equal(env.Id, x.EnvId);
+            Assert.Null(x.OrganizationId);
+        });
         Assert.NotNull(await service.GetLastChangeAsync(org.WorkspaceId, env.Id, "Segment", segment.Id.ToString()));
         Assert.Single(await service.GetLastChangesAsync(org.WorkspaceId, env.Id, "Segment", [segment.Id.ToString()]));
         Assert.Empty(await service.GetLastChangesAsync(Guid.NewGuid(), env.Id, "Segment", [segment.Id.ToString()]));

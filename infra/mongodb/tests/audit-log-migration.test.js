@@ -17,6 +17,9 @@ db.AuditLogs.insertMany([
     { _id: "empty", envId: testEnv, workspaceId: testEmpty },
     { _id: "null", envId: testEnv, workspaceId: null },
     { _id: "shared", envId: testEnv, refType: "Segment", dataChange: { current: JSON.stringify({ type: "shared" }), previous: "" } },
+    { _id: "shared-deleted", envId: testEnv, refType: "Segment", dataChange: { current: "", previous: JSON.stringify({ type: "shared" }) } },
+    { _id: "shared-backfilled", envId: testEnv, workspaceId: testWorkspace, organizationId: testOrg, refType: "Segment", dataChange: { current: JSON.stringify({ type: "shared" }) } },
+    { _id: "segment", envId: testEnv, refType: "Segment", dataChange: { current: JSON.stringify({ type: "environment-specific" }) } },
     { _id: "explicit", envId: testEnv, workspaceId: UUID(), organizationId: null },
     { _id: "iam", envId: null, workspaceId: testWorkspace, organizationId: null },
     { _id: "orphan", envId: UUID() }
@@ -31,14 +34,15 @@ catch (error) {
 }
 check(rejected, "Orphan ownership must stop migration");
 check(!db.AuditLogs.findOne({ _id: "missing" }).workspaceId, "Preflight must not partially backfill logs");
-check(db.AuditLogs.countDocuments({}) === 7, "Migration must preserve all audit history");
+check(db.AuditLogs.countDocuments({}) === 10, "Migration must preserve all audit history");
 // Repair the orphan's verified ownership and retry.
 db.AuditLogs.updateOne({ _id: "orphan" }, { $set: { envId: testEnv } });
 load("/migration/docker-entrypoint-initdb.d/v6.1.0.js");
-for (const id of ["missing", "empty", "null", "shared", "orphan"]) {
+for (const id of ["missing", "empty", "null", "shared", "shared-deleted", "shared-backfilled", "segment", "orphan"]) {
     const log = db.AuditLogs.findOne({ _id: id });
     check(EJSON.stringify(log.workspaceId) === EJSON.stringify(testWorkspace), id + " workspace");
-    check(EJSON.stringify(log.organizationId) === EJSON.stringify(testOrg), id + " organization");
+    check(id.startsWith("shared") ? log.organizationId === null
+        : EJSON.stringify(log.organizationId) === EJSON.stringify(testOrg), id + " organization");
     check(EJSON.stringify(log.envId) === EJSON.stringify(testEnv), id + " environment");
 }
 check(EJSON.stringify(db.AuditLogs.findOne({ _id: "explicit" })) === explicitBefore, "Explicit ownership changed");

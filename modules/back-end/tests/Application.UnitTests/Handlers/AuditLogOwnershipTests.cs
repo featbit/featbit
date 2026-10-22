@@ -37,7 +37,7 @@ public class AuditLogOwnershipTests
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
-    public async Task SharedSegmentNotifications_KeepOriginalEnvironmentAndOrganization(bool deleted)
+    public async Task SharedSegmentNotifications_KeepOriginalEnvironmentWithoutOrganization(bool deleted)
     {
         var owner = new Organization(Guid.NewGuid(), "Owner", "owner") { Id = Guid.NewGuid() };
         var segment = new Segment(owner.WorkspaceId, Guid.NewGuid(), "Shared", "shared", SegmentType.Shared,
@@ -56,7 +56,7 @@ public class AuditLogOwnershipTests
                     new OnSegmentChange(segment, owner.WorkspaceId, owner.Id, Operations.Update, new DataChange(segment).To(segment), actor), default);
 
         logs.Verify(x => x.AddOneAsync(It.Is<AuditLog>(log => log.WorkspaceId == owner.WorkspaceId &&
-            log.OrganizationId == owner.Id && log.EnvId == segment.EnvId && log.CreatorId == actor)), Times.Once);
+            log.OrganizationId == null && log.EnvId == segment.EnvId && log.CreatorId == actor)), Times.Once);
     }
     [Theory]
     [InlineData(true)]

@@ -34,10 +34,11 @@ public class AuditOwnershipMigrationTests(FeatBitPostgresFixture fixture) : Inte
         await Execute(connection, sql);
         await Execute(connection, sql);
         await using var command = new NpgsqlCommand("""
-            SELECT count(*) = 2 AND bool_and(workspace_id = '00000000-0000-0000-0000-000000000001'::uuid
-                AND organization_id = '00000000-0000-0000-0000-000000000002'::uuid
+            SELECT count(*) = 4 AND bool_and(workspace_id = '00000000-0000-0000-0000-000000000001'::uuid
+                AND CASE WHEN ref_id LIKE 'shared%' THEN organization_id IS NULL
+                    ELSE organization_id = '00000000-0000-0000-0000-000000000002'::uuid END
                 AND env_id = '00000000-0000-0000-0000-000000000004'::uuid)
-            FROM audit_logs WHERE ref_id = 'legacy'
+            FROM audit_logs WHERE ref_id <> 'explicit'
             """, connection);
         Assert.Equal(true, await command.ExecuteScalarAsync());
         await using var constraint = new NpgsqlCommand($"""
@@ -49,6 +50,7 @@ public class AuditOwnershipMigrationTests(FeatBitPostgresFixture fixture) : Inte
         {
             await using var explicitOwner = new NpgsqlCommand("""
                 SELECT organization_id IS NULL AND workspace_id = '00000000-0000-0000-0000-000000000009'::uuid
+                    AND env_id = '00000000-0000-0000-0000-000000000004'::uuid
                 FROM audit_logs WHERE ref_id = 'explicit'
                 """, connection);
             Assert.Equal(true, await explicitOwner.ExecuteScalarAsync());
@@ -68,7 +70,7 @@ public class AuditOwnershipMigrationTests(FeatBitPostgresFixture fixture) : Inte
         Assert.Contains("unresolved workspace ownership", error.MessageText);
         await Execute(connection, "ROLLBACK");
         await using var count = new NpgsqlCommand("SELECT count(*) FROM audit_logs", connection);
-        Assert.Equal(3L, await count.ExecuteScalarAsync());
+        Assert.Equal(5L, await count.ExecuteScalarAsync());
         await using var columns = new NpgsqlCommand($"""
             SELECT count(*) FROM information_schema.columns WHERE table_schema = '{schema}'
             AND table_name = 'audit_logs' AND column_name = 'workspace_id'
@@ -92,15 +94,20 @@ public class AuditOwnershipMigrationTests(FeatBitPostgresFixture fixture) : Inte
             INSERT INTO projects VALUES ('00000000-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000002');
             INSERT INTO environments VALUES ('00000000-0000-0000-0000-000000000004', '00000000-0000-0000-0000-000000000003');
             INSERT INTO audit_logs VALUES (gen_random_uuid(), '00000000-0000-0000-0000-000000000004', 'FeatureFlag', 'legacy', now(), NULL);
-            INSERT INTO audit_logs VALUES (gen_random_uuid(), '00000000-0000-0000-0000-000000000004', 'Segment', 'legacy', now(),
+            INSERT INTO audit_logs VALUES (gen_random_uuid(), '00000000-0000-0000-0000-000000000004', 'Segment', 'shared-deleted', now(),
                 jsonb_build_object('previous', jsonb_build_object('type', 'shared')::text, 'current', ''));
+            INSERT INTO audit_logs VALUES (gen_random_uuid(), '00000000-0000-0000-0000-000000000004', 'Segment', 'shared-created', now(),
+                jsonb_build_object('current', jsonb_build_object('type', 'shared')::text, 'previous', ''));
+            INSERT INTO audit_logs VALUES (gen_random_uuid(), '00000000-0000-0000-0000-000000000004', 'Segment', 'legacy', now(),
+                jsonb_build_object('current', jsonb_build_object('type', 'environment-specific')::text));
             """);
         if (existingColumns)
         {
             await Execute(connection, """
                 ALTER TABLE audit_logs ADD COLUMN workspace_id uuid, ADD COLUMN organization_id uuid;
-                INSERT INTO audit_logs(id, env_id, ref_type, ref_id, workspace_id) VALUES
-                (gen_random_uuid(), '00000000-0000-0000-0000-000000000004', 'Segment', 'explicit', '00000000-0000-0000-0000-000000000009');
+                INSERT INTO audit_logs(id, env_id, ref_type, ref_id, workspace_id, organization_id, data_change) VALUES
+                (gen_random_uuid(), '00000000-0000-0000-0000-000000000004', 'Segment', 'explicit', '00000000-0000-0000-0000-000000000009',
+                    '00000000-0000-0000-0000-000000000002', jsonb_build_object('current', jsonb_build_object('type', 'shared')::text));
                 """);
         }
     }

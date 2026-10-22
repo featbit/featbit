@@ -74,8 +74,15 @@ db.AuditLogs.find(legacyAuditOwner).forEach(log => {
     );
 });
 
-// Keep explicitly owned records unchanged, including workspace-wide IAM logs
-// and shared segments whose organizationId is intentionally null.
+// Shared segments belong to the workspace, including records already backfilled.
+// Deleted segments retain their type in the previous snapshot.
+db.AuditLogs.find({ refType: "Segment", organizationId: { $ne: null } }).forEach(log => {
+    const json = log.dataChange && (log.dataChange.current || log.dataChange.previous);
+    if (json && JSON.parse(json)?.type === "shared") {
+        db.AuditLogs.updateOne({ _id: log._id }, { $set: { organizationId: null } });
+    }
+});
+
 db.AuditLogs.createIndex(
     { workspaceId: 1, envId: 1, createdAt: -1, _id: -1 },
     { name: "ix_audit_logs_workspace_env_created" }
