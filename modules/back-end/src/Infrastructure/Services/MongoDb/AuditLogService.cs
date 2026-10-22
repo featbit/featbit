@@ -104,19 +104,7 @@ public class AuditLogService(MongoDbClient mongoDb) : MongoDbService<AuditLog>(m
                 (x.RefType == AuditLogRefTypes.Member || x.RefType == AuditLogRefTypes.Group || x.RefType == AuditLogRefTypes.Policy));
         if (filter.Scope != AuditLogScope.Environment) throw new ArgumentOutOfRangeException(nameof(filter.Scope));
         if (!envId.HasValue) throw new ArgumentException("Environment is required.");
-        // Legacy Mongo logs have no workspaceId. Resolve their environment ownership
-        // rather than dropping tenant isolation when cross-environment history is requested.
-        var orgIds = await MongoDb.QueryableOf<Organization>().Where(x => x.WorkspaceId == workspaceId)
-            .Select(x => x.Id).ToListAsync();
-        var projectIds = await MongoDb.QueryableOf<Project>().Where(x => orgIds.Contains(x.OrganizationId))
-            .Select(x => x.Id).ToListAsync();
-        var envIds = await MongoDb.QueryableOf<Environment>().Where(x => projectIds.Contains(x.ProjectId))
-            .Select(x => (Guid?)x.Id).ToListAsync();
-        var builder = Builders<AuditLog>.Filter;
-        var legacyOwner = builder.And(
-            builder.Or(builder.Exists(x => x.WorkspaceId, false), builder.Eq(x => x.WorkspaceId, Guid.Empty)),
-            builder.In(x => x.EnvId, envIds));
-        var owner = builder.Or(builder.Eq(x => x.WorkspaceId, workspaceId), legacyOwner);
+        var owner = await GetOwnerFilterAsync(workspaceId);
         var queryable = Queryable.Where(x => owner.Inject() &&
             (x.RefType == AuditLogRefTypes.FeatureFlag || x.RefType == AuditLogRefTypes.Segment));
         if (filter.CrossEnvironment != true) queryable = queryable.Where(x => x.EnvId == envId);
@@ -124,11 +112,28 @@ public class AuditLogService(MongoDbClient mongoDb) : MongoDbService<AuditLog>(m
         return queryable;
     }
 
+    private async Task<FilterDefinition<AuditLog>> GetOwnerFilterAsync(Guid workspaceId, Guid? envId = null)
+    {
+        // Legacy Mongo logs have no workspaceId. Resolve their environment ownership
+        // rather than dropping tenant isolation when cross-environment history is requested.
+        var orgIds = await MongoDb.QueryableOf<Organization>().Where(x => x.WorkspaceId == workspaceId)
+            .Select(x => x.Id).ToListAsync();
+        var projectIds = await MongoDb.QueryableOf<Project>().Where(x => orgIds.Contains(x.OrganizationId))
+            .Select(x => x.Id).ToListAsync();
+        var environments = MongoDb.QueryableOf<Environment>().Where(x => projectIds.Contains(x.ProjectId));
+        if (envId.HasValue) environments = environments.Where(x => x.Id == envId.Value);
+        var envIds = await environments
+            .Select(x => (Guid?)x.Id).ToListAsync();
+        var builder = Builders<AuditLog>.Filter;
+        var legacyOwner = builder.And(
+            builder.Or(builder.Exists(x => x.WorkspaceId, false), builder.Eq(x => x.WorkspaceId, Guid.Empty)),
+            builder.In(x => x.EnvId, envIds));
+        return builder.Or(builder.Eq(x => x.WorkspaceId, workspaceId), legacyOwner);
+    }
+
     public async Task<LastChange?> GetLastChangeAsync(Guid workspaceId, Guid envId, string refType, string refId)
     {
-        var builder = Builders<AuditLog>.Filter;
-        var owner = builder.Or(builder.Eq(x => x.WorkspaceId, workspaceId),
-            builder.Eq(x => x.WorkspaceId, Guid.Empty), builder.Exists(x => x.WorkspaceId, false));
+        var owner = await GetOwnerFilterAsync(workspaceId, envId);
         var lastChange = await Queryable.Where(x => owner.Inject()).Where(x =>
                 x.EnvId == envId &&
                 x.RefType == refType &&
@@ -153,18 +158,13 @@ public class AuditLogService(MongoDbClient mongoDb) : MongoDbService<AuditLog>(m
         string refType,
         ICollection<string> refIds)
     {
+        var owner = await GetOwnerFilterAsync(workspaceId, envId);
         var pipeline = new[]
         {
+            new BsonDocument("$match", owner.Render(new RenderArgs<AuditLog>(Collection.DocumentSerializer, Collection.Settings.SerializerRegistry))),
             new BsonDocument("$match", new BsonDocument
             {
                 { "envId", new BsonBinaryData(envId, GuidRepresentation.Standard) },
-                { "$or", new BsonArray
-                    {
-                        new BsonDocument("workspaceId", new BsonBinaryData(workspaceId, GuidRepresentation.Standard)),
-                        new BsonDocument("workspaceId", new BsonBinaryData(Guid.Empty, GuidRepresentation.Standard)),
-                        new BsonDocument("workspaceId", new BsonDocument("$exists", false))
-                    }
-                },
                 { "refType", refType },
                 { "refId", new BsonDocument("$in", new BsonArray(refIds)) },
                 { "operation", new BsonDocument("$ne", Operations.Create) }

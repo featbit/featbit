@@ -97,8 +97,70 @@ public class MongoAuditLogTests(MongoDbFixture fixture) : IntegrationTestBase
         Assert.Empty(await service.GetLastChangesAsync(Guid.NewGuid(), envId, "Segment", [segment.Id.ToString()]));
         await client.CollectionOf<AuditLog>().UpdateOneAsync(x => x.Id == log.Id,
             Builders<AuditLog>.Update.Unset(x => x.WorkspaceId));
+        var org = new Organization(workspaceId, "Own", "own") { Id = Guid.NewGuid() };
+        var project = new Project(org.Id, "Own", "own") { Id = Guid.NewGuid() };
+        await client.CollectionOf<Organization>().InsertOneAsync(org);
+        await client.CollectionOf<Project>().InsertOneAsync(project);
+        await client.CollectionOf<Environment>().InsertOneAsync(new Environment(project.Id, "Own", "own") { Id = envId });
         Assert.NotNull(await service.GetLastChangeAsync(workspaceId, envId, "Segment", segment.Id.ToString()));
         Assert.Single(await service.GetLastChangesAsync(workspaceId, envId, "Segment", [segment.Id.ToString()]));
+        Assert.Null(await service.GetLastChangeAsync(Guid.NewGuid(), envId, "Segment", segment.Id.ToString()));
+        Assert.Empty(await service.GetLastChangesAsync(Guid.NewGuid(), envId, "Segment", [segment.Id.ToString()]));
+    }
+
+    [DockerFact]
+    public async Task LastChanges_ResolveLegacyOwnership_AndExcludeForeignConflictingAndOrphanRecords()
+    {
+        var client = new MongoDbClient(Options.Create(new MongoDbOptions
+        { ConnectionString = fixture.ConnectionString, Database = $"audit-last-{Guid.NewGuid():N}" }));
+        var service = new AuditLogService(client);
+        var org = new Organization(Guid.NewGuid(), "Own", "own") { Id = Guid.NewGuid() };
+        var otherOrg = new Organization(Guid.NewGuid(), "Other", "other") { Id = Guid.NewGuid() };
+        var project = new Project(org.Id, "Own", "own") { Id = Guid.NewGuid() };
+        var otherProject = new Project(otherOrg.Id, "Other", "other") { Id = Guid.NewGuid() };
+        var env = new Environment(project.Id, "Own", "own");
+        var foreignEnv = new Environment(otherProject.Id, "Other", "other");
+        var orphanEnv = new Environment(Guid.NewGuid(), "Orphan", "orphan");
+        await client.CollectionOf<Organization>().InsertManyAsync([org, otherOrg]);
+        await client.CollectionOf<Project>().InsertManyAsync([project, otherProject]);
+        await client.CollectionOf<Environment>().InsertManyAsync([env, foreignEnv, orphanEnv]);
+
+        foreach (var missingWorkspace in new[] { false, true })
+        {
+            foreach (var (environmentId, workspaceId, expected) in new[]
+            {
+                (env.Id, Guid.Empty, true),
+                (foreignEnv.Id, Guid.Empty, false),
+                (orphanEnv.Id, Guid.Empty, false),
+                (Guid.NewGuid(), Guid.Empty, false),
+                (env.Id, otherOrg.WorkspaceId, false)
+            })
+            {
+                var log = new AuditLog(workspaceId, null, environmentId, Guid.NewGuid().ToString(),
+                    AuditLogRefTypes.FeatureFlag, "flag", Operations.Update,
+                    new DataChange(null).To(new { Name = "flag" }), "changed", Guid.NewGuid());
+                await service.AddOneAsync(log);
+                if (missingWorkspace && workspaceId == Guid.Empty)
+                    await client.CollectionOf<AuditLog>().UpdateOneAsync(x => x.Id == log.Id,
+                        Builders<AuditLog>.Update.Unset(x => x.WorkspaceId));
+
+                var single = await service.GetLastChangeAsync(org.WorkspaceId, environmentId, log.RefType, log.RefId);
+                var batch = await service.GetLastChangesAsync(org.WorkspaceId, environmentId, log.RefType, [log.RefId]);
+                if (expected)
+                {
+                    Assert.NotNull(single);
+                    Assert.Equal(log.CreatorId, single.OperatorId);
+                    Assert.Equal(log.CreatorId, Assert.Single(batch).OperatorId);
+                    Assert.Null(await service.GetLastChangeAsync(otherOrg.WorkspaceId, environmentId, log.RefType, log.RefId));
+                    Assert.Empty(await service.GetLastChangesAsync(otherOrg.WorkspaceId, environmentId, log.RefType, [log.RefId]));
+                }
+                else
+                {
+                    Assert.Null(single);
+                    Assert.Empty(batch);
+                }
+            }
+        }
     }
     [DockerFact]
     public async Task Queries_IsolateIamOrganizations_Actors_AndEnvironmentHistory()
