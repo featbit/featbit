@@ -60,7 +60,7 @@ function resolveAuditOwnership(log) {
     const organization = project ? db.Organizations.findOne({ _id: project.organizationId }) : null;
     if (!organization || organization.workspaceId == null
         || organization.workspaceId.toString() === emptyAuditWorkspace.toString()) {
-        throw new Error("Unresolved audit log ownership for " + EJSON.stringify(log._id)
+        throw new Error("Unresolved audit log ownership for " + String(log._id)
             + ". Restore verified environment/project/organization ownership and rerun v6.1.0; no audit history was removed.");
     }
     return { workspaceId: organization.workspaceId, organizationId: organization._id };
