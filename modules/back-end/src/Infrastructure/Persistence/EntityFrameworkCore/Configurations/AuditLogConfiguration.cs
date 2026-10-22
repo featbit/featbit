@@ -9,9 +9,9 @@ public class AuditLogConfiguration : IEntityTypeConfiguration<AuditLog>
     public void Configure(EntityTypeBuilder<AuditLog> builder)
     {
         builder.ToTable("audit_logs");
-        builder.HasIndex(x => new { x.WorkspaceId, x.CreatedAt, x.Id })
-            .HasDatabaseName("ix_audit_logs_workspace_created")
-            .IsDescending(false, true, true);
+        builder.HasIndex(x => new { x.WorkspaceId, x.EnvId, x.CreatedAt, x.Id })
+            .HasDatabaseName("ix_audit_logs_workspace_env_created")
+            .IsDescending(false, false, true, true);
         builder.HasIndex(x => new { x.WorkspaceId, x.RefType, x.RefId, x.CreatedAt, x.Id })
             .HasDatabaseName("ix_audit_logs_workspace_resource_created")
             .IsDescending(false, false, false, true, true);

@@ -12,8 +12,9 @@ ALTER TABLE audit_logs
     ADD COLUMN IF NOT EXISTS organization_id uuid;
 ALTER TABLE audit_logs ALTER COLUMN env_id DROP NOT NULL;
 DROP INDEX IF EXISTS ix_audit_logs_env_id_ref_id_created_at;
-CREATE INDEX IF NOT EXISTS ix_audit_logs_workspace_created
-    ON audit_logs(workspace_id, created_at DESC, id DESC);
+DROP INDEX IF EXISTS ix_audit_logs_workspace_created;
+CREATE INDEX IF NOT EXISTS ix_audit_logs_workspace_env_created
+    ON audit_logs(workspace_id, env_id, created_at DESC, id DESC);
 CREATE INDEX IF NOT EXISTS ix_audit_logs_workspace_resource_created
     ON audit_logs(workspace_id, ref_type, ref_id, created_at DESC, id DESC);
 CREATE INDEX IF NOT EXISTS ix_audit_logs_workspace_org_created

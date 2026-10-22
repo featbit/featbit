@@ -93,7 +93,7 @@ public class IamAuditTests(FeatBitPostgresFixture fixture) : IntegrationTestBase
     }
 
     [DockerFact]
-    public async Task Indexes_ReplaceEnvironmentIndex_WithWorkspaceListAndResourceIndexes()
+    public async Task Indexes_UseEnvironmentOrganizationAndResourceScopes()
     {
         await using var db = AppDbContextFactory.Create(fixture.ConnectionString);
         var definitions = await db.Database.SqlQueryRaw<string>(
@@ -101,8 +101,8 @@ public class IamAuditTests(FeatBitPostgresFixture fixture) : IntegrationTestBase
         Assert.Equal(3, definitions.Count);
         Assert.Contains(definitions, x => x.Contains("ix_audit_logs_workspace_org_created ") &&
             x.EndsWith("(workspace_id, organization_id, created_at DESC, id DESC)"));
-        Assert.Contains(definitions, x => x.Contains("ix_audit_logs_workspace_created ") &&
-            x.EndsWith("(workspace_id, created_at DESC, id DESC)"));
+        Assert.Contains(definitions, x => x.Contains("ix_audit_logs_workspace_env_created ") &&
+            x.EndsWith("(workspace_id, env_id, created_at DESC, id DESC)"));
         Assert.Contains(definitions, x => x.Contains("ix_audit_logs_workspace_resource_created ") &&
             x.EndsWith("(workspace_id, ref_type, ref_id, created_at DESC, id DESC)"));
     }
