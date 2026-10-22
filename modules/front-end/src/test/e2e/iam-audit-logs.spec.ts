@@ -114,11 +114,27 @@ test("IAM audit table renders IAM RN and readable changes without an environment
     page.getByText("policy/developer", { exact: true })
   ).toBeVisible()
   await page.getByRole("button", { name: "Expand audit log" }).first().click()
+  const memberChange = page.getByRole("row").filter({
+    has: page.getByText("Members", { exact: true }),
+  })
+  await expect(memberChange.getByText("Alice", { exact: true })).toBeVisible()
   await expect(
-    page.getByText("Alice member/alice@example.com", { exact: true })
+    memberChange.getByText("member/alice@example.com", { exact: true })
   ).toBeVisible()
   await page.getByRole("button", { name: "Expand audit log" }).last().click()
-  await expect(page.getByText("deny", { exact: true })).toBeVisible()
+  const statementChange = page.getByRole("row").filter({
+    has: page.getByRole("heading", {
+      name: "Permission statement 1",
+      exact: true,
+    }),
+  })
+  await expect(
+    statementChange.getByText("Effect", { exact: true })
+  ).toBeVisible()
+  await expect(
+    statementChange.getByText("Allow", { exact: true })
+  ).toBeVisible()
+  await expect(statementChange.getByText("Deny", { exact: true })).toBeVisible()
   await expect(
     page.getByText(
       "Review Team, Groups and Policies changes in the current organization."
@@ -130,11 +146,19 @@ test("IAM audit table renders IAM RN and readable changes without an environment
     page.getByRole("columnheader", { name: "Previous", exact: true })
   ).toHaveCount(0)
   await page.getByRole("button", { name: "Expand audit log" }).click()
+  const policyChange = page.getByRole("row").filter({
+    has: page.getByText("Policies", { exact: true }),
+  })
   await expect(
-    page.getByText("Developer policy/developer", { exact: true })
+    policyChange.getByText("Developer", { exact: true })
+  ).toBeVisible()
+  await expect(
+    policyChange.getByText("policy/developer", { exact: true })
   ).toBeVisible()
   await expect(page.getByText("Added", { exact: true })).toHaveCount(2)
-  await expect(page.getByText("Updated", { exact: true })).toBeVisible()
+  await expect(
+    statementChange.getByText("Updated", { exact: true })
+  ).toHaveCount(2)
   await page.screenshot({
     path: "test-results/iam-audit-logs.png",
     fullPage: true,

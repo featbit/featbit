@@ -83,7 +83,7 @@ describe("ChangeLedger", () => {
 
     rerender(<ChangeLedger layout="history" changes={[change]} />)
     expect(container.firstElementChild?.firstElementChild).toHaveClass(
-      "grid-cols-[minmax(11.25rem,13.75rem)_6.25rem_minmax(0,1fr)]"
+      "grid-cols-[11.25rem_6.25rem_minmax(0,1fr)]"
     )
   })
 
