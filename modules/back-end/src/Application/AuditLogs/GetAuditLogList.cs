@@ -2,6 +2,7 @@ using Domain.Policies;
 using Application.Bases.Models;
 using Domain.AuditLogs;
 using Domain.SemanticPatch;
+using Application.Bases;
 
 namespace Application.AuditLogs;
 
@@ -16,6 +17,19 @@ public class GetAuditLogList : IRequest<PagedResult<AuditLogVm>>
     public PolicyStatement[] Permissions { get; set; } = [];
 
     public AuditLogFilter Filter { get; set; }
+}
+
+public class GetAuditLogListValidator : AbstractValidator<GetAuditLogList>
+{
+    public GetAuditLogListValidator()
+    {
+        RuleFor(x => x.Filter.Scope)
+            .Must(scope => scope is AuditLogScope.Environment or AuditLogScope.Iam)
+            .WithErrorCode(ErrorCodes.Invalid("scope"));
+        RuleFor(x => x.EnvId).NotNull()
+            .When(x => x.Filter.Scope == AuditLogScope.Environment)
+            .WithErrorCode(ErrorCodes.Required("envId"));
+    }
 }
 
 public class GetAuditLogListHandler : IRequestHandler<GetAuditLogList, PagedResult<AuditLogVm>>

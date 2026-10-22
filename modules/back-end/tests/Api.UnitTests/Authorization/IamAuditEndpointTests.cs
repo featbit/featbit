@@ -17,6 +17,9 @@ using Microsoft.AspNetCore.Mvc;
 using System.Reflection;
 using Api;
 using Api.Authentication;
+using Api.Middlewares;
+using Application.Bases.Behaviours;
+using FluentValidation;
 using Application.AuditLogs;
 using Application.Bases.Models;
 using Domain.AuditLogs;
@@ -36,20 +39,29 @@ public class IamAuditEndpointTests
     [InlineData(false, "/api/v1/envs/11111111-1111-1111-1111-111111111111/audit-logs")]
     [InlineData(true, "/api/v1/envs/11111111-1111-1111-1111-111111111111/audit-logs")]
     [InlineData(false, "/api/v1/envs/11111111-1111-1111-1111-111111111111/audit-logs", "", 200)]
-    [InlineData(true, "/api/v1/audit-logs", "", 200)]
-    [InlineData(true, "/api/v1/audit-logs/actors", "", 200)]
+    [InlineData(true, "/api/v1/audit-logs", "", 400)]
+    [InlineData(true, "/api/v1/audit-logs/actors", "", 400)]
     [InlineData(true, "/api/v1/audit-logs", "unknown", 400)]
     [InlineData(true, "/api/v1/audit-logs/actors", "999", 400)]
-    [InlineData(true, "/api/v1/audit-logs", "unspecified", 200)]
-    [InlineData(true, "/api/v1/audit-logs/actors", "unspecified", 200)]
+    [InlineData(true, "/api/v1/audit-logs/actors", "unknown", 400)]
+    [InlineData(true, "/api/v1/audit-logs", "999", 400)]
+    [InlineData(true, "/api/v1/audit-logs", "unspecified", 400)]
+    [InlineData(true, "/api/v1/audit-logs/actors", "unspecified", 400)]
+    [InlineData(true, "/api/v1/audit-logs", "0", 400)]
+    [InlineData(true, "/api/v1/audit-logs/actors", "0", 400)]
+    [InlineData(false, "/api/v1/audit-logs", "environment", 400, true, false)]
+    [InlineData(false, "/api/v1/audit-logs/actors", "environment", 400, true, false)]
+    [InlineData(true, "/api/v1/audit-logs", "iam", 200, true, false)]
+    [InlineData(true, "/api/v1/audit-logs/actors", "iam", 200, true, false)]
+    [InlineData(false, "/api/v1/envs/11111111-1111-1111-1111-111111111111/audit-logs", "", 200, true, false)]
     [InlineData(false, "/api/v1/audit-logs", "environment", 200)]
     [InlineData(false, "/api/v1/audit-logs/actors", "environment", 200)]
     [InlineData(true, "/api/v1/audit-logs", "iam", 401, false)]
     [InlineData(true, "/api/v1/audit-logs/actors", "iam", 401, false)]
     public async Task Routes_ValidateScopeAndIamPermission(
-        bool allowed, string path, string scope = "iam", int? expectedStatus = null, bool authenticated = true)
+        bool allowed, string path, string scope = "iam", int? expectedStatus = null, bool authenticated = true,
+        bool includeEnvId = true)
     {
-        var sender = new Mock<ISender>();
         var logs = new Mock<IAuditLogService>();
         logs.Setup(x => x.GetListAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<Guid?>(), It.IsAny<AuditLogFilter>()))
             .ReturnsAsync(new PagedResult<AuditLog>(0, []));
@@ -58,14 +70,6 @@ public class IamAuditEndpointTests
         var mapper = new Mock<AutoMapper.IMapper>();
         mapper.Setup(x => x.Map<PagedResult<AuditLogVm>>(It.IsAny<object>()))
             .Returns(new PagedResult<AuditLogVm>(0, []));
-        var access = new AuditLogAccess();
-        var listHandler = new GetAuditLogListHandler(logs.Object, Mock.Of<IUserService>(),
-            Mock.Of<IAccessTokenService>(), mapper.Object, access);
-        var actorsHandler = new GetAuditLogActorsHandler(logs.Object, access);
-        sender.Setup(x => x.Send(It.IsAny<GetAuditLogList>(), It.IsAny<CancellationToken>()))
-            .Returns((GetAuditLogList request, CancellationToken ct) => listHandler.Handle(request, ct));
-        sender.Setup(x => x.Send(It.IsAny<GetAuditLogActors>(), It.IsAny<CancellationToken>()))
-            .Returns((GetAuditLogActors request, CancellationToken ct) => actorsHandler.Handle(request, ct));
         var permissions = new Mock<IRequestPermissions>();
         permissions.Setup(x => x.GetAsync(It.IsAny<HttpContext>())).ReturnsAsync(allowed
             ? new[] { new PolicyStatement { ResourceType = "iam", Effect = EffectType.Allow,
@@ -79,7 +83,14 @@ public class IamAuditEndpointTests
                 services.AddRouting();
                 services.AddControllers().AddApplicationPart(typeof(AuditLogController).Assembly);
                 services.AddApiVersioning().AddMvc();
-                services.AddSingleton(sender.Object);
+                services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<GetAuditLogList>());
+                services.AddValidatorsFromAssemblyContaining<GetAuditLogListValidator>();
+                services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
+                services.AddSingleton<IAuditLogAccess, AuditLogAccess>();
+                services.AddSingleton(logs.Object);
+                services.AddSingleton(mapper.Object);
+                services.AddSingleton(Mock.Of<IUserService>());
+                services.AddSingleton(Mock.Of<IAccessTokenService>());
                 services.AddLogging();
                 services.AddAuthentication();
                 services.AddSingleton(permissions.Object);
@@ -96,20 +107,23 @@ public class IamAuditEndpointTests
                     return next(context);
                 });
                 app.UseAuthorization();
-                app.Use(async (context, next) =>
-                {
-                    try { await next(context); }
-                    catch (Application.Bases.Exceptions.ForbiddenException)
-                    {
-                        context.Response.StatusCode = StatusCodes.Status403Forbidden;
-                    }
-                });
+                app.UseApiExceptionHandler();
                 app.UseEndpoints(endpoints => endpoints.MapControllers());
             });
         }).StartAsync();
-        var response = await host.GetTestClient().GetAsync(path + "?envId=22222222-2222-2222-2222-222222222222" + (scope == "" ? "" : "&scope=" + scope));
+        var response = await host.GetTestClient().GetAsync(path + "?" +
+            (includeEnvId ? "envId=22222222-2222-2222-2222-222222222222&" : "") +
+            (scope == "" ? "" : "scope=" + scope));
         Assert.Equal(expectedStatus.HasValue ? (HttpStatusCode)expectedStatus.Value :
             allowed || path.Contains("/envs/") ? HttpStatusCode.OK : HttpStatusCode.Forbidden, response.StatusCode);
+        if (response.StatusCode == HttpStatusCode.BadRequest)
+        {
+            var body = await response.Content.ReadAsStringAsync();
+            if (scope is "" or "unspecified" or "0")
+                Assert.Contains("scope_is_invalid", body);
+            if (scope == "environment" && !includeEnvId)
+                Assert.Contains("envId_is_required", body);
+        }
         if (response.StatusCode != HttpStatusCode.OK)
             logs.VerifyNoOtherCalls();
         else
@@ -117,14 +131,14 @@ public class IamAuditEndpointTests
             var isEnvironmentRoute = path.Contains("/envs/");
             var expectedScope = isEnvironmentRoute ? AuditLogScope.Environment :
                 scope == "" ? AuditLogScope.Unspecified : Enum.Parse<AuditLogScope>(scope, ignoreCase: true);
+            Guid? expectedEnvId = isEnvironmentRoute ? Guid.Parse("11111111-1111-1111-1111-111111111111") :
+                includeEnvId ? Guid.Parse("22222222-2222-2222-2222-222222222222") : null;
             if (path.EndsWith("/actors"))
-                sender.Verify(x => x.Send(It.Is<GetAuditLogActors>(q => q.Filter.Scope == expectedScope &&
-                    q.EnvId == Guid.Parse("22222222-2222-2222-2222-222222222222")),
-                    It.IsAny<CancellationToken>()), Times.Once);
+                logs.Verify(x => x.GetActorsAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), expectedEnvId,
+                    It.Is<AuditLogFilter>(f => f.Scope == expectedScope)), Times.Once);
             else
-                sender.Verify(x => x.Send(It.Is<GetAuditLogList>(q => q.Filter.Scope == expectedScope &&
-                    q.EnvId == Guid.Parse(isEnvironmentRoute ? "11111111-1111-1111-1111-111111111111" : "22222222-2222-2222-2222-222222222222")),
-                    It.IsAny<CancellationToken>()), Times.Once);
+                logs.Verify(x => x.GetListAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), expectedEnvId,
+                    It.Is<AuditLogFilter>(f => f.Scope == expectedScope)), Times.Once);
         }
     }
 
