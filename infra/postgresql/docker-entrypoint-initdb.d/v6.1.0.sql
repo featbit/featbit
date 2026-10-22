@@ -54,3 +54,48 @@ WHERE t.type = 'Service'
       AND NOT (COALESCE(s->'actions', '[]'::jsonb) ?| ARRAY['ViewEnvSecret', '*'])
       AND COALESCE(s->'actions', '[]'::jsonb) ?| ARRAY['CreateEnvSecret', 'UpdateEnvSecret', 'DeleteEnvSecret']
 );
+
+
+-- IAM audit logs. Keep the ownership backfill and constraints atomic.
+BEGIN;
+ALTER TABLE audit_logs
+    ADD COLUMN IF NOT EXISTS workspace_id uuid,
+    ADD COLUMN IF NOT EXISTS organization_id uuid;
+ALTER TABLE audit_logs ALTER COLUMN env_id DROP NOT NULL;
+
+-- Recover the original environment for legacy shared-segment records if needed.
+-- Existing workspace-scoped records already carry their explicit ownership.
+WITH snapshots AS (
+    SELECT id, COALESCE(NULLIF(data_change->>'current', ''), NULLIF(data_change->>'previous', ''))::jsonb AS value
+    FROM audit_logs
+    WHERE workspace_id IS NULL AND ref_type = 'Segment' AND env_id IS NULL
+)
+UPDATE audit_logs a SET env_id = NULLIF(s.value->>'envId', '')::uuid
+FROM snapshots s
+WHERE a.id = s.id AND s.value->>'type' = 'shared'
+    AND NULLIF(s.value->>'envId', '') IS NOT NULL;
+
+-- Resolve historical ownership from the environment, never from request context.
+-- Do not overwrite explicit ownership (shared segments can have a null organization).
+UPDATE audit_logs a SET workspace_id = o.workspace_id, organization_id = o.id
+FROM environments e
+JOIN projects p ON p.id = e.project_id
+JOIN organizations o ON o.id = p.organization_id
+WHERE a.workspace_id IS NULL AND a.env_id = e.id;
+
+DO $$ BEGIN
+    IF EXISTS (SELECT 1 FROM audit_logs WHERE workspace_id IS NULL) THEN
+        RAISE EXCEPTION 'Audit logs have unresolved workspace ownership. Restore verified environment/project/organization ownership before rerunning v6.1.0; no audit history was removed.';
+    END IF;
+END $$;
+
+ALTER TABLE audit_logs ALTER COLUMN workspace_id SET NOT NULL;
+DROP INDEX IF EXISTS ix_audit_logs_env_id_ref_id_created_at;
+DROP INDEX IF EXISTS ix_audit_logs_workspace_created;
+CREATE INDEX IF NOT EXISTS ix_audit_logs_workspace_env_created
+    ON audit_logs(workspace_id, env_id, created_at DESC, id DESC);
+CREATE INDEX IF NOT EXISTS ix_audit_logs_workspace_resource_created
+    ON audit_logs(workspace_id, ref_type, ref_id, created_at DESC, id DESC);
+CREATE INDEX IF NOT EXISTS ix_audit_logs_workspace_org_created
+    ON audit_logs(workspace_id, organization_id, created_at DESC, id DESC);
+COMMIT;

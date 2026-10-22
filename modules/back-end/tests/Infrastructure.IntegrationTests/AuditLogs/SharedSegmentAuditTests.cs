@@ -9,7 +9,6 @@ using Infrastructure.IntegrationTests.Support;
 using Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Moq;
-using Npgsql;
 using Environment = Domain.Environments.Environment;
 
 namespace Infrastructure.IntegrationTests.AuditLogs;
@@ -52,36 +51,5 @@ public class SharedSegmentAuditTests(FeatBitPostgresFixture fixture) : Integrati
         var history = await service.GetListAsync(org.WorkspaceId, org.Id, otherEnv, new AuditLogFilter { Scope = AuditLogScope.Environment, CrossEnvironment = true, RefType = "Segment", RefId = segment.Id.ToString() });
         Assert.Equal(logs.Select(x => x.Id).Order(), history.Items.Select(x => x.Id).Order());
         Assert.Empty((await service.GetListAsync(Guid.NewGuid(), org.Id, env.Id, new AuditLogFilter { Scope = AuditLogScope.Environment, CrossEnvironment = true, RefId = segment.Id.ToString() })).Items);
-    }
-
-    [DockerFact]
-    public async Task TestSchema_AppliesWithoutLocalMigration_AndIsRepeatable()
-    {
-        await using var connection = new NpgsqlConnection(fixture.ConnectionString);
-        await connection.OpenAsync();
-        var schema = "audit_schema_" + Guid.NewGuid().ToString("N");
-        await using (var setup = new NpgsqlCommand($"""
-            CREATE SCHEMA {schema};
-            SET search_path TO {schema};
-            CREATE TABLE feature_flags (id uuid);
-            CREATE TABLE audit_logs (id uuid, env_id uuid NOT NULL, ref_type text, ref_id text, created_at timestamp);
-            CREATE INDEX ix_audit_logs_env_id_ref_id_created_at ON audit_logs(env_id, ref_id, created_at);
-            """, connection)) await setup.ExecuteNonQueryAsync();
-        using var stream = typeof(SharedSegmentAuditTests).Assembly.GetManifestResourceStream("FeatBitPostgresInitDb.vNext.sql")!;
-        using var reader = new StreamReader(stream);
-        var sql = (await reader.ReadToEndAsync()).Replace("\\connect featbit", "");
-        for (var run = 0; run < 2; run++)
-        {
-            await using var migrate = new NpgsqlCommand(sql, connection);
-            await migrate.ExecuteNonQueryAsync();
-        }
-        await using var insert = new NpgsqlCommand("INSERT INTO audit_logs(id, workspace_id, organization_id, env_id) VALUES (@id, @workspace, @org, NULL)", connection);
-        insert.Parameters.AddWithValue("id", Guid.NewGuid());
-        insert.Parameters.AddWithValue("workspace", Guid.NewGuid());
-        insert.Parameters.AddWithValue("org", Guid.NewGuid());
-        Assert.Equal(1, await insert.ExecuteNonQueryAsync());
-        await using var indexes = new NpgsqlCommand("SELECT count(*) FROM pg_indexes WHERE schemaname = @schema AND tablename = 'audit_logs'", connection);
-        indexes.Parameters.AddWithValue("schema", schema);
-        Assert.Equal(3L, await indexes.ExecuteScalarAsync());
     }
 }

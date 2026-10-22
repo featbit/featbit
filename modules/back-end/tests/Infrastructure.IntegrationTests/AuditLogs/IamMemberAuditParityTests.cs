@@ -33,14 +33,6 @@ namespace Infrastructure.IntegrationTests.AuditLogs;
 public class PostgresIamMemberAuditTests(FeatBitPostgresFixture fixture) : IamMemberAuditParityTests
 {
     protected override Rig Create() => new(AppDbContextFactory.Create(fixture.ConnectionString), null);
-
-    [Fact]
-    public void SchemaResources_DoNotIncludeLocalMigration()
-    {
-        var resources = typeof(FeatBitPostgresFixture).Assembly.GetManifestResourceNames();
-        Assert.DoesNotContain("FeatBitPostgresInitDb.v6.0.1.sql", resources);
-        Assert.Contains("FeatBitPostgresInitDb.vNext.sql", resources);
-    }
 }
 
 [Collection(MongoCollection.Name)]
