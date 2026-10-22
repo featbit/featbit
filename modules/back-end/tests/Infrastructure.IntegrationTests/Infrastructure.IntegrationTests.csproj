@@ -50,9 +50,6 @@
                           Exclude="..\..\..\..\infra\postgresql\docker-entrypoint-initdb.d\v6.0.1.sql">
             <LogicalName>FeatBitPostgresInitDb.%(Filename)%(Extension)</LogicalName>
         </EmbeddedResource>
-        <EmbeddedResource Include="Fixtures\vNext.sql">
-            <LogicalName>FeatBitPostgresInitDb.vNext.sql</LogicalName>
-        </EmbeddedResource>
     </ItemGroup>
 
 </Project>
