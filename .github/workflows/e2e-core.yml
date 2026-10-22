@@ -1,0 +1,97 @@
+name: E2E Core Tests
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths: &paths
+      - 'modules/back-end/**'
+      - 'modules/evaluation-server/**'
+      - 'modules/front-end/**'
+      - 'infra/**'
+      - 'e2e/core/**'
+      - '.github/actions/e2e-core/**'
+      - '.github/workflows/e2e-core.yml'
+      - '.env'
+      - 'docker-compose*.yml'
+  push:
+    branches: [main]
+    paths: *paths
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Test existing images or build source
+        type: choice
+        options: [source, image]
+        default: source
+      image-version:
+        description: Required in image mode; leave empty in source mode
+        type: string
+      ref:
+        description: Source branch, tag or commit; leave empty for this workflow ref
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-core-${{ github.event.pull_request.number || github.ref }}-${{ github.event_name }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Validate manual inputs
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          MODE: ${{ inputs.mode }}
+          IMAGE_VERSION: ${{ inputs.image-version }}
+          SOURCE_REF: ${{ inputs.ref }}
+        run: |
+          if [[ "$MODE" == image ]]; then
+            [[ "$IMAGE_VERSION" =~ ^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$ && -z "$SOURCE_REF" ]]
+          else
+            [[ -z "$IMAGE_VERSION" ]]
+          fi
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        id: checkout
+        with:
+          persist-credentials: false
+      - name: Preserve test harness for older source refs
+        run: |
+          cp -R e2e/core "$RUNNER_TEMP/e2e-core-harness"
+          cp -R .github/actions/e2e-core "$RUNNER_TEMP/e2e-core-action"
+      - name: Checkout selected source
+        if: github.event_name == 'workflow_dispatch' && inputs.mode == 'source' && inputs.ref != ''
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ inputs.ref }}
+          persist-credentials: false
+      - name: Restore harness and record source
+        run: |
+          mkdir -p e2e/core
+          mkdir -p .github/actions/e2e-core
+          cp -R "$RUNNER_TEMP/e2e-core-harness/." e2e/core/
+          cp -R "$RUNNER_TEMP/e2e-core-action/." .github/actions/e2e-core/
+          git rev-parse HEAD | tee "$RUNNER_TEMP/tested-source.txt" >> "$GITHUB_STEP_SUMMARY"
+      - uses: ./.github/actions/e2e-core
+        with:
+          image-version: ${{ inputs.mode == 'image' && inputs.image-version || '' }}
+          stack: ${{ github.event_name == 'pull_request' && 'postgres' || '' }}
+      - name: Final cleanup
+        if: always() && steps.checkout.outcome == 'success'
+        working-directory: e2e/core
+        run: node cli.mjs down --all
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: e2e-core-${{ github.run_id }}-${{ github.run_attempt }}
+          retention-days: 7
+          path: |
+            e2e/core/.runs/
+            ${{ runner.temp }}/tested-source.txt
+          include-hidden-files: true
+          if-no-files-found: warn

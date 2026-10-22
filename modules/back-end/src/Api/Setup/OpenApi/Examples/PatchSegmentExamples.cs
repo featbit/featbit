@@ -1,13 +1,12 @@
 using Microsoft.AspNetCore.JsonPatch.SystemTextJson.Operations;
-using Swashbuckle.AspNetCore.Filters;
 
-namespace Api.Swagger.Examples;
+namespace Api.Setup.OpenApi.Examples;
 
-public class PatchSegmentExamples : IMultipleExamplesProvider<List<Operation>>
+public class PatchSegmentExamples : IOpenApiExamplesProvider
 {
-    public IEnumerable<SwaggerExample<List<Operation>>> GetExamples()
+    public IEnumerable<(string Name, object Value)> GetExamples()
     {
-        yield return SwaggerExample.Create(
+        yield return (
             "Update name and description",
             new List<Operation>
             {
@@ -26,7 +25,7 @@ public class PatchSegmentExamples : IMultipleExamplesProvider<List<Operation>>
             }
         );
 
-        yield return SwaggerExample.Create(
+        yield return (
             "Archive the segment",
             new List<Operation>
             {
@@ -39,7 +38,7 @@ public class PatchSegmentExamples : IMultipleExamplesProvider<List<Operation>>
             }
         );
 
-        yield return SwaggerExample.Create(
+        yield return (
             "Restore the segment",
             new List<Operation>
             {
@@ -52,7 +51,7 @@ public class PatchSegmentExamples : IMultipleExamplesProvider<List<Operation>>
             }
         );
 
-        yield return SwaggerExample.Create(
+        yield return (
             "Add one targeting user to included users",
             new List<Operation>
             {
@@ -64,8 +63,8 @@ public class PatchSegmentExamples : IMultipleExamplesProvider<List<Operation>>
                 }
             }
         );
-        
-        yield return SwaggerExample.Create(
+
+        yield return (
             "Add one targeting user to excluded users",
             new List<Operation>
             {
@@ -78,7 +77,7 @@ public class PatchSegmentExamples : IMultipleExamplesProvider<List<Operation>>
             }
         );
 
-        yield return SwaggerExample.Create(
+        yield return (
             "Overwrite included users",
             new List<Operation>
             {
@@ -91,7 +90,7 @@ public class PatchSegmentExamples : IMultipleExamplesProvider<List<Operation>>
             }
         );
 
-        yield return SwaggerExample.Create(
+        yield return (
             "Overwrite excluded users",
             new List<Operation>
             {
@@ -103,8 +102,8 @@ public class PatchSegmentExamples : IMultipleExamplesProvider<List<Operation>>
                 }
             }
         );
-        
-        yield return SwaggerExample.Create(
+
+        yield return (
             "Add rule",
             new List<Operation>
             {
@@ -130,7 +129,7 @@ public class PatchSegmentExamples : IMultipleExamplesProvider<List<Operation>>
             }
         );
 
-        yield return SwaggerExample.Create(
+        yield return (
             "Remove the first rule",
             new List<Operation>
             {

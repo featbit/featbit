@@ -15,7 +15,7 @@ So we hesitate to move at AI speed, and fall behind the competition.
 
 FeatBit helps you manage that risk. Roll out features gradually, monitor their technical and business impact, and roll back problematic features immediately when something goes wrong.
 
-For more inforamtion, visit [www.featbit.co](https://www.featbit.co).
+For more information, visit [www.featbit.co](https://www.featbit.co).
 
 ![FeatBit release control: production monitoring, targeted rollouts, instant rollback, Bayesian A/B testing, and AI agent workflows](.github/assets/featbit-release-control.png)
 
@@ -28,7 +28,7 @@ To self-host, you'll need Git and Docker with Docker Compose.
 ### 1. Start FeatBit
 
 ```bash
-git clone --branch 6.0.0 --depth 1 https://github.com/featbit/featbit.git
+git clone --branch 6.0.1 --depth 1 https://github.com/featbit/featbit.git
 cd featbit
 docker compose up -d
 ```
@@ -62,7 +62,7 @@ Use the portal to release the feature to a small group of users, observe the res
 
 ## Configure and run FeatBit anywhere
 
-Run FeatBit on your own infrastructure, on premises or in the cloud. Choose the setup that fits your environment:
+Run FeatBit on your own infrastructure, on-premises or in the cloud. Choose the setup that fits your environment:
 
 - **Kubernetes**: deploy with the official [Helm charts](https://github.com/featbit/featbit-charts) or the [manifest files](kubernetes).
 - **AWS**: deploy with [FeatBit's Terraform project](https://github.com/featbit/featbit-terraform-aws).

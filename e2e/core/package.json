@@ -1,0 +1,17 @@
+{
+  "name": "featbit-e2e-core",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node cli.mjs test",
+    "test:all": "node cli.mjs test-all",
+    "down": "node cli.mjs down"
+  },
+  "devDependencies": {
+    "@featbit/js-client-sdk": "4.3.6",
+    "@playwright/test": "1.56.1"
+  }
+}

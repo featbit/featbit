@@ -5,7 +5,6 @@ using System.Security.Claims;
 namespace Api.Public;
 
 [ApiController]
-[Route("api/public/[controller]")]
 public class PublicApiControllerBase : ControllerBase
 {
     protected Guid EnvId

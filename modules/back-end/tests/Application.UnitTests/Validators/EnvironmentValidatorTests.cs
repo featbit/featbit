@@ -9,7 +9,7 @@ public class EnvironmentValidatorTests
     [Fact]
     public void CreateEnvironment_AllFieldsValid_NoErrors()
     {
-        var request = new CreateEnvironment { Name = "Prod", Key = "prod" };
+        var request = new CreateEnvironment(Guid.NewGuid(), new CreateEnvironmentPayload { Name = "Prod", Key = "prod" }, []);
 
         var result = new CreateEnvironmentValidator().Validate(request);
 
@@ -21,7 +21,7 @@ public class EnvironmentValidatorTests
     [InlineData("Prod", "", "key")]
     public void CreateEnvironment_EmptyField_RequiredError(string name, string key, string field)
     {
-        var request = new CreateEnvironment { Name = name, Key = key };
+        var request = new CreateEnvironment(Guid.NewGuid(), new CreateEnvironmentPayload { Name = name, Key = key }, []);
 
         var result = new CreateEnvironmentValidator().Validate(request);
 
@@ -31,7 +31,7 @@ public class EnvironmentValidatorTests
     [Fact]
     public void UpdateEnvironment_EmptyName_NameRequiredError()
     {
-        var result = new UpdateEnvironmentValidator().Validate(new UpdateEnvironment { Name = string.Empty });
+        var result = new UpdateEnvironmentValidator().Validate(new UpdateEnvironment(Guid.NewGuid(), new UpdateEnvironmentPayload { Name = string.Empty }, []));
 
         Assert.Contains(result.Errors, e => e.ErrorCode == ErrorCodes.Required("name"));
     }
