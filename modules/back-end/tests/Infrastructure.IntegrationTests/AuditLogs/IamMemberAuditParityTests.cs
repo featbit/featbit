@@ -1,3 +1,6 @@
+using Application.AuditLogs;
+using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
 using Application.Bases.Exceptions;
 using Application.Groups;
 using Application.Members;
@@ -62,26 +65,25 @@ public abstract class IamMemberAuditParityTests : IntegrationTestBase
         var groupId = Guid.NewGuid();
         var policyId = Guid.NewGuid();
         var updateGroup = new UpdateGroup { Id = groupId, Name = "Missing", Description = "" };
-        var groupHandler = new UpdateGroupHandler(rig.Groups, Mock.Of<AutoMapper.IMapper>());
+        var groupHandler = new UpdateGroupHandler(rig.Groups, Mock.Of<AutoMapper.IMapper>(), rig.Publisher, rig.Actor);
         await Assert.ThrowsAsync<EntityNotFoundException>(() => rig.Run<UpdateGroup, GroupVm>(updateGroup,
             ct => groupHandler.Handle(updateGroup, ct)));
         var updatePolicy = new UpdatePolicySetting { PolicyId = policyId, Name = "Missing", Description = "" };
-        var policyHandler = new UpdatePolicySettingHandler(rig.Policies, Mock.Of<AutoMapper.IMapper>());
+        var policyHandler = new UpdatePolicySettingHandler(rig.Policies, Mock.Of<AutoMapper.IMapper>(), rig.Publisher, rig.Actor);
         await Assert.ThrowsAsync<EntityNotFoundException>(() => rig.Run<UpdatePolicySetting, PolicyVm>(updatePolicy,
             ct => policyHandler.Handle(updatePolicy, ct)));
         var statements = new UpdatePolicyStatements { PolicyId = policyId, Statements = [] };
-        var statementHandler = new UpdatePolicyStatementsHandler(rig.Policies, Mock.Of<AutoMapper.IMapper>());
+        var statementHandler = new UpdatePolicyStatementsHandler(rig.Policies, Mock.Of<AutoMapper.IMapper>(), rig.Publisher, rig.Actor);
         await Assert.ThrowsAsync<EntityNotFoundException>(() => rig.Run<UpdatePolicyStatements, PolicyVm>(statements,
             ct => statementHandler.Handle(statements, ct)));
         for (var i = 0; i < 2; i++)
         {
             var group = new DeleteGroup { Id = groupId };
-            Assert.True(await rig.Run<DeleteGroup, bool>(group, ct => new DeleteGroupHandler(rig.Groups).Handle(group, ct)));
+            Assert.True(await rig.Run<DeleteGroup, bool>(group, ct => new DeleteGroupHandler(rig.Groups, rig.Publisher, rig.Actor).Handle(group, ct)));
             var policy = new DeletePolicy { PolicyId = policyId };
-            Assert.True(await rig.Run<DeletePolicy, bool>(policy, ct => new DeletePolicyHandler(rig.Policies).Handle(policy, ct)));
+            Assert.True(await rig.Run<DeletePolicy, bool>(policy, ct => new DeletePolicyHandler(rig.Policies, rig.Publisher, rig.Actor).Handle(policy, ct)));
         }
         Assert.Empty(await rig.Logs());
-        Assert.False(rig.Store.Active);
     }
 
     [DockerTheory]
@@ -106,7 +108,7 @@ public abstract class IamMemberAuditParityTests : IntegrationTestBase
             GroupIds = useDefaults ? [] : [group.Id], PolicyIds = useDefaults ? [] : [policy.Id]
         };
         var handler = new AddMemberHandler(rig.Workspaces, rig.Organizations, rig.Users,
-            Mock.Of<IIdentityService>(MockBehavior.Strict), rig.Actor);
+            Mock.Of<IIdentityService>(MockBehavior.Strict), rig.Actor, rig.Members, rig.Publisher);
         await rig.Run<AddMember, bool>(request, ct => handler.Handle(request, ct));
         await rig.Run<AddMember, bool>(request, ct => handler.Handle(request, ct));
         var log = Assert.Single(await rig.Logs());
@@ -123,7 +125,7 @@ public abstract class IamMemberAuditParityTests : IntegrationTestBase
         Assert.Equal(group.Id, snapshot.RootElement.GetProperty("groups")[0].GetProperty("id").GetGuid());
         Assert.Equal(policy.Id, snapshot.RootElement.GetProperty("policies")[0].GetProperty("id").GetGuid());
         Assert.DoesNotContain("private-password", log.DataChange.Current);
-        Assert.Single(await rig.Store.Read<OrganizationUser>(x => x.OrganizationId == rig.Org.Id && x.UserId == rig.User.Id));
+        Assert.Single(await rig.Read<OrganizationUser>(x => x.OrganizationId == rig.Org.Id && x.UserId == rig.User.Id));
     }
 
     [DockerTheory]
@@ -152,7 +154,7 @@ public abstract class IamMemberAuditParityTests : IntegrationTestBase
             .Returns((RemoveFromWorkspace request, CancellationToken ct) =>
                 rig.Run<RemoveFromWorkspace, bool>(request, inner => rig.RemoveWorkspaceHandler.Handle(request, inner)));
         var command = new RemoveFromOrganization { WorkspaceId = rig.Workspace.Id, OrganizationId = rig.Org.Id, MemberId = rig.User.Id };
-        var handler = new RemoveFromOrganizationHandler(rig.Organizations, rig.Members, sender.Object);
+        var handler = new RemoveFromOrganizationHandler(rig.Organizations, rig.Members, sender.Object, rig.Publisher, rig.Actor);
         await rig.Run<RemoveFromOrganization, bool>(command, ct => handler.Handle(command, ct));
         var logs = await rig.Logs();
         Assert.Equal(hasOtherOrganization ? 1 : 2, logs.Count);
@@ -169,11 +171,11 @@ public abstract class IamMemberAuditParityTests : IntegrationTestBase
             Assert.Empty(workspaceLog.DataChange.Current);
             Assert.Contains(rig.User.Email, workspaceLog.DataChange.Previous);
         }
-        Assert.Empty(await rig.Store.Read<OrganizationUser>(x => x.OrganizationId == rig.Org.Id && x.UserId == rig.User.Id));
-        Assert.Empty(await rig.Store.Read<GroupMember>(x => x.OrganizationId == rig.Org.Id && x.MemberId == rig.User.Id));
-        Assert.Empty(await rig.Store.Read<MemberPolicy>(x => x.OrganizationId == rig.Org.Id && x.MemberId == rig.User.Id));
-        Assert.Equal(hasOtherOrganization ? 1 : 0, (await rig.Store.Read<User>(x => x.Id == rig.User.Id)).Count);
-        Assert.Equal(hasOtherOrganization ? 1 : 0, (await rig.Store.Read<WorkspaceUser>(x => x.WorkspaceId == rig.Workspace.Id && x.UserId == rig.User.Id)).Count);
+        Assert.Empty(await rig.Read<OrganizationUser>(x => x.OrganizationId == rig.Org.Id && x.UserId == rig.User.Id));
+        Assert.Empty(await rig.Read<GroupMember>(x => x.OrganizationId == rig.Org.Id && x.MemberId == rig.User.Id));
+        Assert.Empty(await rig.Read<MemberPolicy>(x => x.OrganizationId == rig.Org.Id && x.MemberId == rig.User.Id));
+        Assert.Equal(hasOtherOrganization ? 1 : 0, (await rig.Read<User>(x => x.Id == rig.User.Id)).Count);
+        Assert.Equal(hasOtherOrganization ? 1 : 0, (await rig.Read<WorkspaceUser>(x => x.WorkspaceId == rig.Workspace.Id && x.UserId == rig.User.Id)).Count);
         sender.Verify(x => x.Send(It.IsAny<RemoveFromWorkspace>(), It.IsAny<CancellationToken>()),
             hasOtherOrganization ? Times.Never() : Times.Once());
     }
@@ -181,7 +183,7 @@ public abstract class IamMemberAuditParityTests : IntegrationTestBase
     [DockerTheory]
     [InlineData(false)]
     [InlineData(true)]
-    public async Task RemoveFromWorkspace_RequiresOtherOrganizationPermission_AndPreservesOtherWorkspace(bool allowed)
+    public async Task RemoveFromWorkspace_RecordsEveryOrganization_WithoutExtraPermissionChecks(bool allowed)
     {
         using var rig = Create();
         await rig.Initialize();
@@ -205,26 +207,179 @@ public abstract class IamMemberAuditParityTests : IntegrationTestBase
         }
         var command = new RemoveFromWorkspace { WorkspaceId = rig.Workspace.Id, MemberId = rig.User.Id };
         Task<bool> Run() => rig.Run<RemoveFromWorkspace, bool>(command, ct => rig.RemoveWorkspaceHandler.Handle(command, ct));
-        if (allowed)
+        Assert.True(await Run());
+        var logs = await rig.Logs();
+        Assert.Equal(3, logs.Count);
+        Assert.All(logs, x => { Assert.Equal(rig.Workspace.Id, x.WorkspaceId); Assert.Equal(Operations.RemoveFromWorkspace, x.Operation); Assert.Empty(x.DataChange.Current); });
+        Assert.Equal(new Guid?[] { null, rig.Org.Id, other.Id }.Order(), logs.Select(x => x.OrganizationId).Order());
+        Assert.Empty(await rig.Read<OrganizationUser>(x => x.UserId == rig.User.Id && (x.OrganizationId == rig.Org.Id || x.OrganizationId == other.Id)));
+        Assert.Empty(await rig.Read<WorkspaceUser>(x => x.WorkspaceId == rig.Workspace.Id && x.UserId == rig.User.Id));
+        Assert.Single(await rig.Read<OrganizationUser>(x => x.OrganizationId == foreignOrg.Id && x.UserId == rig.User.Id));
+        Assert.Single(await rig.Read<WorkspaceUser>(x => x.WorkspaceId == foreignWorkspace.Id && x.UserId == rig.User.Id));
+        Assert.Single(await rig.Read<User>(x => x.Id == rig.User.Id));
+    }
+
+    [DockerTheory]
+    [InlineData(PolicyTypes.CustomerManaged, "customer-managed")]
+    [InlineData(PolicyTypes.SysManaged, "system-managed")]
+    public async Task ClonePolicy_UsesExplicitNotificationAndTypedComment(string sourceType, string label)
+    {
+        using var rig = Create();
+        await rig.Initialize();
+        var key = $"source-{Guid.NewGuid():N}";
+        var customer = new Policy(rig.Org.Id, "Customer", key, "");
+        var system = new Policy(rig.Org.Id, "System", key, "") { OrganizationId = null, Type = PolicyTypes.SysManaged };
+        await rig.Seed(customer);
+        await rig.Seed(system);
+        var result = await rig.Send(new ClonePolicy
         {
-            Assert.True(await Run());
-            var logs = await rig.Logs();
-            Assert.Equal(3, logs.Count);
-            Assert.All(logs, x => { Assert.Equal(rig.Workspace.Id, x.WorkspaceId); Assert.Equal(Operations.RemoveFromWorkspace, x.Operation); Assert.Empty(x.DataChange.Current); });
-            Assert.Equal(new Guid?[] { null, rig.Org.Id, other.Id }.Order(), logs.Select(x => x.OrganizationId).Order());
-            Assert.Empty(await rig.Store.Read<OrganizationUser>(x => x.UserId == rig.User.Id && (x.OrganizationId == rig.Org.Id || x.OrganizationId == other.Id)));
-            Assert.Empty(await rig.Store.Read<WorkspaceUser>(x => x.WorkspaceId == rig.Workspace.Id && x.UserId == rig.User.Id));
-        }
-        else
+            OriginPolicyType = sourceType, OriginPolicyKey = key,
+            Name = "Clone", Key = $"clone-{Guid.NewGuid():N}", Description = ""
+        });
+        var log = Assert.Single(await rig.Logs());
+        Assert.Equal($"Cloned from: {label} policy/{key}", log.Comment);
+        Assert.Equal(result.Id, log.RefId);
+        Assert.Equal(Operations.ClonePolicy, log.Operation);
+        Assert.Empty(log.DataChange.Previous);
+        Assert.DoesNotContain("clonedFrom", System.Text.Json.JsonSerializer.Serialize(log.DataChange));
+    }
+
+    [DockerFact]
+    public async Task Profile_RecordsAllWorkspacesAndOrganizations_WithoutCredentialsOrDuplicateNoOps()
+    {
+        using var rig = Create();
+        await rig.Initialize();
+        var second = new Organization(rig.Workspace.Id, "Second", Guid.NewGuid().ToString());
+        var other = new Organization(Guid.NewGuid(), "Other workspace", Guid.NewGuid().ToString());
+        var workspaceOnly = Guid.NewGuid();
+        await rig.Seed(second);
+        await rig.Seed(other);
+        await rig.Seed(new Workspace { Id = other.WorkspaceId, Name = "Other", Key = Guid.NewGuid().ToString(), License = "" });
+        await rig.Seed(new Workspace { Id = workspaceOnly, Name = "Workspace only", Key = Guid.NewGuid().ToString(), License = "" });
+        foreach (var org in new[] { rig.Org, second, other })
+            await rig.Seed(new OrganizationUser(org.Id, rig.Actor.Id));
+        foreach (var workspaceId in new[] { rig.Workspace.Id, other.WorkspaceId, workspaceOnly })
+            await rig.Seed(new WorkspaceUser(workspaceId, rig.Actor.Id));
+        var command = new UpdateProfile { Name = "Updated", Email = $"updated-{Guid.NewGuid():N}@example.com" };
+        await rig.Send(command);
+        await rig.Send(command);
+        var logs = await rig.Read<AuditLog>(x => x.RefId == rig.Actor.Id.ToString() && x.Operation == Operations.UpdateProfile);
+        Assert.Equal(4, logs.Count);
+        Assert.Contains(logs, x => x.OrganizationId == rig.Org.Id && x.WorkspaceId == rig.Workspace.Id);
+        Assert.Contains(logs, x => x.OrganizationId == second.Id && x.WorkspaceId == rig.Workspace.Id);
+        Assert.Contains(logs, x => x.OrganizationId == other.Id && x.WorkspaceId == other.WorkspaceId);
+        Assert.Contains(logs, x => x.OrganizationId == null && x.WorkspaceId == workspaceOnly);
+        Assert.All(logs, x =>
         {
-            await Assert.ThrowsAsync<ForbiddenException>(Run);
-            Assert.Empty(await rig.Logs());
-            Assert.Equal(3, (await rig.Store.Read<OrganizationUser>(x => x.UserId == rig.User.Id)).Count);
-            Assert.Single(await rig.Store.Read<WorkspaceUser>(x => x.WorkspaceId == rig.Workspace.Id && x.UserId == rig.User.Id));
+            Assert.Contains(command.Email, x.DataChange.Current);
+            Assert.DoesNotContain("password", x.DataChange.Previous, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("password", x.DataChange.Current, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("private-initial-secret", x.DataChange.Previous + x.DataChange.Current);
+            foreach (var json in new[] { x.DataChange.Previous, x.DataChange.Current })
+            {
+                using var snapshot = System.Text.Json.JsonDocument.Parse(json);
+                Assert.Equal(new[] { "email", "id", "name", "rn" },
+                    snapshot.RootElement.EnumerateObject().Select(p => p.Name).Order());
+                Assert.Equal(rig.Actor.Id, snapshot.RootElement.GetProperty("id").GetGuid());
+                Assert.Equal($"member/{snapshot.RootElement.GetProperty("email").GetString()}",
+                    snapshot.RootElement.GetProperty("rn").GetString());
+            }
+        });
+    }
+
+    [DockerFact]
+    public async Task PolicyReferences_PreserveRnAndDistinguishTypesWithTheSameKey()
+    {
+        using var rig = Create();
+        await rig.Initialize();
+        await rig.Seed(new OrganizationUser(rig.Org.Id, rig.User.Id));
+        var key = $"shared-key-{Guid.NewGuid():N}";
+        var customer = new Policy(rig.Org.Id, "Customer", key, "");
+        var system = new Policy(rig.Org.Id, "System", key, "")
+            { OrganizationId = null, Type = PolicyTypes.SysManaged };
+        var group = new Group(rig.Org.Id, "Group", "");
+        await rig.Seed(customer);
+        await rig.Seed(system);
+        await rig.Seed(group);
+        await rig.Seed(new GroupPolicy(group.Id, customer.Id));
+        await rig.Seed(new GroupPolicy(group.Id, system.Id));
+        await rig.Send(new UpdateGroup { Id = group.Id, Name = "Renamed", Description = "" });
+        await rig.Send(new AddMemberPolicy { MemberId = rig.User.Id, PolicyId = customer.Id });
+        await rig.Send(new AddMemberPolicy { MemberId = rig.User.Id, PolicyId = system.Id });
+
+        var logs = await rig.Logs();
+        var groupLog = Assert.Single(logs, x => x.Operation == Operations.UpdateGroup);
+        var memberLog = Assert.Single(logs, x => x.Operation == Operations.AddMemberPolicy &&
+            x.DataChange.Current.Contains(system.Id.ToString()));
+        foreach (var json in new[] { groupLog.DataChange.Previous, groupLog.DataChange.Current, memberLog.DataChange.Current })
+        {
+            using var snapshot = System.Text.Json.JsonDocument.Parse(json);
+            var policies = snapshot.RootElement.GetProperty("policies").EnumerateArray().ToArray();
+            Assert.Equal(2, policies.Length);
+            Assert.All(policies, x => Assert.Equal($"policy/{key}", x.GetProperty("rn").GetString()));
+            Assert.Contains(policies, x => x.GetProperty("id").GetGuid() == customer.Id &&
+                x.GetProperty("type").GetString() == PolicyTypes.CustomerManaged);
+            Assert.Contains(policies, x => x.GetProperty("id").GetGuid() == system.Id &&
+                x.GetProperty("type").GetString() == PolicyTypes.SysManaged);
         }
-        Assert.Single(await rig.Store.Read<OrganizationUser>(x => x.OrganizationId == foreignOrg.Id && x.UserId == rig.User.Id));
-        Assert.Single(await rig.Store.Read<WorkspaceUser>(x => x.WorkspaceId == foreignWorkspace.Id && x.UserId == rig.User.Id));
-        Assert.Single(await rig.Store.Read<User>(x => x.Id == rig.User.Id));
+    }
+
+    [DockerFact]
+    public async Task GroupAndPolicyMutations_PublishAuditNotifications_AndSkipNoOps()
+    {
+        using var rig = Create();
+        await rig.Initialize();
+        await rig.Seed(new OrganizationUser(rig.Org.Id, rig.User.Id));
+        var group = await rig.Send(new CreateGroup { Name = "Group", Description = "" });
+        var groupId = Guid.Parse(group.Id);
+        await rig.Send(new UpdateGroup { Id = groupId, Name = "Renamed", Description = "description" });
+        await rig.Send(new AddGroupMember { GroupId = groupId, MemberId = rig.User.Id });
+        await rig.Send(new AddGroupMember { GroupId = groupId, MemberId = rig.User.Id });
+        await rig.Send(new RemoveGroupMember { GroupId = groupId, MemberId = rig.User.Id });
+        var policy = await rig.Send(new CreatePolicy { Name = "Policy", Key = $"key-{Guid.NewGuid():N}", Description = "" });
+        var policyId = Guid.Parse(policy.Id);
+        await rig.Send(new UpdatePolicySetting { PolicyId = policyId, Name = "Renamed policy", Description = "updated" });
+        await rig.Send(new UpdatePolicyStatements { PolicyId = policyId, Statements = [new PolicyStatement
+        { Id = "statement", ResourceType = "flag", Effect = "allow", Actions = ["ToggleFlag"], Resources = ["project/*"] }] });
+        await rig.Send(new AddGroupPolicy { GroupId = groupId, PolicyId = policyId });
+        await rig.Send(new RemoveGroupPolicy { GroupId = groupId, PolicyId = policyId });
+        await rig.Send(new AddMemberPolicy { MemberId = rig.User.Id, PolicyId = policyId });
+        await rig.Send(new RemoveMemberPolicy { MemberId = rig.User.Id, PolicyId = policyId });
+        await rig.Send(new DeletePolicy { PolicyId = policyId });
+        await rig.Send(new DeleteGroup { Id = groupId });
+        var logs = await rig.Logs();
+        var operations = new[] { Operations.CreateGroup, Operations.UpdateGroup, Operations.AddGroupMember,
+            Operations.RemoveGroupMember, Operations.CreatePolicy, Operations.UpdatePolicySetting,
+            Operations.UpdatePolicyStatements, Operations.AddGroupPolicy, Operations.RemoveGroupPolicy,
+            Operations.AddMemberPolicy, Operations.RemoveMemberPolicy, Operations.DeletePolicy, Operations.DeleteGroup };
+        Assert.Equal(operations.Order(), logs.Select(x => x.Operation).Order());
+        Assert.All(logs, x =>
+        {
+            Assert.Equal(rig.Workspace.Id, x.WorkspaceId);
+            Assert.Equal(rig.Org.Id, x.OrganizationId);
+            Assert.Equal(rig.Actor.Id, x.CreatorId);
+            Assert.Null(x.EnvId);
+            Assert.DoesNotContain("password", x.DataChange.Previous + x.DataChange.Current, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("private-initial-secret", x.DataChange.Previous + x.DataChange.Current);
+        });
+        Assert.Contains(logs, x => x.Operation == Operations.AddGroupMember && x.DataChange.Current.Contains(rig.User.Email));
+        Assert.Contains(logs, x => x.Operation == Operations.DeleteGroup && x.DataChange.Current == "" && x.DataChange.Previous.Contains("Renamed"));
+    }
+
+    [DockerFact]
+    public async Task AuditWriteFailure_PropagatesWithoutRollingBackSavedMutation()
+    {
+        using var rig = Create();
+        await rig.Initialize();
+        var publisher = new Mock<IPublisher>();
+        publisher.Setup(x => x.Publish(It.IsAny<OnIamResourceChanged>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new InvalidOperationException("audit unavailable"));
+        var mapper = new AutoMapper.MapperConfiguration(c => c.AddProfile<Application.Groups.MapperProfile>()).CreateMapper();
+        var handler = new CreateGroupHandler(rig.Groups, mapper, publisher.Object, rig.Actor);
+        var request = new CreateGroup { WorkspaceId = rig.Workspace.Id, OrganizationId = rig.Org.Id, Name = "Saved", Description = "" };
+        await Assert.ThrowsAsync<InvalidOperationException>(() => handler.Handle(request, default));
+        Assert.Single(await rig.Read<Group>(x => x.OrganizationId == rig.Org.Id && x.Name == "Saved"));
+        Assert.Empty(await rig.Logs());
     }
 
     protected sealed class Rig : IDisposable
@@ -232,12 +387,11 @@ public abstract class IamMemberAuditParityTests : IntegrationTestBase
         private readonly AppDbContext? db;
         private readonly MongoDbClient? mongo;
         private readonly ServiceProvider services;
-        private readonly HttpContextAccessor http;
         public Workspace Workspace { get; } = new() { Id = Guid.NewGuid(), Name = "Audit", Key = Guid.NewGuid().ToString(), License = "" };
         public Organization Org { get; }
-        public User User { get; } = new(Guid.NewGuid(), $"member-{Guid.NewGuid():N}@example.com", "private-password", "Member");
+        public User User { get; } = new(Guid.NewGuid(), $"member-{Guid.NewGuid():N}@example.com", "private-password", "Member", initialPassword: "private-initial-secret");
         public ICurrentUser Actor { get; } = Mock.Of<ICurrentUser>(x => x.Id == Guid.NewGuid());
-        public AuditStore Store { get; }
+        public IPublisher Publisher { get; }
         public IGroupService Groups { get; }
         public IPolicyService Policies { get; }
         public IOrganizationService Organizations { get; }
@@ -245,7 +399,7 @@ public abstract class IamMemberAuditParityTests : IntegrationTestBase
         public IUserService Users { get; }
         public IMemberService Members { get; }
         private IAuditLogService AuditLogs { get; }
-        public RemoveFromWorkspaceHandler RemoveWorkspaceHandler => new(Workspaces, Users, Organizations, Members);
+        public RemoveFromWorkspaceHandler RemoveWorkspaceHandler => new(Workspaces, Users, Organizations, Members, Publisher, Actor);
 
         public Rig(AppDbContext? db, MongoDbClient? mongo)
         {
@@ -259,14 +413,15 @@ public abstract class IamMemberAuditParityTests : IntegrationTestBase
             Users = db != null ? new Pg.UserService(db) : new Mongo.UserService(mongo!);
             Members = db != null ? new Pg.MemberService(db) : new Mongo.MemberService(mongo!);
             AuditLogs = db != null ? new Pg.AuditLogService(db) : new Mongo.AuditLogService(mongo!);
-            var collection = new ServiceCollection().AddSingleton(Members);
+            var collection = new ServiceCollection().AddSingleton(Members)
+                .AddSingleton(Groups).AddSingleton(Policies).AddSingleton(Organizations)
+                .AddSingleton(Workspaces).AddSingleton(Users).AddSingleton(AuditLogs).AddSingleton(Actor)
+                .AddSingleton(Mock.Of<IIdentityService>());
+            collection.AddAutoMapper(typeof(Application.Groups.MapperProfile).Assembly);
+            collection.AddMediatR(c => c.RegisterServicesFromAssembly(typeof(OnIamResourceChanged).Assembly));
             if (db != null) collection.AddSingleton(db); else collection.AddSingleton(mongo!);
             services = collection.BuildServiceProvider();
-            Store = new AuditStore(services);
-            var context = new DefaultHttpContext { RequestServices = services };
-            context.Request.Headers["Organization"] = Org.Id.ToString();
-            context.Request.Headers["Workspace"] = Workspace.Id.ToString();
-            http = new HttpContextAccessor { HttpContext = context };
+            Publisher = services.GetRequiredService<IPublisher>();
         }
 
         public async Task Initialize()
@@ -274,7 +429,7 @@ public abstract class IamMemberAuditParityTests : IntegrationTestBase
             await Seed(Workspace);
             await Seed(Org);
             await Seed(User);
-            await Seed(new User(Actor.Id, $"actor-{Actor.Id}@example.com", "password", "Actor"));
+            await Seed(new User(Actor.Id, $"actor-{Actor.Id}@example.com", "private-password", "Actor", initialPassword: "private-initial-secret"));
         }
 
         public async Task Seed<T>(T entity) where T : Entity
@@ -282,9 +437,34 @@ public abstract class IamMemberAuditParityTests : IntegrationTestBase
             if (db != null) { db.Add(entity); await db.SaveChangesAsync(); }
             else await mongo!.CollectionOf<T>().InsertOneAsync(entity);
         }
-        public Task<List<AuditLog>> Logs() => Store.Read<AuditLog>(x => x.WorkspaceId == Workspace.Id);
-        public Task<T> Run<TRequest, T>(TRequest request, RequestHandlerDelegate<T> next) where TRequest : notnull =>
-            new IamAuditBehaviour<TRequest, T>(Store, AuditLogs, Actor, http).Handle(request, next, CancellationToken.None);
+        public Task<List<AuditLog>> Logs() => Read<AuditLog>(x => x.WorkspaceId == Workspace.Id);
+        public Task<T> Send<T>(IRequest<T> request)
+        {
+            // Each call represents a new HTTP request with a fresh tracking scope.
+            db?.ChangeTracker.Clear();
+            SetContext(request);
+            return services.GetRequiredService<ISender>().Send(request);
+        }
+
+        private void SetContext(object request)
+        {
+            request.GetType().GetProperty("WorkspaceId")?.SetValue(request, Workspace.Id);
+            request.GetType().GetProperty("OrganizationId")?.SetValue(request, Org.Id);
+            request.GetType().GetProperty("OrgId")?.SetValue(request, Org.Id);
+        }
+        public Task<T> Run<TRequest, T>(TRequest request, RequestHandlerDelegate<T> next) where TRequest : notnull
+        {
+            db?.ChangeTracker.Clear();
+            request.GetType().GetProperty("WorkspaceId")?.SetValue(request, Workspace.Id);
+            request.GetType().GetProperty("OrganizationId")?.SetValue(request, Org.Id);
+            request.GetType().GetProperty("OrgId")?.SetValue(request, Org.Id);
+            return next();
+        }
+
+        public Task<List<T>> Read<T>(Expression<Func<T, bool>> predicate) where T : Entity => db != null
+            ? db.Set<T>().AsNoTracking().Where(predicate).ToListAsync()
+            : MongoDB.Driver.Linq.MongoQueryable.ToListAsync(mongo!.QueryableOf<T>().Where(predicate));
+
         public void Dispose() { services.Dispose(); db?.Dispose(); }
     }
 }

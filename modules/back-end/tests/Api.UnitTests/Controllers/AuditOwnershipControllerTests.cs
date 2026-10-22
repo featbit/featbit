@@ -72,6 +72,26 @@ public class AuditOwnershipControllerTests
             r.OrgId == orgId), It.IsAny<CancellationToken>()), Times.Once);
     }
 
+    [Fact]
+    public async Task IamMutations_ForwardActionOwnershipAndOverrideBodyValues()
+    {
+        var sender = new Mock<ISender>();
+        var workspaceId = Guid.NewGuid();
+        var orgId = Guid.NewGuid();
+        await Controller<GroupController>(sender, workspaceId, orgId).UpdateAsync(Guid.NewGuid(),
+            new Application.Groups.UpdateGroup { WorkspaceId = Guid.NewGuid(), OrganizationId = Guid.NewGuid() });
+        await Controller<PolicyController>(sender, workspaceId, orgId).UpdateSettingAsync(Guid.NewGuid(),
+            new Application.Policies.UpdatePolicySetting { WorkspaceId = Guid.NewGuid(), OrganizationId = Guid.NewGuid() });
+        await Controller<MemberController>(sender, workspaceId, orgId).AddPolicyAsync(Guid.NewGuid(), Guid.NewGuid());
+
+        sender.Verify(x => x.Send(It.Is<Application.Groups.UpdateGroup>(r => r.WorkspaceId == workspaceId &&
+            r.OrganizationId == orgId), It.IsAny<CancellationToken>()), Times.Once);
+        sender.Verify(x => x.Send(It.Is<Application.Policies.UpdatePolicySetting>(r => r.WorkspaceId == workspaceId &&
+            r.OrganizationId == orgId), It.IsAny<CancellationToken>()), Times.Once);
+        sender.Verify(x => x.Send(It.Is<Application.Members.AddMemberPolicy>(r => r.WorkspaceId == workspaceId &&
+            r.OrganizationId == orgId), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
     private static T Controller<T>(Mock<ISender> sender, Guid workspaceId, Guid orgId)
         where T : ControllerBase, new()
     {

@@ -1,3 +1,6 @@
+using Application.AuditLogs;
+using Application.Users;
+using Domain.AuditLogs;
 using Application.Bases;
 using Application.Bases.Exceptions;
 using Domain.Policies;
@@ -6,6 +9,8 @@ namespace Application.Policies;
 
 public class ClonePolicy : IRequest<PolicyVm>
 {
+    public Guid WorkspaceId { get; set; }
+
     /// <summary>
     /// The ID of the organization the policy belongs to. Retrieved from the request header.
     /// </summary>
@@ -53,7 +58,7 @@ public class ClonePolicyValidator : AbstractValidator<ClonePolicy>
     }
 }
 
-public class ClonePolicyHandler(IPolicyService service, IMapper mapper)
+public class ClonePolicyHandler(IPolicyService service, IMapper mapper, IPublisher auditPublisher, ICurrentUser auditActor)
     : IRequestHandler<ClonePolicy, PolicyVm>
 {
     public async Task<PolicyVm> Handle(ClonePolicy request, CancellationToken cancellationToken)
@@ -78,6 +83,11 @@ public class ClonePolicyHandler(IPolicyService service, IMapper mapper)
 
         var clonedPolicy = policyToClone.Clone(request.OrgId, request.Name, request.Key, request.Description);
         await service.AddOneAsync(clonedPolicy);
+
+        var change = new DataChange(null);
+        var current = await service.GetAuditSnapshotAsync(clonedPolicy.Id);
+        await auditPublisher.Publish(new OnIamResourceChanged(request.WorkspaceId, request.OrgId,
+            AuditLogRefTypes.Policy, Operations.ClonePolicy, current, change.To(current), auditActor.Id, $"Cloned from: {(request.OriginPolicyType == PolicyTypes.SysManaged ? "system-managed" : "customer-managed")} policy/{request.OriginPolicyKey}"), cancellationToken);
 
         return mapper.Map<PolicyVm>(clonedPolicy);
     }
