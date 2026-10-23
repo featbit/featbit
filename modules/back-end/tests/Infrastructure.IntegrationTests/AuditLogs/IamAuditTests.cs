@@ -11,7 +11,7 @@ namespace Infrastructure.IntegrationTests.AuditLogs;
 public class IamAuditTests(FeatBitPostgresFixture fixture) : IntegrationTestBase
 {
     [DockerFact]
-    public async Task Queries_IsolateIamOrganizations_Actors_AndEnvironmentHistory()
+    public async Task Queries_IsolateIamOrganizations_AndEnvironmentHistory()
     {
         await using var db = AppDbContextFactory.Create(fixture.ConnectionString);
         var workspaceId = Guid.NewGuid();
@@ -35,61 +35,18 @@ public class IamAuditTests(FeatBitPostgresFixture fixture) : IntegrationTestBase
         var page = await logs.GetListAsync(workspaceId, orgId, null, new AuditLogFilter { Scope = AuditLogScope.Iam, PageSize = 1 });
         Assert.Equal(1, page.TotalCount);
         Assert.Equal(allowed.Id, Assert.Single(page.Items).Id);
-        Assert.Equal(actor.Id, Assert.Single(await logs.GetActorsAsync(workspaceId, orgId, null, new AuditLogFilter { Scope = AuditLogScope.Iam })).Id);
-        Assert.Empty(await logs.GetActorsAsync(workspaceId, orgId, null, new AuditLogFilter { Scope = AuditLogScope.Iam, Query = "Hidden" }));
         Assert.Empty((await logs.GetListAsync(workspaceId, orgId, envId, new AuditLogFilter { Scope = AuditLogScope.Iam, RefType = "FeatureFlag", CrossEnvironment = true})).Items);
         Assert.Equal(flag.Id, Assert.Single((await logs.GetListAsync(workspaceId, orgId, envId, new AuditLogFilter { Scope = AuditLogScope.Environment })).Items).Id);
         Assert.Empty((await logs.GetListAsync(workspaceId, orgId, envId, new AuditLogFilter { Scope = AuditLogScope.Environment, CrossEnvironment = true, RefType = "Group" })).Items);
         Assert.Equal(shared.Id, Assert.Single((await logs.GetListAsync(workspaceId, orgId, envId, new AuditLogFilter { Scope = AuditLogScope.Environment, CrossEnvironment = true, RefType = "Segment", RefId = shared.RefId })).Items).Id);
-        Assert.Equal(otherActor.Id, Assert.Single(await logs.GetActorsAsync(workspaceId, orgId, envId, new AuditLogFilter { Scope = AuditLogScope.Environment })).Id);
-        Assert.Empty(await logs.GetActorsAsync(workspaceId, orgId, envId, new AuditLogFilter { Scope = AuditLogScope.Environment, CrossEnvironment = true, RefType = "Group" }));
-        Assert.Empty(await logs.GetActorsAsync(workspaceId, orgId, envId, new AuditLogFilter { Scope = AuditLogScope.Iam, CrossEnvironment = true, RefType = "FeatureFlag" }));
-        Assert.Empty(await logs.GetActorsAsync(Guid.NewGuid(), orgId, envId, new AuditLogFilter { Scope = AuditLogScope.Environment, CrossEnvironment = true }));
-        Assert.Equal(otherActor.Id, Assert.Single(await logs.GetActorsAsync(workspaceId, orgId, envId, new AuditLogFilter { Scope = AuditLogScope.Environment, CrossEnvironment = true,
-                RefType = "Segment", RefId = shared.RefId })).Id);
 
         foreach (var scope in new[] { AuditLogScope.Unspecified, (AuditLogScope)999 })
         {
             await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
                 logs.GetListAsync(workspaceId, orgId, envId, new AuditLogFilter { Scope = scope }));
-            await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
-                logs.GetActorsAsync(workspaceId, orgId, envId, new AuditLogFilter { Scope = scope }));
         }
         await Assert.ThrowsAsync<ArgumentException>(() =>
             logs.GetListAsync(workspaceId, orgId, null, new AuditLogFilter { Scope = AuditLogScope.Environment }));
-        await Assert.ThrowsAsync<ArgumentException>(() =>
-            logs.GetActorsAsync(workspaceId, orgId, null, new AuditLogFilter { Scope = AuditLogScope.Environment }));
-    }
-
-    [DockerFact]
-    public async Task Actors_ReturnExplicitTypes_AndSearchTokensWithNullEmail()
-    {
-        await using var db = AppDbContextFactory.Create(fixture.ConnectionString);
-        var workspaceId = Guid.NewGuid();
-        var orgId = Guid.NewGuid();
-        var user = new User(Guid.NewGuid(), "actor@example.com", "password", "Alice");
-        var token = new Domain.AccessTokens.AccessToken(Guid.NewGuid(), user.Id, "Deploy bot",
-            Domain.AccessTokens.AccessTokenTypes.Service, []);
-        db.AddRange(user, token);
-        foreach (var creatorId in new[] { user.Id, token.Id })
-        {
-            db.Add(new AuditLog(workspaceId, orgId, null, Guid.NewGuid().ToString(), AuditLogRefTypes.Group, "group",
-                Operations.Create, new DataChange(null).To(new { Name = "group" }), "", creatorId));
-        }
-        await db.SaveChangesAsync();
-        var logs = new Infrastructure.Services.EntityFrameworkCore.AuditLogService(db);
-
-        var actors = await logs.GetActorsAsync(workspaceId, orgId, null, new AuditLogFilter { Scope = AuditLogScope.Iam });
-        Assert.Equal(2, actors.Count);
-        var userActor = Assert.Single(actors, x => x.Id == user.Id);
-        Assert.Equal(AuditActorTypes.User, userActor.Type);
-        Assert.Equal(user.Email, userActor.Email);
-        var tokenActor = Assert.Single(actors, x => x.Id == token.Id);
-        Assert.Equal(AuditActorTypes.AccessToken, tokenActor.Type);
-        Assert.Equal(token.Name, tokenActor.Name);
-        Assert.Null(tokenActor.Email);
-        Assert.Equal(token.Id, Assert.Single(await logs.GetActorsAsync(workspaceId, orgId, null, new AuditLogFilter { Scope = AuditLogScope.Iam, Query = "deploy" })).Id);
-        Assert.Equal(user.Id, Assert.Single(await logs.GetActorsAsync(workspaceId, orgId, null, new AuditLogFilter { Scope = AuditLogScope.Iam, Query = "actor@example.com" })).Id);
     }
 
     [DockerFact]

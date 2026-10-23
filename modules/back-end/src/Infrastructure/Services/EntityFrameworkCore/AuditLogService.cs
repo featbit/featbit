@@ -1,9 +1,7 @@
 using Application.AuditLogs;
 using Application.Bases.Models;
 using Dapper;
-using Domain.AccessTokens;
 using Domain.AuditLogs;
-using Domain.Users;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services.EntityFrameworkCore;
@@ -69,29 +67,6 @@ public class AuditLogService(AppDbContext dbContext) : EntityFrameworkCoreServic
             .ToListAsync();
 
         return new PagedResult<AuditLog>(totalCount, items);
-    }
-
-    public async Task<IReadOnlyList<AuditActor>> GetActorsAsync(Guid workspaceId, Guid orgId, Guid? envId, AuditLogFilter filter)
-    {
-        var auditlogs = ScopedLogs(workspaceId, orgId, envId, filter);
-        if (!string.IsNullOrWhiteSpace(filter.RefType)) auditlogs = auditlogs.Where(x => x.RefType == filter.RefType);
-        if (!string.IsNullOrWhiteSpace(filter.RefId)) auditlogs = auditlogs.Where(x => x.RefId == filter.RefId);
-        var creatorIds = auditlogs.Select(x => x.CreatorId).Distinct();
-
-        var userActors = dbContext.Set<User>().Where(x => creatorIds.Contains(x.Id))
-            .Select(x => new AuditActor { Id = x.Id, Type = AuditActorTypes.User, Name = x.Name, Email = x.Email });
-        var tokenActors = dbContext.Set<AccessToken>().Where(x => creatorIds.Contains(x.Id))
-            .Select(x => new AuditActor { Id = x.Id, Type = AuditActorTypes.AccessToken, Name = x.Name, Email = null });
-
-        var options = userActors.Concat(tokenActors);
-        var query = filter.Query;
-        if (!string.IsNullOrWhiteSpace(query))
-        {
-            var text = query.ToLower();
-            options = options.Where(x => x.Name.ToLower().Contains(text) || (x.Email != null && x.Email.ToLower().Contains(text)));
-        }
-        return await options
-            .OrderBy(x => x.Name).ThenBy(x => x.Id).Take(50).ToListAsync();
     }
 
     private IQueryable<AuditLog> ScopedLogs(Guid workspaceId, Guid orgId, Guid? envId, AuditLogFilter filter)

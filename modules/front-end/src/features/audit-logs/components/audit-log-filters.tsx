@@ -39,7 +39,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { fetchAuditUsers, fetchIamAuditUsers } from "../audit-logs-api"
+import { fetchAuditUsers } from "../audit-logs-api"
 import type { AuditUser } from "../audit-logs-types"
 
 function userLabel(user: AuditUser) {
@@ -97,14 +97,9 @@ export function AuditLogFilters({
       "audit-log-users",
       getCurrentWorkspace()?.id,
       getCurrentOrganization()?.id,
-      iam,
-      refType,
       debouncedUserSearch,
     ],
-    queryFn: () =>
-      iam
-        ? fetchIamAuditUsers(debouncedUserSearch, { refType })
-        : fetchAuditUsers(debouncedUserSearch),
+    queryFn: () => fetchAuditUsers(debouncedUserSearch),
     enabled: userOpen,
     staleTime: 30_000,
   })

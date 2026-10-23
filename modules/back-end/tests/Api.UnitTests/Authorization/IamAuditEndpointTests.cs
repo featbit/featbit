@@ -33,31 +33,20 @@ public class IamAuditEndpointTests
 {
     [Theory]
     [InlineData(false, "/api/v1/audit-logs")]
-    [InlineData(false, "/api/v1/audit-logs/actors")]
     [InlineData(true, "/api/v1/audit-logs")]
-    [InlineData(true, "/api/v1/audit-logs/actors")]
     [InlineData(false, "/api/v1/envs/11111111-1111-1111-1111-111111111111/audit-logs")]
     [InlineData(true, "/api/v1/envs/11111111-1111-1111-1111-111111111111/audit-logs")]
     [InlineData(false, "/api/v1/envs/11111111-1111-1111-1111-111111111111/audit-logs", "", 200)]
     [InlineData(true, "/api/v1/audit-logs", "", 400)]
-    [InlineData(true, "/api/v1/audit-logs/actors", "", 400)]
     [InlineData(true, "/api/v1/audit-logs", "unknown", 400)]
-    [InlineData(true, "/api/v1/audit-logs/actors", "999", 400)]
-    [InlineData(true, "/api/v1/audit-logs/actors", "unknown", 400)]
     [InlineData(true, "/api/v1/audit-logs", "999", 400)]
     [InlineData(true, "/api/v1/audit-logs", "unspecified", 400)]
-    [InlineData(true, "/api/v1/audit-logs/actors", "unspecified", 400)]
     [InlineData(true, "/api/v1/audit-logs", "0", 400)]
-    [InlineData(true, "/api/v1/audit-logs/actors", "0", 400)]
     [InlineData(false, "/api/v1/audit-logs", "environment", 400, true, false)]
-    [InlineData(false, "/api/v1/audit-logs/actors", "environment", 400, true, false)]
     [InlineData(true, "/api/v1/audit-logs", "iam", 200, true, false)]
-    [InlineData(true, "/api/v1/audit-logs/actors", "iam", 200, true, false)]
     [InlineData(false, "/api/v1/envs/11111111-1111-1111-1111-111111111111/audit-logs", "", 200, true, false)]
     [InlineData(false, "/api/v1/audit-logs", "environment", 200)]
-    [InlineData(false, "/api/v1/audit-logs/actors", "environment", 200)]
     [InlineData(true, "/api/v1/audit-logs", "iam", 401, false)]
-    [InlineData(true, "/api/v1/audit-logs/actors", "iam", 401, false)]
     public async Task Routes_ValidateScopeAndIamPermission(
         bool allowed, string path, string scope = "iam", int? expectedStatus = null, bool authenticated = true,
         bool includeEnvId = true)
@@ -65,8 +54,6 @@ public class IamAuditEndpointTests
         var logs = new Mock<IAuditLogService>();
         logs.Setup(x => x.GetListAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<Guid?>(), It.IsAny<AuditLogFilter>()))
             .ReturnsAsync(new PagedResult<AuditLog>(0, []));
-        logs.Setup(x => x.GetActorsAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<Guid?>(), It.IsAny<AuditLogFilter>()))
-            .ReturnsAsync(Array.Empty<AuditActor>());
         var mapper = new Mock<AutoMapper.IMapper>();
         mapper.Setup(x => x.Map<PagedResult<AuditLogVm>>(It.IsAny<object>()))
             .Returns(new PagedResult<AuditLogVm>(0, []));
@@ -133,12 +120,8 @@ public class IamAuditEndpointTests
                 scope == "" ? AuditLogScope.Unspecified : Enum.Parse<AuditLogScope>(scope, ignoreCase: true);
             Guid? expectedEnvId = isEnvironmentRoute ? Guid.Parse("11111111-1111-1111-1111-111111111111") :
                 includeEnvId ? Guid.Parse("22222222-2222-2222-2222-222222222222") : null;
-            if (path.EndsWith("/actors"))
-                logs.Verify(x => x.GetActorsAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), expectedEnvId,
-                    It.Is<AuditLogFilter>(f => f.Scope == expectedScope)), Times.Once);
-            else
-                logs.Verify(x => x.GetListAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), expectedEnvId,
-                    It.Is<AuditLogFilter>(f => f.Scope == expectedScope)), Times.Once);
+            logs.Verify(x => x.GetListAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), expectedEnvId,
+                It.Is<AuditLogFilter>(f => f.Scope == expectedScope)), Times.Once);
         }
     }
 
@@ -146,14 +129,13 @@ public class IamAuditEndpointTests
     public void AuditEndpoints_PreserveRoutesAuthenticationAndOpenApiBoundary()
     {
         var actions = GetActions();
-        Assert.Equal(3, actions.Length);
+        Assert.Equal(2, actions.Length);
         foreach (var action in actions)
         {
             var isEnvironment = action.MethodInfo.Name == nameof(AuditLogController.GetListAsync);
             var expectedRoute = isEnvironment
                 ? "api/v{version:apiVersion}/envs/{envId:guid}/audit-logs"
-                : "api/v{version:apiVersion}/audit-logs" +
-                    (action.MethodInfo.Name == nameof(AuditLogController.Actors) ? "/actors" : "");
+                : "api/v{version:apiVersion}/audit-logs";
             Assert.Equal(expectedRoute, action.AttributeRouteInfo!.Template);
             Assert.Empty(action.EndpointMetadata.OfType<IAllowAnonymous>());
             var authorization = action.EndpointMetadata.OfType<IAuthorizeData>().ToArray();
@@ -193,27 +175,6 @@ public class IamAuditEndpointTests
         }
         else
             await controller.GetListAsync(envId, filter);
-
-        sender.VerifyAll();
-        sender.VerifyNoOtherCalls();
-    }
-
-    [Fact]
-    public async Task Actors_PreservesWorkspaceOrganizationAndFilter()
-    {
-        var workspaceId = Guid.NewGuid();
-        var orgId = Guid.NewGuid();
-        var filter = new AuditLogFilter { Scope = AuditLogScope.Iam };
-        var sender = new Mock<ISender>(MockBehavior.Strict);
-        sender.Setup(x => x.Send(It.Is<GetAuditLogActors>(q =>
-                q.WorkspaceId == workspaceId && q.OrgId == orgId && q.Filter.Scope == AuditLogScope.Iam && q.Permissions == TestPermissions && q.Filter == filter),
-                It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Array.Empty<AuditActor>());
-        using var services = new ServiceCollection().AddSingleton(sender.Object)
-            .AddSingleton(Mock.Of<IRequestPermissions>(x => x.GetAsync(It.IsAny<HttpContext>()) == Task.FromResult(TestPermissions)))
-            .BuildServiceProvider();
-
-        await CreateController(services, workspaceId, orgId).Actors(filter);
 
         sender.VerifyAll();
         sender.VerifyNoOtherCalls();

@@ -69,7 +69,6 @@ public class MongoAuditLogTests(MongoDbFixture fixture) : IntegrationTestBase
         foreach (var scope in new[] { AuditLogScope.Unspecified, (AuditLogScope)999 })
         {
             await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => service.GetListAsync(org.WorkspaceId, org.Id, env.Id, new AuditLogFilter { Scope = scope }));
-            await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => service.GetActorsAsync(org.WorkspaceId, org.Id, env.Id, new AuditLogFilter { Scope = scope }));
         }
         await Assert.ThrowsAsync<ArgumentException>(() => service.GetListAsync(org.WorkspaceId, org.Id, null, new AuditLogFilter { Scope = AuditLogScope.Environment }));
     }
@@ -165,7 +164,7 @@ public class MongoAuditLogTests(MongoDbFixture fixture) : IntegrationTestBase
         }
     }
     [DockerFact]
-    public async Task Queries_IsolateIamOrganizations_Actors_AndEnvironmentHistory()
+    public async Task Queries_IsolateIamOrganizations_AndEnvironmentHistory()
     {
         var client = new MongoDbClient(Options.Create(new MongoDbOptions
         { ConnectionString = fixture.ConnectionString, Database = $"audit-iam-{Guid.NewGuid():N}" }));
@@ -189,62 +188,18 @@ public class MongoAuditLogTests(MongoDbFixture fixture) : IntegrationTestBase
         var page = await logs.GetListAsync(workspaceId, orgId, null, new AuditLogFilter { Scope = AuditLogScope.Iam, PageSize = 1 });
         Assert.Equal(1, page.TotalCount);
         Assert.Equal(allowed.Id, Assert.Single(page.Items).Id);
-        Assert.Equal(actor.Id, Assert.Single(await logs.GetActorsAsync(workspaceId, orgId, null, new AuditLogFilter { Scope = AuditLogScope.Iam })).Id);
-        Assert.Empty(await logs.GetActorsAsync(workspaceId, orgId, null, new AuditLogFilter { Scope = AuditLogScope.Iam, Query = "Hidden" }));
         Assert.Empty((await logs.GetListAsync(workspaceId, orgId, envId, new AuditLogFilter { Scope = AuditLogScope.Iam, RefType = "FeatureFlag", CrossEnvironment = true})).Items);
         Assert.Equal(flag.Id, Assert.Single((await logs.GetListAsync(workspaceId, orgId, envId, new AuditLogFilter { Scope = AuditLogScope.Environment })).Items).Id);
         Assert.Empty((await logs.GetListAsync(workspaceId, orgId, envId, new AuditLogFilter { Scope = AuditLogScope.Environment, CrossEnvironment = true, RefType = "Group" })).Items);
         Assert.Equal(shared.Id, Assert.Single((await logs.GetListAsync(workspaceId, orgId, envId, new AuditLogFilter { Scope = AuditLogScope.Environment, CrossEnvironment = true, RefType = "Segment", RefId = shared.RefId })).Items).Id);
-        Assert.Equal(otherActor.Id, Assert.Single(await logs.GetActorsAsync(workspaceId, orgId, envId, new AuditLogFilter { Scope = AuditLogScope.Environment })).Id);
-        Assert.Empty(await logs.GetActorsAsync(workspaceId, orgId, envId, new AuditLogFilter { Scope = AuditLogScope.Environment, CrossEnvironment = true, RefType = "Group" }));
-        Assert.Empty(await logs.GetActorsAsync(workspaceId, orgId, envId, new AuditLogFilter { Scope = AuditLogScope.Iam, CrossEnvironment = true, RefType = "FeatureFlag" }));
-        Assert.Empty(await logs.GetActorsAsync(Guid.NewGuid(), orgId, envId, new AuditLogFilter { Scope = AuditLogScope.Environment, CrossEnvironment = true }));
-        Assert.Equal(otherActor.Id, Assert.Single(await logs.GetActorsAsync(workspaceId, orgId, envId, new AuditLogFilter { Scope = AuditLogScope.Environment, CrossEnvironment = true,
-                RefType = "Segment", RefId = shared.RefId })).Id);
 
         foreach (var scope in new[] { AuditLogScope.Unspecified, (AuditLogScope)999 })
         {
             await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
                 logs.GetListAsync(workspaceId, orgId, envId, new AuditLogFilter { Scope = scope }));
-            await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
-                logs.GetActorsAsync(workspaceId, orgId, envId, new AuditLogFilter { Scope = scope }));
         }
         await Assert.ThrowsAsync<ArgumentException>(() =>
             logs.GetListAsync(workspaceId, orgId, null, new AuditLogFilter { Scope = AuditLogScope.Environment }));
-        await Assert.ThrowsAsync<ArgumentException>(() =>
-            logs.GetActorsAsync(workspaceId, orgId, null, new AuditLogFilter { Scope = AuditLogScope.Environment }));
-    }
-
-    [DockerFact]
-    public async Task Actors_ReturnExplicitTypes_AndSearchTokensWithNullEmail()
-    {
-        var client = new MongoDbClient(Options.Create(new MongoDbOptions
-        { ConnectionString = fixture.ConnectionString, Database = $"audit-iam-{Guid.NewGuid():N}" }));
-        var workspaceId = Guid.NewGuid();
-        var orgId = Guid.NewGuid();
-        var user = new User(Guid.NewGuid(), "actor@example.com", "password", "Alice");
-        var token = new Domain.AccessTokens.AccessToken(Guid.NewGuid(), user.Id, "Deploy bot",
-            Domain.AccessTokens.AccessTokenTypes.Service, []);
-        await client.CollectionOf<User>().InsertOneAsync(user);
-        await client.CollectionOf<Domain.AccessTokens.AccessToken>().InsertOneAsync(token);
-        foreach (var creatorId in new[] { user.Id, token.Id })
-        {
-            await client.CollectionOf<AuditLog>().InsertOneAsync(new AuditLog(workspaceId, orgId, null, Guid.NewGuid().ToString(), AuditLogRefTypes.Group, "group",
-                Operations.Create, new DataChange(null).To(new { Name = "group" }), "", creatorId));
-        }
-        var logs = new AuditLogService(client);
-
-        var actors = await logs.GetActorsAsync(workspaceId, orgId, null, new AuditLogFilter { Scope = AuditLogScope.Iam });
-        Assert.Equal(2, actors.Count);
-        var userActor = Assert.Single(actors, x => x.Id == user.Id);
-        Assert.Equal(AuditActorTypes.User, userActor.Type);
-        Assert.Equal(user.Email, userActor.Email);
-        var tokenActor = Assert.Single(actors, x => x.Id == token.Id);
-        Assert.Equal(AuditActorTypes.AccessToken, tokenActor.Type);
-        Assert.Equal(token.Name, tokenActor.Name);
-        Assert.Null(tokenActor.Email);
-        Assert.Equal(token.Id, Assert.Single(await logs.GetActorsAsync(workspaceId, orgId, null, new AuditLogFilter { Scope = AuditLogScope.Iam, Query = "deploy" })).Id);
-        Assert.Equal(user.Id, Assert.Single(await logs.GetActorsAsync(workspaceId, orgId, null, new AuditLogFilter { Scope = AuditLogScope.Iam, Query = "actor@example.com" })).Id);
     }
 
 }

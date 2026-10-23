@@ -1,8 +1,6 @@
 using Application.AuditLogs;
 using Application.Bases.Models;
 using Domain.AuditLogs;
-using Domain.AccessTokens;
-using Domain.Users;
 using Domain.Organizations;
 using Domain.Projects;
 using Environment = Domain.Environments.Environment;
@@ -74,27 +72,6 @@ public class AuditLogService(MongoDbClient mongoDb) : MongoDbService<AuditLog>(m
             .ToListAsync();
 
         return new PagedResult<AuditLog>(totalCount, items);
-    }
-
-    public async Task<IReadOnlyList<AuditActor>> GetActorsAsync(Guid workspaceId, Guid orgId, Guid? envId, AuditLogFilter filter)
-    {
-        var logs = await ScopedLogs(workspaceId, orgId, envId, filter);
-        if (!string.IsNullOrWhiteSpace(filter.RefType)) logs = logs.Where(x => x.RefType == filter.RefType);
-        if (!string.IsNullOrWhiteSpace(filter.RefId)) logs = logs.Where(x => x.RefId == filter.RefId);
-        var creatorIds = await logs.Select(x => x.CreatorId).Distinct().ToListAsync();
-        var users = MongoDb.QueryableOf<User>().Where(x => creatorIds.Contains(x.Id));
-        var tokens = MongoDb.QueryableOf<AccessToken>().Where(x => creatorIds.Contains(x.Id));
-        if (!string.IsNullOrWhiteSpace(filter.Query))
-        {
-            var query = filter.Query.ToLower();
-            users = users.Where(x => x.Name.ToLower().Contains(query) || x.Email.ToLower().Contains(query));
-            tokens = tokens.Where(x => x.Name.ToLower().Contains(query));
-        }
-        var userActors = await users.OrderBy(x => x.Name).ThenBy(x => x.Id).Take(50)
-            .Select(x => new AuditActor { Id = x.Id, Type = AuditActorTypes.User, Name = x.Name, Email = x.Email }).ToListAsync();
-        var tokenActors = await tokens.OrderBy(x => x.Name).ThenBy(x => x.Id).Take(50)
-            .Select(x => new AuditActor { Id = x.Id, Type = AuditActorTypes.AccessToken, Name = x.Name, Email = null }).ToListAsync();
-        return userActors.Concat(tokenActors).OrderBy(x => x.Name).ThenBy(x => x.Id).Take(50).ToList();
     }
 
     private async Task<IQueryable<AuditLog>> ScopedLogs(Guid workspaceId, Guid orgId, Guid? envId, AuditLogFilter filter)

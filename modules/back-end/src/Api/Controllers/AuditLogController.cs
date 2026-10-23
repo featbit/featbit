@@ -4,12 +4,12 @@ using Application.Bases.Models;
 
 namespace Api.Controllers;
 
-[Route("api/v{version:apiVersion}/envs/{envId:guid}/audit-logs")]
+[Route("api/v{version:apiVersion}/audit-logs")]
 public class AuditLogController : ApiControllerBase
 {
     /// <summary>Get feature flag and segment audit logs for an environment.</summary>
     [OpenApi]
-    [HttpGet]
+    [HttpGet("~/api/v{version:apiVersion}/envs/{envId:guid}/audit-logs")]
     public async Task<ApiResponse<PagedResult<AuditLogVm>>> GetListAsync(
         [FromRoute] Guid envId, [FromQuery] AuditLogFilter filter)
     {
@@ -21,7 +21,7 @@ public class AuditLogController : ApiControllerBase
         }));
     }
 
-    [HttpGet("~/api/v{version:apiVersion}/audit-logs")]
+    [HttpGet]
     public async Task<ApiResponse<PagedResult<AuditLogVm>>> QueryAsync(
         [FromQuery] AuditLogFilter filter, [FromQuery] Guid? envId = null)
     {
@@ -32,15 +32,4 @@ public class AuditLogController : ApiControllerBase
         }));
     }
 
-    [HttpGet("~/api/v{version:apiVersion}/audit-logs/actors")]
-    public async Task<ApiResponse<AuditLogActorsVm>> Actors(
-        [FromQuery] AuditLogFilter filter, [FromQuery] Guid? envId = null)
-    {
-        var actors = await Mediator.Send(new GetAuditLogActors
-        {
-            WorkspaceId = WorkspaceId, OrgId = OrgId, EnvId = envId, Filter = filter,
-            Permissions = await GetRequestPermissionsAsync()
-        });
-        return Ok(new AuditLogActorsVm { Items = actors });
-    }
 }
