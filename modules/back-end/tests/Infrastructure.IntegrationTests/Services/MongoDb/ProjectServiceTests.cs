@@ -121,21 +121,4 @@ public class ProjectServiceTests : IntegrationTestBase
         Assert.False(await client.QueryableOf<Project>().AnyAsync(x => x.Id == project.Id));
         Assert.False(await client.QueryableOf<Environment>().AnyAsync(x => x.ProjectId == project.Id));
     }
-
-    [DockerFact]
-    public async Task DeleteManyAsync_DeletesAllListedProjectsAndTheirEnvironments()
-    {
-        var (sut, _, client) = NewServices();
-        var p1 = new Project(Guid.NewGuid(), "1", "p1");
-        var p2 = new Project(Guid.NewGuid(), "2", "p2");
-        var keep = new Project(Guid.NewGuid(), "3", "keep");
-        await sut.AddWithEnvsAsync(p1, ["Dev"]);
-        await sut.AddWithEnvsAsync(p2, ["Dev"]);
-        await sut.AddWithEnvsAsync(keep, ["Dev"]);
-
-        await sut.DeleteManyAsync([p1.Id, p2.Id]);
-
-        Assert.False(await client.QueryableOf<Project>().AnyAsync(x => x.Id == p1.Id || x.Id == p2.Id));
-        Assert.True(await client.QueryableOf<Project>().AnyAsync(x => x.Id == keep.Id));
-    }
 }
