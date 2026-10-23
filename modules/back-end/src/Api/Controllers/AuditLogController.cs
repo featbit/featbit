@@ -7,11 +7,15 @@ namespace Api.Controllers;
 [Route("api/v{version:apiVersion}/audit-logs")]
 public class AuditLogController : ApiControllerBase
 {
-    /// <summary>Get feature flag and segment audit logs for an environment.</summary>
+    /// <summary>
+    /// Get a list of audit logs
+    /// </summary>
+    /// <remarks>
+    /// Get the list of audit logs for a specific environment, with optional filtering and pagination.
+    /// </remarks>
     [OpenApi]
     [HttpGet("~/api/v{version:apiVersion}/envs/{envId:guid}/audit-logs")]
-    public async Task<ApiResponse<PagedResult<AuditLogVm>>> GetListAsync(
-        [FromRoute] Guid envId, [FromQuery] AuditLogFilter filter)
+    public async Task<ApiResponse<PagedResult<AuditLogVm>>> GetListAsync(Guid envId, [FromQuery] AuditLogFilter filter)
     {
         filter.Scope = AuditLogScope.Environment;
         return Ok(await Mediator.Send(new GetAuditLogList
@@ -31,5 +35,4 @@ public class AuditLogController : ApiControllerBase
             Permissions = await GetRequestPermissionsAsync()
         }));
     }
-
 }

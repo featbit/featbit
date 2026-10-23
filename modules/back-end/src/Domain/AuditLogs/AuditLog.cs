@@ -6,7 +6,9 @@ namespace Domain.AuditLogs;
 public class AuditLog : Entity
 {
     public Guid WorkspaceId { get; set; }
+
     public Guid? OrganizationId { get; set; }
+
     public Guid? EnvId { get; set; }
 
     public string RefId { get; set; }
@@ -90,7 +92,7 @@ public class AuditLog : Entity
     public static AuditLog For(
         Segment segment,
         Guid workspaceId,
-        Guid organizationId,
+        Guid? organizationId,
         string operation,
         DataChange dataChange,
         string comment,
