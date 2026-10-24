@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+
+        <IsPackable>false</IsPackable>
+        <AssemblyName>MongoToPostgresMigrator.Tests</AssemblyName>
+        <RootNamespace>MongoToPostgresMigrator.Tests</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.5.1" />
+        <PackageReference Include="xunit" Version="2.9.3" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="coverlet.collector" Version="10.0.0">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\MongoToPostgresMigrator\MongoToPostgresMigrator.csproj" />
+    </ItemGroup>
+
+</Project>
