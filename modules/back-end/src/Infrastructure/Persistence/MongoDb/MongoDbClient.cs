@@ -34,11 +34,14 @@ public class MongoDbClient
     public IMongoDatabase Database { get; }
 
     public MongoDbClient(IOptions<MongoDbOptions> options)
+        : this(new MongoClient(options.Value.ConnectionString), options.Value.Database)
     {
-        var value = options.Value;
+    }
 
-        MongoClient = new MongoClient(value.ConnectionString);
-        Database = MongoClient.GetDatabase(value.Database);
+    internal MongoDbClient(MongoClient client, string database)
+    {
+        MongoClient = client;
+        Database = client.GetDatabase(database);
     }
 
     private readonly Dictionary<Type, string> _collectionNameMap = new()
