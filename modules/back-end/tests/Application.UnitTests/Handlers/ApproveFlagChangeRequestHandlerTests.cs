@@ -194,8 +194,8 @@ public class ApproveFlagChangeRequestHandlerTests
 
         Assert.True(result);
         Assert.Equal(FlagChangeRequestStatus.Approved, cr.Status);
-        Assert.Equal(FlagScheduleStatus.PendingExecution, schedule.Status);
         crSvc.Verify(x => x.UpdateAsync(cr), Times.Once);
-        schedSvc.Verify(x => x.UpdateAsync(schedule), Times.Once);
+        schedSvc.Verify(x => x.TrySetReviewOutcomeAsync(scheduleId, cr.Id, true, reviewerId), Times.Once);
+        schedSvc.Verify(x => x.UpdateAsync(It.IsAny<FlagSchedule>()), Times.Never);
     }
 }
