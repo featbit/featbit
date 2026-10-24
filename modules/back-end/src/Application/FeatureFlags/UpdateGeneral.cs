@@ -26,6 +26,10 @@ public class UpdateGeneralPayload : ResourceChangeRequest
 
 public class UpdateGeneral : UpdateGeneralPayload, IRequest<Guid>
 {
+    public Guid WorkspaceId { get; set; }
+
+    public Guid OrgId { get; set; }
+
     public Guid EnvId { get; set; }
 
     public string Key { get; set; }
@@ -91,6 +95,8 @@ public class UpdateGeneralHandler(
 
         var notification = new OnFeatureFlagChanged(
             flag,
+            request.WorkspaceId,
+            request.OrgId,
             Operations.Update,
             dataChange,
             currentUser.Id,

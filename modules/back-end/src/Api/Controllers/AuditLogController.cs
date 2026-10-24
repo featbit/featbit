@@ -1,37 +1,46 @@
 using Api.Authentication;
 using Application.AuditLogs;
 using Application.Bases.Models;
-using Domain.SemanticPatch;
 
 namespace Api.Controllers;
 
 [Route("api/v{version:apiVersion}/envs/{envId:guid}/audit-logs")]
 public class AuditLogController : ApiControllerBase
 {
-    /// <summary>
-    /// Get a list of audit logs
-    /// </summary>
-    /// <remarks>
-    /// Get the list of audit logs for a specific environment, with optional filtering and pagination.
-    /// </remarks>
+    /// <summary>Get feature flag and segment audit logs for an environment.</summary>
     [OpenApi]
     [HttpGet]
-    public async Task<ApiResponse<PagedResult<AuditLogVm>>> GetListAsync(Guid envId, [FromQuery] AuditLogFilter filter)
+    public async Task<ApiResponse<PagedResult<AuditLogVm>>> GetListAsync(
+        [FromRoute] Guid envId, [FromQuery] AuditLogFilter filter)
     {
-        var request = new GetAuditLogList
+        filter.Scope = AuditLogScope.Environment;
+        return Ok(await Mediator.Send(new GetAuditLogList
         {
-            EnvId = envId,
-            Filter = filter
-        };
-
-        var auditLogs = await Mediator.Send(request);
-        return Ok(auditLogs);
+            WorkspaceId = WorkspaceId, OrgId = OrgId, EnvId = envId, Filter = filter,
+            Permissions = await GetRequestPermissionsAsync()
+        }));
     }
 
-    [HttpPost(("compare"))]
-    public async Task<ApiResponse<IEnumerable<Instruction>>> CompareAsync(Compare request)
+    [HttpGet("~/api/v{version:apiVersion}/audit-logs")]
+    public async Task<ApiResponse<PagedResult<AuditLogVm>>> QueryAsync(
+        [FromQuery] AuditLogFilter filter, [FromQuery] Guid? envId = null)
     {
-        var instructions = await Mediator.Send(request);
-        return Ok(instructions);
+        return Ok(await Mediator.Send(new GetAuditLogList
+        {
+            WorkspaceId = WorkspaceId, OrgId = OrgId, EnvId = envId, Filter = filter,
+            Permissions = await GetRequestPermissionsAsync()
+        }));
+    }
+
+    [HttpGet("~/api/v{version:apiVersion}/audit-logs/actors")]
+    public async Task<ApiResponse<AuditLogActorsVm>> Actors(
+        [FromQuery] AuditLogFilter filter, [FromQuery] Guid? envId = null)
+    {
+        var actors = await Mediator.Send(new GetAuditLogActors
+        {
+            WorkspaceId = WorkspaceId, OrgId = OrgId, EnvId = envId, Filter = filter,
+            Permissions = await GetRequestPermissionsAsync()
+        });
+        return Ok(new AuditLogActorsVm { Items = actors });
     }
 }

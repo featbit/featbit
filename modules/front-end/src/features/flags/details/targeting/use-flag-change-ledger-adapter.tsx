@@ -4,11 +4,14 @@ import {
   FlagDefaultChangeContent,
   FlagRuleChangeContent,
   FlagRuleChangeLabel,
+  FlagServeValue,
 } from "./flag-rule-change-content"
 import type { FlagTargetingReviewChange } from "./targeting-utils"
 
 export function useFlagChangeLedgerAdapter(
-  segmentNames?: ReadonlyMap<string, string>
+  segmentNames?: ReadonlyMap<string, string>,
+  snapshot = false,
+  history = false
 ) {
   const { t } = useTranslation()
   return {
@@ -47,6 +50,7 @@ export function useFlagChangeLedgerAdapter(
         )
       }
       if (change.kind === "default") {
+        if (snapshot) return <span>{change.label}</span>
         return (
           <FlagChangeBadgeLabel
             badge={t("featureFlags.detailsPage.review.default")}
@@ -60,6 +64,7 @@ export function useFlagChangeLedgerAdapter(
       if (change.kind === "rule") {
         return (
           <FlagRuleChangeContent
+            snapshot={snapshot || history}
             previousRule={change.previousRule}
             currentRule={change.currentRule}
             previousServing={change.previousServing}
@@ -69,8 +74,11 @@ export function useFlagChangeLedgerAdapter(
         )
       }
       if (change.kind === "default") {
+        if (snapshot)
+          return <FlagServeValue value={change.currentServing} snapshot />
         return (
           <FlagDefaultChangeContent
+            history={history}
             previous={change.previousServing}
             current={change.currentServing}
           />

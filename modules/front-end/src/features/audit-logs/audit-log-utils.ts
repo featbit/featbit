@@ -1,4 +1,7 @@
 import type { TFunction } from "i18next"
+import { isIamAudit } from "./iam-audit-changes"
+import { auditSnapshotKind, auditSnapshotLog } from "./audit-snapshot"
+import type { Segment } from "@/features/segments/segments-types"
 import type { ChangeReviewItem } from "@/features/change-review/change-review-types"
 import type { FeatureFlag } from "@/features/flags/flags-types"
 import {
@@ -81,40 +84,85 @@ function firstString(record: Record<string, unknown> | null, keys: string[]) {
   return ""
 }
 
+export function auditStatusChange(log: AuditLog, t: TFunction) {
+  if (!["FeatureFlag", "Segment"].includes(log.refType)) return null
+  const before = recordSnapshot(log.dataChange.previous)
+  const after = recordSnapshot(log.dataChange.current)
+  if (!before || !after) return null
+  const operation = log.operation.toLowerCase()
+  const archive = operation === "archive" || operation === "restore"
+  const field = archive ? "isArchived" : "isEnabled"
+  if (!archive && (log.refType !== "FeatureFlag" || operation !== "update"))
+    return null
+  if (
+    typeof before[field] !== "boolean" ||
+    typeof after[field] !== "boolean" ||
+    before[field] === after[field]
+  )
+    return null
+  // A combined edit must retain every changed field, not just the switch.
+  if (!archive && auditHistoryChanges(log, t).length !== 1) return null
+  const label = archive
+    ? t("auditLogs.archiveStatus")
+    : t("auditLogs.flagState")
+  const format = (value: unknown) =>
+    archive
+      ? t(value ? "auditLogs.archivedState" : "auditLogs.activeState")
+      : t(value ? "featureFlags.on" : "featureFlags.off")
+  return {
+    label,
+    previous: format(before[field]),
+    current: format(after[field]),
+  }
+}
+
 export function auditObjectIdentity(
   log: AuditLog,
   unavailable: string
 ): AuditObjectIdentity {
   const operation = log.operation.toLowerCase()
-  const preferred =
-    operation === "remove"
-      ? recordSnapshot(log.dataChange.previous)
-      : recordSnapshot(log.dataChange.current)
-  const fallback =
-    operation === "remove"
-      ? recordSnapshot(log.dataChange.current)
-      : recordSnapshot(log.dataChange.previous)
+  const removed = [
+    "remove",
+    "deletegroup",
+    "deletepolicy",
+    "removefromorganization",
+    "removefromworkspace",
+  ].includes(operation)
+  const preferred = removed
+    ? recordSnapshot(log.dataChange.previous)
+    : recordSnapshot(log.dataChange.current)
+  const fallback = removed
+    ? recordSnapshot(log.dataChange.current)
+    : recordSnapshot(log.dataChange.previous)
   const snapshot = preferred ?? fallback
-  const name = firstString(snapshot, ["name"])
-  const key = firstString(snapshot, ["key", "keyId"])
+  const name = firstString(snapshot, ["name", "email"])
+  const key = firstString(snapshot, ["rn", "key", "keyId"])
   const id = firstString(snapshot, ["id"]) || log.refId
 
   return {
     id,
     name: name || unavailable,
     key: key || log.refId,
-    removed: operation === "remove",
-    available: Boolean(name && (key || id)) && operation !== "remove",
+    removed,
+    available: Boolean(name && (key || id)) && !removed,
   }
 }
 
 export function auditTypeLabel(refType: string, t: TFunction) {
   if (refType === "FeatureFlag") return t("auditLogs.featureFlag")
   if (refType === "Segment") return t("auditLogs.segment")
+  if (refType === "Member") return t("auditLogs.member")
+  if (refType === "Group") return t("auditLogs.group")
+  if (refType === "Policy") return t("auditLogs.policy")
   return refType || t("auditLogs.unknownType")
 }
 
 export function auditEventTitle(log: AuditLog, t: TFunction) {
+  if (isIamAudit(log)) {
+    return t(`auditLogs.iamActions.${log.operation}`, {
+      defaultValue: log.operation || t("auditLogs.unknownEvent"),
+    })
+  }
   switch (log.operation.toLowerCase()) {
     case "create":
       return t("auditLogs.created")
@@ -380,7 +428,15 @@ function flagSnapshotChanges(
       insightsState(current, t)
     ),
   ]
-  changes.push(...fields.filter((change) => change !== null))
+  changes.push(
+    ...fields
+      .filter((change) => change !== null)
+      .map((change) =>
+        change.label === t("featureFlags.detailsPage.key")
+          ? { ...change, valueFormat: "code" as const }
+          : change
+      )
+  )
 
   const previousTags = previous.tags ?? []
   const currentTags = current.tags ?? []
@@ -459,6 +515,73 @@ export function auditHistoryChanges(
   log: AuditLog,
   t: TFunction
 ): ReviewChange[] | FlagTargetingReviewChange[] {
+  if (auditSnapshotKind(log)) {
+    const snapshotLog = auditSnapshotLog(log)
+    if (log.refType === "FeatureFlag") {
+      const snapshot = flagSnapshot(snapshotLog.dataChange.current)
+      if (!snapshot) return []
+      const changes = flagSnapshotChanges({} as FeatureFlag, snapshot, t)
+      // Defaults and rules render one side only in a lifecycle snapshot.
+      const snapshotChanges: FlagTargetingReviewChange[] = changes.map(
+        (change) => ({
+          ...change,
+          previous: undefined,
+          previousRule: undefined,
+          previousServing: undefined,
+          ...(change.label === t("featureFlags.detailsPage.key")
+            ? { valueFormat: "code" as const }
+            : {}),
+          ...(change.label === t("featureFlags.variationsEditor.type")
+            ? {
+                current:
+                  snapshot.variationType?.toLowerCase() === "json"
+                    ? "JSON"
+                    : snapshot.variationType
+                      ? snapshot.variationType[0].toUpperCase() +
+                        snapshot.variationType.slice(1).toLowerCase()
+                      : undefined,
+              }
+            : {}),
+          ...(change.label ===
+          t("featureFlags.detailsPage.settings.fields.insightsEnabled")
+            ? { label: t("auditLogs.insights") }
+            : {}),
+        })
+      )
+      if (snapshot.insightsEnabled !== false)
+        snapshotChanges.push({
+          kind: "field",
+          label: t("auditLogs.insights"),
+          current: insightsState(snapshot, t),
+          literalLabel: true,
+        })
+      return snapshotChanges
+    }
+    if (log.refType === "Segment") {
+      const snapshot = segmentSnapshot(snapshotLog.dataChange.current)
+      if (!snapshot) return []
+      const empty: Segment = {
+        ...snapshot,
+        name: "",
+        description: "",
+        included: [],
+        excluded: [],
+        rules: [],
+        tags: [],
+      }
+      return [
+        ...settingsReviewChanges(empty, snapshot),
+        {
+          kind: "field",
+          label: t("featureFlags.detailsPage.key"),
+          current: snapshot.key,
+          valueFormat: "code",
+          literalLabel: true,
+        },
+        ...targetingChanges(empty, snapshot),
+      ]
+    }
+  }
   if (log.refType === "Segment") {
     const previous = segmentSnapshot(log.dataChange.previous)
     const current = segmentSnapshot(log.dataChange.current)

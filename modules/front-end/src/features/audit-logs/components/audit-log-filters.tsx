@@ -1,3 +1,8 @@
+import {
+  getCurrentWorkspace,
+  getCurrentOrganization,
+} from "@/features/layout/layout-context"
+import { auditTypeLabel } from "../audit-log-utils"
 import { useQuery } from "@tanstack/react-query"
 import {
   CalendarDays,
@@ -34,7 +39,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { fetchAuditUsers } from "../audit-logs-api"
+import { fetchAuditUsers, fetchIamAuditUsers } from "../audit-logs-api"
 import type { AuditUser } from "../audit-logs-types"
 
 function userLabel(user: AuditUser) {
@@ -49,6 +54,7 @@ export function AuditLogFilters({
   range,
   filtersApplied,
   showRefType = true,
+  iam = false,
   endContent,
   onSearchChange,
   onUserChange,
@@ -63,6 +69,7 @@ export function AuditLogFilters({
   range: DateRange | undefined
   filtersApplied: boolean
   showRefType?: boolean
+  iam?: boolean
   endContent?: ReactNode
   onSearchChange: (value: string) => void
   onUserChange: (value: AuditUser | null) => void
@@ -86,8 +93,18 @@ export function AuditLogFilters({
   }, [userSearch])
 
   const usersQuery = useQuery({
-    queryKey: ["audit-log-users", debouncedUserSearch],
-    queryFn: () => fetchAuditUsers(debouncedUserSearch),
+    queryKey: [
+      "audit-log-users",
+      getCurrentWorkspace()?.id,
+      getCurrentOrganization()?.id,
+      iam,
+      refType,
+      debouncedUserSearch,
+    ],
+    queryFn: () =>
+      iam
+        ? fetchIamAuditUsers(debouncedUserSearch, { refType })
+        : fetchAuditUsers(debouncedUserSearch),
     enabled: userOpen,
     staleTime: 30_000,
   })
@@ -107,7 +124,7 @@ export function AuditLogFilters({
         <Input
           value={search}
           className="pl-9"
-          placeholder={t("auditLogs.search")}
+          placeholder={t(iam ? "auditLogs.iamSearch" : "auditLogs.search")}
           onChange={(event) => onSearchChange(event.target.value)}
         />
       </div>
@@ -179,9 +196,11 @@ export function AuditLogFilters({
                             <p className="truncate text-sm">
                               {userLabel(option)}
                             </p>
-                            {option.name && option.email ? (
+                            {option.type === "accessToken" || option.email ? (
                               <p className="truncate text-xs text-muted-foreground">
-                                {option.email}
+                                {option.type === "accessToken"
+                                  ? t("auditLogs.accessToken")
+                                  : option.email}
                               </p>
                             ) : null}
                           </div>
@@ -216,20 +235,26 @@ export function AuditLogFilters({
         >
           <SelectTrigger className="w-52">
             <SelectValue>
-              {refType === "FeatureFlag"
-                ? t("auditLogs.featureFlag")
-                : refType === "Segment"
-                  ? t("auditLogs.segment")
-                  : t("auditLogs.allTypes")}
+              {refType
+                ? iam && refType === "Member"
+                  ? t("layout.nav.items.team")
+                  : auditTypeLabel(refType, t)
+                : t("auditLogs.allTypes")}
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
               <SelectItem value="all">{t("auditLogs.allTypes")}</SelectItem>
-              <SelectItem value="FeatureFlag">
-                {t("auditLogs.featureFlag")}
-              </SelectItem>
-              <SelectItem value="Segment">{t("auditLogs.segment")}</SelectItem>
+              {(iam
+                ? ["Member", "Group", "Policy"]
+                : ["FeatureFlag", "Segment"]
+              ).map((type) => (
+                <SelectItem key={type} value={type}>
+                  {iam && type === "Member"
+                    ? t("layout.nav.items.team")
+                    : auditTypeLabel(type, t)}
+                </SelectItem>
+              ))}
             </SelectGroup>
           </SelectContent>
         </Select>

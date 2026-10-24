@@ -32,7 +32,7 @@ public class RemoveFromWorkspaceHandlerTests
             .ReturnsAsync(new[] { new Workspace { Name = "other", Key = "other" } });
 
         var sut = new RemoveFromWorkspaceHandler(
-            workspaceSvc.Object, userSvc.Object, orgSvc.Object, memberSvc.Object);
+            workspaceSvc.Object, userSvc.Object, orgSvc.Object, memberSvc.Object, Mock.Of<MediatR.IPublisher>(), Mock.Of<Application.Users.ICurrentUser>());
 
         var result = await sut.Handle(
             new RemoveFromWorkspace { WorkspaceId = workspaceId, MemberId = memberId },
@@ -63,7 +63,7 @@ public class RemoveFromWorkspaceHandlerTests
             .ReturnsAsync(Array.Empty<Workspace>());
 
         var sut = new RemoveFromWorkspaceHandler(
-            workspaceSvc.Object, userSvc.Object, orgSvc.Object, memberSvc.Object);
+            workspaceSvc.Object, userSvc.Object, orgSvc.Object, memberSvc.Object, Mock.Of<MediatR.IPublisher>(), Mock.Of<Application.Users.ICurrentUser>());
 
         var result = await sut.Handle(
             new RemoveFromWorkspace { WorkspaceId = workspaceId, MemberId = memberId },
@@ -86,12 +86,14 @@ public class RemoveFromWorkspaceHandlerTests
         orgSvc.Setup(x => x.GetUserOrganizationsAsync(workspaceId, memberId))
             .ReturnsAsync(Array.Empty<Organization>());
         var memberSvc = new Mock<IMemberService>(MockBehavior.Strict);
+        memberSvc.Setup(x => x.GetAuditSnapshotAsync(memberId, null, workspaceId))
+            .ReturnsAsync((Domain.AuditLogs.MemberAuditSnapshot?)null);
         var userSvc = new Mock<IUserService>();
         userSvc.Setup(x => x.GetWorkspacesAsync(memberId))
             .ReturnsAsync(new[] { new Workspace { Name = "w", Key = "w" } });
 
         var sut = new RemoveFromWorkspaceHandler(
-            workspaceSvc.Object, userSvc.Object, orgSvc.Object, memberSvc.Object);
+            workspaceSvc.Object, userSvc.Object, orgSvc.Object, memberSvc.Object, Mock.Of<MediatR.IPublisher>(), Mock.Of<Application.Users.ICurrentUser>());
 
         var result = await sut.Handle(
             new RemoveFromWorkspace { WorkspaceId = workspaceId, MemberId = memberId },

@@ -1,6 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { fetchApi } from "@/lib/api/authenticated-api"
-import { fetchAuditLogs, fetchAuditUsers } from "./audit-logs-api"
+import {
+  fetchAuditLogs,
+  fetchAuditUsers,
+  fetchIamAuditLogs,
+  fetchIamAuditUsers,
+} from "./audit-logs-api"
 
 vi.mock("@/lib/api/authenticated-api", () => ({
   fetchApi: vi.fn(),
@@ -52,4 +57,15 @@ describe("audit logs API", () => {
       "/api/v1/members?searchText=alex+chen&pageIndex=0&pageSize=20"
     )
   })
+})
+
+it("queries IAM lists and actors through the generic endpoints with explicit IAM scope", async () => {
+  await fetchIamAuditLogs({ query: "", refType: "Group" }, 0, 10)
+  expect(fetchApi).toHaveBeenLastCalledWith(
+    expect.stringMatching(/^\/api\/v1\/audit-logs\?scope=iam&/)
+  )
+  await fetchIamAuditUsers("Alice", { refType: "Member" })
+  expect(fetchApi).toHaveBeenLastCalledWith(
+    expect.stringMatching(/^\/api\/v1\/audit-logs\/actors\?scope=iam&/)
+  )
 })

@@ -5,7 +5,10 @@ export type AuditInstruction = {
   value: unknown
 }
 
-export type AuditDataChange = { previous?: string; current?: string }
+export type AuditDataChange = {
+  previous?: string
+  current?: string
+}
 
 export type ChangeRequestDecisionAuditSnapshot = {
   changeRequestId: string
@@ -34,16 +37,18 @@ export type PagedAuditLogs = {
 
 export type AuditUser = {
   id: string
+  type: "user" | "accessToken"
   name: string
-  email: string
+  email: string | null
 }
 
 export type AuditLogFilters = {
+  crossEnvironment?: boolean
   query: string
   creatorId?: string
   refType?: string
   refId?: string
-  crossEnvironment?: boolean
+  envId?: string
   from?: number
   to?: number
 }

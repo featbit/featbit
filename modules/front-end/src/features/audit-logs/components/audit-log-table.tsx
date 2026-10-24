@@ -90,6 +90,7 @@ export function AuditLogTable({
   loading,
   filtered,
   resourceScoped = false,
+  iam = false,
   adapter,
   segmentNames,
   onClearFilters,
@@ -101,6 +102,7 @@ export function AuditLogTable({
   loading: boolean
   filtered: boolean
   resourceScoped?: boolean
+  iam?: boolean
   adapter?: AuditLogTableAdapter
   segmentNames?: ReadonlyMap<string, string>
   onClearFilters: () => void
@@ -135,11 +137,15 @@ export function AuditLogTable({
         <TableRow className="hover:bg-transparent">
           <TableHead className="w-12" />
           <TableHead className="w-52">{t("auditLogs.date")}</TableHead>
-          <TableHead className="w-56">{t("auditLogs.user")}</TableHead>
+          <TableHead className="w-56">
+            {t(iam ? "auditLogs.iamActor" : "auditLogs.user")}
+          </TableHead>
           {!resourceScoped ? (
             <>
               <TableHead className="w-36">{t("auditLogs.type")}</TableHead>
-              <TableHead className="w-64">{t("auditLogs.keyName")}</TableHead>
+              <TableHead className="w-64">
+                {t(iam ? "auditLogs.iamResource" : "auditLogs.keyName")}
+              </TableHead>
             </>
           ) : null}
           <TableHead>{t("auditLogs.event")}</TableHead>
@@ -265,18 +271,31 @@ export function AuditLogTable({
                       <div>
                         <div className="mb-3 flex items-center justify-between">
                           <div className="flex items-baseline gap-2">
-                            <h3 className="text-sm font-medium">
+                            <h3
+                              className={cn(
+                                "text-sm text-foreground",
+                                "font-semibold"
+                              )}
+                            >
                               {t(
                                 decisionDetails
                                   ? "auditLogs.decision"
-                                  : "auditLogs.changes"
+                                  : changeDetails.kind === "initial"
+                                    ? "auditLogs.initialConfiguration"
+                                    : changeDetails.kind === "deleted"
+                                      ? "auditLogs.deletedConfiguration"
+                                      : changeDetails.kind === "status"
+                                        ? "auditLogs.statusChange"
+                                        : "auditLogs.changes"
                               )}
                             </h3>
-                            {!decisionDetails ? (
+                            {!changeDetails.kind ||
+                            changeDetails.kind === "changes" ? (
                               <span className="text-sm text-muted-foreground">
-                                {t("auditLogs.changeCount", {
-                                  count: changeDetails.count,
-                                })}
+                                {changeDetails.countLabel ??
+                                  t("auditLogs.changeCount", {
+                                    count: changeDetails.count,
+                                  })}
                               </span>
                             ) : null}
                           </div>
@@ -363,7 +382,11 @@ export function AuditLogTable({
                 <p className="text-sm text-muted-foreground">
                   {filtered
                     ? t("auditLogs.filteredEmptyDescription")
-                    : t("auditLogs.emptyDescription")}
+                    : t(
+                        iam
+                          ? "auditLogs.iamEmptyDescription"
+                          : "auditLogs.emptyDescription"
+                      )}
                 </p>
                 {filtered ? (
                   <Button

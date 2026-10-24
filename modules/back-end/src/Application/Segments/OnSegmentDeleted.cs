@@ -6,6 +6,10 @@ namespace Application.Segments;
 
 public class OnSegmentDeleted : INotification
 {
+    public Guid WorkspaceId { get; }
+
+    public Guid OrganizationId { get; }
+
     public Segment Segment { get; set; }
 
     public Guid OperatorId { get; set; }
@@ -14,8 +18,10 @@ public class OnSegmentDeleted : INotification
 
     public string Comment { get; set; }
 
-    public OnSegmentDeleted(Segment segment, Guid operatorId, string comment = "")
+    public OnSegmentDeleted(Segment segment, Guid workspaceId, Guid organizationId, Guid operatorId, string comment = "")
     {
+        WorkspaceId = workspaceId;
+        OrganizationId = organizationId;
         Segment = segment;
         OperatorId = operatorId;
         DataChange = new DataChange(segment).To(null);
@@ -24,7 +30,7 @@ public class OnSegmentDeleted : INotification
 
     public AuditLog GetAuditLog()
     {
-        var auditLog = AuditLog.For(Segment, Operations.Remove, DataChange, Comment, OperatorId);
+        var auditLog = AuditLog.For(Segment, WorkspaceId, OrganizationId, Operations.Remove, DataChange, Comment, OperatorId);
         return auditLog;
     }
 }

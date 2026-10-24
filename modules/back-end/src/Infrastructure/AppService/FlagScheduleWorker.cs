@@ -77,8 +77,10 @@ public class FlagScheduleWorker(IServiceProvider serviceProvider, ILogger<FlagSc
         async Task ApplyScheduleAsync(FlagSchedule schedule)
         {
             // apply flag draft
+            var organizations = scope.ServiceProvider.GetRequiredService<IOrganizationService>();
+            var organization = await organizations.GetAsync(schedule.OrgId);
             await featureFlagAppService.ApplyDraftAsync(
-                schedule.FlagDraftId, Operations.ApplyFlagSchedule, schedule.CreatorId
+                organization.WorkspaceId, organization.Id, schedule.FlagDraftId, Operations.ApplyFlagSchedule, schedule.CreatorId
             );
 
             // update schedule status

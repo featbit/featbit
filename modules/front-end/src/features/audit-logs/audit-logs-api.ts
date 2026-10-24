@@ -39,3 +39,41 @@ export function fetchAuditUsers(searchText: string) {
     `/api/v1/members?${params}`
   )
 }
+
+export function fetchIamAuditLogs(
+  filters: AuditLogFilters,
+  pageIndex: number,
+  pageSize: number
+) {
+  const params = new URLSearchParams({
+    scope: "iam",
+    query: filters.query,
+    creatorId: filters.creatorId ?? "",
+    refType: filters.refType ?? "",
+    refId: filters.refId ?? "",
+    from: filters.from ? String(filters.from) : "",
+    to: filters.to ? String(filters.to) : "",
+    pageIndex: String(pageIndex),
+    pageSize: String(pageSize),
+  })
+
+  return fetchApi<PagedAuditLogs>(`/api/v1/audit-logs?${params}`)
+}
+
+export function fetchIamAuditUsers(
+  searchText: string,
+  scope?: Pick<AuditLogFilters, "refType" | "refId">
+) {
+  const params = new URLSearchParams({
+    scope: "iam",
+    query: searchText,
+    pageIndex: "0",
+    pageSize: "20",
+  })
+
+  if (scope?.refType) params.set("refType", scope.refType)
+  if (scope?.refId) params.set("refId", scope.refId)
+  return fetchApi<{ items: AuditUser[] }>(
+    `/api/v1/audit-logs/actors?${params}`
+  )
+}

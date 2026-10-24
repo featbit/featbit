@@ -75,7 +75,7 @@ describe("HistoryTab", () => {
     expect(summaryComment).toHaveClass("inline-block", "max-w-full")
     expect(
       screen.getAllByRole("columnheader").map((header) => header.textContent)
-    ).toEqual(["", "Date", "User", "Event", "Comment"])
+    ).toEqual(["", "Date", "Actor", "Operation", "Comment"])
     expect(screen.getByText("Updated settings")).toBeInTheDocument()
     expect(screen.getByText("Changed name")).toHaveClass(
       "inline-block",

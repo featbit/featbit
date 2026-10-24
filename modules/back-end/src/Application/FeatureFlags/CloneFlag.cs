@@ -6,7 +6,7 @@ using Domain.FeatureFlags;
 
 namespace Application.FeatureFlags;
 
-public class CloneFlag : IRequest<bool>
+public class CloneFlagPayload
 {
     /// <summary>
     /// The ID of the environment the feature flag belongs to. Retrieved from the URL path.
@@ -37,6 +37,25 @@ public class CloneFlag : IRequest<bool>
     /// The tags to assign to the cloned feature flag
     /// </summary>
     public string[] Tags { get; set; }
+}
+
+public class CloneFlag : CloneFlagPayload, IRequest<bool>
+{
+    public Guid WorkspaceId { get; set; }
+
+    public Guid OrgId { get; set; }
+
+    public CloneFlag(Guid  workspaceId, Guid orgId, CloneFlagPayload payload)
+    {
+        WorkspaceId = workspaceId;
+        OrgId = orgId;
+        Name = payload.Name;
+        Key = payload.Key;
+        Description = payload.Description;
+        Tags = payload.Tags;
+        EnvId = payload.EnvId;
+        OriginFlagKey = payload.OriginFlagKey;
+    }
 }
 
 public class CloneFlagValidator : AbstractValidator<CloneFlag>
@@ -75,7 +94,7 @@ public class CloneFlagHandler(
 
         // publish on feature flag change notification
         var dataChange = new DataChange(null).To(clonedFlag);
-        var notification = new OnFeatureFlagChanged(clonedFlag, Operations.Create, dataChange, currentUser.Id);
+        var notification = new OnFeatureFlagChanged(clonedFlag, request.WorkspaceId, request.OrgId, Operations.Create, dataChange, currentUser.Id);
         await publisher.Publish(notification, cancellationToken);
 
         return true;

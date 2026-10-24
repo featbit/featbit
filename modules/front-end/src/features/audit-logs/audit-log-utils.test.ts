@@ -4,6 +4,7 @@ import {
   auditDecisionSnapshot,
   auditEventTitle,
   auditHistoryChanges,
+  auditStatusChange,
   auditLogSegmentIds,
   auditObjectIdentity,
   dayAfter,
@@ -30,6 +31,113 @@ function log(overrides: Partial<AuditLog> = {}): AuditLog {
 }
 
 describe("audit log presentation", () => {
+  it.each(["FeatureFlag", "Segment"])(
+    "separates %s archive state from its switch",
+    (refType) => {
+      for (const enabled of [true, false]) {
+        const entry = log({
+          refType,
+          operation: "Archive",
+          dataChange: {
+            previous: JSON.stringify({ isArchived: false, isEnabled: enabled }),
+            current: JSON.stringify({ isArchived: true, isEnabled: enabled }),
+          },
+        })
+        expect(auditStatusChange(entry, i18n.t)).toEqual({
+          label: "Archive status",
+          previous: "Active",
+          current: "Archived",
+        })
+        expect(
+          auditStatusChange(
+            {
+              ...entry,
+              operation: "Restore",
+              dataChange: {
+                previous: entry.dataChange.current,
+                current: entry.dataChange.previous,
+              },
+            },
+            i18n.t
+          )
+        ).toEqual({
+          label: "Archive status",
+          previous: "Archived",
+          current: "Active",
+        })
+      }
+    }
+  )
+
+  it("only simplifies a standalone switch change and retains mixed edits", () => {
+    const entry = log({
+      dataChange: {
+        previous: '{"isEnabled":false,"name":"Before"}',
+        current: '{"isEnabled":true,"name":"Before"}',
+      },
+    })
+    expect(auditStatusChange(entry, i18n.t)).toEqual({
+      label: "Flag state",
+      previous: "OFF",
+      current: "ON",
+    })
+    expect(
+      auditStatusChange(
+        {
+          ...entry,
+          dataChange: {
+            ...entry.dataChange,
+            current: '{"isEnabled":true,"name":"After"}',
+          },
+        },
+        i18n.t
+      )
+    ).toBeNull()
+    expect(
+      auditStatusChange(
+        { ...entry, operation: "Archive", dataChange: {} },
+        i18n.t
+      )
+    ).toBeNull()
+  })
+  it.each([
+    ["Group", "AddGroupMember", "Added member"],
+    ["Policy", "ClonePolicy", "Cloned policy"],
+    ["Member", "UpdateProfile", "Updated profile"],
+  ])("uses operation for %s %s event titles", (refType, operation, title) => {
+    expect(auditEventTitle(log({ refType, operation }), i18n.t)).toBe(title)
+  })
+
+  it.each([
+    ["Group", "DeleteGroup", true],
+    ["Policy", "DeletePolicy", true],
+    ["Member", "RemoveFromOrganization", true],
+    ["Member", "RemoveFromWorkspace", true],
+    ["Group", "RemoveGroupMember", false],
+    ["Group", "RemoveGroupPolicy", false],
+    ["Member", "RemoveMemberPolicy", false],
+  ])(
+    "distinguishes resource deletion from relationship removal for %s %s",
+    (refType, operation, removed) => {
+      const identity = auditObjectIdentity(
+        log({
+          refType,
+          operation,
+          dataChange: {
+            previous: JSON.stringify({ name: "Before", rn: "group/before" }),
+            current: removed
+              ? ""
+              : JSON.stringify({ name: "After", rn: "group/after" }),
+          },
+        }),
+        "Unavailable"
+      )
+      expect(identity.removed).toBe(removed)
+      expect(identity.available).toBe(!removed)
+      expect(identity.name).toBe(removed ? "Before" : "After")
+    }
+  )
+
   it("shows reordered rules from audit snapshots as a targeting change", () => {
     const rules = [
       { id: "a", name: "Rule A", conditions: [], variations: [] },

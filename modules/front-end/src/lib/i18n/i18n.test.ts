@@ -50,7 +50,7 @@ describe("global feature translations", () => {
     expect(i18n.t("relayProxies.title")).toBe("中继代理")
     expect(i18n.t("accessTokens.title")).toBe("访问令牌")
     expect(i18n.t("auditLogs.title")).toBe("审计日志")
-    expect(i18n.t("auditLogs.keyName")).toBe("名称 / Key")
+    expect(i18n.t("auditLogs.keyName")).toBe("资源")
     expect(i18n.t("auditLogs.changeCount", { count: 2 })).toBe("2 项变更")
     expect(i18n.t("auditLogs.allUsers")).toBe("所有用户")
     expect(i18n.t("endUsers.title")).toBe("目标用户")
