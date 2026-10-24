@@ -33,6 +33,22 @@ public class ResourceService(MongoDbClient mongoDb) : IResourceService
         };
     }
 
+    public Task<bool> IsProjectInOrganizationAsync(Guid organizationId, Guid projectId) =>
+        QueryableOf<Project>().AnyAsync(x => x.Id == projectId && x.OrganizationId == organizationId);
+
+    public Task<bool> SegmentExistsAsync(Guid id) => QueryableOf<Segment>().AnyAsync(x => x.Id == id);
+
+    public Task<bool> IsEnvInOrganizationAsync(Guid organizationId, Guid envId, Guid? projectId = null) =>
+        (from env in QueryableOf<Environment>()
+         join project in QueryableOf<Project>() on env.ProjectId equals project.Id
+         where env.Id == envId && project.OrganizationId == organizationId
+             && (projectId == null || project.Id == projectId)
+         select env.Id).AnyAsync();
+
+    public Task<Guid?> GetOrganizationWorkspaceIdAsync(Guid organizationId) =>
+        QueryableOf<Organization>().Where(x => x.Id == organizationId)
+            .Select(x => (Guid?)x.WorkspaceId).FirstOrDefaultAsync();
+
     public async Task<string?> GetProjectRnAsync(Guid projectId)
     {
         var key = await QueryableOf<Project>()
@@ -115,12 +131,13 @@ public class ResourceService(MongoDbClient mongoDb) : IResourceService
                     select new
                     {
                         OrganizationKey = organization.Key,
+                        WorkspaceId = organization.WorkspaceId,
                         ProjectKey = project.Key,
                         EnvKey = env.Key
                     };
 
                 var projectEnv = await query.FirstOrDefaultAsync();
-                if (projectEnv == null)
+                if (projectEnv == null || projectEnv.WorkspaceId != segment.WorkspaceId)
                 {
                     return null;
                 }
