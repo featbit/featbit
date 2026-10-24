@@ -13,6 +13,4 @@ public interface IProjectService : IService<Project>
     Task<bool> HasKeyBeenUsedAsync(Guid organizationId, string key);
 
     Task<bool> DeleteAsync(Guid id);
-
-    Task DeleteManyAsync(ICollection<Guid> projectIds);
 }

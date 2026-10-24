@@ -102,16 +102,4 @@ public class OrganizationController : ApiControllerBase
         var organization = await Mediator.Send(request);
         return Ok(organization);
     }
-
-    [HttpDelete]
-    public async Task<ApiResponse<bool>> DeleteAsync()
-    {
-        var request = new DeleteOrganization
-        {
-            Id = OrgId
-        };
-
-        var success = await Mediator.Send(request);
-        return Ok(success);
-    }
 }
