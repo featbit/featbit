@@ -7,8 +7,6 @@
   <h1>FeatBit</h1>
 </div>
 
-## About FeatBit
-
 We code faster with AI. More code, more features—**but also more bugs**. Work gets harder, with more pressure and unpredictable overtime. Customer churn and financial losses become harder to control.
 
 So we hesitate to move at AI speed, and fall behind the competition.
@@ -21,9 +19,10 @@ For more information, visit [www.featbit.co](https://www.featbit.co).
 
 ## Get started in 3 steps
 
-Prefer a hosted service? [Use FeatBit Cloud](https://app.featbit.co) without managing infrastructure.
+> [!NOTE]
+> Prefer a hosted service? [Use FeatBit Cloud](https://app.featbit.co) without managing infrastructure.
 
-To self-host, you'll need Git and Docker with Docker Compose.
+To try FeatBit on your machine, follow the steps below. You'll need Git and Docker with Docker Compose.
 
 ### 1. Start FeatBit
 
@@ -42,13 +41,17 @@ Once the containers have started, open [http://localhost:8081](http://localhost:
 
 Choose an [official SDK](https://docs.featbit.co/sdk/overview) for your application. Follow the portal's getting-started guide to initialize it with your environment's SDK key and connection URLs.
 
-### 3. Check a feature flag
+Once your SDK is connected, you're ready to evaluate your first feature flag.
 
-Create a boolean flag named `user-new-algorithm` in the same environment and set its off variation to `false`. After initializing the .NET SDK, evaluate the flag in your code:
+### 3. Try your first feature flag
+
+In the portal, create a boolean flag named "Use New Algorithm" with an automatically generated key of `use-new-algorithm`.
+
+Use your SDK to evaluate the flag by its key and choose which code to run. For example, with the .NET SDK:
 
 ```csharp
 var user = FbUser.Builder("tester-id").Name("tester").Build();
-if (featbit.BoolVariation("user-new-algorithm", user, false))
+if (featbit.BoolVariation("use-new-algorithm", user, defaultValue: false))
 {
     // Run the new algorithm.
 }
@@ -58,9 +61,9 @@ else
 }
 ```
 
-Use the portal to release the feature to a small group of users, observe the results, and expand the rollout. Turn the flag off to return to the existing behavior.
+In the portal, turn the flag on for a small group of users to try the new algorithm, then gradually expand the rollout. If needed, turn the flag off to switch back to the existing algorithm.
 
-## Configure and run FeatBit anywhere
+## Self-host FeatBit
 
 Run FeatBit on your own infrastructure, on-premises or in the cloud. Choose the setup that fits your environment:
 
