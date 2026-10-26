@@ -32,7 +32,6 @@ public static class ConfigureServices
         // custom services
         services.AddHttpContextAccessor();
         services.AddSingleton<ICurrentUser, CurrentUser>();
-        services.AddScoped<IAuditLogAccess, AuditLogAccess>();
         services.AddTransient<IPermissionGuard, PermissionGuard>();
         services.AddTransient<ISegmentMessageService, SegmentMessageService>();
         if (configuration.UseControlPlane())

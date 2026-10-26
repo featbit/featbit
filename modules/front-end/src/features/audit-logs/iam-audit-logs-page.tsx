@@ -1,3 +1,4 @@
+import { AuditLogScopes } from "./audit-logs-types"
 import { ApiRequestError } from "@/lib/api/authenticated-api"
 import { useInfiniteQuery } from "@tanstack/react-query"
 import { useMemo, useSyncExternalStore } from "react"
@@ -10,7 +11,7 @@ import {
   resolveLang,
 } from "@/features/layout/layout-context"
 import { dayAfter, startOfDay } from "./audit-log-utils"
-import { fetchIamAuditLogs } from "./audit-logs-api"
+import { fetchAuditLogs } from "./audit-logs-api"
 import { useAuditLogFilters } from "./use-audit-log-filters"
 import { AuditLogPageContent } from "./components/audit-log-page-content"
 
@@ -48,11 +49,13 @@ function OrganizationAuditLogsPage() {
       range?.to?.toISOString(),
     ],
     queryFn: ({ pageParam }) =>
-      fetchIamAuditLogs(
+      fetchAuditLogs(
         {
+          scope: AuditLogScopes.Organization,
+          scopeId: orgId,
           query: debouncedSearch,
           creatorId: user?.id,
-          refType: refType || undefined,
+          refTypes: refType ? [refType] : ["Member", "Group", "Policy"],
           from: range?.from ? startOfDay(range.from) : undefined,
           to: range?.to ? dayAfter(range.to) : undefined,
         },

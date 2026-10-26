@@ -1,12 +1,12 @@
+import type { OrganizationMember } from "@/features/organization/organization-members-api"
 import { useEffect, useState } from "react"
 import type { DateRange } from "react-day-picker"
 import { hasAppliedFilters } from "./audit-log-utils"
-import type { AuditUser } from "./audit-logs-types"
 
 export function useAuditLogFilters() {
   const [search, setSearch] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
-  const [user, setUser] = useState<AuditUser | null>(null)
+  const [user, setUser] = useState<OrganizationMember | null>(null)
   const [refType, setRefType] = useState("")
   const [range, setRange] = useState<DateRange | undefined>()
 

@@ -35,20 +35,22 @@ export type PagedAuditLogs = {
   totalCount: number
 }
 
-export type AuditUser = {
-  id: string
-  type: "user" | "accessToken"
-  name: string
-  email: string | null
-}
+export const AuditLogScopes = {
+  Environment: "Environment",
+  Organization: "Organization",
+  Workspace: "Workspace",
+} as const
 
-export type AuditLogFilters = {
+export type AuditLogScope = (typeof AuditLogScopes)[keyof typeof AuditLogScopes]
+
+export type AuditLogQueryFilter = {
+  scope: AuditLogScope
+  scopeId: string
   crossEnvironment?: boolean
-  query: string
+  query?: string
   creatorId?: string
-  refType?: string
+  refTypes?: string[]
   refId?: string
-  envId?: string
   from?: number
   to?: number
 }

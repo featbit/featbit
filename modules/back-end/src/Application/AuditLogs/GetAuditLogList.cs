@@ -1,8 +1,6 @@
-using Domain.Policies;
 using Application.Bases.Models;
 using Domain.AuditLogs;
 using Domain.SemanticPatch;
-using Application.Bases;
 
 namespace Application.AuditLogs;
 
@@ -10,26 +8,9 @@ public class GetAuditLogList : IRequest<PagedResult<AuditLogVm>>
 {
     public Guid WorkspaceId { get; set; }
 
-    public Guid OrgId { get; set; }
-
-    public Guid? EnvId { get; set; }
-
-    public PolicyStatement[] Permissions { get; set; } = [];
+    public Guid EnvId { get; set; }
 
     public AuditLogFilter Filter { get; set; }
-}
-
-public class GetAuditLogListValidator : AbstractValidator<GetAuditLogList>
-{
-    public GetAuditLogListValidator()
-    {
-        RuleFor(x => x.Filter.Scope)
-            .Must(scope => scope is AuditLogScope.Environment or AuditLogScope.Iam)
-            .WithErrorCode(ErrorCodes.Invalid("scope"));
-        RuleFor(x => x.EnvId).NotNull()
-            .When(x => x.Filter.Scope == AuditLogScope.Environment)
-            .WithErrorCode(ErrorCodes.Required("envId"));
-    }
 }
 
 public class GetAuditLogListHandler : IRequestHandler<GetAuditLogList, PagedResult<AuditLogVm>>
@@ -38,26 +19,22 @@ public class GetAuditLogListHandler : IRequestHandler<GetAuditLogList, PagedResu
     private readonly IUserService _userService;
     private readonly IAccessTokenService _accessTokenService;
     private readonly IMapper _mapper;
-    private readonly IAuditLogAccess _access;
 
     public GetAuditLogListHandler(
         IAuditLogService auditLogService,
         IUserService userService,
         IAccessTokenService accessTokenService,
-        IMapper mapper,
-        IAuditLogAccess access)
+        IMapper mapper)
     {
         _auditLogService = auditLogService;
         _userService = userService;
         _accessTokenService = accessTokenService;
         _mapper = mapper;
-        _access = access;
     }
 
     public async Task<PagedResult<AuditLogVm>> Handle(GetAuditLogList request, CancellationToken cancellationToken)
     {
-        await _access.EnsureAsync(request.Filter, request.Permissions);
-        var logs = await _auditLogService.GetListAsync(request.WorkspaceId, request.OrgId, request.EnvId, request.Filter);
+        var logs = await _auditLogService.GetListAsync(request.WorkspaceId, request.EnvId, request.Filter);
         var logVms = _mapper.Map<PagedResult<AuditLogVm>>(logs);
 
         var users = await _userService.GetListAsync(logVms.Items.Select(x => x.CreatorId));

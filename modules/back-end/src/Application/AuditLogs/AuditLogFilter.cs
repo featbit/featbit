@@ -4,10 +4,6 @@ namespace Application.AuditLogs;
 
 public class AuditLogFilter : PagedRequest
 {
-    public AuditLogScope Scope { get; set; }
-
-    public bool? CrossEnvironment { get; set; }
-
     /// <summary>
     /// The part of the keyword/comment of an audit log
     /// </summary>
@@ -24,7 +20,7 @@ public class AuditLogFilter : PagedRequest
     public string RefId { get; set; }
 
     /// <summary>
-    /// The referenced resource type. FeatureFlag, Segment, Member, Group or Policy. Omit for all types.
+    /// The referenced resource type. Can be one of the following: "FeatureFlag" or "Segment"
     /// </summary>
     public string RefType { get; set; }
 
@@ -37,4 +33,10 @@ public class AuditLogFilter : PagedRequest
     /// The end time of the audit log creation time range, in unix milliseconds
     /// </summary>
     public long? To { get; set; }
+
+    /// <summary>
+    /// Whether to query logs across environments. By default, we only query logs in the specified environment (the current environment).
+    /// Only set this to true if you want to query logs for a shared-segment.
+    /// </summary>
+    public bool? CrossEnvironment { get; set; }
 }

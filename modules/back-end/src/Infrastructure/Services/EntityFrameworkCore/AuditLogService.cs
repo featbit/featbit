@@ -8,9 +8,19 @@ namespace Infrastructure.Services.EntityFrameworkCore;
 
 public class AuditLogService(AppDbContext dbContext) : EntityFrameworkCoreService<AuditLog>(dbContext), IAuditLogService
 {
-    public async Task<PagedResult<AuditLog>> GetListAsync(Guid workspaceId, Guid orgId, Guid? envId, AuditLogFilter userFilter)
+    public async Task<PagedResult<AuditLog>> GetListAsync(Guid workspaceId, Guid envId, AuditLogFilter userFilter)
     {
-        var queryable = ScopedLogs(workspaceId, orgId, envId, userFilter);
+        var queryable = Queryable.Where(x =>
+            x.WorkspaceId == workspaceId &&
+            (x.RefType == AuditLogRefTypes.FeatureFlag || x.RefType == AuditLogRefTypes.Segment)
+        );
+
+        // env filter, by default we only query logs in the specified environment
+        var crossEnvironment = userFilter.CrossEnvironment ?? false;
+        if (!crossEnvironment)
+        {
+            queryable = queryable.Where(x => x.EnvId == envId);
+        }
 
         // query(keyword/comment) filter
         var query = userFilter.Query?.ToLower();
@@ -69,21 +79,77 @@ public class AuditLogService(AppDbContext dbContext) : EntityFrameworkCoreServic
         return new PagedResult<AuditLog>(totalCount, items);
     }
 
-    private IQueryable<AuditLog> ScopedLogs(Guid workspaceId, Guid orgId, Guid? envId, AuditLogFilter filter)
+    public async Task<PagedResult<AuditLog>> GetListAsync(Guid workspaceId, AuditLogQueryFilter filter)
     {
-        var logs = Queryable.Where(x => x.WorkspaceId == workspaceId);
-        switch (filter.Scope)
+        var queryable = Queryable.Where(x => x.WorkspaceId == workspaceId);
+
+        // scope filter
+        var scopeId = filter.ScopeId;
+        queryable = filter.Scope switch
         {
-            case AuditLogScope.Iam:
-                return logs.Where(x => x.OrganizationId == orgId &&
-                    (x.RefType == AuditLogRefTypes.Member || x.RefType == AuditLogRefTypes.Group || x.RefType == AuditLogRefTypes.Policy));
-            case AuditLogScope.Environment:
-                if (!envId.HasValue) throw new ArgumentException("Environment is required.");
-                logs = logs.Where(x => x.RefType == AuditLogRefTypes.FeatureFlag || x.RefType == AuditLogRefTypes.Segment);
-                return filter.CrossEnvironment == true ? logs : logs.Where(x => x.EnvId == envId.Value);
-            default:
-                throw new ArgumentOutOfRangeException(nameof(AuditLogFilter.Scope));
+            AuditLogScopes.Environment => filter.CrossEnvironment == true
+                ? queryable
+                : queryable.Where(x => x.EnvId == scopeId),
+            AuditLogScopes.Organization => queryable.Where(x => x.OrganizationId == scopeId),
+            AuditLogScopes.Workspace => queryable.Where(x => x.WorkspaceId == scopeId),
+
+            _ => throw new ArgumentOutOfRangeException(nameof(filter.Scope))
+        };
+
+        // refId filter
+        var refId = filter.RefId;
+        if (!string.IsNullOrWhiteSpace(refId))
+        {
+            queryable = queryable.Where(x => x.RefId == refId);
         }
+
+        // refType filter
+        if (filter.RefTypes.Length > 0)
+        {
+            queryable = queryable.Where(x => filter.RefTypes.Contains(x.RefType));
+        }
+
+        // query(keyword/comment) filter
+        var query = filter.Query?.ToLower();
+        if (!string.IsNullOrWhiteSpace(query))
+        {
+            queryable = queryable.Where(x =>
+                x.Keyword.ToLower().Contains(query) || x.Comment.ToLower().Contains(query)
+            );
+        }
+
+        // creator filter
+        var creator = filter.CreatorId;
+        if (creator.HasValue)
+        {
+            queryable = queryable.Where(x => x.CreatorId == creator.Value);
+        }
+
+        // data-range filter
+        var from = filter.From;
+        var to = filter.To;
+        if (from.HasValue)
+        {
+            var fromDate = DateTimeOffset.FromUnixTimeMilliseconds(from.Value).UtcDateTime;
+            queryable = queryable.Where(x => x.CreatedAt >= fromDate);
+        }
+
+        if (to.HasValue)
+        {
+            var toDate = DateTimeOffset.FromUnixTimeMilliseconds(to.Value).UtcDateTime;
+            queryable = queryable.Where(x => x.CreatedAt <= toDate);
+        }
+
+        var totalCount = await queryable.CountAsync();
+
+        var items = await queryable
+            .OrderByDescending(x => x.CreatedAt)
+            .ThenByDescending(x => x.Id)
+            .Skip(filter.PageIndex * filter.PageSize)
+            .Take(filter.PageSize)
+            .ToListAsync();
+
+        return new PagedResult<AuditLog>(totalCount, items);
     }
 
     public async Task<LastChange?> GetLastChangeAsync(Guid workspaceId, Guid envId, string refType, string refId)

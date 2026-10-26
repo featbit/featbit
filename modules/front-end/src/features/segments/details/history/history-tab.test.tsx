@@ -1,3 +1,4 @@
+import { AuditLogScopes } from "@/features/audit-logs/audit-logs-types"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
@@ -84,9 +85,10 @@ describe("HistoryTab", () => {
 
     await waitFor(() =>
       expect(fetchAuditLogs).toHaveBeenCalledWith(
-        "env-1",
         expect.objectContaining({
-          refType: "Segment",
+          scope: AuditLogScopes.Environment,
+          scopeId: "env-1",
+          refTypes: ["Segment"],
           refId: segment.id,
           crossEnvironment: false,
         }),
@@ -134,8 +136,13 @@ describe("HistoryTab", () => {
     expect(await screen.findByText("Across 2 scopes")).toBeInTheDocument()
     await waitFor(() =>
       expect(fetchAuditLogs).toHaveBeenCalledWith(
-        "env-1",
-        expect.objectContaining({ crossEnvironment: true }),
+        expect.objectContaining({
+          scope: AuditLogScopes.Environment,
+          scopeId: "env-1",
+          refTypes: ["Segment"],
+          refId: sharedSegment.id,
+          crossEnvironment: true,
+        }),
         0,
         10
       )

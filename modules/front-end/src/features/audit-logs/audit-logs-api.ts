@@ -1,31 +1,30 @@
 import { fetchApi } from "@/lib/api/authenticated-api"
-import type {
-  AuditLogFilters,
-  AuditUser,
-  PagedAuditLogs,
-} from "./audit-logs-types"
+import type { OrganizationMember } from "@/features/organization/organization-members-api"
+import type { AuditLogQueryFilter, PagedAuditLogs } from "./audit-logs-types"
 
 export function fetchAuditLogs(
-  envId: string,
-  filters: AuditLogFilters,
+  filter: AuditLogQueryFilter,
   pageIndex: number,
   pageSize: number
 ) {
   const params = new URLSearchParams({
-    crossEnvironment: String(filters.crossEnvironment ?? false),
-    query: filters.query,
-    creatorId: filters.creatorId ?? "",
-    refType: filters.refType ?? "",
-    refId: filters.refId ?? "",
-    from: filters.from ? String(filters.from) : "",
-    to: filters.to ? String(filters.to) : "",
+    scope: filter.scope,
+    scopeId: filter.scopeId,
+    crossEnvironment: String(filter.crossEnvironment ?? false),
+    query: filter.query ?? "",
+    creatorId: filter.creatorId ?? "",
+    refId: filter.refId ?? "",
+    from: filter.from !== undefined ? String(filter.from) : "",
+    to: filter.to !== undefined ? String(filter.to) : "",
     pageIndex: String(pageIndex),
     pageSize: String(pageSize),
   })
 
-  return fetchApi<PagedAuditLogs>(
-    `/api/v1/envs/${encodeURIComponent(envId)}/audit-logs?${params}`
-  )
+  for (const refType of filter.refTypes ?? []) {
+    params.append("refTypes", refType)
+  }
+
+  return fetchApi<PagedAuditLogs>(`/api/v1/audit-logs?${params}`)
 }
 
 export function fetchAuditUsers(searchText: string) {
@@ -35,27 +34,7 @@ export function fetchAuditUsers(searchText: string) {
     pageSize: "20",
   })
 
-  return fetchApi<{ items: AuditUser[]; totalCount: number }>(
+  return fetchApi<{ items: OrganizationMember[]; totalCount: number }>(
     `/api/v1/members?${params}`
   )
-}
-
-export function fetchIamAuditLogs(
-  filters: AuditLogFilters,
-  pageIndex: number,
-  pageSize: number
-) {
-  const params = new URLSearchParams({
-    scope: "iam",
-    query: filters.query,
-    creatorId: filters.creatorId ?? "",
-    refType: filters.refType ?? "",
-    refId: filters.refId ?? "",
-    from: filters.from ? String(filters.from) : "",
-    to: filters.to ? String(filters.to) : "",
-    pageIndex: String(pageIndex),
-    pageSize: String(pageSize),
-  })
-
-  return fetchApi<PagedAuditLogs>(`/api/v1/audit-logs?${params}`)
 }

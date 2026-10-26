@@ -1,3 +1,4 @@
+import { AuditLogScopes } from "./audit-logs-types"
 import { useInfiniteQuery } from "@tanstack/react-query"
 import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
@@ -35,11 +36,12 @@ export function AuditLogsPage() {
     ],
     queryFn: ({ pageParam }) =>
       fetchAuditLogs(
-        envId,
         {
+          scope: AuditLogScopes.Environment,
+          scopeId: envId,
           query: debouncedSearch,
           creatorId: user?.id,
-          refType: refType || undefined,
+          refTypes: refType ? [refType] : ["FeatureFlag", "Segment"],
           from: range?.from ? startOfDay(range.from) : undefined,
           to: range?.to ? dayAfter(range.to) : undefined,
         },

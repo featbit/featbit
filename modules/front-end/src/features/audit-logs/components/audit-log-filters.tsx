@@ -1,3 +1,4 @@
+import type { OrganizationMember } from "@/features/organization/organization-members-api"
 import {
   getCurrentWorkspace,
   getCurrentOrganization,
@@ -40,9 +41,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { fetchAuditUsers } from "../audit-logs-api"
-import type { AuditUser } from "../audit-logs-types"
 
-function userLabel(user: AuditUser) {
+function userLabel(user: OrganizationMember) {
   return user.name?.trim() || user.email || user.id
 }
 
@@ -64,7 +64,7 @@ export function AuditLogFilters({
 }: {
   locale: string
   search: string
-  user: AuditUser | null
+  user: OrganizationMember | null
   refType: string
   range: DateRange | undefined
   filtersApplied: boolean
@@ -72,7 +72,7 @@ export function AuditLogFilters({
   iam?: boolean
   endContent?: ReactNode
   onSearchChange: (value: string) => void
-  onUserChange: (value: AuditUser | null) => void
+  onUserChange: (value: OrganizationMember | null) => void
   onRefTypeChange: (value: string) => void
   onRangeChange: (value: DateRange | undefined) => void
   onClear: () => void
@@ -191,11 +191,9 @@ export function AuditLogFilters({
                             <p className="truncate text-sm">
                               {userLabel(option)}
                             </p>
-                            {option.type === "accessToken" || option.email ? (
+                            {option.email ? (
                               <p className="truncate text-xs text-muted-foreground">
-                                {option.type === "accessToken"
-                                  ? t("auditLogs.accessToken")
-                                  : option.email}
+                                {option.email}
                               </p>
                             ) : null}
                           </div>

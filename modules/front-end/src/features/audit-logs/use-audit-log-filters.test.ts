@@ -26,9 +26,8 @@ describe("useAuditLogFilters", () => {
       result.current.setSearch("old")
       result.current.setUser({
         id: "user",
-        type: "user",
         name: "User",
-        email: null,
+        email: "user@example.com",
       })
       result.current.setRefType("Policy")
       result.current.setRange({ from: new Date(2026, 9, 20) })

@@ -93,8 +93,8 @@ test("IAM audit table renders IAM RN and readable changes without an environment
     requests.push(url)
     const items = records.filter(
       (x) =>
-        !url.searchParams.get("refType") ||
-        x.refType === url.searchParams.get("refType")
+        !url.searchParams.getAll("refTypes").length ||
+        url.searchParams.getAll("refTypes").includes(x.refType)
     )
     return route.fulfill({
       json: { success: true, data: { items, totalCount: items.length } },
@@ -209,7 +209,7 @@ test("original Audit Logs keeps environment queries, columns and type options", 
   await setAuthenticatedUser(page)
   await setCurrentContext(page)
   const requests: URL[] = []
-  await page.route("**/api/v1/envs/*/audit-logs?*", (route) => {
+  await page.route("**/api/v1/audit-logs?*", (route) => {
     requests.push(new URL(route.request().url()))
     return route.fulfill({
       json: { success: true, data: { items: [], totalCount: 0 } },
@@ -219,7 +219,9 @@ test("original Audit Logs keeps environment queries, columns and type options", 
   await expect(
     page.getByText("Changes in this environment will appear here.")
   ).toBeVisible()
-  expect(requests[0]?.pathname).toBe("/api/v1/envs/env-prod-cn/audit-logs")
+  expect(requests[0]?.pathname).toBe("/api/v1/audit-logs")
+  expect(requests[0]?.searchParams.get("scope")).toBe("Environment")
+  expect(requests[0]?.searchParams.get("scopeId")).toBe("env-prod-cn")
   expect(requests[0]?.searchParams.get("crossEnvironment")).toBe("false")
   await expect(
     page.getByRole("columnheader", { name: "Actor", exact: true })
@@ -342,10 +344,10 @@ test("original Audit Logs displays shared segment history in its original enviro
     dataChange: { previous: "", current: JSON.stringify(segment) },
   }
   const requests: URL[] = []
-  await page.route("**/api/v1/envs/*/audit-logs?*", (route) => {
+  await page.route("**/api/v1/audit-logs?*", (route) => {
     const url = new URL(route.request().url())
     requests.push(url)
-    const items = url.pathname.includes(segment.envId) ? [row] : []
+    const items = url.searchParams.get("scopeId") === segment.envId ? [row] : []
     return route.fulfill({
       json: { success: true, data: { items, totalCount: items.length } },
     })
@@ -365,7 +367,11 @@ test("original Audit Logs displays shared segment history in its original enviro
   await page.getByRole("option", { name: "Segment", exact: true }).click()
   await expect
     .poll(() =>
-      requests.some((url) => url.searchParams.get("refType") === "Segment")
+      requests.some(
+        (url) =>
+          url.searchParams.getAll("refTypes").length === 1 &&
+          url.searchParams.getAll("refTypes")[0] === "Segment"
+      )
     )
     .toBe(true)
   await expect(
