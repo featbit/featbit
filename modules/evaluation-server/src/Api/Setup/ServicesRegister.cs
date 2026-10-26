@@ -63,9 +63,15 @@ public static class ServicesRegister
             .RequireAuthenticatedUser()
             .Build();
         services.AddAuthorizationBuilder()
-            .SetFallbackPolicy(requireAuthPolicy);
+            .SetFallbackPolicy(requireAuthPolicy)
+            .AddPolicy(FeatBitPolicies.ServerSecretOnly, policy => policy
+                .RequireAuthenticatedUser().RequireClaim(FeatBitClaims.SecretType, SecretTypes.Server))
+            .AddPolicy(FeatBitPolicies.ClientSecretOnly, policy => policy
+                .RequireAuthenticatedUser().RequireClaim(FeatBitClaims.SecretType, SecretTypes.Client))
+            .AddPolicy(FeatBitPolicies.ServerSecretOrClientSecret, policy => policy
+                .RequireAuthenticatedUser().RequireClaim(FeatBitClaims.SecretType, SecretTypes.Client, SecretTypes.Server));
 
-        // token validator (v1 structural validation only; store lookup added in PR 2)
+        // Structural parsing is shared; HTTP and Streaming also verify the complete secret against the store.
         services.AddSingleton<ITokenValidator, TokenValidator>();
 
         // add bounded memory cache

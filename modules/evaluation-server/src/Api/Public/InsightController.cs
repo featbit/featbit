@@ -1,3 +1,5 @@
+using Api.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Api.RateLimiting;
 using Api.Setup;
 using Domain.EndUsers;
@@ -10,6 +12,7 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace Api.Public;
 
+[Authorize(Policy = FeatBitPolicies.ServerSecretOrClientSecret)]
 [Route("api/public/insight")]
 [EnableRateLimiting(RateLimitingPolicies.Insight)]
 public class InsightController : PublicApiControllerBase
