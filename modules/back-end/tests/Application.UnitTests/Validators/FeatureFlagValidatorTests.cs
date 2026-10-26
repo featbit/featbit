@@ -14,7 +14,7 @@ public class FeatureFlagValidatorTests
     {
         var on = V("v-on");
         var off = V("v-off");
-        return new CreateFeatureFlag(Guid.NewGuid(), Guid.NewGuid(), new CreateFeatureFlagPayload
+        return new CreateFeatureFlag(Guid.NewGuid(), Guid.NewGuid(),  Guid.NewGuid(), new CreateFeatureFlagPayload
         {
             Name = "Flag",
             Key = "flag.key-1",

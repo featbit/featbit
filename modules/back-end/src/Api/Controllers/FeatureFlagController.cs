@@ -124,8 +124,7 @@ public class FeatureFlagController : ApiControllerBase
     [Authorize(Permissions.CreateFlag)]
     public async Task<ApiResponse<FeatureFlag>> CreateAsync(Guid envId, CreateFeatureFlagPayload payload)
     {
-        payload.EnvId = envId;
-        var request = new CreateFeatureFlag(WorkspaceId, OrgId, payload);
+        var request = new CreateFeatureFlag(WorkspaceId, OrgId, envId, payload);
 
         var flag = await Mediator.Send(request);
         return Ok(flag);

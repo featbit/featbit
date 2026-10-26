@@ -2,6 +2,7 @@ using Application.Bases;
 using Application.Bases.Models;
 using Domain.AuditLogs;
 using Domain.SemanticPatch;
+using Domain.Users;
 
 namespace Application.AuditLogs;
 
@@ -66,6 +67,12 @@ public class QueryAuditLogsHandler(
                 _ => Array.Empty<Instruction>()
             };
 
+            if (item.CreatorId == SystemUser.Id)
+            {
+                item.CreatorEmail = "System";
+                continue;
+            }
+
             var user = creators.FirstOrDefault(x => x.Id == item.CreatorId);
             if (user != null)
             {
@@ -83,8 +90,7 @@ public class QueryAuditLogsHandler(
                 continue;
             }
 
-            // Otherwise this audit log is created by system user
-            item.CreatorEmail = item.CreatorId == Guid.Empty ? "System" : "Unknown";
+            item.CreatorEmail = "Unknown";
         }
 
         return logVms;

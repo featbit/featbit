@@ -429,9 +429,8 @@ public class FeatureFlagMcpCreateRequest
             ];
         }
 
-        return new CreateFeatureFlag(workspaceId, orgId, new CreateFeatureFlagPayload
+        return new CreateFeatureFlag(workspaceId, orgId, envId, new CreateFeatureFlagPayload
         {
-            EnvId = envId,
             Name = Name,
             Key = Key,
             Description = Description ?? string.Empty,

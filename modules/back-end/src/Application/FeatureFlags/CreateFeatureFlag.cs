@@ -10,11 +10,6 @@ namespace Application.FeatureFlags;
 public class CreateFeatureFlagPayload
 {
     /// <summary>
-    /// The ID of the environment the feature flag belongs to. Retrieved from the URL path.
-    /// </summary>
-    public Guid EnvId { get; set; }
-
-    /// <summary>
     /// The name of the feature flag.
     /// </summary>
     public string Name { get; set; }
@@ -65,8 +60,10 @@ public class CreateFeatureFlagPayload
     public bool InsightsEnabled { get; set; } = true;
 }
 
-public class CreateFeatureFlag: CreateFeatureFlagPayload, IRequest<FeatureFlag>
+public class CreateFeatureFlag : CreateFeatureFlagPayload, IRequest<FeatureFlag>
 {
+    public Guid EnvId { get; set; }
+
     public Guid WorkspaceId { get; set; }
 
     public Guid OrgId { get; set; }
@@ -93,12 +90,12 @@ public class CreateFeatureFlag: CreateFeatureFlagPayload, IRequest<FeatureFlag>
         return flag;
     }
 
-    public CreateFeatureFlag(Guid workspaceId, Guid orgId, CreateFeatureFlagPayload payload)
+    public CreateFeatureFlag(Guid workspaceId, Guid orgId, Guid envId, CreateFeatureFlagPayload payload)
     {
         WorkspaceId = workspaceId;
         OrgId = orgId;
+        EnvId = envId;
 
-        EnvId = payload.EnvId;
         Name = payload.Name;
         Key = payload.Key;
         IsEnabled = payload.IsEnabled;

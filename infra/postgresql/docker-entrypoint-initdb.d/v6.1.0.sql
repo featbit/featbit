@@ -5,6 +5,7 @@
 ALTER TABLE feature_flags
     ADD COLUMN IF NOT EXISTS insights_enabled boolean NOT NULL DEFAULT true;
 
+-- https://github.com/featbit/featbit/pull/1022
 -- ViewEnvSecret is independent at runtime. Preserve existing secret managers'
 -- access and grant the built-in Developer read access for SDK integration.
 UPDATE policies p
@@ -55,41 +56,24 @@ WHERE t.type = 'Service'
       AND COALESCE(s->'actions', '[]'::jsonb) ?| ARRAY['CreateEnvSecret', 'UpdateEnvSecret', 'DeleteEnvSecret']
 );
 
-
--- IAM audit logs. Keep the ownership backfill and constraints atomic.
-BEGIN;
+-- https://github.com/featbit/featbit/pull/1038
+-- Backfill workspace_id and organization_id for audit logs.
 ALTER TABLE audit_logs
     ADD COLUMN IF NOT EXISTS workspace_id uuid,
     ADD COLUMN IF NOT EXISTS organization_id uuid;
 ALTER TABLE audit_logs ALTER COLUMN env_id DROP NOT NULL;
 
--- Resolve historical ownership from the environment, never from request context.
--- Do not overwrite explicit ownership (shared segments can have a null organization).
 UPDATE audit_logs a SET workspace_id = o.workspace_id, organization_id = o.id
 FROM environments e
 JOIN projects p ON p.id = e.project_id
 JOIN organizations o ON o.id = p.organization_id
 WHERE a.workspace_id IS NULL AND a.env_id = e.id;
 
--- Shared segments belong to the workspace, including records already backfilled.
--- Deleted segments retain their type in the previous snapshot.
-UPDATE audit_logs SET organization_id = NULL
-WHERE ref_type = 'Segment' AND organization_id IS NOT NULL
-    AND COALESCE(NULLIF(data_change->>'current', ''), NULLIF(data_change->>'previous', ''))::jsonb->>'type' = 'shared';
-
-DO $$ BEGIN
-    IF EXISTS (SELECT 1 FROM audit_logs WHERE workspace_id IS NULL) THEN
-        RAISE EXCEPTION 'Audit logs have unresolved workspace ownership. Restore verified environment/project/organization ownership before rerunning v6.1.0; no audit history was removed.';
-    END IF;
-END $$;
-
-ALTER TABLE audit_logs ALTER COLUMN workspace_id SET NOT NULL;
 DROP INDEX IF EXISTS ix_audit_logs_env_id_ref_id_created_at;
 DROP INDEX IF EXISTS ix_audit_logs_workspace_created;
-CREATE INDEX IF NOT EXISTS ix_audit_logs_workspace_env_created
+CREATE INDEX IF NOT EXISTS ix_audit_logs_workspace_id_env_id_created_at_id
     ON audit_logs(workspace_id, env_id, created_at DESC, id DESC);
-CREATE INDEX IF NOT EXISTS ix_audit_logs_workspace_resource_created
+CREATE INDEX IF NOT EXISTS ix_audit_logs_workspace_id_ref_type_ref_id_created_at_id
     ON audit_logs(workspace_id, ref_type, ref_id, created_at DESC, id DESC);
-CREATE INDEX IF NOT EXISTS ix_audit_logs_workspace_org_created
+CREATE INDEX IF NOT EXISTS ix_audit_logs_workspace_id_organization_id_created_at_id
     ON audit_logs(workspace_id, organization_id, created_at DESC, id DESC);
-COMMIT;

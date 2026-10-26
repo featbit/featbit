@@ -29,7 +29,7 @@ public class DirectSegmentChangePublisher(
             {
                 await featureFlagAppService.OnSegmentUpdatedAsync(
                     notification.WorkspaceId,
-                    segment.IsEnvironmentSpecific ? notification.OrganizationId : null,
+                    notification.OrganizationId,
                     segment, notification.OperatorId, affectedFlags);
             }
 
