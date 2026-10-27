@@ -50,6 +50,8 @@ public sealed class SegmentCommitCoordinatorWorkerTests : IntegrationTestBase, I
 
     private readonly string _dbName = $"featbit_s3_test_{Guid.NewGuid():N}";
     private readonly Guid _envId = Guid.NewGuid();
+    private readonly Guid _workspaceId = Guid.NewGuid();
+    private readonly Guid _organizationId = Guid.NewGuid();
 
     private MongoDbClient _mongoDb = null!;
     private SegmentService _segmentService = null!;
@@ -119,7 +121,7 @@ public sealed class SegmentCommitCoordinatorWorkerTests : IntegrationTestBase, I
     private Segment CreateSegment(string key, params string[] included)
     {
         return new Segment(
-            workspaceId: Guid.NewGuid(),
+            workspaceId: _workspaceId,
             envId: _envId,
             name: key,
             key: key,
@@ -143,7 +145,8 @@ public sealed class SegmentCommitCoordinatorWorkerTests : IntegrationTestBase, I
         string key,
         Guid operatorId = default,
         string operation = Operations.Update,
-        bool isTargetingChange = true)
+        bool isTargetingChange = true,
+        Guid? organizationId = null)
     {
         var committed = CreateSegment(key, "alice");
         committed.CommittedVersion = 1;
@@ -156,7 +159,7 @@ public sealed class SegmentCommitCoordinatorWorkerTests : IntegrationTestBase, I
         pendingValue.UpdatedAt = DateTimeOffset.FromUnixTimeMilliseconds(pendingVersion).UtcDateTime;
 
         await _segmentService.SetPendingAsync(
-            committed.Id, pendingValue, pendingVersion, operatorId, operation, isTargetingChange);
+            committed.Id, pendingValue, pendingVersion, operatorId, operation, isTargetingChange, organizationId);
 
         return pendingVersion;
     }
@@ -173,6 +176,7 @@ public sealed class SegmentCommitCoordinatorWorkerTests : IntegrationTestBase, I
         var rawCollection = _mongoDb.CollectionOf("Segments");
         var filter = Builders<BsonDocument>.Filter.Eq("_id", segmentId);
         var unset = Builders<BsonDocument>.Update
+            .Unset("Pending.OrganizationId")
             .Unset("Pending.OperatorId")
             .Unset("Pending.Operation")
             .Unset("Pending.IsTargetingChange");
@@ -424,7 +428,7 @@ public sealed class SegmentCommitCoordinatorWorkerTests : IntegrationTestBase, I
         const bool stagedIsTargetingChange = false;
 
         var v = await SeedCommittedV1PendingV2(
-            key, stagedOperatorId, stagedOperation, stagedIsTargetingChange);
+            key, stagedOperatorId, stagedOperation, stagedIsTargetingChange, _organizationId);
         var segment = await _segmentService.GetAsync(await PendingId(key));
 
         var now = DateTimeOffset.UtcNow;
@@ -445,6 +449,8 @@ public sealed class SegmentCommitCoordinatorWorkerTests : IntegrationTestBase, I
         // the reconstructed notification must carry the ORIGINAL staged attribution, not the
         // coordinator's old hardcoded Guid.Empty/Update/true.
         var notification = Assert.Single(spy.Notifications);
+        Assert.Equal(_workspaceId, notification.WorkspaceId);
+        Assert.Equal(_organizationId, notification.OrganizationId);
         Assert.Equal(stagedOperatorId, notification.OperatorId);
         Assert.Equal(stagedOperation, notification.Operation);
         Assert.Equal(stagedIsTargetingChange, notification.IsTargetingChange);
@@ -479,6 +485,8 @@ public sealed class SegmentCommitCoordinatorWorkerTests : IntegrationTestBase, I
         // Legacy row (missing OperatorId/Operation/IsTargetingChange) must deserialize to exactly
         // today's prior hardcoded reconstruction: Guid.Empty / Operations.Update / true.
         var notification = Assert.Single(spy.Notifications);
+        Assert.Null(notification.OrganizationId);
+        Assert.Equal(_workspaceId, notification.WorkspaceId);
         Assert.Equal(Guid.Empty, notification.OperatorId);
         Assert.Equal(Operations.Update, notification.Operation);
         Assert.True(notification.IsTargetingChange);
@@ -565,10 +573,10 @@ public sealed class SegmentCommitCoordinatorWorkerTests : IntegrationTestBase, I
     /// </summary>
     private sealed class ThrowingFeatureFlagAppService : IFeatureFlagAppService
     {
-        public Task ApplyDraftAsync(Guid draftId, string operation, Guid operatorId) =>
+        public Task ApplyDraftAsync(Guid workspaceId, Guid orgId, Guid draftId, string operation, Guid operatorId) =>
             throw new InvalidOperationException("ApplyDraftAsync should not be called by the commit coordinator.");
 
-        public Task OnSegmentUpdatedAsync(Segment segment, Guid operatorId, ICollection<FlagReference> flagReferences) =>
+        public Task OnSegmentUpdatedAsync(Guid workspaceId, Guid? orgId, Segment segment, Guid operatorId, ICollection<FlagReference> flagReferences) =>
             throw new InvalidOperationException(
                 "OnSegmentUpdatedAsync should not be called when there are no affected flags.");
     }

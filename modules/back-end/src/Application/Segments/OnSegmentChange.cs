@@ -9,7 +9,8 @@ public class OnSegmentChange : INotification
 {
     public Guid WorkspaceId { get; }
 
-    public Guid OrganizationId { get; }
+    // Null when reconstructing legacy pending changes without organization attribution.
+    public Guid? OrganizationId { get; }
 
     public Segment Segment { get; set; }
 
@@ -26,7 +27,7 @@ public class OnSegmentChange : INotification
     public OnSegmentChange(
         Segment segment,
         Guid workspaceId,
-        Guid organizationId,
+        Guid? organizationId,
         string operation,
         DataChange dataChange,
         Guid operatorId,
