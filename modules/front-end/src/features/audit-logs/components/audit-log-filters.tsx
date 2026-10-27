@@ -1,4 +1,7 @@
-import type { OrganizationMember } from "@/features/organization/organization-members-api"
+import {
+  fetchOrganizationMembers,
+  type OrganizationMember,
+} from "@/features/organization/organization-members-api"
 import {
   getCurrentWorkspace,
   getCurrentOrganization,
@@ -40,7 +43,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { fetchAuditUsers } from "../audit-logs-api"
 
 function userLabel(user: OrganizationMember) {
   return user.name?.trim() || user.email || user.id
@@ -99,7 +101,8 @@ export function AuditLogFilters({
       getCurrentOrganization()?.id,
       debouncedUserSearch,
     ],
-    queryFn: () => fetchAuditUsers(debouncedUserSearch),
+    queryFn: () =>
+      fetchOrganizationMembers({ searchText: debouncedUserSearch }),
     enabled: userOpen,
     staleTime: 30_000,
   })

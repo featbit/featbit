@@ -12,7 +12,6 @@ import { HistoryTab } from "./history-tab"
 
 vi.mock("@/features/audit-logs/audit-logs-api", () => ({
   fetchAuditLogs: vi.fn(),
-  fetchAuditUsers: vi.fn(),
 }))
 
 const segment: Segment = {

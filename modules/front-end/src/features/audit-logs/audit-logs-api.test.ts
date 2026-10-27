@@ -1,7 +1,7 @@
 import { AuditLogScopes } from "./audit-logs-types"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { fetchApi } from "@/lib/api/authenticated-api"
-import { fetchAuditLogs, fetchAuditUsers } from "./audit-logs-api"
+import { fetchAuditLogs } from "./audit-logs-api"
 
 vi.mock("@/lib/api/authenticated-api", () => ({ fetchApi: vi.fn() }))
 
@@ -99,10 +99,4 @@ describe("audit logs API", () => {
     expect(lastRequest().searchParams.has("refTypes")).toBe(false)
   })
 
-  it("uses the shared members endpoint for searchable users", async () => {
-    await fetchAuditUsers("alex chen")
-    expect(fetchApi).toHaveBeenCalledWith(
-      "/api/v1/members?searchText=alex+chen&pageIndex=0&pageSize=20"
-    )
-  })
 })

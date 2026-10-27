@@ -1,5 +1,4 @@
 import { fetchApi } from "@/lib/api/authenticated-api"
-import type { OrganizationMember } from "@/features/organization/organization-members-api"
 import type { AuditLogQueryFilter, PagedAuditLogs } from "./audit-logs-types"
 
 export function fetchAuditLogs(
@@ -25,16 +24,4 @@ export function fetchAuditLogs(
   }
 
   return fetchApi<PagedAuditLogs>(`/api/v1/audit-logs?${params}`)
-}
-
-export function fetchAuditUsers(searchText: string) {
-  const params = new URLSearchParams({
-    searchText,
-    pageIndex: "0",
-    pageSize: "20",
-  })
-
-  return fetchApi<{ items: OrganizationMember[]; totalCount: number }>(
-    `/api/v1/members?${params}`
-  )
 }
