@@ -8,6 +8,7 @@ public class AuditLogQueryFilter : PagedRequest
 {
     /// <summary>
     /// Required. Allowed values (case-sensitive): Environment, Organization, Workspace.
+    /// Workspace queries are not currently supported and return 403.
     /// </summary>
     public string Scope { get; set; } = "";
 
@@ -17,16 +18,18 @@ public class AuditLogQueryFilter : PagedRequest
     public Guid ScopeId { get; set; }
 
     /// <summary>
-    /// Optional resource ID, such as a feature flag or segment ID. Used to get audit logs for a specific resource.
-    /// </summary>
-    public string? RefId { get; set; }
-
-    /// <summary>
     /// Optional. Allowed values (case-sensitive): FeatureFlag, Segment, Member, Group, Policy.
-    /// Omit for all types. Multiple values match any selected type.
+    /// Defaults to the types currently supported by the scope: FeatureFlag and Segment for Environment;
+    /// Member, Group and Policy for Organization.
+    /// Types must match the scope. Multiple values match any selected type.
     /// Example: refTypes=FeatureFlag&amp;refTypes=Segment.
     /// </summary>
     public string[] RefTypes { get; set; } = [];
+
+    /// <summary>
+    /// Optional resource ID, such as a feature flag or segment ID. Used to get audit logs for a specific resource.
+    /// </summary>
+    public string? RefId { get; set; }
 
     /// <summary>
     /// Optional user or access token ID. Omit to query logs from all creators.

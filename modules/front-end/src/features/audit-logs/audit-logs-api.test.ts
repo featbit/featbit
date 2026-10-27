@@ -90,9 +90,9 @@ describe("audit logs API", () => {
     expect(url.searchParams.getAll("refTypes")).toEqual(["Segment"])
   })
 
-  it("does not restrict resource types when none are specified", async () => {
+  it("omits resource types so the server applies scope defaults", async () => {
     await fetchAuditLogs(
-      { scope: AuditLogScopes.Workspace, scopeId: "ws-1", query: "" },
+      { scope: AuditLogScopes.Environment, scopeId: "env-1" },
       0,
       10
     )

@@ -1,6 +1,7 @@
 using Api.Authentication;
 using Application.AuditLogs;
 using Application.Bases.Models;
+using Domain.Policies;
 
 namespace Api.Controllers;
 
@@ -13,6 +14,7 @@ public class AuditLogController : ApiControllerBase
     /// Get feature flag and segment audit logs for a specific environment, with optional filtering and pagination.
     /// </remarks>
     [OpenApi]
+    [Authorize(Permissions.CanAccessEnv)]
     [HttpGet("/api/v{version:apiVersion}/envs/{envId:guid}/audit-logs")]
     public async Task<ApiResponse<PagedResult<AuditLogVm>>> GetEnvironmentListAsync(Guid envId, [FromQuery] AuditLogFilter filter)
     {
@@ -40,6 +42,8 @@ public class AuditLogController : ApiControllerBase
         var request = new QueryAuditLogs
         {
             WorkspaceId = WorkspaceId,
+            OrganizationId = OrgId,
+            Permissions = await GetRequestPermissionsAsync(),
             Filter = filter
         };
 

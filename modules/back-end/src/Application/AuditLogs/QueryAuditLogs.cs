@@ -1,6 +1,7 @@
 using Application.Bases;
 using Application.Bases.Models;
 using Domain.AuditLogs;
+using Domain.Policies;
 using Domain.SemanticPatch;
 using Domain.Users;
 
@@ -9,6 +10,10 @@ namespace Application.AuditLogs;
 public class QueryAuditLogs : IRequest<PagedResult<AuditLogVm>>
 {
     public Guid WorkspaceId { get; set; }
+
+    public Guid OrganizationId { get; set; }
+
+    public PolicyStatement[] Permissions { get; set; } = [];
 
     public AuditLogQueryFilter Filter { get; set; }
 }
@@ -47,6 +52,7 @@ public class QueryAuditLogsValidator : AbstractValidator<QueryAuditLogs>
 
 public class QueryAuditLogsHandler(
     IAuditLogService auditLogService,
+    AuditLogAccessGuard accessGuard,
     IUserService userService,
     IAccessTokenService tokenService,
     IMapper mapper)
@@ -54,6 +60,18 @@ public class QueryAuditLogsHandler(
 {
     public async Task<PagedResult<AuditLogVm>> Handle(QueryAuditLogs request, CancellationToken cancellationToken)
     {
+        await accessGuard.EnsureQueryAllowedAsync(request);
+
+        if (request.Filter.RefTypes.Length == 0)
+        {
+            request.Filter.RefTypes = request.Filter.Scope switch
+            {
+                AuditLogScopes.Environment => [AuditLogRefTypes.FeatureFlag, AuditLogRefTypes.Segment],
+                AuditLogScopes.Organization => [AuditLogRefTypes.Member, AuditLogRefTypes.Group, AuditLogRefTypes.Policy],
+                _ => []
+            };
+        }
+
         var result = await auditLogService.GetListAsync(request.WorkspaceId, request.Filter);
         var logVms = mapper.Map<PagedResult<AuditLogVm>>(result);
 
