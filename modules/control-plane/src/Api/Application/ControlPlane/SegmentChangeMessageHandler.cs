@@ -61,7 +61,8 @@ public class SegmentChangeMessageHandler(
                         ts,
                         deserializedNotificationNode.OperatorId,
                         deserializedNotificationNode.Operation,
-                        deserializedNotificationNode.IsTargetingChange);
+                        deserializedNotificationNode.IsTargetingChange,
+                        deserializedNotificationNode.OrganizationId);
                 }
                 else
                 {
@@ -78,6 +79,8 @@ public class SegmentChangeMessageHandler(
                         if (affectedFlags.Count > 0)
                         {
                             await featureFlagAppService.OnSegmentUpdatedAsync(
+                                deserializedNotificationNode.WorkspaceId,
+                                deserializedNotificationNode.OrganizationId,
                                 deserializedSegmentNonEnvironmentSpecificNode,
                                 deserializedNotificationNode.OperatorId, affectedFlags);
                         }

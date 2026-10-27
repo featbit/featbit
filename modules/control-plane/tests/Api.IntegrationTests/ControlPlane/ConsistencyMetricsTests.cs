@@ -535,9 +535,9 @@ public sealed class ConsistencyMetricsTests : IntegrationTestBase, IAsyncLifetim
 
     private sealed class NoopFeatureFlagAppService : IFeatureFlagAppService
     {
-        public Task ApplyDraftAsync(Guid draftId, string operation, Guid operatorId) => Task.CompletedTask;
+        public Task ApplyDraftAsync(Guid workspaceId, Guid orgId, Guid draftId, string operation, Guid operatorId) => Task.CompletedTask;
 
-        public Task OnSegmentUpdatedAsync(Segment segment, Guid operatorId, ICollection<FlagReference> flagReferences) =>
+        public Task OnSegmentUpdatedAsync(Guid workspaceId, Guid? orgId, Segment segment, Guid operatorId, ICollection<FlagReference> flagReferences) =>
             Task.CompletedTask;
     }
 
