@@ -155,7 +155,8 @@ public class AuditLogService(AppDbContext dbContext) : EntityFrameworkCoreServic
     public async Task<LastChange?> GetLastChangeAsync(Guid workspaceId, Guid envId, string refType, string refId)
     {
         var lastChange = await Queryable.Where(x =>
-                x.WorkspaceId == workspaceId && (x.EnvId == envId || x.EnvId == null) &&
+                x.WorkspaceId == workspaceId &&
+                x.EnvId == envId &&
                 x.RefType == refType &&
                 x.RefId == refId &&
                 x.Operation != Operations.Create
@@ -189,7 +190,7 @@ public class AuditLogService(AppDbContext dbContext) : EntityFrameworkCoreServic
                     ref_id,
                     row_number() over(partition by ref_id order by created_at desc) AS rn
                 FROM audit_logs
-                WHERE workspace_id = @workspaceId AND (env_id = @envId OR env_id IS NULL) AND ref_type = @refType AND ref_id = ANY (@refIds) AND operation != 'Create'
+                WHERE workspace_id = @workspaceId AND env_id = @envId AND ref_type = @refType AND ref_id = ANY (@refIds) AND operation != 'Create'
             ) AS ranked
             WHERE rn = 1
             """;
