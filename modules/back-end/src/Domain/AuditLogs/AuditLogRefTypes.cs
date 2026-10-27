@@ -6,10 +6,13 @@ public class AuditLogRefTypes
 
     public const string Segment = nameof(Segment);
 
-    public static readonly string[] All = { FeatureFlag, Segment };
+    public const string Member = nameof(Member);
 
-    public static bool IsDefined(string type)
-    {
-        return All.Contains(type);
-    }
+    public const string Group = nameof(Group);
+
+    public const string Policy = nameof(Policy);
+
+    public static readonly string[] All = [FeatureFlag, Segment, Member, Group, Policy];
+
+    public static bool IsDefined(string type) => All.Contains(type);
 }

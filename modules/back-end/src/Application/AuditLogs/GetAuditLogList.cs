@@ -1,11 +1,14 @@
 using Application.Bases.Models;
 using Domain.AuditLogs;
 using Domain.SemanticPatch;
+using Domain.Users;
 
 namespace Application.AuditLogs;
 
 public class GetAuditLogList : IRequest<PagedResult<AuditLogVm>>
 {
+    public Guid WorkspaceId { get; set; }
+
     public Guid EnvId { get; set; }
 
     public AuditLogFilter Filter { get; set; }
@@ -32,7 +35,7 @@ public class GetAuditLogListHandler : IRequestHandler<GetAuditLogList, PagedResu
 
     public async Task<PagedResult<AuditLogVm>> Handle(GetAuditLogList request, CancellationToken cancellationToken)
     {
-        var logs = await _auditLogService.GetListAsync(request.EnvId, request.Filter);
+        var logs = await _auditLogService.GetListAsync(request.WorkspaceId, request.EnvId, request.Filter);
         var logVms = _mapper.Map<PagedResult<AuditLogVm>>(logs);
 
         var users = await _userService.GetListAsync(logVms.Items.Select(x => x.CreatorId));
@@ -44,6 +47,12 @@ public class GetAuditLogListHandler : IRequestHandler<GetAuditLogList, PagedResu
                 AuditLogRefTypes.Segment => SegmentComparer.Compare(item.DataChange),
                 _ => Array.Empty<Instruction>()
             };
+            
+            if (item.CreatorId == SystemUser.Id)
+            {
+                item.CreatorEmail = "System";
+                continue;
+            }
 
             var user = users.FirstOrDefault(x => x.Id == item.CreatorId);
             if (user != null)
@@ -62,8 +71,7 @@ public class GetAuditLogListHandler : IRequestHandler<GetAuditLogList, PagedResu
                 continue;
             }
 
-            // Otherwise this audit log is created by system user
-            item.CreatorEmail = "System";
+            item.CreatorEmail = "Unknown";
         }
 
         return logVms;

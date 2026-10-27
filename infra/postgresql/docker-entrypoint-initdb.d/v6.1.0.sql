@@ -5,6 +5,7 @@
 ALTER TABLE feature_flags
     ADD COLUMN IF NOT EXISTS insights_enabled boolean NOT NULL DEFAULT true;
 
+-- https://github.com/featbit/featbit/pull/1022
 -- ViewEnvSecret is independent at runtime. Preserve existing secret managers'
 -- access and grant the built-in Developer read access for SDK integration.
 UPDATE policies p
@@ -54,3 +55,25 @@ WHERE t.type = 'Service'
       AND NOT (COALESCE(s->'actions', '[]'::jsonb) ?| ARRAY['ViewEnvSecret', '*'])
       AND COALESCE(s->'actions', '[]'::jsonb) ?| ARRAY['CreateEnvSecret', 'UpdateEnvSecret', 'DeleteEnvSecret']
 );
+
+-- https://github.com/featbit/featbit/pull/1038
+-- Backfill workspace_id and organization_id for audit logs.
+ALTER TABLE audit_logs
+    ADD COLUMN IF NOT EXISTS workspace_id uuid,
+    ADD COLUMN IF NOT EXISTS organization_id uuid;
+ALTER TABLE audit_logs ALTER COLUMN env_id DROP NOT NULL;
+
+UPDATE audit_logs a SET workspace_id = o.workspace_id, organization_id = o.id
+FROM environments e
+JOIN projects p ON p.id = e.project_id
+JOIN organizations o ON o.id = p.organization_id
+WHERE a.workspace_id IS NULL AND a.env_id = e.id;
+
+DROP INDEX IF EXISTS ix_audit_logs_env_id_ref_id_created_at;
+DROP INDEX IF EXISTS ix_audit_logs_workspace_created;
+CREATE INDEX IF NOT EXISTS ix_audit_logs_workspace_id_env_id_created_at_id
+    ON audit_logs(workspace_id, env_id, created_at DESC, id DESC);
+CREATE INDEX IF NOT EXISTS ix_audit_logs_workspace_id_ref_type_ref_id_created_at_id
+    ON audit_logs(workspace_id, ref_type, ref_id, created_at DESC, id DESC);
+CREATE INDEX IF NOT EXISTS ix_audit_logs_workspace_id_organization_id_created_at_id
+    ON audit_logs(workspace_id, organization_id, created_at DESC, id DESC);

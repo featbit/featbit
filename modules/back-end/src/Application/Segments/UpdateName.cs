@@ -7,6 +7,10 @@ namespace Application.Segments;
 
 public class UpdateName : ResourceChangeRequest, IRequest<bool>
 {
+    public Guid WorkspaceId { get; set; }
+
+    public Guid OrgId { get; set; }
+
     /// <summary>
     /// The ID of the segment to update. Retrieved from the URL path.
     /// </summary>
@@ -43,6 +47,8 @@ public class UpdateNameHandler(
         // publish on segment change notification
         var notification = new OnSegmentChange(
             segment,
+            request.WorkspaceId,
+            request.OrgId,
             Operations.Update,
             dataChange,
             currentUser.Id,

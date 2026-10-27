@@ -6,6 +6,10 @@ namespace Application.FeatureFlags;
 
 public class SetTags : ResourceChangeRequest, IRequest<bool>
 {
+    public Guid WorkspaceId { get; set; }
+
+    public Guid OrgId { get; set; }
+
     /// <summary>
     /// The ID of the environment the feature flag belongs to. Retrieved from the URL path.
     /// </summary>
@@ -33,7 +37,7 @@ public class SetTagsHandler(IFeatureFlagService service, ICurrentUser currentUse
 
         // publish on feature flag change notification
         var notification =
-            new OnFeatureFlagChanged(flag, Operations.Update, dataChange, currentUser.Id, request.Comment);
+            new OnFeatureFlagChanged(flag, request.WorkspaceId, request.OrgId, Operations.Update, dataChange, currentUser.Id, request.Comment);
         await publisher.Publish(notification, cancellationToken);
 
         return true;

@@ -86,7 +86,7 @@ public class ApproveFlagChangeRequestHandlerTests
             currentUser.Object);
 
         var result = await sut.Handle(
-            new ApproveFlagChangeRequest { OrgId = cr.OrgId, EnvId = cr.EnvId, Id = cr.Id },
+            new ApproveFlagChangeRequest { WorkspaceId = ResourceOwner.WorkspaceId, OrgId = cr.OrgId, EnvId = cr.EnvId, Id = cr.Id },
             CancellationToken.None);
 
         Assert.False(result);
@@ -127,7 +127,7 @@ public class ApproveFlagChangeRequestHandlerTests
         var result = await sut.Handle(
             new ApproveFlagChangeRequest
             {
-                OrgId = cr.OrgId,
+                WorkspaceId = ResourceOwner.WorkspaceId, OrgId = cr.OrgId,
                 EnvId = cr.EnvId,
                 Id = cr.Id,
                 Comment = "  Looks good  "
@@ -139,6 +139,7 @@ public class ApproveFlagChangeRequestHandlerTests
         Assert.Equal(FlagChangeRequestAction.Approve, cr.Reviewers.Single().Action);
         crSvc.Verify(x => x.UpdateAsync(cr), Times.Once);
         auditSvc.Verify(x => x.AddOneAsync(It.Is<AuditLog>(log =>
+            log.WorkspaceId == ResourceOwner.WorkspaceId && log.OrganizationId == cr.OrgId &&
             log.Operation == Operations.ApproveFlagChangeRequest &&
             log.Comment == "Looks good" &&
             log.CreatorId == reviewerId &&
@@ -189,7 +190,7 @@ public class ApproveFlagChangeRequestHandlerTests
             currentUser.Object);
 
         var result = await sut.Handle(
-            new ApproveFlagChangeRequest { OrgId = cr.OrgId, EnvId = cr.EnvId, Id = cr.Id },
+            new ApproveFlagChangeRequest { WorkspaceId = ResourceOwner.WorkspaceId, OrgId = cr.OrgId, EnvId = cr.EnvId, Id = cr.Id },
             CancellationToken.None);
 
         Assert.True(result);
@@ -198,4 +199,7 @@ public class ApproveFlagChangeRequestHandlerTests
         crSvc.Verify(x => x.UpdateAsync(cr), Times.Once);
         schedSvc.Verify(x => x.UpdateAsync(schedule), Times.Once);
     }
+    private static readonly Domain.Organizations.Organization ResourceOwner =
+        new(Guid.NewGuid(), "Actual owner", "actual-owner") { Id = Guid.NewGuid() };
+
 }

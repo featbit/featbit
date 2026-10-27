@@ -8,6 +8,8 @@ namespace Application.FeatureFlags;
 
 public class GetFeatureFlagList : IRequest<PagedResult<FeatureFlagVm>>
 {
+    public Guid WorkspaceId { get; set; }
+
     public Guid EnvId { get; set; }
 
     public FeatureFlagFilter Filter { get; set; }
@@ -26,6 +28,7 @@ public class GetFeatureFlagListHandler(
 
         var flagIds = flags.Items.Select(x => x.Id.ToString()).ToArray();
         var lastChanges = await auditLogService.GetLastChangesAsync(
+            request.WorkspaceId,
             request.EnvId,
             AuditLogRefTypes.FeatureFlag,
             flagIds

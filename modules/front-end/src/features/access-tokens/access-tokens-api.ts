@@ -6,15 +6,6 @@ import type {
   PolicyResource,
 } from "./access-token-types"
 
-type PagedCreators = {
-  totalCount: number
-  items: Array<{
-    id: string
-    name?: string
-    email?: string
-  }>
-}
-
 function queryString(
   params: Record<string, string | number | boolean | undefined>
 ) {
@@ -81,16 +72,6 @@ export function toggleAccessTokenStatus(id: string) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({}),
   })
-}
-
-export function fetchAccessTokenCreators(searchText: string) {
-  return fetchApi<PagedCreators>(
-    `/api/v1/members${queryString({
-      searchText,
-      pageIndex: 0,
-      pageSize: 20,
-    })}`
-  )
 }
 
 export function fetchAccessTokenResources(name: string, type: string) {

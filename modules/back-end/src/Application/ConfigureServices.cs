@@ -1,5 +1,6 @@
 using System.Reflection;
 using Application;
+using Application.AuditLogs;
 using Application.Bases.Behaviours;
 using Application.FeatureFlags;
 using Application.Policies;
@@ -32,6 +33,7 @@ public static class ConfigureServices
         services.AddHttpContextAccessor();
         services.AddSingleton<ICurrentUser, CurrentUser>();
         services.AddTransient<IPermissionGuard, PermissionGuard>();
+        services.AddTransient<AuditLogAccessGuard>();
         services.AddTransient<ISegmentMessageService, SegmentMessageService>();
         if (configuration.UseControlPlane())
         {

@@ -9,6 +9,10 @@ namespace Application.FeatureFlags;
 
 public class PatchFeatureFlag : IRequest<PatchResult>
 {
+    public Guid WorkspaceId { get; set; }
+
+    public Guid OrgId { get; set; }
+
     public Guid EnvId { get; set; }
 
     public string Key { get; set; }
@@ -46,7 +50,7 @@ public class PatchFeatureFlagHandler(
         await flagService.UpdateAsync(flag);
 
         // publish on feature flag change notification
-        var notification = new OnFeatureFlagChanged(flag, Operations.Update, dataChange, currentUser.Id);
+        var notification = new OnFeatureFlagChanged(flag, request.WorkspaceId, request.OrgId, Operations.Update, dataChange, currentUser.Id);
         await publisher.Publish(notification, cancellationToken);
 
         return PatchResult.Ok();

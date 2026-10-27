@@ -1,3 +1,6 @@
+import { IamAuditDetails } from "./iam-audit-details"
+import { ArrowRight } from "lucide-react"
+import { iamChanges, iamChangeSummary, isIamAudit } from "../iam-audit-changes"
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { ChangeLedger as SharedChangeLedger } from "@/features/change-review/change-ledger"
@@ -9,6 +12,7 @@ import type { ReviewChange } from "@/features/segments/details/segment-details-u
 import type { Segment } from "@/features/segments/segments-types"
 import {
   auditDecisionSnapshot,
+  auditStatusChange,
   auditDisplayedChanges,
   auditEventFragments,
   auditEventTitle,
@@ -16,11 +20,13 @@ import {
   isChangeRequestDecisionOperation,
 } from "../audit-log-utils"
 import type { AuditLog } from "../audit-logs-types"
+import { auditSnapshotKind } from "../audit-snapshot"
 
 export type AuditLogChangeDetails = {
   count: number
+  countLabel?: string
   content: ReactNode
-  kind?: "changes" | "decision"
+  kind?: "changes" | "decision" | "initial" | "deleted" | "status"
 }
 
 export type AuditLogTableAdapter = {
@@ -80,12 +86,44 @@ export function useDefaultAuditLogTableAdapter(
   segmentNames?: ReadonlyMap<string, string>
 ): AuditLogTableAdapter {
   const { t } = useTranslation()
-  const flagLedger = useFlagChangeLedgerAdapter(segmentNames)
+  const flagLedger = useFlagChangeLedgerAdapter(segmentNames, false, true)
+  const snapshotFlagLedger = useFlagChangeLedgerAdapter(segmentNames, true)
 
   return {
     eventTitle: (log) => auditEventTitle(log, t),
-    eventSubtitle: (log) => auditEventFragments(log, t),
+    eventSubtitle: (log) =>
+      auditSnapshotKind(log)
+        ? ""
+        : isIamAudit(log)
+          ? iamChangeSummary(log, t).label
+          : auditEventFragments(log, t),
     changeDetails: (log) => {
+      const status = auditStatusChange(log, t)
+      if (status)
+        return {
+          count: 1,
+          kind: "status",
+          content: (
+            <div className="grid grid-cols-[11.25rem_minmax(0,1fr)] gap-x-4 px-2 py-1.5 text-sm">
+              <span className="text-muted-foreground">{status.label}</span>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-muted-foreground">{status.previous}</span>
+                <ArrowRight className="size-3.5 text-muted-foreground" />
+                <span className="text-foreground">{status.current}</span>
+              </div>
+            </div>
+          ),
+        }
+      const snapshotKind = auditSnapshotKind(log)
+      if (isIamAudit(log))
+        return {
+          kind: snapshotKind,
+          count: snapshotKind
+            ? iamChanges(log).length
+            : iamChangeSummary(log, t).count,
+          countLabel: snapshotKind ? undefined : iamChangeSummary(log, t).label,
+          content: <IamAuditDetails log={log} />,
+        }
       if (isChangeRequestDecisionOperation(log.operation)) {
         const snapshot = auditDecisionSnapshot(log)
         const proposedChanges = auditDisplayedChanges(log, t)
@@ -132,9 +170,57 @@ export function useDefaultAuditLogTableAdapter(
 
       const changes = auditDisplayedChanges(log, t)
 
-      if (!changes.length) return { count: 0, content: null }
+      if (!changes.length)
+        return {
+          count: 0,
+          kind: snapshotKind,
+          content: snapshotKind ? (
+            <p className="text-sm text-muted-foreground">
+              {t("auditLogs.snapshotUnavailable")}
+            </p>
+          ) : null,
+        }
+
+      if (snapshotKind && log.refType === "FeatureFlag") {
+        const fields = changes.filter(
+          (change) => change.kind !== "default"
+        ) as FlagTargetingReviewChange[]
+        const defaults = changes.filter(
+          (change) => change.kind === "default"
+        ) as FlagTargetingReviewChange[]
+        return {
+          count: changes.length,
+          kind: snapshotKind,
+          content: (
+            <div className="space-y-6">
+              <SharedChangeLedger
+                changes={fields}
+                layout="history"
+                snapshot
+                className="max-h-[32rem] bg-transparent p-0"
+                {...snapshotFlagLedger}
+              />
+              {defaults.length > 0 && (
+                <section>
+                  <h4 className="mb-1 px-2 text-[13px] font-semibold text-foreground">
+                    {t("auditLogs.defaultServing")}
+                  </h4>
+                  <SharedChangeLedger
+                    changes={defaults}
+                    layout="history"
+                    snapshot
+                    className="bg-transparent p-0"
+                    {...snapshotFlagLedger}
+                  />
+                </section>
+              )}
+            </div>
+          ),
+        }
+      }
 
       return {
+        kind: snapshotKind,
         count: changes.length,
         content:
           log.refType === "FeatureFlag" ? (
@@ -146,6 +232,7 @@ export function useDefaultAuditLogTableAdapter(
             />
           ) : (
             <ChangeLedger
+              snapshot={!!snapshotKind}
               changes={changes as ReviewChange[]}
               layout="history"
               className="max-h-[32rem] bg-transparent p-0"
