@@ -176,13 +176,21 @@ public sealed class SegmentCommitCoordinatorWorkerTests : IntegrationTestBase, I
         var rawCollection = _mongoDb.CollectionOf("Segments");
         var filter = Builders<BsonDocument>.Filter.Eq("_id", segmentId);
         var unset = Builders<BsonDocument>.Update
-            .Unset("Pending.OrganizationId")
-            .Unset("Pending.OperatorId")
-            .Unset("Pending.Operation")
-            .Unset("Pending.IsTargetingChange");
+            .Unset("pending.organizationId")
+            .Unset("pending.operatorId")
+            .Unset("pending.operation")
+            .Unset("pending.isTargetingChange");
 
         var result = await rawCollection.UpdateOneAsync(filter, unset);
         Assert.Equal(1, result.MatchedCount);
+        Assert.Equal(1, result.ModifiedCount);
+
+        var raw = await rawCollection.Find(filter).SingleAsync();
+        var pending = raw["pending"].AsBsonDocument;
+        foreach (var field in new[] { "organizationId", "operatorId", "operation", "isTargetingChange" })
+        {
+            Assert.False(pending.Contains(field));
+        }
     }
 
     private async Task UpsertLeaseAsync(string dcId, DateTimeOffset expiresAt)
@@ -464,7 +472,8 @@ public sealed class SegmentCommitCoordinatorWorkerTests : IntegrationTestBase, I
 
         // Stage normally, then strip the #73 attribution fields via the RAW collection so the
         // document is byte-for-byte what a pre-#73 pending row looked like.
-        var v = await SeedCommittedV1PendingV2(key);
+        var v = await SeedCommittedV1PendingV2(
+            key, Guid.NewGuid(), Operations.Archive, false, Guid.NewGuid());
         var segment = await _segmentService.GetAsync(await PendingId(key));
         await StripAttributionFieldsViaRawCollection(segment.Id);
 

@@ -4,8 +4,10 @@ using Api.Application.ControlPlane;
 using Application.Caches;
 using Application.Segments;
 using Application.Services;
+using Domain.AuditLogs;
 using Domain.Messages;
 using Domain.Segments;
+using Domain.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Testing;
 using Moq;
@@ -71,6 +73,31 @@ public class SegmentChangeMessageHandlerTests
                    "region": "{{Region}}"
                  }
                  """;
+    }
+
+    [Fact]
+    public async Task HandleAsync_BestEffort_PreservesAuditOwnershipForAffectedFlags()
+    {
+        var workspaceId = Guid.NewGuid();
+        var organizationId = Guid.NewGuid();
+        var operatorId = Guid.NewGuid();
+        var segment = new Segment { Id = Guid.NewGuid(), WorkspaceId = workspaceId };
+        var affectedFlags = new Collection<FlagReference> { new() };
+        _segSvc.Setup(x => x.GetAffectedFlagsAsync(It.IsAny<Guid>(), It.IsAny<OnSegmentChange>()))
+            .ReturnsAsync(affectedFlags);
+        var payload = JsonSerializer.Serialize(new
+        {
+            segmentNonSpecific = segment,
+            envIds = new[] { Guid.NewGuid() },
+            notification = new OnSegmentChange(segment, workspaceId, organizationId, Operations.Update,
+                new DataChange(), operatorId, isTargetingChange: true),
+            region = Region
+        }, ReusableJsonSerializerOptions.Web);
+
+        await CreateSut("BestEffort").HandleAsync(payload);
+
+        _ff.Verify(x => x.OnSegmentUpdatedAsync(workspaceId, organizationId,
+            It.Is<Segment>(s => s.Id == segment.Id), operatorId, affectedFlags), Times.Once);
     }
 
     [Fact]
