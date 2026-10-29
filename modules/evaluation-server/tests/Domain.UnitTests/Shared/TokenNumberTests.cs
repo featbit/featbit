@@ -18,11 +18,11 @@ public class TokenNumberTests
     }
 
     [Theory]
-    [InlineData("BDDBXZPZPXSDQ", 1661784847360)]
-    [InlineData("BWSPHDXZUQ", 1234567890)]
-    public void TryDecodeLong_ValidEncodedLong_ReturnsTrueAndExpectedValue(string encoded, long expected)
+    [InlineData("BXHWUBPDQXDBZ", 1752914607618)]
+    [InlineData("BXXWZBZQBBSUW", 1772818011392)]
+    public void TryDecodeTimestamp_ValidEncodedLong_ReturnsTrueAndExpectedValue(string encoded, long expected)
     {
-        var parseResult = TokenNumber.TryDecodeLong(encoded, out var actual);
+        var parseResult = TokenNumber.TryDecodeTimestamp(encoded, out var actual);
 
         Assert.True(parseResult);
         Assert.Equal(expected, actual);
@@ -35,7 +35,7 @@ public class TokenNumberTests
     public void TryDecode_NullOrWhitespaceInput_ReturnsTrueWithZeroValue(string? encoded)
     {
         var byteParseResult = TokenNumber.TryDecodeByte(encoded, out var byteActual);
-        var longParseResult = TokenNumber.TryDecodeLong(encoded, out var longActual);
+        var longParseResult = TokenNumber.TryDecodeTimestamp(encoded, out var longActual);
 
         Assert.True(byteParseResult);
         Assert.Equal(0, byteActual);
@@ -50,6 +50,6 @@ public class TokenNumberTests
     public void TryDecode_UnknownCharacter_ReturnsFalse(string encoded)
     {
         Assert.False(TokenNumber.TryDecodeByte(encoded, out _));
-        Assert.False(TokenNumber.TryDecodeLong(encoded, out _));
+        Assert.False(TokenNumber.TryDecodeTimestamp(encoded, out _));
     }
 }

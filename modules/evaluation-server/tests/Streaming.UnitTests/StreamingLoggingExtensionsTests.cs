@@ -10,13 +10,13 @@ public class StreamingLoggingExtensionsTests
     [Fact]
     public void RequestRejected_FormatsMessageAndCarriesEventName()
     {
-        _logger.RequestRejected("ws://x/?token=abc", "missing-type");
+        _logger.RequestRejected("request-123", "missing-type");
 
         var record = Assert.Single(_logger.Collector.GetSnapshot());
         Assert.Equal(LogLevel.Warning, record.Level);
         Assert.Equal(1, record.Id.Id);
         Assert.Equal("RequestRejected", record.Id.Name);
-        Assert.Equal("Streaming request was rejected: ws://x/?token=abc. Reason: missing-type.", record.Message);
+        Assert.Equal("Streaming request was rejected: request-123. Reason: missing-type.", record.Message);
     }
 
     [Fact]
