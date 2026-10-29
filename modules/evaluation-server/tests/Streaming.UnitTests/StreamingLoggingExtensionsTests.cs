@@ -37,7 +37,7 @@ public class StreamingLoggingExtensionsTests
         _logger.FailedToResolveHost("10.0.0.1", ex);
 
         var record = Assert.Single(_logger.Collector.GetSnapshot());
-        Assert.Equal(LogLevel.Warning, record.Level);
+        Assert.Equal(LogLevel.Debug, record.Level);
         Assert.Equal(2, record.Id.Id);
         Assert.Equal("FailedToResolveHost", record.Id.Name);
         Assert.Equal("Failed to resolve host for IP address: 10.0.0.1.", record.Message);
