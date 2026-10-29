@@ -39,7 +39,7 @@ public class StreamingMiddleware(
         var validationResult = await requestValidator.ValidateAsync(httpContext);
         if (validationResult.Status == ValidationResultStatus.Invalid)
         {
-            logger.RequestRejected(httpContext.TraceIdentifier, validationResult.Reason);
+            logger.RequestRejected(validationResult.Reason);
 
             // Protocol requirement: accept first, then close with 4003 so SDKs stop reconnecting.
             using var invalidWebSocket = await httpContext.WebSockets.AcceptWebSocketAsync();
@@ -54,7 +54,7 @@ public class StreamingMiddleware(
 
         if (validationResult.Status == ValidationResultStatus.Unavailable)
         {
-            logger.RequestValidationUnavailable(httpContext.TraceIdentifier, validationResult.Reason);
+            logger.RequestValidationUnavailable(validationResult.Reason);
 
             // Transient server error (e.g. store unavailable). Protocol requirement: accept first, then
             // close with a non-4003 status so SDKs treat it as transient and reconnect.

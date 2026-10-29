@@ -29,8 +29,7 @@ public sealed class RequestValidator(
         }
         catch (Exception ex)
         {
-            var requestId = httpContext.TraceIdentifier;
-            logger.ErrorValidateRequest(requestId, ex);
+            logger.ErrorValidateRequest(ex);
 
             // Unexpected exception that escaped inner catches — treat as permanent rejection
             // (store/relay unavailability is already caught and returned as Unavailable by inner handlers)
@@ -77,7 +76,7 @@ public sealed class RequestValidator(
             }
             catch (Exception ex)
             {
-                logger.ErrorLookupRelayProxyToken(httpContext.TraceIdentifier, ex);
+                logger.ErrorLookupRelayProxyToken(ex);
 
                 // Store unavailable → return Unavailable for transient retry
                 return ValidationResult.Unavailable($"Relay proxy lookup unavailable. ex={ex.GetType().Name}");
@@ -100,7 +99,7 @@ public sealed class RequestValidator(
             }
             catch (Exception ex)
             {
-                logger.FailedToParseToken(httpContext.TraceIdentifier, ex);
+                logger.FailedToParseToken(ex);
 
                 return ValidationResult.Invalid($"Secret validation failed. ex={ex.GetType().Name}");
             }
@@ -139,7 +138,7 @@ public sealed class RequestValidator(
             }
             catch (Exception ex)
             {
-                logger.ErrorLookupSecretToken(httpContext.TraceIdentifier, ex);
+                logger.ErrorLookupSecretToken(ex);
 
                 // Store unavailable → return Unavailable for transient retry
                 return ValidationResult.Unavailable($"Secret lookup unavailable. env={validationResult.EnvId}; ct={type}; v={version}; ex={ex.GetType().Name}");
