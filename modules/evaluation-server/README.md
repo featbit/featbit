@@ -79,7 +79,7 @@ and [consumer configs](https://kafka.apache.org/documentation/#consumerconfigs) 
 
 | Name                             | Description                                                  | Default Value |
 |----------------------------------|--------------------------------------------------------------|---------------|
-| `Streaming__TrackClientHostName` | Whether to resolve client's IP hostname for detailed logging | `true`        |
+| `Streaming__TrackClientHostName` | Whether to resolve client's IP hostname for detailed logging | `false`       |
 | `Streaming__TokenExpirySeconds`  | Streaming token expiry time in seconds                       | `30`          |
 
 ## CORS
