@@ -1,8 +1,8 @@
 namespace Domain.Shared.Authentication;
 
 /// <summary>
-/// Single source of truth for token validation. v1 implementation is structural-only (Secret.TryParse);
-/// v2/HMAC validation with store lookup is added in a future PR.
+/// Shared structural parsing for v1 secrets (Secret.TryParse).
+/// Callers must additionally verify the complete secret against IStore.
 /// </summary>
 public interface ITokenValidator
 {

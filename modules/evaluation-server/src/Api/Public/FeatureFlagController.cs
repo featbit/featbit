@@ -1,3 +1,5 @@
+using Api.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using System.Text.Json;
 using Api.Contracts;
 using Api.RateLimiting;
@@ -9,6 +11,7 @@ using Microsoft.AspNetCore.RateLimiting;
 
 namespace Api.Public;
 
+[Authorize(Policy = FeatBitPolicies.ServerSecretOrClientSecret)]
 [Route("api/public/featureflag")]
 [EnableRateLimiting(RateLimitingPolicies.FeatureFlag)]
 public class FeatureFlagController(IFeatureFlagService flagService, IEvaluator evaluator) : PublicApiControllerBase

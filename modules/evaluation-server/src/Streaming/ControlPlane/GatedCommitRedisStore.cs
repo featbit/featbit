@@ -96,16 +96,17 @@ public class GatedCommitRedisStore(
     public async Task<Secret?> GetSecretAsync(string secretString)
     {
         var key = RedisKeys.Secret(secretString);
-        if (!await Redis.KeyExistsAsync(key))
+        var entries = await Redis.HashGetAsync(key, new RedisValue[] { "type", "projectKey", "envId", "envKey" });
+        if (entries.Any(entry => entry.IsNull) ||
+            !Guid.TryParse(entries[2].ToString(), out var envId) || envId == Guid.Empty)
         {
             return null;
         }
 
-        var entries = await Redis.HashGetAsync(key, new RedisValue[] { "type", "projectKey", "envId", "envKey" });
         return new Secret(
             type: entries[0].ToString(),
             entries[1].ToString(),
-            Guid.Parse(entries[2].ToString()),
+            envId,
             entries[3].ToString()
         );
     }

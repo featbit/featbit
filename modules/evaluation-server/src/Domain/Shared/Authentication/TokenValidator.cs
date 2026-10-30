@@ -2,7 +2,7 @@ namespace Domain.Shared.Authentication;
 
 /// <summary>
 /// v1 token validation: structural only (Secret.TryParse). No store lookup, no I/O.
-/// v2/HMAC validation and store-backed verification are added in a future PR.
+/// Callers must additionally verify the complete secret against IStore.
 /// </summary>
 public class TokenValidator : ITokenValidator
 {
