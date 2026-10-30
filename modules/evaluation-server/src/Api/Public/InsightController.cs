@@ -43,12 +43,12 @@ public class InsightController : PublicApiControllerBase
         var endUserMessages = new List<EndUserMessage>(validInsights.Length);
         var insightMessages = new List<InsightMessage>(validInsights.Length);
         var usage = new InsightUsage(EnvId);
+        var newUserKeys = new HashSet<string>();
         foreach (var insight in validInsights)
         {
             var key = $"{envIdString}:{insight!.User!.KeyId}";
-            if (!_cache.TryGetValue(key, out _))
+            if (!_cache.TryGetValue(key, out _) && newUserKeys.Add(key))
             {
-                _cache.Set(key, string.Empty, _cacheEntryOptions);
                 endUserMessages.Add(insight.EndUserMessage(EnvId));
                 usage.AddUser(insight.User!.KeyId);
             }
@@ -57,11 +57,23 @@ public class InsightController : PublicApiControllerBase
             usage.AddEvents(insight.Variations?.Length ?? 0, insight.Metrics?.Length ?? 0);
         }
 
-        await Task.WhenAll(
-            _producer.PublishBatchAsync(Topics.EndUser, endUserMessages),
-            _producer.PublishBatchAsync(Topics.Insights, insightMessages),
-            _producer.PublishAsync(Topics.Usage, usage)
-        );
+        try
+        {
+            await Task.WhenAll(
+                _producer.PublishBatchAsync(Topics.EndUser, endUserMessages),
+                _producer.PublishBatchAsync(Topics.Insights, insightMessages),
+                _producer.PublishAsync(Topics.Usage, usage)
+            );
+        }
+        catch (Exception)
+        {
+            // A partial publish can be retried; do not suppress user data that was not confirmed.
+            // Retried requests may repeat records already accepted by another topic.
+            return StatusCode(StatusCodes.Status503ServiceUnavailable);
+        }
+
+        foreach (var key in newUserKeys)
+            _cache.Set(key, string.Empty, _cacheEntryOptions);
 
         return Ok();
     }
