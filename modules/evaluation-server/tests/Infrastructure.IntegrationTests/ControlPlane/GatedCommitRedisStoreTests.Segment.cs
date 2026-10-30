@@ -19,6 +19,27 @@ namespace Infrastructure.IntegrationTests.ControlPlane;
 [Collection(RedisCollection.Name)]
 public class GatedCommitReadSegmentTests : IntegrationTestBase, IAsyncLifetime
 {
+    [DockerTheory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task GetSegmentAsync_RuleReferenceCase_UsesCommittedSnapshot(bool uppercase)
+    {
+        const string id = "12345678-abcd-abcd-abcd-1234567890ab";
+        var payload = """{"id":"12345678-abcd-abcd-abcd-1234567890ab","included":["user"],"excluded":[],"rules":[]}""";
+        await _db.StringSetAsync(RedisKeys.SegmentVersion(id, 10), payload);
+        await _db.StringSetAsync(RedisKeys.SegmentCommittedPointer(id), "10");
+        await _db.StringSetAsync(RedisKeys.Segment(id), "{}");
+        var reference = uppercase ? id.ToUpperInvariant() : id;
+        var rule = System.Text.Json.JsonSerializer.SerializeToElement(new
+        {
+            conditions = new[] { new { property = "User is in segment", value = System.Text.Json.JsonSerializer.Serialize(new[] { reference }) } }
+        });
+
+        var matches = await new Domain.Evaluation.RuleMatcher(_sut).IsMatchAsync(rule, new Domain.EndUsers.EndUser { KeyId = "user" });
+
+        Assert.True(matches);
+    }
+
     private readonly RedisFixture _fixture;
     private ConnectionMultiplexer _connection = null!;
     private IDatabase _db = null!;

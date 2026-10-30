@@ -6,6 +6,16 @@ namespace Domain.UnitTests.Evaluation;
 
 public class EntityJsonReaderTests
 {
+    [Theory]
+    [InlineData("12345678-abcd-abcd-abcd-1234567890ab")]
+    [InlineData("12345678-ABCD-ABCD-ABCD-1234567890AB")]
+    public void DeserializeSegmentIds_MixedCase_NormalizesId(string id)
+    {
+        var ids = EntityJsonReader.FeatureFlag.DeserializeSegmentIds(JsonSerializer.Serialize(new[] { id }), "value");
+
+        Assert.Equal("12345678-abcd-abcd-abcd-1234567890ab", Assert.Single(ids));
+    }
+
     private const string SegmentId = "0779d76b-afc6-4886-ab65-af8c004273ad";
 
     [Fact]
