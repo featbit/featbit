@@ -209,18 +209,6 @@ public sealed class EntityJsonReader(EvaluationEntityType entityType, string? en
 
     private JsonElement GetRequiredProperty(JsonElement json, string propertyName)
     {
-        EnsureObject(json, propertyName);
-
-        if (!json.TryGetProperty(propertyName, out var propertyValue))
-        {
-            throw Malformed($"Missing required property '{propertyName}'", propertyName);
-        }
-
-        return propertyValue;
-    }
-
-    private void EnsureObject(JsonElement json, string propertyName)
-    {
         if (json.ValueKind != JsonValueKind.Object)
         {
             throw Malformed(
@@ -228,6 +216,13 @@ public sealed class EntityJsonReader(EvaluationEntityType entityType, string? en
                 propertyName
             );
         }
+
+        if (!json.TryGetProperty(propertyName, out var propertyValue))
+        {
+            throw Malformed($"Missing required property '{propertyName}'", propertyName);
+        }
+
+        return propertyValue;
     }
 
     private MalformedDataException WrongType(
