@@ -464,11 +464,13 @@ public class FeatureFlagController : ApiControllerBase
 
     [HttpPost("copy-to-env-precheck/{targetEnvId:guid}")]
     public async Task<ApiResponse<ICollection<CopyToEnvPrecheckResult>>> CopyToEnvPrecheckAsync(
+        Guid envId,
         Guid targetEnvId,
         [FromBody] ICollection<Guid> flagIds)
     {
         var request = new CopyToEnvPrecheck
         {
+            SourceEnvId = envId,
             TargetEnvId = targetEnvId,
             FlagIds = flagIds
         };
