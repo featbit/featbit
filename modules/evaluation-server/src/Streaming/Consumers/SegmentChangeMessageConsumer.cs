@@ -41,7 +41,10 @@ public class SegmentChangeMessageConsumer(
                 var payload = await dataSyncService.GetSegmentChangePayloadAsync(connection, segment, flagIds);
                 var serverMessage = new ServerMessage(MessageTypes.DataSync, payload);
 
-                await connection.SendAsync(serverMessage, cancellationToken);
+                connection.QueueSend(serverMessage, cancellationToken, error => logger.LogError(
+                    error,
+                    "Failed to send segment change to connection {ConnectionId} in env {EnvId}; reconnect required.",
+                    connection.Id, envId));
             }
             catch (Exception ex)
             {

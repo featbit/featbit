@@ -31,8 +31,11 @@ public class Connection
         Secret = secret;
     }
 
-    public async Task SendAsync(ServerMessage message, CancellationToken cancellationToken)
-        => await WebSocket.SendAsync(message.GetBytes(), WebSocketMessageType.Text, true, cancellationToken);
+    public Task SendAsync(ServerMessage message, CancellationToken cancellationToken)
+        => WebSocketSender.For(WebSocket).SendAsync(message.GetBytes(), cancellationToken);
+
+    internal void QueueSend(ServerMessage message, CancellationToken cancellationToken, Action<Exception> onFailure)
+        => WebSocketSender.For(WebSocket).Enqueue(message.GetBytes(), cancellationToken, onFailure);
 
     /// <summary>
     /// attach client-side sdk EndUser
