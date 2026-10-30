@@ -16,6 +16,47 @@ public class FeatureFlagService : MongoDbService<FeatureFlag>, IFeatureFlagServi
     {
     }
 
+    public override Task AddOneAsync(FeatureFlag flag)
+    {
+        flag.MongoETag = Guid.NewGuid();
+        return base.AddOneAsync(flag);
+    }
+
+    public override Task AddManyAsync(IEnumerable<FeatureFlag> flags)
+    {
+        var values = flags.ToArray();
+        foreach (var flag in values) flag.MongoETag = Guid.NewGuid();
+        return base.AddManyAsync(values);
+    }
+
+    public override async Task UpdateAsync(FeatureFlag flag)
+    {
+        var filter = VersionFilter(flag);
+        var previous = flag.MongoETag;
+        flag.MongoETag = Guid.NewGuid();
+        try
+        {
+            var result = await Collection.ReplaceOneAsync(filter, flag);
+            if (result.MatchedCount == 0)
+                throw new ConflictException(nameof(FeatureFlag), flag.Id);
+        }
+        catch
+        {
+            flag.MongoETag = previous;
+            throw;
+        }
+    }
+
+    private static FilterDefinition<FeatureFlag> VersionFilter(FeatureFlag flag)
+    {
+        var filters = Builders<FeatureFlag>.Filter;
+        // Existing documents acquire their first token atomically on the first write.
+        var version = flag.MongoETag == Guid.Empty
+            ? filters.Or(filters.Eq(x => x.MongoETag, Guid.Empty), filters.Exists(x => x.MongoETag, false))
+            : filters.Eq(x => x.MongoETag, flag.MongoETag);
+        return filters.And(filters.Eq(x => x.Id, flag.Id), version);
+    }
+
     public async Task<PagedResult<FeatureFlag>> GetListAsync(Guid envId, FeatureFlagFilter userFilter)
     {
         var filterBuilder = Builders<FeatureFlag>.Filter;
@@ -159,7 +200,8 @@ public class FeatureFlagService : MongoDbService<FeatureFlag>, IFeatureFlagServi
         var filter = Builders<FeatureFlag>.Filter.In(x => x.Id, flagIds);
         var update = Builders<FeatureFlag>.Update
             .Set(x => x.UpdatedAt, now)
-            .Set(x => x.UpdatorId, operatorId);
+            .Set(x => x.UpdatorId, operatorId)
+            .Set(x => x.MongoETag, Guid.NewGuid());
 
         await Collection.UpdateManyAsync(filter, update);
     }
@@ -213,7 +255,8 @@ public class FeatureFlagService : MongoDbService<FeatureFlag>, IFeatureFlagServi
                 Builders<FeatureFlag>.Filter.Lt(x => x.Pending!.Version, version)
             )
         );
-        var update = Builders<FeatureFlag>.Update.Set(x => x.Pending, pending);
+        var update = Builders<FeatureFlag>.Update.Set(x => x.Pending, pending)
+            .Set(x => x.MongoETag, Guid.NewGuid());
 
         await Collection.UpdateOneAsync(filter, update);
     }
@@ -230,15 +273,18 @@ public class FeatureFlagService : MongoDbService<FeatureFlag>, IFeatureFlagServi
             return false;
         }
 
+        var documentVersion = VersionFilter(flag);
         // promote pending -> committed in-memory, then persist the full document so the
         // committed value advances and the pending slot is cleared atomically.
         flag.PromotePending();
+        flag.MongoETag = Guid.NewGuid();
 
         // Optimistic replace filtered on Pending.Version == expectedVersion: if another writer
         // staged a new pending version after our read, the filter no longer matches and the
         // replace is a no-op (MatchedCount == 0), so a concurrent SetPendingAsync cannot be lost
         // (#33).
         var filter = Builders<FeatureFlag>.Filter.And(
+            documentVersion,
             Builders<FeatureFlag>.Filter.Eq(x => x.EnvId, envId),
             Builders<FeatureFlag>.Filter.Eq(x => x.Key, key),
             Builders<FeatureFlag>.Filter.Eq(x => x.Pending!.Version, expectedVersion)

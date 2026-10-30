@@ -6,6 +6,17 @@ namespace Domain.UnitTests.FeatureFlags;
 
 public class FeatureFlagTests
 {
+    [Fact]
+    public void Serialize_InternalMongoToken_IsAbsentFromPublicFlagJson()
+    {
+        var flag = NewFlag();
+        flag.MongoETag = Guid.NewGuid();
+
+        var json = JsonSerializer.SerializeToNode(flag, ReusableJsonSerializerOptions.Web)!.AsObject();
+
+        Assert.False(json.ContainsKey("mongoETag"));
+    }
+
     private static FeatureFlag NewFlag()
     {
         var on = new Variation { Id = "v-on", Name = "On", Value = "true" };

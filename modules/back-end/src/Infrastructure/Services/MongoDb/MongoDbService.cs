@@ -53,17 +53,17 @@ public class MongoDbService<TEntity> : IService<TEntity> where TEntity : Entity
         return await Queryable.CountAsync(predicate) > 0;
     }
 
-    public async Task AddOneAsync(TEntity entity)
+    public virtual async Task AddOneAsync(TEntity entity)
     {
         await Collection.InsertOneAsync(entity);
     }
 
-    public async Task AddManyAsync(IEnumerable<TEntity> entities)
+    public virtual async Task AddManyAsync(IEnumerable<TEntity> entities)
     {
         await Collection.InsertManyAsync(entities);
     }
 
-    public async Task UpdateAsync(TEntity replacement)
+    public virtual async Task UpdateAsync(TEntity replacement)
     {
         await Collection.ReplaceOneAsync(entity => entity.Id == replacement.Id, replacement);
     }
