@@ -43,6 +43,13 @@ public sealed class EntityJsonReader(EvaluationEntityType entityType, string? en
             ? property.GetString()
             : null;
 
+    public static bool? TryGetBoolean(JsonElement json, string propertyName) =>
+        json.ValueKind == JsonValueKind.Object &&
+        json.TryGetProperty(propertyName, out var property) &&
+        property.ValueKind is JsonValueKind.True or JsonValueKind.False
+            ? property.GetBoolean()
+            : null;
+
     public JsonDocument Parse(ReadOnlyMemory<byte> json)
     {
         try
