@@ -43,6 +43,13 @@ public sealed class EntityJsonReader(EvaluationEntityType entityType, string? en
             ? property.GetString()
             : null;
 
+    public static bool? TryGetBoolean(JsonElement json, string propertyName) =>
+        json.ValueKind == JsonValueKind.Object &&
+        json.TryGetProperty(propertyName, out var property) &&
+        property.ValueKind is JsonValueKind.True or JsonValueKind.False
+            ? property.GetBoolean()
+            : null;
+
     public JsonDocument Parse(ReadOnlyMemory<byte> json)
     {
         try
@@ -202,13 +209,7 @@ public sealed class EntityJsonReader(EvaluationEntityType entityType, string? en
 
     private JsonElement GetRequiredProperty(JsonElement json, string propertyName)
     {
-        if (json.ValueKind != JsonValueKind.Object)
-        {
-            throw Malformed(
-                $"Cannot read property '{propertyName}' from JSON value of type '{json.ValueKind}'",
-                propertyName
-            );
-        }
+        EnsureObject(json, propertyName);
 
         if (!json.TryGetProperty(propertyName, out var propertyValue))
         {
@@ -216,6 +217,17 @@ public sealed class EntityJsonReader(EvaluationEntityType entityType, string? en
         }
 
         return propertyValue;
+    }
+
+    private void EnsureObject(JsonElement json, string propertyName)
+    {
+        if (json.ValueKind != JsonValueKind.Object)
+        {
+            throw Malformed(
+                $"Cannot read property '{propertyName}' from JSON value of type '{json.ValueKind}'",
+                propertyName
+            );
+        }
     }
 
     private MalformedDataException WrongType(

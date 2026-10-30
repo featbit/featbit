@@ -42,6 +42,7 @@
           ]
         },
         exptIncludeAllTargets: true,
+        insightsEnabled: false,
         isArchived: false
       },
       {
@@ -91,6 +92,7 @@
           ]
         },
         exptIncludeAllTargets: true,
+        insightsEnabled: true,
         isArchived: false
       },
       {
@@ -159,6 +161,7 @@
           ]
         },
         exptIncludeAllTargets: true,
+        insightsEnabled: true,
         isArchived: false
       },
       {
@@ -261,6 +264,7 @@
           ]
         },
         exptIncludeAllTargets: true,
+        insightsEnabled: true,
         isArchived: false
       },
       {
@@ -358,6 +362,7 @@
           ]
         },
         exptIncludeAllTargets: true,
+        insightsEnabled: false,
         isArchived: false
       }
     ],
