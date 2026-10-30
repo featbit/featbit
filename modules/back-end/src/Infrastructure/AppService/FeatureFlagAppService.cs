@@ -51,6 +51,9 @@ public class FeatureFlagAppService : IFeatureFlagAppService
             throw new ConflictException(nameof(Domain.FeatureFlags.FeatureFlag), flag.Id);
         }
 
+        // Validate after all instructions so a draft can replace references and remove
+        // the old variation atomically. This also protects scheduled draft execution.
+        FlagTargetingValidator.EnsureValid(flag);
         await _flagService.UpdateAsync(flag);
 
         // update draft status
