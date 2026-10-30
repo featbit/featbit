@@ -69,9 +69,8 @@ public class DeclineFlagChangeRequestHandler(
         // update schedule status if change request is attached to a schedule
         if (changeRequest.ScheduleId.HasValue)
         {
-            var schedule = await scheduleService.GetAsync(changeRequest.ScheduleId.Value);
-            schedule.Decline(currentUser.Id);
-            await scheduleService.UpdateAsync(schedule);
+            await scheduleService.TrySetReviewOutcomeAsync(changeRequest.ScheduleId.Value, changeRequest.Id,
+                false, currentUser.Id);
         }
 
         // write audit log
