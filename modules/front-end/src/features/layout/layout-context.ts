@@ -278,6 +278,8 @@ export async function joinCurrentOrganizationIfSsoFirstLogin() {
 
   await fetchApi<boolean>("/api/v1/user/join-organization", {
     method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({}),
   })
   localStorage.removeItem(IS_SSO_FIRST_LOGIN_STORAGE_KEY)
 }
