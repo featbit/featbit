@@ -87,8 +87,7 @@ public class SsoController : ApiControllerBase
             // ensure the user is in the workspace
             await _workspaceService.AddUserIfNotExistsAsync(workspace.Id, user.Id);
 
-            // Keep the existing response contract, but resume onboarding until the user
-            // belongs to an organization in this workspace, even after a failed first attempt.
+            // The frontend uses IsSsoFirstLogin to decide whether to prompt the user to join an organization.
             var organizations = await _organizationService.GetUserOrganizationsAsync(workspace.Id, user.Id);
             var isSsoFirstLogin = organizations.Count == 0;
 
