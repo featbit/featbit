@@ -11,7 +11,7 @@ export type VariationReference = {
 }
 
 export type VariationReviewChange = ChangeReviewItem & {
-  kind: "variation"
+  kind: "variation" | "variations"
 }
 
 export function stableVariations(variations: FlagVariation[] | undefined) {
@@ -82,20 +82,34 @@ export function variationReviewChanges(
   const previousById = new Map(previous.map((item) => [item.id, item]))
   const currentById = new Map(current.map((item) => [item.id, item]))
 
+  const summary = (variation: FlagVariation) =>
+    variation.name.trim() ||
+    (variation.value.length > 120
+      ? `${variation.value.slice(0, 117)}…`
+      : variation.value)
+  const added = current
+    .filter((variation) => !previousById.has(variation.id))
+    .map(summary)
+  const removed = previous
+    .filter((variation) => !currentById.has(variation.id))
+    .map(summary)
+  if (added.length || removed.length) {
+    changes.push({
+      kind: "variations",
+      label: "variations",
+      valueGroups: [
+        ...(added.length ? [{ action: "added" as const, values: added }] : []),
+        ...(removed.length
+          ? [{ action: "removed" as const, values: removed }]
+          : []),
+      ],
+    })
+  }
+
   for (const variation of current) {
     const old = previousById.get(variation.id)
-    if (!old) {
-      changes.push({
-        kind: "variation",
-        label: variation.name.trim(),
-        literalLabel: true,
-        action: "added",
-        current: readableVariation(variation),
-      })
-    } else if (
-      old.name !== variation.name.trim() ||
-      old.value !== variation.value
-    ) {
+    if (!old) continue
+    if (old.name !== variation.name.trim() || old.value !== variation.value) {
       changes.push({
         kind: "variation",
         label: variation.name.trim() || old.name,
@@ -103,17 +117,6 @@ export function variationReviewChanges(
         action: "updated",
         previous: readableVariation(old),
         current: readableVariation(variation),
-      })
-    }
-  }
-  for (const variation of previous) {
-    if (!currentById.has(variation.id)) {
-      changes.push({
-        kind: "variation",
-        label: variation.name,
-        literalLabel: true,
-        action: "removed",
-        previous: readableVariation(variation),
       })
     }
   }

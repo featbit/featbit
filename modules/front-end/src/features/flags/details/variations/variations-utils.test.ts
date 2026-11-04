@@ -60,9 +60,9 @@ describe("variationReferences", () => {
 
 describe("variation drafts", () => {
   it("trims names when comparing stable payloads", () => {
-    expect(
-      stableVariations([{ id: "a", name: " A ", value: "a" }])
-    ).toBe(stableVariations([{ id: "a", name: "A", value: "a" }]))
+    expect(stableVariations([{ id: "a", name: " A ", value: "a" }])).toBe(
+      stableVariations([{ id: "a", name: "A", value: "a" }])
+    )
   })
 
   it("describes add, update, remove, and reorder changes", () => {
@@ -76,10 +76,15 @@ describe("variation drafts", () => {
         { id: "c", name: "C", value: "c" },
       ]
     )
-    expect(changes.map((change) => change.action)).toEqual([
-      "updated",
-      "added",
-      "removed",
+    expect(changes).toMatchObject([
+      {
+        kind: "variations",
+        valueGroups: [
+          { action: "added", values: ["C"] },
+          { action: "removed", values: ["A"] },
+        ],
+      },
+      { action: "updated", label: "Beta" },
     ])
   })
 })
