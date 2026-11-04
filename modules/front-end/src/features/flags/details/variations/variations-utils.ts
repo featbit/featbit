@@ -120,10 +120,12 @@ export function variationReviewChanges(
       })
     }
   }
+  const orderWithoutReordering = [
+    ...previous.filter((item) => currentById.has(item.id)),
+    ...current.filter((item) => !previousById.has(item.id)),
+  ]
   if (
-    previous.length === current.length &&
-    previous.every((item) => currentById.has(item.id)) &&
-    previous.some((item, index) => current[index]?.id !== item.id)
+    orderWithoutReordering.some((item, index) => current[index]?.id !== item.id)
   ) {
     changes.push({
       kind: "variation",
