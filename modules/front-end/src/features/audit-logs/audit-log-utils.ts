@@ -4,6 +4,7 @@ import { auditSnapshotKind, auditSnapshotLog } from "./audit-snapshot"
 import type { Segment } from "@/features/segments/segments-types"
 import type { ChangeReviewItem } from "@/features/change-review/change-review-types"
 import type { FeatureFlag } from "@/features/flags/flags-types"
+import { variationOrderChange } from "@/features/flags/details/variations/variations-utils"
 import {
   targetingReviewChanges,
   targetingReviewSegmentIds,
@@ -500,6 +501,18 @@ function flagSnapshotChanges(
         current: variationDetail(variation),
       })
     }
+  }
+
+  const orderChange = variationOrderChange(
+    previous.variations ?? [],
+    current.variations ?? []
+  )
+  if (orderChange) {
+    changes.push({
+      ...orderChange,
+      label: t("featureFlags.detailsPage.variations.order"),
+      literalLabel: true,
+    })
   }
 
   changes.push(

@@ -120,20 +120,30 @@ export function variationReviewChanges(
       })
     }
   }
+  const orderChange = variationOrderChange(previous, current)
+  if (orderChange) changes.push(orderChange)
+  return changes
+}
+
+export function variationOrderChange(
+  previous: FlagVariation[],
+  current: FlagVariation[]
+): VariationReviewChange | undefined {
+  const previousIds = new Set(previous.map((item) => item.id))
+  const currentIds = new Set(current.map((item) => item.id))
   const orderWithoutReordering = [
-    ...previous.filter((item) => currentById.has(item.id)),
-    ...current.filter((item) => !previousById.has(item.id)),
+    ...previous.filter((item) => currentIds.has(item.id)),
+    ...current.filter((item) => !previousIds.has(item.id)),
   ]
   if (
     orderWithoutReordering.some((item, index) => current[index]?.id !== item.id)
   ) {
-    changes.push({
+    return {
       kind: "variation",
       label: "order",
       action: "updated",
       previous: previous.map((item) => item.name).join(" → "),
       current: current.map((item) => item.name.trim()).join(" → "),
-    })
+    }
   }
-  return changes
 }
