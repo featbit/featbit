@@ -1,5 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using Application.Users;
+using Api.Authorization;
 using Domain.Workspaces;
 
 namespace Api.Controllers;
@@ -19,6 +20,7 @@ public class BasicController : ApiControllerBase
     }
 
     [HttpGet("authorized"), MapToApiVersion(1.0)]
+    [TenantContext(TenantContextRequirement.None)]
     public ApiResponse<ICurrentUser> Authorized()
     {
         return Ok(CurrentUser);
@@ -34,6 +36,7 @@ public class BasicController : ApiControllerBase
     /// 
     /// </remarks>
     [HttpGet("string"), MapToApiVersion(1.0)]
+    [TenantContext(TenantContextRequirement.None)]
     public ApiResponse<string> GetStringV1()
     {
         return Ok("v1");
@@ -49,6 +52,7 @@ public class BasicController : ApiControllerBase
     /// 
     /// </remarks>
     [HttpGet("string"), MapToApiVersion(2.0)]
+    [TenantContext(TenantContextRequirement.None)]
     public ApiResponse<string> GetStringV2()
     {
         return Ok("v2");
@@ -69,12 +73,14 @@ public class BasicController : ApiControllerBase
     /// 
     /// </remarks>
     [HttpPost("bar"), MapToApiVersion(2.0)]
+    [TenantContext(TenantContextRequirement.None)]
     public ApiResponse<Bar> CreateBar(Bar bar)
     {
         return Ok(bar);
     }
 
     [HttpGet("exception")]
+    [TenantContext(TenantContextRequirement.None)]
     public ApiResponse<string> ThrowException()
     {
         throw new Exception("exception message");
@@ -83,6 +89,7 @@ public class BasicController : ApiControllerBase
     [HttpGet]
     [Authorize(LicenseFeatures.Sso)]
     [Route("license-feature-check")]
+    [TenantContext(TenantContextRequirement.Workspace)]
     public ApiResponse<bool> LicenseFeatureCheck()
     {
         return Ok(true);

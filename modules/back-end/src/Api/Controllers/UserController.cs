@@ -1,3 +1,4 @@
+using Api.Authorization;
 using Application.Bases.Models;
 using Application.Members;
 using Application.Policies;
@@ -30,6 +31,7 @@ public class UserController : ApiControllerBase
     }
 
     [HttpGet("profile")]
+    [TenantContext(TenantContextRequirement.None)]
     public async Task<ApiResponse<Profile>> GetProfileAsync()
     {
         var request = new GetProfile();
@@ -39,6 +41,7 @@ public class UserController : ApiControllerBase
     }
 
     [HttpPut("profile")]
+    [TenantContext(TenantContextRequirement.None)]
     public async Task<ApiResponse<Profile>> UpdateProfileAsync(UpdateProfile request)
     {
         var profile = await Mediator.Send(request);
@@ -60,16 +63,25 @@ public class UserController : ApiControllerBase
     }
 
     [HttpPost("join-organization")]
-    public async Task<ApiResponse<bool>> JoinOrganizationAsync(JoinOrganization request)
+    [AllowOrganizationJoin]
+    public async Task<ApiResponse<bool>> JoinOrganizationAsync()
     {
-        request.WorkspaceId = WorkspaceId;
-        request.OrganizationId = OrgId;
+        var request = new JoinOrganization
+        {
+            WorkspaceId = WorkspaceId,
+            OrganizationId = OrgId
+        };
 
         var result = await Mediator.Send(request);
+        if (result)
+        {
+            SsoOrganizationJoinAuthorization.Clear(Response);
+        }
         return Ok(result);
     }
 
     [HttpGet("workspaces")]
+    [TenantContext(TenantContextRequirement.None)]
     public async Task<ApiResponse<ICollection<WorkspaceVm>>> GetWorkspaces()
     {
         var request = new GetWorkspaces

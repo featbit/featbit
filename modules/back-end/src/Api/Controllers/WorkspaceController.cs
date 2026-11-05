@@ -1,5 +1,6 @@
 using Api.Authentication;
 using Application.Workspaces;
+using Api.Authorization;
 using Domain.Policies;
 
 namespace Api.Controllers;
@@ -15,6 +16,7 @@ public class WorkspaceController : ApiControllerBase
     /// </remarks>
     [OpenApi]
     [HttpGet]
+    [TenantContext(TenantContextRequirement.Workspace)]
     public async Task<ApiResponse<WorkspaceVm>> GetAsync()
     {
         var permissions = await GetRequestPermissionsAsync();
@@ -47,6 +49,7 @@ public class WorkspaceController : ApiControllerBase
     }
 
     [HttpGet("usages")]
+    [TenantContext(TenantContextRequirement.Workspace)]
     public async Task<ApiResponse<WorkspaceUsageVm>> GetUsagesAsync([FromQuery] WorkspaceUsageFilter filter)
     {
         var request = new GetWorkspaceUsages
@@ -60,6 +63,7 @@ public class WorkspaceController : ApiControllerBase
     }
 
     [HttpGet("license-quota")]
+    [TenantContext(TenantContextRequirement.Workspace)]
     public async Task<ApiResponse<object>> GetLicenseQuotaAsync()
     {
         var request = new GetLicenseQuota
@@ -89,6 +93,7 @@ public class WorkspaceController : ApiControllerBase
     }
 
     [HttpGet("is-key-used")]
+    [TenantContext(TenantContextRequirement.Workspace)]
     public async Task<ApiResponse<bool>> IsKeyUsedAsync(string key)
     {
         var request = new IsKeyUsed

@@ -1,5 +1,6 @@
 using Application.Bases.Models;
 using Application.Members;
+using Api.Authorization;
 using Application.Organizations;
 using Domain.Policies;
 using Domain.Workspaces;
@@ -19,13 +20,13 @@ public class OrganizationController : ApiControllerBase
     }
 
     [HttpGet]
-    public async Task<ApiResponse<IEnumerable<OrganizationVm>>> GetListAsync([FromQuery(Name = "isSsoFirstLogin")] bool isSsoFirstLogin = false)
+    [TenantContext(TenantContextRequirement.Workspace)]
+    public async Task<ApiResponse<IEnumerable<OrganizationVm>>> GetListAsync()
     {
         var request = new GetOrganizationList
         {
             UserId = CurrentUser.Id,
-            WorkspaceId = WorkspaceId,
-            IsSsoFirstLogin = isSsoFirstLogin
+            WorkspaceId = WorkspaceId
         };
 
         var vms = await Mediator.Send(request);
@@ -33,6 +34,7 @@ public class OrganizationController : ApiControllerBase
     }
 
     [HttpGet("is-key-used")]
+    [TenantContext(TenantContextRequirement.Workspace)]
     public async Task<ApiResponse<bool>> IsKeyUsedAsync(string key)
     {
         var request = new IsKeyUsed

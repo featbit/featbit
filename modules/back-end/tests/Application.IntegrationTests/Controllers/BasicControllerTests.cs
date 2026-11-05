@@ -1,4 +1,8 @@
 using Api.Controllers;
+using Application.Services;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Moq;
 
 namespace Application.IntegrationTests.Controllers;
 
@@ -66,7 +70,13 @@ public class BasicControllerTests
     [Fact]
     public async Task LicenseFeatureEndpoint_NoLicense_ReturnsForbidden()
     {
-        var response = await _app.GetAsync("api/v1/basic/license-feature-check");
+        var workspaces = new Mock<IWorkspaceService>();
+        workspaces.Setup(x => x.GetAsync(TestWorkspace.Id)).ReturnsAsync(TestWorkspace.Instance);
+        using var factory = _app.WithServices(services =>
+            services.Replace(ServiceDescriptor.Singleton(workspaces.Object)));
+        using var client = await _app.CreateAuthenticatedClientAsync(factory);
+        client.DefaultRequestHeaders.Add(Api.ApiConstants.WorkspaceHeaderKey, TestWorkspace.Id.ToString());
+        var response = await client.GetAsync("api/v1/basic/license-feature-check");
 
         await Verify(response);
     }

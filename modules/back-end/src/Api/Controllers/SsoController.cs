@@ -1,4 +1,5 @@
 using Api.Authentication.OpenIdConnect;
+using Api.Authorization;
 using Application.Identity;
 using Application.Services;
 using Domain.Users;
@@ -18,6 +19,7 @@ public class SsoController : ApiControllerBase
     private readonly IWorkspaceService _workspaceService;
     private readonly IOrganizationService _organizationService;
     private readonly ILogger<SsoController> _logger;
+    private readonly SsoOrganizationJoinAuthorization _joinAuthorization;
 
     public SsoController(
         OidcClient client,
@@ -26,7 +28,8 @@ public class SsoController : ApiControllerBase
         IWorkspaceService workspaceService,
         IOrganizationService organizationService,
         IConfiguration configuration,
-        ILogger<SsoController> logger)
+        ILogger<SsoController> logger,
+        SsoOrganizationJoinAuthorization joinAuthorization)
     {
         _isEnabled = "true".Equals(configuration["SSOEnabled"], StringComparison.CurrentCultureIgnoreCase);
 
@@ -36,6 +39,7 @@ public class SsoController : ApiControllerBase
         _workspaceService = workspaceService;
         _organizationService = organizationService;
         _logger = logger;
+        _joinAuthorization = joinAuthorization;
     }
 
     [HttpGet("oidc-authorize-url")]
@@ -94,6 +98,10 @@ public class SsoController : ApiControllerBase
             var (accessToken, refreshToken) =
                 await _identityService.IssueTokensAsync(user, Request.ClientIpAddress());
             Response.SetRefreshTokenCookie(refreshToken);
+            if (isSsoFirstLogin)
+            {
+                _joinAuthorization.Issue(HttpContext, user.Id, workspace.Id);
+            }
 
             return Ok(new LoginToken(isSsoFirstLogin, accessToken));
         }
