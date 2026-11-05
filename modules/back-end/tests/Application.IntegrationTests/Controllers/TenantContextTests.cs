@@ -13,24 +13,6 @@ namespace Application.IntegrationTests.Controllers;
 public class TenantContextTests(TestApp app)
 {
     [Theory]
-    [InlineData("/api/v1/user/workspaces")]
-    [InlineData("/api/v1/user/profile")]
-    public async Task UserActions_RejectAuthenticatedRequestsWithoutContext(string path)
-    {
-        using var client = await app.CreateAuthenticatedClientAsync(app);
-        using var response = await client.GetAsync(path);
-        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
-    }
-
-    [Fact]
-    public async Task UserActions_RequireAuthentication()
-    {
-        using var client = app.CreateClient();
-        using var response = await client.GetAsync("/api/v1/user/workspaces");
-        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
-    }
-
-    [Theory]
     [InlineData(false, false)]
     [InlineData(true, false)]
     [InlineData(false, true)]

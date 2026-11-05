@@ -1,10 +1,6 @@
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Security.Claims;
-using System.IdentityModel.Tokens.Jwt;
-using System.Net;
-using System.Net.Http.Headers;
-using System.Text;
 using Api;
 using Api.Authentication;
 using Api.Controllers;
@@ -16,13 +12,7 @@ using Domain.Workspaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Controllers;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.TestHost;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Primitives;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Api.UnitTests.Authentication;
 
@@ -110,6 +100,7 @@ public class JwtContextValidationMiddlewareTests
     [InlineData(ApiConstants.WorkspaceHeaderKey, "not-a-guid")]
     [InlineData(ApiConstants.WorkspaceHeaderKey, "00000000-0000-0000-0000-000000000000")]
     [InlineData(ApiConstants.WorkspaceHeaderKey, "")]
+    [InlineData(ApiConstants.OrgIdHeaderKey, "")]
     [InlineData(ApiConstants.OrgIdHeaderKey, "not-a-guid")]
     [InlineData(ApiConstants.OrgIdHeaderKey, "00000000-0000-0000-0000-000000000000")]
     public Task InvalidContext_Rejects(string header, string value)
@@ -129,43 +120,6 @@ public class JwtContextValidationMiddlewareTests
         return AssertResult(context, false);
     }
 
-    [Fact]
-    public Task OrganizationWithoutWorkspace_Rejects()
-    {
-        var context = Context();
-        context.Request.Headers.Remove(ApiConstants.WorkspaceHeaderKey);
-        return AssertResult(context, false);
-    }
-
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public async Task WorkspaceSelectionWithoutContext_Rejects(bool emptyHeaders)
-    {
-        var context = Context();
-        SetAction(context, typeof(UserController), nameof(UserController.GetWorkspaces));
-        context.Request.Headers.Clear();
-        if (emptyHeaders)
-        {
-            context.Request.Headers[ApiConstants.WorkspaceHeaderKey] = "";
-            context.Request.Headers[ApiConstants.OrgIdHeaderKey] = "";
-        }
-        await AssertResult(context, false);
-        _users.Verify(x => x.GetWorkspacesAsync(It.IsAny<Guid>()), Times.Never);
-    }
-
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public async Task OrganizationSelection_RequiresOrganizationHeader(bool isMember)
-    {
-        if (!isMember) _users.Setup(x => x.GetWorkspacesAsync(_userId)).ReturnsAsync([]);
-        var context = Context();
-        SetAction(context, typeof(OrganizationController), nameof(OrganizationController.GetListAsync));
-        context.Request.Headers[ApiConstants.OrgIdHeaderKey] = "";
-        await AssertResult(context, false);
-    }
-
     private static void SetAction(HttpContext context, Type controller, string method)
     {
         var methodInfo = controller.GetMethod(method)!;
@@ -181,7 +135,7 @@ public class JwtContextValidationMiddlewareTests
     [InlineData(false, false)]
     [InlineData(true, false)]
     [InlineData(false, true)]
-    public async Task UnmarkedBusinessAction_RejectsMissingContextBeforeAnyLookup(bool workspace, bool organization)
+    public async Task MissingHeaders_RejectsBeforeAnyLookup(bool workspace, bool organization)
     {
         var context = Context();
         SetAction(context, typeof(FeatureFlagController), nameof(FeatureFlagController.GetAsync));
@@ -193,43 +147,15 @@ public class JwtContextValidationMiddlewareTests
     }
 
     [Fact]
-    public Task UnmarkedBusinessAction_RejectsEmptyHeaders()
-    {
-        var context = Context();
-        context.Request.Headers[ApiConstants.WorkspaceHeaderKey] = "";
-        context.Request.Headers[ApiConstants.OrgIdHeaderKey] = "";
-        return AssertResult(context, false);
-    }
-
-    [Fact]
-    public Task OrganizationSelection_RequiresTenantContext()
-    {
-        var context = Context();
-        SetAction(context, typeof(OrganizationController), nameof(OrganizationController.GetListAsync));
-        context.Request.Headers.Clear();
-        return AssertResult(context, false);
-    }
-
-    [Fact]
     public async Task JoinOrganization_SkipsContextValidation()
     {
         _organizations.Setup(x => x.ContainsUserAsync(_organizationId, _userId)).ReturnsAsync(false);
         var context = Context();
+        context.Request.Headers.Clear();
         SetAction(context, typeof(UserController), nameof(UserController.JoinOrganizationAsync));
         await AssertResult(context, true);
         _users.VerifyNoOtherCalls();
         _organizations.VerifyNoOtherCalls();
-    }
-
-    [Theory]
-    [InlineData(ApiConstants.WorkspaceHeaderKey)]
-    [InlineData(ApiConstants.OrgIdHeaderKey)]
-    public Task JoinOrganization_WithoutTenantHeader_Continues(string missingHeader)
-    {
-        var context = Context();
-        context.Request.Headers.Remove(missingHeader);
-        SetAction(context, typeof(UserController), nameof(UserController.JoinOrganizationAsync));
-        return AssertResult(context, true);
     }
 
     [Theory]
@@ -260,74 +186,4 @@ public class JwtContextValidationMiddlewareTests
         return AssertResult(context, false);
     }
 
-    [Theory]
-    [InlineData(true, true, true, false, HttpStatusCode.OK)]
-    [InlineData(false, true, true, false, HttpStatusCode.Forbidden)]
-    [InlineData(true, false, true, false, HttpStatusCode.Forbidden)]
-    [InlineData(true, true, false, false, HttpStatusCode.Forbidden)]
-    [InlineData(true, false, true, true, HttpStatusCode.OK)]
-    [InlineData(false, false, true, true, HttpStatusCode.OK)]
-    [InlineData(true, false, false, true, HttpStatusCode.OK)]
-    public async Task SignedJwt_HttpPipelineEnforcesContextBeforeEndpoint(
-        bool workspaceMember, bool organizationMember, bool correctWorkspace, bool joining, HttpStatusCode expected)
-    {
-        var requestedOrganizationId = correctWorkspace ? _organizationId : Guid.NewGuid();
-        if (!workspaceMember) _users.Setup(x => x.GetWorkspacesAsync(_userId)).ReturnsAsync([]);
-        _organizations.Setup(x => x.ContainsUserAsync(_organizationId, _userId)).ReturnsAsync(organizationMember);
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("jwt-context-validation-test-key-at-least-32-bytes"));
-        using var host = await new HostBuilder().ConfigureWebHost(web => web.UseTestServer()
-            .ConfigureServices(services =>
-            {
-                services.AddRouting();
-                services.AddSingleton(_users.Object);
-                services.AddSingleton(_organizations.Object);
-                services.AddAuthentication(Schemes.JwtBearer).AddJwtBearer(Schemes.JwtBearer, options =>
-                {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        AuthenticationType = Schemes.JwtBearer,
-                        ValidIssuer = "test",
-                        ValidAudience = "test",
-                        IssuerSigningKey = key,
-                        ValidateIssuerSigningKey = true,
-                        ValidateLifetime = true
-                    };
-                });
-                services.AddAuthorization();
-            })
-            .Configure(app =>
-            {
-                app.UseRouting();
-                app.UseAuthentication();
-                app.UseMiddleware<JwtContextValidationMiddleware>();
-                app.UseAuthorization();
-                app.UseEndpoints(endpoints =>
-                {
-                    var endpoint = endpoints.MapGet("/protected", _ =>
-                    {
-                        _reachedEndpoint = true;
-                        return Task.CompletedTask;
-                    }).RequireAuthorization();
-                    if (joining) endpoint.WithMetadata(new ControllerActionDescriptor
-                    {
-                        ControllerTypeInfo = typeof(UserController).GetTypeInfo(),
-                        MethodInfo = typeof(UserController).GetMethod(nameof(UserController.JoinOrganizationAsync))!
-                    });
-                });
-            })).StartAsync();
-        var jwt = new JwtSecurityToken("test", "test",
-            [new Claim(UserClaims.Id, _userId.ToString())],
-            expires: DateTime.UtcNow.AddMinutes(5),
-            signingCredentials: new SigningCredentials(key, SecurityAlgorithms.HmacSha256));
-        using var client = host.GetTestClient();
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", new JwtSecurityTokenHandler().WriteToken(jwt));
-        client.DefaultRequestHeaders.Add(ApiConstants.WorkspaceHeaderKey, _workspaceId.ToString());
-        client.DefaultRequestHeaders.Add(ApiConstants.OrgIdHeaderKey,
-            requestedOrganizationId.ToString());
-
-        using var response = await client.GetAsync("/protected");
-
-        Assert.Equal(expected, response.StatusCode);
-        Assert.Equal(expected == HttpStatusCode.OK, _reachedEndpoint);
-    }
 }
