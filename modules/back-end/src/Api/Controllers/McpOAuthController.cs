@@ -3,7 +3,6 @@ using System.Text.Json.Serialization;
 using Application.Bases.Models;
 using Application.Services;
 using Api.Mcp;
-using Api.Authorization;
 using Domain.Mcp;
 using Domain.Policies;
 using Domain.Users;
