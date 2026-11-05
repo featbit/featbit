@@ -40,6 +40,7 @@ public class PermissionCheckTestApp : WebApplicationFactory<Program>
             collection.Replace(ServiceDescriptor.Singleton<ICurrentUser>(new TestCurrentUser(TestUser.Id)));
             collection.Replace(ServiceDescriptor.Transient<IWorkspaceService, TestWorkspaceService>());
             collection.Replace(ServiceDescriptor.Transient<IUserService, TestUserService>());
+            collection.Replace(ServiceDescriptor.Singleton(TestTenantContext.CreateOrganizationService().Object));
             collection.Replace(ServiceDescriptor.Transient<IRefreshTokenService, TestRefreshTokenService>());
 
             collection.Replace(ServiceDescriptor.Singleton<IPermissionChecker>(PermissionChecker));
@@ -64,6 +65,7 @@ public class PermissionCheckTestApp : WebApplicationFactory<Program>
     public async Task<HttpClient> CreateAuthenticatedClientAsync()
     {
         var client = CreateClient();
+        TestTenantContext.AddHeaders(client);
         var scopeFactory = Services.GetRequiredService<IServiceScopeFactory>();
         using var scope = scopeFactory.CreateScope();
         var identityService = scope.ServiceProvider.GetRequiredService<IIdentityService>();

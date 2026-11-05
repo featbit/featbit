@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using Application.Bases.Models;
 using Application.Services;
 using Api.Mcp;
+using Api.Authorization;
 using Domain.Mcp;
 using Domain.Policies;
 using Domain.Users;
@@ -103,6 +104,7 @@ public class McpOAuthController(
 
     [Authorize(Permissions.CanAccessEnv)]
     [HttpPost("~/api/v{version:apiVersion}/envs/{envId:guid}/mcp/oauth/token")]
+    [TenantContextFromEnvironment]
     public async Task<ActionResult<McpTokenResponse>> CreateScopedToken(
         Guid envId,
         McpScopedTokenRequest request)
@@ -140,6 +142,7 @@ public class McpOAuthController(
 
     [Authorize(Permissions.CanAccessEnv)]
     [HttpPost("~/api/v{version:apiVersion}/envs/{envId:guid}/mcp/oauth/device/authorize")]
+    [TenantContextFromEnvironment]
     public async Task<ActionResult<ApiResponse<McpDeviceAuthorizeResponse>>> AuthorizeDeviceCode(
         Guid envId,
         McpDeviceAuthorizeRequest request)

@@ -36,6 +36,29 @@ public class JwtContextValidationMiddleware(RequestDelegate next)
         var organizationHeader = context.Request.Headers[ApiConstants.OrgIdHeaderKey];
         var workspaceValue = workspaceHeader.ToString();
         var organizationValue = organizationHeader.ToString();
+        var metadata = context.GetEndpoint()?.Metadata;
+        if (metadata?.GetMetadata<TenantContextFromEnvironmentAttribute>() != null)
+        {
+            if (!Guid.TryParse(context.Request.RouteValues["envId"]?.ToString(), out var envId) || envId == Guid.Empty)
+                return false;
+
+            var environments = context.RequestServices.GetRequiredService<IEnvironmentService>();
+            var descriptor = await environments.GetResourceDescriptorAsync(envId);
+            if (descriptor == null) return false;
+            var organization = await organizations.FindOneAsync(org => org.Id == descriptor.Organization.Id);
+            if (organization == null) return false;
+
+            if ((workspaceHeader.Count > 0 &&
+                 (!Guid.TryParse(workspaceValue, out var suppliedWorkspace) || suppliedWorkspace != organization.WorkspaceId)) ||
+                (organizationHeader.Count > 0 &&
+                 (!Guid.TryParse(organizationValue, out var suppliedOrganization) || suppliedOrganization != organization.Id)))
+                return false;
+
+            workspaceValue = organization.WorkspaceId.ToString();
+            organizationValue = organization.Id.ToString();
+            context.Request.Headers[ApiConstants.WorkspaceHeaderKey] = workspaceValue;
+            context.Request.Headers[ApiConstants.OrgIdHeaderKey] = organizationValue;
+        }
         // MCP tokens carry their tenant context in signed claims rather than request headers.
         if (context.User.FindFirst(McpClaimTypes.TokenType)?.Value == McpClaimTypes.McpTokenType)
         {
@@ -52,7 +75,6 @@ public class JwtContextValidationMiddleware(RequestDelegate next)
 
         var hasWorkspace = !string.IsNullOrEmpty(workspaceValue);
         var hasOrganization = !string.IsNullOrEmpty(organizationValue);
-        var metadata = context.GetEndpoint()?.Metadata;
         var joining = metadata?.GetMetadata<AllowOrganizationJoinAttribute>() != null;
         var requirement = joining
             ? TenantContextRequirement.WorkspaceAndOrganization

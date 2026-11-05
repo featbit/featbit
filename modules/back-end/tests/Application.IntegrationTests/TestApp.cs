@@ -26,10 +26,12 @@ public class TestApp : WebApplicationFactory<Program>
     public WebApplicationFactory<Program> WithServices(Action<IServiceCollection> configure) =>
         WithWebHostBuilder(builder => builder.ConfigureTestServices(configure));
 
-    public async Task<HttpClient> CreateAuthenticatedClientAsync(WebApplicationFactory<Program> factory)
+    public async Task<HttpClient> CreateAuthenticatedClientAsync(WebApplicationFactory<Program> factory,
+        bool includeTenantContext = false)
     {
         var client = factory.CreateClient();
         await AddAuthorizationHeader(client);
+        if (includeTenantContext) TestTenantContext.AddHeaders(client);
         return client;
     }
 
@@ -52,6 +54,7 @@ public class TestApp : WebApplicationFactory<Program>
 
             collection.Replace(ServiceDescriptor.Transient<IWorkspaceService, TestWorkspaceService>());
             collection.Replace(ServiceDescriptor.Transient<IUserService, TestUserService>());
+            collection.Replace(ServiceDescriptor.Singleton(TestTenantContext.CreateOrganizationService().Object));
             collection.Replace(ServiceDescriptor.Transient<IRefreshTokenService, TestRefreshTokenService>());
 
             // Replace IPermissionChecker so [Authorize(Permissions.X)] routes don't

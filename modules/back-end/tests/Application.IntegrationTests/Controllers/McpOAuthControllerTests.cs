@@ -1,9 +1,11 @@
 using System.Collections.Concurrent;
+using System.Linq.Expressions;
 using System.Net;
 using System.Security.Claims;
 using System.Text.Json;
 using System.Net.Http.Json;
 using Application.Services;
+using Api.Authorization;
 using Api.Controllers;
 using Domain.Environments;
 using Domain.Mcp;
@@ -22,6 +24,81 @@ public class McpOAuthControllerTests
 {
     private static readonly Guid ExperimentId = new("10000000-0000-0000-0000-000000000001");
     private readonly TestApp _app;
+
+    public static IEnumerable<object[]> InvalidTenantContexts =>
+        from endpoint in new[] { "token", "device/authorize" }
+        from reason in new[] { "workspace-header", "organization-header", "malformed-header", "duplicate-header",
+            "workspace-membership", "organization-membership", "missing-environment", "missing-organization", "permission" }
+        select new object[] { endpoint, reason };
+
+    [Theory]
+    [MemberData(nameof(InvalidTenantContexts))]
+    public async Task IssuingOrApproving_RejectsInvalidTenantContextBeforeStoreAccess(string endpoint, string reason)
+    {
+        var store = new Mock<IMcpAuthorizationStore>(MockBehavior.Strict);
+        var permissions = new TestPermissionChecker { Grant = reason != "permission" };
+        using var factory = CreateFactory(store.Object, services =>
+        {
+            services.Replace(ServiceDescriptor.Singleton<IPermissionChecker>(permissions));
+            if (reason == "workspace-membership")
+            {
+                var users = new Mock<IUserService>();
+                users.Setup(x => x.GetWorkspacesAsync(TestUser.Id)).ReturnsAsync([]);
+                services.Replace(ServiceDescriptor.Singleton(users.Object));
+            }
+            if (reason == "organization-membership" || reason == "missing-organization")
+            {
+                var organizations = TestTenantContext.CreateOrganizationService();
+                organizations.Setup(x => x.ContainsUserAsync(TestWorkspace.OrganizationId, TestUser.Id)).ReturnsAsync(false);
+                if (reason == "missing-organization")
+                    organizations.Setup(x => x.FindOneAsync(It.IsAny<Expression<Func<Organization, bool>>>()))
+                        .ReturnsAsync((Organization?)null);
+                services.Replace(ServiceDescriptor.Singleton(organizations.Object));
+            }
+            if (reason == "missing-environment")
+            {
+                var environments = new Mock<IEnvironmentService>();
+                environments.Setup(x => x.GetResourceDescriptorAsync(It.IsAny<Guid>())).ReturnsAsync((ResourceDescriptor)null!);
+                services.Replace(ServiceDescriptor.Singleton(environments.Object));
+            }
+        });
+        using var client = await _app.CreateAuthenticatedClientAsync(factory);
+        if (reason == "workspace-header")
+            client.DefaultRequestHeaders.Add(Api.ApiConstants.WorkspaceHeaderKey, Guid.NewGuid().ToString());
+        if (reason == "organization-header")
+            client.DefaultRequestHeaders.Add(Api.ApiConstants.OrgIdHeaderKey, Guid.NewGuid().ToString());
+        if (reason == "malformed-header")
+            client.DefaultRequestHeaders.Add(Api.ApiConstants.WorkspaceHeaderKey, "invalid");
+        if (reason == "duplicate-header")
+            client.DefaultRequestHeaders.Add(Api.ApiConstants.WorkspaceHeaderKey,
+                new[] { TestWorkspace.Id.ToString(), TestWorkspace.Id.ToString() });
+
+        var response = await client.PostAsJsonAsync($"/api/v1/envs/{TestWorkspace.Id}/mcp/oauth/{endpoint}",
+            new { client_id = "test", user_code = "test" });
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        store.VerifyNoOtherCalls();
+        if (reason == "permission") Assert.Single(permissions.Calls);
+        else Assert.Empty(permissions.Calls);
+    }
+
+    [Theory]
+    [InlineData("workspace")]
+    [InlineData("organization")]
+    public async Task CreateScopedToken_CompletesPartialTenantContext(string suppliedHeader)
+    {
+        using var factory = CreateFactory(new InMemoryMcpAuthorizationStore());
+        using var client = await _app.CreateAuthenticatedClientAsync(factory);
+        client.DefaultRequestHeaders.Add(
+            suppliedHeader == "workspace" ? Api.ApiConstants.WorkspaceHeaderKey : Api.ApiConstants.OrgIdHeaderKey,
+            (suppliedHeader == "workspace" ? TestWorkspace.Id : TestWorkspace.OrganizationId).ToString());
+        var response = await client.PostAsJsonAsync($"/api/v1/envs/{TestWorkspace.Id}/mcp/oauth/token",
+            new { client_id = "test" });
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var token = new JsonWebToken(await ReadStringAsync(response, "access_token"));
+        Assert.Equal(TestWorkspace.Id.ToString(), token.GetClaim(Api.Mcp.McpClaimTypes.WorkspaceId).Value);
+        Assert.Equal(TestWorkspace.OrganizationId.ToString(), token.GetClaim(Api.Mcp.McpClaimTypes.OrgId).Value);
+    }
 
     public McpOAuthControllerTests(TestApp app)
     {
@@ -255,7 +332,7 @@ public class McpOAuthControllerTests
     }
 
     private Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory<Program> CreateFactory(
-        IMcpAuthorizationStore store)
+        IMcpAuthorizationStore store, Action<IServiceCollection>? configure = null)
     {
         var environmentService = new Mock<IEnvironmentService>();
         environmentService
@@ -266,7 +343,7 @@ public class McpOAuthControllerTests
                 Project = new IdNameKeyProps(),
                 Environment = new IdNameKeyProps { Id = envId }
             });
-        var organizationService = new Mock<IOrganizationService>();
+        var organizationService = TestTenantContext.CreateOrganizationService();
         organizationService
             .Setup(x => x.GetAsync(TestWorkspace.OrganizationId))
             .ReturnsAsync(new Organization(TestWorkspace.Id, "Test organization", "test-org")
@@ -280,6 +357,7 @@ public class McpOAuthControllerTests
             services.Replace(ServiceDescriptor.Scoped(_ => store));
             services.Replace(ServiceDescriptor.Scoped(_ => environmentService.Object));
             services.Replace(ServiceDescriptor.Scoped(_ => organizationService.Object));
+            configure?.Invoke(services);
         });
     }
 

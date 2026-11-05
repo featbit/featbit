@@ -13,7 +13,7 @@ namespace Application.IntegrationTests.Controllers;
 [Collection(nameof(TestApp))]
 public class UserOrganizationMembersControllerTests : IClassFixture<PermissionCheckTestApp>
 {
-    private static readonly Guid OrganizationId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+    private static readonly Guid OrganizationId = TestWorkspace.OrganizationId;
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
     private readonly PermissionCheckTestApp _app;
@@ -42,7 +42,6 @@ public class UserOrganizationMembersControllerTests : IClassFixture<PermissionCh
             .Setup(sender => sender.Send(It.IsAny<GetMemberLookupList>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expected);
         var client = await _app.CreateAuthenticatedClientAsync();
-        client.DefaultRequestHeaders.Add(ApiConstants.OrgIdHeaderKey, OrganizationId.ToString());
 
         var response = await client.GetAsync(
             "/api/v1/user/organization-members?searchText=maya&pageIndex=1&pageSize=20");
