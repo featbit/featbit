@@ -13,6 +13,20 @@ namespace Application.IntegrationTests.Controllers;
 public class TenantContextTests(TestApp app)
 {
     [Theory]
+    [InlineData(true, HttpStatusCode.OK)]
+    [InlineData(false, HttpStatusCode.Unauthorized)]
+    public async Task Profile_RequiresAuthenticationButNotTenantHeaders(bool authenticated, HttpStatusCode expected)
+    {
+        using var client = authenticated
+            ? await app.CreateAuthenticatedClientAsync(app)
+            : app.CreateClient();
+
+        using var response = await client.GetAsync("/api/v1/user/profile");
+
+        Assert.Equal(expected, response.StatusCode);
+    }
+
+    [Theory]
     [InlineData(false, false)]
     [InlineData(true, false)]
     [InlineData(false, true)]

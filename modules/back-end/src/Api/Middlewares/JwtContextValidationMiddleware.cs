@@ -1,4 +1,5 @@
 using Api.Authentication;
+using Api.Authorization;
 using Api.Controllers;
 using Api.Mcp;
 using Application.Services;
@@ -18,6 +19,8 @@ public class JwtContextValidationMiddleware(RequestDelegate next)
             context.GetEndpoint()?.Metadata.GetMetadata<IAllowAnonymous>() != null ||
             // MCP OAuth endpoints, including requests authenticated with an ordinary user JWT.
             action?.ControllerTypeInfo.AsType() == typeof(McpOAuthController) ||
+            // Actions that explicitly skip tenant context validation.
+            context.GetEndpoint()?.Metadata.GetMetadata<SkipJwtContextValidationAttribute>() != null ||
             // TODO: Handle tenant context validation for JoinOrganizationAsync in a follow-up; skip it for now.
             (action?.ControllerTypeInfo.AsType() == typeof(UserController) &&
              action.MethodInfo.Name == nameof(UserController.JoinOrganizationAsync)) ||

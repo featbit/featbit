@@ -1,3 +1,4 @@
+using Api.Authorization;
 using Application.Bases.Models;
 using Application.Members;
 using Application.Policies;
@@ -30,6 +31,8 @@ public class UserController : ApiControllerBase
     }
 
     [HttpGet("profile")]
+    // Login loads the current user's profile before tenant context is available.
+    [SkipJwtContextValidation]
     public async Task<ApiResponse<Profile>> GetProfileAsync()
     {
         var request = new GetProfile();
