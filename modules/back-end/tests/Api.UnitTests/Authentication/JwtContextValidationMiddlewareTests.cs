@@ -138,7 +138,6 @@ public class JwtContextValidationMiddlewareTests
     public async Task MissingHeaders_RejectsBeforeAnyLookup(bool workspace, bool organization)
     {
         var context = Context();
-        SetAction(context, typeof(FeatureFlagController), nameof(FeatureFlagController.GetAsync));
         if (!workspace) context.Request.Headers.Remove(ApiConstants.WorkspaceHeaderKey);
         if (!organization) context.Request.Headers.Remove(ApiConstants.OrgIdHeaderKey);
         await AssertResult(context, false);
@@ -149,7 +148,6 @@ public class JwtContextValidationMiddlewareTests
     [Fact]
     public async Task JoinOrganization_SkipsContextValidation()
     {
-        _organizations.Setup(x => x.ContainsUserAsync(_organizationId, _userId)).ReturnsAsync(false);
         var context = Context();
         context.Request.Headers.Clear();
         SetAction(context, typeof(UserController), nameof(UserController.JoinOrganizationAsync));
@@ -161,7 +159,7 @@ public class JwtContextValidationMiddlewareTests
     [Theory]
     [InlineData(Schemes.OpenApi)]
     [InlineData(null)]
-    public async Task OtherAuthenticationSchemes_AreUnaffected(string? scheme)
+    public async Task UnauthenticatedOrNonJwtRequests_SkipValidation(string? scheme)
     {
         var context = Context();
         context.User = new ClaimsPrincipal(new ClaimsIdentity([], scheme));
