@@ -20,10 +20,7 @@ public class JwtContextValidationMiddleware(RequestDelegate next)
             // MCP OAuth endpoints, including requests authenticated with an ordinary user JWT.
             action?.ControllerTypeInfo.AsType() == typeof(McpOAuthController) ||
             // Actions that explicitly skip tenant context validation.
-            context.GetEndpoint()?.Metadata.GetMetadata<SkipJwtContextValidationAttribute>() != null ||
-            // TODO: Handle tenant context validation for JoinOrganizationAsync in a follow-up; skip it for now.
-            (action?.ControllerTypeInfo.AsType() == typeof(UserController) &&
-             action.MethodInfo.Name == nameof(UserController.JoinOrganizationAsync)) ||
+            context.GetEndpoint()?.Metadata.GetMetadata<TenantContextAttribute>()?.Requirement == TenantContextRequirement.None ||
             // MCP protocol endpoints under /mcp, which are not MVC controller actions.
             context.Request.Path.StartsWithSegments("/mcp") ||
             // Requests carrying an MCP access token, identified by its token-type claim.
@@ -49,10 +46,26 @@ public class JwtContextValidationMiddleware(RequestDelegate next)
         var organizationHeader = context.Request.Headers[ApiConstants.OrgIdHeaderKey];
         var workspaceValue = workspaceHeader.ToString();
         var organizationValue = organizationHeader.ToString();
+        var requirement = context.GetEndpoint()?.Metadata.GetMetadata<TenantContextAttribute>()?.Requirement
+                          ?? TenantContextRequirement.WorkspaceAndOrganization;
+        var hasWorkspace = !string.IsNullOrEmpty(workspaceValue);
+        var hasOrganization = !string.IsNullOrEmpty(organizationValue);
+        if (!hasWorkspace ||
+            (requirement == TenantContextRequirement.WorkspaceAndOrganization && !hasOrganization))
+        {
+            return false;
+        }
+
         if (!Guid.TryParse(context.User.FindFirst(UserClaims.Id)?.Value, out var userId) ||
             userId == Guid.Empty ||
-            !Guid.TryParse(workspaceValue, out var workspaceId) || workspaceId == Guid.Empty ||
-            !Guid.TryParse(organizationValue, out var organizationId) || organizationId == Guid.Empty)
+            !Guid.TryParse(workspaceValue, out var workspaceId) || workspaceId == Guid.Empty)
+        {
+            return false;
+        }
+
+        var organizationId = Guid.Empty;
+        if (hasOrganization &&
+            (!Guid.TryParse(organizationValue, out organizationId) || organizationId == Guid.Empty))
         {
             return false;
         }
@@ -62,6 +75,8 @@ public class JwtContextValidationMiddleware(RequestDelegate next)
         {
             return false;
         }
+
+        if (!hasOrganization) return true;
 
         if (!await organizations.AnyAsync(org => org.Id == organizationId && org.WorkspaceId == workspaceId))
         {

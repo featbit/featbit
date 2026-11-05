@@ -15,6 +15,23 @@ public class TenantContextTests(TestApp app)
     [Theory]
     [InlineData(true, HttpStatusCode.OK)]
     [InlineData(false, HttpStatusCode.Unauthorized)]
+    public async Task WorkspaceSelection_WithEmptyTenantHeaders_RequiresAuthentication(
+        bool authenticated, HttpStatusCode expected)
+    {
+        using var client = authenticated
+            ? await app.CreateAuthenticatedClientAsync(app)
+            : app.CreateClient();
+        client.DefaultRequestHeaders.Add(ApiConstants.WorkspaceHeaderKey, "");
+        client.DefaultRequestHeaders.Add(ApiConstants.OrgIdHeaderKey, "");
+
+        using var response = await client.GetAsync("/api/v1/user/workspaces");
+
+        Assert.Equal(expected, response.StatusCode);
+    }
+
+    [Theory]
+    [InlineData(true, HttpStatusCode.OK)]
+    [InlineData(false, HttpStatusCode.Unauthorized)]
     public async Task Profile_RequiresAuthenticationButNotTenantHeaders(bool authenticated, HttpStatusCode expected)
     {
         using var client = authenticated
@@ -44,19 +61,36 @@ public class TenantContextTests(TestApp app)
         sender.VerifyNoOtherCalls();
     }
 
-    [Fact]
-    public async Task ValidTenantContext_ContinuesToAction()
+    [Theory]
+    [InlineData("member", HttpStatusCode.OK)]
+    [InlineData("foreign", HttpStatusCode.Forbidden)]
+    [InlineData("", HttpStatusCode.Forbidden)]
+    [InlineData(null, HttpStatusCode.Forbidden)]
+    [InlineData("invalid", HttpStatusCode.Forbidden)]
+    public async Task OrganizationSelection_RequiresWorkspaceMembershipWithoutOrganizationHeader(
+        string? workspace, HttpStatusCode expected)
     {
         var sender = new Mock<ISender>(MockBehavior.Strict);
         sender.Setup(x => x.Send(It.IsAny<GetOrganizationList>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Array.Empty<OrganizationVm>());
         using var factory = app.WithServices(services => services.Replace(ServiceDescriptor.Singleton(sender.Object)));
-        using var client = await app.CreateAuthenticatedClientAsync(factory, includeTenantContext: true);
+        using var client = await app.CreateAuthenticatedClientAsync(factory);
+        if (workspace != null)
+        {
+            var workspaceValue = workspace switch
+            {
+                "member" => TestWorkspace.Id.ToString(),
+                "foreign" => Guid.NewGuid().ToString(),
+                _ => workspace
+            };
+            client.DefaultRequestHeaders.Add(ApiConstants.WorkspaceHeaderKey, workspaceValue);
+        }
+        client.DefaultRequestHeaders.Add(ApiConstants.OrgIdHeaderKey, "");
 
         using var response = await client.GetAsync("/api/v1/organizations");
 
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(expected, response.StatusCode);
         sender.Verify(x => x.Send(It.IsAny<GetOrganizationList>(), It.IsAny<CancellationToken>()),
-            Times.Once());
+            expected == HttpStatusCode.OK ? Times.Once() : Times.Never());
     }
 }

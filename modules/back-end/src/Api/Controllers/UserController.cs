@@ -32,7 +32,7 @@ public class UserController : ApiControllerBase
 
     [HttpGet("profile")]
     // Login loads the current user's profile before tenant context is available.
-    [SkipJwtContextValidation]
+    [TenantContext(TenantContextRequirement.None)]
     public async Task<ApiResponse<Profile>> GetProfileAsync()
     {
         var request = new GetProfile();
@@ -63,6 +63,8 @@ public class UserController : ApiControllerBase
     }
 
     [HttpPost("join-organization")]
+    // TODO: Handle tenant context validation for organization joining in a follow-up; skip it for now.
+    [TenantContext(TenantContextRequirement.None)]
     public async Task<ApiResponse<bool>> JoinOrganizationAsync(JoinOrganization request)
     {
         request.WorkspaceId = WorkspaceId;
@@ -73,6 +75,8 @@ public class UserController : ApiControllerBase
     }
 
     [HttpGet("workspaces")]
+    // Login lists the user's workspaces before a workspace or organization is selected.
+    [TenantContext(TenantContextRequirement.None)]
     public async Task<ApiResponse<ICollection<WorkspaceVm>>> GetWorkspaces()
     {
         var request = new GetWorkspaces

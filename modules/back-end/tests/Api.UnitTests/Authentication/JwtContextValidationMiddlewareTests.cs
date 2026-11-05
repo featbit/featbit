@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Security.Claims;
 using Api;
 using Api.Authentication;
+using Api.Authorization;
 using Api.Controllers;
 using Api.Middlewares;
 using Application.Services;
@@ -182,6 +183,43 @@ public class JwtContextValidationMiddlewareTests
         var context = Context();
         context.User = new ClaimsPrincipal(new ClaimsIdentity([], Schemes.JwtBearer));
         return AssertResult(context, false);
+    }
+
+    [Theory]
+    [InlineData(TenantContextRequirement.None, true)]
+    [InlineData(TenantContextRequirement.Workspace, false)]
+    [InlineData(TenantContextRequirement.WorkspaceAndOrganization, false)]
+    public Task DeclaredRequirement_ControlsWhetherContextCanBeOmitted(
+        TenantContextRequirement requirement, bool allowed)
+    {
+        var context = Context();
+        context.Request.Headers.Clear();
+        context.SetEndpoint(new Endpoint(null,
+            new EndpointMetadataCollection(new TenantContextAttribute(requirement)), "context"));
+        return AssertResult(context, allowed);
+    }
+
+    [Fact]
+    public Task WorkspaceRequirement_StillValidatesSuppliedOrganization()
+    {
+        var context = Context();
+        context.SetEndpoint(new Endpoint(null,
+            new EndpointMetadataCollection(new TenantContextAttribute(TenantContextRequirement.Workspace)), "context"));
+        _organizations.Setup(x => x.ContainsUserAsync(_organizationId, _userId)).ReturnsAsync(false);
+        return AssertResult(context, false);
+    }
+
+    [Fact]
+    public async Task NoneRequirement_BypassesInvalidSuppliedContext()
+    {
+        var context = Context();
+        context.Request.Headers[ApiConstants.WorkspaceHeaderKey] = "invalid";
+        context.SetEndpoint(new Endpoint(null,
+            new EndpointMetadataCollection(new TenantContextAttribute(TenantContextRequirement.None)), "context"));
+
+        await AssertResult(context, true);
+        _users.VerifyNoOtherCalls();
+        _organizations.VerifyNoOtherCalls();
     }
 
 }

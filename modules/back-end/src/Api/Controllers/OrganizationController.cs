@@ -1,3 +1,4 @@
+using Api.Authorization;
 using Application.Bases.Models;
 using Application.Members;
 using Application.Organizations;
@@ -19,6 +20,7 @@ public class OrganizationController : ApiControllerBase
     }
 
     [HttpGet]
+    [TenantContext(TenantContextRequirement.Workspace)]
     public async Task<ApiResponse<IEnumerable<OrganizationVm>>> GetListAsync([FromQuery(Name = "isSsoFirstLogin")] bool isSsoFirstLogin = false)
     {
         var request = new GetOrganizationList
