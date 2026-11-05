@@ -6,10 +6,10 @@ public class GetOrganizationList : IRequest<IEnumerable<OrganizationVm>>
 
     public Guid UserId { get; set; }
 
-    public bool IsSsoFirstLogin { get; set; }
 }
 
-public class GetOrganizationListHandler(IOrganizationService service, IMapper mapper)
+public class GetOrganizationListHandler(IOrganizationService service, IMapper mapper,
+    ISsoOrganizationJoinAuthorization authorization)
     : IRequestHandler<GetOrganizationList, IEnumerable<OrganizationVm>>
 {
     public async Task<IEnumerable<OrganizationVm>> Handle(GetOrganizationList request,
@@ -18,9 +18,8 @@ public class GetOrganizationListHandler(IOrganizationService service, IMapper ma
         var organizations =
             await service.GetUserOrganizationsAsync(request.WorkspaceId, request.UserId);
 
-        // If the user is logging in for the first time via Single Sign-On (SSO) and they are not part of any organization yet,
-        // retrieve and return all organizations within the same workspace.
-        if (organizations.Count == 0 && request.IsSsoFirstLogin)
+        // Only server-side SSO authorization permits listing joinable organizations in this workspace.
+        if (await authorization.CanChooseOrganizationAsync(request.WorkspaceId, request.UserId, organizations))
         {
             organizations = await service.FindManyAsync(x => x.WorkspaceId == request.WorkspaceId);
         }

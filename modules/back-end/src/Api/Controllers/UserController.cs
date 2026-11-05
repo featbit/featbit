@@ -1,3 +1,4 @@
+using Api.Authorization;
 using Application.Bases.Models;
 using Application.Members;
 using Application.Policies;
@@ -60,12 +61,19 @@ public class UserController : ApiControllerBase
     }
 
     [HttpPost("join-organization")]
-    public async Task<ApiResponse<bool>> JoinOrganizationAsync(JoinOrganization request)
+    public async Task<ApiResponse<bool>> JoinOrganizationAsync()
     {
-        request.WorkspaceId = WorkspaceId;
-        request.OrganizationId = OrgId;
+        var request = new JoinOrganization
+        {
+            WorkspaceId = WorkspaceId,
+            OrganizationId = OrgId
+        };
 
         var result = await Mediator.Send(request);
+        if (result)
+        {
+            SsoOrganizationJoinAuthorization.Clear(Response);
+        }
         return Ok(result);
     }
 

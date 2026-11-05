@@ -19,13 +19,12 @@ public class OrganizationController : ApiControllerBase
     }
 
     [HttpGet]
-    public async Task<ApiResponse<IEnumerable<OrganizationVm>>> GetListAsync([FromQuery(Name = "isSsoFirstLogin")] bool isSsoFirstLogin = false)
+    public async Task<ApiResponse<IEnumerable<OrganizationVm>>> GetListAsync()
     {
         var request = new GetOrganizationList
         {
             UserId = CurrentUser.Id,
-            WorkspaceId = WorkspaceId,
-            IsSsoFirstLogin = isSsoFirstLogin
+            WorkspaceId = WorkspaceId
         };
 
         var vms = await Mediator.Send(request);

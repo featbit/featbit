@@ -1,4 +1,5 @@
 using Application.Members;
+using Application.Bases.Exceptions;
 
 namespace Application.Users;
 
@@ -10,17 +11,22 @@ public class JoinOrganization : IRequest<bool>
 }
 
 public class JoinOrganizationHandler(
-    IOrganizationService organizationService,
     IUserService userService,
     ICurrentUser currentUser,
+    ISsoOrganizationJoinAuthorization authorization,
     ISender mediator)
     : IRequestHandler<JoinOrganization, bool>
 {
     public async Task<bool> Handle(JoinOrganization request, CancellationToken cancellationToken)
     {
+        var decision = await authorization.GetJoinAuthorizationAsync(request.WorkspaceId, request.OrganizationId, currentUser.Id);
+        if (!decision.IsAllowed)
+        {
+            throw new ForbiddenException();
+        }
+
         // Check if the user is already a member of the organization
-        var exists = await organizationService.ContainsUserAsync(request.OrganizationId, currentUser.Id);
-        if (exists)
+        if (decision.IsAlreadyMember)
         {
             return true;
         }

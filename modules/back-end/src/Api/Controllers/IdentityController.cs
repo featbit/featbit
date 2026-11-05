@@ -1,4 +1,5 @@
 using Application.Bases;
+using Api.Authorization;
 using Application.Identity;
 
 namespace Api.Controllers;
@@ -62,6 +63,7 @@ public class IdentityController : ApiControllerBase
     [Route("logout")]
     public async Task<ApiResponse<bool>> LogoutAsync()
     {
+        SsoOrganizationJoinAuthorization.Clear(Response);
         var refreshToken = Request.RefreshToken();
         if (string.IsNullOrWhiteSpace(refreshToken))
         {
