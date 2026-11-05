@@ -26,6 +26,7 @@ export type ResetPasswordResult = {
 function profileRequest<T>(path: string, init?: RequestInit) {
   return fetchApi<T>(path, {
     ...init,
+    tenantContext: "none",
     headers: {
       "Content-Type": "application/json",
       ...init?.headers,
@@ -64,10 +65,13 @@ export function persistProfile(profile: UserProfile) {
 }
 
 export async function updateProfile(payload: UpdateProfilePayload) {
-  const updatedProfile = await profileRequest<UserProfile>("/api/v1/user/profile", {
-    method: "PUT",
-    body: JSON.stringify(payload),
-  })
+  const updatedProfile = await profileRequest<UserProfile>(
+    "/api/v1/user/profile",
+    {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    }
+  )
   const normalizedProfile = {
     ...updatedProfile,
     origin: updatedProfile.origin ?? getStoredProfile().origin ?? "Local",
@@ -81,8 +85,11 @@ export function resetPassword(payload: {
   currentPassword: string
   newPassword: string
 }) {
-  return profileRequest<ResetPasswordResult>("/api/v1/identity/reset-password", {
-    method: "PUT",
-    body: JSON.stringify(payload),
-  })
+  return profileRequest<ResetPasswordResult>(
+    "/api/v1/identity/reset-password",
+    {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    }
+  )
 }

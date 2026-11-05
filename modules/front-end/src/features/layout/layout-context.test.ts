@@ -10,6 +10,9 @@ import {
   resolveTabProjectEnvRequest,
   saveCurrentProjectEnv,
   saveTabProjectEnv,
+  persistCurrentWorkspace,
+  persistCurrentOrganization,
+  getStoredOrganization,
 } from "./layout-context"
 
 const source: ProjectEnv = {
@@ -109,6 +112,29 @@ describe("project environment access", () => {
     localStorage.clear()
     sessionStorage.clear()
     localStorage.setItem("auth", JSON.stringify({ id: "user-1" }))
+  })
+
+  it("clears organization and both project selections when changing workspace", () => {
+    persistCurrentWorkspace({ id: "old", name: "Old", key: "old" })
+    persistCurrentOrganization({ id: "org", name: "Org", key: "org" })
+    saveCurrentProjectEnv(source)
+    saveTabProjectEnv(target)
+    persistCurrentWorkspace({ id: "new", name: "New", key: "new" })
+    expect(getStoredOrganization()).toBeNull()
+    expect(getStoredProjectEnv()).toBeNull()
+    expect(getStoredTabProjectEnv()).toBeNull()
+  })
+
+  it("preserves organization and project selections when refreshing the same workspace", () => {
+    persistCurrentWorkspace({ id: "same", name: "Original", key: "same" })
+    const organization = { id: "org", name: "Org", key: "org" }
+    persistCurrentOrganization(organization)
+    saveCurrentProjectEnv(source)
+    saveTabProjectEnv(target)
+    persistCurrentWorkspace({ id: "same", name: "Renamed", key: "same" })
+    expect(getStoredOrganization()).toEqual(organization)
+    expect(getStoredProjectEnv()).toEqual(source)
+    expect(getStoredTabProjectEnv()).toEqual(target)
   })
 
   it("falls back to the first accessible environment", () => {
