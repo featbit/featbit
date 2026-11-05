@@ -3,6 +3,7 @@ using Api.Authorization;
 using Application.Services;
 using Application.Users;
 using Domain.Users;
+using Domain.Policies;
 using Infrastructure.Caches;
 using Infrastructure.MQ;
 using MediatR;
@@ -28,6 +29,7 @@ public class PermissionCheckTestApp : WebApplicationFactory<Program>
 {
     public TestPermissionChecker PermissionChecker { get; } = new();
     public Mock<ISender> Sender { get; } = new(MockBehavior.Strict);
+    public Mock<IMemberService> Members { get; } = new(MockBehavior.Strict);
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -41,6 +43,10 @@ public class PermissionCheckTestApp : WebApplicationFactory<Program>
             collection.Replace(ServiceDescriptor.Transient<IWorkspaceService, TestWorkspaceService>());
             collection.Replace(ServiceDescriptor.Transient<IUserService, TestUserService>());
             collection.Replace(ServiceDescriptor.Singleton(TestTenantContext.CreateOrganizationService().Object));
+            // Keep the real request-permission resolver, but isolate its database dependency.
+            Members.Setup(x => x.GetPermissionsAsync(TestWorkspace.OrganizationId, TestUser.Id))
+                .ReturnsAsync(Array.Empty<PolicyStatement>());
+            collection.Replace(ServiceDescriptor.Singleton(Members.Object));
             collection.Replace(ServiceDescriptor.Transient<IRefreshTokenService, TestRefreshTokenService>());
 
             collection.Replace(ServiceDescriptor.Singleton<IPermissionChecker>(PermissionChecker));
