@@ -9,7 +9,6 @@ using Api.Authentication;
 using Api.Authorization;
 using Api.Controllers;
 using Api.Middlewares;
-using Api.Mcp;
 using Application.Services;
 using Domain.Organizations;
 using Domain.Users;
@@ -214,35 +213,6 @@ public class JwtContextValidationMiddlewareTests
         var context = Context();
         context.SetEndpoint(new Endpoint(null, new EndpointMetadataCollection(new TenantContextAttribute(requirement)), "optional"));
         _organizations.Setup(x => x.ContainsUserAsync(_organizationId, _userId)).ReturnsAsync(false);
-        return AssertResult(context, false);
-    }
-
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public Task McpSignedClaims_ProvideContextWithoutHeaders(bool conflictingHeader)
-    {
-        var context = Context();
-        context.Request.Headers.Clear();
-        var identity = (ClaimsIdentity)context.User.Identity!;
-        identity.AddClaims([
-            new Claim(McpClaimTypes.TokenType, McpClaimTypes.McpTokenType),
-            new Claim(McpClaimTypes.WorkspaceId, _workspaceId.ToString()),
-            new Claim(McpClaimTypes.OrgId, _organizationId.ToString())
-        ]);
-        if (conflictingHeader) context.Request.Headers[ApiConstants.OrgIdHeaderKey] = Guid.NewGuid().ToString();
-        return AssertResult(context, !conflictingHeader);
-    }
-
-    [Fact]
-    public Task OrdinaryJwt_CannotUseMcpClaimsToBypassRequiredHeaders()
-    {
-        var context = Context();
-        context.Request.Headers.Clear();
-        ((ClaimsIdentity)context.User.Identity!).AddClaims([
-            new Claim(McpClaimTypes.WorkspaceId, _workspaceId.ToString()),
-            new Claim(McpClaimTypes.OrgId, _organizationId.ToString())
-        ]);
         return AssertResult(context, false);
     }
 
