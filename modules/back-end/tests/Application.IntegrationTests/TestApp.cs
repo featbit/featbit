@@ -87,6 +87,7 @@ public class TestApp : WebApplicationFactory<Program>
         if (authenticated)
         {
             await AddAuthorizationHeader(client);
+            TestTenantContext.AddHeaders(client);
         }
 
         return await client.GetAsync(uri);
@@ -101,6 +102,7 @@ public class TestApp : WebApplicationFactory<Program>
         if (authenticated)
         {
             await AddAuthorizationHeader(client);
+            TestTenantContext.AddHeaders(client);
         }
 
         var body = JsonSerializer.Serialize(payload);

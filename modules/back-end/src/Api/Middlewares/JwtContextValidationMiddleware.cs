@@ -1,5 +1,4 @@
 using Api.Authentication;
-using Api.Authorization;
 using Api.Controllers;
 using Api.Mcp;
 using Application.Services;
@@ -47,36 +46,10 @@ public class JwtContextValidationMiddleware(RequestDelegate next)
         var organizationHeader = context.Request.Headers[ApiConstants.OrgIdHeaderKey];
         var workspaceValue = workspaceHeader.ToString();
         var organizationValue = organizationHeader.ToString();
-        var metadata = context.GetEndpoint()?.Metadata;
-        var hasWorkspace = !string.IsNullOrEmpty(workspaceValue);
-        var hasOrganization = !string.IsNullOrEmpty(organizationValue);
-        var requirement = metadata?.GetMetadata<TenantContextAttribute>()?.Requirement
-                          ?? TenantContextRequirement.WorkspaceAndOrganization;
-        if ((requirement != TenantContextRequirement.None && !hasWorkspace) ||
-            (requirement == TenantContextRequirement.WorkspaceAndOrganization && !hasOrganization))
-        {
-            return false;
-        }
-
-        if (!hasWorkspace && !hasOrganization)
-        {
-            return true;
-        }
-
         if (!Guid.TryParse(context.User.FindFirst(UserClaims.Id)?.Value, out var userId) ||
             userId == Guid.Empty ||
-            !Guid.TryParse(workspaceValue, out var workspaceId) || workspaceId == Guid.Empty)
-        {
-            return false;
-        }
-
-        if (!hasOrganization)
-        {
-            var userWorkspaces = await users.GetWorkspacesAsync(userId);
-            return userWorkspaces.Any(workspace => workspace.Id == workspaceId);
-        }
-
-        if (!Guid.TryParse(organizationValue, out var organizationId) || organizationId == Guid.Empty)
+            !Guid.TryParse(workspaceValue, out var workspaceId) || workspaceId == Guid.Empty ||
+            !Guid.TryParse(organizationValue, out var organizationId) || organizationId == Guid.Empty)
         {
             return false;
         }

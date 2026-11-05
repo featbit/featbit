@@ -1,4 +1,3 @@
-using Api.Authorization;
 using Application.Bases.Models;
 using Application.Members;
 using Application.Policies;
@@ -31,7 +30,6 @@ public class UserController : ApiControllerBase
     }
 
     [HttpGet("profile")]
-    [TenantContext(TenantContextRequirement.None)]
     public async Task<ApiResponse<Profile>> GetProfileAsync()
     {
         var request = new GetProfile();
@@ -41,7 +39,6 @@ public class UserController : ApiControllerBase
     }
 
     [HttpPut("profile")]
-    [TenantContext(TenantContextRequirement.None)]
     public async Task<ApiResponse<Profile>> UpdateProfileAsync(UpdateProfile request)
     {
         var profile = await Mediator.Send(request);
@@ -73,7 +70,6 @@ public class UserController : ApiControllerBase
     }
 
     [HttpGet("workspaces")]
-    [TenantContext(TenantContextRequirement.None)]
     public async Task<ApiResponse<ICollection<WorkspaceVm>>> GetWorkspaces()
     {
         var request = new GetWorkspaces

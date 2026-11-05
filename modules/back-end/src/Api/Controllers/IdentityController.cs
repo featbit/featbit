@@ -1,5 +1,4 @@
 using Application.Bases;
-using Api.Authorization;
 using Application.Identity;
 
 namespace Api.Controllers;
@@ -61,7 +60,6 @@ public class IdentityController : ApiControllerBase
 
     [HttpPost]
     [Route("logout")]
-    [TenantContext(TenantContextRequirement.None)]
     public async Task<ApiResponse<bool>> LogoutAsync()
     {
         var refreshToken = Request.RefreshToken();
@@ -85,7 +83,6 @@ public class IdentityController : ApiControllerBase
     }
 
     [HttpPut("reset-password")]
-    [TenantContext(TenantContextRequirement.None)]
     public async Task<ApiResponse<ResetPasswordResult>> ResetPasswordAsync(ResetPassword request)
     {
         var resetPasswordResult = await Mediator.Send(request);

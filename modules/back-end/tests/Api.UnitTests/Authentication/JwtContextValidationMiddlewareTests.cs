@@ -7,7 +7,6 @@ using System.Net.Http.Headers;
 using System.Text;
 using Api;
 using Api.Authentication;
-using Api.Authorization;
 using Api.Controllers;
 using Api.Middlewares;
 using Application.Services;
@@ -141,7 +140,7 @@ public class JwtContextValidationMiddlewareTests
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public async Task WorkspaceSelectionWithoutContext_Continues(bool emptyHeaders)
+    public async Task WorkspaceSelectionWithoutContext_Rejects(bool emptyHeaders)
     {
         var context = Context();
         SetAction(context, typeof(UserController), nameof(UserController.GetWorkspaces));
@@ -151,20 +150,20 @@ public class JwtContextValidationMiddlewareTests
             context.Request.Headers[ApiConstants.WorkspaceHeaderKey] = "";
             context.Request.Headers[ApiConstants.OrgIdHeaderKey] = "";
         }
-        await AssertResult(context, true);
+        await AssertResult(context, false);
         _users.Verify(x => x.GetWorkspacesAsync(It.IsAny<Guid>()), Times.Never);
     }
 
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public async Task OrganizationSelection_RequiresWorkspaceMembership(bool isMember)
+    public async Task OrganizationSelection_RequiresOrganizationHeader(bool isMember)
     {
         if (!isMember) _users.Setup(x => x.GetWorkspacesAsync(_userId)).ReturnsAsync([]);
         var context = Context();
         SetAction(context, typeof(OrganizationController), nameof(OrganizationController.GetListAsync));
         context.Request.Headers[ApiConstants.OrgIdHeaderKey] = "";
-        await AssertResult(context, isMember);
+        await AssertResult(context, false);
     }
 
     private static void SetAction(HttpContext context, Type controller, string method)
@@ -203,22 +202,11 @@ public class JwtContextValidationMiddlewareTests
     }
 
     [Fact]
-    public Task WorkspaceOnlyAction_StillRequiresWorkspace()
+    public Task OrganizationSelection_RequiresTenantContext()
     {
         var context = Context();
         SetAction(context, typeof(OrganizationController), nameof(OrganizationController.GetListAsync));
         context.Request.Headers.Clear();
-        return AssertResult(context, false);
-    }
-
-    [Theory]
-    [InlineData(TenantContextRequirement.None)]
-    [InlineData(TenantContextRequirement.Workspace)]
-    public Task OptionalContext_StillValidatesSuppliedOrganization(TenantContextRequirement requirement)
-    {
-        var context = Context();
-        context.SetEndpoint(new Endpoint(null, new EndpointMetadataCollection(new TenantContextAttribute(requirement)), "optional"));
-        _organizations.Setup(x => x.ContainsUserAsync(_organizationId, _userId)).ReturnsAsync(false);
         return AssertResult(context, false);
     }
 

@@ -74,8 +74,7 @@ public class BasicControllerTests
         workspaces.Setup(x => x.GetAsync(TestWorkspace.Id)).ReturnsAsync(TestWorkspace.Instance);
         using var factory = _app.WithServices(services =>
             services.Replace(ServiceDescriptor.Singleton(workspaces.Object)));
-        using var client = await _app.CreateAuthenticatedClientAsync(factory);
-        client.DefaultRequestHeaders.Add(Api.ApiConstants.WorkspaceHeaderKey, TestWorkspace.Id.ToString());
+        using var client = await _app.CreateAuthenticatedClientAsync(factory, includeTenantContext: true);
         var response = await client.GetAsync("api/v1/basic/license-feature-check");
 
         await Verify(response);

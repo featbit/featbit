@@ -1,6 +1,5 @@
 using Application.Bases.Models;
 using Application.Members;
-using Api.Authorization;
 using Application.Organizations;
 using Domain.Policies;
 using Domain.Workspaces;
@@ -20,7 +19,6 @@ public class OrganizationController : ApiControllerBase
     }
 
     [HttpGet]
-    [TenantContext(TenantContextRequirement.Workspace)]
     public async Task<ApiResponse<IEnumerable<OrganizationVm>>> GetListAsync([FromQuery(Name = "isSsoFirstLogin")] bool isSsoFirstLogin = false)
     {
         var request = new GetOrganizationList
@@ -35,7 +33,6 @@ public class OrganizationController : ApiControllerBase
     }
 
     [HttpGet("is-key-used")]
-    [TenantContext(TenantContextRequirement.Workspace)]
     public async Task<ApiResponse<bool>> IsKeyUsedAsync(string key)
     {
         var request = new IsKeyUsed

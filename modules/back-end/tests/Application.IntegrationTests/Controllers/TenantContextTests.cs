@@ -15,15 +15,15 @@ public class TenantContextTests(TestApp app)
     [Theory]
     [InlineData("/api/v1/user/workspaces")]
     [InlineData("/api/v1/user/profile")]
-    public async Task ExplicitUserActions_AllowAuthenticatedRequestsWithoutContext(string path)
+    public async Task UserActions_RejectAuthenticatedRequestsWithoutContext(string path)
     {
         using var client = await app.CreateAuthenticatedClientAsync(app);
         using var response = await client.GetAsync(path);
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     [Fact]
-    public async Task ContextExemption_DoesNotBypassAuthentication()
+    public async Task UserActions_RequireAuthentication()
     {
         using var client = app.CreateClient();
         using var response = await client.GetAsync("/api/v1/user/workspaces");
@@ -52,7 +52,7 @@ public class TenantContextTests(TestApp app)
     [InlineData(false, false, HttpStatusCode.Forbidden)]
     [InlineData(true, false, HttpStatusCode.OK)]
     [InlineData(true, true, HttpStatusCode.Forbidden)]
-    public async Task OrganizationList_RequiresOnlyAWorkspaceTheUserBelongsTo(
+    public async Task OrganizationList_RequiresValidTenantContext(
         bool workspaceHeader, bool foreignWorkspace, HttpStatusCode expected)
     {
         var sender = new Mock<ISender>(MockBehavior.Strict);
@@ -60,6 +60,7 @@ public class TenantContextTests(TestApp app)
             .ReturnsAsync(Array.Empty<OrganizationVm>());
         using var factory = app.WithServices(services => services.Replace(ServiceDescriptor.Singleton(sender.Object)));
         using var client = await app.CreateAuthenticatedClientAsync(factory);
+        client.DefaultRequestHeaders.Add(ApiConstants.OrgIdHeaderKey, TestWorkspace.OrganizationId.ToString());
         if (workspaceHeader)
         {
             client.DefaultRequestHeaders.Add(ApiConstants.WorkspaceHeaderKey,
