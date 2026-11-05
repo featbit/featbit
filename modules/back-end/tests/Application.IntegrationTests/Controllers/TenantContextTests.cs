@@ -1,5 +1,8 @@
 using System.Net;
+using System.Net.Http.Json;
 using Api;
+using Api.Controllers;
+using Application.Bases;
 using Application.Organizations;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -58,6 +61,11 @@ public class TenantContextTests(TestApp app)
         using var response = await client.GetAsync($"/api/v1/envs/{Guid.NewGuid()}/feature-flags/flag");
 
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        Assert.Equal("application/json", response.Content.Headers.ContentType?.MediaType);
+        var body = await response.Content.ReadFromJsonAsync<ApiResponse<object>>();
+        Assert.NotNull(body);
+        Assert.False(body.Success);
+        Assert.Equal(ErrorCodes.Forbidden, Assert.Single(body.Errors));
         sender.VerifyNoOtherCalls();
     }
 

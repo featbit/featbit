@@ -2,6 +2,7 @@ using Api.Authentication;
 using Api.Authorization;
 using Api.Controllers;
 using Api.Mcp;
+using Application.Bases;
 using Application.Services;
 using Domain.Users;
 using Microsoft.AspNetCore.Mvc.Controllers;
@@ -33,6 +34,7 @@ public class JwtContextValidationMiddleware(RequestDelegate next)
         if (!await IsValidAsync(context, users, organizations))
         {
             context.Response.StatusCode = StatusCodes.Status403Forbidden;
+            await context.Response.WriteAsJsonAsync(ApiResponse<object>.Error(ErrorCodes.Forbidden));
             return;
         }
 
