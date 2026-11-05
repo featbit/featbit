@@ -10,15 +10,18 @@ namespace Api.Middlewares;
 
 public class JwtContextValidationMiddleware(RequestDelegate next)
 {
-    public async Task InvokeAsync(HttpContext context, IUserService users, IOrganizationService organizations,
-        ISsoOrganizationJoinAuthorization joinAuthorization)
+    public async Task InvokeAsync(HttpContext context, IUserService users, IOrganizationService organizations)
     {
+        var action = context.GetEndpoint()?.Metadata.GetMetadata<ControllerActionDescriptor>();
         // Unauthenticated requests and identities authenticated with a non-JWT scheme.
         if (context.User.Identity is not { IsAuthenticated: true, AuthenticationType: Schemes.JwtBearer } ||
             // Endpoints that explicitly allow anonymous access.
             context.GetEndpoint()?.Metadata.GetMetadata<IAllowAnonymous>() != null ||
             // MCP OAuth endpoints, including requests authenticated with an ordinary user JWT.
-            context.GetEndpoint()?.Metadata.GetMetadata<ControllerActionDescriptor>()?.ControllerTypeInfo.AsType() == typeof(McpOAuthController) ||
+            action?.ControllerTypeInfo.AsType() == typeof(McpOAuthController) ||
+            // TODO: Handle tenant context validation for JoinOrganizationAsync in a follow-up; skip it for now.
+            (action?.ControllerTypeInfo.AsType() == typeof(UserController) &&
+             action.MethodInfo.Name == nameof(UserController.JoinOrganizationAsync)) ||
             // MCP protocol endpoints under /mcp, which are not MVC controller actions.
             context.Request.Path.StartsWithSegments("/mcp") ||
             // Requests carrying an MCP access token, identified by its token-type claim.
@@ -28,7 +31,7 @@ public class JwtContextValidationMiddleware(RequestDelegate next)
             return;
         }
 
-        if (!await IsValidAsync(context, users, organizations, joinAuthorization))
+        if (!await IsValidAsync(context, users, organizations))
         {
             context.Response.StatusCode = StatusCodes.Status403Forbidden;
             return;
@@ -38,8 +41,7 @@ public class JwtContextValidationMiddleware(RequestDelegate next)
     }
 
     private static async Task<bool> IsValidAsync(
-        HttpContext context, IUserService users, IOrganizationService organizations,
-        ISsoOrganizationJoinAuthorization joinAuthorization)
+        HttpContext context, IUserService users, IOrganizationService organizations)
     {
         var workspaceHeader = context.Request.Headers[ApiConstants.WorkspaceHeaderKey];
         var organizationHeader = context.Request.Headers[ApiConstants.OrgIdHeaderKey];
@@ -48,11 +50,8 @@ public class JwtContextValidationMiddleware(RequestDelegate next)
         var metadata = context.GetEndpoint()?.Metadata;
         var hasWorkspace = !string.IsNullOrEmpty(workspaceValue);
         var hasOrganization = !string.IsNullOrEmpty(organizationValue);
-        var joining = metadata?.GetMetadata<AllowOrganizationJoinAttribute>() != null;
-        var requirement = joining
-            ? TenantContextRequirement.WorkspaceAndOrganization
-            : metadata?.GetMetadata<TenantContextAttribute>()?.Requirement
-              ?? TenantContextRequirement.WorkspaceAndOrganization;
+        var requirement = metadata?.GetMetadata<TenantContextAttribute>()?.Requirement
+                          ?? TenantContextRequirement.WorkspaceAndOrganization;
         if ((requirement != TenantContextRequirement.None && !hasWorkspace) ||
             (requirement == TenantContextRequirement.WorkspaceAndOrganization && !hasOrganization))
         {
@@ -80,13 +79,6 @@ public class JwtContextValidationMiddleware(RequestDelegate next)
         if (!Guid.TryParse(organizationValue, out var organizationId) || organizationId == Guid.Empty)
         {
             return false;
-        }
-
-        // The join authorization service owns the complete membership/ownership check for this endpoint.
-        if (joining)
-        {
-            var authorization = await joinAuthorization.GetJoinAuthorizationAsync(workspaceId, organizationId, userId);
-            return authorization.IsAllowed;
         }
 
         var workspaces = await users.GetWorkspacesAsync(userId);

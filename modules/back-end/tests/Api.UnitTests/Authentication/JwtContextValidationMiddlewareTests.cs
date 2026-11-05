@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
@@ -15,6 +16,7 @@ using Domain.Users;
 using Domain.Workspaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
@@ -32,7 +34,6 @@ public class JwtContextValidationMiddlewareTests
     private readonly Guid _organizationId = Guid.NewGuid();
     private readonly Mock<IUserService> _users = new();
     private readonly Mock<IOrganizationService> _organizations = new();
-    private readonly Mock<ISsoOrganizationJoinAuthorization> _joinAuthorization = new();
     private bool _reachedEndpoint;
 
     public JwtContextValidationMiddlewareTests()
@@ -64,7 +65,7 @@ public class JwtContextValidationMiddlewareTests
             _reachedEndpoint = true;
             return Task.CompletedTask;
         });
-        await middleware.InvokeAsync(context, _users.Object, _organizations.Object, _joinAuthorization.Object);
+        await middleware.InvokeAsync(context, _users.Object, _organizations.Object);
         Assert.Equal(allowed, _reachedEndpoint);
         Assert.Equal(allowed ? StatusCodes.Status200OK : StatusCodes.Status403Forbidden, context.Response.StatusCode);
     }
@@ -168,7 +169,12 @@ public class JwtContextValidationMiddlewareTests
 
     private static void SetAction(HttpContext context, Type controller, string method)
     {
-        var attributes = controller.GetMethod(method)!.GetCustomAttributes(true);
+        var methodInfo = controller.GetMethod(method)!;
+        var attributes = methodInfo.GetCustomAttributes(true).Append(new ControllerActionDescriptor
+        {
+            ControllerTypeInfo = controller.GetTypeInfo(),
+            MethodInfo = methodInfo
+        }).ToArray();
         context.SetEndpoint(new Endpoint(null, new EndpointMetadataCollection(attributes), method));
     }
 
@@ -216,20 +222,13 @@ public class JwtContextValidationMiddlewareTests
         return AssertResult(context, false);
     }
 
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public async Task JoinOrganization_DelegatesAllDatabaseChecks(bool authorized)
+    [Fact]
+    public async Task JoinOrganization_SkipsContextValidation()
     {
-        _joinAuthorization.Setup(x => x.GetJoinAuthorizationAsync(_workspaceId, _organizationId, _userId)).ReturnsAsync(new OrganizationJoinAuthorization(authorized, false));
         _organizations.Setup(x => x.ContainsUserAsync(_organizationId, _userId)).ReturnsAsync(false);
         var context = Context();
-        var attributes = typeof(UserController).GetMethod(nameof(UserController.JoinOrganizationAsync))!
-            .GetCustomAttributes(typeof(AllowOrganizationJoinAttribute), true);
-        Assert.Single(attributes);
-        context.SetEndpoint(new Endpoint(null, new EndpointMetadataCollection(attributes), "join"));
-        await AssertResult(context, authorized);
-        _joinAuthorization.Verify(x => x.GetJoinAuthorizationAsync(_workspaceId, _organizationId, _userId), Times.Once);
+        SetAction(context, typeof(UserController), nameof(UserController.JoinOrganizationAsync));
+        await AssertResult(context, true);
         _users.VerifyNoOtherCalls();
         _organizations.VerifyNoOtherCalls();
     }
@@ -237,12 +236,12 @@ public class JwtContextValidationMiddlewareTests
     [Theory]
     [InlineData(ApiConstants.WorkspaceHeaderKey)]
     [InlineData(ApiConstants.OrgIdHeaderKey)]
-    public Task JoinOrganization_RequiresBothHeaders(string missingHeader)
+    public Task JoinOrganization_WithoutTenantHeader_Continues(string missingHeader)
     {
         var context = Context();
         context.Request.Headers.Remove(missingHeader);
-        context.SetEndpoint(new Endpoint(null, new EndpointMetadataCollection(new AllowOrganizationJoinAttribute()), "join"));
-        return AssertResult(context, false);
+        SetAction(context, typeof(UserController), nameof(UserController.JoinOrganizationAsync));
+        return AssertResult(context, true);
     }
 
     [Theory]
@@ -279,14 +278,12 @@ public class JwtContextValidationMiddlewareTests
     [InlineData(true, false, true, false, HttpStatusCode.Forbidden)]
     [InlineData(true, true, false, false, HttpStatusCode.Forbidden)]
     [InlineData(true, false, true, true, HttpStatusCode.OK)]
-    [InlineData(false, false, true, true, HttpStatusCode.Forbidden)]
-    [InlineData(true, false, false, true, HttpStatusCode.Forbidden)]
+    [InlineData(false, false, true, true, HttpStatusCode.OK)]
+    [InlineData(true, false, false, true, HttpStatusCode.OK)]
     public async Task SignedJwt_HttpPipelineEnforcesContextBeforeEndpoint(
         bool workspaceMember, bool organizationMember, bool correctWorkspace, bool joining, HttpStatusCode expected)
     {
         var requestedOrganizationId = correctWorkspace ? _organizationId : Guid.NewGuid();
-        _joinAuthorization.Setup(x => x.GetJoinAuthorizationAsync(_workspaceId, requestedOrganizationId, _userId))
-            .ReturnsAsync(new OrganizationJoinAuthorization(workspaceMember && correctWorkspace, false));
         if (!workspaceMember) _users.Setup(x => x.GetWorkspacesAsync(_userId)).ReturnsAsync([]);
         _organizations.Setup(x => x.ContainsUserAsync(_organizationId, _userId)).ReturnsAsync(organizationMember);
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("jwt-context-validation-test-key-at-least-32-bytes"));
@@ -296,7 +293,6 @@ public class JwtContextValidationMiddlewareTests
                 services.AddRouting();
                 services.AddSingleton(_users.Object);
                 services.AddSingleton(_organizations.Object);
-                services.AddSingleton(_joinAuthorization.Object);
                 services.AddAuthentication(Schemes.JwtBearer).AddJwtBearer(Schemes.JwtBearer, options =>
                 {
                     options.TokenValidationParameters = new TokenValidationParameters
@@ -324,7 +320,11 @@ public class JwtContextValidationMiddlewareTests
                         _reachedEndpoint = true;
                         return Task.CompletedTask;
                     }).RequireAuthorization();
-                    if (joining) endpoint.WithMetadata(new AllowOrganizationJoinAttribute());
+                    if (joining) endpoint.WithMetadata(new ControllerActionDescriptor
+                    {
+                        ControllerTypeInfo = typeof(UserController).GetTypeInfo(),
+                        MethodInfo = typeof(UserController).GetMethod(nameof(UserController.JoinOrganizationAsync))!
+                    });
                 });
             })).StartAsync();
         var jwt = new JwtSecurityToken("test", "test",

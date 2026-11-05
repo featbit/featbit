@@ -64,7 +64,6 @@ public class IdentityController : ApiControllerBase
     [TenantContext(TenantContextRequirement.None)]
     public async Task<ApiResponse<bool>> LogoutAsync()
     {
-        SsoOrganizationJoinAuthorization.Clear(Response);
         var refreshToken = Request.RefreshToken();
         if (string.IsNullOrWhiteSpace(refreshToken))
         {
