@@ -11,10 +11,6 @@ type ApiEnvelope<T> = {
   errors?: string[]
 }
 
-export type ApiRequestInit = RequestInit & {
-  tenantContext?: "none" | "workspace" | "workspaceAndOrganization"
-}
-
 export class ApiRequestError extends Error {
   readonly status: number
   /** Error codes from the API response envelope, when the body had one. */
@@ -166,37 +162,17 @@ async function getRefreshedToken(staleToken: string | null) {
 
 export async function fetchApi<T>(
   path: string,
-  init?: ApiRequestInit,
+  init?: RequestInit,
   token = getIdentityToken(),
   retryOnUnauthorized = true
 ): Promise<T> {
-  const { tenantContext = "workspaceAndOrganization", ...requestInit } =
-    init ?? {}
-  const headers: Record<string, string> = authHeaders(token)
-  const suppliedHeaders =
-    requestInit.headers instanceof Headers
-      ? requestInit.headers.entries()
-      : Array.isArray(requestInit.headers)
-        ? requestInit.headers
-        : Object.entries(requestInit.headers ?? {})
-  for (const [name, value] of suppliedHeaders) {
-    for (const key of Object.keys(headers)) {
-      if (key.toLowerCase() === name.toLowerCase()) delete headers[key]
-    }
-    headers[name] = value
-  }
-  for (const key of Object.keys(headers)) {
-    if (
-      (tenantContext === "none" && key.toLowerCase() === "workspace") ||
-      (tenantContext !== "workspaceAndOrganization" &&
-        key.toLowerCase() === "organization")
-    )
-      delete headers[key]
-  }
   const response = await fetch(`${apiOrigin()}${path}`, {
     credentials: "include",
-    ...requestInit,
-    headers,
+    ...init,
+    headers: {
+      ...authHeaders(token),
+      ...init?.headers,
+    },
   })
 
   if (response.status === 401 && retryOnUnauthorized) {

@@ -64,8 +64,8 @@ async function hasAccessibleContextOutsideSelectedOrganization(
       const organizations = await fetchApi<Organization[]>(
         `/api/v1/organizations?isSsoFirstLogin=false`,
         {
-          tenantContext: "workspace",
           headers: {
+            Organization: "",
             Workspace: workspace.id,
           },
         }

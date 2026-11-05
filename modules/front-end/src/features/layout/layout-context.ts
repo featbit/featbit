@@ -223,10 +223,6 @@ export function chooseProjectEnv(projects: Project[]) {
 }
 
 export function persistCurrentWorkspace(workspace: Workspace) {
-  if (getCurrentWorkspace()?.id !== workspace.id) {
-    localStorage.removeItem(contextKey("current-organization"))
-    clearCurrentProjectEnv()
-  }
   saveCurrentWorkspace(workspace)
 }
 
@@ -257,16 +253,13 @@ export function onProjectsChanged(callback: () => void) {
 }
 
 export async function fetchWorkspaces() {
-  return fetchApi<Workspace[]>("/api/v1/user/workspaces", {
-    tenantContext: "none",
-  })
+  return fetchApi<Workspace[]>("/api/v1/user/workspaces")
 }
 
 export async function fetchOrganizations() {
   const isSsoFirstLogin = getIsSsoFirstLogin()
   return fetchApi<Organization[]>(
-    `/api/v1/organizations?isSsoFirstLogin=${isSsoFirstLogin}`,
-    { tenantContext: "workspace" }
+    `/api/v1/organizations?isSsoFirstLogin=${isSsoFirstLogin}`
   )
 }
 
