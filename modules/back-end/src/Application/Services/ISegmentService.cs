@@ -41,9 +41,10 @@ public interface ISegmentService : IService<Segment>
     /// </para>
     /// <para>
     /// <paramref name="operatorId"/>, <paramref name="operation"/> and
-    /// <paramref name="isTargetingChange"/> are the attribution context of the original change
+    /// <paramref name="isTargetingChange"/> and <paramref name="organizationId"/> are the attribution context of the original change
     /// notification (#73), persisted alongside the pending value so the coordinator can later
     /// reconstruct the notification with the real operator instead of inventing one at commit time.
+    /// A missing organization ID remains null for legacy pending changes.
     /// </para>
     /// </summary>
     Task SetPendingAsync(
@@ -52,7 +53,8 @@ public interface ISegmentService : IService<Segment>
         long version,
         Guid operatorId = default,
         string operation = Operations.Update,
-        bool isTargetingChange = true);
+        bool isTargetingChange = true,
+        Guid? organizationId = null);
 
     /// <summary>
     /// Optimistically promote the staged pending change to committed for the segment identified by

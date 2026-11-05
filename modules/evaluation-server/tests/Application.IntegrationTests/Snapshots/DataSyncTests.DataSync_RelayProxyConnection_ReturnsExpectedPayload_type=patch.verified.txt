@@ -101,6 +101,7 @@
               ]
             },
             exptIncludeAllTargets: true,
+            insightsEnabled: false,
             isArchived: false
           }
         ],

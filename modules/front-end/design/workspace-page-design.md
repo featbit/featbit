@@ -84,9 +84,12 @@ The General tab uses a structured settings page:
   - Validate key uniqueness asynchronously with debounce, except when unchanged.
   - Save button is aligned with the form footer, not floated.
   - Disable save if the user lacks `UpdateWorkspaceGeneralSettings`; show a small permission note near the footer.
-- Section: `Single sign-on`
+- Section: `Single sign-on (SSO)`
   - Render only when SSO is licensed and permission allows SSO settings.
   - Fields: `Client ID`, `Client secret`, `Token endpoint`, `Client authentication method`, `Authorization endpoint`, `Scope`, `User email claim`.
+  - Use one SSO section heading with an OIDC introduction and a setup-guide link; do not repeat the heading inside the form.
+  - Every field includes persistent helper text and an example or entry prompt as its placeholder, in English and Chinese.
+  - Client authentication method uses a Select with an empty initial state and the documented protocol values `client_secret_basic` and `client_secret_post`. Preserve existing saved values, including nonstandard values, until explicitly changed.
   - Client secret uses a password field with a reveal icon button.
   - Endpoint fields should use URL-like validation where backend compatibility allows it; keep backend validation as source of truth.
   - Use a separate save action for SSO settings.

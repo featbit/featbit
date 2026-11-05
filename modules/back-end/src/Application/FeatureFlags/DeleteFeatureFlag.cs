@@ -7,6 +7,10 @@ namespace Application.FeatureFlags;
 
 public class DeleteFeatureFlag : ResourceChangeRequest, IRequest<bool>
 {
+    public Guid WorkspaceId { get; set; }
+
+    public Guid OrgId { get; set; }
+
     public Guid EnvId { get; set; }
 
     public string Key { get; set; }
@@ -39,7 +43,7 @@ public class DeleteFeatureFlagHandler : IRequestHandler<DeleteFeatureFlag, bool>
         await _service.DeleteOneAsync(flag.Id);
 
         // publish on feature flag delete notification
-        await _publisher.Publish(new OnFeatureFlagDeleted(flag, _currentUser.Id, request.Comment), cancellationToken);
+        await _publisher.Publish(new OnFeatureFlagDeleted(flag, request.WorkspaceId, request.OrgId, _currentUser.Id, request.Comment), cancellationToken);
 
         return true;
     }

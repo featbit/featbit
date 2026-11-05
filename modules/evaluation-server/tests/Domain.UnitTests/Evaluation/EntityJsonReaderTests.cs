@@ -8,6 +8,21 @@ public class EntityJsonReaderTests
 {
     private const string SegmentId = "0779d76b-afc6-4886-ab65-af8c004273ad";
 
+    [Theory]
+    [InlineData("{}", null)]
+    [InlineData("{\"enabled\":null}", null)]
+    [InlineData("{\"enabled\":\"false\"}", null)]
+    [InlineData("{\"enabled\":0}", null)]
+    [InlineData("[]", null)]
+    [InlineData("{\"enabled\":true}", true)]
+    [InlineData("{\"enabled\":false}", false)]
+    public void TryGetBoolean_ReturnsBooleanOrNull(string jsonText, bool? expected)
+    {
+        var value = EntityJsonReader.TryGetBoolean(Parse(jsonText), "enabled");
+
+        Assert.Equal(expected, value);
+    }
+
     [Fact]
     public void TryGetString_StringProperty_ReturnsValue()
     {

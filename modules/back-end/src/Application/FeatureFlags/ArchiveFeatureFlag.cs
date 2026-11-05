@@ -6,6 +6,10 @@ namespace Application.FeatureFlags;
 
 public class ArchiveFeatureFlag : ResourceChangeRequest, IRequest<bool>
 {
+    public Guid WorkspaceId { get; set; }
+
+    public Guid OrgId { get; set; }
+
     public Guid EnvId { get; set; }
 
     public string Key { get; set; }
@@ -40,7 +44,7 @@ public class ArchiveFeatureFlagHandler : IRequestHandler<ArchiveFeatureFlag, boo
 
         // publish on feature flag change notification
         var notification =
-            new OnFeatureFlagChanged(flag, Operations.Archive, dataChange, _currentUser.Id, request.Comment);
+            new OnFeatureFlagChanged(flag, request.WorkspaceId, request.OrgId, Operations.Archive, dataChange, _currentUser.Id, request.Comment);
         await _publisher.Publish(notification, cancellationToken);
 
         return true;

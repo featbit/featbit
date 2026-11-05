@@ -7,6 +7,10 @@ namespace Application.Segments;
 
 public class DeleteSegment : ResourceChangeRequest, IRequest<bool>
 {
+    public Guid WorkspaceId { get; set; }
+
+    public Guid OrgId { get; set; }
+
     public Guid Id { get; set; }
 }
 
@@ -34,7 +38,7 @@ public class DeleteSegmentHandler : IRequestHandler<DeleteSegment, bool>
         await _service.DeleteOneAsync(request.Id);
 
         // publish on segment change notification
-        var notification = new OnSegmentDeleted(segment, _currentUser.Id, comment: request.Comment);
+        var notification = new OnSegmentDeleted(segment, request.WorkspaceId, request.OrgId, _currentUser.Id, comment: request.Comment);
         await _publisher.Publish(notification, cancellationToken);
 
         return true;

@@ -164,6 +164,11 @@ const SegmentDetailsPage = lazy(() =>
     default: module.SegmentDetailsPage,
   }))
 )
+const IamAuditLogsPage = lazy(() =>
+  import("@/features/audit-logs/iam-audit-logs-page").then((module) => ({
+    default: module.IamAuditLogsPage,
+  }))
+)
 const AuditLogsPage = lazy(() =>
   import("@/features/audit-logs/audit-logs-page").then((module) => ({
     default: module.AuditLogsPage,
@@ -380,6 +385,7 @@ export function AppRoutes() {
           />
           <Route path="iam" element={<IamRouteGuard />}>
             <Route index element={<Navigate to="team" replace />} />
+            <Route path="audit-logs" element={<IamAuditLogsPage />} />
             <Route path="team" element={<TeamPage />} />
             <Route path="team/:memberId/:tab" element={<TeamDetailsPage />} />
             <Route path="groups" element={<GroupPage />} />

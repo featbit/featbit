@@ -528,6 +528,8 @@ public sealed class CommitCoordinatorWorker : BackgroundService
                 var committedSegment = await segmentService.GetCommittedAsync(segment.Id);
                 var notification = new OnSegmentChange(
                     committedSegment,
+                    committedSegment.WorkspaceId,
+                    pendingChange.OrganizationId,
                     pendingChange.Operation,
                     // DataChange is intentionally empty: the only consumer on this path
                     // (OnSegmentUpdatedAsync) recomputes its own before/after locally, and the
@@ -546,6 +548,8 @@ public sealed class CommitCoordinatorWorker : BackgroundService
                     if (affectedFlags.Count > 0)
                     {
                         await featureFlagAppService.OnSegmentUpdatedAsync(
+                            notification.WorkspaceId,
+                            notification.OrganizationId,
                             committedSegment,
                             notification.OperatorId,
                             affectedFlags);

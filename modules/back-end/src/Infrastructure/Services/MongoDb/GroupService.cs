@@ -1,3 +1,4 @@
+using Domain.AuditLogs;
 using Application.Bases.Models;
 using Application.Groups;
 using Domain.Groups;
@@ -11,6 +12,20 @@ namespace Infrastructure.Services.MongoDb;
 
 public class GroupService(MongoDbClient mongoDb) : MongoDbService<Group>(mongoDb), IGroupService
 {
+    public async Task<GroupAuditSnapshot?> GetAuditSnapshotAsync(Guid id)
+    {
+        var group = await MongoDb.QueryableOf<Group>().FirstOrDefaultAsync(x => x.Id == id);
+        if (group == null) return null;
+        var memberIds = await MongoDb.QueryableOf<GroupMember>().Where(x => x.GroupId == id).Select(x => x.MemberId).ToListAsync();
+        var policyIds = await MongoDb.QueryableOf<GroupPolicy>().Where(x => x.GroupId == id).Select(x => x.PolicyId).ToListAsync();
+        var members = await MongoDb.QueryableOf<User>().Where(x => memberIds.Contains(x.Id))
+            .Select(x => new IamAuditReference(x.Id, x.Name, "member/" + x.Email)).ToListAsync();
+        var policies = await MongoDb.QueryableOf<Policy>().Where(x => policyIds.Contains(x.Id))
+            .Select(x => new PolicyAuditReference(x.Id, x.Name, "policy/" + x.Key, x.Type)).ToListAsync();
+        return new GroupAuditSnapshot(group.Id, group.Name, $"group/{group.Name}", group.Description,
+            members.OrderBy(x => x.Id).ToArray(), policies.OrderBy(x => x.Id).ToArray());
+    }
+
     public async Task DeleteAsync(Guid id)
     {
         // delete group

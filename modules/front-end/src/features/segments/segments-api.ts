@@ -1,7 +1,6 @@
 import { fetchApi } from "@/lib/api/authenticated-api"
 import type {
   EnvironmentSettings,
-  AuditInstruction,
   PagedSegments,
   ScopeResource,
   Segment,
@@ -130,24 +129,6 @@ export function createSegmentEndUser(envId: string, keyId: string) {
 export function fetchSegmentUserProperties(envId: string) {
   return fetchApi<SegmentUserProperty[]>(
     `/api/v1/envs/${encodeURIComponent(envId)}/end-user-properties`
-  )
-}
-
-export function compareSegmentData(
-  envId: string,
-  previous: string,
-  current: string
-) {
-  return fetchApi<AuditInstruction[]>(
-    `/api/v1/envs/${encodeURIComponent(envId)}/audit-logs/compare`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        refType: "Segment",
-        dataChange: { previous, current },
-      }),
-    }
   )
 }
 

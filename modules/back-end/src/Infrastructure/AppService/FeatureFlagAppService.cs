@@ -30,7 +30,7 @@ public class FeatureFlagAppService : IFeatureFlagAppService
         _publisher = publisher;
     }
 
-    public async Task ApplyDraftAsync(Guid draftId, string operation, Guid operatorId)
+    public async Task ApplyDraftAsync(Guid workspaceId, Guid orgId, Guid draftId, string operation, Guid operatorId)
     {
         // check draft status
         var draft = await _flagDraftService.GetAsync(draftId);
@@ -58,13 +58,12 @@ public class FeatureFlagAppService : IFeatureFlagAppService
         await _flagDraftService.UpdateAsync(draft);
 
         // publish on feature flag change notification
-        var notification = new OnFeatureFlagChanged(
-            flag, operation, dataChange, operatorId, draft.Comment
+        var notification = new OnFeatureFlagChanged(flag, workspaceId, orgId, operation, dataChange, operatorId, draft.Comment
         );
         await _publisher.Publish(notification);
     }
 
-    public async Task OnSegmentUpdatedAsync(Segment segment, Guid operatorId, ICollection<FlagReference> flagReferences)
+    public async Task OnSegmentUpdatedAsync(Guid workspaceId, Guid? orgId, Segment segment, Guid operatorId, ICollection<FlagReference> flagReferences)
     {
         // mark flags as updated
         var flagIds = flagReferences.Select(x => x.Id).ToArray();
@@ -84,6 +83,8 @@ public class FeatureFlagAppService : IFeatureFlagAppService
 
             var auditLog = AuditLog.For(
                 flag,
+                workspaceId,
+                orgId,
                 Operations.Update,
                 dataChange,
                 $"Referenced segment '{segment.Name}' has been updated.",

@@ -1,3 +1,6 @@
+#nullable enable
+
+using Domain.AuditLogs;
 using Application.Bases.Models;
 using Application.Policies;
 using Domain.Policies;
@@ -6,6 +9,8 @@ namespace Application.Services;
 
 public interface IPolicyService : IService<Policy>
 {
+    Task<PolicyAuditSnapshot?> GetAuditSnapshotAsync(Guid id);
+
     Task DeleteAsync(Guid id);
 
     Task<Policy> GetAsync(Guid organizationId, string key);

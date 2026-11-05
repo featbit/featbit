@@ -15,6 +15,7 @@ export type ChangeReviewItem = {
   values?: string[]
   valueGroups?: ChangeReviewValueGroup[]
   literalLabel?: boolean
+  valueFormat?: "code"
 }
 
 export type ChangeLedgerLayout = "settings" | "targeting" | "history"

@@ -1,3 +1,6 @@
+#nullable enable
+
+using Domain.AuditLogs;
 using Application.Bases.Models;
 using Application.Members;
 using Domain.Members;
@@ -7,6 +10,8 @@ namespace Application.Services;
 
 public interface IMemberService
 {
+    Task<MemberAuditSnapshot?> GetAuditSnapshotAsync(Guid id, Guid? organizationId, Guid workspaceId);
+
     Task<Member> GetAsync(Guid organizationId, Guid memberId);
 
     Task<ICollection<Member>> GetListAsync(Guid organizationId, Guid[] ids);

@@ -1,10 +1,12 @@
-﻿using Application.Users;
+using Application.Users;
 using Domain.AuditLogs;
 
 namespace Application.FeatureFlags;
 
 public class ApplyFlagChangeRequest : IRequest<bool>
 {
+    public Guid WorkspaceId { get; set; }
+
     public Guid OrgId { get; set; }
 
     public Guid EnvId { get; set; }
@@ -42,7 +44,7 @@ public class ApplyFlagChangeRequestHandler : IRequestHandler<ApplyFlagChangeRequ
 
         // apply flag draft
         await _featureFlagAppService.ApplyDraftAsync(
-            changeRequest.FlagDraftId, Operations.ApplyFlagChangeRequest, _currentUser.Id
+            request.WorkspaceId, request.OrgId, changeRequest.FlagDraftId, Operations.ApplyFlagChangeRequest, _currentUser.Id
         );
 
         // update change request status

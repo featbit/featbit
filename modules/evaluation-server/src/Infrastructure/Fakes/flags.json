@@ -40,6 +40,7 @@
       ]
     },
     "exptIncludeAllTargets": true,
+    "insightsEnabled": false,
     "tags": [],
     "isArchived": false
   },
@@ -92,6 +93,7 @@
       ]
     },
     "exptIncludeAllTargets": true,
+    "insightsEnabled": true,
     "tags": [],
     "isArchived": false
   },
@@ -162,6 +164,7 @@
       ]
     },
     "exptIncludeAllTargets": true,
+    "insightsEnabled": true,
     "tags": [],
     "isArchived": false
   },
@@ -266,6 +269,7 @@
       ]
     },
     "exptIncludeAllTargets": true,
+    "insightsEnabled": true,
     "tags": [],
     "isArchived": false
   },
@@ -365,6 +369,7 @@
       ]
     },
     "exptIncludeAllTargets": true,
+    "insightsEnabled": false,
     "tags": [],
     "isArchived": false
   }

@@ -41,7 +41,7 @@ public class ApplyFlagChangeRequestHandlerTests
             CancellationToken.None);
 
         Assert.False(result);
-        ffApp.Verify(x => x.ApplyDraftAsync(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<Guid>()), Times.Never);
+        ffApp.Verify(x => x.ApplyDraftAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<Guid>()), Times.Never);
         crSvc.Verify(x => x.UpdateAsync(It.IsAny<FlagChangeRequest>()), Times.Never);
     }
 
@@ -64,7 +64,7 @@ public class ApplyFlagChangeRequestHandlerTests
             CancellationToken.None);
 
         Assert.False(result);
-        ffApp.Verify(x => x.ApplyDraftAsync(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<Guid>()), Times.Never);
+        ffApp.Verify(x => x.ApplyDraftAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<Guid>()), Times.Never);
         crSvc.Verify(x => x.UpdateAsync(It.IsAny<FlagChangeRequest>()), Times.Never);
     }
 
@@ -88,7 +88,7 @@ public class ApplyFlagChangeRequestHandlerTests
             CancellationToken.None);
 
         Assert.False(result);
-        ffApp.Verify(x => x.ApplyDraftAsync(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<Guid>()), Times.Never);
+        ffApp.Verify(x => x.ApplyDraftAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<Guid>()), Times.Never);
     }
 
     [Fact]
@@ -119,7 +119,7 @@ public class ApplyFlagChangeRequestHandlerTests
             CancellationToken.None);
 
         Assert.False(result);
-        ffApp.Verify(x => x.ApplyDraftAsync(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<Guid>()), Times.Never);
+        ffApp.Verify(x => x.ApplyDraftAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<Guid>()), Times.Never);
         crSvc.Verify(x => x.UpdateAsync(It.IsAny<FlagChangeRequest>()), Times.Never);
     }
 
@@ -146,7 +146,7 @@ public class ApplyFlagChangeRequestHandlerTests
         Assert.True(result);
         Assert.Equal(FlagChangeRequestStatus.Applied, cr.Status);
         ffApp.Verify(x => x.ApplyDraftAsync(
-            cr.FlagDraftId, Operations.ApplyFlagChangeRequest, reviewerId), Times.Once);
+            Guid.Empty, orgId, cr.FlagDraftId, Operations.ApplyFlagChangeRequest, reviewerId), Times.Once);
         crSvc.Verify(x => x.UpdateAsync(cr), Times.Once);
     }
 
@@ -172,7 +172,7 @@ public class ApplyFlagChangeRequestHandlerTests
         Assert.True(result);
         Assert.Equal(FlagChangeRequestStatus.Applied, cr.Status);
         ffApp.Verify(x => x.ApplyDraftAsync(
-            cr.FlagDraftId, Operations.ApplyFlagChangeRequest, creatorId), Times.Once);
+            Guid.Empty, orgId, cr.FlagDraftId, Operations.ApplyFlagChangeRequest, creatorId), Times.Once);
         crSvc.Verify(x => x.UpdateAsync(cr), Times.Once);
     }
 }

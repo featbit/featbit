@@ -27,7 +27,7 @@ To try FeatBit on your machine, follow the steps below. You'll need Git and Dock
 ### 1. Start FeatBit
 
 ```bash
-git clone --branch 6.0.1 --depth 1 https://github.com/featbit/featbit.git
+git clone --branch 6.1.0 --depth 1 https://github.com/featbit/featbit.git
 cd featbit
 docker compose up -d
 ```

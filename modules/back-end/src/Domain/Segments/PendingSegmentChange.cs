@@ -23,6 +23,8 @@ public class PendingSegmentChange
     // backward-compat defaults: a pending row staged before these fields existed
     // deserializes to exactly the values the coordinator used to hardcode.
     public Guid OperatorId { get; set; }                       // Guid.Empty for legacy rows
+    // Legacy pending changes have no organization attribution; retain null rather than infer it.
+    public Guid? OrganizationId { get; set; }
     public string Operation { get; set; } = Operations.Update;
     public bool IsTargetingChange { get; set; } = true;
 }

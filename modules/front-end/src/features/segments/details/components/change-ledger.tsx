@@ -7,10 +7,12 @@ export function ChangeLedger({
   changes,
   layout,
   className,
+  snapshot,
 }: {
   changes: ReviewChange[]
   layout: ChangeLedgerLayout
   className?: string
+  snapshot?: boolean
 }) {
   const adapter = useSegmentChangeLedgerAdapter()
   return (
@@ -18,6 +20,7 @@ export function ChangeLedger({
       changes={changes}
       layout={layout}
       className={className}
+      snapshot={snapshot}
       {...adapter}
     />
   )

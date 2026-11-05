@@ -78,6 +78,7 @@ public class PolicyController : ApiControllerBase
     public async Task<ApiResponse<PolicyVm>> CreateAsync(CreatePolicy request)
     {
         request.OrganizationId = OrgId;
+        request.WorkspaceId = WorkspaceId;
 
         var policy = await Mediator.Send(request);
         return Ok(policy);
@@ -93,6 +94,7 @@ public class PolicyController : ApiControllerBase
     [HttpPost("clone/{key}")]
     public async Task<ApiResponse<PolicyVm>> CloneAsync(string key, ClonePolicy request)
     {
+        request.WorkspaceId = WorkspaceId;
         request.OrgId = OrgId;
         request.OriginPolicyKey = key;
 
@@ -112,6 +114,9 @@ public class PolicyController : ApiControllerBase
     {
         request.PolicyId = policyId;
 
+        request.WorkspaceId = WorkspaceId;
+        request.OrganizationId = OrgId;
+
         var policy = await Mediator.Send(request);
         return Ok(policy);
     }
@@ -128,6 +133,8 @@ public class PolicyController : ApiControllerBase
     {
         var request = new UpdatePolicyStatements
         {
+            WorkspaceId = WorkspaceId,
+            OrganizationId = OrgId,
             PolicyId = policyId,
             Statements = statements
         };
@@ -148,6 +155,8 @@ public class PolicyController : ApiControllerBase
     {
         var request = new DeletePolicy
         {
+            WorkspaceId = WorkspaceId,
+            OrganizationId = OrgId,
             PolicyId = policyId
         };
 

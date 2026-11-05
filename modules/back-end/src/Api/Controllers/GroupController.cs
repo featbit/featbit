@@ -74,6 +74,7 @@ public class GroupController : ApiControllerBase
     [HttpPost]
     public async Task<ApiResponse<GroupVm>> CreateAsync(CreateGroup request)
     {
+        request.WorkspaceId = WorkspaceId;
         request.OrganizationId = OrgId;
 
         var group = await Mediator.Send(request);
@@ -91,6 +92,8 @@ public class GroupController : ApiControllerBase
     public async Task<ApiResponse<GroupVm>> UpdateAsync(Guid id, UpdateGroup request)
     {
         request.Id = id;
+        request.WorkspaceId = WorkspaceId;
+        request.OrganizationId = OrgId;
 
         var group = await Mediator.Send(request);
         return Ok(group);
@@ -111,6 +114,8 @@ public class GroupController : ApiControllerBase
             Id = id
         };
 
+        request.WorkspaceId = WorkspaceId;
+        request.OrganizationId = OrgId;
         var success = await Mediator.Send(request);
         return Ok(success);
     }
@@ -150,6 +155,7 @@ public class GroupController : ApiControllerBase
     {
         var request = new AddGroupMember
         {
+            WorkspaceId = WorkspaceId,
             OrganizationId = OrgId,
             GroupId = groupId,
             MemberId = memberId
@@ -171,6 +177,8 @@ public class GroupController : ApiControllerBase
     {
         var request = new RemoveGroupMember
         {
+            WorkspaceId = WorkspaceId,
+            OrganizationId = OrgId,
             GroupId = groupId,
             MemberId = memberId
         };
@@ -214,6 +222,8 @@ public class GroupController : ApiControllerBase
     {
         var request = new AddGroupPolicy
         {
+            WorkspaceId = WorkspaceId,
+            OrganizationId = OrgId,
             GroupId = groupId,
             PolicyId = policyId
         };
@@ -234,6 +244,8 @@ public class GroupController : ApiControllerBase
     {
         var request = new RemoveGroupPolicy
         {
+            WorkspaceId = WorkspaceId,
+            OrganizationId = OrgId,
             GroupId = groupId,
             PolicyId = policyId
         };

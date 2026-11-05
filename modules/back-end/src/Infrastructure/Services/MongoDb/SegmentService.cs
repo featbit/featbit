@@ -196,7 +196,8 @@ public class SegmentService(MongoDbClient mongoDb, ILogger<SegmentService> logge
         long version,
         Guid operatorId = default,
         string operation = Operations.Update,
-        bool isTargetingChange = true)
+        bool isTargetingChange = true,
+        Guid? organizationId = null)
     {
         // ensure the segment exists (committed value is left untouched)
         await GetAsync(id);
@@ -213,6 +214,7 @@ public class SegmentService(MongoDbClient mongoDb, ILogger<SegmentService> logge
             Version = version,
             Value = pendingValue,
             OperatorId = operatorId,
+            OrganizationId = organizationId,
             Operation = operation,
             IsTargetingChange = isTargetingChange
         };

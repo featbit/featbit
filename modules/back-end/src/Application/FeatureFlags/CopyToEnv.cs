@@ -6,6 +6,10 @@ namespace Application.FeatureFlags;
 
 public class CopyToEnv : IRequest<CopyToEnvResult>
 {
+    public Guid WorkspaceId { get; set; }
+
+    public Guid OrgId {get; set;}
+
     public Guid SourceEnvId { get; set; }
 
     public Guid TargetEnvId { get; set; }
@@ -55,8 +59,7 @@ public class CopyToEnvHandler(
 
             // publish on feature flag change notification
             var dataChange = new DataChange(null).To(flag);
-            var notification = new OnFeatureFlagChanged(
-                flag, Operations.Create, dataChange, currentUser.Id, $"Copied from \"{projectEnv}\""
+            var notification = new OnFeatureFlagChanged(flag, request.WorkspaceId, request.OrgId, Operations.Create, dataChange, currentUser.Id, $"Copied from \"{projectEnv}\""
             );
             await publisher.Publish(notification, cancellationToken);
         }

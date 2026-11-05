@@ -1,3 +1,4 @@
+import { AuditLogScopes } from "@/features/audit-logs/audit-logs-types"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
@@ -11,7 +12,6 @@ import { HistoryTab } from "./history-tab"
 
 vi.mock("@/features/audit-logs/audit-logs-api", () => ({
   fetchAuditLogs: vi.fn(),
-  fetchAuditUsers: vi.fn(),
 }))
 
 const segment: Segment = {
@@ -75,7 +75,7 @@ describe("HistoryTab", () => {
     expect(summaryComment).toHaveClass("inline-block", "max-w-full")
     expect(
       screen.getAllByRole("columnheader").map((header) => header.textContent)
-    ).toEqual(["", "Date", "User", "Event", "Comment"])
+    ).toEqual(["", "Date", "Actor", "Operation", "Comment"])
     expect(screen.getByText("Updated settings")).toBeInTheDocument()
     expect(screen.getByText("Changed name")).toHaveClass(
       "inline-block",
@@ -84,9 +84,10 @@ describe("HistoryTab", () => {
 
     await waitFor(() =>
       expect(fetchAuditLogs).toHaveBeenCalledWith(
-        "env-1",
         expect.objectContaining({
-          refType: "Segment",
+          scope: AuditLogScopes.Environment,
+          scopeId: "env-1",
+          refTypes: ["Segment"],
           refId: segment.id,
           crossEnvironment: false,
         }),
@@ -134,8 +135,13 @@ describe("HistoryTab", () => {
     expect(await screen.findByText("Across 2 scopes")).toBeInTheDocument()
     await waitFor(() =>
       expect(fetchAuditLogs).toHaveBeenCalledWith(
-        "env-1",
-        expect.objectContaining({ crossEnvironment: true }),
+        expect.objectContaining({
+          scope: AuditLogScopes.Environment,
+          scopeId: "env-1",
+          refTypes: ["Segment"],
+          refId: sharedSegment.id,
+          crossEnvironment: true,
+        }),
         0,
         10
       )

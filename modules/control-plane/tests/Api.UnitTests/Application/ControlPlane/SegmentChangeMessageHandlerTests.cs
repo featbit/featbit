@@ -1,10 +1,13 @@
 using System.Collections.ObjectModel;
+using System.Text.Json;
 using Api.Application.ControlPlane;
 using Application.Caches;
 using Application.Segments;
 using Application.Services;
+using Domain.AuditLogs;
 using Domain.Messages;
 using Domain.Segments;
+using Domain.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Testing;
 using Moq;
@@ -49,12 +52,13 @@ public class SegmentChangeMessageHandlerTests
 
     private static string BuildMessage(
         Guid env1, Guid env2, Guid segmentId, DateTime updatedAt,
-        Guid? operatorId = null, string? operation = null, bool? isTargetingChange = null)
+        Guid? operatorId = null, string? operation = null, bool? isTargetingChange = null, Guid? organizationId = null)
     {
         var notification = operatorId is null && operation is null && isTargetingChange is null
             ? "{}"
             : $$"""
                 {
+                  "organizationId": {{JsonSerializer.Serialize(organizationId)}},
                   "operatorId": "{{operatorId}}",
                   "operation": "{{operation}}",
                   "isTargetingChange": {{(isTargetingChange!.Value ? "true" : "false")}}
@@ -69,6 +73,31 @@ public class SegmentChangeMessageHandlerTests
                    "region": "{{Region}}"
                  }
                  """;
+    }
+
+    [Fact]
+    public async Task HandleAsync_BestEffort_PreservesAuditOwnershipForAffectedFlags()
+    {
+        var workspaceId = Guid.NewGuid();
+        var organizationId = Guid.NewGuid();
+        var operatorId = Guid.NewGuid();
+        var segment = new Segment { Id = Guid.NewGuid(), WorkspaceId = workspaceId };
+        var affectedFlags = new Collection<FlagReference> { new() };
+        _segSvc.Setup(x => x.GetAffectedFlagsAsync(It.IsAny<Guid>(), It.IsAny<OnSegmentChange>()))
+            .ReturnsAsync(affectedFlags);
+        var payload = JsonSerializer.Serialize(new
+        {
+            segmentNonSpecific = segment,
+            envIds = new[] { Guid.NewGuid() },
+            notification = new OnSegmentChange(segment, workspaceId, organizationId, Operations.Update,
+                new DataChange(), operatorId, isTargetingChange: true),
+            region = Region
+        }, ReusableJsonSerializerOptions.Web);
+
+        await CreateSut("BestEffort").HandleAsync(payload);
+
+        _ff.Verify(x => x.OnSegmentUpdatedAsync(workspaceId, organizationId,
+            It.Is<Segment>(s => s.Id == segment.Id), operatorId, affectedFlags), Times.Once);
     }
 
     [Fact]
@@ -113,7 +142,7 @@ public class SegmentChangeMessageHandlerTests
         _cache.Verify(x => x.UpsertSegmentAsync(It.IsAny<ICollection<Guid>>(), It.IsAny<Segment>()), Times.Once);
 
         _ff.Verify(
-            x => x.OnSegmentUpdatedAsync(It.IsAny<Segment>(), It.IsAny<Guid>(), It.IsAny<ICollection<FlagReference>>()),
+            x => x.OnSegmentUpdatedAsync(It.IsAny<Guid>(), It.IsAny<Guid?>(), It.IsAny<Segment>(), It.IsAny<Guid>(), It.IsAny<ICollection<FlagReference>>()),
             Times.Never);
 
         _segSvc.Verify(
@@ -164,12 +193,13 @@ public class SegmentChangeMessageHandlerTests
         // isTargetingChange = false) so the assertions below can't be satisfied by accident with
         // the legacy hardcoded reconstruction values (Guid.Empty / Update / true).
         var operatorId = Guid.NewGuid();
+        var organizationId = Guid.NewGuid();
         const string operation = "Archive";
         const bool isTargetingChange = false;
 
         var payload = BuildMessage(
             env1, env2, segmentId, updatedAt,
-            operatorId: operatorId, operation: operation, isTargetingChange: isTargetingChange);
+            operatorId: operatorId, operation: operation, isTargetingChange: isTargetingChange, organizationId: organizationId);
 
         await sut.HandleAsync(payload);
 
@@ -183,13 +213,14 @@ public class SegmentChangeMessageHandlerTests
                 expectedTs,
                 operatorId,
                 operation,
-                isTargetingChange),
+                isTargetingChange,
+                organizationId),
             Times.Once);
 
         // GatedCommit must hold the affected-flags / segment-change propagation for the coordinator.
         _cache.Verify(x => x.UpsertSegmentAsync(It.IsAny<ICollection<Guid>>(), It.IsAny<Segment>()), Times.Never);
         _ff.Verify(
-            x => x.OnSegmentUpdatedAsync(It.IsAny<Segment>(), It.IsAny<Guid>(), It.IsAny<ICollection<FlagReference>>()),
+            x => x.OnSegmentUpdatedAsync(It.IsAny<Guid>(), It.IsAny<Guid?>(), It.IsAny<Segment>(), It.IsAny<Guid>(), It.IsAny<ICollection<FlagReference>>()),
             Times.Never);
         _segSvc.Verify(
             x => x.PublishChangeMessage(

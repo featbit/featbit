@@ -111,7 +111,7 @@ public class DeclineFlagChangeRequestHandlerTests
         var result = await sut.Handle(
             new DeclineFlagChangeRequest
             {
-                OrgId = changeRequest.OrgId,
+                WorkspaceId = ResourceOwner.WorkspaceId, OrgId = changeRequest.OrgId,
                 EnvId = changeRequest.EnvId,
                 Id = changeRequest.Id,
                 Comment = "  Needs a rollback plan.  "
@@ -121,6 +121,7 @@ public class DeclineFlagChangeRequestHandlerTests
         Assert.True(result);
         Assert.Equal(FlagChangeRequestStatus.Declined, changeRequest.Status);
         auditLogService.Verify(x => x.AddOneAsync(It.Is<AuditLog>(log =>
+            log.WorkspaceId == ResourceOwner.WorkspaceId && log.OrganizationId == changeRequest.OrgId &&
             log.Operation == Operations.DeclineFlagChangeRequest &&
             log.Comment == "Needs a rollback plan." &&
             log.CreatorId == reviewerId &&
@@ -128,5 +129,8 @@ public class DeclineFlagChangeRequestHandlerTests
             log.DataChange.Current.Contains("Ready for review") &&
             log.DataChange.Current.Contains("proposedDataChange"))), Times.Once);
     }
+
+    private static readonly Domain.Organizations.Organization ResourceOwner =
+        new(Guid.NewGuid(), "Actual owner", "actual-owner") { Id = Guid.NewGuid() };
 
 }

@@ -1,6 +1,9 @@
 import type { TFunction } from "i18next"
 import { useTranslation } from "react-i18next"
 import type { AuditLogTableAdapter } from "@/features/audit-logs/components/audit-log-table-adapter"
+import { useDefaultAuditLogTableAdapter } from "@/features/audit-logs/components/audit-log-table-adapter"
+import { auditSnapshotKind } from "@/features/audit-logs/audit-snapshot"
+import { auditStatusChange } from "@/features/audit-logs/audit-log-utils"
 import type {
   AuditInstruction,
   AuditLog,
@@ -104,11 +107,17 @@ function historyChanges(log: AuditLog, t: TFunction): ReviewChange[] {
 
 export function useSegmentAuditLogAdapter(): AuditLogTableAdapter {
   const { t } = useTranslation()
+  const defaultAdapter = useDefaultAuditLogTableAdapter()
 
   return {
     eventTitle: (log) => eventTitle(log, t),
-    eventSubtitle: (log) => eventSubtitle(log, t),
+    eventSubtitle: (log) =>
+      auditSnapshotKind(log)
+        ? defaultAdapter.eventSubtitle(log)
+        : eventSubtitle(log, t),
     changeDetails: (log) => {
+      if (auditSnapshotKind(log) || auditStatusChange(log, t))
+        return defaultAdapter.changeDetails(log)
       const changes = historyChanges(log, t)
       return {
         count: changes.length,

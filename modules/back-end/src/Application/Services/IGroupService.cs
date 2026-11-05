@@ -1,3 +1,6 @@
+#nullable enable
+
+using Domain.AuditLogs;
 using Application.Bases.Models;
 using Application.Groups;
 using Domain.Groups;
@@ -6,6 +9,8 @@ namespace Application.Services;
 
 public interface IGroupService : IService<Group>
 {
+    Task<GroupAuditSnapshot?> GetAuditSnapshotAsync(Guid id);
+
     Task DeleteAsync(Guid id);
 
     Task<PagedResult<Group>> GetListAsync(Guid organizationId, GroupFilter groupFilter);

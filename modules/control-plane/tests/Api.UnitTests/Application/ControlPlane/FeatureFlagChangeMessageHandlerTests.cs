@@ -55,7 +55,7 @@ public class FeatureFlagChangeMessageHandlerTests
         };
 
         var onFeatureFlagChanged =
-            new OnFeatureFlagChanged(flag, "op", new DataChange(), Guid.NewGuid(), "user");
+            new OnFeatureFlagChanged(flag, Guid.NewGuid(), Guid.NewGuid(), "op", new DataChange(), Guid.NewGuid(), "user");
 
         var message = new
         {

@@ -37,7 +37,7 @@ public class DefaultTests
         Assert.Equal(ConnectionVersion.All, options.SupportedVersions);
         Assert.Equal(ConnectionType.All, options.SupportedTypes);
         Assert.Null(options.CustomRpService);
-        Assert.True(options.TrackClientHostName);
+        Assert.False(options.TrackClientHostName);
         Assert.Equal(30, options.TokenExpirySeconds);
     }
 }

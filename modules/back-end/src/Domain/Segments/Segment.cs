@@ -221,7 +221,8 @@ public class Segment : AuditedEntity
         long version,
         Guid operatorId = default,
         string operation = Operations.Update,
-        bool isTargetingChange = true)
+        bool isTargetingChange = true,
+        Guid? organizationId = null)
     {
         // A pending value must never itself carry a pending change (no pending-within-pending):
         // the staged payload describes a single committed-to-be state, so null out any nested
@@ -236,6 +237,7 @@ public class Segment : AuditedEntity
             Version = version,
             Value = pendingValue,
             OperatorId = operatorId,
+            OrganizationId = organizationId,
             Operation = operation,
             IsTargetingChange = isTargetingChange
         };

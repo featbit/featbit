@@ -56,7 +56,7 @@ public struct Token
             return;
         }
 
-        if (!TokenNumber.TryDecodeLong(payloadSpan.Slice(Position, ContentLength), out var timestamp))
+        if (!TokenNumber.TryDecodeTimestamp(payloadSpan.Slice(Position, ContentLength), out var timestamp))
         {
             // invalid token: invalid timestamp
             return;

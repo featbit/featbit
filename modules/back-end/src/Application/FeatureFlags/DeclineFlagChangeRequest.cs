@@ -6,6 +6,8 @@ namespace Application.FeatureFlags;
 
 public class DeclineFlagChangeRequest : IRequest<bool>
 {
+    public Guid WorkspaceId { get; set; }
+
     public Guid OrgId { get; set; }
 
     public Guid EnvId { get; set; }
@@ -77,6 +79,8 @@ public class DeclineFlagChangeRequestHandler(
         var dataChange = new DataChange().To(snapshot);
         var auditLog = AuditLog.For(
             flag,
+            request.WorkspaceId,
+            request.OrgId,
             Operations.DeclineFlagChangeRequest,
             dataChange,
             request.Comment?.Trim() ?? string.Empty,

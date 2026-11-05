@@ -56,9 +56,11 @@ export function VariationsReviewDialog({
       ledger={{
         copy: {
           label: (change) =>
-            change.label === "order"
-              ? t("featureFlags.detailsPage.variations.order")
-              : change.label,
+            change.kind === "variations"
+              ? t("featureFlags.variationsEditor.variations")
+              : !change.literalLabel && change.label === "order"
+                ? t("featureFlags.detailsPage.variations.order")
+                : change.label,
           action: (action) => t(`featureFlags.detailsPage.review.${action}`),
           actionCount: (action, count) =>
             t("featureFlags.detailsPage.review.actionCount", {

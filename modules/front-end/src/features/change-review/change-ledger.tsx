@@ -24,8 +24,8 @@ const layoutColumns: Record<
     groupedOperation: "grid-cols-[6rem_minmax(0,1fr)]",
   },
   history: {
-    row: "grid-cols-[minmax(11.25rem,13.75rem)_6.25rem_minmax(0,1fr)]",
-    groupedRow: "grid-cols-[minmax(11.25rem,13.75rem)_minmax(0,1fr)]",
+    row: "grid-cols-[11.25rem_6.25rem_minmax(0,1fr)]",
+    groupedRow: "grid-cols-[11.25rem_minmax(0,1fr)]",
     groupedOperation: "grid-cols-[6.25rem_minmax(0,1fr)]",
   },
 }
@@ -46,8 +46,10 @@ export type ChangeLedgerProps<TChange extends ChangeReviewItem> = {
   layout: ChangeLedgerLayout
   copy: ChangeLedgerCopy<TChange>
   className?: string
+  snapshot?: boolean
   renderLabel?: (change: TChange) => ReactNode | undefined
   renderContent?: (change: TChange) => ReactNode | undefined
+  renderValue?: (value: string, change: TChange) => ReactNode
 }
 
 export function ChangePair({
@@ -73,19 +75,31 @@ export function ChangeLedger<TChange extends ChangeReviewItem>({
   className,
   renderLabel,
   renderContent,
+  renderValue,
+  snapshot = false,
 }: ChangeLedgerProps<TChange>) {
   const columns = layoutColumns[layout]
+  const history = layout === "history"
+  const snapshotColumns = "grid-cols-[11.25rem_minmax(0,1fr)]"
   const previewLimit = layout === "settings" ? 3 : 2
   const [expandedValues, setExpandedValues] = useState<Record<string, boolean>>(
     {}
   )
 
-  function valuesContent(values: string[], key: string) {
+  function valuesContent(values: string[], key: string, change: TChange) {
     const expanded = expandedValues[key]
     const visible = expanded ? values : values.slice(0, previewLimit)
     return (
       <div className="min-w-0 text-sm">
-        <span className="break-words">{visible.join(", ") || "—"}</span>
+        {renderValue ? (
+          <ul className="space-y-3">
+            {visible.map((value, index) => (
+              <li key={index}>{renderValue(value, change)}</li>
+            ))}
+          </ul>
+        ) : (
+          <span className="break-words">{visible.join(", ") || "—"}</span>
+        )}
         {values.length > previewLimit ? (
           <Button
             type="button"
@@ -127,26 +141,51 @@ export function ChangeLedger<TChange extends ChangeReviewItem>({
             <div
               key={key}
               className={cn(
-                "grid gap-x-4 px-2 py-2 text-sm",
-                columns.groupedRow
+                "grid gap-x-4 px-2 text-sm",
+                snapshot
+                  ? `${snapshotColumns} py-1.5`
+                  : `${columns.groupedRow} ${history ? "py-1.5" : "py-2"}`
               )}
             >
-              <span className="block min-w-0 truncate">
+              <div
+                className={cn(
+                  "min-w-0",
+                  snapshot
+                    ? "flex items-baseline gap-1.5 text-muted-foreground"
+                    : "block truncate",
+                  history && "text-muted-foreground"
+                )}
+              >
                 {renderLabel?.(change) ?? copy.label(change)}
-              </span>
+                {snapshot && (
+                  <span className="shrink-0 text-muted-foreground">
+                    {"· "}
+                    {change.valueGroups.reduce(
+                      (count, group) => count + group.values.length,
+                      0
+                    )}
+                  </span>
+                )}
+              </div>
               <div className="space-y-2">
                 {change.valueGroups.map((group, groupIndex) => (
                   <div
                     key={`${group.action}-${groupIndex}`}
                     className={cn(
                       "grid min-w-0 gap-x-4",
-                      columns.groupedOperation
+                      !snapshot && columns.groupedOperation
                     )}
                   >
-                    <span className="text-muted-foreground">
-                      {copy.actionCount(group.action, group.values.length)}
-                    </span>
-                    {valuesContent(group.values, `${key}-${groupIndex}`)}
+                    {!snapshot && (
+                      <span className="text-muted-foreground">
+                        {copy.actionCount(group.action, group.values.length)}
+                      </span>
+                    )}
+                    {valuesContent(
+                      group.values,
+                      `${key}-${groupIndex}`,
+                      change
+                    )}
                   </div>
                 ))}
               </div>
@@ -158,28 +197,56 @@ export function ChangeLedger<TChange extends ChangeReviewItem>({
         return (
           <div
             key={key}
-            className={cn("grid gap-x-4 px-2 py-2 text-sm", columns.row)}
+            className={cn(
+              "grid gap-x-4 px-2 text-sm",
+              snapshot
+                ? `${snapshotColumns} py-1.5`
+                : `${columns.row} ${history ? "py-1.5" : "py-2"}`
+            )}
           >
-            <div className="min-w-0 self-start">
+            <div
+              className={cn(
+                "min-w-0 self-start",
+                snapshot && "flex items-baseline gap-1.5",
+                (snapshot || history) && "text-muted-foreground"
+              )}
+            >
               {renderLabel?.(change) ?? (
                 <span className="block truncate">{copy.label(change)}</span>
               )}
+              {snapshot && change.values?.length ? (
+                <span className="text-muted-foreground">
+                  {"· "}
+                  {change.values.length}
+                </span>
+              ) : null}
             </div>
-            <span className="self-start text-muted-foreground">
-              {change.action &&
-              change.affectedCount !== undefined &&
-              (change.action === "added" || change.action === "removed")
-                ? copy.actionCount(change.action, change.affectedCount)
-                : change.action
-                  ? copy.action(change.action)
-                  : null}
-            </span>
-            <div className="min-w-0">
+            {!snapshot && (
+              <span className="self-start text-muted-foreground">
+                {change.action &&
+                change.affectedCount !== undefined &&
+                (change.action === "added" || change.action === "removed")
+                  ? copy.actionCount(change.action, change.affectedCount)
+                  : change.action
+                    ? copy.action(change.action)
+                    : null}
+              </span>
+            )}
+            <div
+              className={cn(
+                "min-w-0",
+                (snapshot || history) && "text-foreground",
+                (snapshot || history) &&
+                  change.valueFormat === "code" &&
+                  "font-mono text-[13px]"
+              )}
+            >
               {customContent !== undefined ? (
                 customContent
               ) : change.values?.length ? (
-                valuesContent(change.values, key)
-              ) : change.previous !== undefined &&
+                valuesContent(change.values, key, change)
+              ) : !snapshot &&
+                change.previous !== undefined &&
                 change.current !== undefined ? (
                 <ChangePair
                   previous={change.previous}

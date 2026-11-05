@@ -11,6 +11,16 @@ namespace Infrastructure.Services.EntityFrameworkCore;
 public class EnvironmentService(AppDbContext dbContext, ILogger<EnvironmentService> logger)
     : EntityFrameworkCoreService<Environment>(dbContext), IEnvironmentService
 {
+    public async Task<Organization> GetOrganizationAsync(Guid envId)
+    {
+        var query = from environment in QueryableOf<Environment>()
+            join project in QueryableOf<Project>() on environment.ProjectId equals project.Id
+            join organization in QueryableOf<Organization>() on project.OrganizationId equals organization.Id
+            where environment.Id == envId
+            select organization;
+        return await query.SingleAsync();
+    }
+
     public async Task<string[]> GetServesAsync(string[] scopes)
     {
         if (scopes.Length == 0)

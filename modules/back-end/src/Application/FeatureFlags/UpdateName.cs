@@ -7,6 +7,10 @@ namespace Application.FeatureFlags;
 
 public class UpdateName : ResourceChangeRequest, IRequest<Guid>
 {
+    public Guid WorkspaceId { get; set; }
+
+    public Guid OrgId { get; set; }
+
     /// <summary>
     /// The ID of the environment the feature flag belongs to. Retrieved from the URL path.
     /// </summary>
@@ -53,6 +57,8 @@ public class UpdateNameHandler(
         // publish on feature flag change notification
         var notification = new OnFeatureFlagChanged(
             flag,
+            request.WorkspaceId,
+            request.OrgId,
             Operations.Update,
             dataChange,
             currentUser.Id,

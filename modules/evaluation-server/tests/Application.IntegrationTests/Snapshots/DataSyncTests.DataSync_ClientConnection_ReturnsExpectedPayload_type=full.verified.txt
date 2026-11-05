@@ -21,6 +21,7 @@
           }
         ],
         sendToExperiment: true,
+        insightsEnabled: false,
         timestamp: 1674871495616
       },
       {
@@ -40,6 +41,7 @@
           }
         ],
         sendToExperiment: true,
+        insightsEnabled: true,
         timestamp: 1674871694804
       },
       {
@@ -59,6 +61,7 @@
           }
         ],
         sendToExperiment: true,
+        insightsEnabled: true,
         timestamp: 1674872452102
       },
       {
@@ -78,6 +81,7 @@
           }
         ],
         sendToExperiment: true,
+        insightsEnabled: true,
         timestamp: 1674884975885
       },
       {
@@ -97,6 +101,7 @@
           }
         ],
         sendToExperiment: true,
+        insightsEnabled: false,
         timestamp: 1674885485421
       }
     ]

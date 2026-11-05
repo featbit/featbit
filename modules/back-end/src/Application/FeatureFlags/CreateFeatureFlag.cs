@@ -6,13 +6,9 @@ using Application.Bases.Exceptions;
 
 namespace Application.FeatureFlags;
 
-public class CreateFeatureFlag : IRequest<FeatureFlag>
-{
-    /// <summary>
-    /// The ID of the environment the feature flag belongs to. Retrieved from the URL path.
-    /// </summary>
-    public Guid EnvId { get; set; }
 
+public class CreateFeatureFlagPayload
+{
     /// <summary>
     /// The name of the feature flag.
     /// </summary>
@@ -62,6 +58,15 @@ public class CreateFeatureFlag : IRequest<FeatureFlag>
     /// Whether evaluation insights are collected for this flag. Defaults to true.
     /// </summary>
     public bool InsightsEnabled { get; set; } = true;
+}
+
+public class CreateFeatureFlag : CreateFeatureFlagPayload, IRequest<FeatureFlag>
+{
+    public Guid EnvId { get; set; }
+
+    public Guid WorkspaceId { get; set; }
+
+    public Guid OrgId { get; set; }
 
     public FeatureFlag AsFeatureFlag(Guid currentUserId)
     {
@@ -83,6 +88,24 @@ public class CreateFeatureFlag : IRequest<FeatureFlag>
         };
 
         return flag;
+    }
+
+    public CreateFeatureFlag(Guid workspaceId, Guid orgId, Guid envId, CreateFeatureFlagPayload payload)
+    {
+        WorkspaceId = workspaceId;
+        OrgId = orgId;
+        EnvId = envId;
+
+        Name = payload.Name;
+        Key = payload.Key;
+        IsEnabled = payload.IsEnabled;
+        Description = payload.Description;
+        VariationType = payload.VariationType;
+        Variations = payload.Variations;
+        DisabledVariationId = payload.DisabledVariationId;
+        EnabledVariationId = payload.EnabledVariationId;
+        Tags = payload.Tags;
+        InsightsEnabled = payload.InsightsEnabled;
     }
 }
 
@@ -117,37 +140,27 @@ public class CreateFeatureFlagValidator : AbstractValidator<CreateFeatureFlag>
     }
 }
 
-public class CreateFeatureFlagHandler : IRequestHandler<CreateFeatureFlag, FeatureFlag>
+public class CreateFeatureFlagHandler(
+    IFeatureFlagService service,
+    ICurrentUser currentUser,
+    IPublisher publisher)
+    : IRequestHandler<CreateFeatureFlag, FeatureFlag>
 {
-    private readonly IFeatureFlagService _service;
-    private readonly ICurrentUser _currentUser;
-    private readonly IPublisher _publisher;
-
-    public CreateFeatureFlagHandler(
-        IFeatureFlagService service,
-        ICurrentUser currentUser,
-        IPublisher publisher)
-    {
-        _service = service;
-        _currentUser = currentUser;
-        _publisher = publisher;
-    }
-
     public async Task<FeatureFlag> Handle(CreateFeatureFlag request, CancellationToken cancellationToken)
     {
-        var hasKeyBeenUsed = await _service.HasKeyBeenUsedAsync(request.EnvId, request.Key);
+        var hasKeyBeenUsed = await service.HasKeyBeenUsedAsync(request.EnvId, request.Key);
         if (hasKeyBeenUsed)
         {
             throw new BusinessException(ErrorCodes.KeyHasBeenUsed);
         }
 
-        var flag = request.AsFeatureFlag(_currentUser.Id);
-        await _service.AddOneAsync(flag);
+        var flag = request.AsFeatureFlag(currentUser.Id);
+        await service.AddOneAsync(flag);
 
         // publish on feature flag change notification
         var dataChange = new DataChange(null).To(flag);
-        var notification = new OnFeatureFlagChanged(flag, Operations.Create, dataChange, _currentUser.Id);
-        await _publisher.Publish(notification, cancellationToken);
+        var notification = new OnFeatureFlagChanged(flag, request.WorkspaceId, request.OrgId, Operations.Create, dataChange, currentUser.Id);
+        await publisher.Publish(notification, cancellationToken);
 
         return flag;
     }

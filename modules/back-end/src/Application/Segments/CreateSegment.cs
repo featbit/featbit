@@ -10,6 +10,8 @@ namespace Application.Segments;
 
 public class CreateSegment : IRequest<Segment>
 {
+    public Guid OrgId { get; set; }
+
     /// <summary>
     /// The ID of the workspace the segment belongs to. Retrieved from the request header.
     /// </summary>
@@ -118,7 +120,8 @@ public class CreateSegmentHandler : IRequestHandler<CreateSegment, Segment>
 
         // publish on segment created notification
         var dataChange = new DataChange(null).To(segment);
-        var notification = new OnSegmentChange(segment, Operations.Create, dataChange, _currentUser.Id);
+
+        var notification = new OnSegmentChange(segment, request.WorkspaceId, request.OrgId, Operations.Create, dataChange, _currentUser.Id);
         await _publisher.Publish(notification, cancellationToken);
 
         return segment;

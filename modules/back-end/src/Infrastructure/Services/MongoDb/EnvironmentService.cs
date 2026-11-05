@@ -12,6 +12,16 @@ namespace Infrastructure.Services.MongoDb;
 public class EnvironmentService(MongoDbClient mongoDb, ILogger<EnvironmentService> logger)
     : MongoDbService<Environment>(mongoDb), IEnvironmentService
 {
+    public async Task<Organization> GetOrganizationAsync(Guid envId)
+    {
+        var query = from environment in MongoDb.QueryableOf<Environment>()
+            join project in MongoDb.QueryableOf<Project>() on environment.ProjectId equals project.Id
+            join organization in MongoDb.QueryableOf<Organization>() on project.OrganizationId equals organization.Id
+            where environment.Id == envId
+            select organization;
+        return await query.SingleAsync();
+    }
+
     public async Task<string[]> GetServesAsync(string[] scopes)
     {
         if (scopes.Length == 0)

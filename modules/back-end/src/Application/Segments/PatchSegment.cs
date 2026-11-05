@@ -9,6 +9,10 @@ namespace Application.Segments;
 
 public class PatchSegment : IRequest<PatchResult>
 {
+    public Guid WorkspaceId { get; set; }
+
+    public Guid OrgId { get; set; }
+
     public Guid Id { get; set; }
 
     public JsonPatchDocument<Segment> Patch { get; set; }
@@ -51,6 +55,8 @@ public class PatchSegmentHandler(
         // publish on segment change notification
         var notification = new OnSegmentChange(
             segment,
+            request.WorkspaceId,
+            request.OrgId,
             Operations.Update,
             dataChange,
             currentUser.Id,

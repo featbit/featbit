@@ -1,3 +1,5 @@
+using Application.AuditLogs;
+using Domain.AuditLogs;
 using Application.Bases;
 using Application.Users;
 using Domain.Organizations;
@@ -48,7 +50,7 @@ public class AddMemberHandler(
     IOrganizationService organizationService,
     IUserService userService,
     IIdentityService identityService,
-    ICurrentUser currentUser)
+    ICurrentUser currentUser, IMemberService memberService, IPublisher publisher)
     : IRequestHandler<AddMember, bool>
 {
     public async Task<bool> Handle(AddMember request, CancellationToken cancellationToken)
@@ -71,6 +73,9 @@ public class AddMemberHandler(
             userId = user.Id;
         }
 
+        var previous = await memberService.GetAuditSnapshotAsync(userId, request.OrganizationId, request.WorkspaceId);
+        var change = new DataChange(previous);
+
         // ensure user is in workspace
         await workspaceService.AddUserIfNotExistsAsync(request.WorkspaceId, userId);
 
@@ -89,6 +94,9 @@ public class AddMemberHandler(
             request.GroupIds
         );
 
+        var current = await memberService.GetAuditSnapshotAsync(userId, request.OrganizationId, request.WorkspaceId);
+        await publisher.Publish(new OnIamResourceChanged(request.WorkspaceId, request.OrganizationId,
+            AuditLogRefTypes.Member, Operations.AddMember, current ?? previous, change.To(current), currentUser.Id), cancellationToken);
         return true;
     }
 }

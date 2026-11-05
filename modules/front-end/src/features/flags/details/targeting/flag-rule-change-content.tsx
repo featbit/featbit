@@ -53,16 +53,20 @@ export function FlagChangeBadgeLabel({
   )
 }
 
-function FlagServeValue({
+export function FlagServeValue({
   value,
   previous = false,
+  snapshot = false,
 }: {
   value?: FlagServingReview
   previous?: boolean
+  snapshot?: boolean
 }) {
   const { t } = useTranslation()
   return (
-    <div className="flex min-w-0 flex-wrap items-center gap-1.5 text-xs">
+    <div
+      className={`flex min-w-0 flex-wrap items-center gap-1.5 ${snapshot ? "text-sm" : "text-xs"}`}
+    >
       {value?.variations.length ? (
         value.variations.map((variation) => (
           <span key={variation.id} className="inline-flex items-center gap-1.5">
@@ -100,9 +104,11 @@ function FlagServeValue({
 function FlagServeChange({
   previous,
   current,
+  snapshot = false,
 }: {
   previous?: FlagServingReview
   current?: FlagServingReview
+  snapshot?: boolean
 }) {
   const { t } = useTranslation()
   return (
@@ -111,14 +117,14 @@ function FlagServeChange({
         {t("featureFlags.detailsPage.review.serve")}
       </p>
       {!previous ? (
-        <FlagServeValue value={current} />
+        <FlagServeValue value={current} snapshot={snapshot} />
       ) : !current ? (
-        <FlagServeValue value={previous} previous />
+        <FlagServeValue value={previous} previous snapshot={snapshot} />
       ) : (
         <div className="space-y-1">
-          <FlagServeValue value={previous} previous />
+          <FlagServeValue value={previous} previous snapshot={snapshot} />
           <ArrowDown className="size-3.5 text-muted-foreground" />
-          <FlagServeValue value={current} />
+          <FlagServeValue value={current} snapshot={snapshot} />
         </div>
       )}
     </section>
@@ -128,11 +134,15 @@ function FlagServeChange({
 export function FlagDefaultChangeContent({
   previous,
   current,
+  history = false,
 }: {
   previous?: FlagServingReview
   current?: FlagServingReview
+  history?: boolean
 }) {
-  return <FlagServeChange previous={previous} current={current} />
+  return (
+    <FlagServeChange previous={previous} current={current} snapshot={history} />
+  )
 }
 
 export function FlagRuleChangeContent({
@@ -141,12 +151,14 @@ export function FlagRuleChangeContent({
   previousServing,
   currentServing,
   segmentNames,
+  snapshot = false,
 }: {
   previousRule?: FlagRule
   currentRule?: FlagRule
   previousServing?: FlagServingReview
   currentServing?: FlagServingReview
   segmentNames?: ReadonlyMap<string, string>
+  snapshot?: boolean
 }) {
   const definitionChanged =
     !previousRule ||
@@ -167,7 +179,11 @@ export function FlagRuleChangeContent({
         />
       ) : null}
       {servingChanged ? (
-        <FlagServeChange previous={previousServing} current={currentServing} />
+        <FlagServeChange
+          previous={previousServing}
+          current={currentServing}
+          snapshot={snapshot}
+        />
       ) : null}
     </div>
   )

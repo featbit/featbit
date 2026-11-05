@@ -1,4 +1,11 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react"
+import {
+  fireEvent,
+  render,
+  renderHook,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
 import { describe, expect, it, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
@@ -6,6 +13,7 @@ import "@/lib/i18n/i18n"
 import type { AuditLog } from "../audit-logs-types"
 import type { AuditLogTableAdapter } from "./audit-log-table-adapter"
 import { AuditLogTable } from "./audit-log-table"
+import { useSegmentAuditLogAdapter } from "@/features/segments/details/history/segment-audit-log-adapter"
 
 const auditLog: AuditLog = {
   id: "audit-1",
@@ -33,6 +41,284 @@ const auditLog: AuditLog = {
 }
 
 describe("AuditLogTable", () => {
+  it.each([
+    ["FeatureFlag", "/en/feature-flags/checkout-redesign/targeting"],
+    ["Segment", "/en/segments/flag-1/targeting"],
+    ["Policy", null],
+  ])("renders %s resource links without scope metadata", (refType, href) => {
+    render(
+      <MemoryRouter>
+        <TooltipProvider>
+          <AuditLogTable
+            items={[{ ...auditLog, refType }]}
+            lang="en"
+            locale="en"
+            loading={false}
+            filtered={false}
+            onClearFilters={vi.fn()}
+            onViewRawData={vi.fn()}
+          />
+        </TooltipProvider>
+      </MemoryRouter>
+    )
+    const link = screen.queryByRole("link", { name: "Checkout redesign" })
+    if (href) {
+      expect(link).toHaveAttribute("href", href)
+    } else {
+      expect(link).not.toBeInTheDocument()
+      expect(screen.getByText("Checkout redesign")).toBeInTheDocument()
+    }
+  })
+
+  it.each([
+    [
+      "FeatureFlag",
+      "Archive",
+      false,
+      true,
+      "Archive status",
+      "Active",
+      "Archived",
+    ],
+    [
+      "FeatureFlag",
+      "Restore",
+      true,
+      false,
+      "Archive status",
+      "Archived",
+      "Active",
+    ],
+    ["Segment", "Archive", false, true, "Archive status", "Active", "Archived"],
+    ["Segment", "Restore", true, false, "Archive status", "Archived", "Active"],
+    ["FeatureFlag", "Update", false, true, "Flag state", "OFF", "ON"],
+    ["FeatureFlag", "Update", true, false, "Flag state", "ON", "OFF"],
+  ] as const)(
+    "renders %s %s as one state transition",
+    (refType, operation, before, after, label, previous, current) => {
+      const { result: segmentAdapter } = renderHook(useSegmentAuditLogAdapter)
+      const field = operation === "Update" ? "isEnabled" : "isArchived"
+      render(
+        <MemoryRouter>
+          <TooltipProvider>
+            <AuditLogTable
+              adapter={
+                refType === "Segment" ? segmentAdapter.current : undefined
+              }
+              items={[
+                {
+                  ...auditLog,
+                  refType,
+                  operation,
+                  dataChange: {
+                    previous: JSON.stringify({
+                      name: "Recorded",
+                      [field]: before,
+                    }),
+                    current: JSON.stringify({
+                      name: "Recorded",
+                      [field]: after,
+                    }),
+                  },
+                  instructions: [],
+                },
+              ]}
+              lang="en"
+              locale="en"
+              loading={false}
+              filtered={false}
+              onClearFilters={vi.fn()}
+              onViewRawData={vi.fn()}
+            />
+          </TooltipProvider>
+        </MemoryRouter>
+      )
+      fireEvent.click(screen.getByRole("button", { name: "Expand audit log" }))
+      const heading = screen.getByRole("heading", { name: "Status change" })
+      const details = within(heading.closest("tr")!)
+      expect(details.getByText(label)).toBeInTheDocument()
+      expect(details.getByText(previous)).toBeInTheDocument()
+      expect(details.getByText(current)).toBeInTheDocument()
+      expect(details.queryByText("Updated")).not.toBeInTheDocument()
+      expect(details.queryByText("1 change")).not.toBeInTheDocument()
+      expect(
+        heading.closest("tr")!.querySelector(".lucide-arrow-right")
+      ).not.toBeNull()
+    }
+  )
+  it.each([
+    ["FeatureFlag", "Create", false],
+    ["FeatureFlag", "Clone", false],
+    ["FeatureFlag", "Remove", true],
+    ["Segment", "Create", false],
+    ["Segment", "Clone", false],
+    ["Segment", "Remove", true],
+    ["Group", "CreateGroup", false],
+    ["Group", "Create", false],
+    ["Group", "Clone", false],
+    ["Group", "DeleteGroup", true],
+    ["Policy", "ClonePolicy", false],
+    ["Policy", "CreatePolicy", false],
+    ["Policy", "Create", false],
+    ["Policy", "Remove", true],
+    ["Policy", "DeletePolicy", true],
+    ["Member", "AddMember", false],
+    ["Member", "Create", false],
+    ["Member", "RemoveFromOrganization", true],
+    ["Member", "RemoveFromWorkspace", true],
+  ])(
+    "shows %s %s as a snapshot without comparison actions",
+    (refType, operation, deleted) => {
+      const { result: segmentAdapter } = renderHook(useSegmentAuditLogAdapter)
+      const snapshot = JSON.stringify({
+        name: "Recorded name",
+        key: "recorded-key",
+        rn: "policy/recorded-key",
+        isEnabled: false,
+        variationType: "boolean",
+        tags: ["first", "second", "third"],
+        included: ["included-user"],
+        excluded: [],
+        rules: [
+          {
+            id: "rule-1",
+            name: "Recorded rule",
+            conditions: [
+              {
+                id: "condition-1",
+                property: "country",
+                op: "IsOneOf",
+                value: '["France"]',
+              },
+            ],
+            variations: [{ id: "yes", rollout: [0, 1] }],
+          },
+        ],
+        variations: [
+          { id: "yes", name: "Yes", value: "true" },
+          { id: "no", name: "No", value: "false" },
+        ],
+        targetUsers: [{ variationId: "yes", keyIds: ["targeted-user"] }],
+        fallthrough: { variations: [{ id: "yes", rollout: [0, 1] }] },
+        disabledVariationId: "no",
+        members: [{ id: "member-1", name: "Member Alice", rn: "member/alice" }],
+        statements: [
+          {
+            id: "statement-1",
+            effect: "allow",
+            resourceType: "flag",
+            resources: ["project/*"],
+            actions: ["ToggleFlag"],
+          },
+        ],
+      })
+      render(
+        <MemoryRouter>
+          <TooltipProvider>
+            <AuditLogTable
+              adapter={
+                refType === "Segment" ? segmentAdapter.current : undefined
+              }
+              items={[
+                {
+                  ...auditLog,
+                  refType,
+                  operation,
+                  instructions: [],
+                  dataChange: {
+                    previous: deleted ? snapshot : "",
+                    current: deleted ? "" : snapshot,
+                  },
+                },
+              ]}
+              lang="en"
+              locale="en"
+              loading={false}
+              filtered={false}
+              onClearFilters={vi.fn()}
+              onViewRawData={vi.fn()}
+            />
+          </TooltipProvider>
+        </MemoryRouter>
+      )
+      fireEvent.click(screen.getByRole("button", { name: "Expand audit log" }))
+      const heading = screen.getByRole("heading", {
+        name: deleted
+          ? "Configuration before deletion"
+          : "Initial configuration",
+      })
+      const eventRow = screen
+        .getByRole("button", { name: "Collapse audit log" })
+        .closest("tr")!
+      expect(
+        within(eventRow).queryByText("Initial configuration")
+      ).not.toBeInTheDocument()
+      expect(
+        within(eventRow).queryByText("Configuration before deletion")
+      ).not.toBeInTheDocument()
+      const details = within(heading.closest("tr")!)
+      expect(details.getByText("Recorded name")).toBeInTheDocument()
+      expect(
+        details.queryByText(/^(Added|Removed|Updated)( · \d+)?$/)
+      ).not.toBeInTheDocument()
+      expect(details.queryByText(/^\d+ changes$/)).not.toBeInTheDocument()
+      expect(
+        heading.closest("tr")!.querySelector(".lucide-arrow-down")
+      ).toBeNull()
+      if (refType === "FeatureFlag") {
+        expect(details.getByText("Default serving")).toBeInTheDocument()
+        expect(details.getByText("targeted-user")).toBeInTheDocument()
+        expect(details.getByText("France")).toBeInTheDocument()
+      }
+      if (refType === "Segment") {
+        expect(details.getByText("included-user")).toBeInTheDocument()
+        expect(details.getByText("France")).toBeInTheDocument()
+      }
+      if (refType === "FeatureFlag" || refType === "Segment") {
+        fireEvent.click(details.getByRole("button", { name: "Show 1 more" }))
+        expect(details.getByText("first, second, third")).toBeInTheDocument()
+      }
+      if (operation === "ClonePolicy")
+        expect(details.queryByText("policy/source-key")).not.toBeInTheDocument()
+    }
+  )
+
+  it.each([
+    "AddGroupMember",
+    "RemoveGroupMember",
+    "AddGroupPolicy",
+    "RemoveGroupPolicy",
+  ])("keeps %s as a relationship comparison", (operation) => {
+    render(
+      <MemoryRouter>
+        <TooltipProvider>
+          <AuditLogTable
+            items={[
+              {
+                ...auditLog,
+                refType: "Group",
+                operation,
+                dataChange: {
+                  previous: '{"name":"Before"}',
+                  current: '{"name":"After"}',
+                },
+              },
+            ]}
+            lang="en"
+            locale="en"
+            loading={false}
+            filtered={false}
+            onClearFilters={vi.fn()}
+            onViewRawData={vi.fn()}
+          />
+        </TooltipProvider>
+      </MemoryRouter>
+    )
+    fireEvent.click(screen.getByRole("button", { name: "Expand audit log" }))
+    expect(screen.getByRole("heading", { name: "Changes" })).toBeInTheDocument()
+    expect(screen.getByText("Updated")).toBeInTheDocument()
+  })
+
   it("renders the global columns and reuses the expandable history ledger", () => {
     render(
       <MemoryRouter>
@@ -52,7 +338,7 @@ describe("AuditLogTable", () => {
 
     expect(
       screen.getAllByRole("columnheader").map((header) => header.textContent)
-    ).toEqual(["", "Date", "User", "Type", "Name / Key", "Event", "Comment"])
+    ).toEqual(["", "Date", "Actor", "Type", "Resource", "Operation", "Comment"])
     expect(
       screen.getByRole("link", { name: "Checkout redesign" })
     ).toHaveAttribute("href", "/en/feature-flags/checkout-redesign/targeting")
@@ -78,7 +364,7 @@ describe("AuditLogTable", () => {
     expect(screen.getAllByText("Increase rollout after QA")).toHaveLength(2)
   })
 
-  it("keeps the Event and Comment tooltips above their cell content", async () => {
+  it("keeps the Operation and Comment tooltips above their cell content", async () => {
     render(
       <MemoryRouter>
         <TooltipProvider>
@@ -153,7 +439,7 @@ describe("AuditLogTable", () => {
 
     expect(
       screen.getAllByRole("columnheader").map((header) => header.textContent)
-    ).toEqual(["", "Date", "User", "Event", "Comment"])
+    ).toEqual(["", "Date", "Actor", "Operation", "Comment"])
     expect(screen.getByText("Updated segment settings")).toBeInTheDocument()
     expect(screen.getByText("Changed segment name")).toBeInTheDocument()
 

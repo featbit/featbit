@@ -1,3 +1,11 @@
+import { useSyncExternalStore } from "react"
+import { useQuery } from "@tanstack/react-query"
+import {
+  getCurrentOrganization,
+  onCurrentOrganizationChanged,
+} from "@/features/layout/layout-context"
+import { currentUserPoliciesQueryOptions } from "@/features/iam/current-user-policy-query"
+import { canUseAction } from "@/features/iam/current-user-permissions"
 import {
   ChevronDown,
   ChevronUp,
@@ -234,6 +242,14 @@ export function Sidebar({
   setCollapsed: (collapsed: boolean) => void
 }) {
   const { t } = useTranslation()
+  const organizationId = useSyncExternalStore(
+    onCurrentOrganizationChanged,
+    () => getCurrentOrganization()?.id ?? ""
+  )
+  const policies = useQuery(currentUserPoliciesQueryOptions(organizationId))
+  const canManageIam =
+    !policies.isError &&
+    canUseAction(policies.data ?? [], "iam/*", "CanManageIAM")
   const [expandedNav, setExpandedNav] = useState<Record<string, boolean>>({})
 
   function toggleNavItem(labelKey: string) {
@@ -290,16 +306,18 @@ export function Sidebar({
                   {t(group.labelKey)}
                 </h2>
               ) : null}
-              {group.items.map((item) => (
-                <SidebarNavItem
-                  key={item.href}
-                  item={item}
-                  lang={lang}
-                  collapsed={collapsed}
-                  expanded={Boolean(expandedNav[item.labelKey])}
-                  onToggle={() => toggleNavItem(item.labelKey)}
-                />
-              ))}
+              {group.items
+                .filter((item) => item.href !== "/iam" || canManageIam)
+                .map((item) => (
+                  <SidebarNavItem
+                    key={item.href}
+                    item={item}
+                    lang={lang}
+                    collapsed={collapsed}
+                    expanded={Boolean(expandedNav[item.labelKey])}
+                    onToggle={() => toggleNavItem(item.labelKey)}
+                  />
+                ))}
             </section>
           ))}
         </div>
