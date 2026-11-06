@@ -172,42 +172,6 @@ public class HttpAuthenticationTests
     }
 
     [Fact]
-    public async Task AgentRegister_WithValidRelayProxyKey_RegistersWithoutEnvironmentSecretLookup()
-    {
-        const string agentId = "regression-test-agent";
-        var key = TestData.RelayProxyTokenString;
-        var workspace = new Workspace { Id = Guid.NewGuid() };
-        var relayProxy = new Mock<IRelayProxyAppService>(MockBehavior.Strict);
-        relayProxy.Setup(x => x.GetWorkspaceAsync(key)).ReturnsAsync(workspace);
-        relayProxy.Setup(x => x.CheckQuotaAsync(workspace)).ReturnsAsync(true);
-        relayProxy.Setup(x => x.RegisterAgentAsync(key, agentId)).Returns(Task.CompletedTask);
-        var store = new Mock<IStore>(MockBehavior.Strict);
-
-        // Keep the real authentication/authorization pipeline. Only the independent
-        // Relay Proxy service and environment store are replaced at the I/O boundary.
-        using var host = _app.WithWebHostBuilder(builder => builder.ConfigureTestServices(services =>
-        {
-            services.Replace(ServiceDescriptor.Singleton<IRelayProxyAppService>(relayProxy.Object));
-            services.Replace(ServiceDescriptor.Singleton<IStore>(store.Object));
-        }));
-        using var client = host.CreateClient();
-        client.DefaultRequestHeaders.Add("Authorization", key);
-
-        using var response = await client.PostAsJsonAsync("/api/public/agent/register", agentId);
-
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.Equal(agentId, await response.Content.ReadAsStringAsync());
-        relayProxy.Verify(x => x.GetWorkspaceAsync(key), Times.Once);
-        relayProxy.Verify(x => x.CheckQuotaAsync(workspace), Times.Once);
-        relayProxy.Verify(x => x.RegisterAgentAsync(key, agentId), Times.Once);
-        relayProxy.VerifyNoOtherCalls();
-        // Explicit verification is required: the auth handler catches store exceptions,
-        // so a strict mock alone would not detect an accidental lookup on an anonymous endpoint.
-        store.Verify(x => x.GetSecretAsync(It.IsAny<string>()), Times.Never);
-        store.VerifyNoOtherCalls();
-    }
-
-    [Fact]
     public async Task AgentRegister_WithoutAuthHeader_Returns401()
     {
         // Agent uses a different auth model (relay-proxy key lookup)

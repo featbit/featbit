@@ -119,7 +119,8 @@ public class RedisStore(IRedisClient redisClient, ILogger<RedisStore> logger) : 
         var key = RedisKeys.Secret(secretString);
         var entries = await Redis.HashGetAsync(key, new RedisValue[] { "type", "projectKey", "envId", "envKey" });
         if (entries.Any(entry => entry.IsNull) ||
-            !Guid.TryParse(entries[2].ToString(), out var envId) || envId == Guid.Empty)
+            !Guid.TryParse(entries[2].ToString(), out var envId) ||
+            envId == Guid.Empty)
         {
             return null;
         }
