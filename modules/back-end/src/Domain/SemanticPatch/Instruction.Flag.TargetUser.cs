@@ -56,6 +56,11 @@ public class TargetUsersInstruction : FlagInstruction
         void SetTargetUsers()
         {
             var targetUserForSet = flag.TargetUsers.FirstOrDefault(x => x.VariationId == newTargetUser.VariationId);
+            if (newTargetUser.KeyIds is { Count: 0 })
+            {
+                if (targetUserForSet != null) flag.TargetUsers.Remove(targetUserForSet);
+                return;
+            }
             if (targetUserForSet != null)
             {
                 targetUserForSet.KeyIds = newTargetUser.KeyIds;

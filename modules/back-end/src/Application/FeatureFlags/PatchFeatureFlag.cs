@@ -42,6 +42,8 @@ public class PatchFeatureFlagHandler(
             return PatchResult.Fail(error);
         }
 
+        FlagTargetingValidator.EnsureValid(flag);
+
         flag.MarkAsUpdated(currentUser.Id);
         dataChange.To(flag);
 

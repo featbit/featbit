@@ -59,6 +59,8 @@ public class UpdateVariationsHandler(
             throw new ConflictException(nameof(FeatureFlag), flag.Id);
         }
 
+        FlagTargetingValidator.EnsureValid(flag, request.Variations);
+
         var dataChange = flag.UpdateVariations(request.Variations, currentUser.Id);
         await service.UpdateAsync(flag);
 
