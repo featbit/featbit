@@ -44,7 +44,7 @@ public class FeatureFlagChangeMessageConsumerTests
     [Fact]
     public async Task HandleAsync_OneServerConnection_SendsServerMessageToConnection()
     {
-        var ws = CreateOpenWebSocketMock();
+        var ws = CreateOpenWebSocketMock(out var sent);
         var connection = new Connection(ws.Object, new Secret(SecretTypes.Server, "p", EnvId, "dev"));
 
         _connectionManager.Setup(c => c.GetEnvConnections(EnvId)).Returns(new[] { connection });
@@ -56,6 +56,7 @@ public class FeatureFlagChangeMessageConsumerTests
 
         await _consumer.HandleAsync(message, CancellationToken.None);
 
+        await sent.WaitAsync(TimeSpan.FromSeconds(5));
         ws.Verify(x => x.SendAsync(
             It.IsAny<ArraySegment<byte>>(),
             WebSocketMessageType.Text,
@@ -68,7 +69,7 @@ public class FeatureFlagChangeMessageConsumerTests
     public async Task HandleAsync_OneConnectionFails_LogsErrorAndContinuesToNextConnection()
     {
         var failingWs = CreateOpenWebSocketMock();
-        var workingWs = CreateOpenWebSocketMock();
+        var workingWs = CreateOpenWebSocketMock(out var workingSent);
         var failing = new Connection(failingWs.Object, new Secret(SecretTypes.Server, "p", EnvId, "dev"));
         var working = new Connection(workingWs.Object, new Secret(SecretTypes.Server, "p", EnvId, "dev"));
 
@@ -84,6 +85,7 @@ public class FeatureFlagChangeMessageConsumerTests
 
         await _consumer.HandleAsync(message, CancellationToken.None);
 
+        await workingSent.WaitAsync(TimeSpan.FromSeconds(5));
         workingWs.Verify(x => x.SendAsync(
             It.IsAny<ArraySegment<byte>>(),
             WebSocketMessageType.Text,
@@ -96,11 +98,60 @@ public class FeatureFlagChangeMessageConsumerTests
         Assert.IsType<InvalidOperationException>(record.Exception);
     }
 
-    private static string BuildMessage(Guid envId) =>
-        JsonSerializer.Serialize(new { envId, id = "flag-1" });
-
-    private static Mock<WebSocket> CreateOpenWebSocketMock()
+    [Fact]
+    public async Task HandleAsync_StalledFirstSocket_DeliversBothHealthyUpdatesInOrder()
     {
+        var blocked = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var entered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var firstSent = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var secondSent = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var receivedVersions = new List<int>();
+        var stalled = CreateOpenWebSocketMock();
+        stalled.Setup(x => x.SendAsync(It.IsAny<ArraySegment<byte>>(), WebSocketMessageType.Text, true,
+            It.IsAny<CancellationToken>())).Returns(() => { entered.TrySetResult(); return blocked.Task; });
+        var healthy = CreateOpenWebSocketMock();
+        healthy.Setup(x => x.SendAsync(It.IsAny<ArraySegment<byte>>(), WebSocketMessageType.Text, true,
+            It.IsAny<CancellationToken>())).Returns((ArraySegment<byte> bytes, WebSocketMessageType _, bool _, CancellationToken _) =>
+        {
+            using var response = JsonDocument.Parse(bytes);
+            receivedVersions.Add(response.RootElement.GetProperty("data").GetProperty("version").GetInt32());
+            if (receivedVersions.Count == 1) firstSent.TrySetResult();
+            if (receivedVersions.Count == 2) secondSent.TrySetResult();
+            return Task.CompletedTask;
+        });
+        var first = new Connection(stalled.Object, new Secret(SecretTypes.Server, "p", EnvId, "dev"));
+        var second = new Connection(healthy.Object, new Secret(SecretTypes.Server, "p", EnvId, "dev"));
+        _connectionManager.Setup(x => x.GetEnvConnections(EnvId)).Returns([first, second]);
+        _dataSyncService.Setup(s => s.GetFlagChangePayloadAsync(It.IsAny<Connection>(), It.IsAny<JsonElement>()))
+            .ReturnsAsync((Connection _, JsonElement change) => new { version = change.GetProperty("version").GetInt32() });
+
+        try
+        {
+            await _consumer.HandleAsync(BuildMessage(EnvId, 1), CancellationToken.None).WaitAsync(TimeSpan.FromSeconds(5));
+            await entered.Task.WaitAsync(TimeSpan.FromSeconds(5));
+            await firstSent.Task.WaitAsync(TimeSpan.FromSeconds(5));
+            await _consumer.HandleAsync(BuildMessage(EnvId, 2), CancellationToken.None).WaitAsync(TimeSpan.FromSeconds(5));
+            await secondSent.Task.WaitAsync(TimeSpan.FromSeconds(5));
+            Assert.Equal(new[] { 1, 2 }, receivedVersions);
+            Assert.False(blocked.Task.IsCompleted);
+        }
+        finally
+        {
+            blocked.TrySetResult();
+            await WebSocketSender.For(stalled.Object).CompleteAsync();
+            await WebSocketSender.For(healthy.Object).CompleteAsync();
+        }
+    }
+
+    private static string BuildMessage(Guid envId, int version = 1) =>
+        JsonSerializer.Serialize(new { envId, id = "flag-1", version });
+
+    private static Mock<WebSocket> CreateOpenWebSocketMock() => CreateOpenWebSocketMock(out _);
+
+    private static Mock<WebSocket> CreateOpenWebSocketMock(out Task sent)
+    {
+        var completion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        sent = completion.Task;
         var ws = new Mock<WebSocket>();
         ws.SetupGet(x => x.State).Returns(WebSocketState.Open);
         ws.Setup(x => x.SendAsync(
@@ -108,7 +159,7 @@ public class FeatureFlagChangeMessageConsumerTests
                 It.IsAny<WebSocketMessageType>(),
                 It.IsAny<bool>(),
                 It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
+            .Returns(() => { completion.TrySetResult(); return Task.CompletedTask; });
         return ws;
     }
 }
