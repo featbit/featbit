@@ -309,7 +309,7 @@ public class FeatureFlagController : ApiControllerBase
     /// </summary>
     [OpenApi]
     [HttpPut("{key}/insight-collection")]
-    [Authorize(Permissions.CanAccessEnv)]
+    [Authorize(Permissions.ToggleFlag)]
     public async Task<ApiResponse<Guid>> UpdateInsightCollectionAsync(Guid envId, string key, UpdateInsightCollectionPayload payload)
     {
         var request = new UpdateInsightCollection
