@@ -12,6 +12,7 @@ public class SecretAuthenticationHandler(
     ILoggerFactory logger,
     UrlEncoder encoder,
     IStore store,
+    TrackSecretCache trackSecretCache,
     AuthenticationUnavailableReporter unavailableReporter)
     : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
 {
@@ -33,7 +34,9 @@ public class SecretAuthenticationHandler(
         Secret? secret;
         try
         {
-            secret = await store.GetSecretAsync(secretString);
+            secret = Context.GetEndpoint()?.Metadata.GetMetadata<CacheSecretAuthenticationAttribute>() is not null
+                ? await trackSecretCache.GetAsync(secretString, envId)
+                : await store.GetSecretAsync(secretString);
         }
         catch (Exception)
         {

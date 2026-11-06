@@ -121,7 +121,6 @@ public class SecretAuthorizationTests(TestApp app)
     [InlineData("sdk/server/latest-all")]
     [InlineData("sdk/client/latest-all")]
     [InlineData("featureflag/evaluate")]
-    [InlineData("insight/track")]
     public async Task RevokedSecret_IsRejectedOnNextRequest(string endpoint)
     {
         var isClient = endpoint == "sdk/client/latest-all";

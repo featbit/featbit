@@ -1,4 +1,5 @@
 using Api.Authorization;
+using Api.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Api.RateLimiting;
 using Api.Setup;
@@ -32,6 +33,7 @@ public class InsightController : ApiControllerBase
     }
 
     [HttpPost("track")]
+    [CacheSecretAuthentication]
     [Authorize(SecretPolicies.ServerOrClient)]
     public async Task<IActionResult> TrackAsync(ICollection<Insight?> insights)
     {

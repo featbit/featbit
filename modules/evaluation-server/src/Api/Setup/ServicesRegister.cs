@@ -50,6 +50,7 @@ public static class ServicesRegister
         builder.AddCustomCors();
 
         // authentication and authorization
+        services.AddSingleton<TrackSecretCache>();
         services.AddSingleton(provider => new AuthenticationUnavailableReporter(
             provider.GetRequiredService<ILogger<AuthenticationUnavailableReporter>>(), TimeProvider.System)
         );
