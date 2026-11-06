@@ -3,6 +3,7 @@ using System.Net.Mime;
 using System.Text;
 using System.Text.Json;
 using Api.Authorization;
+using Api.Filters;
 using Application.Identity;
 using Application.Services;
 using Application.Users;
@@ -60,6 +61,9 @@ public class TestApp : WebApplicationFactory<Program>
             // still issues 401 for unauthenticated requests because the combined policy
             // also includes DenyAnonymousAuthorizationRequirement.
             collection.Replace(ServiceDescriptor.Singleton<IPermissionChecker>(new TestPermissionChecker { Grant = true }));
+            // Existing host tests isolate routing/serialization from backing stores. Security
+            // scenarios restore the production filter together with their scoped resource fixtures.
+            collection.Replace(ServiceDescriptor.Scoped<ResourceOrganizationFilter, TestResourceOrganizationFilter>());
 
             var hostedServices = collection.Where(x =>
                 x.ServiceType.IsAssignableTo(typeof(IHostedService)) &&
