@@ -1,4 +1,5 @@
 using System.Text;
+using Domain.Secrets;
 using Domain.Shared;
 using Infrastructure.Caches.Redis;
 using Microsoft.Extensions.Logging;

@@ -1,4 +1,4 @@
-using Domain.Shared;
+using Domain.Secrets;
 
 namespace Streaming.Connections;
 

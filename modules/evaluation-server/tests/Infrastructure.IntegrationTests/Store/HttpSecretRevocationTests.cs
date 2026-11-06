@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using Domain.EndUsers;
 using Domain.Insights;
 using Domain.Messages;
+using Domain.Secrets;
 using Domain.Shared;
 using Infrastructure.Caches;
 using Infrastructure.Caches.Redis;

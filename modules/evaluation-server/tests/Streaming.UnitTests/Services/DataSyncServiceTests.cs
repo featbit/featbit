@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text;
 using Domain.EndUsers;
 using Domain.Evaluation;
+using Domain.Secrets;
 using Domain.Shared;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Logging.Testing;

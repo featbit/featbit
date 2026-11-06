@@ -1,6 +1,6 @@
 using System.Text.Json;
 using Dapper;
-using Domain.Shared;
+using Domain.Secrets;
 using Infrastructure;
 using Infrastructure.Fakes;
 using Infrastructure.Persistence;
