@@ -122,7 +122,7 @@ public class SecretAuthorizationTests(TestApp app)
     [InlineData("sdk/client/latest-all")]
     [InlineData("featureflag/evaluate")]
     [InlineData("insight/track")]
-    public async Task RevokedSecret_IsRejectedOnNextRequest(string endpoint)
+    public async Task RevokedSecret_RemainsAcceptedWhileCached(string endpoint)
     {
         var isClient = endpoint == "sdk/client/latest-all";
         var token = isClient ? TestData.ClientSecretString : TestData.ServerSecretString;
@@ -136,10 +136,10 @@ public class SecretAuthorizationTests(TestApp app)
         using var client = host.CreateClient();
         client.DefaultRequestHeaders.Add("Authorization", token);
         using var first = await SendAsync(client, endpoint);
-        using var second = await SendAsync(client, endpoint);
+        using var cached = await SendAsync(client, endpoint);
         Assert.Equal(HttpStatusCode.OK, first.StatusCode);
-        Assert.Equal(HttpStatusCode.Unauthorized, second.StatusCode);
-        store.Verify(x => x.GetSecretAsync(token), Times.Exactly(2));
+        Assert.Equal(HttpStatusCode.OK, cached.StatusCode);
+        store.Verify(x => x.GetSecretAsync(token), Times.Once());
     }
 
     private static Task<HttpResponseMessage> SendAsync(HttpClient client, string endpoint)

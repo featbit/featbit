@@ -10,7 +10,7 @@ public sealed class RequestValidator(
     ISystemClock systemClock,
     StreamingOptions options,
     IRelayProxyService rpService,
-    IStore store)
+    SecretCache secretCache)
     : IRequestValidator
 {
     public async Task<ValidationResult> ValidateAsync(HttpContext httpContext)
@@ -100,7 +100,7 @@ public sealed class RequestValidator(
             Secret? secret;
             try
             {
-                secret = await store.GetSecretAsync(token.SecretString);
+                secret = await secretCache.GetAsync(token.SecretString);
             }
             catch (Exception ex)
             {
