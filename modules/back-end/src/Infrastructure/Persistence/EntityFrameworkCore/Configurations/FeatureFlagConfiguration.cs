@@ -9,6 +9,7 @@ public class FeatureFlagConfiguration : IEntityTypeConfiguration<FeatureFlag>
     public void Configure(EntityTypeBuilder<FeatureFlag> builder)
     {
         builder.ToTable("feature_flags");
+        builder.Ignore(x => x.MongoETag);
 
         builder.HasIndex(x => new { x.EnvId, x.UpdatedAt });
 
