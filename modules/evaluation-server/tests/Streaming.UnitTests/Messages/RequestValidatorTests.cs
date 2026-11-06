@@ -1,8 +1,7 @@
+using Domain.Secrets;
 using Domain.Shared;
-using Domain.Shared.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Internal;
-using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Streaming.Connections;
 using Streaming.Services;
@@ -116,7 +115,7 @@ public class RequestValidatorTests
         nullStore.Setup(x => x.GetSecretAsync(It.IsAny<string>())).ReturnsAsync(() => null);
 
         await EnsureInvalidAsync(
-            expectedReason: $"Secret not found. env={TestData.ClientSecret.EnvId}; ct={ConnectionType.Client}; v={ConnectionVersion.V2}",
+            expectedReason: "Invalid environment secret",
             store: nullStore.Object
         );
     }
@@ -158,29 +157,11 @@ public class RequestValidatorTests
         var validationResult = await validator.ValidateAsync(context);
 
         Assert.Equal(ValidationResultStatus.Unavailable, validationResult.Status);
-        Assert.Contains("ex=Exception", validationResult.Reason);
-        Assert.DoesNotContain("Test exception", validationResult.Reason);
-    }
-
-    [Fact]
-    public async Task ParseTokenThrows()
-    {
-        // A throwing ITokenValidator simulates a parsing-stage failure.
-        // It must produce Failed (permanent rejection / WS 4003), never Unavailable (transient / WS 1011).
-        var throwingValidator = new Mock<ITokenValidator>();
-        throwingValidator
-            .Setup(x => x.ValidateAsync(It.IsAny<string?>(), It.IsAny<CancellationToken>()))
-            .ThrowsAsync(new FormatException("Simulated parse error"));
-
-        var context = SetupTestContext();
-        var validator = SetupValidator(tokenValidator: throwingValidator.Object);
-
-        var validationResult = await validator.ValidateAsync(context);
-
-        Assert.Equal(ValidationResultStatus.Invalid, validationResult.Status);
-        Assert.Empty(validationResult.Secrets);
-        Assert.Contains("ex=FormatException", validationResult.Reason);
-        Assert.DoesNotContain("Simulated parse error", validationResult.Reason);
+        Assert.NotNull(validationResult.Exception);
+        Assert.Equal(
+            $"Secret lookup unavailable. env={TestData.ClientSecret.EnvId}; ct=client; v=2",
+            validationResult.Reason
+        );
     }
 
     private static async Task EnsureInvalidAsync(
@@ -209,8 +190,7 @@ public class RequestValidatorTests
         long? current = null,
         IStore? store = null,
         StreamingOptions? streamingOptions = null,
-        IRelayProxyService? rpService = null,
-        ITokenValidator? tokenValidator = null)
+        IRelayProxyService? rpService = null)
     {
         var mockedStore = Mock.Of<IStore>(x =>
             x.GetSecretAsync(TestData.ClientSecretString) == Task.FromResult(TestData.ClientSecret)
@@ -218,11 +198,9 @@ public class RequestValidatorTests
 
         var validator = new RequestValidator(
             new TestSystemClock(current ?? TestData.ClientToken.Timestamp),
-            store ?? mockedStore,
             streamingOptions ?? new StreamingOptions(),
             rpService ?? Mock.Of<IRelayProxyService>(),
-            tokenValidator ?? new TokenValidator(),
-            NullLogger<RequestValidator>.Instance
+            store ?? mockedStore
         );
 
         return validator;

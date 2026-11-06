@@ -1,9 +1,9 @@
+using Api.Authorization;
 using Api.Authentication;
 using Api.ControlPlane;
 using Api.Cors;
 using Api.RateLimiting;
 using Api.Services;
-using Domain.Shared.Authentication;
 using Domain.Workspaces;
 using Infrastructure;
 using Infrastructure.Services;
@@ -50,23 +50,18 @@ public static class ServicesRegister
         builder.AddCustomCors();
 
         // authentication and authorization
-        services.AddAuthentication(FeatBitAuthScheme.Name)
-            .AddScheme<AuthenticationSchemeOptions, FeatBitAuthHandler>(FeatBitAuthScheme.Name, _ => { });
+        services.AddSingleton(provider => new AuthenticationUnavailableReporter(
+            provider.GetRequiredService<ILogger<AuthenticationUnavailableReporter>>(), TimeProvider.System)
+        );
+        services.AddAuthentication(defaultScheme: Schemes.Secret)
+            .AddScheme<AuthenticationSchemeOptions, SecretAuthenticationHandler>(Schemes.Secret, _ => { });
 
         var requireAuthPolicy = new AuthorizationPolicyBuilder()
             .RequireAuthenticatedUser()
             .Build();
         services.AddAuthorizationBuilder()
             .SetFallbackPolicy(requireAuthPolicy)
-            .AddPolicy(FeatBitPolicies.ServerSecretOnly, policy => policy
-                .RequireAuthenticatedUser().RequireClaim(FeatBitClaims.SecretType, SecretTypes.Server))
-            .AddPolicy(FeatBitPolicies.ClientSecretOnly, policy => policy
-                .RequireAuthenticatedUser().RequireClaim(FeatBitClaims.SecretType, SecretTypes.Client))
-            .AddPolicy(FeatBitPolicies.ServerSecretOrClientSecret, policy => policy
-                .RequireAuthenticatedUser().RequireClaim(FeatBitClaims.SecretType, SecretTypes.Client, SecretTypes.Server));
-
-        // Structural parsing is shared; HTTP and Streaming also verify the complete secret against the store.
-        services.AddSingleton<ITokenValidator, TokenValidator>();
+            .AddSecretPolicies();
 
         // add bounded memory cache
         services.AddSingleton<BoundedMemoryCache>();

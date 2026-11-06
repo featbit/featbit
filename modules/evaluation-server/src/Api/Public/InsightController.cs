@@ -1,4 +1,4 @@
-using Api.Authentication;
+using Api.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Api.RateLimiting;
 using Api.Setup;
@@ -12,10 +12,9 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace Api.Public;
 
-[Authorize(Policy = FeatBitPolicies.ServerSecretOrClientSecret)]
 [Route("api/public/insight")]
 [EnableRateLimiting(RateLimitingPolicies.Insight)]
-public class InsightController : PublicApiControllerBase
+public class InsightController : ApiControllerBase
 {
     private readonly IMessageProducer _producer;
     private readonly MemoryCache _cache;
@@ -33,6 +32,7 @@ public class InsightController : PublicApiControllerBase
     }
 
     [HttpPost("track")]
+    [Authorize(SecretPolicies.ServerOrClient)]
     public async Task<IActionResult> TrackAsync(ICollection<Insight?> insights)
     {
         var validInsights = insights.Where(x => x != null && x.IsValid()).ToArray();

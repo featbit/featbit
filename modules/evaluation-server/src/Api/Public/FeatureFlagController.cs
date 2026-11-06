@@ -1,4 +1,4 @@
-using Api.Authentication;
+using Api.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using System.Text.Json;
 using Api.Contracts;
@@ -11,12 +11,12 @@ using Microsoft.AspNetCore.RateLimiting;
 
 namespace Api.Public;
 
-[Authorize(Policy = FeatBitPolicies.ServerSecretOrClientSecret)]
 [Route("api/public/featureflag")]
 [EnableRateLimiting(RateLimitingPolicies.FeatureFlag)]
-public class FeatureFlagController(IFeatureFlagService flagService, IEvaluator evaluator) : PublicApiControllerBase
+public class FeatureFlagController(IFeatureFlagService flagService, IEvaluator evaluator) : ApiControllerBase
 {
     [HttpPost("evaluate")]
+    [Authorize(SecretPolicies.ServerOrClient)]
     public async Task<IActionResult> EvaluateAsync(EvaluateFlagRequest request)
     {
         if (!request.TryValidate(out var validationError))

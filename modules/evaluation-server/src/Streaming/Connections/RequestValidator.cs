@@ -1,24 +1,16 @@
+using Domain.Secrets;
 using Domain.Shared;
-using Domain.Shared.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Internal;
-using Microsoft.Extensions.Logging;
 using Streaming.Services;
 
 namespace Streaming.Connections;
 
-/// <summary>
-/// Validates streaming requests pre-accept (before accepting the WebSocket).
-/// v1: performs structural validation (type, version, token parse) and store lookup with fallback handling.
-/// v2/HMAC validation added in a future PR.
-/// </summary>
 public sealed class RequestValidator(
     ISystemClock systemClock,
-    IStore store,
     StreamingOptions options,
     IRelayProxyService rpService,
-    ITokenValidator tokenValidator,
-    ILogger<RequestValidator> logger)
+    IStore store)
     : IRequestValidator
 {
     public async Task<ValidationResult> ValidateAsync(HttpContext httpContext)
@@ -29,11 +21,7 @@ public sealed class RequestValidator(
         }
         catch (Exception ex)
         {
-            logger.ErrorValidateRequest(ex);
-
-            // Unexpected exception that escaped inner catches — treat as permanent rejection
-            // (store/relay unavailability is already caught and returned as Unavailable by inner handlers)
-            return ValidationResult.Invalid($"Request validation failed: {ex.Message}");
+            return ValidationResult.Unavailable("Request validation unavailable.", ex);
         }
     }
 
@@ -76,39 +64,27 @@ public sealed class RequestValidator(
             }
             catch (Exception ex)
             {
-                logger.ErrorLookupRelayProxyToken(ex);
-
                 // Store unavailable → return Unavailable for transient retry
-                return ValidationResult.Unavailable($"Relay proxy lookup unavailable. ex={ex.GetType().Name}");
+                return ValidationResult.Unavailable("Relay proxy lookup unavailable.", ex);
             }
         }
 
         async Task<ValidationResult> ValidateSecretTokenAsync()
         {
+            // check token format
             var token = new Token(tokenString.AsSpan());
             if (!token.IsValid)
             {
                 return ValidationResult.Invalid("Invalid token format");
             }
 
-            TokenValidationResult validationResult;
-            try
-            {
-                // v1: structural-only validation of the parsed secret string
-                validationResult = await tokenValidator.ValidateAsync(token.SecretString);
-            }
-            catch (Exception ex)
-            {
-                logger.FailedToParseToken(ex);
-
-                return ValidationResult.Invalid($"Secret validation failed. ex={ex.GetType().Name}");
-            }
-
-            if (validationResult.Status == TokenValidationStatus.Invalid)
+            // check secret format
+            if (!Secret.TryParse(token.SecretString, out var envId))
             {
                 return ValidationResult.Invalid("Invalid secret format");
             }
 
+            // check token clock skew (server time vs token timestamp)
             var currentTime = systemClock.UtcNow;
             var currentTimestamp = currentTime.ToUnixTimeMilliseconds();
             var serverMinusTokenMs = currentTimestamp - token.Timestamp;
@@ -116,33 +92,36 @@ public sealed class RequestValidator(
             {
                 var tokenTime = DateTimeOffset.FromUnixTimeMilliseconds(token.Timestamp).ToString("O");
                 return ValidationResult.Invalid(
-                    $"Token timestamp out of range. TokenTime={tokenTime}({token.Timestamp}); ServerTime={currentTime:O}({currentTimestamp}); ServerMinusTokenMs={serverMinusTokenMs}; Configured Streaming:TokenExpirySeconds={options.TokenExpirySeconds}s; env={validationResult.EnvId}; ct={type}; v={version}"
+                    $"Token timestamp out of range. TokenTime={tokenTime}({token.Timestamp}); ServerTime={currentTime:O}({currentTimestamp}); ServerMinusTokenMs={serverMinusTokenMs}; Configured Streaming:TokenExpirySeconds={options.TokenExpirySeconds}s; env={envId}; ct={type}; v={version}"
                 );
             }
 
-            // Store lookup with fallback handling (wrap in try/catch)
+            // check secret
+            Secret? secret;
             try
             {
-                var secret = await store.GetSecretAsync(token.SecretString);
-                if (secret is null)
-                {
-                    return ValidationResult.Invalid($"Secret not found. env={validationResult.EnvId}; ct={type}; v={version}");
-                }
-
-                if (secret.Type != type)
-                {
-                    return ValidationResult.Invalid($"Secret type mismatch. st={secret.Type}; ct={type}; v={version}; env={validationResult.EnvId}");
-                }
-
-                return ValidationResult.Valid([secret]);
+                secret = await store.GetSecretAsync(token.SecretString);
             }
             catch (Exception ex)
             {
-                logger.ErrorLookupSecretToken(ex);
-
-                // Store unavailable → return Unavailable for transient retry
-                return ValidationResult.Unavailable($"Secret lookup unavailable. env={validationResult.EnvId}; ct={type}; v={version}; ex={ex.GetType().Name}");
+                return ValidationResult.Unavailable(
+                    $"Secret lookup unavailable. env={envId}; ct={type}; v={version}", ex
+                );
             }
+
+            if (secret is null || secret.EnvId != envId)
+            {
+                return ValidationResult.Invalid("Invalid environment secret");
+            }
+
+            if (secret.Type != type)
+            {
+                return ValidationResult.Invalid(
+                    $"Secret type mismatch. st={secret.Type}; ct={type}; v={version}; env={secret.EnvId}"
+                );
+            }
+
+            return ValidationResult.Valid([secret]);
         }
     }
 }
