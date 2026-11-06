@@ -1,10 +1,9 @@
 using System.Net.WebSockets;
 using Domain.EndUsers;
-using Domain.Shared;
+using Domain.Secrets;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Testing;
 using Moq;
-using Streaming;
 using Streaming.Connections;
 using Streaming.Protocol;
 using Streaming.Services;

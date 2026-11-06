@@ -1,3 +1,4 @@
+using Domain.Secrets;
 using Domain.Shared;
 
 namespace Infrastructure.Fakes;

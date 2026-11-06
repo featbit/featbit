@@ -1,4 +1,4 @@
-namespace Domain.Shared;
+namespace Domain.Secrets;
 
 public static class SecretTypes
 {
