@@ -2,6 +2,7 @@ using System.Text.Json;
 using Domain.EndUsers;
 using Domain.Messages;
 using Domain.Shared;
+using Microsoft.Extensions.Logging;
 using Streaming.Connections;
 using Streaming.Protocol;
 using Streaming.Services;
@@ -14,11 +15,13 @@ public class DataSyncMessageHandler : IMessageHandler
 
     private readonly IMessageProducer _producer;
     private readonly IDataSyncService _service;
+    private readonly ILogger<DataSyncMessageHandler> _logger;
 
-    public DataSyncMessageHandler(IMessageProducer producer, IDataSyncService service)
+    public DataSyncMessageHandler(IMessageProducer producer, IDataSyncService service, ILogger<DataSyncMessageHandler> logger)
     {
         _producer = producer;
         _service = service;
+        _logger = logger;
     }
 
     public async Task HandleAsync(MessageContext ctx)
@@ -46,7 +49,15 @@ public class DataSyncMessageHandler : IMessageHandler
 
             // publish end-user message
             var endUserMessage = new EndUserMessage(connection.EnvId, user);
-            await _producer.PublishAsync(Topics.EndUser, endUserMessage);
+            try
+            {
+                await _producer.PublishAsync(Topics.EndUser, endUserMessage);
+            }
+            catch (Exception error) when (!ctx.CancellationToken.IsCancellationRequested)
+            {
+                // End-user analytics are best effort here; readable flags must remain available.
+                _logger.LogWarning(error, "Failed to publish end user for environment {EnvId}; continuing flag sync.", connection.EnvId);
+            }
         }
 
         var payload = await _service.GetPayloadAsync(connectionContext, ctx.Data);

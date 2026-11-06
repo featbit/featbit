@@ -29,6 +29,7 @@ public partial class PostgresMessageProducer(NpgsqlDataSource dataSource, ILogge
         catch (Exception ex)
         {
             Log.ErrorPublishMessage(logger, ex);
+            throw;
         }
     }
 
@@ -63,6 +64,7 @@ public partial class PostgresMessageProducer(NpgsqlDataSource dataSource, ILogge
         catch (Exception ex)
         {
             Log.ErrorPublishMessage(logger, ex);
+            throw;
         }
     }
 }
