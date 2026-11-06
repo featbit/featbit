@@ -8,6 +8,8 @@ namespace Api.Authentication;
 // after deletion from the selected store; hits never extend this window.
 public sealed class TrackSecretCache(IStore store) : IDisposable
 {
+    private const int CacheTtlSeconds = 5;
+
     private readonly MemoryCache _cache = new(new MemoryCacheOptions { SizeLimit = 10_000 });
 
     // Fixed stripes bound synchronization state even when callers send arbitrary keys.
@@ -25,7 +27,7 @@ public sealed class TrackSecretCache(IStore store) : IDisposable
             if (_cache.TryGetValue(secretString, out cached)) return cached;
 
             // Include lookup time in the TTL so a slow read cannot extend revocation delay.
-            var expiresAt = DateTimeOffset.UtcNow.AddSeconds(5);
+            var expiresAt = DateTimeOffset.UtcNow.AddSeconds(CacheTtlSeconds);
             var secret = await store.GetSecretAsync(secretString);
             if (secret is not null && secret.EnvId == envId &&
                 secret.Type is SecretTypes.Client or SecretTypes.Server && expiresAt > DateTimeOffset.UtcNow)
