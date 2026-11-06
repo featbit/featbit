@@ -200,7 +200,7 @@ public class RequestValidatorTests
             new TestSystemClock(current ?? TestData.ClientToken.Timestamp),
             streamingOptions ?? new StreamingOptions(),
             rpService ?? Mock.Of<IRelayProxyService>(),
-            store ?? mockedStore
+            new SecretCache(store ?? mockedStore)
         );
 
         return validator;

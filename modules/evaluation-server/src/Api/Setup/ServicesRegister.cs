@@ -4,6 +4,7 @@ using Api.ControlPlane;
 using Api.Cors;
 using Api.RateLimiting;
 using Api.Services;
+using Domain.EndUsers;
 using Domain.Workspaces;
 using Infrastructure;
 using Infrastructure.Services;
@@ -50,7 +51,6 @@ public static class ServicesRegister
         builder.AddCustomCors();
 
         // authentication and authorization
-        services.AddSingleton<TrackSecretCache>();
         services.AddSingleton(provider => new AuthenticationUnavailableReporter(
             provider.GetRequiredService<ILogger<AuthenticationUnavailableReporter>>(), TimeProvider.System)
         );
@@ -64,8 +64,8 @@ public static class ServicesRegister
             .SetFallbackPolicy(requireAuthPolicy)
             .AddSecretPolicies();
 
-        // add bounded memory cache
-        services.AddSingleton<BoundedMemoryCache>();
+        // domain services
+        services.AddSingleton<EndUserDeduplicator>();
 
         // streaming services
         services

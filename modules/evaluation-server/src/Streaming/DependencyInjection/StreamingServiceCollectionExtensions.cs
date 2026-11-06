@@ -1,4 +1,5 @@
 using Domain;
+using Domain.Secrets;
 using Domain.Messages;
 using Infrastructure;
 using Infrastructure.Persistence;
@@ -28,6 +29,9 @@ public static class StreamingServiceCollectionExtensions
 
         // system clock
         services.AddSingleton<ISystemClock, SystemClock>();
+
+        // Secret lookup cache
+        services.AddSingleton<SecretCache>();
 
         // request validator
         services.AddSingleton<IRequestValidator, RequestValidator>();
