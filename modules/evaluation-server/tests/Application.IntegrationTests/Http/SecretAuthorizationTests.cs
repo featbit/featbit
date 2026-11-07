@@ -10,6 +10,7 @@ using Domain.Shared;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Internal;
 using Moq;
 using Streaming.Services;
 using Streaming.Protocol;
@@ -122,24 +123,38 @@ public class SecretAuthorizationTests(TestApp app)
     [InlineData("sdk/client/latest-all")]
     [InlineData("featureflag/evaluate")]
     [InlineData("insight/track")]
-    public async Task RevokedSecret_RemainsAcceptedWhileCached(string endpoint)
+    public async Task RevokedSecret_IsRejectedAfterCacheExpiration(string endpoint)
     {
         var isClient = endpoint == "sdk/client/latest-all";
         var token = isClient ? TestData.ClientSecretString : TestData.ServerSecretString;
         var secret = isClient ? TestData.ClientSecret : TestData.ServerSecret;
+        var now = DateTimeOffset.UtcNow;
+        var clock = new Mock<ISystemClock>();
+        clock.SetupGet(x => x.UtcNow).Returns(() => now);
         var store = new Mock<IStore>();
-        store.SetupSequence(x => x.GetSecretAsync(token)).ReturnsAsync(secret).ReturnsAsync((Secret?)null);
+        store.Setup(x => x.GetSecretAsync(token)).ReturnsAsync(secret);
         store.Setup(x => x.GetFlagsAsync(secret.EnvId, 0)).ReturnsAsync(Array.Empty<byte[]>());
         store.Setup(x => x.GetSegmentsAsync(secret.EnvId, 0)).ReturnsAsync(Array.Empty<byte[]>());
         using var host = app.WithWebHostBuilder(builder => builder.ConfigureTestServices(services =>
-            services.Replace(ServiceDescriptor.Singleton(store.Object))));
+        {
+            services.Replace(ServiceDescriptor.Singleton(store.Object));
+            services.Replace(ServiceDescriptor.Singleton(clock.Object));
+        }));
         using var client = host.CreateClient();
         client.DefaultRequestHeaders.Add("Authorization", token);
         using var first = await SendAsync(client, endpoint);
-        using var cached = await SendAsync(client, endpoint);
         Assert.Equal(HttpStatusCode.OK, first.StatusCode);
+
+        store.Setup(x => x.GetSecretAsync(token)).ReturnsAsync((Secret?)null);
+        now = now.AddSeconds(29);
+        using var cached = await SendAsync(client, endpoint);
         Assert.Equal(HttpStatusCode.OK, cached.StatusCode);
         store.Verify(x => x.GetSecretAsync(token), Times.Once());
+
+        now = now.AddSeconds(1);
+        using var revoked = await SendAsync(client, endpoint);
+        Assert.Equal(HttpStatusCode.Unauthorized, revoked.StatusCode);
+        store.Verify(x => x.GetSecretAsync(token), Times.Exactly(2));
     }
 
     private static Task<HttpResponseMessage> SendAsync(HttpClient client, string endpoint)

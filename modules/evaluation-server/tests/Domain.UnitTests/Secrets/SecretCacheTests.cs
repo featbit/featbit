@@ -1,5 +1,6 @@
 using Domain.Secrets;
 using Domain.Shared;
+using Microsoft.Extensions.Internal;
 using Moq;
 
 namespace Domain.UnitTests.Secrets;
@@ -85,5 +86,26 @@ public class SecretCacheTests
             pending.SetResult(TestData.ServerSecret);
             await slow.WaitAsync(TimeSpan.FromSeconds(10));
         }
+    }
+
+    [Fact]
+    public async Task CacheHit_DoesNotExtendExpiration_AndExpiredSecretIsNotReused()
+    {
+        var now = DateTimeOffset.UnixEpoch;
+        var clock = new Mock<ISystemClock>();
+        clock.SetupGet(x => x.UtcNow).Returns(() => now);
+        var store = new Mock<IStore>();
+        store.SetupSequence(x => x.GetSecretAsync(TestData.ServerSecretString))
+            .ReturnsAsync(TestData.ServerSecret).ReturnsAsync((Secret?)null);
+        using var cache = new SecretCache(store.Object, clock.Object);
+
+        Assert.Same(TestData.ServerSecret, await cache.GetAsync(TestData.ServerSecretString));
+        now = now.AddSeconds(29);
+        Assert.Same(TestData.ServerSecret, await cache.GetAsync(TestData.ServerSecretString));
+        store.Verify(x => x.GetSecretAsync(TestData.ServerSecretString), Times.Once());
+
+        now = now.AddSeconds(1);
+        Assert.Null(await cache.GetAsync(TestData.ServerSecretString));
+        store.Verify(x => x.GetSecretAsync(TestData.ServerSecretString), Times.Exactly(2));
     }
 }

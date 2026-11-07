@@ -1,10 +1,11 @@
 using Domain.Shared;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Internal;
 
 namespace Domain.Secrets;
 
 // Shared Secret lookup cache for HTTP and streaming authentication.
-public sealed class SecretCache(IStore store) : IDisposable
+public sealed class SecretCache(IStore store, ISystemClock? clock = null) : IDisposable
 {
     // Maximum number of Secrets retained; each entry has size 1, not bytes.
     private const int MaxCacheEntries = 10_000;
@@ -13,7 +14,11 @@ public sealed class SecretCache(IStore store) : IDisposable
     // duration plus an in-flight store read; cache hits do not extend expiration.
     private const int CacheTtlSeconds = 30;
 
-    private readonly MemoryCache _cache = new(new MemoryCacheOptions { SizeLimit = MaxCacheEntries });
+    private readonly MemoryCache _cache = new(new MemoryCacheOptions
+    {
+        SizeLimit = MaxCacheEntries,
+        Clock = clock
+    });
     private static readonly MemoryCacheEntryOptions CacheEntryOptions = new()
     {
         Size = 1,
