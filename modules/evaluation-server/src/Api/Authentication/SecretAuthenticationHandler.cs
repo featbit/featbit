@@ -1,7 +1,6 @@
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 using Domain.Secrets;
-using Domain.Shared;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 
@@ -11,7 +10,7 @@ public class SecretAuthenticationHandler(
     IOptionsMonitor<AuthenticationSchemeOptions> options,
     ILoggerFactory logger,
     UrlEncoder encoder,
-    IStore store,
+    SecretCache secretCache,
     AuthenticationUnavailableReporter unavailableReporter)
     : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
 {
@@ -33,7 +32,7 @@ public class SecretAuthenticationHandler(
         Secret? secret;
         try
         {
-            secret = await store.GetSecretAsync(secretString);
+            secret = await secretCache.GetAsync(secretString);
         }
         catch (Exception)
         {
