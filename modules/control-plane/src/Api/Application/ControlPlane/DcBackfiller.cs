@@ -154,8 +154,10 @@ public interface IDcBackfiller
     /// <summary>
     /// Runs only the prune step of a backfill for <paramref name="dcId"/>, from the pre-fetched
     /// <paramref name="snapshot"/>: removes the flags and segments that DC still lists although the source of
-    /// truth no longer has them. Returns the number removed, or <see cref="Skipped"/> if the composite cache is
-    /// unavailable or a backfill or prune of this DcId is already in flight.
+    /// truth no longer has them, and publishes a targeted client refresh if it removed any. Returns the number
+    /// removed, or <see cref="Skipped"/> if the composite cache is unavailable or a backfill or prune of this
+    /// DcId is already in flight. A prune yields to a backfill of the same DC; a backfill is never skipped
+    /// because of a prune, since a prune does not repair what a backfill is there to write.
     /// </summary>
     Task<int> PruneDcAsync(
         string dcId,
@@ -191,6 +193,10 @@ public sealed class DcBackfiller(
     private readonly object _inFlightLock = new();
     private readonly HashSet<string> _inFlight = new();
 
+    // DcIds with a prune-only pass currently running. Kept apart from _inFlight so that a prune can never make a
+    // backfill look like a duplicate and get it skipped.
+    private readonly HashSet<string> _pruneInFlight = new();
+
     public bool IsCompositeCacheAvailable => compositeCache is CompositeRedisCacheService;
 
     public IEnumerable<string> TakeDcsDueForPrune()
@@ -219,10 +225,13 @@ public sealed class DcBackfiller(
             return IDcBackfiller.Skipped;
         }
 
-        // Share the in-flight slot with the backfill of the same DC, so the two never run at once.
+        // A prune yields to a backfill of the same DC, which prunes as part of its run, and to another prune.
+        // The other way round, a backfill is never skipped because a prune is running: a skipped backfill is
+        // taken to mean that another backfill is repairing the DC, and a prune does not repair what a backfill
+        // is there to write (a missed flag, segment or secret).
         lock (_inFlightLock)
         {
-            if (!_inFlight.Add(dcId))
+            if (_inFlight.Contains(dcId) || !_pruneInFlight.Add(dcId))
             {
                 logger.LogDebug("DC prune: a backfill or prune for DC {DcId} is already in flight; skipping.", dcId);
                 return IDcBackfiller.Skipped;
@@ -231,13 +240,20 @@ public sealed class DcBackfiller(
 
         try
         {
-            return await PruneSafelyAsync(dcId, mode, snapshot, composite, cancellationToken);
+            var removed = await PruneSafelyAsync(dcId, mode, snapshot, composite, cancellationToken);
+            if (removed > 0)
+            {
+                // The DC's clients may hold what was removed, as the backfill's own refresh would have told them.
+                await PublishClientRefreshAsync(dcId);
+            }
+
+            return removed;
         }
         finally
         {
             lock (_inFlightLock)
             {
-                _inFlight.Remove(dcId);
+                _pruneInFlight.Remove(dcId);
             }
         }
     }

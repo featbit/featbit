@@ -738,6 +738,87 @@ public class DcBackfillerTests
         await backfill;
     }
 
+    [Fact]
+    public async Task PruneDcAsync_EntriesWereRemoved_PublishesAClientRefreshForThatDc()
+    {
+        var f = CreatePruneFixture();
+        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ReturnsAsync(Index((Guid.NewGuid(), OldScore)));
+
+        var removed = await f.Sut.PruneDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        Assert.Equal(1, removed);
+        _producer.Verify(
+            p => p.PublishAsync(
+                ControlPlaneTopics.ControlPlaneCommand,
+                It.Is<ControlPlaneCommand>(c => c.Action == Domain.Messages.Action.PushFullSync && c.TargetDcId == "east")),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task PruneDcAsync_NothingWasRemoved_PublishesNoClientRefresh()
+    {
+        var f = CreatePruneFixture();
+
+        var removed = await f.Sut.PruneDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        Assert.Equal(0, removed);
+        _producer.Verify(p => p.PublishAsync(It.IsAny<string>(), It.IsAny<ControlPlaneCommand>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task BackfillDcAsync_WhileAPruneOfThatDcIsInFlight_IsNotSkipped()
+    {
+        // A skipped backfill is taken to mean that another backfill is repairing the DC. A prune does not repair
+        // what a backfill writes, so it must never make a backfill look like a duplicate.
+        var f = CreatePruneFixture();
+        var gate = new TaskCompletionSource();
+        var calls = 0;
+        f.East.Setup(s => s.GetFlagIndexAsync(It.IsAny<Guid>()))
+            .Returns(async () =>
+            {
+                if (Interlocked.Increment(ref calls) == 1)
+                {
+                    await gate.Task; // the prune is held here
+                }
+
+                return Index();
+            });
+        f.East.Setup(s => s.UpsertFlagIfNewerAsync(It.IsAny<FeatureFlag>())).ReturnsAsync(true);
+        var prune = f.Sut.PruneDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        var backfill = await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        Assert.NotEqual(IDcBackfiller.Skipped, backfill);
+        Assert.Equal(2, backfill); // both live flags were written
+        gate.SetResult();
+        await prune;
+    }
+
+    [Fact]
+    public async Task PruneDcAsync_WhileAnotherPruneOfThatDcIsInFlight_ReturnsSkipped()
+    {
+        var f = CreatePruneFixture();
+        var gate = new TaskCompletionSource();
+        var calls = 0;
+        f.East.Setup(s => s.GetFlagIndexAsync(It.IsAny<Guid>()))
+            .Returns(async () =>
+            {
+                if (Interlocked.Increment(ref calls) == 1)
+                {
+                    await gate.Task;
+                }
+
+                return Index();
+            });
+        var first = f.Sut.PruneDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        var second = await f.Sut.PruneDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        Assert.Equal(IDcBackfiller.Skipped, second);
+        gate.SetResult();
+        await first;
+    }
+
     // ----- a segment listed in several environments -----
 
     [Fact]
