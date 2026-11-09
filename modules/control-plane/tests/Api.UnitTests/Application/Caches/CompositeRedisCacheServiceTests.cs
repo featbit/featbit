@@ -76,7 +76,7 @@ public class CompositeRedisCacheServiceTests
     }
 
     [Fact]
-    public async Task DeletePodConnection_RunsOnLocalInstanceOnly()
+    public async Task DeletePodConnection_WhenCalled_RunsOnLocalInstanceOnly()
     {
         var podId = Guid.NewGuid();
         var sut = CreateSut();
