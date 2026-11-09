@@ -351,6 +351,11 @@ public class RedisCacheService(IRedisClient redis) : ICacheService
         return result;
     }
 
+    /// <summary>
+    /// Reads the value that is current for the consistency mode and reports whether it is archived. Under <c>GatedCommit</c>
+    /// that is the version the committed pointer refers to (the plain value when there is no pointer); under
+    /// <c>BestEffort</c> it is the plain value only. A missing or unreadable value is reported as not archived.
+    /// </summary>
     private async Task<bool> IsArchivedAsync(
         ConsistencyMode mode, RedisKey valueKey, RedisKey pointerKey, Func<long, RedisKey> versionKey)
     {

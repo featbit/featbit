@@ -235,6 +235,9 @@ public class RedisCacheServiceTests : IntegrationTestBase, IAsyncLifetime
         Assert.Empty(index);
     }
 
+    /// <summary>
+    /// A segment that belongs to two environments is listed in the index of each.
+    /// </summary>
     [DockerFact]
     public async Task GetSegmentIndexAsync_SegmentListedInTwoEnvironments_ReturnsItForEach()
     {

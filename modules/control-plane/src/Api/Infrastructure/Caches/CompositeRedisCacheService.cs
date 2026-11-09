@@ -392,6 +392,10 @@ public class CompositeRedisCacheService(
             },
             nameof(DeleteSegmentFromDcAsync));
 
+    /// <summary>
+    /// Runs a read against one DC's cache. Returns <c>null</c> if no DC matches <paramref name="dcId"/> or the read fails,
+    /// so that a caller can tell an unreadable answer from an empty one.
+    /// </summary>
     private async Task<T?> TargetedReadAsync<T>(string dcId, Func<ICacheService, Task<T>> read, string operationName)
         where T : class
     {

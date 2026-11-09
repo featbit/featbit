@@ -199,6 +199,10 @@ public sealed class RecoveryWorkerTests : IntegrationTestBase, IAsyncLifetime
         return env;
     }
 
+    /// <summary>
+    /// Builds the worker over the real backfiller and composite cache, with pruning switched off, since these tests are
+    /// about recovery. The producer it publishes refreshes to is kept for the tests to inspect.
+    /// </summary>
     private RecoveryWorker CreateSut(
         ILogger<RecoveryWorker>? logger = null,
         bool isLeader = true,

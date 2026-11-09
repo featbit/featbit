@@ -214,6 +214,10 @@ public sealed class DcBackfiller(
 
     public bool IsCompositeCacheAvailable => compositeCache is CompositeRedisCacheService;
 
+    /// <summary>
+    /// Returns the DCs whose prune is due and pushes each one's next due time back a minute, so that a DC that cannot be
+    /// pruned right away is not picked up again on every tick. Pruning a DC resets its schedule.
+    /// </summary>
     public IEnumerable<string> TakeDcsDueForPrune()
     {
         var now = _time.GetUtcNow();
@@ -229,6 +233,11 @@ public sealed class DcBackfiller(
         return due;
     }
 
+    /// <summary>
+    /// Runs only the prune step for one DC, from a snapshot the caller already fetched, and publishes a client refresh if it
+    /// removed anything. It yields to a backfill of the same DC and to another prune; a backfill is never skipped because
+    /// of a prune. Returns the number of entries removed, or <see cref="IDcBackfiller.Skipped"/>.
+    /// </summary>
     public async Task<int> PruneDcAsync(
         string dcId,
         ConsistencyMode mode,
@@ -334,6 +343,11 @@ public sealed class DcBackfiller(
         }
     }
 
+    /// <summary>
+    /// Writes every flag, segment and secret of the snapshot to one DC, prunes what that DC still lists although the
+    /// snapshot no longer has it, and tells the DC's clients to refresh. A flag or segment that a prune removed after the
+    /// snapshot was taken is not written back. Returns the number of writes that were accepted plus the entries pruned.
+    /// </summary>
     private async Task<int> RunBackfillAsync(
         string dcId,
         ConsistencyMode mode,
