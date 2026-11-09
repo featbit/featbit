@@ -57,6 +57,11 @@ public class OnSegmentDeletedHandler : INotificationHandler<OnSegmentDeleted>
         _changePublisher = changePublisher;
     }
 
+    /// <summary>
+    /// Writes the audit log, deletes the segment from the local cache and dispatches the webhooks of every environment it
+    /// belongs to. The delete is published last, so that the other datacenters remove the segment too and a failure to
+    /// publish does not skip the webhooks.
+    /// </summary>
     public async Task Handle(OnSegmentDeleted notification, CancellationToken cancellationToken)
     {
         // write audit log

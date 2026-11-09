@@ -18,6 +18,11 @@ public class FeatureFlagChangeMessageHandler(
 {
     public string Topic => ControlPlaneTopics.ControlPlaneFeatureFlagChange;
 
+    /// <summary>
+    /// Applies one message from the flag change topic. A change is written to every datacenter's Redis and republished to
+    /// the evaluation servers (staged first under <c>GatedCommit</c>); a delete, which has a <c>deleted</c> property and no
+    /// <c>notification</c>, removes the flag from every datacenter. A message of neither shape is rejected.
+    /// </summary>
     public async Task HandleAsync(string message)
     {
         try

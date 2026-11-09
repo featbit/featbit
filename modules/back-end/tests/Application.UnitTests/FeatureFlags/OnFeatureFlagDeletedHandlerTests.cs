@@ -7,6 +7,19 @@ namespace Application.UnitTests.FeatureFlags;
 
 public class OnFeatureFlagDeletedHandlerTests
 {
+    /// <summary>
+    /// Builds the handler, with a fresh mock for every dependency a test does not pass in.
+    /// </summary>
+    private static OnFeatureFlagDeletedHandler CreateSut(
+        Mock<ICacheService>? cache = null,
+        Mock<IWebhookHandler>? webhookHandler = null,
+        Mock<IFeatureFlagChangePublisher>? publisher = null) =>
+        new(
+            (cache ?? new()).Object,
+            Mock.Of<IAuditLogService>(),
+            (webhookHandler ?? new()).Object,
+            (publisher ?? new()).Object);
+
     [Fact]
     public async Task Handle_FlagDeleted_DeletesFromTheLocalCacheThenPublishesTheDelete()
     {
@@ -20,11 +33,7 @@ public class OnFeatureFlagDeletedHandlerTests
         publisher.Setup(x => x.PublishDeletedAsync(flag.EnvId, flag.Id))
             .Callback(() => calls.Add("publish"))
             .Returns(Task.CompletedTask);
-        var sut = new OnFeatureFlagDeletedHandler(
-            cache.Object,
-            new Mock<IAuditLogService>().Object,
-            new Mock<IWebhookHandler>().Object,
-            publisher.Object);
+        var sut = CreateSut(cache: cache, publisher: publisher);
         var notification = new OnFeatureFlagDeleted(flag, Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
 
         await sut.Handle(notification, CancellationToken.None);
@@ -40,11 +49,7 @@ public class OnFeatureFlagDeletedHandlerTests
         var publisher = new Mock<IFeatureFlagChangePublisher>();
         publisher.Setup(x => x.PublishDeletedAsync(flag.EnvId, flag.Id))
             .ThrowsAsync(new InvalidOperationException("broker down"));
-        var sut = new OnFeatureFlagDeletedHandler(
-            new Mock<ICacheService>().Object,
-            new Mock<IAuditLogService>().Object,
-            webhookHandler.Object,
-            publisher.Object);
+        var sut = CreateSut(webhookHandler: webhookHandler, publisher: publisher);
         var notification = new OnFeatureFlagDeleted(flag, Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
 
         await Assert.ThrowsAsync<InvalidOperationException>(() => sut.Handle(notification, CancellationToken.None));

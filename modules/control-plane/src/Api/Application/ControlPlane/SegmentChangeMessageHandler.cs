@@ -21,6 +21,11 @@ public class SegmentChangeMessageHandler(
 {
     public string Topic => ControlPlaneTopics.ControlPlaneSegmentChange;
 
+    /// <summary>
+    /// Applies one message from the segment change topic. A change is written to every datacenter's Redis and republished
+    /// for the affected flags (staged first under <c>GatedCommit</c>); a delete, which has a <c>deleted</c> property and no
+    /// <c>notification</c>, removes the segment from every datacenter. A message of neither shape is rejected.
+    /// </summary>
     public async Task HandleAsync(string message)
     {
         try

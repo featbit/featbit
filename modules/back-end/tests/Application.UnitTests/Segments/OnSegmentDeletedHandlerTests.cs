@@ -7,6 +7,21 @@ namespace Application.UnitTests.Segments;
 
 public class OnSegmentDeletedHandlerTests
 {
+    /// <summary>
+    /// Builds the handler, with a fresh mock for every dependency a test does not pass in.
+    /// </summary>
+    private static OnSegmentDeletedHandler CreateSut(
+        Mock<ICacheService>? cache = null,
+        Mock<IWebhookHandler>? webhookHandler = null,
+        Mock<ISegmentService>? segmentService = null,
+        Mock<ISegmentChangePublisher>? publisher = null) =>
+        new(
+            (cache ?? new()).Object,
+            Mock.Of<IAuditLogService>(),
+            (webhookHandler ?? new()).Object,
+            (segmentService ?? new()).Object,
+            (publisher ?? new()).Object);
+
     [Fact]
     public async Task Handle_SegmentDeleted_DeletesFromTheLocalCacheThenPublishesTheDelete()
     {
@@ -23,12 +38,7 @@ public class OnSegmentDeletedHandlerTests
         publisher.Setup(x => x.PublishDeletedAsync(envIds, segment.Id))
             .Callback(() => calls.Add("publish"))
             .Returns(Task.CompletedTask);
-        var sut = new OnSegmentDeletedHandler(
-            cache.Object,
-            new Mock<IAuditLogService>().Object,
-            new Mock<IWebhookHandler>().Object,
-            segmentService.Object,
-            publisher.Object);
+        var sut = CreateSut(cache: cache, segmentService: segmentService, publisher: publisher);
         var notification = new OnSegmentDeleted(segment, Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
 
         await sut.Handle(notification, CancellationToken.None);
@@ -36,6 +46,10 @@ public class OnSegmentDeletedHandlerTests
         Assert.Equal(["cache", "publish"], calls);
     }
 
+    /// <summary>
+    /// A failure to publish the delete still reaches the caller, but only after the webhooks of every environment
+    /// the segment belongs to have been dispatched.
+    /// </summary>
     [Fact]
     public async Task Handle_PublishFails_StillDispatchesTheWebhooksAndRethrows()
     {
@@ -47,12 +61,7 @@ public class OnSegmentDeletedHandlerTests
         var publisher = new Mock<ISegmentChangePublisher>();
         publisher.Setup(x => x.PublishDeletedAsync(envIds, segment.Id))
             .ThrowsAsync(new InvalidOperationException("broker down"));
-        var sut = new OnSegmentDeletedHandler(
-            new Mock<ICacheService>().Object,
-            new Mock<IAuditLogService>().Object,
-            webhookHandler.Object,
-            segmentService.Object,
-            publisher.Object);
+        var sut = CreateSut(webhookHandler: webhookHandler, segmentService: segmentService, publisher: publisher);
         var notification = new OnSegmentDeleted(segment, Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
 
         await Assert.ThrowsAsync<InvalidOperationException>(() => sut.Handle(notification, CancellationToken.None));
