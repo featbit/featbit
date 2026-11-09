@@ -206,6 +206,118 @@ public class RedisCacheServiceTests : IntegrationTestBase, IAsyncLifetime
         Assert.False(await _connection.GetDatabase().KeyExistsAsync(RedisKeys.Secret(secret.Value)));
     }
 
+    [DockerFact]
+    public async Task GetFlagIndexAsync_FlagsListed_ReturnsEachIdWithItsScore()
+    {
+        var first = NewFlag();
+        first.Id = Guid.NewGuid();
+        var second = NewFlag(first.EnvId);
+        second.Id = Guid.NewGuid();
+        await _sut.UpsertFlagAsync(first);
+        await _sut.UpsertFlagAsync(second);
+
+        var index = await _sut.GetFlagIndexAsync(first.EnvId);
+
+        var db = _connection.GetDatabase();
+        Assert.Equal(2, index.Count);
+        Assert.Equal(
+            (long)(await db.SortedSetScoreAsync(RedisKeys.FlagIndex(first.EnvId), first.Id.ToString()))!.Value,
+            index[first.Id]);
+        Assert.True(index.ContainsKey(second.Id));
+    }
+
+    [DockerFact]
+    public async Task GetFlagIndexAsync_NothingListed_ReturnsEmpty()
+    {
+        var index = await _sut.GetFlagIndexAsync(Guid.NewGuid());
+
+        Assert.Empty(index);
+    }
+
+    [DockerFact]
+    public async Task GetSegmentIndexAsync_SegmentListedInTwoEnvironments_ReturnsItForEach()
+    {
+        var envIds = new[] { Guid.NewGuid(), Guid.NewGuid() };
+        var segment = NewSegment();
+        segment.Id = Guid.NewGuid();
+        await _sut.UpsertSegmentAsync(envIds, segment);
+
+        foreach (var envId in envIds)
+        {
+            Assert.True((await _sut.GetSegmentIndexAsync(envId)).ContainsKey(segment.Id));
+        }
+    }
+
+    [DockerFact]
+    public async Task IsFlagArchivedAsync_ArchivedFlagIsCached_ReturnsTrue()
+    {
+        var flag = NewFlag();
+        flag.Id = Guid.NewGuid();
+        flag.IsArchived = true;
+        await _sut.UpsertFlagAsync(flag);
+
+        Assert.True(await _sut.IsFlagArchivedAsync(flag.Id));
+    }
+
+    [DockerFact]
+    public async Task IsFlagArchivedAsync_FlagIsNotArchived_ReturnsFalse()
+    {
+        var flag = NewFlag();
+        flag.Id = Guid.NewGuid();
+        await _sut.UpsertFlagAsync(flag);
+
+        Assert.False(await _sut.IsFlagArchivedAsync(flag.Id));
+    }
+
+    [DockerFact]
+    public async Task IsFlagArchivedAsync_NoValueIsCached_ReturnsFalse()
+    {
+        Assert.False(await _sut.IsFlagArchivedAsync(Guid.NewGuid()));
+    }
+
+    [DockerFact]
+    public async Task IsFlagArchivedAsync_ValueCannotBeRead_ReturnsFalse()
+    {
+        var id = Guid.NewGuid();
+        await _connection.GetDatabase().StringSetAsync(RedisKeys.Flag(id), "not json");
+
+        Assert.False(await _sut.IsFlagArchivedAsync(id));
+    }
+
+    [DockerFact]
+    public async Task IsFlagArchivedAsync_ArchivedFlagIsCommittedUnderGatedCommit_ReturnsTrue()
+    {
+        var flag = NewFlag();
+        flag.Id = Guid.NewGuid();
+        flag.IsArchived = true;
+        const long ts = 1000;
+        await _sut.StageFlagAsync(flag, ts);
+        await _sut.CommitFlagAsync(flag.EnvId, flag.Id.ToString(), ts);
+
+        Assert.True(await _sut.IsFlagArchivedAsync(flag.Id));
+    }
+
+    [DockerFact]
+    public async Task IsSegmentArchivedAsync_ArchivedSegmentIsCached_ReturnsTrue()
+    {
+        var segment = NewSegment();
+        segment.Id = Guid.NewGuid();
+        segment.IsArchived = true;
+        await _sut.UpsertSegmentAsync([Guid.NewGuid()], segment);
+
+        Assert.True(await _sut.IsSegmentArchivedAsync(segment.Id));
+    }
+
+    [DockerFact]
+    public async Task IsSegmentArchivedAsync_SegmentIsNotArchived_ReturnsFalse()
+    {
+        var segment = NewSegment();
+        segment.Id = Guid.NewGuid();
+        await _sut.UpsertSegmentAsync([Guid.NewGuid()], segment);
+
+        Assert.False(await _sut.IsSegmentArchivedAsync(segment.Id));
+    }
+
     private static FeatureFlag NewFlag(Guid? envId = null)
     {
         var flag = new FeatureFlag(

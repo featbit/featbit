@@ -10,6 +10,7 @@ using Domain.Projects;
 using Infrastructure.Caches.Redis;
 using Infrastructure.Persistence.MongoDb;
 using Infrastructure.Services.MongoDb;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
@@ -165,10 +166,19 @@ public sealed class DcBackfillerOnlyAdvanceTests : IntegrationTestBase, IAsyncLi
         services.AddTransient<IEnvironmentService>(_ => _environmentService);
         var provider = services.BuildServiceProvider();
 
+        // These tests are about the only-advance guard; pruning deleted entries has its own tests.
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["ControlPlane:CacheReconcile:PruneDeleted:Mode"] = "Off"
+            })
+            .Build();
+
         return new DcBackfiller(
             provider.GetRequiredService<IServiceScopeFactory>(),
             _composite,
             producer,
+            configuration,
             NullLogger<DcBackfiller>.Instance);
     }
 

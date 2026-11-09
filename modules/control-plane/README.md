@@ -28,7 +28,13 @@ The control plane supports two cross-DC consistency modes, selected by
   (normally sub-second), by documented design.
 
 Regardless of mode, a **cache self-heal** (`CacheReconciler`) rebuilds any DC's Redis (flags,
-segments, and secrets) from the source of truth when that DC's link becomes reachable.
+segments, and secrets) from the source of truth when that DC's link becomes reachable. The same
+backfill also removes the flags and segments that DC still lists although they were deleted, for
+example because the DC was unreachable when the delete was relayed. An entry is removed only if it
+is absent from the snapshot, older than `MinAgeSeconds`, archived in that DC, and still absent from
+the database when asked again; more than `MaxRemovalsPerRun` such entries at once means none are
+removed. Set `ControlPlane:CacheReconcile:PruneDeleted:Mode` to `DryRun` to only log what would be
+removed, or `Off` to disable it (default `On`).
 
 The consistency background workers — commit coordinator, recovery worker, DcId consistency
 checker — run on every instance by default; their operations are idempotent and version-guarded,

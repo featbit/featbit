@@ -1,11 +1,16 @@
+using System.Linq.Expressions;
 using Api.Application.ControlPlane;
 using Api.Infrastructure.Caches;
 using Application.Caches;
 using Application.ControlPlane;
+using Application.Services;
 using Domain.FeatureFlags;
 using Domain.Messages;
+using Domain.Segments;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Time.Testing;
 using Moq;
 
 namespace Api.UnitTests.Application.ControlPlane;
@@ -52,12 +57,35 @@ public class DcBackfillerTests
         tags: [],
         currentUserId: Guid.NewGuid());
 
-    private DcBackfiller CreateSut(ICacheService compositeCache) =>
+    // Pruning deleted entries is off unless a test turns it on, so the tests of the writes stay about the writes.
+    private DcBackfiller CreateSut(
+        ICacheService compositeCache,
+        IServiceScopeFactory? scopeFactory = null,
+        IConfiguration? configuration = null,
+        TimeProvider? timeProvider = null) =>
         new(
-            Mock.Of<IServiceScopeFactory>(),
+            scopeFactory ?? Mock.Of<IServiceScopeFactory>(),
             compositeCache,
             _producer.Object,
-            NullLogger<DcBackfiller>.Instance);
+            configuration ?? PruneSettings("Off"),
+            NullLogger<DcBackfiller>.Instance,
+            timeProvider);
+
+    private static IConfiguration PruneSettings(string mode, int? maxRemovals = null, int? minAgeSeconds = null)
+    {
+        var values = new Dictionary<string, string?> { ["ControlPlane:CacheReconcile:PruneDeleted:Mode"] = mode };
+        if (maxRemovals is not null)
+        {
+            values["ControlPlane:CacheReconcile:PruneDeleted:MaxRemovalsPerRun"] = maxRemovals.ToString();
+        }
+
+        if (minAgeSeconds is not null)
+        {
+            values["ControlPlane:CacheReconcile:PruneDeleted:MinAgeSeconds"] = minAgeSeconds.ToString();
+        }
+
+        return new ConfigurationBuilder().AddInMemoryCollection(values).Build();
+    }
 
     [Fact]
     public async Task ConcurrentBackfillsForSameDc_AreCoalesced()
@@ -280,5 +308,289 @@ public class DcBackfillerTests
         var result = await sut.BackfillDcAsync("east", ConsistencyMode.GatedCommit, snapshot);
 
         Assert.Equal(1, result);
+    }
+
+    // ----- pruning the flags and segments the source of truth no longer has -----
+
+    private static readonly DateTimeOffset Now = new(2026, 1, 2, 3, 0, 0, TimeSpan.Zero);
+    private static readonly long OldScore = Now.AddHours(-1).ToUnixTimeMilliseconds();
+    private static readonly long RecentScore = Now.AddMinutes(-1).ToUnixTimeMilliseconds();
+
+    private static IReadOnlyDictionary<Guid, long> Index(params (Guid Id, long Score)[] entries) =>
+        entries.ToDictionary(e => e.Id, e => e.Score);
+
+    private sealed record PruneFixture(
+        DcBackfiller Sut,
+        Mock<ICacheService> East,
+        Mock<ICacheService> West,
+        Mock<IFeatureFlagService> Flags,
+        Mock<ISegmentService> Segments,
+        CommittedSnapshot Snapshot,
+        Guid EnvA,
+        Guid EnvB);
+
+    // East is the DC under test and lists whatever a test sets up. Every value it holds is archived and the
+    // database holds nothing beyond the snapshot, so a test changes only the one thing it is about.
+    private PruneFixture CreatePruneFixture(string mode = "On", int? maxRemovals = null)
+    {
+        var east = new Mock<ICacheService>();
+        east.Setup(s => s.IsFlagArchivedAsync(It.IsAny<Guid>())).ReturnsAsync(true);
+        east.Setup(s => s.IsSegmentArchivedAsync(It.IsAny<Guid>())).ReturnsAsync(true);
+        var west = new Mock<ICacheService>();
+
+        var flags = new Mock<IFeatureFlagService>();
+        flags.Setup(s => s.AnyAsync(It.IsAny<Expression<Func<FeatureFlag, bool>>>())).ReturnsAsync(false);
+        var segments = new Mock<ISegmentService>();
+        segments.Setup(s => s.AnyAsync(It.IsAny<Expression<Func<Segment, bool>>>())).ReturnsAsync(false);
+
+        var services = new ServiceCollection();
+        services.AddTransient(_ => flags.Object);
+        services.AddTransient(_ => segments.Object);
+
+        var composite = new CompositeRedisCacheService(
+            new[] { new DcCacheService("east", east.Object), new DcCacheService("west", west.Object) },
+            NullLogger<CompositeRedisCacheService>.Instance);
+
+        var liveA = CreateFlag("live-a");
+        liveA.Id = Guid.NewGuid();
+        var liveB = CreateFlag("live-b");
+        liveB.Id = Guid.NewGuid();
+        var snapshot = EmptySnapshot with { Flags = [liveA, liveB] };
+
+        var sut = CreateSut(
+            composite,
+            services.BuildServiceProvider().GetRequiredService<IServiceScopeFactory>(),
+            PruneSettings(mode, maxRemovals),
+            new FakeTimeProvider(Now));
+
+        return new PruneFixture(sut, east, west, flags, segments, snapshot, liveA.EnvId, liveB.EnvId);
+    }
+
+    [Fact]
+    public async Task BackfillDcAsync_DeletedFlagStillListed_RemovesItFromThatDcOnly()
+    {
+        var f = CreatePruneFixture();
+        var orphan = Guid.NewGuid();
+        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ReturnsAsync(Index((orphan, OldScore)));
+
+        var result = await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        f.East.Verify(s => s.DeleteFlagAsync(f.EnvA, orphan), Times.Once);
+        f.West.Verify(s => s.DeleteFlagAsync(It.IsAny<Guid>(), It.IsAny<Guid>()), Times.Never);
+        f.West.Verify(s => s.GetFlagIndexAsync(It.IsAny<Guid>()), Times.Never);
+        Assert.Equal(1, result);
+    }
+
+    [Fact]
+    public async Task BackfillDcAsync_ListedFlagIsInTheSnapshot_IsNotRemoved()
+    {
+        var f = CreatePruneFixture();
+        var live = f.Snapshot.Flags[0];
+        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ReturnsAsync(Index((live.Id, OldScore)));
+
+        await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        f.East.Verify(s => s.DeleteFlagAsync(It.IsAny<Guid>(), It.IsAny<Guid>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task BackfillDcAsync_ListedFlagWasChangedRecently_IsNotRemoved()
+    {
+        var f = CreatePruneFixture();
+        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ReturnsAsync(Index((Guid.NewGuid(), RecentScore)));
+
+        await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        f.East.Verify(s => s.DeleteFlagAsync(It.IsAny<Guid>(), It.IsAny<Guid>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task BackfillDcAsync_ListedFlagIsNotArchivedInTheDc_IsNotRemoved()
+    {
+        var f = CreatePruneFixture();
+        var orphan = Guid.NewGuid();
+        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ReturnsAsync(Index((orphan, OldScore)));
+        f.East.Setup(s => s.IsFlagArchivedAsync(orphan)).ReturnsAsync(false);
+
+        await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        f.East.Verify(s => s.DeleteFlagAsync(It.IsAny<Guid>(), It.IsAny<Guid>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task BackfillDcAsync_ListedFlagIsStillInTheDatabase_IsNotRemoved()
+    {
+        var f = CreatePruneFixture();
+        var orphan = Guid.NewGuid();
+        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ReturnsAsync(Index((orphan, OldScore)));
+        f.Flags.Setup(s => s.AnyAsync(It.IsAny<Expression<Func<FeatureFlag, bool>>>())).ReturnsAsync(true);
+
+        await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        f.East.Verify(s => s.DeleteFlagAsync(It.IsAny<Guid>(), It.IsAny<Guid>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task BackfillDcAsync_SnapshotHasSecretsButNoFlagsOrSegments_PrunesNothing()
+    {
+        // A snapshot with no flags and no segments is far more likely to be a failed or empty read than a
+        // database where everything was deleted. The environment is still known, from its secret, so without
+        // the guard every entry the DC lists for it would look deleted.
+        var f = CreatePruneFixture();
+        var secret = new Domain.Environments.SecretCache(
+            new Domain.Environments.ResourceDescriptor
+            {
+                Environment = new Domain.Environments.IdNameKeyProps { Id = f.EnvA, Name = "env", Key = "env" }
+            },
+            new Domain.Environments.Secret(f.EnvA, "key", "server"));
+        var snapshot = EmptySnapshot with { Secrets = [secret] };
+        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ReturnsAsync(Index((Guid.NewGuid(), OldScore)));
+
+        await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, snapshot);
+
+        f.East.Verify(s => s.GetFlagIndexAsync(It.IsAny<Guid>()), Times.Never);
+        f.East.Verify(s => s.DeleteFlagAsync(It.IsAny<Guid>(), It.IsAny<Guid>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task BackfillDcAsync_EnvironmentWithNoFlagsLeft_IsFoundThroughItsSecrets()
+    {
+        // Every flag of environment B was deleted, so the snapshot holds none of its flags; its secret is how
+        // the environment is still found and its leftover entry removed.
+        var f = CreatePruneFixture();
+        var envC = Guid.NewGuid();
+        var orphan = Guid.NewGuid();
+        var secret = new Domain.Environments.SecretCache(
+            new Domain.Environments.ResourceDescriptor
+            {
+                Environment = new Domain.Environments.IdNameKeyProps { Id = envC, Name = "env", Key = "env" }
+            },
+            new Domain.Environments.Secret(envC, "key", "server"));
+        var snapshot = f.Snapshot with { Secrets = [secret] };
+        f.East.Setup(s => s.GetFlagIndexAsync(envC)).ReturnsAsync(Index((orphan, OldScore)));
+
+        await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, snapshot);
+
+        f.East.Verify(s => s.DeleteFlagAsync(envC, orphan), Times.Once);
+    }
+
+    [Fact]
+    public async Task BackfillDcAsync_MoreDeletedEntriesThanTheLimit_RemovesNone()
+    {
+        var f = CreatePruneFixture(maxRemovals: 1);
+        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA))
+            .ReturnsAsync(Index((Guid.NewGuid(), OldScore), (Guid.NewGuid(), OldScore)));
+
+        var result = await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        f.East.Verify(s => s.DeleteFlagAsync(It.IsAny<Guid>(), It.IsAny<Guid>()), Times.Never);
+        Assert.Equal(0, result);
+    }
+
+    [Fact]
+    public async Task BackfillDcAsync_DryRun_RemovesNothing()
+    {
+        var f = CreatePruneFixture(mode: "DryRun");
+        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ReturnsAsync(Index((Guid.NewGuid(), OldScore)));
+
+        var result = await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        f.East.Verify(s => s.DeleteFlagAsync(It.IsAny<Guid>(), It.IsAny<Guid>()), Times.Never);
+        Assert.Equal(0, result);
+    }
+
+    [Fact]
+    public async Task BackfillDcAsync_PruningOff_ReadsNoIndex()
+    {
+        var f = CreatePruneFixture(mode: "Off");
+
+        await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        f.East.Verify(s => s.GetFlagIndexAsync(It.IsAny<Guid>()), Times.Never);
+        f.East.Verify(s => s.GetSegmentIndexAsync(It.IsAny<Guid>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task BackfillDcAsync_DeletedSegmentListedInTwoEnvironments_IsRemovedOnceWithBoth()
+    {
+        var f = CreatePruneFixture();
+        var orphan = Guid.NewGuid();
+        f.East.Setup(s => s.GetSegmentIndexAsync(f.EnvA)).ReturnsAsync(Index((orphan, OldScore)));
+        f.East.Setup(s => s.GetSegmentIndexAsync(f.EnvB)).ReturnsAsync(Index((orphan, OldScore)));
+
+        var result = await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        f.East.Verify(
+            s => s.DeleteSegmentAsync(
+                It.Is<ICollection<Guid>>(ids => ids.OrderBy(i => i).SequenceEqual(new[] { f.EnvA, f.EnvB }.OrderBy(i => i))),
+                orphan),
+            Times.Once);
+        Assert.Equal(1, result);
+    }
+
+    [Fact]
+    public async Task BackfillDcAsync_DeletedSegmentWasChangedRecentlyInOneEnvironment_IsNotRemoved()
+    {
+        var f = CreatePruneFixture();
+        var orphan = Guid.NewGuid();
+        f.East.Setup(s => s.GetSegmentIndexAsync(f.EnvA)).ReturnsAsync(Index((orphan, OldScore)));
+        f.East.Setup(s => s.GetSegmentIndexAsync(f.EnvB)).ReturnsAsync(Index((orphan, RecentScore)));
+
+        await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        f.East.Verify(s => s.DeleteSegmentAsync(It.IsAny<ICollection<Guid>>(), It.IsAny<Guid>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task BackfillDcAsync_ListedSegmentIsNotArchivedInTheDc_IsNotRemoved()
+    {
+        var f = CreatePruneFixture();
+        var orphan = Guid.NewGuid();
+        f.East.Setup(s => s.GetSegmentIndexAsync(f.EnvA)).ReturnsAsync(Index((orphan, OldScore)));
+        f.East.Setup(s => s.IsSegmentArchivedAsync(orphan)).ReturnsAsync(false);
+
+        await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        f.East.Verify(s => s.DeleteSegmentAsync(It.IsAny<ICollection<Guid>>(), It.IsAny<Guid>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task BackfillDcAsync_ListedSegmentIsStillInTheDatabase_IsNotRemoved()
+    {
+        var f = CreatePruneFixture();
+        f.East.Setup(s => s.GetSegmentIndexAsync(f.EnvA)).ReturnsAsync(Index((Guid.NewGuid(), OldScore)));
+        f.Segments.Setup(s => s.AnyAsync(It.IsAny<Expression<Func<Segment, bool>>>())).ReturnsAsync(true);
+
+        await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        f.East.Verify(s => s.DeleteSegmentAsync(It.IsAny<ICollection<Guid>>(), It.IsAny<Guid>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task BackfillDcAsync_IndexCannotBeRead_RemovesNothingAndStillBackfills()
+    {
+        var f = CreatePruneFixture();
+        f.East.Setup(s => s.GetFlagIndexAsync(It.IsAny<Guid>())).ThrowsAsync(new TimeoutException("redis"));
+        f.East.Setup(s => s.UpsertFlagIfNewerAsync(It.IsAny<FeatureFlag>())).ReturnsAsync(true);
+
+        var result = await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        f.East.Verify(s => s.DeleteFlagAsync(It.IsAny<Guid>(), It.IsAny<Guid>()), Times.Never);
+        Assert.Equal(2, result); // the two live flags were still written
+    }
+
+    [Fact]
+    public async Task BackfillDcAsync_PruningThrows_DoesNotFailTheBackfill()
+    {
+        var f = CreatePruneFixture();
+        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ReturnsAsync(Index((Guid.NewGuid(), OldScore)));
+        f.Flags.Setup(s => s.AnyAsync(It.IsAny<Expression<Func<FeatureFlag, bool>>>()))
+            .ThrowsAsync(new InvalidOperationException("database down"));
+        f.East.Setup(s => s.UpsertFlagIfNewerAsync(It.IsAny<FeatureFlag>())).ReturnsAsync(true);
+
+        var result = await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        f.East.Verify(s => s.DeleteFlagAsync(It.IsAny<Guid>(), It.IsAny<Guid>()), Times.Never);
+        Assert.Equal(2, result);
     }
 }

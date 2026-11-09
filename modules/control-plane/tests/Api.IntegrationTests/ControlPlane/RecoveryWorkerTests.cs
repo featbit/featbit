@@ -230,6 +230,12 @@ public sealed class RecoveryWorkerTests : IntegrationTestBase, IAsyncLifetime
             provider.GetRequiredService<IServiceScopeFactory>(),
             _composite,
             _producer,
+            new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    ["ControlPlane:CacheReconcile:PruneDeleted:Mode"] = "Off"
+                })
+                .Build(),
             NullLogger<DcBackfiller>.Instance);
 
         return new RecoveryWorker(

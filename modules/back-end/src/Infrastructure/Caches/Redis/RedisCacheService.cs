@@ -317,6 +317,63 @@ public class RedisCacheService(IRedisClient redis) : ICacheService
         await Redis.KeyDeleteAsync(cacheKey);
     }
 
+    public Task<IReadOnlyDictionary<Guid, long>> GetFlagIndexAsync(Guid envId) =>
+        ReadIndexAsync(RedisKeys.FlagIndex(envId));
+
+    public Task<IReadOnlyDictionary<Guid, long>> GetSegmentIndexAsync(Guid envId) =>
+        ReadIndexAsync(RedisKeys.SegmentIndex(envId));
+
+    public Task<bool> IsFlagArchivedAsync(Guid id) =>
+        IsArchivedAsync(RedisKeys.Flag(id), RedisKeys.FlagCommittedPointer(id), ts => RedisKeys.FlagVersion(id, ts));
+
+    public Task<bool> IsSegmentArchivedAsync(Guid id) =>
+        IsArchivedAsync(
+            RedisKeys.Segment(id), RedisKeys.SegmentCommittedPointer(id), ts => RedisKeys.SegmentVersion(id, ts));
+
+    private async Task<IReadOnlyDictionary<Guid, long>> ReadIndexAsync(RedisKey indexKey)
+    {
+        var entries = await Redis.SortedSetRangeByRankWithScoresAsync(indexKey);
+
+        var result = new Dictionary<Guid, long>(entries.Length);
+        foreach (var entry in entries)
+        {
+            if (Guid.TryParse(entry.Element.ToString(), out var id))
+            {
+                result[id] = (long)entry.Score;
+            }
+        }
+
+        return result;
+    }
+
+    private async Task<bool> IsArchivedAsync(RedisKey valueKey, RedisKey pointerKey, Func<long, RedisKey> versionKey)
+    {
+        // Under GatedCommit the value is the versioned key the committed pointer refers to.
+        var key = valueKey;
+        var pointer = await Redis.StringGetAsync(pointerKey);
+        if (pointer.HasValue && pointer.TryParse(out long ts))
+        {
+            key = versionKey(ts);
+        }
+
+        var value = await Redis.StringGetAsync(key);
+        if (!value.HasValue)
+        {
+            return false;
+        }
+
+        try
+        {
+            using var document = JsonDocument.Parse((byte[])value!);
+            return document.RootElement.TryGetProperty("isArchived", out var archived)
+                   && archived.ValueKind == JsonValueKind.True;
+        }
+        catch (JsonException)
+        {
+            return false;
+        }
+    }
+
     public async Task UpsertLicenseAsync(Workspace workspace)
     {
         var key = RedisKeys.License(workspace.Id);
