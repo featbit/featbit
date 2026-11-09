@@ -101,6 +101,27 @@ public interface ICacheService
 
     Task DeleteSegmentAsync(ICollection<Guid> envIds, Guid segmentId);
 
+    /// <summary>
+    /// Reads THIS cache's flag index for an environment: the id and index score (the committed unix-ms
+    /// version) of every flag it lists. Used to find entries kept for flags that no longer exist.
+    /// </summary>
+    Task<IReadOnlyDictionary<Guid, long>> GetFlagIndexAsync(Guid envId);
+
+    /// <summary>
+    /// Segment counterpart of <see cref="GetFlagIndexAsync"/>: the id and index score of every segment
+    /// THIS cache lists for an environment.
+    /// </summary>
+    Task<IReadOnlyDictionary<Guid, long>> GetSegmentIndexAsync(Guid envId);
+
+    /// <summary>
+    /// Whether THIS cache holds a value for the flag and that value is archived. <c>false</c> when the
+    /// value is missing or cannot be read, so "not archived" is the answer whenever it is uncertain.
+    /// </summary>
+    Task<bool> IsFlagArchivedAsync(Guid id);
+
+    /// <summary>Segment counterpart of <see cref="IsFlagArchivedAsync"/>.</summary>
+    Task<bool> IsSegmentArchivedAsync(Guid id);
+
     Task UpsertLicenseAsync(Workspace workspace);
 
     Task UpsertSecretAsync(ResourceDescriptor resourceDescriptor, Secret secret);
