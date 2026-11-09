@@ -308,6 +308,11 @@ public class RedisCacheService(IRedisClient redis) : ICacheService
         return Redis.KeyExistsAsync(RedisKeys.SegmentVersion(id, ts));
     }
 
+    /// <summary>
+    /// Removes the segment from the index of every environment it belongs to and deletes its value key. Under
+    /// <c>GatedCommit</c> it also deletes the committed version; the committed pointer stays, so that an older version
+    /// committed later cannot make the segment servable again.
+    /// </summary>
     public async Task DeleteSegmentAsync(ICollection<Guid> envIds, Guid segmentId)
     {
         // delete index first

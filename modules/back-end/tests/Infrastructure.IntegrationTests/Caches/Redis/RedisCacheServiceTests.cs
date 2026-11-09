@@ -129,6 +129,10 @@ public class RedisCacheServiceTests : IntegrationTestBase, IAsyncLifetime
         Assert.NotNull(await db.SortedSetScoreAsync(RedisKeys.FlagIndex(other.EnvId), other.Id.ToString()));
     }
 
+    /// <summary>
+    /// A backfill that read the database before the flag was archived and deleted commits its older version after the
+    /// delete. The flag is served only when the committed pointer resolves to an existing version, so it must not be.
+    /// </summary>
     [DockerFact]
     public async Task DeleteFlagAsync_AStaleCommitArrivesAfterTheDelete_DoesNotMakeTheFlagServableAgain()
     {
@@ -153,6 +157,9 @@ public class RedisCacheServiceTests : IntegrationTestBase, IAsyncLifetime
         Assert.False(servable);
     }
 
+    /// <summary>
+    /// Segment counterpart of the stale-commit test for flags.
+    /// </summary>
     [DockerFact]
     public async Task DeleteSegmentAsync_AStaleCommitArrivesAfterTheDelete_DoesNotMakeTheSegmentServableAgain()
     {
@@ -222,6 +229,10 @@ public class RedisCacheServiceTests : IntegrationTestBase, IAsyncLifetime
         }
     }
 
+    /// <summary>
+    /// Deleting a segment that belongs to two environments removes its committed version and its index entries, and keeps
+    /// the committed pointer.
+    /// </summary>
     [DockerFact]
     public async Task DeleteSegmentAsync_CommittedVersionExists_RemovesTheVersionAndKeepsThePointer()
     {
