@@ -34,8 +34,9 @@ example because the DC was unreachable when the delete was relayed. An entry is 
 is absent from the snapshot, older than `MinAgeSeconds`, archived in that DC, and still absent from
 the database when asked again; more than `MaxRemovalsPerRun` such entries at once means none are
 removed. An entry that is still too recent, or that sits in an index which could not be read, is
-looked at again later by the reconciler, so it does not wait for the next reconnect. Set `ControlPlane:CacheReconcile:PruneDeleted:Mode` to `DryRun` to only log what would be
-removed, or `Off` to disable it (default `On`).
+looked at again later by the reconciler, so it does not wait for the next reconnect. By default
+(`ControlPlane:CacheReconcile:PruneDeleted:Mode` is `DryRun`) it only logs what it would remove.
+Set the mode to `On` to remove the entries, or to `Off` to disable the step.
 
 The consistency background workers — commit coordinator, recovery worker, DcId consistency
 checker — run on every instance by default; their operations are idempotent and version-guarded,

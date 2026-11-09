@@ -77,9 +77,14 @@ public class DcBackfillerTests
     /// <summary>
     /// Builds the pruning settings, leaving out any value that is not given.
     /// </summary>
-    private static IConfiguration PruneSettings(string mode, int? maxRemovals = null, int? minAgeSeconds = null)
+    private static IConfiguration PruneSettings(string? mode, int? maxRemovals = null, int? minAgeSeconds = null)
     {
-        var values = new Dictionary<string, string?> { ["ControlPlane:CacheReconcile:PruneDeleted:Mode"] = mode };
+        var values = new Dictionary<string, string?>();
+        if (mode is not null)
+        {
+            values["ControlPlane:CacheReconcile:PruneDeleted:Mode"] = mode;
+        }
+
         if (maxRemovals is not null)
         {
             values["ControlPlane:CacheReconcile:PruneDeleted:MaxRemovalsPerRun"] = maxRemovals.ToString();
@@ -338,7 +343,7 @@ public class DcBackfillerTests
 
     // East is the DC under test and lists whatever a test sets up. Every value it holds is archived and the
     // database holds nothing beyond the snapshot, so a test changes only the one thing it is about.
-    private PruneFixture CreatePruneFixture(string mode = "On", int? maxRemovals = null)
+    private PruneFixture CreatePruneFixture(string? mode = "On", int? maxRemovals = null)
     {
         var east = new Mock<ICacheService>();
         // An index that nothing was set up for is empty, as in Redis, not unreadable (a null answer).
@@ -857,15 +862,32 @@ public class DcBackfillerTests
     [Theory]
     [InlineData("")]
     [InlineData("   ")]
-    public async Task BackfillDcAsync_ModeIsBlank_DefaultsToOn(string mode)
+    public async Task BackfillDcAsync_ModeIsBlank_DefaultsToDryRun(string mode)
     {
         var f = CreatePruneFixture(mode: mode);
-        var orphan = Guid.NewGuid();
-        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ReturnsAsync(Index((orphan, OldScore)));
+        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ReturnsAsync(Index((Guid.NewGuid(), OldScore)));
 
         await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
 
-        f.East.Verify(s => s.DeleteFlagAsync(f.EnvA, orphan), Times.Once);
+        f.East.Verify(s => s.GetFlagIndexAsync(f.EnvA), Times.Once); // it looked, as a dry run does
+        f.East.Verify(s => s.DeleteFlagAsync(It.IsAny<Guid>(), It.IsAny<Guid>()), Times.Never);
+    }
+
+    /// <summary>
+    /// Nothing is removed until the step is switched on: without a <c>Mode</c> it only reports what it would remove.
+    /// </summary>
+    [Fact]
+    public async Task BackfillDcAsync_ModeIsNotSet_DefaultsToDryRun()
+    {
+        var f = CreatePruneFixture(mode: null);
+        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ReturnsAsync(Index((Guid.NewGuid(), OldScore)));
+
+        var result = await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        f.East.Verify(s => s.GetFlagIndexAsync(f.EnvA), Times.Once);
+        f.East.Verify(s => s.DeleteFlagAsync(It.IsAny<Guid>(), It.IsAny<Guid>()), Times.Never);
+        f.East.Verify(s => s.DeleteSegmentAsync(It.IsAny<ICollection<Guid>>(), It.IsAny<Guid>()), Times.Never);
+        Assert.Equal(0, result); // nothing written (the guard accepted none) and nothing pruned
     }
 
     [Theory]
