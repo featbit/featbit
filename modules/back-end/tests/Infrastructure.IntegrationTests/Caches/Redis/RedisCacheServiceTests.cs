@@ -40,6 +40,7 @@ public class RedisCacheServiceTests : IntegrationTestBase, IAsyncLifetime
 
         var clientMock = new Mock<IRedisClient>();
         clientMock.Setup(x => x.GetDatabase()).Returns(() => _connection.GetDatabase());
+        clientMock.Setup(x => x.Connection).Returns(_connection);
 
         _sut = new RedisCacheService(clientMock.Object);
     }
@@ -204,6 +205,82 @@ public class RedisCacheServiceTests : IntegrationTestBase, IAsyncLifetime
         await _sut.DeleteSecretAsync(secret);
 
         Assert.False(await _connection.GetDatabase().KeyExistsAsync(RedisKeys.Secret(secret.Value)));
+    }
+
+    [DockerFact]
+    public async Task DeletePodConnection_ManyConnectionKeys_RemovesOnlyTheKeysOwnedByThePod()
+    {
+        var podA = Guid.NewGuid();
+        var podB = Guid.NewGuid();
+        var db = _connection.GetDatabase();
+
+        // More keys than one cleanup batch, interleaved so that every batch holds both pods' keys.
+        const int total = 1203;
+        var ownedByA = 0;
+        for (var i = 0; i < total; i++)
+        {
+            var owner = i % 2 == 0 ? podA : podB;
+            ownedByA += owner == podA ? 1 : 0;
+            await SeedConnectionAsync($"c{i}", owner.ToString());
+        }
+
+        await db.HashSetAsync(RedisKeys.Heartbeats, podA.ToString(), "{}");
+        await db.HashSetAsync(RedisKeys.Heartbeats, podB.ToString(), "{}");
+        await db.StringSetAsync("featbit:flag:unrelated", "keep");
+
+        await _sut.DeletePodConnection(podA);
+
+        var remaining = _connection.GetServer(_connection.GetEndPoints().Single())
+            .Keys(pattern: RedisKeys.ConnectionPattern)
+            .ToArray();
+        Assert.Equal(total - ownedByA, remaining.Length);
+        foreach (var key in remaining)
+        {
+            Assert.Equal(podB.ToString(), (string?)await db.HashGetAsync(key, "heartbeatId"));
+        }
+
+        Assert.False(await db.HashExistsAsync(RedisKeys.Heartbeats, podA.ToString()));
+        Assert.True(await db.HashExistsAsync(RedisKeys.Heartbeats, podB.ToString()));
+        Assert.Equal("keep", await db.StringGetAsync("featbit:flag:unrelated"));
+    }
+
+    [DockerFact]
+    public async Task DeletePodConnection_NoConnectionKeys_DeletesTheHeartbeatEntryOnly()
+    {
+        var pod = Guid.NewGuid();
+        var db = _connection.GetDatabase();
+        await db.HashSetAsync(RedisKeys.Heartbeats, pod.ToString(), "{}");
+        await db.StringSetAsync("featbit:flag:unrelated", "keep");
+
+        await _sut.DeletePodConnection(pod);
+
+        Assert.False(await db.HashExistsAsync(RedisKeys.Heartbeats, pod.ToString()));
+        Assert.Equal("keep", await db.StringGetAsync("featbit:flag:unrelated"));
+    }
+
+    [DockerFact]
+    public async Task DeletePodConnection_ConnectionKeyWithoutHeartbeatId_KeepsTheKey()
+    {
+        var pod = Guid.NewGuid();
+        await SeedConnectionAsync("no-owner", heartbeatId: null);
+        await SeedConnectionAsync("owned", pod.ToString());
+
+        await _sut.DeletePodConnection(pod);
+
+        var db = _connection.GetDatabase();
+        Assert.True(await db.KeyExistsAsync(RedisKeys.Connection("no-owner")));
+        Assert.False(await db.KeyExistsAsync(RedisKeys.Connection("owned")));
+    }
+
+    private async Task SeedConnectionAsync(string id, string? heartbeatId)
+    {
+        var fields = new List<HashEntry> { new("id", id), new("envId", Guid.NewGuid().ToString()), new("secret", "test") };
+        if (heartbeatId is not null)
+        {
+            fields.Add(new HashEntry("heartbeatId", heartbeatId));
+        }
+
+        await _connection.GetDatabase().HashSetAsync(RedisKeys.Connection(id), fields.ToArray());
     }
 
     private static FeatureFlag NewFlag(Guid? envId = null)
