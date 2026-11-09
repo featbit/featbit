@@ -93,6 +93,55 @@ public class RedisCacheServiceTests : IntegrationTestBase, IAsyncLifetime
     }
 
     [DockerFact]
+    public async Task DeleteFlagAsync_CommittedVersionExists_RemovesTheVersionAndThePointer()
+    {
+        var flag = NewFlag();
+        const long ts = 1000;
+        await _sut.StageFlagAsync(flag, ts);
+        await _sut.CommitFlagAsync(flag.EnvId, flag.Id.ToString(), ts);
+
+        await _sut.DeleteFlagAsync(flag.EnvId, flag.Id);
+
+        var db = _connection.GetDatabase();
+        Assert.False(await db.KeyExistsAsync(RedisKeys.FlagVersion(flag.Id, ts)));
+        Assert.False(await db.KeyExistsAsync(RedisKeys.FlagCommittedPointer(flag.Id)));
+        Assert.Null(await db.SortedSetScoreAsync(RedisKeys.FlagIndex(flag.EnvId), flag.Id.ToString()));
+    }
+
+    [DockerFact]
+    public async Task DeleteFlagAsync_CommittedVersionExists_LeavesAnotherFlagsStateAlone()
+    {
+        var flag = NewFlag();
+        flag.Id = Guid.NewGuid();
+        var other = NewFlag(flag.EnvId);
+        other.Id = Guid.NewGuid();
+        const long ts = 1000;
+        await _sut.StageFlagAsync(flag, ts);
+        await _sut.CommitFlagAsync(flag.EnvId, flag.Id.ToString(), ts);
+        await _sut.StageFlagAsync(other, ts);
+        await _sut.CommitFlagAsync(other.EnvId, other.Id.ToString(), ts);
+
+        await _sut.DeleteFlagAsync(flag.EnvId, flag.Id);
+
+        var db = _connection.GetDatabase();
+        Assert.True(await db.KeyExistsAsync(RedisKeys.FlagVersion(other.Id, ts)));
+        Assert.True(await db.KeyExistsAsync(RedisKeys.FlagCommittedPointer(other.Id)));
+        Assert.NotNull(await db.SortedSetScoreAsync(RedisKeys.FlagIndex(other.EnvId), other.Id.ToString()));
+    }
+
+    [DockerFact]
+    public async Task DeleteFlagAsync_PointerIsNotANumber_StillRemovesThePointer()
+    {
+        var flag = NewFlag();
+        var db = _connection.GetDatabase();
+        await db.StringSetAsync(RedisKeys.FlagCommittedPointer(flag.Id), "not-a-timestamp");
+
+        await _sut.DeleteFlagAsync(flag.EnvId, flag.Id);
+
+        Assert.False(await db.KeyExistsAsync(RedisKeys.FlagCommittedPointer(flag.Id)));
+    }
+
+    [DockerFact]
     public async Task UpsertSegmentAsync_WritesIndexForEachEnvironment()
     {
         var envIds = new[] { Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid() };
@@ -120,6 +169,26 @@ public class RedisCacheServiceTests : IntegrationTestBase, IAsyncLifetime
 
         var db = _connection.GetDatabase();
         Assert.False(await db.KeyExistsAsync(RedisKeys.Segment(segment.Id)));
+        foreach (var envId in envIds)
+        {
+            Assert.Null(await db.SortedSetScoreAsync(RedisKeys.SegmentIndex(envId), segment.Id.ToString()));
+        }
+    }
+
+    [DockerFact]
+    public async Task DeleteSegmentAsync_CommittedVersionExists_RemovesTheVersionAndThePointer()
+    {
+        var envIds = new[] { Guid.NewGuid(), Guid.NewGuid() };
+        var segment = NewSegment();
+        const long ts = 1000;
+        await _sut.StageSegmentAsync(segment, ts);
+        await _sut.CommitSegmentAsync(envIds, segment.Id.ToString(), ts);
+
+        await _sut.DeleteSegmentAsync(envIds, segment.Id);
+
+        var db = _connection.GetDatabase();
+        Assert.False(await db.KeyExistsAsync(RedisKeys.SegmentVersion(segment.Id, ts)));
+        Assert.False(await db.KeyExistsAsync(RedisKeys.SegmentCommittedPointer(segment.Id)));
         foreach (var envId in envIds)
         {
             Assert.Null(await db.SortedSetScoreAsync(RedisKeys.SegmentIndex(envId), segment.Id.ToString()));
