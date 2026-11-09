@@ -128,4 +128,49 @@ public class FeatureFlagChangeMessageHandlerTests
 
         await Assert.ThrowsAnyAsync<Exception>(() => sut.HandleAsync("{not valid json"));
     }
+
+    private static string BuildDeleteMessage(Guid envId, Guid flagId, string? region = Region)
+        => JsonSerializer.Serialize(
+            new { deleted = new { envId, id = flagId }, region },
+            ReusableJsonSerializerOptions.Web);
+
+    [Fact]
+    public async Task HandleAsync_Deleted_DeletesTheFlagFromEveryDcAndPublishesNothing()
+    {
+        var sut = CreateSut();
+        var envId = Guid.NewGuid();
+        var flagId = Guid.NewGuid();
+
+        await sut.HandleAsync(BuildDeleteMessage(envId, flagId));
+
+        _cache.Verify(x => x.DeleteFlagAsync(envId, flagId), Times.Once);
+        _cache.Verify(x => x.UpsertFlagAsync(It.IsAny<FeatureFlag>()), Times.Never);
+        _producer.Verify(
+            x => x.PublishAsync(It.IsAny<string>(), It.IsAny<It.IsAnyType>()), Times.Never);
+    }
+
+    [Theory]
+    [InlineData("another-region")]
+    [InlineData(null)]
+    public async Task HandleAsync_Deleted_ForAnotherRegion_DoesNothing(string? region)
+    {
+        var sut = CreateSut();
+
+        await sut.HandleAsync(BuildDeleteMessage(Guid.NewGuid(), Guid.NewGuid(), region));
+
+        _cache.Verify(x => x.DeleteFlagAsync(It.IsAny<Guid>(), It.IsAny<Guid>()), Times.Never);
+    }
+
+    [Theory]
+    [InlineData("""{"deleted":{"id":"3f2c3f64-6d6a-4f4b-9f0a-1d7c2f8c9a01"},"region":"us-east-1"}""")]
+    [InlineData("""{"deleted":{"envId":"3f2c3f64-6d6a-4f4b-9f0a-1d7c2f8c9a01"},"region":"us-east-1"}""")]
+    [InlineData("""{"deleted":{"envId":"3f2c3f64-6d6a-4f4b-9f0a-1d7c2f8c9a01","id":"5b8d7a10-1c2e-4d3f-8a9b-0c1d2e3f4a5b"}}""")]
+    public async Task HandleAsync_DeletedWithMissingFields_Throws(string payload)
+    {
+        var sut = CreateSut();
+
+        await Assert.ThrowsAsync<InvalidDataException>(() => sut.HandleAsync(payload));
+
+        _cache.Verify(x => x.DeleteFlagAsync(It.IsAny<Guid>(), It.IsAny<Guid>()), Times.Never);
+    }
 }

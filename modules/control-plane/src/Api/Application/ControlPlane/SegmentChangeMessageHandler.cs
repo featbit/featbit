@@ -27,6 +27,14 @@ public class SegmentChangeMessageHandler(
         {
             using var document = JsonDocument.Parse(message);
             var root = document.RootElement;
+
+            // A delete has a "deleted" property and no "notification".
+            if (root.TryGetProperty("deleted", out var deleted))
+            {
+                await HandleDeletedAsync(root, deleted);
+                return;
+            }
+
             if (!root.TryGetProperty("segmentNonSpecific", out var segmentNonSpecific) ||
                 !root.TryGetProperty("envIds", out var envIds) ||
                 !root.TryGetProperty("notification", out var notification) ||
@@ -104,5 +112,35 @@ public class SegmentChangeMessageHandler(
             logger.LogError(e, "Error processing segment change message");
             throw;
         }
+    }
+
+    /// <summary>
+    /// Removes a deleted segment from every datacenter's Redis. Nothing is published to the evaluation servers:
+    /// a segment has to be archived before it can be deleted, and SDKs already hide archived segments.
+    /// </summary>
+    private async Task HandleDeletedAsync(JsonElement root, JsonElement deleted)
+    {
+        if (!root.TryGetProperty("region", out var region) ||
+            !deleted.TryGetProperty("envIds", out var envIdsNode) ||
+            !deleted.TryGetProperty("id", out var idNode))
+        {
+            throw new InvalidDataException("invalid segment delete data");
+        }
+
+        var deserializedRegion = region.Deserialize<string>(ReusableJsonSerializerOptions.Web);
+        if (deserializedRegion == null || deserializedRegion != configuration.GetRegion())
+        {
+            return;
+        }
+
+        var envIds = envIdsNode.Deserialize<ICollection<Guid>>(ReusableJsonSerializerOptions.Web);
+        if (envIds is null)
+        {
+            throw new InvalidDataException("invalid segment delete data");
+        }
+
+        var segmentId = idNode.Deserialize<Guid>(ReusableJsonSerializerOptions.Web);
+
+        await cacheService.DeleteSegmentAsync(envIds, segmentId);
     }
 }

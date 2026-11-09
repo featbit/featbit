@@ -25,6 +25,12 @@ public class FeatureFlagChangeMessageHandler(
             using var document = JsonDocument.Parse(message);
             var root = document.RootElement;
 
+            // A delete has a "deleted" property and no "notification".
+            if (root.TryGetProperty("deleted", out var deleted))
+            {
+                await HandleDeletedAsync(root, deleted);
+                return;
+            }
 
             if (!root.TryGetProperty("notification", out var notification) ||
                 !root.TryGetProperty("region", out var region))
@@ -71,5 +77,30 @@ public class FeatureFlagChangeMessageHandler(
             logger.LogError(e, "Error handling feature flag change message");
             throw;
         }
+    }
+
+    /// <summary>
+    /// Removes a deleted flag from every datacenter's Redis. Nothing is published to the evaluation servers:
+    /// a flag has to be archived before it can be deleted, and SDKs already hide archived flags.
+    /// </summary>
+    private async Task HandleDeletedAsync(JsonElement root, JsonElement deleted)
+    {
+        if (!root.TryGetProperty("region", out var region) ||
+            !deleted.TryGetProperty("envId", out var envIdNode) ||
+            !deleted.TryGetProperty("id", out var idNode))
+        {
+            throw new InvalidDataException("invalid flag delete data");
+        }
+
+        var deserializedRegion = region.Deserialize<string>(ReusableJsonSerializerOptions.Web);
+        if (deserializedRegion == null || deserializedRegion != configuration.GetRegion())
+        {
+            return;
+        }
+
+        var envId = envIdNode.Deserialize<Guid>(ReusableJsonSerializerOptions.Web);
+        var flagId = idNode.Deserialize<Guid>(ReusableJsonSerializerOptions.Web);
+
+        await cacheService.DeleteFlagAsync(envId, flagId);
     }
 }

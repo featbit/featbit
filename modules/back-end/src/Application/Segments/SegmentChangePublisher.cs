@@ -9,6 +9,11 @@ namespace Application.Segments;
 public interface ISegmentChangePublisher
 {
     Task PublishAsync(OnSegmentChange notification);
+
+    /// <summary>
+    /// Tells every datacenter that the segment was deleted, so each removes it from its own Redis.
+    /// </summary>
+    Task PublishDeletedAsync(ICollection<Guid> envIds, Guid segmentId);
 }
 
 public class DirectSegmentChangePublisher(
@@ -37,6 +42,9 @@ public class DirectSegmentChangePublisher(
             await segmentMessageService.PublishChangeMessage(envId, affectedFlags, segment);
         }
     }
+
+    // Without the control plane there is a single Redis, which the delete handler has already updated.
+    public Task PublishDeletedAsync(ICollection<Guid> envIds, Guid segmentId) => Task.CompletedTask;
 }
 
 public class ControlPlaneSegmentChangePublisher(
@@ -64,5 +72,18 @@ public class ControlPlaneSegmentChangePublisher(
         };
 
         await messageProducer.PublishAsync(ControlPlaneTopics.ControlPlaneSegmentChange, segmentUpsertMessage);
+    }
+
+    // Sent on the same topic as the change. The "deleted" shape has no "notification", so a control plane that
+    // does not know it rejects the message instead of treating it as a change.
+    public async Task PublishDeletedAsync(ICollection<Guid> envIds, Guid segmentId)
+    {
+        var message = new
+        {
+            deleted = new { envIds, id = segmentId },
+            region = configuration.GetRegion()
+        };
+
+        await messageProducer.PublishAsync(ControlPlaneTopics.ControlPlaneSegmentChange, message);
     }
 }

@@ -41,17 +41,20 @@ public class OnSegmentDeletedHandler : INotificationHandler<OnSegmentDeleted>
     private readonly IAuditLogService _auditLogService;
     private readonly IWebhookHandler _webhookHandler;
     private readonly ISegmentService _segmentService;
+    private readonly ISegmentChangePublisher _changePublisher;
 
     public OnSegmentDeletedHandler(
         ICacheService cache,
         IAuditLogService auditLogService,
         IWebhookHandler webhookHandler,
-        ISegmentService segmentService)
+        ISegmentService segmentService,
+        ISegmentChangePublisher changePublisher)
     {
         _cache = cache;
         _auditLogService = auditLogService;
         _webhookHandler = webhookHandler;
         _segmentService = segmentService;
+        _changePublisher = changePublisher;
     }
 
     public async Task Handle(OnSegmentDeleted notification, CancellationToken cancellationToken)
@@ -64,6 +67,9 @@ public class OnSegmentDeletedHandler : INotificationHandler<OnSegmentDeleted>
 
         // delete cache
         await _cache.DeleteSegmentAsync(envIds, segment.Id);
+
+        // the other datacenters delete it too
+        await _changePublisher.PublishDeletedAsync(envIds, segment.Id);
 
         // handle webhooks
         foreach (var envId in envIds)
