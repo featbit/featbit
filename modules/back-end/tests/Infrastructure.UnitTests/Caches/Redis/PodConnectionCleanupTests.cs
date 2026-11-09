@@ -7,6 +7,9 @@ public class PodConnectionCleanupTests
 {
     private const string Pod = "pod-a";
 
+    /// <summary>
+    /// Streams the given keys one at a time, reporting each one as it is read so a test can see how far the cleanup has read.
+    /// </summary>
     private static async IAsyncEnumerable<RedisKey> Stream(IEnumerable<string> keys, Action<string>? onRead = null)
     {
         foreach (var key in keys)
@@ -17,6 +20,9 @@ public class PodConnectionCleanupTests
         }
     }
 
+    /// <summary>
+    /// Answers a heartbeat-id lookup from a dictionary: the owner of each key, or no value for a key without one.
+    /// </summary>
     private static Task<RedisValue[]> Owners(RedisKey[] keys, IReadOnlyDictionary<string, string> owner) =>
         Task.FromResult(keys
             .Select(k => owner.TryGetValue(k.ToString(), out var v) ? (RedisValue)v : RedisValue.Null)
@@ -93,6 +99,10 @@ public class PodConnectionCleanupTests
         Assert.Equal(0, deleteCalls);
     }
 
+    /// <summary>
+    /// A lookup that fails in the second batch stops the cleanup with that exception: the first batch stays deleted and the
+    /// keys that were not read yet are not touched.
+    /// </summary>
     [Fact]
     public async Task RemoveOwnedByAsync_LookupThrows_StopsWithTheExceptionAndLeavesUnreadKeysAlone()
     {

@@ -54,6 +54,10 @@ internal static class PodConnectionCleanup
         return removed;
     }
 
+    /// <summary>
+    /// Looks up the heartbeat id of every key in one batch and deletes the keys the pod owns. Keys without a heartbeat id
+    /// are left alone. Returns the number of keys deleted.
+    /// </summary>
     private static async Task<int> RemoveBatchAsync(
         List<RedisKey> batch,
         string heartbeatId,

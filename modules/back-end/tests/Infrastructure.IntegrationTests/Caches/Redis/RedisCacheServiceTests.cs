@@ -24,6 +24,9 @@ public class RedisCacheServiceTests : IntegrationTestBase, IAsyncLifetime
         _fixture = fixture;
     }
 
+    /// <summary>
+    /// Connects to the shared Redis container with admin access, clears it, and builds the service under test.
+    /// </summary>
     public async Task InitializeAsync()
     {
         if (!DockerAvailability.IsAvailable)
@@ -207,6 +210,10 @@ public class RedisCacheServiceTests : IntegrationTestBase, IAsyncLifetime
         Assert.False(await _connection.GetDatabase().KeyExistsAsync(RedisKeys.Secret(secret.Value)));
     }
 
+    /// <summary>
+    /// Seeds more connection keys than one cleanup batch, interleaved between two pods, and checks that only the dead pod's
+    /// keys and heartbeat entry go while the other pod's keys and unrelated keys stay.
+    /// </summary>
     [DockerFact]
     public async Task DeletePodConnection_ManyConnectionKeys_RemovesOnlyTheKeysOwnedByThePod()
     {
@@ -289,6 +296,9 @@ public class RedisCacheServiceTests : IntegrationTestBase, IAsyncLifetime
         Assert.True(await db.HashExistsAsync(RedisKeys.Heartbeats, pod.ToString()));
     }
 
+    /// <summary>
+    /// Writes a connection key as the control plane does, with a heartbeat id only when one is given.
+    /// </summary>
     private async Task SeedConnectionAsync(string id, string? heartbeatId)
     {
         var fields = new List<HashEntry> { new("id", id), new("envId", Guid.NewGuid().ToString()), new("secret", "test") };

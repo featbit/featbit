@@ -423,6 +423,11 @@ public class RedisCacheService(IRedisClient redis) : ICacheService
         return result;
     }
 
+    /// <summary>
+    /// Deletes the connection keys that belong to the pod with this heartbeat id, on every non-replica endpoint of this
+    /// Redis. The keys are read as a stream and handled in batches, so the memory used does not grow with the number of
+    /// connection keys in Redis.
+    /// </summary>
     private async Task DeletePodClients(Guid heartbeatId)
     {
         var heartbeatIdString = heartbeatId.ToString();
