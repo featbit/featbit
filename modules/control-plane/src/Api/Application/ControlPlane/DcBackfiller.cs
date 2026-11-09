@@ -734,6 +734,10 @@ public sealed class DcBackfiller(
                 logger.LogInformation(
                     "DC backfill: removed deleted flag {FlagId} from DC {DcId}.", id, dcId);
             }
+            else
+            {
+                Defer(now.AddSeconds(UnreadableIndexRetrySeconds)); // not removed: look again
+            }
         }
 
         foreach (var (id, envs) in segmentsToRemove)
@@ -744,6 +748,10 @@ public sealed class DcBackfiller(
                 removed++;
                 logger.LogInformation(
                     "DC backfill: removed deleted segment {SegmentId} from DC {DcId}.", id, dcId);
+            }
+            else
+            {
+                Defer(now.AddSeconds(UnreadableIndexRetrySeconds)); // not removed: look again
             }
         }
 
