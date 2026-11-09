@@ -522,11 +522,12 @@ public sealed class DcBackfiller(
         CompositeRedisCacheService composite,
         CancellationToken cancellationToken)
     {
-        // On when the setting is absent. A value that is not one of the modes is a mistake (a typo, or a number,
-        // which Enum.TryParse would accept as an undefined mode that behaves like On), and it must not turn on a
+        // A dry run when the setting is absent or blank: the step reports what it would remove and removes nothing
+        // until it is switched on. A value that is not one of the modes is a mistake (a typo, or a number, which
+        // Enum.TryParse would accept as an undefined mode that behaves like On), and it must not turn on a
         // destructive step, so it switches the step off and says so.
         var rawMode = configuration[$"{PruneSection}:Mode"];
-        var pruneMode = PruneMode.On;
+        var pruneMode = PruneMode.DryRun;
         if (!string.IsNullOrWhiteSpace(rawMode))
         {
             if (Enum.TryParse<PruneMode>(rawMode.Trim(), ignoreCase: true, out var parsed) && Enum.IsDefined(parsed))
