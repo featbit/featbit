@@ -1,3 +1,4 @@
+using Application.ControlPlane;
 using Domain.Environments;
 using Domain.Segments;
 using Domain.FeatureFlags;
@@ -116,11 +117,15 @@ public interface ICacheService
     /// <summary>
     /// Whether THIS cache holds a value for the flag and that value is archived. <c>false</c> when the
     /// value is missing or cannot be read, so "not archived" is the answer whenever it is uncertain.
+    /// <paramref name="mode"/> picks the value that is current: under <c>GatedCommit</c> the versioned value
+    /// the committed pointer refers to (or the plain value when there is no pointer), under
+    /// <c>BestEffort</c> only the plain value, because a pointer left behind by an earlier <c>GatedCommit</c>
+    /// is no longer kept up to date.
     /// </summary>
-    Task<bool> IsFlagArchivedAsync(Guid id);
+    Task<bool> IsFlagArchivedAsync(Guid id, ConsistencyMode mode);
 
     /// <summary>Segment counterpart of <see cref="IsFlagArchivedAsync"/>.</summary>
-    Task<bool> IsSegmentArchivedAsync(Guid id);
+    Task<bool> IsSegmentArchivedAsync(Guid id, ConsistencyMode mode);
 
     Task UpsertLicenseAsync(Workspace workspace);
 

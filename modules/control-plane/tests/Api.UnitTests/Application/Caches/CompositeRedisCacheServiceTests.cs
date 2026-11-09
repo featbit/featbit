@@ -1,5 +1,6 @@
 using Api.Infrastructure.Caches;
 using Application.Caches;
+using Application.ControlPlane;
 using Domain.ControlPlane;
 using Domain.Environments;
 using Microsoft.Extensions.Logging.Testing;
@@ -232,11 +233,11 @@ public class CompositeRedisCacheServiceTests
     public async Task IsFlagArchivedInDcAsync_AsksOnlyThatDc()
     {
         var id = Guid.NewGuid();
-        _remote.Setup(s => s.IsFlagArchivedAsync(id)).ReturnsAsync(true);
+        _remote.Setup(s => s.IsFlagArchivedAsync(id, ConsistencyMode.BestEffort)).ReturnsAsync(true);
         var sut = CreateSut();
 
-        Assert.True(await sut.IsFlagArchivedInDcAsync(RemoteDcId, id));
-        _local.Verify(s => s.IsFlagArchivedAsync(It.IsAny<Guid>()), Times.Never);
+        Assert.True(await sut.IsFlagArchivedInDcAsync(RemoteDcId, id, ConsistencyMode.BestEffort));
+        _local.Verify(s => s.IsFlagArchivedAsync(It.IsAny<Guid>(), It.IsAny<ConsistencyMode>()), Times.Never);
     }
 
     [Fact]
@@ -244,7 +245,7 @@ public class CompositeRedisCacheServiceTests
     {
         var sut = CreateSut();
 
-        Assert.False(await sut.IsSegmentArchivedInDcAsync("dc-does-not-exist", Guid.NewGuid()));
+        Assert.False(await sut.IsSegmentArchivedInDcAsync("dc-does-not-exist", Guid.NewGuid(), ConsistencyMode.BestEffort));
     }
 
     [Fact]

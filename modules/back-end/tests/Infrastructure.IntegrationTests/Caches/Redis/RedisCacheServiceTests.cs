@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Application.Caches;
+using Application.ControlPlane;
 using Domain.Environments;
 using Domain.FeatureFlags;
 using Domain.Organizations;
@@ -485,7 +486,7 @@ public class RedisCacheServiceTests : IntegrationTestBase, IAsyncLifetime
         flag.IsArchived = true;
         await _sut.UpsertFlagAsync(flag);
 
-        Assert.True(await _sut.IsFlagArchivedAsync(flag.Id));
+        Assert.True(await _sut.IsFlagArchivedAsync(flag.Id, ConsistencyMode.BestEffort));
     }
 
     [DockerFact]
@@ -495,13 +496,13 @@ public class RedisCacheServiceTests : IntegrationTestBase, IAsyncLifetime
         flag.Id = Guid.NewGuid();
         await _sut.UpsertFlagAsync(flag);
 
-        Assert.False(await _sut.IsFlagArchivedAsync(flag.Id));
+        Assert.False(await _sut.IsFlagArchivedAsync(flag.Id, ConsistencyMode.BestEffort));
     }
 
     [DockerFact]
     public async Task IsFlagArchivedAsync_NoValueIsCached_ReturnsFalse()
     {
-        Assert.False(await _sut.IsFlagArchivedAsync(Guid.NewGuid()));
+        Assert.False(await _sut.IsFlagArchivedAsync(Guid.NewGuid(), ConsistencyMode.BestEffort));
     }
 
     [DockerFact]
@@ -510,7 +511,7 @@ public class RedisCacheServiceTests : IntegrationTestBase, IAsyncLifetime
         var id = Guid.NewGuid();
         await _connection.GetDatabase().StringSetAsync(RedisKeys.Flag(id), "not json");
 
-        Assert.False(await _sut.IsFlagArchivedAsync(id));
+        Assert.False(await _sut.IsFlagArchivedAsync(id, ConsistencyMode.BestEffort));
     }
 
     [DockerFact]
@@ -523,7 +524,51 @@ public class RedisCacheServiceTests : IntegrationTestBase, IAsyncLifetime
         await _sut.StageFlagAsync(flag, ts);
         await _sut.CommitFlagAsync(flag.EnvId, flag.Id.ToString(), ts);
 
-        Assert.True(await _sut.IsFlagArchivedAsync(flag.Id));
+        Assert.True(await _sut.IsFlagArchivedAsync(flag.Id, ConsistencyMode.GatedCommit));
+    }
+
+    [DockerFact]
+    public async Task IsFlagArchivedAsync_RolledBackToBestEffort_ReadsThePlainValueNotTheStalePointer()
+    {
+        // A flag committed under GatedCommit, then archived after the switch back to BestEffort: the pointer
+        // still refers to the old, unarchived version while the plain value is current.
+        var flag = NewFlag();
+        flag.Id = Guid.NewGuid();
+        const long ts = 1000;
+        await _sut.StageFlagAsync(flag, ts);
+        await _sut.CommitFlagAsync(flag.EnvId, flag.Id.ToString(), ts);
+        flag.IsArchived = true;
+        await _sut.UpsertFlagAsync(flag);
+
+        Assert.True(await _sut.IsFlagArchivedAsync(flag.Id, ConsistencyMode.BestEffort));
+        Assert.False(await _sut.IsFlagArchivedAsync(flag.Id, ConsistencyMode.GatedCommit));
+    }
+
+    [DockerFact]
+    public async Task IsFlagArchivedAsync_GatedCommitButNoPointer_FallsBackToThePlainValue()
+    {
+        var flag = NewFlag();
+        flag.Id = Guid.NewGuid();
+        flag.IsArchived = true;
+        await _sut.UpsertFlagAsync(flag);
+
+        Assert.True(await _sut.IsFlagArchivedAsync(flag.Id, ConsistencyMode.GatedCommit));
+    }
+
+    [DockerFact]
+    public async Task IsSegmentArchivedAsync_RolledBackToBestEffort_ReadsThePlainValueNotTheStalePointer()
+    {
+        var envIds = new[] { Guid.NewGuid() };
+        var segment = NewSegment();
+        segment.Id = Guid.NewGuid();
+        const long ts = 1000;
+        await _sut.StageSegmentAsync(segment, ts);
+        await _sut.CommitSegmentAsync(envIds, segment.Id.ToString(), ts);
+        segment.IsArchived = true;
+        await _sut.UpsertSegmentAsync(envIds, segment);
+
+        Assert.True(await _sut.IsSegmentArchivedAsync(segment.Id, ConsistencyMode.BestEffort));
+        Assert.False(await _sut.IsSegmentArchivedAsync(segment.Id, ConsistencyMode.GatedCommit));
     }
 
     [DockerFact]
@@ -534,7 +579,7 @@ public class RedisCacheServiceTests : IntegrationTestBase, IAsyncLifetime
         segment.IsArchived = true;
         await _sut.UpsertSegmentAsync([Guid.NewGuid()], segment);
 
-        Assert.True(await _sut.IsSegmentArchivedAsync(segment.Id));
+        Assert.True(await _sut.IsSegmentArchivedAsync(segment.Id, ConsistencyMode.BestEffort));
     }
 
     [DockerFact]
@@ -544,7 +589,7 @@ public class RedisCacheServiceTests : IntegrationTestBase, IAsyncLifetime
         segment.Id = Guid.NewGuid();
         await _sut.UpsertSegmentAsync([Guid.NewGuid()], segment);
 
-        Assert.False(await _sut.IsSegmentArchivedAsync(segment.Id));
+        Assert.False(await _sut.IsSegmentArchivedAsync(segment.Id, ConsistencyMode.BestEffort));
     }
 
     private static FeatureFlag NewFlag(Guid? envId = null)

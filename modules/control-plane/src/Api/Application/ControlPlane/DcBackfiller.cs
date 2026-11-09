@@ -142,6 +142,26 @@ public interface IDcBackfiller
     /// identical view (#90).
     /// </summary>
     Task<CommittedSnapshot> FetchCommittedSnapshotAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// The DCs whose last prune left entries for later (for example because they were too recent to remove, or
+    /// an index could not be read) and for which that time has now come. A cheap, in-memory check. A DC that is
+    /// returned is not returned again for a minute, so a caller that cannot prune it right away does not retry
+    /// on every tick; pruning it resets the schedule.
+    /// </summary>
+    IEnumerable<string> TakeDcsDueForPrune();
+
+    /// <summary>
+    /// Runs only the prune step of a backfill for <paramref name="dcId"/>, from the pre-fetched
+    /// <paramref name="snapshot"/>: removes the flags and segments that DC still lists although the source of
+    /// truth no longer has them. Returns the number removed, or <see cref="Skipped"/> if the composite cache is
+    /// unavailable or a backfill or prune of this DcId is already in flight.
+    /// </summary>
+    Task<int> PruneDcAsync(
+        string dcId,
+        ConsistencyMode mode,
+        CommittedSnapshot snapshot,
+        CancellationToken cancellationToken = default);
 }
 
 public sealed class DcBackfiller(
@@ -155,8 +175,14 @@ public sealed class DcBackfiller(
     private const string PruneSection = "ControlPlane:CacheReconcile:PruneDeleted";
     private const int DefaultMaxRemovalsPerRun = 200;
     private const int DefaultMinAgeSeconds = 600;
+    private const int UnreadableIndexRetrySeconds = 60;
 
     private readonly TimeProvider _time = timeProvider ?? TimeProvider.System;
+
+    // When a DC's prune is due again: it left entries for later, either too recent to remove yet or in an
+    // index it could not read. Nothing else would come back for them, because a backfill only runs when a DC
+    // becomes reachable.
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<string, DateTimeOffset> _pruneDueAt = new();
 
     // #92: DcIds with a backfill currently running, shared across EVERY caller (RecoveryWorker and
     // CacheReconciler both hold a reference to this same singleton), so the two workers coalesce
@@ -166,6 +192,55 @@ public sealed class DcBackfiller(
     private readonly HashSet<string> _inFlight = new();
 
     public bool IsCompositeCacheAvailable => compositeCache is CompositeRedisCacheService;
+
+    public IEnumerable<string> TakeDcsDueForPrune()
+    {
+        var now = _time.GetUtcNow();
+        var due = new List<string>();
+        foreach (var (dcId, dueAt) in _pruneDueAt)
+        {
+            if (dueAt <= now && _pruneDueAt.TryUpdate(dcId, now.AddSeconds(UnreadableIndexRetrySeconds), dueAt))
+            {
+                due.Add(dcId);
+            }
+        }
+
+        return due;
+    }
+
+    public async Task<int> PruneDcAsync(
+        string dcId,
+        ConsistencyMode mode,
+        CommittedSnapshot snapshot,
+        CancellationToken cancellationToken = default)
+    {
+        if (!TryGetComposite(dcId, out var composite))
+        {
+            return IDcBackfiller.Skipped;
+        }
+
+        // Share the in-flight slot with the backfill of the same DC, so the two never run at once.
+        lock (_inFlightLock)
+        {
+            if (!_inFlight.Add(dcId))
+            {
+                logger.LogDebug("DC prune: a backfill or prune for DC {DcId} is already in flight; skipping.", dcId);
+                return IDcBackfiller.Skipped;
+            }
+        }
+
+        try
+        {
+            return await PruneSafelyAsync(dcId, mode, snapshot, composite, cancellationToken);
+        }
+        finally
+        {
+            lock (_inFlightLock)
+            {
+                _inFlight.Remove(dcId);
+            }
+        }
+    }
 
     public async Task<int> BackfillDcAsync(
         string dcId,
@@ -315,19 +390,7 @@ public sealed class DcBackfiller(
         // Remove what this DC still lists for flags and segments the source of truth no longer has, i.e.
         // a delete this DC missed (see PruneDeletedAsync). A failure here must not fail the backfill that
         // already repaired the DC, so it is logged and the backfill carries on.
-        var pruned = 0;
-        try
-        {
-            pruned = await PruneDeletedAsync(dcId, snapshot, composite, cancellationToken);
-        }
-        catch (OperationCanceledException)
-        {
-            throw;
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "DC backfill: pruning deleted flags and segments from DC {DcId} failed.", dcId);
-        }
+        var pruned = await PruneSafelyAsync(dcId, mode, snapshot, composite, cancellationToken);
 
         // #105: report ACCEPTED vs ATTEMPTED so the log is honest about how much of this backfill
         // actually changed state — a DC that was already fully synced legitimately shows 0/N
@@ -377,34 +440,50 @@ public sealed class DcBackfiller(
     /// </list>
     /// If more than <c>MaxRemovalsPerRun</c> entries qualify, none is removed: that many at once points at the
     /// snapshot rather than at missed deletes. <c>Mode</c> can switch the whole step off or to a dry run that
-    /// only logs what it would remove. Returns the number of entries removed.
+    /// only logs what it would remove.
+    /// <para>
+    /// An entry that was left for later, because it is still too recent or because an index could not be read,
+    /// is not forgotten: the outcome says when to look again (see <see cref="TakeDcsDueForPrune"/>). A segment
+    /// is never removed while any environment's segment index could not be read, because it may be listed there
+    /// too and would be left behind; an index that could not be read is not the same as an empty one.
+    /// </para>
     /// </summary>
-    private async Task<int> PruneDeletedAsync(
+    private async Task<PruneOutcome> PruneDeletedAsync(
         string dcId,
+        ConsistencyMode mode,
         CommittedSnapshot snapshot,
         CompositeRedisCacheService composite,
         CancellationToken cancellationToken)
     {
-        var mode = Enum.TryParse<PruneMode>(configuration[$"{PruneSection}:Mode"], ignoreCase: true, out var parsed)
+        var pruneMode = Enum.TryParse<PruneMode>(configuration[$"{PruneSection}:Mode"], ignoreCase: true, out var parsed)
             ? parsed
             : PruneMode.On;
-        if (mode == PruneMode.Off)
+        if (pruneMode == PruneMode.Off)
         {
-            return 0;
+            return new PruneOutcome(0, null);
         }
 
         if (snapshot.Flags.Count == 0 && snapshot.Segments.Count == 0)
         {
             logger.LogDebug(
                 "DC backfill: the snapshot holds no flags or segments; not pruning DC {DcId}.", dcId);
-            return 0;
+            return new PruneOutcome(0, null);
         }
 
         var configuredMax = configuration.GetValue<int?>($"{PruneSection}:MaxRemovalsPerRun");
         var maxRemovals = configuredMax is > 0 ? configuredMax.Value : DefaultMaxRemovalsPerRun;
         var configuredAge = configuration.GetValue<int?>($"{PruneSection}:MinAgeSeconds");
         var minAgeSeconds = configuredAge is >= 0 ? configuredAge.Value : DefaultMinAgeSeconds;
-        var cutoff = _time.GetUtcNow().AddSeconds(-minAgeSeconds).ToUnixTimeMilliseconds();
+        var now = _time.GetUtcNow();
+        var cutoff = now.AddSeconds(-minAgeSeconds).ToUnixTimeMilliseconds();
+
+        // The earliest time at which something left for later is worth another look.
+        DateTimeOffset? retryAt = null;
+        void Defer(DateTimeOffset when) => retryAt = retryAt is { } current && current <= when ? current : when;
+
+        // A score is too recent until it is MinAgeSeconds old; look again a second after that.
+        void DeferTooNew(long score) =>
+            Defer(DateTimeOffset.FromUnixTimeMilliseconds(score).AddSeconds(minAgeSeconds + 1));
 
         // Every environment the source of truth knows. An environment whose flags were all deleted still
         // has its SDK keys, so it is found through its secrets.
@@ -419,20 +498,40 @@ public sealed class DcBackfiller(
         var flagCandidates = new List<(Guid EnvId, Guid Id)>();
         var segmentEnvs = new Dictionary<Guid, List<Guid>>();
         var segmentsTooNew = new HashSet<Guid>();
+        var segmentIndexUnreadable = false;
         foreach (var envId in envIds)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
             var flagIndex = await composite.GetFlagIndexFromDcAsync(dcId, envId);
+            if (flagIndex is null)
+            {
+                Defer(now.AddSeconds(UnreadableIndexRetrySeconds));
+            }
+
             foreach (var (id, score) in flagIndex ?? new Dictionary<Guid, long>())
             {
-                if (!liveFlagIds.Contains(id) && score < cutoff)
+                if (liveFlagIds.Contains(id))
                 {
-                    flagCandidates.Add((envId, id));
+                    continue;
                 }
+
+                if (score >= cutoff)
+                {
+                    DeferTooNew(score);
+                    continue;
+                }
+
+                flagCandidates.Add((envId, id));
             }
 
             var segmentIndex = await composite.GetSegmentIndexFromDcAsync(dcId, envId);
+            if (segmentIndex is null)
+            {
+                segmentIndexUnreadable = true;
+                Defer(now.AddSeconds(UnreadableIndexRetrySeconds));
+            }
+
             foreach (var (id, score) in segmentIndex ?? new Dictionary<Guid, long>())
             {
                 if (liveSegmentIds.Contains(id))
@@ -442,6 +541,7 @@ public sealed class DcBackfiller(
 
                 if (score >= cutoff)
                 {
+                    DeferTooNew(score);
                     segmentsTooNew.Add(id);
                     continue;
                 }
@@ -461,9 +561,21 @@ public sealed class DcBackfiller(
             segmentEnvs.Remove(id);
         }
 
+        // An index that could not be read may list a segment that is listed elsewhere too. Removing it from the
+        // environments that were read would leave it behind in that one, so no segment is removed until every
+        // index can be read.
+        if (segmentIndexUnreadable && segmentEnvs.Count > 0)
+        {
+            logger.LogWarning(
+                "DC backfill: a segment index of DC {DcId} could not be read; not removing deleted segments " +
+                "until every index can be read.",
+                dcId);
+            segmentEnvs.Clear();
+        }
+
         if (flagCandidates.Count == 0 && segmentEnvs.Count == 0)
         {
-            return 0;
+            return new PruneOutcome(0, retryAt);
         }
 
         // 2. Confirm: archived in this DC, and still absent from the database right now. The scope is only
@@ -477,7 +589,7 @@ public sealed class DcBackfiller(
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (await composite.IsFlagArchivedInDcAsync(dcId, id) && !await featureFlagService.AnyAsync(f => f.Id == id))
+            if (await composite.IsFlagArchivedInDcAsync(dcId, id, mode) && !await featureFlagService.AnyAsync(f => f.Id == id))
             {
                 flagsToRemove.Add((envId, id));
             }
@@ -488,7 +600,7 @@ public sealed class DcBackfiller(
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (await composite.IsSegmentArchivedInDcAsync(dcId, id) && !await segmentService.AnyAsync(s => s.Id == id))
+            if (await composite.IsSegmentArchivedInDcAsync(dcId, id, mode) && !await segmentService.AnyAsync(s => s.Id == id))
             {
                 segmentsToRemove.Add((id, envs));
             }
@@ -497,7 +609,7 @@ public sealed class DcBackfiller(
         var total = flagsToRemove.Count + segmentsToRemove.Count;
         if (total == 0)
         {
-            return 0;
+            return new PruneOutcome(0, retryAt);
         }
 
         if (total > maxRemovals)
@@ -509,10 +621,10 @@ public sealed class DcBackfiller(
                 dcId,
                 maxRemovals,
                 $"{PruneSection}:MaxRemovalsPerRun");
-            return 0;
+            return new PruneOutcome(0, retryAt);
         }
 
-        if (mode == PruneMode.DryRun)
+        if (pruneMode == PruneMode.DryRun)
         {
             logger.LogInformation(
                 "DC backfill (dry run): DC {DcId} still lists {FlagCount} deleted flag(s) ({FlagIds}) and " +
@@ -522,7 +634,7 @@ public sealed class DcBackfiller(
                 flagsToRemove.Select(f => f.Id),
                 segmentsToRemove.Count,
                 segmentsToRemove.Select(s => s.Id));
-            return 0;
+            return new PruneOutcome(0, retryAt);
         }
 
         // 3. Remove, in this DC only.
@@ -547,8 +659,48 @@ public sealed class DcBackfiller(
             }
         }
 
-        return removed;
+        return new PruneOutcome(removed, retryAt);
     }
+
+    /// <summary>
+    /// Runs <see cref="PruneDeletedAsync"/> and records when this DC's prune is due again. A failure here must
+    /// not fail a backfill that already repaired the DC, so it is logged and retried in a minute.
+    /// </summary>
+    private async Task<int> PruneSafelyAsync(
+        string dcId,
+        ConsistencyMode mode,
+        CommittedSnapshot snapshot,
+        CompositeRedisCacheService composite,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var outcome = await PruneDeletedAsync(dcId, mode, snapshot, composite, cancellationToken);
+            if (outcome.RetryAt is { } retryAt)
+            {
+                _pruneDueAt[dcId] = retryAt;
+            }
+            else
+            {
+                _pruneDueAt.TryRemove(dcId, out _);
+            }
+
+            return outcome.Removed;
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(
+                ex, "DC backfill: pruning deleted flags and segments from DC {DcId} failed; will retry.", dcId);
+            _pruneDueAt[dcId] = _time.GetUtcNow().AddSeconds(UnreadableIndexRetrySeconds);
+            return 0;
+        }
+    }
+
+    private readonly record struct PruneOutcome(int Removed, DateTimeOffset? RetryAt);
 
     private enum PruneMode
     {
