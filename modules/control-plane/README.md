@@ -33,7 +33,8 @@ backfill also removes the flags and segments that DC still lists although they w
 example because the DC was unreachable when the delete was relayed. An entry is removed only if it
 is absent from the snapshot, older than `MinAgeSeconds`, archived in that DC, and still absent from
 the database when asked again; more than `MaxRemovalsPerRun` such entries at once means none are
-removed. Set `ControlPlane:CacheReconcile:PruneDeleted:Mode` to `DryRun` to only log what would be
+removed. An entry that is still too recent, or that sits in an index which could not be read, is
+looked at again later by the reconciler, so it does not wait for the next reconnect. Set `ControlPlane:CacheReconcile:PruneDeleted:Mode` to `DryRun` to only log what would be
 removed, or `Off` to disable it (default `On`).
 
 The consistency background workers — commit coordinator, recovery worker, DcId consistency

@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Application.Caches;
+using Application.ControlPlane;
 using Domain.ControlPlane;
 using Domain.Environments;
 using Domain.FeatureFlags;
@@ -323,12 +324,16 @@ public class RedisCacheService(IRedisClient redis) : ICacheService
     public Task<IReadOnlyDictionary<Guid, long>> GetSegmentIndexAsync(Guid envId) =>
         ReadIndexAsync(RedisKeys.SegmentIndex(envId));
 
-    public Task<bool> IsFlagArchivedAsync(Guid id) =>
-        IsArchivedAsync(RedisKeys.Flag(id), RedisKeys.FlagCommittedPointer(id), ts => RedisKeys.FlagVersion(id, ts));
-
-    public Task<bool> IsSegmentArchivedAsync(Guid id) =>
+    public Task<bool> IsFlagArchivedAsync(Guid id, ConsistencyMode mode) =>
         IsArchivedAsync(
-            RedisKeys.Segment(id), RedisKeys.SegmentCommittedPointer(id), ts => RedisKeys.SegmentVersion(id, ts));
+            mode, RedisKeys.Flag(id), RedisKeys.FlagCommittedPointer(id), ts => RedisKeys.FlagVersion(id, ts));
+
+    public Task<bool> IsSegmentArchivedAsync(Guid id, ConsistencyMode mode) =>
+        IsArchivedAsync(
+            mode,
+            RedisKeys.Segment(id),
+            RedisKeys.SegmentCommittedPointer(id),
+            ts => RedisKeys.SegmentVersion(id, ts));
 
     private async Task<IReadOnlyDictionary<Guid, long>> ReadIndexAsync(RedisKey indexKey)
     {
@@ -346,14 +351,20 @@ public class RedisCacheService(IRedisClient redis) : ICacheService
         return result;
     }
 
-    private async Task<bool> IsArchivedAsync(RedisKey valueKey, RedisKey pointerKey, Func<long, RedisKey> versionKey)
+    private async Task<bool> IsArchivedAsync(
+        ConsistencyMode mode, RedisKey valueKey, RedisKey pointerKey, Func<long, RedisKey> versionKey)
     {
-        // Under GatedCommit the value is the versioned key the committed pointer refers to.
+        // Under GatedCommit the value is the versioned key the committed pointer refers to. Under BestEffort it
+        // is the plain value key: a pointer left behind by an earlier GatedCommit is no longer kept up to date,
+        // so reading through it could return an older value than the one that is current.
         var key = valueKey;
-        var pointer = await Redis.StringGetAsync(pointerKey);
-        if (pointer.HasValue && pointer.TryParse(out long ts))
+        if (mode == ConsistencyMode.GatedCommit)
         {
-            key = versionKey(ts);
+            var pointer = await Redis.StringGetAsync(pointerKey);
+            if (pointer.HasValue && pointer.TryParse(out long ts))
+            {
+                key = versionKey(ts);
+            }
         }
 
         var value = await Redis.StringGetAsync(key);

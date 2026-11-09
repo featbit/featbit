@@ -1,4 +1,5 @@
 using Application.Caches;
+using Application.ControlPlane;
 using Domain.ControlPlane;
 using Domain.Environments;
 using Domain.FeatureFlags;
@@ -107,11 +108,11 @@ public class CompositeRedisCacheService(
     public Task<IReadOnlyDictionary<Guid, long>> GetSegmentIndexAsync(Guid envId) =>
         cacheServices.First().Service.GetSegmentIndexAsync(envId);
 
-    public Task<bool> IsFlagArchivedAsync(Guid id) =>
-        cacheServices.First().Service.IsFlagArchivedAsync(id);
+    public Task<bool> IsFlagArchivedAsync(Guid id, ConsistencyMode mode) =>
+        cacheServices.First().Service.IsFlagArchivedAsync(id, mode);
 
-    public Task<bool> IsSegmentArchivedAsync(Guid id) =>
-        cacheServices.First().Service.IsSegmentArchivedAsync(id);
+    public Task<bool> IsSegmentArchivedAsync(Guid id, ConsistencyMode mode) =>
+        cacheServices.First().Service.IsSegmentArchivedAsync(id, mode);
 
     public Task UpsertLicenseAsync(Workspace workspace) =>
         BroadcastAsync(s => s.UpsertLicenseAsync(workspace), nameof(UpsertLicenseAsync));
@@ -359,12 +360,12 @@ public class CompositeRedisCacheService(
     /// Targeted probe: whether ONE DC's Redis holds the flag and its value is archived. <c>false</c> for an
     /// unknown DC, a failed read or a missing value, so "not archived" is the answer whenever it is uncertain.
     /// </summary>
-    public Task<bool> IsFlagArchivedInDcAsync(string dcId, Guid id) =>
-        TargetedAsync(dcId, s => s.IsFlagArchivedAsync(id), nameof(IsFlagArchivedInDcAsync));
+    public Task<bool> IsFlagArchivedInDcAsync(string dcId, Guid id, ConsistencyMode mode) =>
+        TargetedAsync(dcId, s => s.IsFlagArchivedAsync(id, mode), nameof(IsFlagArchivedInDcAsync));
 
     /// <summary>Segment counterpart of <see cref="IsFlagArchivedInDcAsync"/>.</summary>
-    public Task<bool> IsSegmentArchivedInDcAsync(string dcId, Guid id) =>
-        TargetedAsync(dcId, s => s.IsSegmentArchivedAsync(id), nameof(IsSegmentArchivedInDcAsync));
+    public Task<bool> IsSegmentArchivedInDcAsync(string dcId, Guid id, ConsistencyMode mode) =>
+        TargetedAsync(dcId, s => s.IsSegmentArchivedAsync(id, mode), nameof(IsSegmentArchivedInDcAsync));
 
     /// <summary>
     /// Targeted delete: removes a flag from ONE DC's Redis, unlike the broadcast <see cref="DeleteFlagAsync"/>.

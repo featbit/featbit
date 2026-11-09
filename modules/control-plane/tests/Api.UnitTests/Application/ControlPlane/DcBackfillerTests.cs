@@ -327,15 +327,19 @@ public class DcBackfillerTests
         Mock<ISegmentService> Segments,
         CommittedSnapshot Snapshot,
         Guid EnvA,
-        Guid EnvB);
+        Guid EnvB,
+        FakeTimeProvider Time);
 
     // East is the DC under test and lists whatever a test sets up. Every value it holds is archived and the
     // database holds nothing beyond the snapshot, so a test changes only the one thing it is about.
     private PruneFixture CreatePruneFixture(string mode = "On", int? maxRemovals = null)
     {
         var east = new Mock<ICacheService>();
-        east.Setup(s => s.IsFlagArchivedAsync(It.IsAny<Guid>())).ReturnsAsync(true);
-        east.Setup(s => s.IsSegmentArchivedAsync(It.IsAny<Guid>())).ReturnsAsync(true);
+        // An index that nothing was set up for is empty, as in Redis, not unreadable (a null answer).
+        east.Setup(s => s.GetFlagIndexAsync(It.IsAny<Guid>())).ReturnsAsync(Index());
+        east.Setup(s => s.GetSegmentIndexAsync(It.IsAny<Guid>())).ReturnsAsync(Index());
+        east.Setup(s => s.IsFlagArchivedAsync(It.IsAny<Guid>(), It.IsAny<ConsistencyMode>())).ReturnsAsync(true);
+        east.Setup(s => s.IsSegmentArchivedAsync(It.IsAny<Guid>(), It.IsAny<ConsistencyMode>())).ReturnsAsync(true);
         var west = new Mock<ICacheService>();
 
         var flags = new Mock<IFeatureFlagService>();
@@ -357,13 +361,14 @@ public class DcBackfillerTests
         liveB.Id = Guid.NewGuid();
         var snapshot = EmptySnapshot with { Flags = [liveA, liveB] };
 
+        var time = new FakeTimeProvider(Now);
         var sut = CreateSut(
             composite,
             services.BuildServiceProvider().GetRequiredService<IServiceScopeFactory>(),
             PruneSettings(mode, maxRemovals),
-            new FakeTimeProvider(Now));
+            time);
 
-        return new PruneFixture(sut, east, west, flags, segments, snapshot, liveA.EnvId, liveB.EnvId);
+        return new PruneFixture(sut, east, west, flags, segments, snapshot, liveA.EnvId, liveB.EnvId, time);
     }
 
     [Fact]
@@ -410,7 +415,7 @@ public class DcBackfillerTests
         var f = CreatePruneFixture();
         var orphan = Guid.NewGuid();
         f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ReturnsAsync(Index((orphan, OldScore)));
-        f.East.Setup(s => s.IsFlagArchivedAsync(orphan)).ReturnsAsync(false);
+        f.East.Setup(s => s.IsFlagArchivedAsync(orphan, It.IsAny<ConsistencyMode>())).ReturnsAsync(false);
 
         await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
 
@@ -547,7 +552,7 @@ public class DcBackfillerTests
         var f = CreatePruneFixture();
         var orphan = Guid.NewGuid();
         f.East.Setup(s => s.GetSegmentIndexAsync(f.EnvA)).ReturnsAsync(Index((orphan, OldScore)));
-        f.East.Setup(s => s.IsSegmentArchivedAsync(orphan)).ReturnsAsync(false);
+        f.East.Setup(s => s.IsSegmentArchivedAsync(orphan, It.IsAny<ConsistencyMode>())).ReturnsAsync(false);
 
         await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
 
@@ -592,5 +597,203 @@ public class DcBackfillerTests
 
         f.East.Verify(s => s.DeleteFlagAsync(It.IsAny<Guid>(), It.IsAny<Guid>()), Times.Never);
         Assert.Equal(2, result);
+    }
+
+    // ----- entries left for later are looked at again -----
+
+    [Fact]
+    public async Task BackfillDcAsync_ListedFlagWasChangedRecently_IsPrunedLaterOnceItIsOldEnough()
+    {
+        var f = CreatePruneFixture();
+        var orphan = Guid.NewGuid();
+        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ReturnsAsync(Index((orphan, RecentScore)));
+
+        await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+        Assert.Empty(f.Sut.TakeDcsDueForPrune());
+        f.East.Verify(s => s.DeleteFlagAsync(It.IsAny<Guid>(), It.IsAny<Guid>()), Times.Never);
+
+        f.Time.Advance(TimeSpan.FromMinutes(10)); // the entry is now older than MinAgeSeconds
+        Assert.Equal(["east"], f.Sut.TakeDcsDueForPrune());
+        var removed = await f.Sut.PruneDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        Assert.Equal(1, removed);
+        f.East.Verify(s => s.DeleteFlagAsync(f.EnvA, orphan), Times.Once);
+    }
+
+    [Fact]
+    public async Task BackfillDcAsync_ListedSegmentWasChangedRecently_IsPrunedLaterOnceItIsOldEnough()
+    {
+        var f = CreatePruneFixture();
+        var orphan = Guid.NewGuid();
+        f.East.Setup(s => s.GetSegmentIndexAsync(f.EnvA)).ReturnsAsync(Index((orphan, RecentScore)));
+
+        await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+        f.East.Verify(s => s.DeleteSegmentAsync(It.IsAny<ICollection<Guid>>(), It.IsAny<Guid>()), Times.Never);
+
+        f.Time.Advance(TimeSpan.FromMinutes(10));
+        Assert.Equal(["east"], f.Sut.TakeDcsDueForPrune());
+        await f.Sut.PruneDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        f.East.Verify(
+            s => s.DeleteSegmentAsync(It.Is<ICollection<Guid>>(ids => ids.SequenceEqual(new[] { f.EnvA })), orphan),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task TakeDcsDueForPrune_NothingWasLeftForLater_ReturnsNothing()
+    {
+        var f = CreatePruneFixture();
+        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ReturnsAsync(Index((Guid.NewGuid(), OldScore)));
+
+        await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+        f.Time.Advance(TimeSpan.FromDays(1));
+
+        Assert.Empty(f.Sut.TakeDcsDueForPrune());
+    }
+
+    [Fact]
+    public async Task TakeDcsDueForPrune_ADcThatWasTaken_IsNotTakenAgainForAMinute()
+    {
+        var f = CreatePruneFixture();
+        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ReturnsAsync(Index((Guid.NewGuid(), RecentScore)));
+        await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+        f.Time.Advance(TimeSpan.FromMinutes(10));
+
+        Assert.Equal(["east"], f.Sut.TakeDcsDueForPrune());
+        Assert.Empty(f.Sut.TakeDcsDueForPrune());
+
+        f.Time.Advance(TimeSpan.FromSeconds(61));
+        Assert.Equal(["east"], f.Sut.TakeDcsDueForPrune());
+    }
+
+    [Fact]
+    public async Task BackfillDcAsync_FlagIndexCannotBeRead_IsRetriedInAMinute()
+    {
+        var f = CreatePruneFixture();
+        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ThrowsAsync(new TimeoutException("redis"));
+
+        await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        Assert.Empty(f.Sut.TakeDcsDueForPrune());
+        f.Time.Advance(TimeSpan.FromSeconds(61));
+        Assert.Equal(["east"], f.Sut.TakeDcsDueForPrune());
+    }
+
+    [Fact]
+    public async Task BackfillDcAsync_PruningThrows_IsRetriedInAMinute()
+    {
+        var f = CreatePruneFixture();
+        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ReturnsAsync(Index((Guid.NewGuid(), OldScore)));
+        f.Flags.Setup(s => s.AnyAsync(It.IsAny<Expression<Func<FeatureFlag, bool>>>()))
+            .ThrowsAsync(new InvalidOperationException("database down"));
+
+        await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        f.Time.Advance(TimeSpan.FromSeconds(61));
+        Assert.Equal(["east"], f.Sut.TakeDcsDueForPrune());
+    }
+
+    [Fact]
+    public async Task PruneDcAsync_ALaterPruneFindsNothingLeftForLater_StopsBeingDue()
+    {
+        var f = CreatePruneFixture();
+        var orphan = Guid.NewGuid();
+        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ReturnsAsync(Index((orphan, RecentScore)));
+        await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+        f.Time.Advance(TimeSpan.FromMinutes(10));
+
+        await f.Sut.PruneDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+        f.Time.Advance(TimeSpan.FromDays(1));
+
+        Assert.Empty(f.Sut.TakeDcsDueForPrune());
+    }
+
+    [Fact]
+    public async Task PruneDcAsync_WhenCompositeCacheUnavailable_ReturnsSkipped()
+    {
+        var sut = CreateSut(Mock.Of<ICacheService>());
+
+        var result = await sut.PruneDcAsync("east", ConsistencyMode.BestEffort, EmptySnapshot);
+
+        Assert.Equal(IDcBackfiller.Skipped, result);
+    }
+
+    [Fact]
+    public async Task PruneDcAsync_WhileABackfillOfThatDcIsInFlight_ReturnsSkipped()
+    {
+        var f = CreatePruneFixture();
+        var gate = new TaskCompletionSource();
+        f.East.Setup(s => s.UpsertFlagIfNewerAsync(It.IsAny<FeatureFlag>()))
+            .Returns(async () =>
+            {
+                await gate.Task;
+                return true;
+            });
+        var backfill = f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        var result = await f.Sut.PruneDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        Assert.Equal(IDcBackfiller.Skipped, result);
+        gate.SetResult();
+        await backfill;
+    }
+
+    // ----- a segment listed in several environments -----
+
+    [Fact]
+    public async Task BackfillDcAsync_OneSegmentIndexCannotBeRead_RemovesNoSegmentUntilEveryIndexCanBe()
+    {
+        var f = CreatePruneFixture();
+        var orphan = Guid.NewGuid();
+        f.East.Setup(s => s.GetSegmentIndexAsync(f.EnvA)).ReturnsAsync(Index((orphan, OldScore)));
+        f.East.Setup(s => s.GetSegmentIndexAsync(f.EnvB)).ThrowsAsync(new TimeoutException("redis"));
+
+        await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        f.East.Verify(s => s.DeleteSegmentAsync(It.IsAny<ICollection<Guid>>(), It.IsAny<Guid>()), Times.Never);
+
+        // The index can be read a minute later, and the segment is removed from both environments.
+        f.East.Setup(s => s.GetSegmentIndexAsync(f.EnvB)).ReturnsAsync(Index((orphan, OldScore)));
+        f.Time.Advance(TimeSpan.FromSeconds(61));
+        Assert.Equal(["east"], f.Sut.TakeDcsDueForPrune());
+        await f.Sut.PruneDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        f.East.Verify(
+            s => s.DeleteSegmentAsync(
+                It.Is<ICollection<Guid>>(ids => ids.OrderBy(i => i).SequenceEqual(new[] { f.EnvA, f.EnvB }.OrderBy(i => i))),
+                orphan),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task BackfillDcAsync_FlagIndexOfOneEnvironmentCannotBeRead_StillPrunesTheOthers()
+    {
+        var f = CreatePruneFixture();
+        var orphan = Guid.NewGuid();
+        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ThrowsAsync(new TimeoutException("redis"));
+        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvB)).ReturnsAsync(Index((orphan, OldScore)));
+
+        await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        f.East.Verify(s => s.DeleteFlagAsync(f.EnvB, orphan), Times.Once);
+    }
+
+    // ----- which value says whether an entry is archived -----
+
+    [Theory]
+    [InlineData(ConsistencyMode.BestEffort)]
+    [InlineData(ConsistencyMode.GatedCommit)]
+    public async Task BackfillDcAsync_ChecksArchivedStateInTheModeOfTheBackfill(ConsistencyMode mode)
+    {
+        var f = CreatePruneFixture();
+        var orphanFlag = Guid.NewGuid();
+        var orphanSegment = Guid.NewGuid();
+        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ReturnsAsync(Index((orphanFlag, OldScore)));
+        f.East.Setup(s => s.GetSegmentIndexAsync(f.EnvA)).ReturnsAsync(Index((orphanSegment, OldScore)));
+
+        await f.Sut.BackfillDcAsync("east", mode, f.Snapshot);
+
+        f.East.Verify(s => s.IsFlagArchivedAsync(orphanFlag, mode), Times.Once);
+        f.East.Verify(s => s.IsSegmentArchivedAsync(orphanSegment, mode), Times.Once);
     }
 }
