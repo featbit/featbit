@@ -58,6 +58,9 @@ public class DcBackfillerTests
         currentUserId: Guid.NewGuid());
 
     // Pruning deleted entries is off unless a test turns it on, so the tests of the writes stay about the writes.
+    /// <summary>
+    /// Builds the backfiller. Pruning is off unless a test turns it on, so the tests of the writes stay about the writes.
+    /// </summary>
     private DcBackfiller CreateSut(
         ICacheService compositeCache,
         IServiceScopeFactory? scopeFactory = null,
@@ -71,6 +74,9 @@ public class DcBackfillerTests
             NullLogger<DcBackfiller>.Instance,
             timeProvider);
 
+    /// <summary>
+    /// Builds the pruning settings, leaving out any value that is not given.
+    /// </summary>
     private static IConfiguration PruneSettings(string mode, int? maxRemovals = null, int? minAgeSeconds = null)
     {
         var values = new Dictionary<string, string?> { ["ControlPlane:CacheReconcile:PruneDeleted:Mode"] = mode };
@@ -738,6 +744,9 @@ public class DcBackfillerTests
         await backfill;
     }
 
+    /// <summary>
+    /// A prune that removed something tells that DC's clients to refresh, as a backfill does.
+    /// </summary>
     [Fact]
     public async Task PruneDcAsync_EntriesWereRemoved_PublishesAClientRefreshForThatDc()
     {
@@ -765,6 +774,10 @@ public class DcBackfillerTests
         _producer.Verify(p => p.PublishAsync(It.IsAny<string>(), It.IsAny<ControlPlaneCommand>()), Times.Never);
     }
 
+    /// <summary>
+    /// A skipped backfill is taken to mean that another backfill is repairing the DC. A prune does not repair what a
+    /// backfill writes, so it must never make a backfill look like a duplicate.
+    /// </summary>
     [Fact]
     public async Task BackfillDcAsync_WhileAPruneOfThatDcIsInFlight_IsNotSkipped()
     {
@@ -794,6 +807,9 @@ public class DcBackfillerTests
         await prune;
     }
 
+    /// <summary>
+    /// Two prunes of one DC never run at once: the second yields.
+    /// </summary>
     [Fact]
     public async Task PruneDcAsync_WhileAnotherPruneOfThatDcIsInFlight_ReturnsSkipped()
     {
@@ -868,6 +884,10 @@ public class DcBackfillerTests
 
     // ----- overlapping prunes and stale snapshots -----
 
+    /// <summary>
+    /// The prune that started last has the newest snapshot, so an earlier prune that finishes after it, with nothing left
+    /// for later, must not clear the retry that the later run scheduled.
+    /// </summary>
     [Fact]
     public async Task BackfillDcAsync_AnEarlierPruneFinishingLast_DoesNotClearWhatALaterRunLeftForLater()
     {
@@ -897,6 +917,9 @@ public class DcBackfillerTests
         Assert.Equal(["east"], f.Sut.TakeDcsDueForPrune());
     }
 
+    /// <summary>
+    /// An earlier prune may bring the retry schedule forward but never push back a sooner retry that a later run set.
+    /// </summary>
     [Fact]
     public async Task BackfillDcAsync_AnEarlierPruneWithALaterRetry_DoesNotPushBackASoonerOne()
     {
