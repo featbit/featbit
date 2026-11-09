@@ -272,6 +272,23 @@ public class RedisCacheServiceTests : IntegrationTestBase, IAsyncLifetime
         Assert.False(await db.KeyExistsAsync(RedisKeys.Connection("owned")));
     }
 
+    [DockerFact]
+    public async Task DeletePodConnection_CleanupFails_KeepsTheHeartbeatEntryForTheNextCheck()
+    {
+        var pod = Guid.NewGuid();
+        var db = _connection.GetDatabase();
+        await db.HashSetAsync(RedisKeys.Heartbeats, pod.ToString(), "{}");
+
+        var failingClient = new Mock<IRedisClient>();
+        failingClient.Setup(x => x.GetDatabase()).Returns(db);
+        failingClient.Setup(x => x.Connection).Throws(new InvalidOperationException("scan failed"));
+        var sut = new RedisCacheService(failingClient.Object);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => sut.DeletePodConnection(pod));
+
+        Assert.True(await db.HashExistsAsync(RedisKeys.Heartbeats, pod.ToString()));
+    }
+
     private async Task SeedConnectionAsync(string id, string? heartbeatId)
     {
         var fields = new List<HashEntry> { new("id", id), new("envId", Guid.NewGuid().ToString()), new("secret", "test") };

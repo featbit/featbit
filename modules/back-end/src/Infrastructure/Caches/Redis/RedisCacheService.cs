@@ -394,9 +394,11 @@ public class RedisCacheService(IRedisClient redis) : ICacheService
 
     public async Task DeletePodConnection(Guid podId)
     {
-        await Redis.HashDeleteAsync(RedisKeys.Heartbeats, podId.ToString());
-
         await DeletePodClients(podId);
+
+        // Remove the heartbeat entry last: if the cleanup above fails, the pod is still listed as stale
+        // and the next health check tries again.
+        await Redis.HashDeleteAsync(RedisKeys.Heartbeats, podId.ToString());
     }
 
     public async Task<List<HealthMessage>> GetAllHealthMessages()
