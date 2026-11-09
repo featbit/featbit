@@ -136,8 +136,6 @@ public class RedisCacheServiceTests : IntegrationTestBase, IAsyncLifetime
     [DockerFact]
     public async Task DeleteFlagAsync_AStaleCommitArrivesAfterTheDelete_DoesNotMakeTheFlagServableAgain()
     {
-        // A backfill that read the database before the flag was archived and deleted writes its older version
-        // after the delete. The flag is served only when the committed pointer resolves to an existing version.
         var flag = NewFlag();
         flag.Id = Guid.NewGuid();
         const long staleTs = 1000;
