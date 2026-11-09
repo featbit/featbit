@@ -93,7 +93,7 @@ public class RedisCacheServiceTests : IntegrationTestBase, IAsyncLifetime
     }
 
     [DockerFact]
-    public async Task DeleteFlagAsync_CommittedVersionExists_RemovesTheVersionAndThePointer()
+    public async Task DeleteFlagAsync_CommittedVersionExists_RemovesTheVersionAndKeepsThePointer()
     {
         var flag = NewFlag();
         const long ts = 1000;
@@ -104,7 +104,7 @@ public class RedisCacheServiceTests : IntegrationTestBase, IAsyncLifetime
 
         var db = _connection.GetDatabase();
         Assert.False(await db.KeyExistsAsync(RedisKeys.FlagVersion(flag.Id, ts)));
-        Assert.False(await db.KeyExistsAsync(RedisKeys.FlagCommittedPointer(flag.Id)));
+        Assert.True(await db.KeyExistsAsync(RedisKeys.FlagCommittedPointer(flag.Id)));
         Assert.Null(await db.SortedSetScoreAsync(RedisKeys.FlagIndex(flag.EnvId), flag.Id.ToString()));
     }
 
@@ -130,7 +130,54 @@ public class RedisCacheServiceTests : IntegrationTestBase, IAsyncLifetime
     }
 
     [DockerFact]
-    public async Task DeleteFlagAsync_PointerIsNotANumber_StillRemovesThePointer()
+    public async Task DeleteFlagAsync_AStaleCommitArrivesAfterTheDelete_DoesNotMakeTheFlagServableAgain()
+    {
+        // A backfill that read the database before the flag was archived and deleted writes its older version
+        // after the delete. The flag is served only when the committed pointer resolves to an existing version.
+        var flag = NewFlag();
+        flag.Id = Guid.NewGuid();
+        const long staleTs = 1000;
+        const long archivedTs = 2000;
+        await _sut.StageFlagAsync(flag, staleTs);
+        await _sut.CommitFlagAsync(flag.EnvId, flag.Id.ToString(), staleTs);
+        await _sut.StageFlagAsync(flag, archivedTs);
+        await _sut.CommitFlagAsync(flag.EnvId, flag.Id.ToString(), archivedTs);
+        await _sut.DeleteFlagAsync(flag.EnvId, flag.Id);
+
+        await _sut.StageFlagAsync(flag, staleTs);
+        await _sut.CommitFlagAsync(flag.EnvId, flag.Id.ToString(), staleTs);
+
+        var db = _connection.GetDatabase();
+        var pointer = await db.StringGetAsync(RedisKeys.FlagCommittedPointer(flag.Id));
+        var servable = pointer.HasValue && await db.KeyExistsAsync(RedisKeys.FlagVersion(flag.Id, (long)pointer));
+        Assert.False(servable);
+    }
+
+    [DockerFact]
+    public async Task DeleteSegmentAsync_AStaleCommitArrivesAfterTheDelete_DoesNotMakeTheSegmentServableAgain()
+    {
+        var envIds = new[] { Guid.NewGuid() };
+        var segment = NewSegment();
+        segment.Id = Guid.NewGuid();
+        const long staleTs = 1000;
+        const long archivedTs = 2000;
+        await _sut.StageSegmentAsync(segment, staleTs);
+        await _sut.CommitSegmentAsync(envIds, segment.Id.ToString(), staleTs);
+        await _sut.StageSegmentAsync(segment, archivedTs);
+        await _sut.CommitSegmentAsync(envIds, segment.Id.ToString(), archivedTs);
+        await _sut.DeleteSegmentAsync(envIds, segment.Id);
+
+        await _sut.StageSegmentAsync(segment, staleTs);
+        await _sut.CommitSegmentAsync(envIds, segment.Id.ToString(), staleTs);
+
+        var db = _connection.GetDatabase();
+        var pointer = await db.StringGetAsync(RedisKeys.SegmentCommittedPointer(segment.Id));
+        var servable = pointer.HasValue && await db.KeyExistsAsync(RedisKeys.SegmentVersion(segment.Id, (long)pointer));
+        Assert.False(servable);
+    }
+
+    [DockerFact]
+    public async Task DeleteFlagAsync_PointerIsNotANumber_LeavesThePointerAlone()
     {
         var flag = NewFlag();
         var db = _connection.GetDatabase();
@@ -138,7 +185,7 @@ public class RedisCacheServiceTests : IntegrationTestBase, IAsyncLifetime
 
         await _sut.DeleteFlagAsync(flag.EnvId, flag.Id);
 
-        Assert.False(await db.KeyExistsAsync(RedisKeys.FlagCommittedPointer(flag.Id)));
+        Assert.Equal("not-a-timestamp", await db.StringGetAsync(RedisKeys.FlagCommittedPointer(flag.Id)));
     }
 
     [DockerFact]
@@ -176,7 +223,7 @@ public class RedisCacheServiceTests : IntegrationTestBase, IAsyncLifetime
     }
 
     [DockerFact]
-    public async Task DeleteSegmentAsync_CommittedVersionExists_RemovesTheVersionAndThePointer()
+    public async Task DeleteSegmentAsync_CommittedVersionExists_RemovesTheVersionAndKeepsThePointer()
     {
         var envIds = new[] { Guid.NewGuid(), Guid.NewGuid() };
         var segment = NewSegment();
@@ -188,7 +235,7 @@ public class RedisCacheServiceTests : IntegrationTestBase, IAsyncLifetime
 
         var db = _connection.GetDatabase();
         Assert.False(await db.KeyExistsAsync(RedisKeys.SegmentVersion(segment.Id, ts)));
-        Assert.False(await db.KeyExistsAsync(RedisKeys.SegmentCommittedPointer(segment.Id)));
+        Assert.True(await db.KeyExistsAsync(RedisKeys.SegmentCommittedPointer(segment.Id)));
         foreach (var envId in envIds)
         {
             Assert.Null(await db.SortedSetScoreAsync(RedisKeys.SegmentIndex(envId), segment.Id.ToString()));
