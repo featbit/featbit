@@ -691,6 +691,37 @@ public class DcBackfillerTests
     }
 
     [Fact]
+    public async Task BackfillDcAsync_DeletingAFlagFromTheDcFails_IsRetriedInAMinute()
+    {
+        var f = CreatePruneFixture();
+        var orphan = Guid.NewGuid();
+        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ReturnsAsync(Index((orphan, OldScore)));
+        f.East.Setup(s => s.DeleteFlagAsync(f.EnvA, orphan)).ThrowsAsync(new TimeoutException("redis"));
+
+        await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        Assert.Empty(f.Sut.TakeDcsDueForPrune());
+        f.Time.Advance(TimeSpan.FromSeconds(61));
+        Assert.Equal(["east"], f.Sut.TakeDcsDueForPrune());
+    }
+
+    [Fact]
+    public async Task BackfillDcAsync_DeletingASegmentFromTheDcFails_IsRetriedInAMinute()
+    {
+        var f = CreatePruneFixture();
+        var orphan = Guid.NewGuid();
+        f.East.Setup(s => s.GetSegmentIndexAsync(f.EnvA)).ReturnsAsync(Index((orphan, OldScore)));
+        f.East.Setup(s => s.DeleteSegmentAsync(It.IsAny<ICollection<Guid>>(), orphan))
+            .ThrowsAsync(new TimeoutException("redis"));
+
+        await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        Assert.Empty(f.Sut.TakeDcsDueForPrune());
+        f.Time.Advance(TimeSpan.FromSeconds(61));
+        Assert.Equal(["east"], f.Sut.TakeDcsDueForPrune());
+    }
+
+    [Fact]
     public async Task BackfillDcAsync_PruningThrows_IsRetriedInAMinute()
     {
         var f = CreatePruneFixture();
