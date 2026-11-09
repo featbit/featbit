@@ -35,4 +35,32 @@ public class OnSegmentDeletedHandlerTests
 
         Assert.Equal(["cache", "publish"], calls);
     }
+
+    [Fact]
+    public async Task Handle_PublishFails_StillDispatchesTheWebhooksAndRethrows()
+    {
+        var segment = new Segment { Id = Guid.NewGuid(), Key = "segment-key" };
+        ICollection<Guid> envIds = [Guid.NewGuid(), Guid.NewGuid()];
+        var webhookHandler = new Mock<IWebhookHandler>();
+        var segmentService = new Mock<ISegmentService>();
+        segmentService.Setup(x => x.GetEnvironmentIdsAsync(segment)).ReturnsAsync(envIds);
+        var publisher = new Mock<ISegmentChangePublisher>();
+        publisher.Setup(x => x.PublishDeletedAsync(envIds, segment.Id))
+            .ThrowsAsync(new InvalidOperationException("broker down"));
+        var sut = new OnSegmentDeletedHandler(
+            new Mock<ICacheService>().Object,
+            new Mock<IAuditLogService>().Object,
+            webhookHandler.Object,
+            segmentService.Object,
+            publisher.Object);
+        var notification = new OnSegmentDeleted(segment, Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => sut.Handle(notification, CancellationToken.None));
+
+        foreach (var envId in envIds)
+        {
+            webhookHandler.Verify(
+                x => x.HandleAsync(envId, segment, notification.DataChange, notification.OperatorId), Times.Once);
+        }
+    }
 }

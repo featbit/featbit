@@ -68,9 +68,6 @@ public class OnSegmentDeletedHandler : INotificationHandler<OnSegmentDeleted>
         // delete cache
         await _cache.DeleteSegmentAsync(envIds, segment.Id);
 
-        // the other datacenters delete it too
-        await _changePublisher.PublishDeletedAsync(envIds, segment.Id);
-
         // handle webhooks
         foreach (var envId in envIds)
         {
@@ -81,5 +78,8 @@ public class OnSegmentDeletedHandler : INotificationHandler<OnSegmentDeleted>
                 notification.OperatorId
             );
         }
+
+        // the other datacenters delete it too; last, so that a failure to publish does not skip the webhooks
+        await _changePublisher.PublishDeletedAsync(envIds, segment.Id);
     }
 }

@@ -64,10 +64,10 @@ public class OnFeatureFlagDeletedHandler : INotificationHandler<OnFeatureFlagDel
         var flagId = notification.Flag.Id;
         await _cache.DeleteFlagAsync(envId, flagId);
 
-        // the other datacenters delete it too
-        await _changePublisher.PublishDeletedAsync(envId, flagId);
-
         // handle webhooks
         _ = _webhookHandler.HandleAsync(notification.Flag, notification.DataChange, notification.OperatorId);
+
+        // the other datacenters delete it too; last, so that a failure to publish does not skip the webhooks
+        await _changePublisher.PublishDeletedAsync(envId, flagId);
     }
 }
