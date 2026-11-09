@@ -11,6 +11,12 @@ namespace Api.ControlPlane;
 
 public static class ServiceCollectionExtensions
 {
+    /// <summary>
+    /// Registers the control-plane services of the evaluation server: the connection manager that reports connections, the
+    /// store for the consistency mode, and the heartbeat with its applied-watermark reader. The Redis reader is registered
+    /// only under <c>GatedCommit</c>, the one mode in which the control plane uses the watermarks; any other mode gets a reader
+    /// that reports none and never touches Redis.
+    /// </summary>
     public static IServiceCollection AddControlPlane(this IServiceCollection services, IConfiguration configuration)
     {
         // Replace the `DefaultConnectionManager` with `ControlPlaneConnectionManager`

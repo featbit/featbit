@@ -42,6 +42,10 @@ public class ControlPlaneRegistrationTests
         Assert.Equal(2, stores.Count);
     }
 
+    /// <summary>
+    /// Only <c>GatedCommit</c> reads the applied watermarks from Redis; with no mode set, or any other mode, the heartbeat
+    /// gets the no-op reader.
+    /// </summary>
     [Theory]
     [InlineData(null, typeof(NoOpAppliedWatermarkReader))]
     [InlineData(ConsistencyMode.BestEffort, typeof(NoOpAppliedWatermarkReader))]
