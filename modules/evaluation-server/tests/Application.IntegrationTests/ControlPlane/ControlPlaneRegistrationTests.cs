@@ -41,4 +41,28 @@ public class ControlPlaneRegistrationTests
         Assert.Equal(expectedRedisStoreType, stores[^1].ImplementationType);
         Assert.Equal(2, stores.Count);
     }
+
+    [Theory]
+    [InlineData(null, typeof(NoOpAppliedWatermarkReader))]
+    [InlineData(ConsistencyMode.BestEffort, typeof(NoOpAppliedWatermarkReader))]
+    [InlineData(ConsistencyMode.GatedCommit, typeof(RedisAppliedWatermarkReader))]
+    public void AddControlPlane_ConsistencyMode_RegistersExpectedWatermarkReader(
+        ConsistencyMode? consistencyMode,
+        Type expectedReaderType)
+    {
+        var configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            [DbProvider.SectionName] = DbProvider.Fake,
+            [CacheProvider.SectionName] = CacheProvider.Redis,
+            ["ControlPlane:ConsistencyMode"] = consistencyMode?.ToString(),
+            ["Redis:ConnectionString"] = "localhost:6379"
+        }).Build();
+
+        var services = new ServiceCollection();
+        services.AddStreamingCore().UseStore(configuration);
+        services.AddControlPlane(configuration);
+
+        var readers = services.Where(x => x.ServiceType == typeof(IAppliedWatermarkReader)).ToList();
+        Assert.Equal(expectedReaderType, Assert.Single(readers).ImplementationType);
+    }
 }
