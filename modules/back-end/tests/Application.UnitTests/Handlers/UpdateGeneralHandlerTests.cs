@@ -13,6 +13,7 @@ namespace Application.UnitTests.Handlers;
 
 public class UpdateGeneralHandlerTests
 {
+    private static readonly Guid OrganizationId = Guid.NewGuid();
     private static FeatureFlag NewFlag()
     {
         var on = new Variation { Id = "v-on", Name = "On", Value = "true" };
@@ -58,7 +59,7 @@ public class UpdateGeneralHandlerTests
                 Tags = tags ?? flag.Tags,
                 Comment = "General settings update"
             },
-            permissions);
+            permissions) { OrgId = OrganizationId };
 
     private static UpdateGeneralHandler BuildSut(
         FeatureFlag flag,
@@ -67,7 +68,7 @@ public class UpdateGeneralHandlerTests
         Mock<IPublisher> publisher)
     {
         flagService.Setup(x => x.GetAsync(flag.EnvId, flag.Key)).ReturnsAsync(flag);
-        resourceService.Setup(x => x.GetFlagRnAsync(flag.EnvId, flag.Key)).ReturnsAsync("flag/*");
+        resourceService.Setup(x => x.GetFlagRnAsync(flag.EnvId, flag.Key)).ReturnsAsync(new ResourceRn("flag/*", OrganizationId));
 
         var currentUser = new Mock<ICurrentUser>();
         currentUser.SetupGet(x => x.Id).Returns(Guid.NewGuid());
@@ -181,7 +182,7 @@ public class UpdateGeneralHandlerTests
         Assert.Equal(flag.Revision, revision);
         resourceService.Verify(
             x => x.GetFlagRnAsync(It.IsAny<Guid>(), It.IsAny<string>()),
-            Times.Never);
+            Times.Once);
         flagService.Verify(x => x.UpdateAsync(It.IsAny<FeatureFlag>()), Times.Never);
         publisher.Verify(
             x => x.Publish(It.IsAny<OnFeatureFlagChanged>(), It.IsAny<CancellationToken>()),

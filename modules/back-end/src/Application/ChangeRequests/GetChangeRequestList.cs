@@ -64,7 +64,7 @@ public class GetChangeRequestListHandler(
         foreach (var environmentId in environmentIds)
         {
             environmentRns[environmentId] =
-                await resourceService.GetEnvRnAsync(environmentId) ?? string.Empty;
+                (await resourceService.GetEnvRnAsync(environmentId))?.Rn ?? string.Empty;
         }
 
         var reviewerMembers = (await memberService.GetListAsync(request.OrgId, reviewerIds))

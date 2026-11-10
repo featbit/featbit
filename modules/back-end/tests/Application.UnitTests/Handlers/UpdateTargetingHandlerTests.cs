@@ -12,6 +12,7 @@ namespace Application.UnitTests.Handlers;
 
 public class UpdateTargetingHandlerTests
 {
+    private static readonly Guid OrganizationId = Guid.NewGuid();
     private static FeatureFlag NewFlag()
     {
         var on = new Variation { Id = "v-on", Name = "On", Value = "true" };
@@ -57,7 +58,7 @@ public class UpdateTargetingHandlerTests
         Mock<IPublisher> publisher)
     {
         flagService.Setup(x => x.GetAsync(flag.EnvId, flag.Key)).ReturnsAsync(flag);
-        resourceService.Setup(x => x.GetFlagRnAsync(flag.EnvId, flag.Key)).ReturnsAsync("flag/*");
+        resourceService.Setup(x => x.GetFlagRnAsync(flag.EnvId, flag.Key)).ReturnsAsync(new ResourceRn("flag/*", OrganizationId));
 
         var currentUser = new Mock<ICurrentUser>();
         currentUser.SetupGet(x => x.Id).Returns(Guid.NewGuid());
@@ -82,7 +83,7 @@ public class UpdateTargetingHandlerTests
                 Revision = flag.Revision,
                 Targeting = NewTargeting(flag, disabledVariationId)
             },
-            permissions);
+            permissions) { OrgId = OrganizationId };
 
     [Fact]
     public async Task Handle_OffVariationChangedWithoutPermission_ThrowsForbidden()

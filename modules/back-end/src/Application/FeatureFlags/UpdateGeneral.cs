@@ -81,6 +81,8 @@ public class UpdateGeneralHandler(
 
         if (!nameChanged && !descriptionChanged && !tagsChanged)
         {
+            await permissionGuard.EnsureFlagChangeAllowedAsync(
+                request.OrgId, flag, new DataChange(flag).To(flag), request.Permissions);
             return flag.Revision;
         }
 
@@ -90,7 +92,7 @@ public class UpdateGeneralHandler(
             tagsChanged ? requestedTags : currentTags,
             currentUser.Id
         );
-        await permissionGuard.EnsureFlagChangeAllowedAsync(flag, dataChange, request.Permissions);
+        await permissionGuard.EnsureFlagChangeAllowedAsync(request.OrgId, flag, dataChange, request.Permissions);
         await service.UpdateAsync(flag);
 
         var notification = new OnFeatureFlagChanged(

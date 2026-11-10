@@ -17,7 +17,7 @@ public class GetEnvironmentHandler(IEnvironmentService envService, IResourceServ
         var env = await envService.GetAsync(request.Id);
 
         var resourceRn = await resourceService.GetEnvRnAsync(env.Id);
-        env.Sanitize(resourceRn, request.Permissions);
+        env.Sanitize(resourceRn?.Rn, request.Permissions);
 
         return mapper.Map<EnvironmentVm>(env);
     }

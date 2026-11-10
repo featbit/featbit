@@ -87,7 +87,7 @@ public class CreateEnvironmentHandler(
         await publisher.Publish(new OnEnvironmentAdded(env), cancellationToken);
 
         var resourceRn = await resources.GetEnvRnAsync(env.Id);
-        env.Sanitize(resourceRn, request.Permissions);
+        env.Sanitize(resourceRn?.Rn, request.Permissions);
 
         return mapper.Map<EnvironmentVm>(env);
     }

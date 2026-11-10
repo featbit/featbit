@@ -69,7 +69,7 @@ public class UpdateTargetingHandler(
         var segment = await service.GetAsync(request.Id);
         var dataChange = segment.UpdateTargeting(request.Included, request.Excluded, request.Rules);
 
-        await permissionGuard.EnsureSegmentChangeAllowedAsync(segment, dataChange, request.Permissions);
+        await permissionGuard.EnsureSegmentChangeAllowedAsync(request.OrgId, segment, dataChange, request.Permissions);
 
         await service.UpdateAsync(segment);
 
