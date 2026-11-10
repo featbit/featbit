@@ -154,8 +154,23 @@ public class WebhookHandlerFactoryTests
         await Assert.ThrowsAsync<AntiSSRFException>(() => client.GetAsync("http://127.0.0.1:1/"));
     }
 
+    [Fact]
+    public void CreateTrustedHandler_Always_DoesNotFollowRedirectsOrUseAProxy()
+    {
+        using var handler = WebhookHandlerFactory.CreateTrustedHandler();
+
+        // A redirect would lead the request to an address nothing has checked. A proxy is not used because the
+        // checked requests connect directly, and an internal host is often not reachable or resolvable through one.
+        Assert.False(handler.AllowAutoRedirect);
+        Assert.False(handler.UseProxy);
+    }
+
     // ----- which handler a request goes to -----
 
+    /// <summary>
+    /// Only a request for a listed host, matched by its exact name, goes to the trusted handler. A subdomain, a longer
+    /// name that starts or ends with a listed name, and any other host go to the guarded handler.
+    /// </summary>
     [Theory]
     [InlineData("http://notify.internal/hook", true)]
     [InlineData("https://NOTIFY.internal:8443/hook?a=1", true)] // any case, port, path or scheme
@@ -217,6 +232,10 @@ public class WebhookHandlerFactoryTests
         private readonly byte[] _response;
         private int _requests;
 
+        /// <summary>
+        /// Starts listening on a free loopback port. <paramref name="rawResponse"/> is the complete HTTP response to
+        /// send; without it the server answers 200 with no body.
+        /// </summary>
         public LoopbackServer(string? rawResponse = null)
         {
             _response = Encoding.ASCII.GetBytes(
@@ -231,6 +250,9 @@ public class WebhookHandlerFactoryTests
 
         public int Requests => Volatile.Read(ref _requests);
 
+        /// <summary>
+        /// Accepts connections until the server is disposed, counts each request and answers it with the response.
+        /// </summary>
         private async Task AcceptAsync()
         {
             try

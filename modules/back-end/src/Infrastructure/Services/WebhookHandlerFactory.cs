@@ -72,10 +72,21 @@ internal static class WebhookHandlerFactory
             return guarded;
         }
 
-        var trusted = new SocketsHttpHandler { AllowAutoRedirect = false };
-        return new AllowedHostsHandler(allowedHosts, trusted, guarded);
+        return new AllowedHostsHandler(allowedHosts, CreateTrustedHandler(), guarded);
     }
 
+    /// <summary>
+    /// The handler for a listed host. It does not follow redirects, because a redirect would lead the request to an
+    /// address nothing has checked, and it does not use a proxy, because the checked requests connect directly and an
+    /// internal host is often not reachable or resolvable through one.
+    /// </summary>
+    internal static SocketsHttpHandler CreateTrustedHandler() =>
+        new() { AllowAutoRedirect = false, UseProxy = false };
+
+    /// <summary>
+    /// Reads a list setting: the trimmed, non-blank values of the children of <paramref name="setting"/>. An unset
+    /// setting gives an empty list.
+    /// </summary>
     private static string[] ReadList(IConfiguration configuration, string setting) =>
         configuration
             .GetSection(setting)
@@ -85,6 +96,10 @@ internal static class WebhookHandlerFactory
             .Where(value => value.Length > 0)
             .ToArray();
 
+    /// <summary>
+    /// The policy for requests to any host that is not listed: it blocks every non-public address except the given
+    /// ones. Plain HTTP is allowed, and no X-Forwarded-For header is added.
+    /// </summary>
     private static AntiSSRFPolicy CreatePolicy(string[] allowedAddresses)
     {
         var policy = new AntiSSRFPolicy(PolicyConfigOptions.ExternalOnlyLatest)

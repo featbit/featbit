@@ -22,6 +22,10 @@ internal sealed class AllowedHostsHandler : HttpMessageHandler
         _guarded = new HttpMessageInvoker(guarded);
     }
 
+    /// <summary>
+    /// Sends the request through the trusted handler when its host is listed and through the guarded handler otherwise.
+    /// A request without an absolute URI is never treated as listed.
+    /// </summary>
     protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         var uri = request.RequestUri;
@@ -30,6 +34,9 @@ internal sealed class AllowedHostsHandler : HttpMessageHandler
         return (listed ? _trusted : _guarded).SendAsync(request, cancellationToken);
     }
 
+    /// <summary>
+    /// Disposes both handlers.
+    /// </summary>
     protected override void Dispose(bool disposing)
     {
         if (disposing)

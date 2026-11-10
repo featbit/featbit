@@ -16,6 +16,10 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class ConfigureServices
 {
+    /// <summary>
+    /// Registers the infrastructure services: caches, messaging, identity, the HTTP clients and the database-specific
+    /// services. The webhook client reads its allowed hosts and addresses here, so an invalid entry stops the startup.
+    /// </summary>
     public static IServiceCollection AddInfrastructureServices(
         this IServiceCollection services,
         IConfiguration configuration)
