@@ -517,6 +517,8 @@ public class FeatureFlagController : ApiControllerBase
     [HttpPost("compare-overview")]
     public async Task<ApiResponse<PagedResult<CompareFlagOverview>>> GetCompareOverviewAsync(Guid envId, GetCompareFlagOverview request)
     {
+        request.OrgId = OrgId;
+        request.Permissions = await GetRequestPermissionsAsync();
         request.SourceEnvId = envId;
 
         var overview = await Mediator.Send(request);
@@ -529,6 +531,8 @@ public class FeatureFlagController : ApiControllerBase
     {
         var request = new CompareFlag
         {
+            OrgId = OrgId,
+            Permissions = await GetRequestPermissionsAsync(),
             Key = key,
             SourceEnvId = envId,
             TargetEnvId = targetEnvId
