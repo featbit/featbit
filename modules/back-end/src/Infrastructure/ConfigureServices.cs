@@ -7,7 +7,6 @@ using Infrastructure.MQ;
 using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Security.AntiSSRF;
 using Services = Infrastructure.Services;
 using AppServices = Infrastructure.AppService;
 
@@ -63,22 +62,10 @@ public static class ConfigureServices
 
         // http clients
         services.AddHttpClient<IAgentService, Services.AgentService>();
+        var webhookAllowedAddresses = Services.WebhookHandlerFactory.GetAllowedAddresses(configuration);
+        var webhookAllowedHosts = Services.WebhookHandlerFactory.GetAllowedHosts(configuration);
         services.AddHttpClient<IWebhookSender, Services.WebhookSender>()
-            .ConfigurePrimaryHttpMessageHandler(() =>
-            {
-                var policy = new AntiSSRFPolicy(PolicyConfigOptions.ExternalOnlyLatest)
-                {
-                    AllowPlainTextHttp = true,
-
-                    // ExternalOnlyLatest adds X-Forwarded-For: true by default as a
-                    // defense-in-depth against IMDS. For an outgoing webhook sender the
-                    // dummy value can cause third-party receivers to reject the request,
-                    // and IMDS is already blocked by the IP-range enforcement, so disable it.
-                    AddXFFHeader = false
-                };
-
-                return policy.GetHandler();
-            });
+            .ConfigurePrimaryHttpMessageHandler(() => Services.WebhookHandlerFactory.CreateHandler(webhookAllowedAddresses, webhookAllowedHosts));
 
         // custom services
         services.AddDbSpecificServices(configuration);

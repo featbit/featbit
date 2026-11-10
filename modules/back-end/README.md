@@ -153,6 +153,17 @@ for insights, and `ClickHouse__HttpEndpoint` is required. When `OLAPProvider` is
 | `InsightsTracking__ChannelCapacity` | Maximum number of insight events buffered in the channel (1–100000). | `10000` |
 | `InsightsTracking__MaxBatchSize` | Maximum events per flush (1–10000); cannot exceed channel capacity. | `1000` |
 
+### Webhook
+
+Webhook deliveries are refused when the target is not a public address (private ranges, loopback, link-local and
+the instance metadata address). To deliver to an internal service in a self-hosted installation, list its host name.
+Only what is listed is exempt; every other private target stays blocked.
+
+| Name | Description | Default Value |
+|------|-------------|---------------|
+| `Webhook__AllowedHosts__0`, `Webhook__AllowedHosts__1`, ... | Host names that webhooks may target even though they resolve to a non-public address, for example `notify.internal` or `chat-gateway.default.svc.cluster.local`. A host is matched by its exact name, in any case and on any port; its subdomains are not matched, and wildcards are not supported. Redirects from a listed host are not followed. The address of a listed host is not checked, so list only hosts you control. An entry that is not a host name stops the API from starting. | none |
+| `Webhook__AllowedAddresses__0`, `Webhook__AllowedAddresses__1`, ... | IP addresses or CIDR ranges that webhooks may target even though they are not public, for example `10.0.0.5` or `10.20.0.0/16`. Use this for a target that has no stable name. An entry that is not an address stops the API from starting. | none |
+
 ### OAuth integrations
 
 | Name | Description | Default Value |
