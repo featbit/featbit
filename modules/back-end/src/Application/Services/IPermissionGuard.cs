@@ -19,5 +19,6 @@ public interface IPermissionGuard
     /// Throws <see cref="Bases.Exceptions.ForbiddenException"/> if ownership is invalid or the given policy statements do not grant every
     /// permission required by the semantic instructions derived from the segment change.
     /// </summary>
-    Task EnsureSegmentChangeAllowedAsync(Guid organizationId, Segment segment, DataChange change, PolicyStatement[] permissions);
+    /// <remarks>Use the accessing environment from the request, which may differ from a shared segment's creation environment.</remarks>
+    Task EnsureSegmentChangeAllowedAsync(Guid organizationId, Guid environmentId, Segment segment, DataChange change, PolicyStatement[] permissions);
 }

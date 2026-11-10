@@ -12,7 +12,7 @@ public class SegmentValidatorTests
         Type = SegmentType.EnvironmentSpecific,
         Name = "seg",
         Key = "seg-key",
-        Scopes = new[] { "project/x:env/y" }
+        Scopes = new[] { "organization/o:project/x:env/y" }
     };
 
     [Fact]

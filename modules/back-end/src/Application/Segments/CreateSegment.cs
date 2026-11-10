@@ -80,7 +80,7 @@ public class CreateSegmentValidator : AbstractValidator<CreateSegment>
 
         RuleFor(x => x.Scopes)
             .NotEmpty().WithErrorCode(ErrorCodes.Invalid("scopes"))
-            .Must(scopes => !scopes.Any(x => x.Contains('*'))).WithErrorCode(ErrorCodes.Invalid("scopes"));
+            .Must(scopes => scopes.All(SegmentScopeGuard.IsValidScope)).WithErrorCode(ErrorCodes.Invalid("scopes"));
     }
 }
 
@@ -90,17 +90,20 @@ public class CreateSegmentHandler : IRequestHandler<CreateSegment, Segment>
     private readonly ILicenseService _licenseService;
     private readonly IPublisher _publisher;
     private readonly ICurrentUser _currentUser;
+    private readonly SegmentScopeGuard _scopeGuard;
 
     public CreateSegmentHandler(
         ISegmentService segmentService,
         ILicenseService licenseService,
         IPublisher publisher,
-        ICurrentUser currentUser)
+        ICurrentUser currentUser,
+        SegmentScopeGuard scopeGuard)
     {
         _segmentService = segmentService;
         _licenseService = licenseService;
         _publisher = publisher;
         _currentUser = currentUser;
+        _scopeGuard = scopeGuard;
     }
 
     public async Task<Segment> Handle(CreateSegment request, CancellationToken cancellationToken)
@@ -115,6 +118,7 @@ public class CreateSegmentHandler : IRequestHandler<CreateSegment, Segment>
             }
         }
 
+        await _scopeGuard.EnsureAllowedAsync(request);
         var segment = request.AsSegment();
         await _segmentService.AddOneAsync(segment);
 
