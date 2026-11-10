@@ -14,13 +14,13 @@ internal static class WebhookHandlerFactory
     public const string AllowedAddressesSetting = "Webhook:AllowedAddresses";
 
     /// <summary>
-    /// Reads the host names that skip the check. A host is listed by its exact name, without a scheme, port or path,
-    /// and without wildcards. Blank entries are dropped. An entry that is not a host name fails here, at startup,
-    /// and not on the first delivery.
+    /// Reads the host names that skip the check, given as one comma-separated string. A host is listed by its exact
+    /// name, without a scheme, port or path, and without wildcards. An entry that is not a host name fails here, at
+    /// startup, and not on the first delivery.
     /// </summary>
     public static string[] GetAllowedHosts(IConfiguration configuration)
     {
-        var hosts = ReadList(configuration, AllowedHostsSetting);
+        var hosts = ReadList(configuration, AllowedHostsSetting, "notify.internal,chat-gateway");
 
         foreach (var host in hosts)
         {
@@ -36,12 +36,12 @@ internal static class WebhookHandlerFactory
     }
 
     /// <summary>
-    /// Reads the addresses exempt from the check: a list of IPs or CIDR ranges. Blank entries are dropped. An entry
+    /// Reads the addresses exempt from the check, given as one comma-separated string of IPs or CIDR ranges. An entry
     /// that is not an address fails here, at startup, and not on the first delivery.
     /// </summary>
     public static string[] GetAllowedAddresses(IConfiguration configuration)
     {
-        var addresses = ReadList(configuration, AllowedAddressesSetting);
+        var addresses = ReadList(configuration, AllowedAddressesSetting, "10.0.0.5,10.20.0.0/16");
 
         // The policy parses an entry when it is added, so adding each one to a throwaway policy finds the bad one.
         foreach (var address in addresses)
@@ -84,17 +84,27 @@ internal static class WebhookHandlerFactory
         new() { AllowAutoRedirect = false, UseProxy = false };
 
     /// <summary>
-    /// Reads a list setting: the trimmed, non-blank values of the children of <paramref name="setting"/>. An unset
-    /// setting gives an empty list.
+    /// Reads a list setting given as one comma-separated string: the entries are trimmed, blank ones are dropped and
+    /// exact duplicates are removed, keeping the order. An unset or empty setting gives an empty list. A list given
+    /// as indexed keys (<c>Webhook__AllowedHosts__0</c>, ...) fails, naming the setting, because ignoring it would
+    /// leave webhooks blocked with no explanation.
     /// </summary>
-    private static string[] ReadList(IConfiguration configuration, string setting) =>
-        configuration
-            .GetSection(setting)
-            .GetChildren()
-            .Select(child => child.Value?.Trim())
-            .OfType<string>()
-            .Where(value => value.Length > 0)
+    private static string[] ReadList(IConfiguration configuration, string setting, string example)
+    {
+        if (configuration.GetSection(setting).GetChildren().Any())
+        {
+            throw new InvalidOperationException(
+                $"{setting} must be given as one comma-separated value, for example " +
+                $"{setting.Replace(":", "__")}={example}, and not as indexed keys such as {setting.Replace(":", "__")}__0.");
+        }
+
+        return (configuration[setting] ?? string.Empty)
+            .Split(',')
+            .Select(entry => entry.Trim())
+            .Where(entry => entry.Length > 0)
+            .Distinct()
             .ToArray();
+    }
 
     /// <summary>
     /// The policy for requests to any host that is not listed: it blocks every non-public address except the given

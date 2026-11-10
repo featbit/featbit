@@ -159,10 +159,14 @@ Webhook deliveries are refused when the target is not a public address (private 
 the instance metadata address). To deliver to an internal service in a self-hosted installation, list its host name.
 Only what is listed is exempt; every other private target stays blocked.
 
+Each setting is one comma-separated string. Spaces around an entry and empty entries are ignored, and a repeated
+entry counts once. The indexed form (`Webhook__AllowedHosts__0`, ...) is not supported and stops the API from
+starting.
+
 | Name | Description | Default Value |
 |------|-------------|---------------|
-| `Webhook__AllowedHosts__0`, `Webhook__AllowedHosts__1`, ... | Host names that webhooks may target even though they resolve to a non-public address, for example `notify.internal` or `chat-gateway.default.svc.cluster.local`. A host is matched by its exact name, in any case and on any port; its subdomains are not matched, and wildcards are not supported. Redirects from a listed host are not followed, and requests to it do not use the proxy set in the environment (`HTTP_PROXY`, `HTTPS_PROXY`), so an internal host is reached directly without needing `NO_PROXY`. The address of a listed host is not checked, so list only hosts you control. An entry that is not a host name stops the API from starting. | none |
-| `Webhook__AllowedAddresses__0`, `Webhook__AllowedAddresses__1`, ... | IP addresses or CIDR ranges that webhooks may target even though they are not public, for example `10.0.0.5` or `10.20.0.0/16`. Use this for a target that has no stable name. Every address a name resolves to must be listed, for example both an IPv4 and an IPv6 address, so for a target addressed by name use `Webhook__AllowedHosts__*` instead. An entry that is not an address stops the API from starting. | none |
+| `Webhook__AllowedHosts` | Host names that webhooks may target even though they resolve to a non-public address, for example `Webhook__AllowedHosts=notify.internal,chat-gateway`. A host is matched by its exact name, in any case, on any port and with or without a trailing dot; its subdomains are not matched, and wildcards are not supported. Redirects from a listed host are not followed, and requests to it do not use the proxy set in the environment (`HTTP_PROXY`, `HTTPS_PROXY`), so an internal host is reached directly without needing `NO_PROXY`. The address of a listed host is not checked, so list only hosts you control. An IP address listed here skips the address checks entirely; use `Webhook__AllowedAddresses` for a target with no stable name. An entry that is not a host name stops the API from starting. | none |
+| `Webhook__AllowedAddresses` | IP addresses or CIDR ranges that webhooks may target even though they are not public, for example `Webhook__AllowedAddresses=10.0.0.5,10.20.0.0/16`. Use this for a target with no stable name. Every address a name resolves to must be listed, for example both an IPv4 and an IPv6 address, so for a target addressed by name use `Webhook__AllowedHosts` instead. An entry that is not an address stops the API from starting. | none |
 
 ### OAuth integrations
 

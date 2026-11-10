@@ -9,12 +9,20 @@ namespace Infrastructure.UnitTests.Services;
 
 public class WebhookHandlerFactoryTests
 {
-    // ----- reading the setting -----
+    // ----- reading the addresses setting -----
 
-    [Fact]
-    public void GetAllowedAddresses_NotConfigured_ReturnsEmpty()
+    /// <summary>
+    /// An unset setting, an empty or blank string, and a string with only separators all give an empty list, so
+    /// the default behavior is unchanged.
+    /// </summary>
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("  ")]
+    [InlineData(" , ,")]
+    public void GetAllowedAddresses_NotConfiguredOrBlank_ReturnsEmpty(string? value)
     {
-        var configuration = Configure();
+        var configuration = value is null ? Configure() : Configure(("Webhook:AllowedAddresses", value));
 
         var result = WebhookHandlerFactory.GetAllowedAddresses(configuration);
 
@@ -22,12 +30,29 @@ public class WebhookHandlerFactoryTests
     }
 
     [Fact]
-    public void GetAllowedAddresses_Configured_ReturnsTheEntriesTrimmedAndWithoutBlanks()
+    public void GetAllowedAddresses_OneEntry_ReturnsIt()
     {
-        var configuration = Configure(
-            ("Webhook:AllowedAddresses:0", " 10.0.0.0/8 "),
-            ("Webhook:AllowedAddresses:1", ""),
-            ("Webhook:AllowedAddresses:2", "192.168.1.5"));
+        var configuration = Configure(("Webhook:AllowedAddresses", "10.20.0.0/16"));
+
+        var result = WebhookHandlerFactory.GetAllowedAddresses(configuration);
+
+        Assert.Equal(["10.20.0.0/16"], result);
+    }
+
+    [Fact]
+    public void GetAllowedAddresses_SeveralEntries_ReturnsThemInOrder()
+    {
+        var configuration = Configure(("Webhook:AllowedAddresses", "10.0.0.5,10.20.0.0/16,192.168.1.5"));
+
+        var result = WebhookHandlerFactory.GetAllowedAddresses(configuration);
+
+        Assert.Equal(["10.0.0.5", "10.20.0.0/16", "192.168.1.5"], result);
+    }
+
+    [Fact]
+    public void GetAllowedAddresses_SpacesAndBlankSegments_AreTrimmedAndDropped()
+    {
+        var configuration = Configure(("Webhook:AllowedAddresses", " 10.0.0.0/8 , ,192.168.1.5,"));
 
         var result = WebhookHandlerFactory.GetAllowedAddresses(configuration);
 
@@ -35,17 +60,53 @@ public class WebhookHandlerFactoryTests
     }
 
     [Fact]
-    public void GetAllowedAddresses_AnEntryIsNotAnAddress_FailsAndNamesTheSetting()
+    public void GetAllowedAddresses_DuplicateEntries_AreRemovedKeepingTheFirst()
     {
-        var configuration = Configure(
-            ("Webhook:AllowedAddresses:0", "10.0.0.0/8"),
-            ("Webhook:AllowedAddresses:1", "not-an-address"));
+        var configuration = Configure(("Webhook:AllowedAddresses", "10.0.0.5,192.168.1.5, 10.0.0.5,192.168.1.5"));
+
+        var result = WebhookHandlerFactory.GetAllowedAddresses(configuration);
+
+        Assert.Equal(["10.0.0.5", "192.168.1.5"], result);
+    }
+
+    [Fact]
+    public void GetAllowedAddresses_AnEntryIsNotAnAddress_FailsAndNamesTheSettingAndTheEntry()
+    {
+        var configuration = Configure(("Webhook:AllowedAddresses", "10.0.0.0/8,not-an-address"));
 
         var ex = Assert.Throws<InvalidOperationException>(
             () => WebhookHandlerFactory.GetAllowedAddresses(configuration));
 
         Assert.Contains("Webhook:AllowedAddresses", ex.Message);
         Assert.Contains("not-an-address", ex.Message);
+    }
+
+    [Fact]
+    public void GetAllowedAddresses_GivenAsIndexedKeys_FailsAndNamesTheSetting()
+    {
+        var configuration = Configure(
+            ("Webhook:AllowedAddresses:0", "10.0.0.5"),
+            ("Webhook:AllowedAddresses:1", "192.168.1.5"));
+
+        var ex = Assert.Throws<InvalidOperationException>(
+            () => WebhookHandlerFactory.GetAllowedAddresses(configuration));
+
+        Assert.Contains("Webhook:AllowedAddresses", ex.Message);
+        Assert.Contains("comma-separated", ex.Message);
+    }
+
+    [Fact]
+    public void GetAllowedAddresses_GivenAsAStringAndAsIndexedKeys_Fails()
+    {
+        // The indexed entries would otherwise be ignored without a word.
+        var configuration = Configure(
+            ("Webhook:AllowedAddresses", "10.0.0.5"),
+            ("Webhook:AllowedAddresses:0", "192.168.1.5"));
+
+        var ex = Assert.Throws<InvalidOperationException>(
+            () => WebhookHandlerFactory.GetAllowedAddresses(configuration));
+
+        Assert.Contains("Webhook:AllowedAddresses", ex.Message);
     }
 
     // ----- what the handler lets through -----
@@ -94,25 +155,72 @@ public class WebhookHandlerFactoryTests
 
     // ----- reading the hosts setting -----
 
-    [Fact]
-    public void GetAllowedHosts_NotConfigured_ReturnsEmpty()
+    /// <summary>
+    /// An unset setting, an empty or blank string, and a string with only separators all give an empty list, so
+    /// the default behavior is unchanged.
+    /// </summary>
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("  ")]
+    [InlineData(" , ,")]
+    public void GetAllowedHosts_NotConfiguredOrBlank_ReturnsEmpty(string? value)
     {
-        var result = WebhookHandlerFactory.GetAllowedHosts(Configure());
+        var configuration = value is null ? Configure() : Configure(("Webhook:AllowedHosts", value));
+
+        var result = WebhookHandlerFactory.GetAllowedHosts(configuration);
 
         Assert.Empty(result);
     }
 
     [Fact]
-    public void GetAllowedHosts_Configured_ReturnsTheEntriesTrimmedAndWithoutBlanks()
+    public void GetAllowedHosts_OneEntry_ReturnsIt()
     {
-        var configuration = Configure(
-            ("Webhook:AllowedHosts:0", " notify.internal.example "),
-            ("Webhook:AllowedHosts:1", " "),
-            ("Webhook:AllowedHosts:2", "chat-gateway"));
+        var configuration = Configure(("Webhook:AllowedHosts", "notify.internal"));
 
         var result = WebhookHandlerFactory.GetAllowedHosts(configuration);
 
-        Assert.Equal(["notify.internal.example", "chat-gateway"], result);
+        Assert.Equal(["notify.internal"], result);
+    }
+
+    [Fact]
+    public void GetAllowedHosts_SeveralEntries_ReturnsThemInOrder()
+    {
+        var configuration = Configure(("Webhook:AllowedHosts", "notify.internal,chat-gateway,svc.default.svc.cluster.local"));
+
+        var result = WebhookHandlerFactory.GetAllowedHosts(configuration);
+
+        Assert.Equal(["notify.internal", "chat-gateway", "svc.default.svc.cluster.local"], result);
+    }
+
+    [Fact]
+    public void GetAllowedHosts_SpacesAndBlankSegments_AreTrimmedAndDropped()
+    {
+        var configuration = Configure(("Webhook:AllowedHosts", " notify.internal , ,chat-gateway,"));
+
+        var result = WebhookHandlerFactory.GetAllowedHosts(configuration);
+
+        Assert.Equal(["notify.internal", "chat-gateway"], result);
+    }
+
+    [Fact]
+    public void GetAllowedHosts_DuplicateEntries_AreRemovedKeepingTheFirst()
+    {
+        var configuration = Configure(("Webhook:AllowedHosts", "notify.internal,chat-gateway, notify.internal"));
+
+        var result = WebhookHandlerFactory.GetAllowedHosts(configuration);
+
+        Assert.Equal(["notify.internal", "chat-gateway"], result);
+    }
+
+    [Fact]
+    public void GetAllowedHosts_AFullyQualifiedNameWithATrailingDot_IsAccepted()
+    {
+        var configuration = Configure(("Webhook:AllowedHosts", "notify.internal."));
+
+        var result = WebhookHandlerFactory.GetAllowedHosts(configuration);
+
+        Assert.Equal(["notify.internal."], result);
     }
 
     [Theory]
@@ -121,14 +229,40 @@ public class WebhookHandlerFactoryTests
     [InlineData("notify.internal/path")]
     [InlineData("*.internal")] // no wildcards: a host is listed by its exact name
     [InlineData("bad host")]
-    public void GetAllowedHosts_AnEntryIsNotAHostName_FailsAndNamesTheSetting(string entry)
+    public void GetAllowedHosts_AnEntryIsNotAHostName_FailsAndNamesTheSettingAndTheEntry(string entry)
     {
-        var configuration = Configure(("Webhook:AllowedHosts:0", entry));
+        var configuration = Configure(("Webhook:AllowedHosts", $"chat-gateway,{entry}"));
 
         var ex = Assert.Throws<InvalidOperationException>(() => WebhookHandlerFactory.GetAllowedHosts(configuration));
 
         Assert.Contains("Webhook:AllowedHosts", ex.Message);
         Assert.Contains(entry, ex.Message);
+    }
+
+    [Fact]
+    public void GetAllowedHosts_GivenAsIndexedKeys_FailsAndNamesTheSetting()
+    {
+        var configuration = Configure(
+            ("Webhook:AllowedHosts:0", "notify.internal"),
+            ("Webhook:AllowedHosts:1", "chat-gateway"));
+
+        var ex = Assert.Throws<InvalidOperationException>(() => WebhookHandlerFactory.GetAllowedHosts(configuration));
+
+        Assert.Contains("Webhook:AllowedHosts", ex.Message);
+        Assert.Contains("comma-separated", ex.Message);
+    }
+
+    [Fact]
+    public void GetAllowedHosts_GivenAsAStringAndAsIndexedKeys_Fails()
+    {
+        // The indexed entries would otherwise be ignored without a word.
+        var configuration = Configure(
+            ("Webhook:AllowedHosts", "notify.internal"),
+            ("Webhook:AllowedHosts:0", "chat-gateway"));
+
+        var ex = Assert.Throws<InvalidOperationException>(() => WebhookHandlerFactory.GetAllowedHosts(configuration));
+
+        Assert.Contains("Webhook:AllowedHosts", ex.Message);
     }
 
     // ----- what the handler lets through for a listed host -----
@@ -175,6 +309,8 @@ public class WebhookHandlerFactoryTests
     [InlineData("http://notify.internal/hook", true)]
     [InlineData("https://NOTIFY.internal:8443/hook?a=1", true)] // any case, port, path or scheme
     [InlineData("http://[::1]:8080/", true)] // an IPv6 literal, listed without brackets
+    [InlineData("http://notify.internal./hook", true)] // a trailing dot is the same name
+    [InlineData("http://svc.internal/hook", true)] // listed with a trailing dot
     [InlineData("http://sub.notify.internal/hook", false)] // a subdomain is a different host
     [InlineData("http://notify.internal.evil.example/hook", false)] // a longer name that starts with it
     [InlineData("http://evil-notify.internal/hook", false)] // a name that ends with it
@@ -183,7 +319,7 @@ public class WebhookHandlerFactoryTests
     {
         var trusted = new RecordingHandler();
         var guarded = new RecordingHandler();
-        using var client = new HttpClient(new AllowedHostsHandler(["notify.internal", "::1"], trusted, guarded));
+        using var client = new HttpClient(new AllowedHostsHandler(["notify.internal", "::1", "svc.internal."], trusted, guarded));
 
         await client.GetAsync(url);
 
