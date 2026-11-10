@@ -49,6 +49,6 @@ internal sealed class AllowedHostsHandler : HttpMessageHandler
     }
 
     // An IPv6 literal is written in brackets in a URL and without them in a setting, and a name may end in a dot
-    // ("notify.internal.") that does not change which host it is.
+    // that does not change which host it is.
     private static string Normalize(string host) => host.Trim().TrimStart('[').TrimEnd(']').TrimEnd('.');
 }

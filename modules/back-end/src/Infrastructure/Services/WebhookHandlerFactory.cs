@@ -20,7 +20,7 @@ internal static class WebhookHandlerFactory
     /// </summary>
     public static string[] GetAllowedHosts(IConfiguration configuration)
     {
-        var hosts = ReadList(configuration, AllowedHostsSetting, "notify.internal,chat-gateway");
+        var hosts = ReadList(configuration, AllowedHostsSetting);
 
         foreach (var host in hosts)
         {
@@ -28,7 +28,7 @@ internal static class WebhookHandlerFactory
             {
                 throw new InvalidOperationException(
                     $"{AllowedHostsSetting} has the entry '{host}', which is not a host name. " +
-                    "List the name only, for example 'notify.internal', without a scheme, port, path or wildcard.");
+                    "List the name only, without a scheme, port, path or wildcard.");
             }
         }
 
@@ -41,7 +41,7 @@ internal static class WebhookHandlerFactory
     /// </summary>
     public static string[] GetAllowedAddresses(IConfiguration configuration)
     {
-        var addresses = ReadList(configuration, AllowedAddressesSetting, "10.0.0.5,10.20.0.0/16");
+        var addresses = ReadList(configuration, AllowedAddressesSetting);
 
         // The policy parses an entry when it is added, so adding each one to a throwaway policy finds the bad one.
         foreach (var address in addresses)
@@ -89,13 +89,13 @@ internal static class WebhookHandlerFactory
     /// as indexed keys (<c>Webhook__AllowedHosts__0</c>, ...) fails, naming the setting, because ignoring it would
     /// leave webhooks blocked with no explanation.
     /// </summary>
-    private static string[] ReadList(IConfiguration configuration, string setting, string example)
+    private static string[] ReadList(IConfiguration configuration, string setting)
     {
         if (configuration.GetSection(setting).GetChildren().Any())
         {
             throw new InvalidOperationException(
-                $"{setting} must be given as one comma-separated value, for example " +
-                $"{setting.Replace(":", "__")}={example}, and not as indexed keys such as {setting.Replace(":", "__")}__0.");
+                $"{setting} must be given as one comma-separated value, and not as indexed keys such as " +
+                $"{setting.Replace(":", "__")}__0.");
         }
 
         return (configuration[setting] ?? string.Empty)
