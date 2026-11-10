@@ -431,10 +431,13 @@ public class FeatureFlagController : ApiControllerBase
 
     [Authorize(LicenseFeatures.Schedule)]
     [HttpDelete("schedules/{id:guid}")]
-    public async Task<ApiResponse<bool>> DeleteScheduleAsync(Guid id)
+    public async Task<ApiResponse<bool>> DeleteScheduleAsync(Guid envId, Guid id)
     {
         var request = new DeleteFlagSchedule
         {
+            OrgId = OrgId,
+            EnvId = envId,
+            Permissions = await GetRequestPermissionsAsync(),
             Id = id
         };
 
