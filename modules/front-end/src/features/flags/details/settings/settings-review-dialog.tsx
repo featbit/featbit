@@ -10,6 +10,7 @@ export function SettingsReviewDialog({
   saving,
   onOpenChange,
   onSave,
+  fieldLabels = {},
 }: {
   open: boolean
   flagName: string
@@ -18,6 +19,7 @@ export function SettingsReviewDialog({
   saving: boolean
   onOpenChange: (open: boolean) => void
   onSave: (comment: string) => void
+  fieldLabels?: Record<string, string>
 }) {
   const { t } = useTranslation()
   return (
@@ -56,6 +58,7 @@ export function SettingsReviewDialog({
       ledger={{
         copy: {
           label: (change) =>
+            fieldLabels[change.label] ??
             t(`featureFlags.detailsPage.settings.fields.${change.label}`),
           action: (action) => t(`featureFlags.detailsPage.review.${action}`),
           actionCount: (action, count) =>

@@ -53,6 +53,11 @@ import {
   FlagDifferenceValue,
   type FlagDifferenceKey,
 } from "./flag-difference-value"
+import { FlagDocumentationCopyRows } from "./flag-documentation-copy-rows"
+import { useDocumentationComparison } from "./use-documentation-comparison"
+import type { DocumentationSettingKey } from "../custom-fields/custom-fields-model"
+
+type CopySettingKey = FlagDifferenceKey | DocumentationSettingKey
 
 export type FlagDifferenceTarget = {
   id: string
@@ -113,7 +118,7 @@ const rows: RowDefinition[] = [
 ]
 
 function getCopyOptions(
-  selected: Set<FlagDifferenceKey>,
+  selected: Set<CopySettingKey>,
   modes: Record<"individualTargeting" | "targetingRule", FlagSettingCopyMode>
 ): FlagSettingCopyOptions {
   return {
@@ -146,7 +151,7 @@ export function FlagDifferencesSheet({
   const queryClient = useQueryClient()
   const source = getCurrentProjectEnv()
   const [selectedTargetId, setSelectedTargetId] = useState("")
-  const [selected, setSelected] = useState<Set<FlagDifferenceKey>>(new Set())
+  const [selected, setSelected] = useState<Set<CopySettingKey>>(new Set())
   const [modes, setModes] = useState<
     Record<"individualTargeting" | "targetingRule", FlagSettingCopyMode>
   >({ individualTargeting: "overwrite", targetingRule: "overwrite" })
@@ -200,6 +205,12 @@ export function FlagDifferencesSheet({
     retry: false,
   })
   const detail = comparisonQuery.data ?? null
+  const documentation = useDocumentationComparison(
+    envId,
+    targetId,
+    flag?.key ?? "",
+    open && comparisonGranted
+  )
   const canAppendRules = Boolean(
     detail?.diff.targetingRule.some(
       (item) => item.source && (item.canAppend ?? item.isDifferent)
@@ -221,17 +232,17 @@ export function FlagDifferencesSheet({
       ),
     [detail]
   )
-  const eligibleKeys = useMemo(
-    () =>
-      new Set(
-        detail
-          ? rows
-              .filter((row) => row.different(detail) && row.copyable(detail))
-              .map((row) => row.key)
-          : []
-      ),
-    [detail]
+  const eligibleKeys = new Set<CopySettingKey>(
+    detail
+      ? rows
+          .filter((row) => row.different(detail) && row.copyable(detail))
+          .map((row) => row.key)
+      : []
   )
+  for (const { key, different } of documentation.rows) {
+    if (documentation.ready && different && !documentation.errorFor(key))
+      eligibleKeys.add(key)
+  }
   const allSelected =
     eligibleKeys.size > 0 && [...eligibleKeys].every((key) => selected.has(key))
   const someSelected =
@@ -252,28 +263,49 @@ export function FlagDifferencesSheet({
   }
 
   const copyMutation = useMutation({
-    mutationFn: () =>
-      copyFeatureFlagSettings(
-        envId,
-        targetId,
-        flag!.key,
-        getCopyOptions(selected, effectiveModes)
-      ),
+    mutationFn: async () => {
+      if (
+        !canCopy ||
+        !selected.size ||
+        [...selected].some((key) => !eligibleKeys.has(key))
+      )
+        throw new Error(t("featureFlags.differencesSheet.copyFailed"))
+      const copyDocumentation = [...selected].some(
+        (key) => key === "description" || key.startsWith("custom:")
+      )
+        ? documentation.prepare(selected)
+        : null
+      if (rows.some((row) => selected.has(row.key))) {
+        await copyFeatureFlagSettings(
+          envId,
+          targetId,
+          flag!.key,
+          getCopyOptions(selected, effectiveModes)
+        )
+      }
+      copyDocumentation?.()
+    },
     onSuccess: () => {
       toast.success(t("featureFlags.differencesSheet.copied"))
       void queryClient.invalidateQueries({
         queryKey: ["feature-flag-difference"],
+      })
+      void queryClient.invalidateQueries({
+        queryKey: ["feature-flag-details", targetId, flag?.key],
       })
       onCopied?.()
       resetComparisonState()
       if (!lockedTarget) setSelectedTargetId("")
       onOpenChange(false)
     },
-    onError: () => toast.error(t("featureFlags.differencesSheet.copyFailed")),
+    onError: (error) =>
+      toast.error(
+        error.message || t("featureFlags.differencesSheet.copyFailed")
+      ),
   })
   const selectAllDisabled = !eligibleKeys.size || copyMutation.isPending
 
-  function toggleRow(key: FlagDifferenceKey) {
+  function toggleRow(key: CopySettingKey) {
     if (!eligibleKeys.has(key) || copyMutation.isPending) return
     setSelected((current) => {
       const next = new Set(current)
@@ -456,7 +488,7 @@ export function FlagDifferencesSheet({
             </div>
           ) : (
             <div className="min-w-[880px]">
-              <div className="grid grid-cols-[220px_minmax(280px,1fr)_minmax(280px,1fr)] border-b bg-muted/30 text-xs font-medium">
+              <div className="sticky top-0 z-10 grid grid-cols-[220px_minmax(280px,1fr)_minmax(280px,1fr)] border-b bg-background text-xs font-medium">
                 <div className="flex items-center gap-3 px-5 py-3">
                   <Checkbox
                     aria-label={t("featureFlags.differencesSheet.selectAll")}
@@ -663,6 +695,12 @@ export function FlagDifferencesSheet({
                   </div>
                 )
               })}
+              <FlagDocumentationCopyRows
+                comparison={documentation}
+                selected={selected}
+                disabled={copyMutation.isPending || !canCopy}
+                toggle={toggleRow}
+              />
             </div>
           )}
         </div>
@@ -702,6 +740,7 @@ export function FlagDifferencesSheet({
                   !canCopy ||
                   !detail ||
                   !selected.size ||
+                  [...selected].some((key) => !eligibleKeys.has(key)) ||
                   copyMutation.isPending
                 }
                 onClick={() => copyMutation.mutate()}

@@ -18,6 +18,7 @@ import {
 } from "@/features/iam/current-user-permissions"
 import { currentUserPoliciesQueryOptions } from "@/features/iam/current-user-policy-query"
 import { OrganizationLayout } from "@/features/organization/components/organization-layout"
+import { ProjectCustomFieldsSheet } from "./components/project-custom-fields-sheet"
 import { normalizeOrganization } from "@/features/organization/organization-api"
 import {
   DeleteConfirmDialog,
@@ -89,6 +90,8 @@ export function OrganizationProjectsPage() {
   const [saving, setSaving] = useState(false)
   const [projectTarget, setProjectTarget] = useState<ProjectTarget>(null)
   const [projectSheetOpen, setProjectSheetOpen] = useState(false)
+  const [customFieldsTarget, setCustomFieldsTarget] =
+    useState<ProjectTarget>(null)
   const [environmentTarget, setEnvironmentTarget] =
     useState<EnvironmentTarget>(null)
   const [environmentSheetOpen, setEnvironmentSheetOpen] = useState(false)
@@ -768,6 +771,7 @@ export function OrganizationProjectsPage() {
         onSearchChange={setSearch}
         onCreateProject={openCreateProject}
         onEditProject={openEditProject}
+        onCustomFields={setCustomFieldsTarget}
         onDeleteProject={openDeleteProject}
         onCreateEnvironment={openCreateEnvironment}
         onEditEnvironment={openEditEnvironment}
@@ -785,6 +789,14 @@ export function OrganizationProjectsPage() {
         onOpenChange={setProjectSheetOpen}
         onSubmit={submitProject}
       />
+      {customFieldsTarget && (
+        <ProjectCustomFieldsSheet
+          key={customFieldsTarget.id}
+          project={customFieldsTarget}
+          canConfigure={canUpdateProject(customFieldsTarget)}
+          onClose={() => setCustomFieldsTarget(null)}
+        />
+      )}
 
       <EnvironmentSheet
         open={environmentSheetOpen}

@@ -91,6 +91,7 @@ function renderSettings(
 
 describe("SettingsTab", () => {
   beforeEach(() => {
+    localStorage.clear()
     vi.mocked(updateFeatureFlagGeneral).mockReset()
     vi.mocked(updateFeatureFlagInsightCollection).mockReset()
     vi.mocked(fetchRunningExperiments).mockReset()
@@ -188,7 +189,7 @@ describe("SettingsTab", () => {
     fireEvent.change(screen.getByLabelText("Name"), {
       target: { value: "Checkout rollout" },
     })
-    fireEvent.change(screen.getByLabelText(/Description/), {
+    fireEvent.change(screen.getByRole("textbox", { name: /Description/ }), {
       target: { value: "Updated description" },
     })
     fireEvent.click(screen.getByRole("button", { name: "Remove tag checkout" }))
@@ -229,7 +230,7 @@ describe("SettingsTab", () => {
       canUpdateTags: false,
     })
 
-    fireEvent.change(screen.getByLabelText(/Description/), {
+    fireEvent.change(screen.getByRole("textbox", { name: /Description/ }), {
       target: { value: "Updated description" },
     })
     fireEvent.click(screen.getByRole("button", { name: "Review & save" }))
@@ -299,7 +300,9 @@ describe("SettingsTab", () => {
       "No running experiments are linked to this flag. You can enable or disable insight collection."
     )
     fireEvent.click(screen.getByRole("button", { name: "Disable insights" }))
-    fireEvent.click(await screen.findByRole("button", { name: "Disable collection" }))
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Disable collection" })
+    )
     await waitFor(() =>
       expect(updateFeatureFlagInsightCollection).toHaveBeenCalledWith(
         "env-1",
@@ -340,7 +343,9 @@ describe("SettingsTab", () => {
       "No running experiments are linked to this flag. You can enable or disable insight collection."
     )
     fireEvent.click(screen.getByRole("button", { name: "Disable insights" }))
-    fireEvent.click(await screen.findByRole("button", { name: "Disable collection" }))
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Disable collection" })
+    )
     await waitFor(() =>
       expect(fetchRunningExperiments).toHaveBeenCalledTimes(2)
     )

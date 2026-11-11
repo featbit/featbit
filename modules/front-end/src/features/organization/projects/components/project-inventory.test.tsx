@@ -48,6 +48,7 @@ function renderInventory(canWrite: boolean, canView = true) {
       onSearchChange={vi.fn()}
       onCreateProject={vi.fn()}
       onEditProject={vi.fn()}
+      onCustomFields={vi.fn()}
       onDeleteProject={vi.fn()}
       onCreateEnvironment={vi.fn()}
       onEditEnvironment={vi.fn()}

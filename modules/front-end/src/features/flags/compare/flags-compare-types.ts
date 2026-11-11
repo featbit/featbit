@@ -5,6 +5,8 @@ export type FlagDiffOverview = {
   targetingRule: boolean
   defaultRule: boolean
   offVariation: boolean
+  description?: boolean
+  customFields?: { id: string; name: string }[]
 }
 
 export type FlagCompareOverview = {

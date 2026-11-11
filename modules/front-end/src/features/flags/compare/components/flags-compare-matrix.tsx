@@ -34,7 +34,7 @@ import type {
 } from "../flags-compare-types"
 
 type DifferenceCategory = {
-  key: keyof Omit<FlagDiffOverview, "targetEnvId">
+  key: keyof Omit<FlagDiffOverview, "targetEnvId" | "customFields">
 }
 
 const differenceCategories: DifferenceCategory[] = [
@@ -43,6 +43,7 @@ const differenceCategories: DifferenceCategory[] = [
   { key: "targetingRule" },
   { key: "defaultRule" },
   { key: "offVariation" },
+  { key: "description" },
 ]
 
 function FlagIdentity({
@@ -251,8 +252,17 @@ function DifferenceCell({
     )
   }
 
-  const differences = differenceCategories.filter(
-    (category) => diff[category.key]
+  const differences: { key: string; label: string }[] = differenceCategories
+    .filter((category) => diff[category.key])
+    .map((category) => ({
+      key: category.key,
+      label: t(`featureFlags.comparePage.matrix.categories.${category.key}`),
+    }))
+  differences.push(
+    ...(diff.customFields ?? []).map((field) => ({
+      key: `custom:${field.id}`,
+      label: field.name,
+    }))
   )
   if (!differences.length) {
     return (
@@ -277,7 +287,7 @@ function DifferenceCell({
       <div className="flex flex-wrap gap-1.5">
         {differences.map((category) => (
           <Badge key={category.key} variant="outline" className="font-normal">
-            {t(`featureFlags.comparePage.matrix.categories.${category.key}`)}
+            {category.label}
           </Badge>
         ))}
       </div>

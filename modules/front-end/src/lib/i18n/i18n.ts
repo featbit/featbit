@@ -11,6 +11,10 @@ import {
   zhReleaseDecision,
 } from "./resources/release-decision"
 import { enFeatureFlags, zhFeatureFlags } from "./resources/feature-flags"
+import {
+  enFlagDocumentation,
+  zhFlagDocumentation,
+} from "./resources/flag-documentation"
 import { enGetStarted, zhGetStarted } from "./resources/get-started"
 import { enLayout, zhLayout } from "./resources/layout"
 import { enIam, zhIam } from "./resources/iam"
@@ -48,6 +52,7 @@ i18n.use(initReactI18next).init({
         endUsers: enEndUsers,
         releaseDecision: enReleaseDecision,
         featureFlags: enFeatureFlags,
+        flagDocumentation: enFlagDocumentation,
         getStarted: enGetStarted,
         segments: enSegments,
         targeting: enTargeting,
@@ -72,6 +77,7 @@ i18n.use(initReactI18next).init({
         endUsers: zhEndUsers,
         releaseDecision: zhReleaseDecision,
         featureFlags: zhFeatureFlags,
+        flagDocumentation: zhFlagDocumentation,
         getStarted: zhGetStarted,
         segments: zhSegments,
         targeting: zhTargeting,

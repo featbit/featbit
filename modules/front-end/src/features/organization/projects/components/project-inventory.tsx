@@ -32,6 +32,7 @@ export function ProjectInventory({
   onSearchChange,
   onCreateProject,
   onEditProject,
+  onCustomFields,
   onDeleteProject,
   onCreateEnvironment,
   onEditEnvironment,
@@ -68,6 +69,7 @@ export function ProjectInventory({
   onSearchChange: (value: string) => void
   onCreateProject: () => void
   onEditProject: (project: OrganizationProject) => void
+  onCustomFields: (project: OrganizationProject) => void
   onDeleteProject: (project: OrganizationProject) => void
   onCreateEnvironment: (project: OrganizationProject) => void
   onEditEnvironment: (
@@ -183,6 +185,7 @@ export function ProjectInventory({
                   onCopyText={onCopyText}
                   onCreateEnvironment={onCreateEnvironment}
                   onEditProject={onEditProject}
+                  onCustomFields={onCustomFields}
                   onDeleteProject={onDeleteProject}
                 />
                 <EnvironmentTable

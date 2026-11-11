@@ -588,6 +588,7 @@ export function FlagDetailsPage() {
           />
         ) : activeTab === "settings" ? (
           <SettingsTab
+            key={`${envId}:${saved.key}`}
             envId={envId}
             flag={saved}
             requireComment={settingsQuery.data?.requireChangeComment ?? false}

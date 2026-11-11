@@ -1,10 +1,11 @@
-import { Copy, Edit, Plus, Trash2 } from "lucide-react"
+import { Copy, Edit, Plus, Settings2, Trash2 } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import type { ProjectEnv } from "@/features/layout/layout-types"
 import type { OrganizationProject } from "@/features/organization/projects/projects-api"
 import { IconTooltip } from "./inventory-shared"
+import { useDocumentationCopy } from "@/features/flags/documentation/use-documentation-copy"
 
 export function ProjectHeader({
   project,
@@ -15,6 +16,7 @@ export function ProjectHeader({
   onCopyText,
   onCreateEnvironment,
   onEditProject,
+  onCustomFields,
   onDeleteProject,
 }: {
   project: OrganizationProject
@@ -25,9 +27,11 @@ export function ProjectHeader({
   onCopyText: (value: string) => void
   onCreateEnvironment: (project: OrganizationProject) => void
   onEditProject: (project: OrganizationProject) => void
+  onCustomFields: (project: OrganizationProject) => void
   onDeleteProject: (project: OrganizationProject) => void
 }) {
   const { t } = useTranslation()
+  const { t: d } = useDocumentationCopy()
   const isCurrent = project.id === currentProjectEnv?.projectId
 
   return (
@@ -71,6 +75,16 @@ export function ProjectHeader({
         </span>
       </div>
       <div className="flex shrink-0 items-center gap-1.5">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          aria-label={d("manageProjectFields", { project: project.name })}
+          onClick={() => onCustomFields(project)}
+        >
+          <Settings2 className="size-3.5" />
+          {d("customFields")}
+        </Button>
         {canCreateEnvironment ? (
           <Button
             type="button"

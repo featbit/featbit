@@ -18,6 +18,8 @@ const mocks = vi.hoisted(() => ({
 }))
 
 vi.mock("@/features/layout/layout-context", () => ({
+  getCurrentOrganization: () => null,
+  getCurrentWorkspace: () => null,
   getCurrentProjectEnv: () => ({
     projectId: "source-project",
     projectName: "Growth Platform",
@@ -31,6 +33,7 @@ vi.mock("@/features/layout/layout-context", () => ({
 }))
 
 vi.mock("../flags-api", () => ({
+  fetchFeatureFlag: vi.fn().mockResolvedValue(null),
   compareFeatureFlag: mocks.compare,
   copyFeatureFlagSettings: mocks.copy,
 }))

@@ -9,7 +9,19 @@ import { Button } from "@/components/ui/button"
 import { InsightsSettingsSection } from "./insights-settings-section"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
+import { useDocumentationCopy } from "../../documentation/use-documentation-copy"
+import type { FlagSettingsFormValues } from "../../custom-fields/custom-fields-model"
+import {
+  FlagDocumentationTabs,
+  type FlagDocumentationTab,
+} from "./flag-documentation-tabs"
+import {
+  customFieldReviewChanges,
+  customValuesSchema,
+  normalizeCustomValues,
+  validateCustomValues,
+} from "../../custom-fields/custom-fields-model"
+import { useCustomFields } from "../../custom-fields/use-custom-fields"
 import { ApiRequestError } from "@/lib/api/authenticated-api"
 import {
   archiveFeatureFlag,
@@ -59,23 +71,50 @@ export function SettingsTab({
   onRemoved,
 }: Props) {
   const { t } = useTranslation()
+  const { t: d } = useDocumentationCopy()
   const queryClient = useQueryClient()
   const [reviewOpen, setReviewOpen] = useState(false)
   const [confirmation, setConfirmation] = useState<FlagConfirmation>(null)
-  const baseline = useMemo(() => flagSettingsOf(flag), [flag])
+  const [documentationTab, setDocumentationTab] =
+    useState<FlagDocumentationTab>("description")
+  const custom = useCustomFields(envId, flag.key)
+  const baseline = useMemo(
+    () => ({
+      ...flagSettingsOf(flag),
+      description:
+        custom.savedRecord?.general.description ?? flag.description ?? "",
+      customFields: custom.savedRecord?.customFields ?? {},
+    }),
+    [flag, custom.savedRecord]
+  )
   const schema = useMemo(
     () =>
-      z.object({
-        name: z
-          .string()
-          .trim()
-          .min(1, t("featureFlags.detailsPage.settings.nameRequired")),
-        description: z.string(),
-        tags: z.array(z.string()),
-      }),
-    [t]
+      z
+        .object({
+          name: z
+            .string()
+            .trim()
+            .min(1, t("featureFlags.detailsPage.settings.nameRequired")),
+          description: z.string(),
+          tags: z.array(z.string()),
+          customFields: customValuesSchema,
+        })
+        .superRefine((values, context) => {
+          if (!canUpdateDescription) return
+          for (const issue of validateCustomValues(
+            custom.fields,
+            values.customFields
+          )) {
+            context.addIssue({
+              code: "custom",
+              path: ["customFields", issue.fieldId, issue.controlId],
+              message: d(issue.code),
+            })
+          }
+        }),
+    [t, d, custom.fields, canUpdateDescription]
   )
-  const form = useForm<FlagSettingsValues>({
+  const form = useForm<FlagSettingsFormValues>({
     resolver: zodResolver(schema),
     defaultValues: baseline,
   })
@@ -85,6 +124,18 @@ export function SettingsTab({
   }, [baseline, form])
 
   const watched = useWatch({ control: form.control })
+  const watchedCustom = useWatch({
+    control: form.control,
+    name: "customFields",
+  })
+  const submittedCustom = useMemo(
+    () =>
+      normalizeCustomValues(
+        custom.fields,
+        (canUpdateDescription ? watchedCustom : baseline.customFields) ?? {}
+      ),
+    [custom.fields, canUpdateDescription, watchedCustom, baseline.customFields]
+  )
   const draft = useMemo<FlagSettingsValues>(
     () => ({
       name: watched.name ?? baseline.name,
@@ -117,10 +168,21 @@ export function SettingsTab({
     ]
   )
   const dirty =
-    stableFlagSettings(submittedDraft) !== stableFlagSettings(baseline)
+    stableFlagSettings(submittedDraft) !== stableFlagSettings(baseline) ||
+    JSON.stringify(submittedCustom) !==
+      JSON.stringify(
+        normalizeCustomValues(custom.fields, baseline.customFields)
+      )
   const changes = useMemo(
-    () => flagSettingsReviewChanges(baseline, submittedDraft),
-    [baseline, submittedDraft]
+    () => [
+      ...flagSettingsReviewChanges(baseline, submittedDraft),
+      ...customFieldReviewChanges(
+        custom.fields,
+        baseline.customFields,
+        submittedCustom
+      ),
+    ],
+    [baseline, submittedDraft, submittedCustom, custom.fields]
   )
   const archived = Boolean(flag.isArchived)
   const saveMutation = useMutation({
@@ -135,6 +197,15 @@ export function SettingsTab({
         },
         comment
       )
+      if (
+        !custom.saveRecord(
+          submittedDraft,
+          submittedCustom,
+          comment,
+          flagSettingsOf(flag)
+        )
+      )
+        throw new Error("Preview storage could not be saved")
       return { ...flag, ...submittedDraft, revision }
     },
     onSuccess: (saved) => {
@@ -190,14 +261,20 @@ export function SettingsTab({
   return (
     <form
       className="space-y-8 pt-4 pb-8"
-      onSubmit={form.handleSubmit(() => setReviewOpen(true))}
+      onSubmit={form.handleSubmit(
+        () => setReviewOpen(true),
+        (errors) => {
+          if (errors.description) setDocumentationTab("description")
+          else if (errors.customFields) setDocumentationTab("customFields")
+        }
+      )}
     >
       <section className="max-w-3xl space-y-5">
         <h2 className="text-base font-medium">
           {t("featureFlags.detailsPage.settings.general")}
         </h2>
 
-        <div className="space-y-5">
+        <div className="grid gap-5 md:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="flag-name">
               {t("featureFlags.detailsPage.settings.fields.name")}
@@ -220,21 +297,6 @@ export function SettingsTab({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="flag-description">
-              {t("featureFlags.detailsPage.settings.fields.description")}
-              <span className="font-normal text-muted-foreground">
-                {` ${t("featureFlags.detailsPage.review.optional")}`}
-              </span>
-            </Label>
-            <Textarea
-              id="flag-description"
-              rows={4}
-              disabled={archived || !canUpdateDescription}
-              {...form.register("description")}
-            />
-          </div>
-
-          <div className="space-y-2">
             <Label>{t("featureFlags.detailsPage.settings.fields.tags")}</Label>
             <FlagTagPicker
               key={`${envId}-${flag.id}`}
@@ -250,6 +312,13 @@ export function SettingsTab({
             </p>
           </div>
         </div>
+        <FlagDocumentationTabs
+          form={form}
+          fields={custom.fields}
+          disabled={archived || !canUpdateDescription}
+          tab={documentationTab}
+          onTabChange={setDocumentationTab}
+        />
       </section>
 
       {!archived ? (
@@ -364,6 +433,9 @@ export function SettingsTab({
         open={reviewOpen}
         flagName={flag.name}
         changes={changes}
+        fieldLabels={Object.fromEntries(
+          custom.fields.map((field) => [`custom:${field.id}`, field.name])
+        )}
         requireComment={requireComment}
         saving={saveMutation.isPending}
         onOpenChange={setReviewOpen}
