@@ -160,21 +160,24 @@ public class SegmentService(MongoDbClient mongoDb, ILogger<SegmentService> logge
         {
             var sharedSegments = segments.Where(x => x.Type == SegmentType.Shared).ToArray();
 
-            var scopes = new Dictionary<(Guid WorkspaceId, string Scope), ICollection<Guid>>();
+            var scopesToTranslate = sharedSegments
+                .SelectMany(segment => segment.Scopes.Select(scope => (segment.WorkspaceId, Scope: scope)))
+                .Distinct()
+                .ToArray();
+            var translations = await Task.WhenAll(scopesToTranslate.Select(async key =>
+            {
+                var (_, envIds) = await TranslateScopeAsync(key.WorkspaceId, key.Scope);
+                return (Key: key, EnvIds: envIds);
+            }));
+            var scopes = translations.ToDictionary(x => x.Key, x => x.EnvIds);
+
             foreach (var sharedSegment in sharedSegments)
             {
-                var envIds = new HashSet<Guid>();
-                foreach (var scope in sharedSegment.Scopes)
-                {
-                    var key = (sharedSegment.WorkspaceId, scope);
-                    if (!scopes.TryGetValue(key, out var ids))
-                    {
-                        (_, ids) = await TranslateScopeAsync(sharedSegment.WorkspaceId, scope);
-                        scopes.Add(key, ids);
-                    }
-                    envIds.UnionWith(ids);
-                }
-                caches.Add(new SegmentCache(envIds.ToArray(), sharedSegment));
+                var envIds = sharedSegment.Scopes
+                    .SelectMany(scope => scopes[(sharedSegment.WorkspaceId, scope)])
+                    .Distinct()
+                    .ToArray();
+                caches.Add(new SegmentCache(envIds, sharedSegment));
             }
         }
     }

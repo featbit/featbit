@@ -14,6 +14,45 @@ namespace Api.UnitTests.Authorization;
 public class OrganizationPermissionsTests
 {
     [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task MissingHttpContextReturnsNoPermissionsWithoutResolvingPolicies(bool emptyOrganization)
+    {
+        var requests = new Mock<IRequestPermissions>(MockBehavior.Strict);
+        var organizations = new Mock<IOrganizationService>(MockBehavior.Strict);
+        var members = new Mock<IMemberService>(MockBehavior.Strict);
+        var provider = new Api.Authorization.OrganizationPermissions(new HttpContextAccessor(),
+            requests.Object, organizations.Object, members.Object);
+
+        Assert.Empty(await provider.GetAsync(emptyOrganization ? Guid.Empty : Guid.NewGuid()));
+
+        requests.VerifyNoOtherCalls();
+        organizations.VerifyNoOtherCalls();
+        members.VerifyNoOtherCalls();
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task EmptyOrganizationReturnsNoPermissionsWithoutResolvingPolicies(bool hasRequestOrganization)
+    {
+        var context = new DefaultHttpContext();
+        if (hasRequestOrganization)
+            context.Request.Headers[ApiConstants.OrgIdHeaderKey] = Guid.NewGuid().ToString();
+        var requests = new Mock<IRequestPermissions>(MockBehavior.Strict);
+        var organizations = new Mock<IOrganizationService>(MockBehavior.Strict);
+        var members = new Mock<IMemberService>(MockBehavior.Strict);
+        var provider = new Api.Authorization.OrganizationPermissions(new HttpContextAccessor { HttpContext = context },
+            requests.Object, organizations.Object, members.Object);
+
+        Assert.Empty(await provider.GetAsync(Guid.Empty));
+
+        requests.VerifyNoOtherCalls();
+        organizations.VerifyNoOtherCalls();
+        members.VerifyNoOtherCalls();
+    }
+
+    [Theory]
     [InlineData("JWT", true, true)]
     [InlineData("JWT", false, true)]
     [InlineData("JWT", true, false)]

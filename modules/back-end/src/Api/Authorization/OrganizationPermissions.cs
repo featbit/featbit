@@ -6,7 +6,7 @@ using Domain.Users;
 namespace Api.Authorization;
 
 public class OrganizationPermissions(
-    IHttpContextAccessor accessor,
+    IHttpContextAccessor contextAccessor,
     IRequestPermissions requestPermissions,
     IOrganizationService organizations,
     IMemberService members) : IOrganizationPermissions
@@ -15,10 +15,10 @@ public class OrganizationPermissions(
 
     public async Task<PolicyStatement[]> GetAsync(Guid organizationId)
     {
-        var context = accessor.HttpContext;
+        var context = contextAccessor.HttpContext;
         if (context == null || organizationId == Guid.Empty) return [];
         if (organizationId == context.Request.OrganizationId()) return await requestPermissions.GetAsync(context);
-        // API tokens are bound to a single organization, including personal tokens.
+        // Access tokens are bound to a single organization, including personal tokens.
         if (context.User.Identity?.AuthenticationType != Schemes.JwtBearer) return [];
         if (_permissions.TryGetValue(organizationId, out var cached)) return cached;
         var userClaim = context.User.FindFirst(UserClaims.Id)?.Value;

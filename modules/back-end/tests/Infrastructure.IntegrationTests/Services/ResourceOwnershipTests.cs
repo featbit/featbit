@@ -102,6 +102,37 @@ public class PostgresResourceOwnershipTests(FeatBitPostgresFixture fixture) : In
 public class MongoResourceOwnershipTests(MongoDbFixture fixture) : IntegrationTestBase
 {
     [DockerFact]
+    public async Task SharedCachesHandleRepeatedAndOverlappingScopesWithinEachWorkspace()
+    {
+        var db = new MongoDbClient(Options.Create(new MongoDbOptions
+        { ConnectionString = fixture.ConnectionString, Database = $"scope-cache-{Guid.NewGuid():N}" }));
+        var data = new ResourceOwnershipData();
+        data.Shared.Scopes = [data.Shared.Scopes[0], data.Shared.Scopes[0], "organization/org", "organization/shared-org"];
+        var repeated = new Segment(data.Organization.WorkspaceId, data.Environment.Id, "Repeated", "repeated",
+            SegmentType.Shared, data.Shared.Scopes, [], [], [], "") { Id = Guid.NewGuid() };
+        var empty = new Segment(data.Organization.WorkspaceId, data.Environment.Id, "Empty", "empty",
+            SegmentType.Shared, [], [], [], [], "") { Id = Guid.NewGuid() };
+        await db.CollectionOf<Organization>().InsertManyAsync([data.Organization, data.ForeignOrganization, data.SharedOrganization]);
+        await db.CollectionOf<Project>().InsertManyAsync([data.Project, data.ForeignProject, data.SharedProject]);
+        await db.CollectionOf<Environment>().InsertManyAsync([data.Environment, data.ForeignEnvironment, data.SharedEnvironment]);
+        await db.CollectionOf<Segment>().InsertManyAsync([data.Local, data.Shared, data.ForeignShared, repeated, empty]);
+        var service = new Infrastructure.Services.MongoDb.SegmentService(db,
+            NullLogger<Infrastructure.Services.MongoDb.SegmentService>.Instance);
+
+        var caches = await service.GetCachesAsync();
+
+        Assert.Equal(5, caches.Count);
+        foreach (var segment in new[] { data.Shared, repeated })
+        {
+            var cache = Assert.Single(caches, x => x.Segment.Id == segment.Id);
+            Assert.Equal(new[] { data.Environment.Id, data.SharedEnvironment.Id }.Order(), cache.EnvIds.Order());
+        }
+        Assert.Equal(new[] { data.ForeignEnvironment.Id }, Assert.Single(caches, x => x.Segment.Id == data.ForeignShared.Id).EnvIds);
+        Assert.Equal(new[] { data.Environment.Id }, Assert.Single(caches, x => x.Segment.Id == data.Local.Id).EnvIds);
+        Assert.Empty(Assert.Single(caches, x => x.Segment.Id == empty.Id).EnvIds);
+    }
+
+    [DockerFact]
     public async Task ResourceRnsIncludeOwningOrganizationAndSharedSegmentAccessContext()
     {
         var db = new MongoDbClient(Options.Create(new MongoDbOptions
