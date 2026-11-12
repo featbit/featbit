@@ -1,4 +1,5 @@
 using Domain.AuditLogs;
+using Domain.FlagChangeRequests;
 using Domain.FlagSchedules;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -30,7 +31,7 @@ public class FlagScheduleWorker(IServiceProvider serviceProvider, ILogger<FlagSc
         return base.StopAsync(cancellationToken);
     }
 
-    private async Task DoWorkAsync(CancellationToken cancellationToken)
+    internal async Task DoWorkAsync(CancellationToken cancellationToken)
     {
         using var scope = serviceProvider.CreateScope();
         var flagScheduleService = scope.ServiceProvider.GetRequiredService<IFlagScheduleService>();
@@ -41,14 +42,15 @@ public class FlagScheduleWorker(IServiceProvider serviceProvider, ILogger<FlagSc
         try
         {
             var pendingSchedules = await flagScheduleService.FindManyAsync(
-                x => x.Status == FlagScheduleStatus.PendingExecution && x.ScheduledTime <= DateTime.UtcNow
+                x => (x.Status == FlagScheduleStatus.PendingExecution || x.Status == FlagScheduleStatus.PendingReview)
+                     && x.ScheduledTime <= DateTime.UtcNow
             );
 
             foreach (var schedule in pendingSchedules)
             {
                 try
                 {
-                    await ApplyScheduleAsync(schedule);
+                    if (!await ApplyScheduleAsync(schedule)) continue;
 
                     logger.LogInformation(
                         "{ScheduleId}:{ScheduleTitle}: Flag schedule has been applied.", schedule.Id,
@@ -75,8 +77,39 @@ public class FlagScheduleWorker(IServiceProvider serviceProvider, ILogger<FlagSc
 
         return;
 
-        async Task ApplyScheduleAsync(FlagSchedule schedule)
+        async Task<bool> ApplyScheduleAsync(FlagSchedule schedule)
         {
+            FlagChangeRequest? changeRequest = null;
+            if (schedule.ChangeRequestId.HasValue)
+            {
+                changeRequest = await flagChangeRequestService.GetAsync(schedule.ChangeRequestId.Value);
+                if (changeRequest.OrgId != schedule.OrgId || changeRequest.EnvId != schedule.EnvId ||
+                    changeRequest.FlagId != schedule.FlagId || changeRequest.FlagDraftId != schedule.FlagDraftId)
+                    return false;
+
+                // The durable decision is authoritative. Repair interrupted schedule updates,
+                // and never execute an unreviewed or declined request even on a stale schedule.
+                if (changeRequest.Status == FlagChangeRequestStatus.Declined)
+                {
+                    await flagScheduleService.TrySetReviewOutcomeAsync(schedule.Id, changeRequest.Id, false, schedule.CreatorId);
+                    return false;
+                }
+                if (changeRequest.Status == FlagChangeRequestStatus.Applied)
+                {
+                    await flagScheduleService.TrySetReviewOutcomeAsync(schedule.Id, changeRequest.Id, true, schedule.CreatorId);
+                    await flagScheduleService.TryMarkAppliedAsync(schedule.Id, schedule.CreatorId);
+                    return false;
+                }
+                if (changeRequest.Status != FlagChangeRequestStatus.Approved) return false;
+                if (schedule.Status == FlagScheduleStatus.PendingReview)
+                {
+                    if (!await flagScheduleService.TrySetReviewOutcomeAsync(schedule.Id, changeRequest.Id, true, schedule.CreatorId))
+                        return false;
+                    schedule.PendingExecution(schedule.CreatorId);
+                }
+            }
+
+            if (schedule.Status != FlagScheduleStatus.PendingExecution) return false;
             // apply flag draft
             var organization = await organizationService.GetAsync(schedule.OrgId);
             await featureFlagAppService.ApplyDraftAsync(
@@ -84,16 +117,15 @@ public class FlagScheduleWorker(IServiceProvider serviceProvider, ILogger<FlagSc
             );
 
             // update schedule status
-            schedule.Applied(schedule.CreatorId);
-            await flagScheduleService.UpdateAsync(schedule);
+            await flagScheduleService.TryMarkAppliedAsync(schedule.Id, schedule.CreatorId);
 
             // update change request status
-            if (schedule.ChangeRequestId.HasValue)
+            if (changeRequest != null)
             {
-                var changeRequest = await flagChangeRequestService.GetAsync(schedule.ChangeRequestId.Value);
                 changeRequest.Applied(schedule.CreatorId);
                 await flagChangeRequestService.UpdateAsync(changeRequest);
             }
+            return true;
         }
     }
 }
