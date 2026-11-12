@@ -8,7 +8,9 @@ export function parsePageCursor(raw: string | null): PageCursor | undefined {
     const cursor = value as Record<string, unknown>
     if (
       typeof cursor.id !== "string" ||
-      !cursor.id ||
+      !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+        cursor.id
+      ) ||
       typeof cursor.updatedAt !== "string" ||
       !Number.isFinite(Date.parse(cursor.updatedAt)) ||
       (cursor.direction !== "forward" && cursor.direction !== "backward")

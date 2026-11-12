@@ -5,7 +5,11 @@ import {
   useState,
   type SetStateAction,
 } from "react"
-import { useLocation, useSearchParams } from "react-router-dom"
+import {
+  useLocation,
+  useNavigationType,
+  useSearchParams,
+} from "react-router-dom"
 
 export function positiveInt(
   value: string | null,
@@ -89,18 +93,30 @@ export function useListSearch(
   delay = 350
 ) {
   const committed = searchParams.get(key) ?? ""
-  const locationKey = useLocation().key
-  const [draft, setDraft] = useState({ source: locationKey, value: committed })
+  const { key: locationKey, pathname } = useLocation()
+  const navigationType = useNavigationType()
+  const [draft, setDraft] = useState({
+    source: locationKey,
+    pathname,
+    committed,
+    value: committed,
+  })
+  // Local list controls replace the URL. Keep pending input when only another
+  // query parameter changes; history navigation and a new search remain authoritative.
+  const preserveDraft =
+    navigationType === "REPLACE" &&
+    draft.pathname === pathname &&
+    draft.committed === committed
+  const search =
+    draft.source === locationKey || preserveDraft ? draft.value : committed
   if (draft.source !== locationKey) {
-    setDraft({ source: locationKey, value: committed })
+    setDraft({ source: locationKey, pathname, committed, value: search })
   }
-  // URL navigation wins over a draft from the previous location.
-  const search = draft.source === locationKey ? draft.value : committed
   const setSearch = useCallback(
     (value: string) => {
-      setDraft({ source: locationKey, value })
+      setDraft({ source: locationKey, pathname, committed, value })
     },
-    [locationKey]
+    [locationKey, pathname, committed]
   )
   useEffect(() => {
     if (search.trim() === committed.trim()) return

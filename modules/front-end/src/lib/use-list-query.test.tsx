@@ -115,6 +115,43 @@ function setup(
 afterEach(() => vi.useRealTimers())
 
 describe("URL list state", () => {
+  it.each(["Archive filter", "Next", "Resize"])(
+    "preserves a pending search through %s",
+    (control) => {
+      vi.useFakeTimers()
+      setup("/en/segments?name=checkout&page=3&pageSize=20")
+      fireEvent.change(screen.getByLabelText("search"), {
+        target: { value: "pending" },
+      })
+      act(() => vi.advanceTimersByTime(100))
+      fireEvent.click(screen.getByText(control))
+      expect(screen.getByLabelText("search")).toHaveValue("pending")
+      act(() => vi.advanceTimersByTime(1000))
+      expect(screen.getByTestId("state")).toHaveTextContent(
+        '"search":"pending"'
+      )
+      expect(screen.getByTestId("state")).toHaveTextContent('"pageIndex":1')
+      if (control === "Archive filter")
+        expect(screen.getByTestId("location")).toHaveTextContent(
+          "archived=true"
+        )
+      if (control === "Resize")
+        expect(screen.getByTestId("state")).toHaveTextContent('"pageSize":30')
+    }
+  )
+
+  it("discards pending input on history navigation even when the committed search is unchanged", () => {
+    vi.useFakeTimers()
+    setup()
+    fireEvent.click(screen.getByText("Same search URL"))
+    fireEvent.change(screen.getByLabelText("search"), {
+      target: { value: "pending" },
+    })
+    fireEvent.click(screen.getByText("History back"))
+    expect(screen.getByLabelText("search")).toHaveValue("checkout")
+    act(() => vi.advanceTimersByTime(1000))
+    expect(screen.getByTestId("state")).toHaveTextContent('"pageIndex":3')
+  })
   it("restores a direct URL without resetting it after the debounce", () => {
     vi.useFakeTimers()
     setup()
