@@ -450,12 +450,14 @@ public class CompositeRedisCacheService(
         }
     }
 
-    // Heartbeats live ONLY in the local DC's Redis (cacheServices.First()).
+    // Heartbeats and connection keys live ONLY in the local DC's Redis (cacheServices.First()).
     // - UpsertPodHeartbeat writes to the local instance only (this method).
     // - GetAllHealthMessages reads from the local instance only.
-    // - DeletePodConnection still broadcasts, because it also clears the pod's
-    //   connection keys, and those were broadcast on connect by
-    //   UpsertConnectionMadeAsync.
+    // - The connection handlers use the unkeyed ICacheService, which is the local
+    //   instance, so a pod's connection keys are written there only.
+    // - DeletePodConnection therefore runs on the local instance only: it removes the
+    //   pod's heartbeat entry and connection keys, and a peer Redis holds neither, so
+    //   broadcasting would only scan the peer's keyspace for keys that are not there.
     // Each DC's control plane MUST be configured with its own Redis as
     // Redis:Instances[0] for this contract to hold.
     public Task UpsertPodHeartbeat(HealthMessage healthMessage)
@@ -467,8 +469,14 @@ public class CompositeRedisCacheService(
             nameof(UpsertPodHeartbeat));
     }
 
-    public Task DeletePodConnection(Guid podId) =>
-        BroadcastAsync(s => s.DeletePodConnection(podId), nameof(DeletePodConnection));
+    public Task DeletePodConnection(Guid podId)
+    {
+        var local = cacheServices.First();
+        return ExecuteSafelyAsync(
+            local,
+            s => s.DeletePodConnection(podId),
+            nameof(DeletePodConnection));
+    }
 
     public Task<List<HealthMessage>> GetAllHealthMessages()
     {
