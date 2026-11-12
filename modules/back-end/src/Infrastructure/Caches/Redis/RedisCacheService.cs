@@ -394,9 +394,11 @@ public class RedisCacheService(IRedisClient redis) : ICacheService
 
     public async Task DeletePodConnection(Guid podId)
     {
-        await Redis.HashDeleteAsync(RedisKeys.Heartbeats, podId.ToString());
-
         await DeletePodClients(podId);
+
+        // Remove the heartbeat entry last: if the cleanup above fails, the pod is still listed as stale
+        // and the next health check tries again.
+        await Redis.HashDeleteAsync(RedisKeys.Heartbeats, podId.ToString());
     }
 
     public async Task<List<HealthMessage>> GetAllHealthMessages()
@@ -421,10 +423,14 @@ public class RedisCacheService(IRedisClient redis) : ICacheService
         return result;
     }
 
+    /// <summary>
+    /// Deletes the connection keys that belong to the pod with this heartbeat id, on every non-replica endpoint of this
+    /// Redis. The keys are read as a stream and handled in batches, so the memory used does not grow with the number of
+    /// connection keys in Redis.
+    /// </summary>
     private async Task DeletePodClients(Guid heartbeatId)
     {
         var heartbeatIdString = heartbeatId.ToString();
-        var connectionKeys = new List<RedisKey>();
 
         foreach (var endPoint in redis.Connection.GetEndPoints())
         {
@@ -434,32 +440,12 @@ public class RedisCacheService(IRedisClient redis) : ICacheService
                 continue;
             }
 
-            await foreach (var key in server.KeysAsync(pattern: RedisKeys.ConnectionPattern, pageSize: 250))
-            {
-                connectionKeys.Add(key);
-            }
-        }
-
-        if (connectionKeys.Count == 0)
-        {
-            return;
-        }
-
-        var heartbeatLookups = connectionKeys
-            .Select(key => Redis.HashGetAsync(key, "heartbeatId"))
-            .ToArray();
-
-        var heartbeatValues = await Task.WhenAll(heartbeatLookups);
-
-        var connectionsToRemove = connectionKeys
-            .Zip(heartbeatValues, (key, value) => (Key: key, Value: value))
-            .Where(x => x.Value.HasValue && x.Value == heartbeatIdString)
-            .Select(x => x.Key)
-            .ToArray();
-
-        if (connectionsToRemove.Length > 0)
-        {
-            await Redis.KeyDeleteAsync(connectionsToRemove);
+            // Work in bounded batches so the memory used does not grow with the number of connection keys in Redis.
+            await PodConnectionCleanup.RemoveOwnedByAsync(
+                server.KeysAsync(pattern: RedisKeys.ConnectionPattern, pageSize: 250),
+                heartbeatIdString,
+                keys => Task.WhenAll(keys.Select(key => Redis.HashGetAsync(key, "heartbeatId"))),
+                keys => Redis.KeyDeleteAsync(keys));
         }
     }
 }
