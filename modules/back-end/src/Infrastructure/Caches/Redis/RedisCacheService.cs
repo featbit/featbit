@@ -188,6 +188,11 @@ public class RedisCacheService(IRedisClient redis) : ICacheService
         // delete cache
         var cacheKey = RedisKeys.Flag(flagId);
         await Redis.KeyDeleteAsync(cacheKey);
+
+        // delete the committed version (B1 stage/commit storage, GatedCommit only)
+        await DeleteCommittedVersionAsync(
+            RedisKeys.FlagCommittedPointer(flagId),
+            ts => RedisKeys.FlagVersion(flagId, ts));
     }
 
     public async Task UpsertSegmentAsync(ICollection<Guid> envIds, Segment segment)
@@ -303,6 +308,11 @@ public class RedisCacheService(IRedisClient redis) : ICacheService
         return Redis.KeyExistsAsync(RedisKeys.SegmentVersion(id, ts));
     }
 
+    /// <summary>
+    /// Removes the segment from the index of every environment it belongs to and deletes its value key. Under
+    /// <c>GatedCommit</c> it also deletes the committed version; the committed pointer stays, so that an older version
+    /// committed later cannot make the segment servable again.
+    /// </summary>
     public async Task DeleteSegmentAsync(ICollection<Guid> envIds, Guid segmentId)
     {
         // delete index first
@@ -315,6 +325,32 @@ public class RedisCacheService(IRedisClient redis) : ICacheService
         // delete cache
         var cacheKey = RedisKeys.Segment(segmentId);
         await Redis.KeyDeleteAsync(cacheKey);
+
+        // delete the committed version (B2 stage/commit storage, GatedCommit only)
+        await DeleteCommittedVersionAsync(
+            RedisKeys.SegmentCommittedPointer(segmentId),
+            ts => RedisKeys.SegmentVersion(segmentId, ts));
+    }
+
+    /// <summary>
+    /// Deletes the committed versioned value key an object's committed pointer refers to. Only
+    /// <c>GatedCommit</c> writes a pointer, so in any other mode this is a single read that finds nothing.
+    /// <para>
+    /// The pointer itself stays, on purpose. It keeps rejecting an older version that is committed after the
+    /// delete (for example by a backfill that read the database before the object was deleted), so such a
+    /// version cannot make the object servable again, and <see cref="Infrastructure.AppService.StagedFlagGcWorker"/>
+    /// only collects the older versions of an object that still has a pointer.
+    /// </para>
+    /// A staged version that was never committed is not found this way, because finding it would take a scan of
+    /// the keyspace, so it stays in Redis.
+    /// </summary>
+    private async Task DeleteCommittedVersionAsync(RedisKey pointerKey, Func<long, RedisKey> versionKey)
+    {
+        var pointer = await Redis.StringGetAsync(pointerKey);
+        if (pointer.HasValue && pointer.TryParse(out long ts))
+        {
+            await Redis.KeyDeleteAsync(versionKey(ts));
+        }
     }
 
     public async Task UpsertLicenseAsync(Workspace workspace)
