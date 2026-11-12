@@ -35,17 +35,16 @@ public class StreamingLoggingExtensionsTests
     }
 
     [Fact]
-    public void ErrorValidateRequest_FormatsMessageAndCapturesException()
+    public void RequestValidationUnavailable_CapturesException()
     {
-        var ex = new InvalidOperationException("bad");
+        var exception = new InvalidOperationException("lookup failed");
+        var logger = new FakeLogger();
 
-        _logger.ErrorValidateRequest(ex);
+        logger.RequestValidationUnavailable("unavailable", exception);
 
-        var record = Assert.Single(_logger.Collector.GetSnapshot());
+        var record = Assert.Single(logger.Collector.GetSnapshot());
         Assert.Equal(LogLevel.Error, record.Level);
-        Assert.Equal(3, record.Id.Id);
-        Assert.Equal("ErrorValidateRequest", record.Id.Name);
-        Assert.Equal("Exception occurred while validating request.", record.Message);
-        Assert.Same(ex, record.Exception);
+        Assert.Same(exception, record.Exception);
+        Assert.Equal("RequestValidationUnavailable", record.Id.Name);
     }
 }

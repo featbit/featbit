@@ -1,4 +1,4 @@
-using Domain.Shared;
+using Domain.Secrets;
 
 namespace Streaming.Connections;
 
@@ -13,6 +13,8 @@ public sealed class ValidationResult
     public ValidationResultStatus Status { get; set; }
 
     public string Reason { get; set; } = string.Empty;
+
+    public Exception? Exception { get; set; }
 
     public Secret[] Secrets { get; set; } = [];
 
@@ -36,11 +38,12 @@ public sealed class ValidationResult
         };
     }
 
-    public static ValidationResult Unavailable(string reason)
+    public static ValidationResult Unavailable(string reason, Exception? exception = null)
     {
         return new ValidationResult
         {
             Status = ValidationResultStatus.Unavailable,
+            Exception = exception,
             Secrets = [],
             Reason = reason
         };

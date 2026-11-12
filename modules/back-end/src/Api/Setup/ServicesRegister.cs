@@ -119,6 +119,7 @@ public static class ServicesRegister
             .AddOpenApi(Schemes.OpenApi);
 
         // authorization
+        builder.Services.AddScoped<ITenantAccessValidator, TenantAccessValidator>();
         LicenseVerifier.ImportPublicKey(builder.Configuration["PublicKey"]);
         builder.Services.AddTransient<ILicenseService, LicenseService>();
         builder.Services.AddScoped<IRequestPermissions, RequestPermissions>();

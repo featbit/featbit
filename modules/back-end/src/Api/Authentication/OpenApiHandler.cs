@@ -9,8 +9,7 @@ using Microsoft.Extensions.Options;
 
 namespace Api.Authentication;
 
-public class
-    OpenApiHandler(
+public class OpenApiHandler(
     IOptionsMonitor<OpenApiOptions> options,
     ILoggerFactory logger,
     UrlEncoder encoder,
@@ -39,7 +38,7 @@ public class
                 return AuthenticateResult.Fail("invalid-access-token");
             }
 
-            // Bind organization and workspace to the token, overriding client-supplied headers.
+            // set workspace, organization id header
             var org = await organizationService.GetAsync(accessToken.OrganizationId);
             Context.Request.Headers[ApiConstants.WorkspaceHeaderKey] = org.WorkspaceId.ToString();
             Context.Request.Headers[ApiConstants.OrgIdHeaderKey] = org.Id.ToString();

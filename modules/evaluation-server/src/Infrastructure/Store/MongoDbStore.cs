@@ -1,3 +1,4 @@
+using Domain.Secrets;
 using Domain.Shared;
 using Infrastructure.Persistence.MongoDb;
 using MongoDB.Bson;

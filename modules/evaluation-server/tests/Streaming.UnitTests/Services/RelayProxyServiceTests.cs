@@ -1,5 +1,5 @@
+using Domain.Secrets;
 using Domain.Shared;
-using Infrastructure.Fakes;
 using Infrastructure.Persistence;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

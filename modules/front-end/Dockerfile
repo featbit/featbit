@@ -1,4 +1,4 @@
-FROM node:22.19 AS build-stage
+FROM --platform=$BUILDPLATFORM node:22.19 AS build-stage
 
 WORKDIR /app
 COPY package*.json /app/

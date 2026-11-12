@@ -54,7 +54,7 @@ public class StreamingMiddleware(
 
         if (validationResult.Status == ValidationResultStatus.Unavailable)
         {
-            logger.RequestValidationUnavailable(validationResult.Reason);
+            logger.RequestValidationUnavailable(validationResult.Reason, validationResult.Exception);
 
             // Transient server error (e.g. store unavailable). Protocol requirement: accept first, then
             // close with a non-4003 status so SDKs treat it as transient and reconnect.

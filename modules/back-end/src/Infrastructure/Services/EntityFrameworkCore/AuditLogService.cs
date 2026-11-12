@@ -181,18 +181,17 @@ public class AuditLogService(AppDbContext dbContext) : EntityFrameworkCoreServic
     {
         const string sql =
             """
-            SELECT ref_id AS RefId, creator_id AS OperatorId, created_at AS HappenedAt, comment AS Comment
-            FROM (
-                SELECT
-                    creator_id,
-                    created_at,
-                    comment,
-                    ref_id,
-                    row_number() over(partition by ref_id order by created_at desc) AS rn
+            SELECT latest.ref_id AS RefId, latest.creator_id AS OperatorId,
+                   latest.created_at AS HappenedAt, latest.comment AS Comment
+            FROM (SELECT DISTINCT unnest(@refIds) AS ref_id) AS refs
+            CROSS JOIN LATERAL (
+                SELECT ref_id, creator_id, created_at, comment
                 FROM audit_logs
-                WHERE workspace_id = @workspaceId AND env_id = @envId AND ref_type = @refType AND ref_id = ANY (@refIds) AND operation != 'Create'
-            ) AS ranked
-            WHERE rn = 1
+                WHERE workspace_id = @workspaceId AND env_id = @envId AND ref_type = @refType
+                    AND ref_id = refs.ref_id AND operation != 'Create'
+                ORDER BY created_at DESC, id DESC
+                LIMIT 1
+            ) AS latest
             """;
 
         var parameters = new
