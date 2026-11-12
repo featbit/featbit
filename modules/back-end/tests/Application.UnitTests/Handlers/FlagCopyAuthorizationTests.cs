@@ -106,15 +106,30 @@ public class FlagCopyAuthorizationTests
     [InlineData(false, "tag-deny")]
     [InlineData(true, "tag-missing")]
     [InlineData(false, "tag-missing")]
+    [InlineData(true, "tag-comma")]
+    [InlineData(false, "tag-comma")]
+    [InlineData(true, "tag-semicolon")]
+    [InlineData(false, "tag-semicolon")]
+    [InlineData(true, "tag-colon")]
+    [InlineData(false, "tag-colon")]
+    [InlineData(true, "tag-percent")]
+    [InlineData(false, "tag-percent")]
     public async Task InvalidBatch_IsRejectedBeforePrecheckOrAnyWrite(bool preview, string invalid)
     {
         var first = Add(_source, "allowed", "copyable");
-        var second = Add(invalid == "other-env" ? _target : _source, "denied", "restricted");
+        var second = Add(invalid == "other-env" ? _target : _source, "denied", invalid switch
+        {
+            "tag-comma" => "internal,copyable",
+            "tag-semicolon" => "copyable;internal",
+            "tag-colon" => "copyable:env/other",
+            "tag-percent" => "internal%2Ccopyable",
+            _ => "restricted"
+        });
         var policies = new List<PolicyStatement> { EnvAccess };
         policies.Add(Statement(Permissions.CopyFlagTo, invalid switch
         {
             "key-missing" => "project/p:env/source:flag/allowed",
-            "tag-missing" => "project/p:env/source:flag/*;copyable",
+            "tag-missing" or "tag-comma" or "tag-semicolon" or "tag-colon" or "tag-percent" => "project/p:env/source:flag/*;copyable",
             _ => "project/p:env/source:flag/*"
         }));
         if (invalid.EndsWith("deny"))

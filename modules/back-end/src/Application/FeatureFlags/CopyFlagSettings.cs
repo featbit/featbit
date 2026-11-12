@@ -31,6 +31,21 @@ public class CopyFlagSettingsValidator : AbstractValidator<CopyFlagSettings>
     {
         RuleFor(x => x.Key).NotEmpty().WithErrorCode(ErrorCodes.Invalid("key"));
         RuleFor(x => x.Options).NotNull().WithErrorCode(ErrorCodes.Invalid("options"));
+        When(x => x.Options != null, () =>
+        {
+            RuleFor(x => x.Options.IndividualTargeting)
+                .NotNull().WithErrorCode(ErrorCodes.Invalid("options.individualTargeting"));
+            RuleFor(x => x.Options.TargetingRule)
+                .NotNull().WithErrorCode(ErrorCodes.Invalid("options.targetingRule"));
+            RuleFor(x => x.Options.IndividualTargeting.Mode)
+                .Must(mode => mode is CopyModes.Overwrite or CopyModes.Append)
+                .WithErrorCode(ErrorCodes.Invalid("options.individualTargeting.mode"))
+                .When(x => x.Options.IndividualTargeting?.Copy == true);
+            RuleFor(x => x.Options.TargetingRule.Mode)
+                .Must(mode => mode is CopyModes.Overwrite or CopyModes.Append)
+                .WithErrorCode(ErrorCodes.Invalid("options.targetingRule.mode"))
+                .When(x => x.Options.TargetingRule?.Copy == true);
+        });
         RuleFor(x => x.SourceEnvId).NotEmpty().WithErrorCode(ErrorCodes.Invalid("sourceEnvId"));
         RuleFor(x => x.TargetEnvId)
             .Cascade(CascadeMode.Stop)

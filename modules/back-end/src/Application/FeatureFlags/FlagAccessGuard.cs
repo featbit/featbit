@@ -2,6 +2,7 @@
 using Application.Bases.Exceptions;
 using Domain.Policies;
 using Domain.FeatureFlags;
+using Domain.Resources;
 
 namespace Application.FeatureFlags;
 
@@ -36,7 +37,7 @@ public class FlagAccessGuard(IResourceService resourceService, IFeatureFlagServi
         if (flagKey != null)
         {
             rn += $":flag/{flagKey}";
-            if (tags is { Count: > 0 }) rn += $";{string.Join(",", tags)}";
+            if (tags is { Count: > 0 }) rn = RN.WithTags(rn, tags);
         }
 
         if (!PolicyHelper.IsAllowed(statements, rn, permission))

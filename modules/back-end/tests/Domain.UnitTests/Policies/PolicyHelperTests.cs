@@ -6,6 +6,21 @@ namespace Domain.UnitTests.Policies;
 public class PolicyHelperTests
 {
     [Theory]
+    [InlineData("internal,copyable", "internal*copyable")]
+    [InlineData("copyable;internal", "copyable*internal")]
+    [InlineData("copyable:env/other", "copyable*other")]
+    [InlineData("internal%2Ccopyable", "internal%2Ccopyable")]
+    public void IsAllowed_EncodedTagMatchingDeny_OverridesOwnerGrant(string tag, string pattern)
+    {
+        var owner = Statement(ResourceTypes.All, EffectType.Allow, ["*"], ["*"]);
+        var deny = Statement(ResourceTypes.FeatureFlag, EffectType.Deny, ["*"],
+            [$"project/p:env/e:flag/*;{pattern}"]);
+        var resourceRn = RN.ForFlag("p", "e", "f", [tag]);
+
+        Assert.False(PolicyHelper.IsAllowed([owner, deny], resourceRn, Permissions.CopyFlagTo));
+    }
+
+    [Theory]
     [InlineData(null)]
     [InlineData("")]
     [InlineData(" \t\r\n")]
