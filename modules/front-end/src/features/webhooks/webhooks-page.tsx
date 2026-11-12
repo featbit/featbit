@@ -203,7 +203,8 @@ export function WebhooksPage() {
               }
             >
               <span className="truncate">
-                {selectedProject?.name ?? t("webhooks.allProjects")}
+                {selectedProject?.name ??
+                  (projectId || t("webhooks.allProjects"))}
               </span>
               <ChevronsUpDown className="size-4 shrink-0 text-muted-foreground" />
             </PopoverTrigger>

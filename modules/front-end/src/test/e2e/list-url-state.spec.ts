@@ -305,3 +305,43 @@ test("flag compare: restores applied environments, filters and page without a mo
     })
   }
 })
+
+test("webhooks: shows an unmatched project filter and lets users clear it", async ({
+  page,
+}) => {
+  const requests: URLSearchParams[] = []
+  await page.route("**/api/v1/webhooks?*", (route) => {
+    requests.push(new URL(route.request().url()).searchParams)
+    return route.fulfill({
+      json: { success: true, data: { items: [], totalCount: 0 } },
+    })
+  })
+  await page.goto(
+    "/en/webhooks?name=checkout&page=3&pageSize=20&projectId=deleted-project"
+  )
+  const filter = page.getByRole("button", {
+    name: "deleted-project",
+    exact: true,
+  })
+  await expect(filter).toBeEnabled()
+  expect(requests.at(-1)?.get("projectId")).toBe("deleted-project")
+  await filter.click()
+  await page.getByRole("option", { name: "All projects", exact: true }).click()
+  await expect(
+    page.getByRole("button", { name: "All projects", exact: true })
+  ).toBeVisible()
+  await expect.poll(() => requests.at(-1)?.get("projectId")).toBe("")
+  expect(new URL(page.url()).searchParams.has("projectId")).toBe(false)
+  expect(new URL(page.url()).searchParams.get("name")).toBe("checkout")
+  expect(requests.at(-1)?.get("pageIndex")).toBe("0")
+  await page.getByRole("button", { name: "All projects", exact: true }).click()
+  await page
+    .getByRole("option", { name: "Growth Platform", exact: true })
+    .click()
+  await expect(
+    page.getByRole("button", { name: "Growth Platform", exact: true })
+  ).toBeVisible()
+  await expect
+    .poll(() => requests.at(-1)?.get("projectId"))
+    .toBe("project-growth")
+})

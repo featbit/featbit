@@ -75,8 +75,18 @@ export function useDetailHref() {
   const { search } = useLocation()
   const returnTo = listReturnUrl(search, "")
   return useCallback(
-    (href: string) => (returnTo ? withListReturn(href, returnTo) : href),
-    [returnTo]
+    (href: string) => {
+      const url = new URL(href, "https://featbit.invalid")
+      const currentParams = new URLSearchParams(search)
+      for (const key of ["context", "projectId", "envId"]) {
+        const value = currentParams.get(key)
+        if (value && !url.searchParams.has(key))
+          url.searchParams.set(key, value)
+      }
+      const destination = `${url.pathname}${url.search}${url.hash}`
+      return returnTo ? withListReturn(destination, returnTo) : destination
+    },
+    [search, returnTo]
   )
 }
 

@@ -5,6 +5,16 @@ import { withListReturn } from "@/lib/list-navigation"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { FlagsCompareMatrix } from "./flags-compare-matrix"
 
+vi.mock("@/features/layout/layout-context", async (importOriginal) => ({
+  ...(await importOriginal<
+    typeof import("@/features/layout/layout-context")
+  >()),
+  getCurrentProjectEnv: () => ({
+    projectId: "project-source",
+    envId: "env-source",
+  }),
+}))
+
 describe("FlagsCompareMatrix environment links", () => {
   it.each([
     "/",
@@ -75,7 +85,7 @@ describe("FlagsCompareMatrix environment links", () => {
           ? "/en/feature-flags/checkout%2Frollout/targeting?context=environment&projectId=project-source&envId=env-source"
           : withListReturn(
               "/en/feature-flags/checkout%2Frollout/targeting?context=environment&projectId=project-source&envId=env-source",
-              initialUrl
+              `${initialUrl}&context=environment&projectId=project-source&envId=env-source`
             )
       )
       expect(sourceLink).toHaveAttribute("target", "_blank")
@@ -89,9 +99,24 @@ describe("FlagsCompareMatrix environment links", () => {
           ? "/en/feature-flags/checkout%2Frollout/targeting?context=environment&projectId=project-target&envId=env-target"
           : withListReturn(
               "/en/feature-flags/checkout%2Frollout/targeting?context=environment&projectId=project-target&envId=env-target",
-              initialUrl
+              `${initialUrl}&context=environment&projectId=project-source&envId=env-source`
             )
       )
+      if (initialUrl !== "/") {
+        const targetUrl = new URL(
+          targetLink.getAttribute("href")!,
+          "https://example.test"
+        )
+        const origin = new URL(
+          targetUrl.searchParams.get("returnTo")!,
+          "https://example.test"
+        )
+        expect(origin.searchParams.get("projectId")).toBe("project-source")
+        expect(origin.searchParams.get("envId")).toBe("env-source")
+        expect(origin.searchParams.get("name")).toBe("checkout")
+        expect(origin.searchParams.get("page")).toBe("3")
+        expect(origin.searchParams.get("targetEnvIds")).toBe("env-target")
+      }
       expect(targetLink).toHaveAttribute("target", "_blank")
       expect(targetLink).toHaveAttribute("rel", "noopener noreferrer")
       expect(targetLink).toHaveTextContent("Open flag in this environment")
