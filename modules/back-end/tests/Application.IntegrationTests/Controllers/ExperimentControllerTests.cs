@@ -37,7 +37,7 @@ public class ExperimentControllerTests
     public async Task Create_RequestValidation()
     {
         using var factory = CreateFactory(Mock.Of<IExperimentService>());
-        using var client = await _app.CreateAuthenticatedClientAsync(factory);
+        using var client = await _app.CreateAuthenticatedClientAsync(factory, includeTenantContext: true);
 
         var response = await client.PostAsJsonAsync(BasePath, new { name = " " });
 
@@ -64,7 +64,7 @@ public class ExperimentControllerTests
                 It.Is<ExperimentFilter>(filter => filter.FlagId == flagId)))
             .ReturnsAsync(new PagedResult<ExperimentVm>(1, [detail]));
         using var factory = CreateFactory(service.Object);
-        using var client = await _app.CreateAuthenticatedClientAsync(factory);
+        using var client = await _app.CreateAuthenticatedClientAsync(factory, includeTenantContext: true);
 
         using var created = await client.PostAsJsonAsync(BasePath, new { name = "Checkout", flagId });
         Assert.True(created.IsSuccessStatusCode);
@@ -95,7 +95,7 @@ public class ExperimentControllerTests
         var path = $"/api/v1/envs/{flag.EnvId}/feature-flags/by-id/{flag.Id}";
         using var anonymous = factory.CreateClient();
         Assert.Equal(System.Net.HttpStatusCode.Unauthorized, (await anonymous.GetAsync(path)).StatusCode);
-        using var client = await _app.CreateAuthenticatedClientAsync(factory);
+        using var client = await _app.CreateAuthenticatedClientAsync(factory, includeTenantContext: true);
         using var found = await client.GetAsync(path);
         Assert.True(found.IsSuccessStatusCode);
         using var payload = System.Text.Json.JsonDocument.Parse(await found.Content.ReadAsStringAsync());
@@ -108,7 +108,7 @@ public class ExperimentControllerTests
     public async Task UpdateMetrics_RequestValidation()
     {
         using var factory = CreateFactory(Mock.Of<IExperimentService>());
-        using var client = await _app.CreateAuthenticatedClientAsync(factory);
+        using var client = await _app.CreateAuthenticatedClientAsync(factory, includeTenantContext: true);
 
         var response = await client.PutAsJsonAsync($"{BasePath}/{ExperimentId}/metrics", new
         {
@@ -131,7 +131,7 @@ public class ExperimentControllerTests
                     update.GuardrailMetrics[0].MetricId == guardrailId && update.GuardrailMetrics[0].Direction == "decrease_bad")))
             .ReturnsAsync(new ExperimentDetailVm { Id = ExperimentId, EnvId = TestWorkspace.Id });
         using var factory = CreateFactory(service.Object);
-        using var client = await _app.CreateAuthenticatedClientAsync(factory);
+        using var client = await _app.CreateAuthenticatedClientAsync(factory, includeTenantContext: true);
 
         using var response = await client.PutAsJsonAsync($"{BasePath}/{ExperimentId}/metrics", new
         {
@@ -151,7 +151,7 @@ public class ExperimentControllerTests
             .Setup(x => x.AnalyzeRunAsync(TestWorkspace.Id, ExperimentId, RunId, It.IsAny<ExperimentRunAnalyzeRequest>()))
             .ReturnsAsync(new ExperimentDetailVm { Id = ExperimentId, EnvId = TestWorkspace.Id });
         using var factory = CreateFactory(service.Object);
-        using var client = await _app.CreateAuthenticatedClientAsync(factory);
+        using var client = await _app.CreateAuthenticatedClientAsync(factory, includeTenantContext: true);
 
         var response = await client.PostAsJsonAsync(
             $"{BasePath}/{ExperimentId}/runs/{RunId}/analyze",
@@ -169,7 +169,7 @@ public class ExperimentControllerTests
             .Setup(x => x.AnalyzeRunAsync(TestWorkspace.Id, ExperimentId, RunId, It.IsAny<ExperimentRunAnalyzeRequest>()))
             .ThrowsAsync(new BusinessException(ErrorCodes.Required("primaryMetric")));
         using var factory = CreateFactory(service.Object);
-        using var client = await _app.CreateAuthenticatedClientAsync(factory);
+        using var client = await _app.CreateAuthenticatedClientAsync(factory, includeTenantContext: true);
 
         using var response = await client.PostAsJsonAsync(
             $"{BasePath}/{ExperimentId}/runs/{RunId}/analyze",
