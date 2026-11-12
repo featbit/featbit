@@ -7,12 +7,31 @@ namespace Application.UnitTests.Validators;
 
 public class SegmentValidatorTests
 {
+    [Theory]
+    [InlineData("organization/o", true)]
+    [InlineData("organization/o:project/p", true)]
+    [InlineData("organization/o:project/p:env/e", true)]
+    [InlineData("project/p:env/e", false)]
+    [InlineData("organization/o:env/e", false)]
+    [InlineData("organization/o:project/p:env/e:segment/s", false)]
+    [InlineData("organization/*", false)]
+    [InlineData("organization/o;tag", false)]
+    [InlineData("organization/o/extra", false)]
+    [InlineData("organization/", false)]
+    [InlineData(null, false)]
+    public void ScopeShapeIsValidated(string? scope, bool valid)
+    {
+        var request = new CreateSegment { Name = "S", Key = "s", Type = SegmentType.Shared, Scopes = [scope!] };
+        Assert.Equal(valid, new CreateSegmentValidator().Validate(request).IsValid);
+    }
+
+
     private static CreateSegment ValidCreate() => new()
     {
         Type = SegmentType.EnvironmentSpecific,
         Name = "seg",
         Key = "seg-key",
-        Scopes = new[] { "project/x:env/y" }
+        Scopes = new[] { "organization/o:project/x:env/y" }
     };
 
     [Fact]

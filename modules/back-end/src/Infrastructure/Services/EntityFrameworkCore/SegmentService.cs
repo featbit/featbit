@@ -94,7 +94,7 @@ public class SegmentService(AppDbContext dbContext, ILogger<SegmentService> logg
         var envIds = new List<Guid>();
         foreach (var scope in segment.Scopes)
         {
-            var (_, scopeEnvIds) = await TranslateScopeAsync(scope);
+            var (_, scopeEnvIds) = await TranslateScopeAsync(segment.WorkspaceId, scope);
             envIds.AddRange(scopeEnvIds);
         }
 
@@ -153,24 +153,21 @@ public class SegmentService(AppDbContext dbContext, ILogger<SegmentService> logg
         {
             var sharedSegments = segments.Where(x => x.Type == SegmentType.Shared).ToArray();
 
-            var scopesToTranslate = sharedSegments.SelectMany(x => x.Scopes)
-                .Distinct()
-                .ToArray();
-
-            var scopes = new List<(string scope, ICollection<Guid> envIds)>();
-            foreach (var scopeToTranslate in scopesToTranslate)
-            {
-                scopes.Add(await TranslateScopeAsync(scopeToTranslate));
-            }
-
+            var scopes = new Dictionary<(Guid WorkspaceId, string Scope), ICollection<Guid>>();
             foreach (var sharedSegment in sharedSegments)
             {
-                var envIds = sharedSegment.Scopes
-                    .SelectMany(scope => scopes.First(x => x.scope == scope).envIds)
-                    .Distinct()
-                    .ToArray();
-
-                caches.Add(new SegmentCache(envIds, sharedSegment));
+                var envIds = new HashSet<Guid>();
+                foreach (var scope in sharedSegment.Scopes)
+                {
+                    var key = (sharedSegment.WorkspaceId, scope);
+                    if (!scopes.TryGetValue(key, out var ids))
+                    {
+                        (_, ids) = await TranslateScopeAsync(sharedSegment.WorkspaceId, scope);
+                        scopes.Add(key, ids);
+                    }
+                    envIds.UnionWith(ids);
+                }
+                caches.Add(new SegmentCache(envIds.ToArray(), sharedSegment));
             }
         }
     }
@@ -338,7 +335,7 @@ public class SegmentService(AppDbContext dbContext, ILogger<SegmentService> logg
         return segments;
     }
 
-    private async Task<(string scope, ICollection<Guid> envIds)> TranslateScopeAsync(string scope)
+    private async Task<(string scope, ICollection<Guid> envIds)> TranslateScopeAsync(Guid workspaceId, string scope)
     {
         if (!RN.TryParse(scope, out var props))
         {
@@ -349,7 +346,7 @@ public class SegmentService(AppDbContext dbContext, ILogger<SegmentService> logg
 
         var environments = QueryableOf<Environment>();
         var projects = QueryableOf<Project>();
-        var organizations = QueryableOf<Organization>();
+        var organizations = QueryableOf<Organization>().Where(x => x.WorkspaceId == workspaceId);
 
         var envProp = props.FirstOrDefault(x => x.Type == ResourceTypes.Env);
         if (envProp != null && envProp.Key != "*")

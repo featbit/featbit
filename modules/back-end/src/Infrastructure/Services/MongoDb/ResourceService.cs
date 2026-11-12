@@ -92,7 +92,8 @@ public class ResourceService(MongoDbClient mongoDb) : IResourceService
                 var query =
                     from project in QueryableOf<Project>()
                     join env in QueryableOf<Environment>() on project.Id equals env.ProjectId
-                    where env.Id == envId
+                    join organization in QueryableOf<Organization>() on project.OrganizationId equals organization.Id
+                    where env.Id == envId && organization.WorkspaceId == segment.WorkspaceId
                     select new
                     {
                         ProjectKey = project.Key,
@@ -112,7 +113,7 @@ public class ResourceService(MongoDbClient mongoDb) : IResourceService
                 var query = from env in QueryableOf<Environment>()
                     join project in QueryableOf<Project>() on env.ProjectId equals project.Id
                     join organization in QueryableOf<Organization>() on project.OrganizationId equals organization.Id
-                    where env.Id == envId
+                    where env.Id == envId && organization.WorkspaceId == segment.WorkspaceId
                     select new
                     {
                         OrganizationKey = organization.Key,

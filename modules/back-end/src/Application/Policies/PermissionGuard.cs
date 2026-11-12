@@ -18,12 +18,12 @@ public class PermissionGuard(IResourceService resourceService) : IPermissionGuar
             () => resourceService.GetFlagRnAsync(flag.EnvId, flag.Key)
         );
 
-    public Task EnsureSegmentChangeAllowedAsync(Guid organizationId, Segment segment, DataChange change, PolicyStatement[] permissions) =>
+    public Task EnsureSegmentChangeAllowedAsync(Guid organizationId, Guid environmentId, Segment segment, DataChange change, PolicyStatement[] permissions) =>
         EnsureAllowedAsync(
             organizationId,
             SegmentComparer.Compare(change).Select(instruction => instruction.Permission),
             permissions,
-            () => resourceService.GetSegmentRnAsync(segment.EnvId, segment.Id)
+            () => resourceService.GetSegmentRnAsync(environmentId, segment.Id)
         );
 
     private static async Task EnsureAllowedAsync(
