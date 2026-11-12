@@ -1,3 +1,5 @@
+using Domain.Secrets;
+
 namespace Domain.Shared;
 
 /// <summary>

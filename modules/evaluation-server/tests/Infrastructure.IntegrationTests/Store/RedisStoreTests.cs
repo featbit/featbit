@@ -1,5 +1,5 @@
 using System.Text;
-using Domain.Shared;
+using Domain.Secrets;
 using Infrastructure.Caches.Redis;
 using Infrastructure.IntegrationTests.Fixtures;
 using Infrastructure.Store;

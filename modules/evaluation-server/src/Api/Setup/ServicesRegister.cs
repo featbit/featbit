@@ -1,9 +1,10 @@
+using Api.Authorization;
 using Api.Authentication;
 using Api.ControlPlane;
 using Api.Cors;
 using Api.RateLimiting;
 using Api.Services;
-using Domain.Shared.Authentication;
+using Domain.EndUsers;
 using Domain.Workspaces;
 using Infrastructure;
 using Infrastructure.Services;
@@ -50,20 +51,21 @@ public static class ServicesRegister
         builder.AddCustomCors();
 
         // authentication and authorization
-        services.AddAuthentication(FeatBitAuthScheme.Name)
-            .AddScheme<AuthenticationSchemeOptions, FeatBitAuthHandler>(FeatBitAuthScheme.Name, _ => { });
+        services.AddSingleton(provider => new AuthenticationUnavailableReporter(
+            provider.GetRequiredService<ILogger<AuthenticationUnavailableReporter>>(), TimeProvider.System)
+        );
+        services.AddAuthentication(defaultScheme: Schemes.Secret)
+            .AddScheme<AuthenticationSchemeOptions, SecretAuthenticationHandler>(Schemes.Secret, _ => { });
 
         var requireAuthPolicy = new AuthorizationPolicyBuilder()
             .RequireAuthenticatedUser()
             .Build();
         services.AddAuthorizationBuilder()
-            .SetFallbackPolicy(requireAuthPolicy);
+            .SetFallbackPolicy(requireAuthPolicy)
+            .AddSecretPolicies();
 
-        // token validator (v1 structural validation only; store lookup added in PR 2)
-        services.AddSingleton<ITokenValidator, TokenValidator>();
-
-        // add bounded memory cache
-        services.AddSingleton<BoundedMemoryCache>();
+        // domain services
+        services.AddSingleton<EndUserDeduplicator>();
 
         // streaming services
         services

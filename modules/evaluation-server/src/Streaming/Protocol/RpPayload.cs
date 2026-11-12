@@ -1,5 +1,5 @@
 using System.Text.Json.Nodes;
-using Domain.Shared;
+using Domain.Secrets;
 
 namespace Streaming.Protocol;
 

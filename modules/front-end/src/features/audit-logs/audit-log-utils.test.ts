@@ -31,6 +31,51 @@ function log(overrides: Partial<AuditLog> = {}): AuditLog {
 }
 
 describe("audit log presentation", () => {
+  it.each([
+    ["reorder only", ["b", "a", "d"], true],
+    ["reorder with additions and removals", ["b", "a", "e"], true],
+    ["move a newly added variation", ["e", "a", "b", "d"], true],
+    ["add and remove without reordering", ["a", "b", "e"], false],
+  ])("shows variation order: %s", (_scenario, ids, reordered) => {
+    const variation = (id: string) => ({
+      id,
+      name: `Variation ${id.toUpperCase()}`,
+      value: id,
+    })
+    const changes = auditHistoryChanges(
+      log({
+        dataChange: {
+          previous: JSON.stringify({
+            variations: ["a", "b", "d"].map(variation),
+          }),
+          current: JSON.stringify({ variations: ids.map(variation) }),
+        },
+      }),
+      i18n.t
+    )
+    const order = changes.find((change) => change.label === "Variation order")
+    if (reordered) {
+      expect(order).toMatchObject({
+        action: "updated",
+        literalLabel: true,
+        previous: "Variation A → Variation B → Variation D",
+        current: ids.map((id) => variation(id).name).join(" → "),
+      })
+    } else {
+      expect(order).toBeUndefined()
+    }
+    if (ids.includes("e") && !ids.includes("d")) {
+      expect(changes).toHaveLength(reordered ? 2 : 1)
+      expect(changes[0]).toMatchObject({
+        label: "Variations",
+        valueGroups: [
+          { action: "added", values: ["Variation E"] },
+          { action: "removed", values: ["Variation D"] },
+        ],
+      })
+    }
+  })
+
   it.each(["FeatureFlag", "Segment"])(
     "separates %s archive state from its switch",
     (refType) => {

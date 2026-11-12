@@ -1,4 +1,5 @@
 using System.Threading.RateLimiting;
+using Domain.Secrets;
 using Domain.Shared;
 using Infrastructure;
 using Infrastructure.Caches;

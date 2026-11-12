@@ -262,6 +262,9 @@ for (const surface of ["list", "details"] as const) {
         .click()
       if (surface === "details") {
         await page.getByRole("link", { name: flag.name, exact: true }).click()
+        await expect(
+          page.getByRole("heading", { name: "Flag status", exact: true })
+        ).toBeVisible()
       }
       await toggle.click()
       const updatedDialog = page.getByRole("dialog", {

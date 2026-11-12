@@ -1,9 +1,11 @@
+using System.Text.Json;
 using Application.Bases;
 using Application.Bases.Exceptions;
 using Application.Bases.Models;
 using Application.EndUsers;
 using Dapper;
 using Domain.EndUsers;
+using Domain.Utils;
 using Microsoft.EntityFrameworkCore;
 using SqlKata;
 using SqlKata.Compilers;
@@ -151,16 +153,29 @@ public class EndUserService(AppDbContext dbContext)
 
     public async Task<EndUser> UpsertAsync(EndUser user)
     {
-        var existed = await Queryable.FirstOrDefaultAsync(x => x.EnvId == user.EnvId && x.KeyId == user.KeyId);
-        if (existed == null)
+        if (user.Id == Guid.Empty)
         {
-            await AddOneAsync(user);
+            user.Id = Guid.NewGuid();
         }
-        else if (!existed.ValueEquals(user))
-        {
-            existed.Update(user.Name, user.CustomizedProperties);
-            await UpdateAsync(existed);
-        }
+
+        await DbConnection.ExecuteAsync(
+            """
+            INSERT INTO end_users (id, workspace_id, env_id, key_id, name, customized_properties, created_at, updated_at)
+            VALUES (@Id, @WorkspaceId, @EnvId, @KeyId, @Name, @Properties::jsonb, @CreatedAt, @UpdatedAt)
+            ON CONFLICT (env_id, key_id) DO UPDATE
+            SET name = EXCLUDED.name,
+                customized_properties = EXCLUDED.customized_properties,
+                updated_at = @UpdateTime
+            WHERE end_users.name IS DISTINCT FROM EXCLUDED.name
+               OR end_users.customized_properties IS DISTINCT FROM EXCLUDED.customized_properties
+            """,
+            new
+            {
+                user.Id, user.WorkspaceId, user.EnvId, user.KeyId, user.Name,
+                Properties = JsonSerializer.Serialize(user.CustomizedProperties, ReusableJsonSerializerOptions.Web),
+                user.CreatedAt, user.UpdatedAt,
+                UpdateTime = DateTime.UtcNow
+            });
 
         return user;
     }

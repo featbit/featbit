@@ -1,6 +1,12 @@
 using System.Net;
 using System.Net.Http.Json;
 using Domain.Shared;
+using Domain.Workspaces;
+using Infrastructure.Services;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Moq;
 
 namespace Application.IntegrationTests.Http;
 
@@ -49,34 +55,31 @@ public class HttpAuthenticationTests
     }
 
     [Fact]
-    public async Task GetServerSideSdkPayload_WithClientSecret_Returns200()
+    public async Task GetServerSideSdkPayload_WithClientSecret_Returns403()
     {
         var client = _app.CreateClient();
         client.DefaultRequestHeaders.Add("Authorization", TestData.ClientSecretString);
 
         var response = await client.GetAsync("/api/public/sdk/server/latest-all");
 
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     [Fact]
-    public async Task GetClientSideSdkPayload_WithValidAuthHeader_IsNotUnauthorized()
+    public async Task GetClientSideSdkPayload_WithValidAuthHeader_Returns200()
     {
         var client = _app.CreateClient();
-        client.DefaultRequestHeaders.Add("Authorization", TestData.ServerSecretString);
+        client.DefaultRequestHeaders.Add("Authorization", TestData.ClientSecretString);
 
         var request = new
         {
-            user = new
-            {
-                key = "test-user",
-                name = "Test User"
-            }
+            keyId = "test-user",
+            name = "Test User"
         };
 
         var response = await client.PostAsJsonAsync("/api/public/sdk/client/latest-all?timestamp=0", request);
 
-        Assert.NotEqual(HttpStatusCode.Unauthorized, response.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
 
     [Fact]
@@ -88,7 +91,7 @@ public class HttpAuthenticationTests
         {
             user = new
             {
-                key = "test-user",
+                keyId = "test-user",
                 name = "Test User"
             }
         };
@@ -120,7 +123,7 @@ public class HttpAuthenticationTests
     }
 
     [Fact]
-    public async Task EvaluateFeatureFlag_WithValidAuthHeader_IsNotUnauthorized()
+    public async Task EvaluateFeatureFlag_WithValidAuthHeader_Returns200()
     {
         var client = _app.CreateClient();
         client.DefaultRequestHeaders.Add("Authorization", TestData.ServerSecretString);
@@ -129,14 +132,14 @@ public class HttpAuthenticationTests
         {
             user = new
             {
-                key = "test-user",
+                keyId = "test-user",
                 name = "Test User"
             }
         };
 
-        var response = await client.PostAsJsonAsync("/api/public/feature-flag/evaluate", request);
+        var response = await client.PostAsJsonAsync("/api/public/featureflag/evaluate", request);
 
-        Assert.NotEqual(HttpStatusCode.Unauthorized, response.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
 
     [Fact]
@@ -148,12 +151,12 @@ public class HttpAuthenticationTests
         {
             user = new
             {
-                key = "test-user",
+                keyId = "test-user",
                 name = "Test User"
             }
         };
 
-        var response = await client.PostAsJsonAsync("/api/public/feature-flag/evaluate", request);
+        var response = await client.PostAsJsonAsync("/api/public/featureflag/evaluate", request);
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
@@ -172,7 +175,7 @@ public class HttpAuthenticationTests
     public async Task AgentRegister_WithoutAuthHeader_Returns401()
     {
         // Agent uses a different auth model (relay-proxy key lookup)
-        // Without auth, should fail but with a different path (no AuthenticationHandler involved)
+        // The default handler returns NoResult; the controller independently rejects the missing RP key.
         var client = _app.CreateClient();
 
         var response = await client.PostAsJsonAsync("/api/public/agent/register", "agent-id");
