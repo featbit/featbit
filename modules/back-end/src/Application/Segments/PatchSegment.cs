@@ -48,7 +48,7 @@ public class PatchSegmentHandler(
         segment.MarkAsUpdated(currentUser.Id);
         dataChange.To(segment);
 
-        await permissionGuard.EnsureSegmentChangeAllowedAsync(segment, dataChange, request.Permissions);
+        await permissionGuard.EnsureSegmentChangeAllowedAsync(request.OrgId, segment, dataChange, request.Permissions);
 
         await segmentService.UpdateAsync(segment);
 

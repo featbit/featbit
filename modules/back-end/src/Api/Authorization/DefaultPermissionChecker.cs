@@ -21,43 +21,49 @@ public class DefaultPermissionChecker(
             return false;
         }
 
-        var resourceRN = await GetRnAsync(permission, resourceType, httpContext.Request);
-        if (string.IsNullOrWhiteSpace(resourceRN))
+        var resource = await GetResourceRnAsync(permission, resourceType, httpContext.Request);
+        if (resource == null || string.IsNullOrWhiteSpace(resource.Rn))
         {
             // failed to get resource RN, return false to be safe. This usually indicates bad requests, e.g. invalid or missing route parameters.
             return false;
         }
 
+        // Ensure the resolved resource's organization context matches the request organization.
+        if (resourceType != ResourceTypes.Workspace && resource.OrganizationId != httpContext.Request.OrganizationId())
+        {
+            return false;
+        }
+
         // check if the user has the required permission on the resource
         var statements = await requestPermissions.GetAsync(httpContext);
-        return PolicyHelper.IsAllowed(statements, resourceRN, permission);
+        return PolicyHelper.IsAllowed(statements, resource.Rn, permission);
     }
 
-    private async ValueTask<string?> GetRnAsync(string permission, string resourceType, HttpRequest request)
+    private async ValueTask<ResourceRn?> GetResourceRnAsync(string permission, string resourceType, HttpRequest request)
     {
         var routeValues = request.RouteValues;
 
         return resourceType switch
         {
-            ResourceTypes.Workspace => RN.ForWorkspace(),
-            ResourceTypes.Iam => RN.ForIam(),
-            ResourceTypes.AccessToken => RN.ForAccessToken(),
-            ResourceTypes.Organization => RN.ForOrganization(),
-            ResourceTypes.RelayProxy => RN.ForRelayProxy(),
+            ResourceTypes.Workspace => new ResourceRn(RN.ForWorkspace(), null),
+            ResourceTypes.Iam => new ResourceRn(RN.ForIam(), request.OrganizationId()),
+            ResourceTypes.AccessToken => new ResourceRn(RN.ForAccessToken(), request.OrganizationId()),
+            ResourceTypes.Organization => new ResourceRn(RN.ForOrganization(), request.OrganizationId()),
+            ResourceTypes.RelayProxy => new ResourceRn(RN.ForRelayProxy(), request.OrganizationId()),
             ResourceTypes.Project => await GetProjectRnAsync(),
             ResourceTypes.Env => await GetEnvRnAsync(),
             ResourceTypes.FeatureFlag => await GetFlagRnAsync(),
             ResourceTypes.Segment => await GetSegmentRnAsync(),
-            _ => string.Empty
+            _ => null
         };
 
-        async Task<string?> GetProjectRnAsync()
+        async Task<ResourceRn?> GetProjectRnAsync()
         {
             if (permission == Permissions.CreateProject)
             {
                 // `CreateProject` is a special case as it doesn't have projectId in route values.
                 // It operates on organization level, so we can return project level wildcard.
-                return "project/*";
+                return new ResourceRn("project/*", request.OrganizationId());
             }
 
             var routeValue = routeValues.TryGetValue("projectId", out var projectIdRouteValue)
@@ -71,17 +77,23 @@ public class DefaultPermissionChecker(
             {
                 // invalid project id, return empty
                 logger.LogWarning("Invalid projectId '{ProjectId}' in route values.", projectIdString);
-                return string.Empty;
+                return null;
             }
 
             var rn = await resourceService.GetProjectRnAsync(projectId);
+
+            if (rn == null)
+            {
+                return null;
+            }
+
             return permission == Permissions.CreateEnv
                 // return env level wildcard for `CreateEnv` permission
-                ? rn == null ? null : $"{rn}:env/*"
+                ? rn with { Rn = $"{rn.Rn}:env/*" }
                 : rn;
         }
 
-        async Task<string?> GetEnvRnAsync()
+        async Task<ResourceRn?> GetEnvRnAsync()
         {
             var routeValue = routeValues.TryGetValue("envId", out var envIdRouteValue)
                 ? envIdRouteValue
@@ -94,56 +106,56 @@ public class DefaultPermissionChecker(
             {
                 // invalid env id, return empty
                 logger.LogWarning("Invalid envId '{EnvId}' in route values.", envIdString);
-                return string.Empty;
+                return null;
             }
 
-            var rn = await resourceService.GetEnvRnAsync(envId);
-            return rn;
+            return await resourceService.GetEnvRnAsync(envId);
         }
 
-        async Task<string?> GetFlagRnAsync()
+        async Task<ResourceRn?> GetFlagRnAsync()
         {
             if (!routeValues.TryGetValue("envId", out var envIdRouteValue) ||
                 !Guid.TryParse(envIdRouteValue?.ToString(), out var envId))
             {
-                // invalid or missing env id, return empty
-                return string.Empty;
+                // invalid or missing env id
+                return null;
             }
 
             if (!routeValues.TryGetValue("key", out var keyRouteValue))
             {
                 // missing key, return env level wildcard
-                var envRn = await resourceService.GetEnvRnAsync(envId);
-                return envRn == null ? null : $"{envRn}:flag/*";
+                var environment = await resourceService.GetEnvRnAsync(envId);
+                return environment == null || string.IsNullOrWhiteSpace(environment.Rn)
+                    ? null : environment with { Rn = $"{environment.Rn}:flag/*" };
             }
 
             var key = keyRouteValue?.ToString()!;
 
-            var rn = await resourceService.GetFlagRnAsync(envId, key);
-            return rn;
+            return await resourceService.GetFlagRnAsync(envId, key);
         }
 
-        async Task<string?> GetSegmentRnAsync()
+        async Task<ResourceRn?> GetSegmentRnAsync()
         {
             if (!routeValues.TryGetValue("envId", out var envIdRouteValue) ||
                 !Guid.TryParse(envIdRouteValue?.ToString(), out var envId))
             {
                 // invalid or missing env id, return empty
-                return string.Empty;
+                return null;
             }
 
             if (!routeValues.TryGetValue("segmentId", out var segmentIdRouteValue))
             {
                 // missing id, return env level wildcard
-                var envRn = await resourceService.GetEnvRnAsync(envId);
-                return envRn == null ? null : $"{envRn}:segment/*";
+                var environment = await resourceService.GetEnvRnAsync(envId);
+                return environment == null || string.IsNullOrWhiteSpace(environment.Rn)
+                    ? null : environment with { Rn = $"{environment.Rn}:segment/*" };
             }
 
             if (!Guid.TryParse(segmentIdRouteValue?.ToString(), out var segmentId))
             {
                 // invalid segment id, return empty
                 logger.LogWarning("Invalid segmentId '{SegmentId}' in route values.", segmentIdRouteValue);
-                return string.Empty;
+                return null;
             }
 
             var rn = await resourceService.GetSegmentRnAsync(envId, segmentId);

@@ -1,11 +1,19 @@
 using Application.Bases;
 using Application.Bases.Models;
 using Domain.FeatureFlags;
+using Domain.Policies;
+using System.Text.Json.Serialization;
 
 namespace Application.FeatureFlags;
 
 public class GetCompareFlagOverview : IRequest<PagedResult<CompareFlagOverview>>
 {
+    [JsonIgnore]
+    public Guid OrgId { get; set; }
+
+    [JsonIgnore]
+    public PolicyStatement[] Permissions { get; set; } = [];
+
     public Guid SourceEnvId { get; set; }
 
     public Guid[] TargetEnvIds { get; set; }
@@ -21,14 +29,22 @@ public class GetCompareFlagOverviewValidator : AbstractValidator<GetCompareFlagO
             .NotEmpty().WithErrorCode(ErrorCodes.Invalid("sourceEnvId"));
         RuleFor(x => x.TargetEnvIds)
             .NotEmpty().WithErrorCode(ErrorCodes.Invalid("targetEnvIds"));
+        RuleForEach(x => x.TargetEnvIds)
+            .NotEmpty().WithErrorCode(ErrorCodes.Invalid("targetEnvIds"));
     }
 }
 
-public class GetCompareFlagOverviewHandler(IFeatureFlagService service)
+public class GetCompareFlagOverviewHandler(IFeatureFlagService service, FlagAccessGuard access)
     : IRequestHandler<GetCompareFlagOverview, PagedResult<CompareFlagOverview>>
 {
     public async Task<PagedResult<CompareFlagOverview>> Handle(GetCompareFlagOverview request, CancellationToken cancellationToken)
     {
+        await access.EnsureEnvironmentAccessAsync(request.OrgId, request.SourceEnvId, request.Permissions);
+        foreach (var targetEnvId in request.TargetEnvIds.Distinct())
+        {
+            await access.EnsureEnvironmentAccessAsync(request.OrgId, targetEnvId, request.Permissions);
+        }
+
         var pagedFlags = await service.GetListAsync(request.SourceEnvId, request.Filter);
 
         var flags = pagedFlags.Items;

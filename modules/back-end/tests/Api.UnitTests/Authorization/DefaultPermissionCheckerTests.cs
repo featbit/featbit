@@ -10,6 +10,43 @@ namespace Api.UnitTests.Authorization;
 
 public class DefaultPermissionCheckerTests
 {
+    [Theory]
+    [InlineData("project", "own", true)]
+    [InlineData("env", "own", true)]
+    [InlineData("flag", "own", true)]
+    [InlineData("segment", "own", true)]
+    [InlineData("project", "foreign", false)]
+    [InlineData("env", "foreign", false)]
+    [InlineData("flag", "foreign", false)]
+    [InlineData("segment", "foreign", false)]
+    [InlineData("flag", "missing-org", false)]
+    [InlineData("flag", "missing-resource", false)]
+    [InlineData("flag", "blank-rn", false)]
+    public async Task ResourceOwnershipIsRequiredEvenWithWildcardPolicy(string type, string ownership, bool allowed)
+    {
+        var (sut, resources, permissions) = BuildSut();
+        var id = Guid.NewGuid();
+        var rn = ownership == "blank-rn" ? " " : "project/p:env/e:flag/f";
+        ResourceRn? resource = ownership == "missing-resource" ? null : new ResourceRn(rn,
+            ownership == "missing-org" ? null : ownership == "foreign" ? Guid.NewGuid() : OrganizationId);
+        resources.Setup(x => x.GetProjectRnAsync(id)).ReturnsAsync(resource);
+        resources.Setup(x => x.GetEnvRnAsync(id)).ReturnsAsync(resource);
+        resources.Setup(x => x.GetFlagRnAsync(id, "f")).ReturnsAsync(resource);
+        resources.Setup(x => x.GetSegmentRnAsync(id, id)).ReturnsAsync(resource);
+        permissions.Setup(x => x.GetAsync(It.IsAny<HttpContext>())).ReturnsAsync(
+            [new PolicyStatement { ResourceType = ResourceTypes.All, Effect = EffectType.Allow, Actions = ["*"], Resources = ["*"] }]);
+        var permission = type switch
+        {
+            "project" => Permissions.DeleteProject, "env" => Permissions.CanAccessEnv,
+            "segment" => Permissions.DeleteSegment, _ => Permissions.ToggleFlag
+        };
+        var context = BuildHttpContext(("projectId", id), ("envId", id), ("key", "f"), ("segmentId", id));
+        Assert.Equal(allowed, await sut.IsGrantedAsync(context, new PermissionRequirement(permission)));
+        if (!allowed) permissions.VerifyNoOtherCalls();
+    }
+
+    private static readonly Guid OrganizationId = Guid.NewGuid();
+
     private static PolicyStatement[] AllowStatement(string permission, string resourcePattern) =>
     [
         new PolicyStatement
@@ -38,6 +75,7 @@ public class DefaultPermissionCheckerTests
     private static HttpContext BuildHttpContext(params (string key, object value)[] routeValues)
     {
         var ctx = new DefaultHttpContext();
+        ctx.Request.Headers[Api.ApiConstants.OrgIdHeaderKey] = OrganizationId.ToString();
         var rd = new RouteData();
         foreach (var (key, value) in routeValues)
         {
@@ -152,7 +190,7 @@ public class DefaultPermissionCheckerTests
         var projectId = Guid.NewGuid();
         var projectRn = $"project/{projectId}";
         var (sut, resourceSvc, perms) = BuildSut();
-        resourceSvc.Setup(x => x.GetProjectRnAsync(projectId)).ReturnsAsync(projectRn);
+        resourceSvc.Setup(x => x.GetProjectRnAsync(projectId)).ReturnsAsync(new ResourceRn(projectRn, OrganizationId));
         perms.Setup(x => x.GetAsync(It.IsAny<HttpContext>()))
             .ReturnsAsync(AllowStatement(Permissions.DeleteProject, projectRn));
 
@@ -185,7 +223,7 @@ public class DefaultPermissionCheckerTests
         var projectId = Guid.NewGuid();
         var projectRn = $"project/{projectId}";
         var (sut, resourceSvc, perms) = BuildSut();
-        resourceSvc.Setup(x => x.GetProjectRnAsync(projectId)).ReturnsAsync(projectRn);
+        resourceSvc.Setup(x => x.GetProjectRnAsync(projectId)).ReturnsAsync(new ResourceRn(projectRn, OrganizationId));
         perms.Setup(x => x.GetAsync(It.IsAny<HttpContext>()))
             .ReturnsAsync(AllowStatement(Permissions.CreateEnv, projectRn));
 
@@ -203,7 +241,7 @@ public class DefaultPermissionCheckerTests
         var envId = Guid.NewGuid();
         var envRn = $"project/p:env/{envId}";
         var (sut, resourceSvc, perms) = BuildSut();
-        resourceSvc.Setup(x => x.GetEnvRnAsync(envId)).ReturnsAsync(envRn);
+        resourceSvc.Setup(x => x.GetEnvRnAsync(envId)).ReturnsAsync(new ResourceRn(envRn, OrganizationId));
         perms.Setup(x => x.GetAsync(It.IsAny<HttpContext>()))
             .ReturnsAsync(AllowStatement(Permissions.DeleteEnv, envRn));
 
@@ -237,7 +275,7 @@ public class DefaultPermissionCheckerTests
         var envRn = $"project/p:env/{envId}";
         var allFlagRN = $"{envRn}:flag/*";
         var (sut, resourceSvc, perms) = BuildSut();
-        resourceSvc.Setup(x => x.GetEnvRnAsync(envId)).ReturnsAsync(envRn);
+        resourceSvc.Setup(x => x.GetEnvRnAsync(envId)).ReturnsAsync(new ResourceRn(envRn, OrganizationId));
         perms.Setup(x => x.GetAsync(It.IsAny<HttpContext>()))
             .ReturnsAsync(AllowStatement(Permissions.CreateFlag, allFlagRN));
 
@@ -256,7 +294,7 @@ public class DefaultPermissionCheckerTests
         var key = "my-flag";
         var flagRn = $"project/p:env/{envId}:flag/{key}";
         var (sut, resourceSvc, perms) = BuildSut();
-        resourceSvc.Setup(x => x.GetFlagRnAsync(envId, key)).ReturnsAsync(flagRn);
+        resourceSvc.Setup(x => x.GetFlagRnAsync(envId, key)).ReturnsAsync(new ResourceRn(flagRn, OrganizationId));
         perms.Setup(x => x.GetAsync(It.IsAny<HttpContext>()))
             .ReturnsAsync(AllowStatement(Permissions.ToggleFlag, flagRn));
 
@@ -291,7 +329,7 @@ public class DefaultPermissionCheckerTests
         var envRn = $"project/p:env/{envId}";
         var allSegmentRN = $"{envRn}:segment/*";
         var (sut, resourceSvc, perms) = BuildSut();
-        resourceSvc.Setup(x => x.GetEnvRnAsync(envId)).ReturnsAsync(envRn);
+        resourceSvc.Setup(x => x.GetEnvRnAsync(envId)).ReturnsAsync(new ResourceRn(envRn, OrganizationId));
         perms.Setup(x => x.GetAsync(It.IsAny<HttpContext>()))
             .ReturnsAsync(AllowStatement(Permissions.CreateSegment, allSegmentRN));
 
@@ -311,7 +349,7 @@ public class DefaultPermissionCheckerTests
         var segmentRn = $"project/p:env/{envId}:segment/{segmentId}";
         var allSegmentRN = $"project/p:env/{envId}:segment/*";
         var (sut, resourceSvc, perms) = BuildSut();
-        resourceSvc.Setup(x => x.GetSegmentRnAsync(envId, segmentId)).ReturnsAsync(segmentRn);
+        resourceSvc.Setup(x => x.GetSegmentRnAsync(envId, segmentId)).ReturnsAsync(new ResourceRn(segmentRn, OrganizationId));
         perms.Setup(x => x.GetAsync(It.IsAny<HttpContext>()))
             .ReturnsAsync(AllowStatement(Permissions.DeleteSegment, allSegmentRN));
 
