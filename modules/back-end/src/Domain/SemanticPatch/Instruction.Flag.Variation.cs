@@ -69,10 +69,11 @@ public class DisabledVariationInstruction : FlagInstruction
             return;
         }
 
-        if (flag.Variations.Any(x => x.Id == variationId))
+        if (flag.Variations.All(x => x.Id != variationId))
         {
-            flag.DisabledVariationId = variationId;
+            throw new FlagInstructionConflictException(Kind, "The disabled variation no longer exists.");
         }
+        flag.DisabledVariationId = variationId;
     }
 }
 
