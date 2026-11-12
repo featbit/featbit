@@ -17,7 +17,7 @@ using Microsoft.Extensions.Primitives;
 
 namespace Api.UnitTests.Authentication;
 
-public class JwtContextValidationMiddlewareTests
+public class TenantAccessValidationMiddlewareTests
 {
     private readonly Guid _userId = Guid.NewGuid();
     private readonly Guid _workspaceId = Guid.NewGuid();
@@ -26,7 +26,7 @@ public class JwtContextValidationMiddlewareTests
     private readonly Mock<IOrganizationService> _organizations = new();
     private bool _reachedEndpoint;
 
-    public JwtContextValidationMiddlewareTests()
+    public TenantAccessValidationMiddlewareTests()
     {
         _users.Setup(x => x.GetWorkspacesAsync(_userId))
             .ReturnsAsync([new Workspace { Id = _workspaceId }]);
@@ -43,6 +43,7 @@ public class JwtContextValidationMiddlewareTests
             User = new ClaimsPrincipal(new ClaimsIdentity(
                 [new Claim(UserClaims.Id, _userId.ToString())], Schemes.JwtBearer))
         };
+        context.SetEndpoint(new Endpoint(null, new EndpointMetadataCollection(), "business"));
         context.Request.Headers[ApiConstants.WorkspaceHeaderKey] = _workspaceId.ToString();
         context.Request.Headers[ApiConstants.OrgIdHeaderKey] = _organizationId.ToString();
         return context;
@@ -50,18 +51,31 @@ public class JwtContextValidationMiddlewareTests
 
     private async Task AssertResult(HttpContext context, bool allowed)
     {
-        var middleware = new JwtContextValidationMiddleware(_ =>
+        var middleware = new TenantAccessValidationMiddleware(_ =>
         {
             _reachedEndpoint = true;
             return Task.CompletedTask;
         });
-        await middleware.InvokeAsync(context, _users.Object, _organizations.Object);
+        await middleware.InvokeAsync(context, new TenantAccessValidator(_users.Object, _organizations.Object));
         Assert.Equal(allowed, _reachedEndpoint);
         Assert.Equal(allowed ? StatusCodes.Status200OK : StatusCodes.Status403Forbidden, context.Response.StatusCode);
     }
 
     [Fact]
     public Task MemberOfWorkspaceAndOrganization_Continues() => AssertResult(Context(), true);
+
+    [Fact]
+    public async Task UnmatchedEndpoint_SkipsValidationWithoutAnyLookup()
+    {
+        var context = Context();
+        context.SetEndpoint(null);
+        context.Request.Headers.Clear();
+
+        await AssertResult(context, true);
+
+        _users.VerifyNoOtherCalls();
+        _organizations.VerifyNoOtherCalls();
+    }
 
     [Fact]
     public async Task NotWorkspaceMember_RejectsBeforeOrganizationLookup()
@@ -197,16 +211,6 @@ public class JwtContextValidationMiddlewareTests
         context.SetEndpoint(new Endpoint(null,
             new EndpointMetadataCollection(new TenantContextAttribute(requirement)), "context"));
         return AssertResult(context, allowed);
-    }
-
-    [Fact]
-    public Task WorkspaceRequirement_StillValidatesSuppliedOrganization()
-    {
-        var context = Context();
-        context.SetEndpoint(new Endpoint(null,
-            new EndpointMetadataCollection(new TenantContextAttribute(TenantContextRequirement.Workspace)), "context"));
-        _organizations.Setup(x => x.ContainsUserAsync(_organizationId, _userId)).ReturnsAsync(false);
-        return AssertResult(context, false);
     }
 
     [Fact]

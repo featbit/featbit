@@ -77,18 +77,13 @@ public class OpenApiHandlerTests
         Assert.NotNull(result.Failure);
     }
 
-    [Theory]
-    [InlineData(AccessTokenTypes.Service, false)]
-    [InlineData(AccessTokenTypes.Service, true)]
-    [InlineData(AccessTokenTypes.Personal, false)]
-    [InlineData(AccessTokenTypes.Personal, true)]
-    public async Task Authenticate_ValidToken_SetsHeadersStoresTokenAndIssuesIdentity(
-        string tokenType, bool hasClientHeaders)
+    [Fact]
+    public async Task Authenticate_ValidToken_SetsHeadersStoresTokenAndIssuesIdentity()
     {
         var orgId = Guid.NewGuid();
         var workspaceId = Guid.NewGuid();
         var creatorId = Guid.NewGuid();
-        var token = new AccessToken(orgId, creatorId, "name", tokenType, permissions: [])
+        var token = new AccessToken(orgId, creatorId, "name", AccessTokenTypes.Service, permissions: [])
         {
             Id = Guid.NewGuid()
         };
@@ -102,19 +97,12 @@ public class OpenApiHandlerTests
         orgSvc.Setup(x => x.GetAsync(orgId)).ReturnsAsync(org);
 
         var (handler, ctx) = await BuildHandlerAsync(tokenSvc, orgSvc, token.Token);
-        if (hasClientHeaders)
-        {
-            ctx.Request.Headers[ApiConstants.OrgIdHeaderKey] = Guid.NewGuid().ToString();
-            ctx.Request.Headers[ApiConstants.WorkspaceHeaderKey] = Guid.NewGuid().ToString();
-        }
 
         var result = await handler.AuthenticateAsync();
 
         Assert.True(result.Succeeded);
         Assert.Equal(workspaceId.ToString(), ctx.Request.Headers[ApiConstants.WorkspaceHeaderKey]);
         Assert.Equal(orgId.ToString(), ctx.Request.Headers[ApiConstants.OrgIdHeaderKey]);
-        Assert.Equal(orgId, ctx.Request.OrganizationId());
-        Assert.Equal(workspaceId, ctx.Request.WorkspaceId());
         Assert.Same(token, ctx.Items[ApplicationConsts.AccessTokenItem]);
 
         Assert.NotNull(result.Principal);

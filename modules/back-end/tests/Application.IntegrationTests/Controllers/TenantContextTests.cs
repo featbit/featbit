@@ -15,6 +15,16 @@ namespace Application.IntegrationTests.Controllers;
 [Collection(nameof(TestApp))]
 public class TenantContextTests(TestApp app)
 {
+    [Fact]
+    public async Task UnmatchedEndpoint_WithoutTenantHeaders_ReturnsNotFound()
+    {
+        using var client = await app.CreateAuthenticatedClientAsync(app);
+
+        using var response = await client.GetAsync("/api/v1/nonexistent-tenant-context-endpoint");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
     [Theory]
     [InlineData(true, HttpStatusCode.OK)]
     [InlineData(false, HttpStatusCode.Unauthorized)]

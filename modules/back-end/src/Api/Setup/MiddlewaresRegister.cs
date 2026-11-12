@@ -77,7 +77,7 @@ public static class MiddlewaresRegister
 
         // authentication & authorization
         app.UseAuthentication();
-        app.UseMiddleware<JwtContextValidationMiddleware>();
+        app.UseMiddleware<TenantAccessValidationMiddleware>();
         app.UseAuthorization();
 
         app.MapMcp("/mcp").RequireAuthorization();
