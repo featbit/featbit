@@ -148,7 +148,14 @@ test("segments: detail tabs and return restore the complete list URL", async ({
   await page.getByRole("link", { name: "Checkout", exact: true }).click()
   await page.getByRole("link", { name: "Settings", exact: true }).click()
   await page.reload()
-  await page.getByRole("link", { name: "Segments", exact: true }).last().click()
+  await expect(
+    page.getByRole("heading", { name: "Checkout", exact: true })
+  ).toBeVisible()
+  const backLink = page
+    .locator("header")
+    .getByRole("link", { name: "Segments", exact: true })
+  await expect(backLink).toHaveAttribute("href", url)
+  await backLink.click()
   await expect(page).toHaveURL(url)
   await expect(page.locator('input[value="Checkout"]')).toBeVisible()
   await page.clock.runFor(1000)
