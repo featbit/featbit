@@ -28,7 +28,7 @@ import {
 import { localizedPath } from "@/features/layout/layout-context"
 import type { Lang } from "@/features/layout/layout-types"
 import { cn } from "@/lib/utils"
-import { Link } from "react-router-dom"
+import { ListDetailLink as Link } from "@/components/list-detail-link"
 import type { FeatureFlag, FlagUser } from "../../flags-types"
 import { variationMarkerColor } from "../../variation-colors"
 

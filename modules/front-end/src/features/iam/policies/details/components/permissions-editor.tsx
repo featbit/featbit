@@ -13,7 +13,8 @@ import {
 } from "lucide-react"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useNavigate, useSearchParams } from "react-router-dom"
+import { useSearchParams } from "react-router-dom"
+import { useDetailNavigate } from "@/lib/list-navigation"
 import { toast } from "sonner"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
@@ -88,7 +89,7 @@ export function PermissionsEditor({
   onPolicyChange: (policy: PolicyDetail) => void
 }) {
   const { t } = useTranslation()
-  const navigate = useNavigate()
+  const navigate = useDetailNavigate(localizedPath(lang, "/iam/policies"))
   const [searchParams] = useSearchParams()
   const [statements, setStatements] = useState<PolicyStatement[]>(
     policy?.statements ?? []

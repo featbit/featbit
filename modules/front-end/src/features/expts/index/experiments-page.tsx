@@ -1,8 +1,10 @@
+import { useListNavigate } from "@/lib/list-navigation"
+import { useListQuery, useListSearch } from "@/lib/use-list-query"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { Plus, Search, X } from "lucide-react"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useNavigate, useParams, useSearchParams } from "react-router-dom"
+import { useParams } from "react-router-dom"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -31,19 +33,6 @@ import {
 } from "./experiment-list-state"
 import { createExperiment, fetchExperimentList } from "./experiments-api"
 
-function positiveInt(
-  value: string | null,
-  fallback: number,
-  allowed?: number[]
-) {
-  const parsed = Number(value)
-  return Number.isInteger(parsed) &&
-    parsed >= 1 &&
-    (!allowed || allowed.includes(parsed))
-    ? parsed
-    : fallback
-}
-
 function stageFromParam(value: string | null): ExperimentListFilter {
   if (value === "learning") return "learnt"
   return EXPERIMENT_LIST_STATES.includes(value as ExperimentListStateKey)
@@ -55,51 +44,23 @@ export function ExperimentsPage() {
   const { t } = useTranslation()
   const { lang: langParam } = useParams()
   const lang = resolveLang(langParam)
-  const navigate = useNavigate()
-  const [searchParams, setSearchParams] = useSearchParams()
+  const navigate = useListNavigate()
+  const { searchParams, updateParams, pageIndex, pageSize } = useListQuery()
   const projectEnv = getCurrentProjectEnv()
   const envId = projectEnv?.envId ?? ""
-  const [name, setName] = useState(() => searchParams.get("name") ?? "")
-  const [debouncedName, setDebouncedName] = useState(name.trim())
+  const {
+    search: name,
+    setSearch: setName,
+    debouncedSearch: debouncedName,
+  } = useListSearch(searchParams, updateParams)
   const [sheetOpen, setSheetOpen] = useState(false)
   const [now, setNow] = useState(() => Date.now())
   const flagId = searchParams.get("flagId") ?? ""
   const stage = stageFromParam(searchParams.get("stage"))
-  const pageIndex = positiveInt(searchParams.get("page"), 1)
-  const pageSize = positiveInt(searchParams.get("pageSize"), 10, [10, 20, 30])
   // Only stage filtering needs the full matching set. Ordinary browsing stays paged.
   const scope = stage === "all" ? "page" : "all"
   const requestPage = scope === "page" ? pageIndex - 1 : 0
   const requestPageSize = scope === "page" ? pageSize : 100
-
-  const updateParams = useCallback(
-    (updates: Record<string, string | null>, resetPage = false) => {
-      setSearchParams(
-        (current) => {
-          const next = new URLSearchParams(current)
-          for (const [key, value] of Object.entries(updates)) {
-            if (value) next.set(key, value)
-            else next.delete(key)
-          }
-          if (resetPage) next.delete("page")
-          return next
-        },
-        { replace: true }
-      )
-    },
-    [setSearchParams]
-  )
-
-  useEffect(() => {
-    if (name.trim() === debouncedName) return
-
-    const timeout = window.setTimeout(() => {
-      const value = name.trim()
-      setDebouncedName(value)
-      updateParams({ name: value || null }, true)
-    }, 350)
-    return () => window.clearTimeout(timeout)
-  }, [name, debouncedName, updateParams])
 
   useEffect(() => {
     const refreshClock = () => setNow(Date.now())
@@ -173,7 +134,6 @@ export function ExperimentsPage() {
 
   function clearFilters() {
     setName("")
-    setDebouncedName("")
     updateParams({ name: null, flagId: null, stage: null }, true)
   }
 

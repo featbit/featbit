@@ -46,6 +46,29 @@ const experiment: ExperimentDetail = {
 }
 
 describe("ExperimentDetailsHeader", () => {
+  it("preserves the source list pagination and filters in the loaded header", () => {
+    const returnTo =
+      "/en/experiments?name=checkout&page=3&pageSize=20&stage=implementing&flagId=flag-1"
+    render(
+      <MemoryRouter
+        initialEntries={[
+          `/en/experiments/experiment-1?${new URLSearchParams({ returnTo })}`,
+        ]}
+      >
+        <ExperimentDetailsHeader
+          experiment={experiment}
+          lang="en"
+          settingsActive={false}
+          onAgentSetup={vi.fn()}
+          onSettings={vi.fn()}
+        />
+      </MemoryRouter>
+    )
+    expect(
+      screen.getByRole("link", { name: "Experiments" })
+    ).toHaveAttribute("href", returnTo)
+  })
+
   it("shows the real detail run count without a saved stage badge", () => {
     render(
       <MemoryRouter>
@@ -62,6 +85,9 @@ describe("ExperimentDetailsHeader", () => {
     expect(screen.queryByText("Measuring")).not.toBeInTheDocument()
     expect(screen.getByText("2 runs")).toBeInTheDocument()
     expect(screen.queryByText("No runs")).not.toBeInTheDocument()
+    expect(
+      screen.getByRole("link", { name: "Experiments" })
+    ).toHaveAttribute("href", "/en/experiments")
 
     const description = screen.getByText("Test checkout changes")
     const headerDetails =

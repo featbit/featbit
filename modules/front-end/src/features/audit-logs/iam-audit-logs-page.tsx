@@ -34,7 +34,7 @@ function OrganizationAuditLogsPage() {
   const locale = i18n.resolvedLanguage || lang
   const orgId = getCurrentOrganization()?.id ?? ""
   const workspaceId = getCurrentWorkspace()?.id ?? ""
-  const filters = useAuditLogFilters()
+  const filters = useAuditLogFilters(true)
   const { debouncedSearch, user, refType, range } = filters
 
   const logsQuery = useInfiniteQuery({

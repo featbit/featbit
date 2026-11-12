@@ -1,6 +1,7 @@
+import { useListQuery, useListSearch } from "@/lib/use-list-query"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { CircleAlert, KeyRound, Plus, Search, X } from "lucide-react"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useParams } from "react-router-dom"
 import { toast } from "sonner"
@@ -65,12 +66,35 @@ export function AccessTokensPage() {
   const params = useParams()
   const lang = resolveLang(params.lang)
   const queryClient = useQueryClient()
-  const [search, setSearch] = useState("")
-  const [debouncedSearch, setDebouncedSearch] = useState("")
-  const [creator, setCreator] = useState<AccessTokenCreator | null>(null)
-  const [typeFilter, setTypeFilter] = useState<AccessTokenType | "">("")
-  const [pageIndex, setPageIndex] = useState(1)
-  const [pageSize, setPageSize] = useState(10)
+  const {
+    searchParams,
+    updateParams,
+    pageIndex,
+    pageSize,
+    setPageIndex,
+    setPageSize,
+  } = useListQuery()
+  const { search, setSearch, debouncedSearch } = useListSearch(
+    searchParams,
+    updateParams
+  )
+  const creatorId = searchParams.get("creatorId") ?? ""
+  const creator: AccessTokenCreator | null = creatorId
+    ? { id: creatorId, name: searchParams.get("creatorName") ?? undefined }
+    : null
+  const setCreator = (value: AccessTokenCreator | null) =>
+    updateParams(
+      {
+        creatorId: value?.id ?? null,
+        creatorName: value?.name || value?.email || null,
+      },
+      true
+    )
+  const rawType = searchParams.get("type")
+  const typeFilter: AccessTokenType | "" =
+    rawType === "Personal" || rawType === "Service" ? rawType : ""
+  const setTypeFilter = (value: AccessTokenType | "") =>
+    updateParams({ type: value || null }, true)
   const [sheet, setSheet] = useState<SheetState>(null)
   const [confirmTarget, setConfirmTarget] =
     useState<AccessTokenConfirmTarget>(null)
@@ -80,16 +104,6 @@ export function AccessTokensPage() {
   } | null>(null)
   const workspace = getCurrentWorkspace()
   const organizationId = getCurrentOrganization()?.id ?? ""
-
-  useEffect(() => {
-    if (search.trim() === debouncedSearch) return
-
-    const timeout = window.setTimeout(() => {
-      setDebouncedSearch(search.trim())
-      setPageIndex(1)
-    }, 300)
-    return () => window.clearTimeout(timeout)
-  }, [search, debouncedSearch])
 
   const permissionsQuery = useQuery({
     ...currentUserPoliciesQueryOptions<UserPolicy>(organizationId),
@@ -180,7 +194,7 @@ export function AccessTokensPage() {
 
   function clearFilters() {
     setSearch("")
-    setDebouncedSearch("")
+    updateParams({ name: null }, true)
     setCreator(null)
     setTypeFilter("")
     setPageIndex(1)
