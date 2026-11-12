@@ -111,8 +111,10 @@ public class MongoDbStoreTests : IntegrationTestBase, IAsyncLifetime
         Assert.Contains("c", result);
     }
 
-    [DockerFact]
-    public async Task GetSegmentAsync_KnownId_ReturnsBytes()
+    [DockerTheory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task GetSegmentAsync_KnownId_ReturnsBytes(bool uppercase)
     {
         var id = Guid.NewGuid();
         await _db.GetCollection<BsonDocument>("Segments").InsertOneAsync(new BsonDocument
@@ -121,7 +123,7 @@ public class MongoDbStoreTests : IntegrationTestBase, IAsyncLifetime
             { "name", "finance" }
         });
 
-        var bytes = await _sut.GetSegmentAsync(id.ToString());
+        var bytes = await _sut.GetSegmentAsync(uppercase ? id.ToString().ToUpperInvariant() : id.ToString());
 
         var json = JsonSerializer.Deserialize<JsonElement>(Encoding.UTF8.GetString(bytes));
         Assert.Equal("finance", json.GetProperty("name").GetString());

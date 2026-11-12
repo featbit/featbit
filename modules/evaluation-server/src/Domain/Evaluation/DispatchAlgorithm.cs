@@ -11,7 +11,7 @@ public static class DispatchAlgorithm
         var max = rollouts[1];
 
         // if [0, 1]
-        if (min == 0d && 1d - max < 1e-5)
+        if (min == 0d && max == 1d)
         {
             return true;
         }
