@@ -40,15 +40,18 @@ public class OnFeatureFlagDeletedHandler : INotificationHandler<OnFeatureFlagDel
     private readonly ICacheService _cache;
     private readonly IAuditLogService _auditLogService;
     private readonly IWebhookHandler _webhookHandler;
+    private readonly IFeatureFlagChangePublisher _changePublisher;
 
     public OnFeatureFlagDeletedHandler(
         ICacheService cache,
         IAuditLogService auditLogService,
-        IWebhookHandler webhookHandler)
+        IWebhookHandler webhookHandler,
+        IFeatureFlagChangePublisher changePublisher)
     {
         _cache = cache;
         _auditLogService = auditLogService;
         _webhookHandler = webhookHandler;
+        _changePublisher = changePublisher;
     }
 
     public async Task Handle(OnFeatureFlagDeleted notification, CancellationToken cancellationToken)
@@ -63,5 +66,8 @@ public class OnFeatureFlagDeletedHandler : INotificationHandler<OnFeatureFlagDel
 
         // handle webhooks
         _ = _webhookHandler.HandleAsync(notification.Flag, notification.DataChange, notification.OperatorId);
+
+        // the other datacenters delete it too; last, so that a failure to publish does not skip the webhooks
+        await _changePublisher.PublishDeletedAsync(envId, flagId);
     }
 }

@@ -18,6 +18,11 @@ public class FeatureFlagChangeMessageHandler(
 {
     public string Topic => ControlPlaneTopics.ControlPlaneFeatureFlagChange;
 
+    /// <summary>
+    /// Applies one message from the flag change topic. A change is written to every datacenter's Redis and republished to
+    /// the evaluation servers (staged first under <c>GatedCommit</c>); a delete, which has a <c>deleted</c> property and no
+    /// <c>notification</c>, removes the flag from every datacenter. A message of neither shape is rejected.
+    /// </summary>
     public async Task HandleAsync(string message)
     {
         try
@@ -25,6 +30,12 @@ public class FeatureFlagChangeMessageHandler(
             using var document = JsonDocument.Parse(message);
             var root = document.RootElement;
 
+            // A delete has a "deleted" property and no "notification".
+            if (root.TryGetProperty("deleted", out var deleted))
+            {
+                await HandleDeletedAsync(root, deleted);
+                return;
+            }
 
             if (!root.TryGetProperty("notification", out var notification) ||
                 !root.TryGetProperty("region", out var region))
@@ -71,5 +82,30 @@ public class FeatureFlagChangeMessageHandler(
             logger.LogError(e, "Error handling feature flag change message");
             throw;
         }
+    }
+
+    /// <summary>
+    /// Removes a deleted flag from every datacenter's Redis. Nothing is published to the evaluation servers:
+    /// a flag has to be archived before it can be deleted, and SDKs already hide archived flags.
+    /// </summary>
+    private async Task HandleDeletedAsync(JsonElement root, JsonElement deleted)
+    {
+        if (!root.TryGetProperty("region", out var region) ||
+            !deleted.TryGetProperty("envId", out var envIdNode) ||
+            !deleted.TryGetProperty("id", out var idNode))
+        {
+            throw new InvalidDataException("invalid flag delete data");
+        }
+
+        var deserializedRegion = region.Deserialize<string>(ReusableJsonSerializerOptions.Web);
+        if (deserializedRegion == null || deserializedRegion != configuration.GetRegion())
+        {
+            return;
+        }
+
+        var envId = envIdNode.Deserialize<Guid>(ReusableJsonSerializerOptions.Web);
+        var flagId = idNode.Deserialize<Guid>(ReusableJsonSerializerOptions.Web);
+
+        await cacheService.DeleteFlagAsync(envId, flagId);
     }
 }

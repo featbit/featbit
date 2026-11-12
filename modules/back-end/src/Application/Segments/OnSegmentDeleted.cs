@@ -41,19 +41,27 @@ public class OnSegmentDeletedHandler : INotificationHandler<OnSegmentDeleted>
     private readonly IAuditLogService _auditLogService;
     private readonly IWebhookHandler _webhookHandler;
     private readonly ISegmentService _segmentService;
+    private readonly ISegmentChangePublisher _changePublisher;
 
     public OnSegmentDeletedHandler(
         ICacheService cache,
         IAuditLogService auditLogService,
         IWebhookHandler webhookHandler,
-        ISegmentService segmentService)
+        ISegmentService segmentService,
+        ISegmentChangePublisher changePublisher)
     {
         _cache = cache;
         _auditLogService = auditLogService;
         _webhookHandler = webhookHandler;
         _segmentService = segmentService;
+        _changePublisher = changePublisher;
     }
 
+    /// <summary>
+    /// Writes the audit log, deletes the segment from the local cache and dispatches the webhooks of every environment it
+    /// belongs to. The delete is published last, so that the other datacenters remove the segment too and a failure to
+    /// publish does not skip the webhooks.
+    /// </summary>
     public async Task Handle(OnSegmentDeleted notification, CancellationToken cancellationToken)
     {
         // write audit log
@@ -75,5 +83,8 @@ public class OnSegmentDeletedHandler : INotificationHandler<OnSegmentDeleted>
                 notification.OperatorId
             );
         }
+
+        // the other datacenters delete it too; last, so that a failure to publish does not skip the webhooks
+        await _changePublisher.PublishDeletedAsync(envIds, segment.Id);
     }
 }
