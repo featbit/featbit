@@ -32,6 +32,8 @@ public class PatchFeatureFlagHandler(
     public async Task<PatchResult> Handle(PatchFeatureFlag request, CancellationToken cancellationToken)
     {
         var flag = await flagService.GetAsync(request.EnvId, request.Key);
+        var flagId = flag.Id;
+        var envId = flag.EnvId;
         var dataChange = new DataChange(flag);
 
         var error = string.Empty;
@@ -41,6 +43,9 @@ public class PatchFeatureFlagHandler(
         {
             return PatchResult.Fail(error);
         }
+
+        if (flag.Id != flagId || flag.EnvId != envId)
+            return PatchResult.Fail("Flag identity and environment cannot be changed by a patch.");
 
         flag.MarkAsUpdated(currentUser.Id);
         dataChange.To(flag);

@@ -14,6 +14,29 @@ namespace Application.UnitTests.Handlers;
 
 public class PatchFeatureFlagHandlerTests
 {
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Handle_OwnershipFieldsChanged_RejectsWithoutPersistence(bool changeId)
+    {
+        var flag = NewFlag();
+        var service = new Mock<IFeatureFlagService>();
+        service.Setup(x => x.GetAsync(flag.EnvId, flag.Key)).ReturnsAsync(flag);
+        var publisher = new Mock<IPublisher>(MockBehavior.Strict);
+        var guard = new Mock<IPermissionGuard>(MockBehavior.Strict);
+        var sut = new PatchFeatureFlagHandler(service.Object, guard.Object, Mock.Of<ICurrentUser>(), publisher.Object);
+        var patch = new JsonPatchDocument<FeatureFlag>();
+        if (changeId) patch.Replace(x => x.Id, Guid.NewGuid());
+        else patch.Replace(x => x.EnvId, Guid.NewGuid());
+
+        var result = await sut.Handle(new PatchFeatureFlag { EnvId = flag.EnvId, Key = flag.Key, Patch = patch }, CancellationToken.None);
+
+        Assert.False(result.Success);
+        service.Verify(x => x.UpdateAsync(It.IsAny<FeatureFlag>()), Times.Never);
+        guard.VerifyNoOtherCalls();
+        publisher.VerifyNoOtherCalls();
+    }
+
     private static FeatureFlag NewFlag()
     {
         var on = new Variation { Id = "v-on", Name = "On", Value = "true" };

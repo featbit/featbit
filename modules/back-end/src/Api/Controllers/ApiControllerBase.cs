@@ -10,6 +10,7 @@ namespace Api.Controllers;
 [Authorize]
 [ApiController]
 [VerifyOpenApiApplicable]
+[ServiceFilter(typeof(ResourceOrganizationFilter))]
 [Produces(MediaTypeNames.Application.Json)]
 [ProducesResponseType(StatusCodes.Status200OK)]
 [ProducesResponseType(StatusCodes.Status401Unauthorized)]
