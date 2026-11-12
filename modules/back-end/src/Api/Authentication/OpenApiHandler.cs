@@ -9,8 +9,7 @@ using Microsoft.Extensions.Options;
 
 namespace Api.Authentication;
 
-public class
-    OpenApiHandler(
+public class OpenApiHandler(
     IOptionsMonitor<OpenApiOptions> options,
     ILoggerFactory logger,
     UrlEncoder encoder,
