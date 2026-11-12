@@ -14,6 +14,28 @@ namespace Application.UnitTests.Handlers;
 
 public class PatchFeatureFlagHandlerTests
 {
+    [Fact]
+    public async Task Handle_InternalMongoTokenPatch_IsNotWritableThroughPublicJsonPatch()
+    {
+        var flag = NewFlag();
+        var token = flag.MongoETag;
+        var service = new Mock<IFeatureFlagService>();
+        service.Setup(x => x.GetAsync(flag.EnvId, flag.Key)).ReturnsAsync(flag);
+        var publisher = new Mock<IPublisher>(MockBehavior.Strict);
+        var guard = new Mock<IPermissionGuard>(MockBehavior.Strict);
+        var sut = new PatchFeatureFlagHandler(service.Object, guard.Object, Mock.Of<ICurrentUser>(), publisher.Object);
+        var patch = new JsonPatchDocument<FeatureFlag>();
+        patch.Operations.Add(new Operation<FeatureFlag> { op = "replace", path = "/mongoETag", value = Guid.NewGuid() });
+
+        var result = await sut.Handle(new PatchFeatureFlag { EnvId = flag.EnvId, Key = flag.Key, Patch = patch }, CancellationToken.None);
+
+        Assert.False(result.Success);
+        Assert.Equal(token, flag.MongoETag);
+        service.Verify(x => x.UpdateAsync(It.IsAny<FeatureFlag>()), Times.Never);
+        guard.VerifyNoOtherCalls();
+        publisher.VerifyNoOtherCalls();
+    }
+
     private static FeatureFlag NewFlag()
     {
         var on = new Variation { Id = "v-on", Name = "On", Value = "true" };
