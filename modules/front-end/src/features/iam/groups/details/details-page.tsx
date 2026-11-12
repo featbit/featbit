@@ -1,6 +1,7 @@
+import { useDetailNavigate } from "@/lib/list-navigation"
 import { useCallback, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useNavigate, useParams } from "react-router-dom"
+import { useParams } from "react-router-dom"
 import { toast } from "sonner"
 import { DetailBackLink } from "@/components/detail-back-link"
 import { TooltipProvider } from "@/components/ui/tooltip"
@@ -17,9 +18,9 @@ const validTabs = new Set<GroupDetailTab>(["team", "policies"])
 
 export function GroupDetailsPage() {
   const params = useParams()
-  const navigate = useNavigate()
   const { t } = useTranslation()
   const lang = resolveLang(params.lang)
+  const navigate = useDetailNavigate(localizedPath(lang, "/iam/groups"))
   const groupId = params.groupId ?? ""
   const requestedTab = params.tab as GroupDetailTab | undefined
   const activeTab =

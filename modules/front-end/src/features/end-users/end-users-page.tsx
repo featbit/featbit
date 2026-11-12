@@ -1,3 +1,5 @@
+import { useListQuery, useListSearch } from "@/lib/use-list-query"
+import { parsePageCursor } from "./page-cursor"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Download, MoreHorizontal, Settings, Upload } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
@@ -65,10 +67,14 @@ export function EndUsersPage() {
   const lang = resolveLang(langParam)
   const queryClient = useQueryClient()
   const envId = getCurrentProjectEnv()?.envId ?? ""
-  const [search, setSearch] = useState("")
-  const [debouncedSearch, setDebouncedSearch] = useState("")
-  const [pageSize, setPageSize] = useState(10)
-  const [cursor, setCursor] = useState<CursorState>({ direction: null })
+  const { searchParams, updateParams, pageSize, setPageSize } = useListQuery()
+  const { search, setSearch, debouncedSearch } = useListSearch(
+    searchParams,
+    updateParams
+  )
+  const cursor = { value: parsePageCursor(searchParams.get("cursor")) }
+  const setCursor = (value: CursorState) =>
+    updateParams({ cursor: value.value ? JSON.stringify(value.value) : null })
   const [selectedColumns, setSelectedColumns] = useState<string[]>([])
   const [importOpen, setImportOpen] = useState(false)
   const [importError, setImportError] = useState<string | null>(null)
@@ -77,14 +83,6 @@ export function EndUsersPage() {
   const [evaluateUser, setEvaluateUser] = useState<EndUser | null>(null)
   const [detailsUser, setDetailsUser] = useState<EndUser | null>(null)
   const [propertiesOpen, setPropertiesOpen] = useState(false)
-
-  useEffect(() => {
-    const timeout = window.setTimeout(() => {
-      setDebouncedSearch(search.trim())
-      setCursor({ direction: null })
-    }, 400)
-    return () => window.clearTimeout(timeout)
-  }, [search])
 
   useEffect(() => {
     if (!envId) return

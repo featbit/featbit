@@ -27,7 +27,7 @@ describe("ChangeRequestPreviewAlert", () => {
     expect(screen.getByText("Approved")).toBeVisible()
     expect(
       screen.getByText(
-        "This is how Targeting will look after this change request is applied. The current configuration has not changed."
+        "This preview shows the targeting configuration after this change request is applied. The current configuration has not changed."
       )
     ).toBeVisible()
     expect(screen.getByText(preview.reason)).toBeVisible()

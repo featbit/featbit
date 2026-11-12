@@ -1,8 +1,10 @@
+import { useListNavigate } from "@/lib/list-navigation"
+import { useListQuery, useListSearch } from "@/lib/use-list-query"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Archive, Plus, Search } from "lucide-react"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useNavigate, useParams } from "react-router-dom"
+import { useParams } from "react-router-dom"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -62,7 +64,7 @@ export function SegmentsPage() {
   const { t } = useTranslation()
   const { lang: langParam } = useParams()
   const lang = resolveLang(langParam)
-  const navigate = useNavigate()
+  const navigate = useListNavigate()
   const queryClient = useQueryClient()
   const workspace = getCurrentWorkspace()
   const organization = getCurrentOrganization()
@@ -78,11 +80,28 @@ export function SegmentsPage() {
     environmentKey: projectEnv?.envKey ?? "",
   })
 
-  const [search, setSearch] = useState("")
-  const [debouncedSearch, setDebouncedSearch] = useState("")
-  const [archived, setArchived] = useState(false)
-  const [pageIndex, setPageIndex] = useState(1)
-  const [pageSize, setPageSize] = useState(10)
+  const {
+    searchParams,
+    updateParams,
+    pageIndex,
+    pageSize,
+    setPageIndex,
+    setPageSize,
+  } = useListQuery()
+  const { search, setSearch, debouncedSearch } = useListSearch(
+    searchParams,
+    updateParams
+  )
+  const archived = searchParams.get("archived") === "true"
+  const setArchived = (value: boolean | ((current: boolean) => boolean)) =>
+    updateParams(
+      {
+        archived: (typeof value === "function" ? value(archived) : value)
+          ? "true"
+          : null,
+      },
+      true
+    )
   const [sheetOpen, setSheetOpen] = useState(false)
   const [confirmation, setConfirmation] = useState<SegmentConfirmation>(null)
   const [referenceDialog, setReferenceDialog] = useState<{
@@ -92,16 +111,6 @@ export function SegmentsPage() {
   const [referenceLoadingId, setReferenceLoadingId] = useState<string | null>(
     null
   )
-
-  useEffect(() => {
-    if (search.trim() === debouncedSearch) return
-
-    const timeout = window.setTimeout(() => {
-      setDebouncedSearch(search.trim())
-      setPageIndex(1)
-    }, 400)
-    return () => window.clearTimeout(timeout)
-  }, [search, debouncedSearch])
 
   const permissionsQuery = useQuery({
     ...currentUserPoliciesQueryOptions<UserPolicy>(organization?.id ?? ""),

@@ -1,7 +1,8 @@
+import { useListQuery } from "@/lib/use-list-query"
 import { AuditLogScopes } from "./audit-logs-types"
 import { ApiRequestError } from "@/lib/api/authenticated-api"
 import { useInfiniteQuery } from "@tanstack/react-query"
-import { useMemo, useSyncExternalStore } from "react"
+import { useCallback, useMemo, useSyncExternalStore } from "react"
 import { useTranslation } from "react-i18next"
 import { useParams } from "react-router-dom"
 import {
@@ -18,8 +19,31 @@ import { AuditLogPageContent } from "./components/audit-log-page-content"
 const PAGE_SIZE = 10
 
 export function IamAuditLogsPage() {
+  const { updateParams } = useListQuery()
+  const subscribe = useCallback(
+    (onChange: () => void) => {
+      let organizationId = getCurrentOrganization()?.id ?? ""
+      return onCurrentOrganizationChanged(() => {
+        const nextId = getCurrentOrganization()?.id ?? ""
+        if (nextId !== organizationId) {
+          organizationId = nextId
+          // A remount alone no longer resets filters now that they live in the URL.
+          updateParams({
+            query: null,
+            creatorId: null,
+            creatorName: null,
+            refType: null,
+            from: null,
+            to: null,
+          })
+        }
+        onChange()
+      })
+    },
+    [updateParams]
+  )
   const orgId = useSyncExternalStore(
-    onCurrentOrganizationChanged,
+    subscribe,
     () => getCurrentOrganization()?.id ?? ""
   )
   return (
@@ -34,7 +58,7 @@ function OrganizationAuditLogsPage() {
   const locale = i18n.resolvedLanguage || lang
   const orgId = getCurrentOrganization()?.id ?? ""
   const workspaceId = getCurrentWorkspace()?.id ?? ""
-  const filters = useAuditLogFilters()
+  const filters = useAuditLogFilters(true)
   const { debouncedSearch, user, refType, range } = filters
 
   const logsQuery = useInfiniteQuery({

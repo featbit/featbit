@@ -1,7 +1,7 @@
 import { ChevronsUpDown, Copy } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { Link } from "react-router-dom"
+import { DetailTabLink as Link } from "@/components/list-detail-link"
 import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"

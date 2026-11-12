@@ -1,6 +1,7 @@
+import { useListQuery, useListSearch } from "@/lib/use-list-query"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Archive, Loader2, MousePointerClick, Plus, Search } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useParams } from "react-router-dom"
 import { toast } from "sonner"
@@ -38,24 +39,31 @@ export function LayersPage() {
   const lang = resolveLang(langParam)
   const queryClient = useQueryClient()
   const envId = getCurrentProjectEnv()?.envId ?? ""
-  const [search, setSearch] = useState("")
-  const [debouncedSearch, setDebouncedSearch] = useState("")
-  const [archived, setArchived] = useState(false)
-  const [pageIndex, setPageIndex] = useState(1)
-  const [pageSize, setPageSize] = useState(10)
+  const {
+    searchParams,
+    updateParams,
+    pageIndex,
+    pageSize,
+    setPageIndex,
+    setPageSize,
+  } = useListQuery()
+  const { search, setSearch, debouncedSearch } = useListSearch(
+    searchParams,
+    updateParams
+  )
+  const archived = searchParams.get("archived") === "true"
+  const setArchived = (value: boolean | ((current: boolean) => boolean)) =>
+    updateParams(
+      {
+        archived: (typeof value === "function" ? value(archived) : value)
+          ? "true"
+          : null,
+      },
+      true
+    )
   const [sheetLayer, setSheetLayer] = useState<Layer | null | undefined>()
   const [archiveTarget, setArchiveTarget] = useState<Layer | null>(null)
   const [archiveConfirmationKey, setArchiveConfirmationKey] = useState("")
-
-  useEffect(() => {
-    if (search.trim() === debouncedSearch) return
-
-    const timeout = window.setTimeout(() => {
-      setDebouncedSearch(search.trim())
-      setPageIndex(1)
-    }, 400)
-    return () => window.clearTimeout(timeout)
-  }, [search, debouncedSearch])
 
   const listQuery = useQuery({
     queryKey: ["layers", envId, debouncedSearch, archived, pageIndex, pageSize],

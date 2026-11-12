@@ -9,6 +9,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { localizedPath } from "@/features/layout/layout-context"
+import { useListReturnUrl } from "@/lib/list-navigation"
 import type { Lang } from "@/features/layout/layout-types"
 import type { ExperimentDetail } from "../experiment-details-types"
 
@@ -28,12 +29,13 @@ export function ExperimentDetailsHeader({
   onSettings,
 }: Props) {
   const { t } = useTranslation()
+  const backHref = useListReturnUrl(localizedPath(lang, "/experiments"))
   const runCount = experiment.experimentRuns.length
 
   return (
     <header className="space-y-5">
       <Link
-        to={localizedPath(lang, "/experiments")}
+        to={backHref}
         className="inline-flex items-center gap-1 text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
       >
         <ChevronLeft className="size-4" />

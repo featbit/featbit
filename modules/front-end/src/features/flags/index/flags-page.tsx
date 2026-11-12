@@ -1,6 +1,8 @@
+import { useListNavigate } from "@/lib/list-navigation"
+import { useListQuery, useListSearch } from "@/lib/use-list-query"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { useCallback, useEffect, useMemo, useState } from "react"
-import { useNavigate, useParams, useSearchParams } from "react-router-dom"
+import { useCallback, useMemo, useState } from "react"
+import { useParams } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -53,28 +55,13 @@ import { FlagsPagination } from "../components/flags-pagination"
 import { FlagsTable } from "./components/flags-table"
 import { FlagsToolbar } from "./components/flags-toolbar"
 
-function positiveInt(
-  value: string | null,
-  fallback: number,
-  allowed?: number[]
-) {
-  const parsed = Number(value)
-  if (
-    !Number.isInteger(parsed) ||
-    parsed < 1 ||
-    (allowed && !allowed.includes(parsed))
-  )
-    return fallback
-  return parsed
-}
-
 export function FlagsPage() {
   const { lang: langParam } = useParams()
   const lang = resolveLang(langParam)
   const { t } = useTranslation()
-  const navigate = useNavigate()
+  const navigate = useListNavigate()
   const queryClient = useQueryClient()
-  const [searchParams, setSearchParams] = useSearchParams()
+  const { searchParams, updateParams, pageIndex, pageSize } = useListQuery()
   const workspace = getCurrentWorkspace()
   const organization = getCurrentOrganization() as ReturnType<
     typeof getCurrentOrganization
@@ -86,8 +73,10 @@ export function FlagsPage() {
     environmentKey: projectEnv?.envKey ?? "",
   })
 
-  const [search, setSearch] = useState(() => searchParams.get("name") ?? "")
-  const [debouncedSearch, setDebouncedSearch] = useState(search.trim())
+  const { search, setSearch, debouncedSearch } = useListSearch(
+    searchParams,
+    updateParams
+  )
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [selectedFlags, setSelectedFlags] = useState<Map<string, FeatureFlag>>(
     new Map()
@@ -108,36 +97,6 @@ export function FlagsPage() {
       : "all"
   ) as "all" | "on" | "off"
   const archived = searchParams.get("archived") === "true"
-  const pageIndex = positiveInt(searchParams.get("page"), 1)
-  const pageSize = positiveInt(searchParams.get("pageSize"), 10, [10, 20, 30])
-
-  const updateParams = useCallback(
-    (updates: Record<string, string | null>, resetPage = false) => {
-      setSearchParams(
-        (current) => {
-          const next = new URLSearchParams(current)
-          Object.entries(updates).forEach(([key, value]) =>
-            value ? next.set(key, value) : next.delete(key)
-          )
-          if (resetPage) next.delete("page")
-          return next
-        },
-        { replace: true }
-      )
-    },
-    [setSearchParams]
-  )
-
-  useEffect(() => {
-    if (search.trim() === debouncedSearch) return
-
-    const timeout = window.setTimeout(() => {
-      const value = search.trim()
-      setDebouncedSearch(value)
-      updateParams({ name: value || null }, true)
-    }, 350)
-    return () => window.clearTimeout(timeout)
-  }, [search, debouncedSearch, updateParams])
 
   const listQuery = useQuery({
     queryKey: [

@@ -1,8 +1,10 @@
+import { useListQuery, useListSearch } from "@/lib/use-list-query"
 import { Plus, Search } from "lucide-react"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
-import { Link, useParams } from "react-router-dom"
+import { useParams } from "react-router-dom"
+import { ListDetailLink as Link } from "@/components/list-detail-link"
 import { toast } from "sonner"
 import {
   getCoreRowModel,
@@ -49,23 +51,21 @@ export function TeamPage() {
   const queryClient = useQueryClient()
   const profile = useMemo(() => getStoredUserProfile(), [])
   const organizationId = getCurrentOrganization()?.id ?? ""
-  const [search, setSearch] = useState("")
-  const [debouncedSearch, setDebouncedSearch] = useState("")
-  const [pageIndex, setPageIndex] = useState(1)
-  const [pageSize, setPageSize] = useState(10)
+  const {
+    searchParams,
+    updateParams,
+    pageIndex,
+    pageSize,
+    setPageIndex,
+    setPageSize,
+  } = useListQuery()
+  const { search, setSearch, debouncedSearch } = useListSearch(
+    searchParams,
+    updateParams
+  )
   const [addOpen, setAddOpen] = useState(false)
   const [removeTarget, setRemoveTarget] = useState<RemoveTarget>(null)
   const [isRemoving, setIsRemoving] = useState(false)
-
-  useEffect(() => {
-    if (search === debouncedSearch) return
-
-    const timeout = window.setTimeout(() => {
-      setDebouncedSearch(search)
-      setPageIndex(1)
-    }, 300)
-    return () => window.clearTimeout(timeout)
-  }, [search, debouncedSearch])
 
   const memberParams = useMemo(
     () => ({
