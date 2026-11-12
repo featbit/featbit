@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Application.Caches;
+using Application.ControlPlane;
 using Domain.ControlPlane;
 using Domain.Environments;
 using Domain.FeatureFlags;
@@ -315,6 +316,78 @@ public class RedisCacheService(IRedisClient redis) : ICacheService
         // delete cache
         var cacheKey = RedisKeys.Segment(segmentId);
         await Redis.KeyDeleteAsync(cacheKey);
+    }
+
+    public Task<IReadOnlyDictionary<Guid, long>> GetFlagIndexAsync(Guid envId) =>
+        ReadIndexAsync(RedisKeys.FlagIndex(envId));
+
+    public Task<IReadOnlyDictionary<Guid, long>> GetSegmentIndexAsync(Guid envId) =>
+        ReadIndexAsync(RedisKeys.SegmentIndex(envId));
+
+    public Task<bool> IsFlagArchivedAsync(Guid id, ConsistencyMode mode) =>
+        IsArchivedAsync(
+            mode, RedisKeys.Flag(id), RedisKeys.FlagCommittedPointer(id), ts => RedisKeys.FlagVersion(id, ts));
+
+    public Task<bool> IsSegmentArchivedAsync(Guid id, ConsistencyMode mode) =>
+        IsArchivedAsync(
+            mode,
+            RedisKeys.Segment(id),
+            RedisKeys.SegmentCommittedPointer(id),
+            ts => RedisKeys.SegmentVersion(id, ts));
+
+    private async Task<IReadOnlyDictionary<Guid, long>> ReadIndexAsync(RedisKey indexKey)
+    {
+        var entries = await Redis.SortedSetRangeByRankWithScoresAsync(indexKey);
+
+        var result = new Dictionary<Guid, long>(entries.Length);
+        foreach (var entry in entries)
+        {
+            if (Guid.TryParse(entry.Element.ToString(), out var id))
+            {
+                result[id] = (long)entry.Score;
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Reads the value that is current for the consistency mode and reports whether it is archived. Under <c>GatedCommit</c>
+    /// that is the version the committed pointer refers to (the plain value when there is no pointer); under
+    /// <c>BestEffort</c> it is the plain value only. A missing or unreadable value is reported as not archived.
+    /// </summary>
+    private async Task<bool> IsArchivedAsync(
+        ConsistencyMode mode, RedisKey valueKey, RedisKey pointerKey, Func<long, RedisKey> versionKey)
+    {
+        // Under GatedCommit the value is the versioned key the committed pointer refers to. Under BestEffort it
+        // is the plain value key: a pointer left behind by an earlier GatedCommit is no longer kept up to date,
+        // so reading through it could return an older value than the one that is current.
+        var key = valueKey;
+        if (mode == ConsistencyMode.GatedCommit)
+        {
+            var pointer = await Redis.StringGetAsync(pointerKey);
+            if (pointer.HasValue && pointer.TryParse(out long ts))
+            {
+                key = versionKey(ts);
+            }
+        }
+
+        var value = await Redis.StringGetAsync(key);
+        if (!value.HasValue)
+        {
+            return false;
+        }
+
+        try
+        {
+            using var document = JsonDocument.Parse((byte[])value!);
+            return document.RootElement.TryGetProperty("isArchived", out var archived)
+                   && archived.ValueKind == JsonValueKind.True;
+        }
+        catch (JsonException)
+        {
+            return false;
+        }
     }
 
     public async Task UpsertLicenseAsync(Workspace workspace)

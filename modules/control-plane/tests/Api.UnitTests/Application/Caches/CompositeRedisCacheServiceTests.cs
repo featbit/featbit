@@ -1,5 +1,6 @@
 using Api.Infrastructure.Caches;
 using Application.Caches;
+using Application.ControlPlane;
 using Domain.ControlPlane;
 using Domain.Environments;
 using Microsoft.Extensions.Logging.Testing;
@@ -162,5 +163,133 @@ public class CompositeRedisCacheServiceTests
 
         _local.Verify(s => s.UpsertSecretAsync(It.IsAny<ResourceDescriptor>(), It.IsAny<Secret>()), Times.Never);
         _remote.Verify(s => s.UpsertSecretAsync(It.IsAny<ResourceDescriptor>(), It.IsAny<Secret>()), Times.Never);
+    }
+
+    // ----- reads and deletes of flags and segments that target ONE DC -----
+
+    [Fact]
+    public async Task GetFlagIndexFromDcAsync_KnownDc_ReturnsThatDcsIndexOnly()
+    {
+        var envId = Guid.NewGuid();
+        var expected = new Dictionary<Guid, long> { [Guid.NewGuid()] = 1000 };
+        _remote.Setup(s => s.GetFlagIndexAsync(envId)).ReturnsAsync(expected);
+        var sut = CreateSut();
+
+        var index = await sut.GetFlagIndexFromDcAsync(RemoteDcId, envId);
+
+        Assert.Same(expected, index);
+        _local.Verify(s => s.GetFlagIndexAsync(It.IsAny<Guid>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task GetFlagIndexFromDcAsync_UnknownDc_ReturnsNull()
+    {
+        var sut = CreateSut();
+
+        var index = await sut.GetFlagIndexFromDcAsync("dc-does-not-exist", Guid.NewGuid());
+
+        Assert.Null(index);
+    }
+
+    [Fact]
+    public async Task GetFlagIndexFromDcAsync_WhenTheDcThrows_ReturnsNull()
+    {
+        _remote.Setup(s => s.GetFlagIndexAsync(It.IsAny<Guid>())).ThrowsAsync(new InvalidOperationException("boom"));
+        var sut = CreateSut();
+
+        var index = await sut.GetFlagIndexFromDcAsync(RemoteDcId, Guid.NewGuid());
+
+        Assert.Null(index);
+    }
+
+    [Fact]
+    public async Task GetSegmentIndexFromDcAsync_KnownDc_ReturnsThatDcsIndexOnly()
+    {
+        var envId = Guid.NewGuid();
+        var expected = new Dictionary<Guid, long> { [Guid.NewGuid()] = 1000 };
+        _remote.Setup(s => s.GetSegmentIndexAsync(envId)).ReturnsAsync(expected);
+        var sut = CreateSut();
+
+        var index = await sut.GetSegmentIndexFromDcAsync(RemoteDcId, envId);
+
+        Assert.Same(expected, index);
+        _local.Verify(s => s.GetSegmentIndexAsync(It.IsAny<Guid>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task IsFlagArchivedInDcAsync_AsksOnlyThatDc()
+    {
+        var id = Guid.NewGuid();
+        _remote.Setup(s => s.IsFlagArchivedAsync(id, ConsistencyMode.BestEffort)).ReturnsAsync(true);
+        var sut = CreateSut();
+
+        Assert.True(await sut.IsFlagArchivedInDcAsync(RemoteDcId, id, ConsistencyMode.BestEffort));
+        _local.Verify(s => s.IsFlagArchivedAsync(It.IsAny<Guid>(), It.IsAny<ConsistencyMode>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task IsSegmentArchivedInDcAsync_UnknownDc_ReturnsFalse()
+    {
+        var sut = CreateSut();
+
+        Assert.False(await sut.IsSegmentArchivedInDcAsync("dc-does-not-exist", Guid.NewGuid(), ConsistencyMode.BestEffort));
+    }
+
+    [Fact]
+    public async Task DeleteFlagFromDcAsync_DeletesFromThatDcOnly()
+    {
+        var envId = Guid.NewGuid();
+        var flagId = Guid.NewGuid();
+        var sut = CreateSut();
+
+        var deleted = await sut.DeleteFlagFromDcAsync(RemoteDcId, envId, flagId);
+
+        Assert.True(deleted);
+        _remote.Verify(s => s.DeleteFlagAsync(envId, flagId), Times.Once);
+        _local.Verify(s => s.DeleteFlagAsync(It.IsAny<Guid>(), It.IsAny<Guid>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task DeleteFlagFromDcAsync_WhenTheDcThrows_ReturnsFalse()
+    {
+        _remote.Setup(s => s.DeleteFlagAsync(It.IsAny<Guid>(), It.IsAny<Guid>()))
+            .ThrowsAsync(new InvalidOperationException("boom"));
+        var sut = CreateSut();
+
+        Assert.False(await sut.DeleteFlagFromDcAsync(RemoteDcId, Guid.NewGuid(), Guid.NewGuid()));
+    }
+
+    [Fact]
+    public async Task DeleteSegmentFromDcAsync_DeletesFromThatDcOnly()
+    {
+        ICollection<Guid> envIds = [Guid.NewGuid(), Guid.NewGuid()];
+        var segmentId = Guid.NewGuid();
+        var sut = CreateSut();
+
+        var deleted = await sut.DeleteSegmentFromDcAsync(RemoteDcId, envIds, segmentId);
+
+        Assert.True(deleted);
+        _remote.Verify(s => s.DeleteSegmentAsync(envIds, segmentId), Times.Once);
+        _local.Verify(s => s.DeleteSegmentAsync(It.IsAny<ICollection<Guid>>(), It.IsAny<Guid>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task DeleteSegmentFromDcAsync_UnknownDc_ReturnsFalse()
+    {
+        var sut = CreateSut();
+
+        Assert.False(await sut.DeleteSegmentFromDcAsync("dc-does-not-exist", [Guid.NewGuid()], Guid.NewGuid()));
+    }
+
+    [Fact]
+    public async Task GetFlagIndexAsync_ReadsFromLocalInstanceOnly()
+    {
+        var envId = Guid.NewGuid();
+        var expected = new Dictionary<Guid, long>();
+        _local.Setup(s => s.GetFlagIndexAsync(envId)).ReturnsAsync(expected);
+        var sut = CreateSut();
+
+        Assert.Same(expected, await sut.GetFlagIndexAsync(envId));
+        _remote.Verify(s => s.GetFlagIndexAsync(It.IsAny<Guid>()), Times.Never);
     }
 }

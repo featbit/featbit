@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Application.Caches;
+using Application.ControlPlane;
 using Domain.Environments;
 using Domain.FeatureFlags;
 using Domain.Organizations;
@@ -204,6 +205,165 @@ public class RedisCacheServiceTests : IntegrationTestBase, IAsyncLifetime
         await _sut.DeleteSecretAsync(secret);
 
         Assert.False(await _connection.GetDatabase().KeyExistsAsync(RedisKeys.Secret(secret.Value)));
+    }
+
+    [DockerFact]
+    public async Task GetFlagIndexAsync_FlagsListed_ReturnsEachIdWithItsScore()
+    {
+        var first = NewFlag();
+        first.Id = Guid.NewGuid();
+        var second = NewFlag(first.EnvId);
+        second.Id = Guid.NewGuid();
+        await _sut.UpsertFlagAsync(first);
+        await _sut.UpsertFlagAsync(second);
+
+        var index = await _sut.GetFlagIndexAsync(first.EnvId);
+
+        var db = _connection.GetDatabase();
+        Assert.Equal(2, index.Count);
+        Assert.Equal(
+            (long)(await db.SortedSetScoreAsync(RedisKeys.FlagIndex(first.EnvId), first.Id.ToString()))!.Value,
+            index[first.Id]);
+        Assert.True(index.ContainsKey(second.Id));
+    }
+
+    [DockerFact]
+    public async Task GetFlagIndexAsync_NothingListed_ReturnsEmpty()
+    {
+        var index = await _sut.GetFlagIndexAsync(Guid.NewGuid());
+
+        Assert.Empty(index);
+    }
+
+    /// <summary>
+    /// A segment that belongs to two environments is listed in the index of each.
+    /// </summary>
+    [DockerFact]
+    public async Task GetSegmentIndexAsync_SegmentListedInTwoEnvironments_ReturnsItForEach()
+    {
+        var envIds = new[] { Guid.NewGuid(), Guid.NewGuid() };
+        var segment = NewSegment();
+        segment.Id = Guid.NewGuid();
+        await _sut.UpsertSegmentAsync(envIds, segment);
+
+        foreach (var envId in envIds)
+        {
+            Assert.True((await _sut.GetSegmentIndexAsync(envId)).ContainsKey(segment.Id));
+        }
+    }
+
+    [DockerFact]
+    public async Task IsFlagArchivedAsync_ArchivedFlagIsCached_ReturnsTrue()
+    {
+        var flag = NewFlag();
+        flag.Id = Guid.NewGuid();
+        flag.IsArchived = true;
+        await _sut.UpsertFlagAsync(flag);
+
+        Assert.True(await _sut.IsFlagArchivedAsync(flag.Id, ConsistencyMode.BestEffort));
+    }
+
+    [DockerFact]
+    public async Task IsFlagArchivedAsync_FlagIsNotArchived_ReturnsFalse()
+    {
+        var flag = NewFlag();
+        flag.Id = Guid.NewGuid();
+        await _sut.UpsertFlagAsync(flag);
+
+        Assert.False(await _sut.IsFlagArchivedAsync(flag.Id, ConsistencyMode.BestEffort));
+    }
+
+    [DockerFact]
+    public async Task IsFlagArchivedAsync_NoValueIsCached_ReturnsFalse()
+    {
+        Assert.False(await _sut.IsFlagArchivedAsync(Guid.NewGuid(), ConsistencyMode.BestEffort));
+    }
+
+    [DockerFact]
+    public async Task IsFlagArchivedAsync_ValueCannotBeRead_ReturnsFalse()
+    {
+        var id = Guid.NewGuid();
+        await _connection.GetDatabase().StringSetAsync(RedisKeys.Flag(id), "not json");
+
+        Assert.False(await _sut.IsFlagArchivedAsync(id, ConsistencyMode.BestEffort));
+    }
+
+    [DockerFact]
+    public async Task IsFlagArchivedAsync_ArchivedFlagIsCommittedUnderGatedCommit_ReturnsTrue()
+    {
+        var flag = NewFlag();
+        flag.Id = Guid.NewGuid();
+        flag.IsArchived = true;
+        const long ts = 1000;
+        await _sut.StageFlagAsync(flag, ts);
+        await _sut.CommitFlagAsync(flag.EnvId, flag.Id.ToString(), ts);
+
+        Assert.True(await _sut.IsFlagArchivedAsync(flag.Id, ConsistencyMode.GatedCommit));
+    }
+
+    [DockerFact]
+    public async Task IsFlagArchivedAsync_RolledBackToBestEffort_ReadsThePlainValueNotTheStalePointer()
+    {
+        // A flag committed under GatedCommit, then archived after the switch back to BestEffort: the pointer
+        // still refers to the old, unarchived version while the plain value is current.
+        var flag = NewFlag();
+        flag.Id = Guid.NewGuid();
+        const long ts = 1000;
+        await _sut.StageFlagAsync(flag, ts);
+        await _sut.CommitFlagAsync(flag.EnvId, flag.Id.ToString(), ts);
+        flag.IsArchived = true;
+        await _sut.UpsertFlagAsync(flag);
+
+        Assert.True(await _sut.IsFlagArchivedAsync(flag.Id, ConsistencyMode.BestEffort));
+        Assert.False(await _sut.IsFlagArchivedAsync(flag.Id, ConsistencyMode.GatedCommit));
+    }
+
+    [DockerFact]
+    public async Task IsFlagArchivedAsync_GatedCommitButNoPointer_FallsBackToThePlainValue()
+    {
+        var flag = NewFlag();
+        flag.Id = Guid.NewGuid();
+        flag.IsArchived = true;
+        await _sut.UpsertFlagAsync(flag);
+
+        Assert.True(await _sut.IsFlagArchivedAsync(flag.Id, ConsistencyMode.GatedCommit));
+    }
+
+    [DockerFact]
+    public async Task IsSegmentArchivedAsync_RolledBackToBestEffort_ReadsThePlainValueNotTheStalePointer()
+    {
+        var envIds = new[] { Guid.NewGuid() };
+        var segment = NewSegment();
+        segment.Id = Guid.NewGuid();
+        const long ts = 1000;
+        await _sut.StageSegmentAsync(segment, ts);
+        await _sut.CommitSegmentAsync(envIds, segment.Id.ToString(), ts);
+        segment.IsArchived = true;
+        await _sut.UpsertSegmentAsync(envIds, segment);
+
+        Assert.True(await _sut.IsSegmentArchivedAsync(segment.Id, ConsistencyMode.BestEffort));
+        Assert.False(await _sut.IsSegmentArchivedAsync(segment.Id, ConsistencyMode.GatedCommit));
+    }
+
+    [DockerFact]
+    public async Task IsSegmentArchivedAsync_ArchivedSegmentIsCached_ReturnsTrue()
+    {
+        var segment = NewSegment();
+        segment.Id = Guid.NewGuid();
+        segment.IsArchived = true;
+        await _sut.UpsertSegmentAsync([Guid.NewGuid()], segment);
+
+        Assert.True(await _sut.IsSegmentArchivedAsync(segment.Id, ConsistencyMode.BestEffort));
+    }
+
+    [DockerFact]
+    public async Task IsSegmentArchivedAsync_SegmentIsNotArchived_ReturnsFalse()
+    {
+        var segment = NewSegment();
+        segment.Id = Guid.NewGuid();
+        await _sut.UpsertSegmentAsync([Guid.NewGuid()], segment);
+
+        Assert.False(await _sut.IsSegmentArchivedAsync(segment.Id, ConsistencyMode.BestEffort));
     }
 
     private static FeatureFlag NewFlag(Guid? envId = null)

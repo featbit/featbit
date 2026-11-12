@@ -1,4 +1,5 @@
 using Application.Caches;
+using Application.ControlPlane;
 using Domain.ControlPlane;
 using Domain.Environments;
 using Domain.FeatureFlags;
@@ -35,6 +36,16 @@ public class NoneCacheService : ICacheService
     public Task<bool> HasStagedSegmentAsync(Guid id, long ts) => Task.FromResult(false);
 
     public Task DeleteSegmentAsync(ICollection<Guid> envIds, Guid segmentId) => Task.CompletedTask;
+
+    public Task<IReadOnlyDictionary<Guid, long>> GetFlagIndexAsync(Guid envId) =>
+        Task.FromResult<IReadOnlyDictionary<Guid, long>>(new Dictionary<Guid, long>());
+
+    public Task<IReadOnlyDictionary<Guid, long>> GetSegmentIndexAsync(Guid envId) =>
+        Task.FromResult<IReadOnlyDictionary<Guid, long>>(new Dictionary<Guid, long>());
+
+    public Task<bool> IsFlagArchivedAsync(Guid id, ConsistencyMode mode) => Task.FromResult(false);
+
+    public Task<bool> IsSegmentArchivedAsync(Guid id, ConsistencyMode mode) => Task.FromResult(false);
 
     public Task UpsertLicenseAsync(Workspace workspace) => Task.CompletedTask;
 

@@ -182,7 +182,15 @@ public sealed class CacheReconciler : BackgroundService
             }
         }
 
-        if (newlyReachable.Count == 0)
+        // A backfill that pruned a DC may have left entries for later (too recent to remove yet, or in an index it
+        // could not read). Nothing else comes back for them while the DC stays connected, so a DC whose time has
+        // come gets a prune of its own, which needs a fresh snapshot but not a backfill. This is an in-memory check.
+        var duePrune = _backfiller.TakeDcsDueForPrune()
+            .Where(dcId => _lastConnected.TryGetValue(dcId, out var connected) && connected
+                           && newlyReachable.All(n => n.DcId != dcId))
+            .ToList();
+
+        if (newlyReachable.Count == 0 && duePrune.Count == 0)
         {
             // Idle tick: nothing newly reachable, so no snapshot fetch and no DB read this tick.
             return;
@@ -233,6 +241,23 @@ public sealed class CacheReconciler : BackgroundService
         foreach (var (dcId, isLocal) in newlyReachable)
         {
             await RunReconcileAsync(dcId, isLocal, snapshot, cancellationToken);
+        }
+
+        foreach (var dcId in duePrune)
+        {
+            try
+            {
+                await _backfiller.PruneDcAsync(dcId, _mode, snapshot, cancellationToken);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex, "Cache reconciler: pruning deleted entries from DC {DcId} failed; will retry later.", dcId);
+            }
         }
     }
 
