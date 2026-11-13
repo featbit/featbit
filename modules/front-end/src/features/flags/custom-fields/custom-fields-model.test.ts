@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest"
 import {
   copyDocumentation,
+  controlSchema,
   customFieldReviewChanges,
   documentationRows,
   normalizeCustomValues,
@@ -54,6 +55,77 @@ const target: DocumentationRecord = {
 
 describe("project custom fields", () => {
   beforeEach(() => localStorage.clear())
+  it("validates controlled multi-select values and compares them without depending on selection order", () => {
+    const list: CustomField = {
+      id: "apps",
+      key: "apps",
+      name: "Applications",
+      required: true,
+      controls: [
+        {
+          id: "values",
+          key: "values",
+          label: "Applications",
+          type: "list",
+          options: ["Web", "API"],
+        },
+      ],
+    }
+    expect(
+      controlSchema.safeParse({ ...list.controls[0], options: [] }).success
+    ).toBe(false)
+    expect(
+      controlSchema.safeParse({ ...list.controls[0], options: ["Web", "web"] })
+        .success
+    ).toBe(false)
+    expect(normalizeCustomValues([list], {})).toEqual({ apps: { values: [] } })
+    expect(validateCustomValues([list], { apps: { values: [] } })[0].code).toBe(
+      "requiredValue"
+    )
+    for (const values of [["Other"], ["Web", "Web"], "Web"])
+      expect(validateCustomValues([list], { apps: { values } })[0].code).toBe(
+        "invalidValue"
+      )
+    const selected: DocumentationRecord = {
+      ...source,
+      customFields: { apps: { values: ["Web", "API"] } },
+    }
+    const reordered: DocumentationRecord = {
+      ...target,
+      customFields: { apps: { values: ["API", "Web"] } },
+    }
+    expect(
+      documentationRows(selected, [list], reordered, [list])[1].different
+    ).toBe(false)
+    expect(
+      customFieldReviewChanges(
+        [list],
+        selected.customFields,
+        reordered.customFields
+      )
+    ).toEqual([])
+    const copied = copyDocumentation(
+      selected,
+      [list],
+      target,
+      [list],
+      new Set(["custom:apps"])
+    )
+    expect(copied.customFields.apps.values).toEqual(["API", "Web"])
+    const narrower = {
+      ...list,
+      controls: [{ ...list.controls[0], options: ["Web"] }],
+    }
+    expect(() =>
+      copyDocumentation(
+        selected,
+        [list],
+        target,
+        [narrower],
+        new Set(["custom:apps"])
+      )
+    ).toThrow("copyInvalidValue")
+  })
   it("validates all controls in a required group and treats zero and false as values", () => {
     expect(validateCustomValues([field], source.customFields)).toEqual([])
     expect(

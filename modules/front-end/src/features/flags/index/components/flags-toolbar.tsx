@@ -36,6 +36,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import type { Lang } from "@/features/layout/layout-types"
+import type { ReactNode } from "react"
 
 type Props = {
   lang: Lang
@@ -47,6 +48,8 @@ type Props = {
   archived: boolean
   selectedCount: number
   canCopySelected: boolean
+  customFieldFilters?: ReactNode
+  hasCustomFieldFilters?: boolean
   onSearchChange: (value: string) => void
   onTagsChange: (value: string[]) => void
   onStatusChange: (value: "all" | "on" | "off") => void
@@ -64,7 +67,8 @@ export function FlagsToolbar(props: Props) {
     props.search.trim() ||
     props.selectedTags.length ||
     props.status !== "all" ||
-    props.archived
+    props.archived ||
+    props.hasCustomFieldFilters
   )
   const visibleTags = props.selectedTags.slice(0, 2)
   const hiddenTagCount = props.selectedTags.length - visibleTags.length
@@ -175,6 +179,7 @@ export function FlagsToolbar(props: Props) {
           <Archive />
           {t("featureFlags.showArchived")}
         </Button>
+        {props.customFieldFilters}
         {filtersApplied ? (
           <Button type="button" variant="ghost" onClick={props.onClearFilters}>
             {t("featureFlags.clearFilters")}

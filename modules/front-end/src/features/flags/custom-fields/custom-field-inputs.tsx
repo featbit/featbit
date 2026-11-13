@@ -3,6 +3,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
+import { CustomListInput } from "./custom-list-input"
 import {
   DescriptionContent,
   DescriptionEditor,
@@ -72,13 +73,27 @@ export function CustomFieldInputs({
                   control={form.control}
                   name={path}
                   defaultValue={
-                    control.type === "checkbox"
-                      ? false
-                      : control.type === "number"
-                        ? null
-                        : ""
+                    control.type === "list"
+                      ? []
+                      : control.type === "checkbox"
+                        ? false
+                        : control.type === "number"
+                          ? null
+                          : ""
                   }
                   render={({ field: input }) => {
+                    if (control.type === "list")
+                      return (
+                        <CustomListInput
+                          id={id}
+                          options={control.options ?? []}
+                          value={Array.isArray(input.value) ? input.value : []}
+                          disabled={disabled}
+                          invalid={!!error}
+                          onChange={input.onChange}
+                          onBlur={input.onBlur}
+                        />
+                      )
                     if (control.type === "markdown")
                       return (
                         <DescriptionEditor

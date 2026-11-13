@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useSyncExternalStore } from "react"
 import { toast } from "sonner"
 import { useDocumentationCopy } from "../documentation/use-documentation-copy"
-import type { CustomField } from "./custom-fields-model"
+import { customFieldSchema, type CustomField } from "./custom-fields-model"
 import {
   customFieldsChangedEvent,
   customFieldsStorageKey,
@@ -50,6 +50,10 @@ export function useProjectCustomFields(
   function saveField(field: CustomField | null, removedId?: string) {
     if (!canConfigure) {
       toast.error(t("projectPermission"))
+      return false
+    }
+    if (field && !customFieldSchema.safeParse(field).success) {
+      toast.error(t("invalidValue"))
       return false
     }
     const latest = readCustomFieldsProject(projectId)

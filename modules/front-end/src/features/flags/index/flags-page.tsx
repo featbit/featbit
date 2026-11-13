@@ -23,7 +23,6 @@ import {
   archiveFeatureFlag,
   cloneFeatureFlag,
   createFeatureFlag,
-  fetchFeatureFlags,
   fetchFeatureFlagTags,
   fetchFlagEnvironmentSettings,
   isFeatureFlagKeyUsed,
@@ -52,6 +51,9 @@ import {
 import { FlagsPagination } from "../components/flags-pagination"
 import { FlagsTable } from "./components/flags-table"
 import { FlagsToolbar } from "./components/flags-toolbar"
+import { CustomFieldFilters } from "./components/custom-field-filters"
+import { useCustomFieldFilters } from "../custom-fields/use-custom-field-filters"
+import { fetchCustomFilteredFlags } from "./custom-filtered-flags"
 
 function positiveInt(
   value: string | null,
@@ -81,6 +83,10 @@ export function FlagsPage() {
   > & { settings?: { flagSortedBy?: "created_at" | "key" } }
   const projectEnv = getCurrentProjectEnv()
   const envId = projectEnv?.envId ?? ""
+  const customFilters = useCustomFieldFilters(
+    projectEnv?.projectId ?? "",
+    envId
+  )
   const envRn = environmentRn({
     projectKey: projectEnv?.projectKey ?? "",
     environmentKey: projectEnv?.envKey ?? "",
@@ -150,17 +156,25 @@ export function FlagsPage() {
       pageIndex,
       pageSize,
       organization?.settings?.flagSortedBy,
+      customFilters.applied,
+      customFilters.applied.length ? customFilters.records : null,
     ],
     queryFn: () =>
-      fetchFeatureFlags(envId, {
-        name: debouncedSearch,
-        tags: selectedTags,
-        isEnabled: status === "all" ? undefined : status === "on",
-        isArchived: archived,
-        sortBy: organization?.settings?.flagSortedBy ?? "created_at",
-        pageIndex,
-        pageSize,
-      }),
+      fetchCustomFilteredFlags(
+        envId,
+        {
+          name: debouncedSearch,
+          tags: selectedTags,
+          isEnabled: status === "all" ? undefined : status === "on",
+          isArchived: archived,
+          sortBy: organization?.settings?.flagSortedBy ?? "created_at",
+          pageIndex,
+          pageSize,
+        },
+        customFilters.applied,
+        customFilters.controls,
+        customFilters.records
+      ),
     enabled: Boolean(envId),
     placeholderData: (previous) => previous,
   })
@@ -356,6 +370,7 @@ export function FlagsPage() {
   }
   function clearFilters() {
     setSearch("")
+    customFilters.setFilters([])
     updateParams({ name: null, tags: null, status: null, archived: null }, true)
   }
   function requirePermission(
@@ -405,6 +420,17 @@ export function FlagsPage() {
           archived={archived}
           selectedCount={selectedCount}
           canCopySelected={canCopySelected}
+          hasCustomFieldFilters={customFilters.filters.length > 0}
+          customFieldFilters={
+            <CustomFieldFilters
+              controls={customFilters.controls}
+              filters={customFilters.filters}
+              onChange={(filters) => {
+                customFilters.setFilters(filters)
+                updateParams({ page: null }, true)
+              }}
+            />
+          }
           onSearchChange={setSearch}
           onTagsChange={(tags) =>
             updateParams({ tags: tags.length ? tags.join(",") : null }, true)
@@ -443,7 +469,10 @@ export function FlagsPage() {
             loading={listQuery.isLoading && !listQuery.data}
             archived={archived}
             hasFilters={Boolean(
-              debouncedSearch || selectedTags.length || status !== "all"
+              debouncedSearch ||
+              selectedTags.length ||
+              status !== "all" ||
+              customFilters.applied.length
             )}
             selectedIds={selectedIds}
             mutatingId={

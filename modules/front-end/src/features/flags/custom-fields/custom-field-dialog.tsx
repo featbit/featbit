@@ -12,6 +12,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
+import { CustomListOptions } from "./custom-list-options"
 import {
   DocSelect,
   FieldError,
@@ -74,6 +75,14 @@ export function CustomFieldDialog({
       return
     }
     const id = field?.id ?? crypto.randomUUID()
+    if (
+      controls.some(
+        (control) => control.type === "list" && !control.options?.length
+      )
+    ) {
+      setError(t("listOptionsRequired"))
+      return
+    }
     if (
       onSave({
         id,
@@ -210,6 +219,19 @@ export function CustomFieldDialog({
                     />
                   </div>
                 </div>
+                {control.type === "list" ? (
+                  <CustomListOptions
+                    id={control.id}
+                    options={control.options ?? []}
+                    onChange={(options) =>
+                      setControls(
+                        controls.map((item) =>
+                          item.id === control.id ? { ...item, options } : item
+                        )
+                      )
+                    }
+                  />
+                ) : null}
               </div>
             ))}
           </div>

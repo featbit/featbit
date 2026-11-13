@@ -9,13 +9,30 @@ export const controlTypes = [
   "number",
   "checkbox",
   "markdown",
+  "list",
 ] as const
-export const controlSchema = z.object({
-  id: z.string().min(1),
-  key: z.string().min(1),
-  label: z.string().trim().min(1),
-  type: z.enum(controlTypes),
-})
+export const controlSchema = z
+  .object({
+    id: z.string().min(1),
+    key: z.string().min(1),
+    label: z.string().trim().min(1),
+    type: z.enum(controlTypes),
+    options: z.array(z.string().trim().min(1)).optional(),
+  })
+  .superRefine((control, context) => {
+    if (control.type !== "list") return
+    const options = control.options ?? []
+    if (
+      !options.length ||
+      new Set(options.map((option) => option.toLowerCase())).size !==
+        options.length
+    )
+      context.addIssue({
+        code: "custom",
+        path: ["options"],
+        message: "invalidListOptions",
+      })
+  })
 export const customFieldSchema = z.object({
   id: z.string().min(1),
   key: z.string().min(1),
@@ -25,10 +42,19 @@ export const customFieldSchema = z.object({
 })
 export type CustomField = z.infer<typeof customFieldSchema>
 export type CustomControl = z.infer<typeof controlSchema>
-export type ControlValue = string | number | boolean | null
+export type ControlValue = string | number | boolean | string[] | null
 export const customValuesSchema = z.record(
   z.string(),
-  z.record(z.string(), z.union([z.string(), z.number(), z.boolean(), z.null()]))
+  z.record(
+    z.string(),
+    z.union([
+      z.string(),
+      z.number(),
+      z.boolean(),
+      z.array(z.string()),
+      z.null(),
+    ])
+  )
 )
 export type CustomFieldValues = z.infer<typeof customValuesSchema>
 export type FlagSettingsFormValues = FlagSettingsValues & {
@@ -45,7 +71,13 @@ export function newControl(
   label: string
 ): CustomControl {
   const id = crypto.randomUUID()
-  return { id, key: id, type, label }
+  return {
+    id,
+    key: id,
+    type,
+    label,
+    ...(type === "list" ? { options: [] } : {}),
+  }
 }
 
 export function normalizeCustomValues(
@@ -58,14 +90,18 @@ export function normalizeCustomValues(
       Object.fromEntries(
         field.controls.map((control) => {
           const value = values[field.id]?.[control.id]
+          if (control.type === "list" && Array.isArray(value))
+            return [control.id, [...value].sort()]
           return [
             control.id,
             value ??
-              (control.type === "checkbox"
-                ? false
-                : control.type === "number"
-                  ? null
-                  : ""),
+              (control.type === "list"
+                ? []
+                : control.type === "checkbox"
+                  ? false
+                  : control.type === "number"
+                    ? null
+                    : ""),
           ]
         })
       ),
@@ -88,7 +124,9 @@ export function validateCustomValues(
         values[field.id]?.[control.id] ??
         (control.type === "checkbox" ? false : null)
       const empty =
-        value === null || (typeof value === "string" && !value.trim())
+        value === null ||
+        (typeof value === "string" && !value.trim()) ||
+        (control.type === "list" && Array.isArray(value) && !value.length)
       if (empty)
         return field.required
           ? [
@@ -100,13 +138,18 @@ export function validateCustomValues(
             ]
           : []
       const valid =
-        control.type === "number"
-          ? typeof value === "number" && Number.isFinite(value)
-          : control.type === "checkbox"
-            ? typeof value === "boolean"
-            : control.type === "datetime"
-              ? typeof value === "string" && Number.isFinite(Date.parse(value))
-              : typeof value === "string"
+        control.type === "list"
+          ? Array.isArray(value) &&
+            new Set(value).size === value.length &&
+            value.every((option) => control.options?.includes(option))
+          : control.type === "number"
+            ? typeof value === "number" && Number.isFinite(value)
+            : control.type === "checkbox"
+              ? typeof value === "boolean"
+              : control.type === "datetime"
+                ? typeof value === "string" &&
+                  Number.isFinite(Date.parse(value))
+                : typeof value === "string"
       return valid
         ? []
         : [{ fieldId: field.id, controlId: control.id, code: "invalidValue" }]
@@ -120,6 +163,8 @@ export function controlText(
   locale = "en"
 ): string {
   if (control.type === "checkbox") return String(value ?? false)
+  if (control.type === "list")
+    return Array.isArray(value) ? value.join(", ") : ""
   if (value === null || value === undefined || value === "") return ""
   if (
     control.type === "datetime" &&
