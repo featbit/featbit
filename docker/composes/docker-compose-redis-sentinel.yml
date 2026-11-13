@@ -25,6 +25,7 @@ services:
       context: ./modules/back-end
       dockerfile: ./deploy/Dockerfile
     environment:
+      - Jwt__Key=${JWT_KEY:?set JWT_KEY to a random secret of at least 32 bytes, e.g. openssl rand -base64 32}
       - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
       - MongoDb__Database=featbit
       - Redis__ConnectionString=redis-sentinel-1:26379,redis-sentinel-2:26379,redis-sentinel-3:26379,serviceName=mymaster,defaultDatabase=1,ssl=false,user=featbit

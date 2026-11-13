@@ -17,6 +17,7 @@ services:
   api-server:
     image: featbit/featbit-api-server:latest
     environment:
+      - Jwt__Key=${JWT_KEY:?set JWT_KEY to a random secret of at least 32 bytes, e.g. openssl rand -base64 32}
       - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
       - MongoDb__Database=featbit
       - Redis__ConnectionString=redis:6379

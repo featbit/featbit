@@ -17,6 +17,11 @@ spec:
     spec:
       containers:
         - env:
+            - name: Jwt__Key
+              valueFrom:
+                secretKeyRef:
+                  name: featbit-api-jwt
+                  key: key
             - name: IS_PRO
               value: "true"
             - name: Kafka__BootstrapServers

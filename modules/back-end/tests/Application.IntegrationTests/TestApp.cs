@@ -1,5 +1,6 @@
 using System.Net.Http.Headers;
 using System.Net.Mime;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Application.Caches;
@@ -20,8 +21,12 @@ namespace Application.IntegrationTests;
 
 public class TestApp : WebApplicationFactory<Program>
 {
+    private static readonly string JwtKey = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        builder.UseSetting("Jwt:Key", JwtKey);
+
         builder.ConfigureServices(collection =>
         {
             var passwordHasher = new ServiceDescriptor(

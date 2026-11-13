@@ -7,7 +7,7 @@
 
 ## Build & Run
 
-1. `cd ./featbit`
+1. `cd ./featbit` and create the API's JWT signing key once: `grep -qs '^JWT_KEY=' .env || printf '\nJWT_KEY=%s\n' "$(openssl rand -base64 32)" >> .env`
 2. `docker-compose -f .\docker-compose-dev.yml up -d api`
 3. run `docker inspect --format '{{json .State}}' featbit-mongodb-dev | jq` to check mongodb's status
 4. run `docker inspect --format '{{json .State.Health}}' featbit-api-dev | jq` to check api service's health status
@@ -52,7 +52,7 @@ basic requirements of the application itself i.e. can they respond to an HTTP re
 |-----------------|-----------------|--------------------------|
 | `Jwt__Issuer`   | JWT Issuer Name | `"featbit"`              |
 | `Jwt__Audience` | JWT Audience    | `"featbit-api"`          |
-| `Jwt__Key`      | JWT Private Key | `"featbit-identity-key"` |
+| `Jwt__Key`      | **Required.** Secret JWT signing key, at least 32 bytes (e.g. `openssl rand -base64 32`). The API refuses to start without it | none |
 
 ### MongoDB
 

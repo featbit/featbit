@@ -13,6 +13,11 @@ This directory contains these compose files for development purposes, including
 > You should run these compose files from the root directory and include the --project-diretory argument, for
 > example: `docker compose --project-directory . -f ./docker/composes/docker-compose-dev.yml up --build -d`
 
+> **Note**
+> The api-server requires a secret JWT signing key, read from `JWT_KEY` in the `.env` file of the root directory.
+> Create it once and keep it across restarts:
+> `grep -qs '^JWT_KEY=' .env || printf '\nJWT_KEY=%s\n' "$(openssl rand -base64 32)" >> .env`
+
 ### SSO Setup
 
 ```bash

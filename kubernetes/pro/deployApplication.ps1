@@ -15,6 +15,13 @@ if (-not (kubectl get namespaces $namespace -o name)) {
 
 kubectl config set-context --current --namespace=$namespace
 
+# the api-server needs a secret JWT signing key: create a random one unless the secret already exists
+if (-not (kubectl get secret featbit-api-jwt -o name --ignore-not-found)) {
+    $jwtKeyBytes = New-Object byte[] 32
+    [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($jwtKeyBytes)
+    kubectl create secret generic featbit-api-jwt --from-literal=key=$([Convert]::ToBase64String($jwtKeyBytes))
+}
+
 kubectl apply -f .\application\api-server-service.yaml  
 
 kubectl apply -f .\application\api-server-deployment.yaml

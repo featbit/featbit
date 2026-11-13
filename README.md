@@ -86,8 +86,11 @@ To self-host FeatBit with Docker, Run this script:
 ```
 git clone https://github.com/featbit/featbit
 cd featbit
+grep -qs '^JWT_KEY=' .env || printf '\nJWT_KEY=%s\n' "$(openssl rand -base64 32)" >> .env
 docker compose up -d
 ```
+
+The API server signs sessions with `JWT_KEY` and refuses to start without it, so keep the `.env` file (and the same key) across restarts and upgrades.
 
 Once all containers have started, you can access FeatBit's portal at [http://localhost:8081](http://localhost:8081) and log in with the default credentials:
 

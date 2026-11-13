@@ -7,7 +7,9 @@ using Api.Swagger;
 using Application.Services;
 using Domain.Workspaces;
 using Domain.Identity;
+using Domain.Users;
 using Infrastructure;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Infrastructure.License;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
@@ -66,6 +68,17 @@ public static class ServicesRegister
 
         // authentication
         var jwtOption = builder.Configuration.GetSection(JwtOptions.Jwt);
+        var jwtKey = jwtOption["Key"];
+        if (string.IsNullOrWhiteSpace(jwtKey) ||
+            Encoding.UTF8.GetByteCount(jwtKey) < 32 ||
+            jwtKey == "featbit-identity-key-must-longer-than-32-characters")
+        {
+            throw new InvalidOperationException(
+                "Jwt:Key (env Jwt__Key) must be set to a secret random value of at least 32 bytes, " +
+                "e.g. the output of `openssl rand -base64 32`. The previously published default key is not allowed."
+            );
+        }
+
         builder.Services.Configure<JwtOptions>(jwtOption);
         builder.Services
             .AddAuthentication(options =>
@@ -99,7 +112,29 @@ public static class ServicesRegister
                     ValidAudience = jwtOption["Audience"],
 
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOption["Key"]!))
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+                };
+
+                // reject tokens that do not belong to an existing user of the workspace named in the token
+                options.Events = new JwtBearerEvents
+                {
+                    OnTokenValidated = async context =>
+                    {
+                        var principal = context.Principal!;
+                        if (!Guid.TryParse(principal.FindFirst(UserClaims.Id)?.Value, out var userId) ||
+                            !Guid.TryParse(principal.FindFirst(UserClaims.WorkspaceId)?.Value, out var workspaceId))
+                        {
+                            context.Fail("invalid-token");
+                            return;
+                        }
+
+                        var userService = context.HttpContext.RequestServices.GetRequiredService<IUserService>();
+                        var user = await userService.FindOneAsync(x => x.Id == userId && x.WorkspaceId == workspaceId);
+                        if (user == null)
+                        {
+                            context.Fail("invalid-token");
+                        }
+                    }
                 };
             })
             .AddOpenApi(Schemes.OpenApi);

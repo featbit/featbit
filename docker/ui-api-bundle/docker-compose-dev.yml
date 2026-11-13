@@ -8,6 +8,7 @@ services:
       context: ../../
       dockerfile: ./docker/ui-api-bundle/Dockerfile
     environment:
+      - Jwt__Key=${JWT_KEY:?set JWT_KEY to a random secret of at least 32 bytes, e.g. openssl rand -base64 32}
       - DEMO_URL=http://localhost:5173
       - EVALUATION_URL=http://localhost:5100
     depends_on:

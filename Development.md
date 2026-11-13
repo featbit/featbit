@@ -22,6 +22,9 @@ launch these two services from the code.
 ## Setup dependencies
 
 ```bash
+# docker-compose.yml requires JWT_KEY (the api-server's JWT signing key), even when starting other services
+grep -qs '^JWT_KEY=' .env || printf '\nJWT_KEY=%s\n' "$(openssl rand -base64 32)" >> .env
+
 # run mongodb and redis containers
 docker compose up -d mongodb redis
 
@@ -38,6 +41,9 @@ Wait until those services are successfully launched, and we're ready to run API 
 
 The API project is built with [.NET 6](https://dotnet.microsoft.com/en-us/download/dotnet/6.0), make sure you have the
 latest .NET 6.0 SDK installed before you start.
+
+The API refuses to start without a JWT signing key of at least 32 bytes, so set the `Jwt__Key` environment variable
+first, e.g. `export Jwt__Key=$(openssl rand -base64 32)` (PowerShell: `$env:Jwt__Key = "<random 32+ byte value>"`).
 
 Navigate to **modules/back-end/src/Api** folder and run `dotnet run`, then the swagger should be available
 at [http://localhost:5000/swagger](http://localhost:5000/swagger).

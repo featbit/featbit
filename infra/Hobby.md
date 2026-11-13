@@ -21,6 +21,9 @@ git clone https://github.com/featbit/featbit.git
 
 cd featbit/
 
+# the api-server needs a secret JWT signing key; keep this .env file across restarts and upgrades
+grep -qs '^JWT_KEY=' .env || printf '\nJWT_KEY=%s\n' "$(openssl rand -base64 32)" >> .env
+
 docker compose up -d
 ```
 

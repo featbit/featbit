@@ -25,6 +25,7 @@ services:
       context: ./modules/back-end
       dockerfile: ./deploy/Dockerfile
     environment:
+      - Jwt__Key=${JWT_KEY:?set JWT_KEY to a random secret of at least 32 bytes, e.g. openssl rand -base64 32}
       - SSOEnabled=true
     depends_on:
       - mongodb

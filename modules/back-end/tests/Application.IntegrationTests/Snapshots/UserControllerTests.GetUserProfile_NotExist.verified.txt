@@ -1,19 +1,16 @@
 ﻿{
-  Status: 404 Not Found,
+  Status: 401 Unauthorized,
   Headers: {
-    api-supported-versions: 1.0,
-    Cache-Control: no-store, no-cache,
-    Pragma: no-cache
+    WWW-Authenticate: Bearer
   },
   Content: {
     Headers: {
-      Content-Type: application/json; charset=utf-8,
-      Expires: -1
+      Content-Type: application/json; charset=utf-8
     },
     Value: {
       data: null,
       errors: [
-        ResourceNotFound
+        Unauthorized
       ],
       success: false
     }

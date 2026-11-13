@@ -21,6 +21,8 @@ A working Kubernetes Cluster such as
 - The manifests in the ingress folder are provided as a convenience and assume that traefik is installed and properly configured.  As such configurations are highly custom, we cannot support your specific configuration.  If you need help with traefik, please seek support from that community and their documentation.
 
 
+- The api-server reads its JWT signing key from the `featbit-api-jwt` secret (key `key`). deployApplication.ps1 creates a random one if it does not exist; otherwise create it before deploying, e.g. `kubectl create secret generic featbit-api-jwt -n featbit --from-literal=key=$(openssl rand -base64 32)`.
+
 **Instructions**
 
 *For Powershell*:

@@ -13,8 +13,14 @@ If you have MongoDB, Redis and DA-Server running as Docker containers, you can u
 application:
 
 ```powershell
+# generate a secret JWT signing key (keep it to reuse across restarts, or sessions are invalidated)
+$jwtKeyBytes = New-Object byte[] 32
+[Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($jwtKeyBytes)
+$jwtKey = [Convert]::ToBase64String($jwtKeyBytes)
+
 docker run -d `
 -p 8081:80 `
+-e Jwt__Key="$jwtKey" `
 -e MongoDb__ConnectionString="mongodb://admin:password@host.docker.internal:27017" `
 -e MongoDb__Database="featbit" `
 -e Redis__ConnectionString="host.docker.internal:6379" `
@@ -27,5 +33,6 @@ docker run -d `
 
 ```powershell
 cd featbit
-docker compose -f ./docker/ui-api-bundle/docker-compose-dev.yml up -d
+# reads JWT_KEY from the .env file in the repository root (see the root README)
+docker compose --env-file .env -f ./docker/ui-api-bundle/docker-compose-dev.yml up -d
 ```

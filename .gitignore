@@ -18,3 +18,5 @@ benchmark/k6-scripts/test-results/
 
 #Ignore IntelliJ IDEA files
 .idea/
+# local docker compose secrets (e.g. JWT_KEY)
+/.env

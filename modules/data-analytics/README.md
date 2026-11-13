@@ -11,6 +11,8 @@ We recommend you to run it via:
 ```bash
 git clone https://github.com/featbit/featbit.git
 cd featbit/
+# docker-compose.yml requires JWT_KEY (the api-server's JWT signing key), even when starting other services
+grep -qs '^JWT_KEY=' .env || printf '\nJWT_KEY=%s\n' "$(openssl rand -base64 32)" >> .env
 docker compose up da-server -d
 ```
 

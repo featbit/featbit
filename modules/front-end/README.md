@@ -25,6 +25,7 @@ The FeatBit UI provides features for managing and updating feature flags, users,
 
 Usually, you should run UI along with all other services by running in the root of the repository :
 ```
+grep -qs '^JWT_KEY=' .env || printf '\nJWT_KEY=%s\n' "$(openssl rand -base64 32)" >> .env
 docker compose -f ./docker-compse.yml up -d
 ```
 The UI will be available at http://localhost:8081

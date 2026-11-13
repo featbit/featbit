@@ -58,5 +58,7 @@ Then you need to **install the CA certificate `localCA.crt` to your system**.
 
 ```bash
 cd /featbit
+# the api-server needs a secret JWT signing key (JWT_KEY in .env); keep this .env file across restarts
+grep -qs '^JWT_KEY=' .env || printf '\nJWT_KEY=%s\n' "$(openssl rand -base64 32)" >> .env
 docker compose --project-directory . -f ./docker/https/docker-compose-dev.yml up -d
 ```
