@@ -53,7 +53,7 @@ public class OnFeatureFlagChangedHandler(
     ICacheService cache,
     IAuditLogService auditLogService,
     IWebhookHandler webhookHandler,
-    IFeatureFlagChangePublisher featureFlagChangePublisher,
+    IFeatureFlagChangePublisher changePublisher,
     IConfiguration configuration)
     : INotificationHandler<OnFeatureFlagChanged>
 {
@@ -72,7 +72,7 @@ public class OnFeatureFlagChangedHandler(
         await flagRevisionService.AddOneAsync(revision);
 
         // publish feature flag change message
-        await featureFlagChangePublisher.PublishAsync(notification);
+        await changePublisher.PublishAsync(notification);
 
         if (!configuration.UseControlPlane())
         {

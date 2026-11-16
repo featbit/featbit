@@ -5,10 +5,13 @@ namespace Application.FeatureFlags;
 
 public interface IFeatureFlagChangePublisher
 {
+    /// <summary>
+    /// Publishes a feature flag change message.
+    /// </summary>
     Task PublishAsync(OnFeatureFlagChanged notification);
 
     /// <summary>
-    /// Tells every datacenter that the flag was deleted, so each removes it from its own Redis.
+    /// Publishes a feature flag deletion message.
     /// </summary>
     Task PublishDeletedAsync(Guid envId, Guid flagId);
 }
@@ -20,7 +23,7 @@ public class DirectFeatureFlagChangePublisher(IMessageProducer messageProducer) 
         await messageProducer.PublishAsync(Topics.FeatureFlagChange, notification.Flag);
     }
 
-    // Without the control plane there is a single Redis, which the delete handler has already updated.
+    // no-op for now
     public Task PublishDeletedAsync(Guid envId, Guid flagId) => Task.CompletedTask;
 }
 

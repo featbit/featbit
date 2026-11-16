@@ -35,39 +35,27 @@ public class OnFeatureFlagDeleted : INotification
     }
 }
 
-public class OnFeatureFlagDeletedHandler : INotificationHandler<OnFeatureFlagDeleted>
+public class OnFeatureFlagDeletedHandler(
+    ICacheService cache,
+    IAuditLogService auditLogService,
+    IWebhookHandler webhookHandler,
+    IFeatureFlagChangePublisher changePublisher)
+    : INotificationHandler<OnFeatureFlagDeleted>
 {
-    private readonly ICacheService _cache;
-    private readonly IAuditLogService _auditLogService;
-    private readonly IWebhookHandler _webhookHandler;
-    private readonly IFeatureFlagChangePublisher _changePublisher;
-
-    public OnFeatureFlagDeletedHandler(
-        ICacheService cache,
-        IAuditLogService auditLogService,
-        IWebhookHandler webhookHandler,
-        IFeatureFlagChangePublisher changePublisher)
-    {
-        _cache = cache;
-        _auditLogService = auditLogService;
-        _webhookHandler = webhookHandler;
-        _changePublisher = changePublisher;
-    }
-
     public async Task Handle(OnFeatureFlagDeleted notification, CancellationToken cancellationToken)
     {
         // write audit log
-        await _auditLogService.AddOneAsync(notification.GetAuditLog());
+        await auditLogService.AddOneAsync(notification.GetAuditLog());
 
         // delete cache
         var envId = notification.Flag.EnvId;
         var flagId = notification.Flag.Id;
-        await _cache.DeleteFlagAsync(envId, flagId);
+        await cache.DeleteFlagAsync(envId, flagId);
 
         // handle webhooks
-        _ = _webhookHandler.HandleAsync(notification.Flag, notification.DataChange, notification.OperatorId);
+        _ = webhookHandler.HandleAsync(notification.Flag, notification.DataChange, notification.OperatorId);
 
-        // the other datacenters delete it too; last, so that a failure to publish does not skip the webhooks
-        await _changePublisher.PublishDeletedAsync(envId, flagId);
+        // publish flag deletion message
+        await changePublisher.PublishDeletedAsync(envId, flagId);
     }
 }

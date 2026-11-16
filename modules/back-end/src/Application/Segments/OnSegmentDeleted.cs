@@ -35,48 +35,29 @@ public class OnSegmentDeleted : INotification
     }
 }
 
-public class OnSegmentDeletedHandler : INotificationHandler<OnSegmentDeleted>
+public class OnSegmentDeletedHandler(
+    ICacheService cache,
+    IAuditLogService auditLogService,
+    IWebhookHandler webhookHandler,
+    ISegmentService segmentService,
+    ISegmentChangePublisher changePublisher)
+    : INotificationHandler<OnSegmentDeleted>
 {
-    private readonly ICacheService _cache;
-    private readonly IAuditLogService _auditLogService;
-    private readonly IWebhookHandler _webhookHandler;
-    private readonly ISegmentService _segmentService;
-    private readonly ISegmentChangePublisher _changePublisher;
-
-    public OnSegmentDeletedHandler(
-        ICacheService cache,
-        IAuditLogService auditLogService,
-        IWebhookHandler webhookHandler,
-        ISegmentService segmentService,
-        ISegmentChangePublisher changePublisher)
-    {
-        _cache = cache;
-        _auditLogService = auditLogService;
-        _webhookHandler = webhookHandler;
-        _segmentService = segmentService;
-        _changePublisher = changePublisher;
-    }
-
-    /// <summary>
-    /// Writes the audit log, deletes the segment from the local cache and dispatches the webhooks of every environment it
-    /// belongs to. The delete is published last, so that the other datacenters remove the segment too and a failure to
-    /// publish does not skip the webhooks.
-    /// </summary>
     public async Task Handle(OnSegmentDeleted notification, CancellationToken cancellationToken)
     {
         // write audit log
-        await _auditLogService.AddOneAsync(notification.GetAuditLog());
+        await auditLogService.AddOneAsync(notification.GetAuditLog());
 
         var segment = notification.Segment;
-        var envIds = await _segmentService.GetEnvironmentIdsAsync(segment);
+        var envIds = await segmentService.GetEnvironmentIdsAsync(segment);
 
         // delete cache
-        await _cache.DeleteSegmentAsync(envIds, segment.Id);
+        await cache.DeleteSegmentAsync(envIds, segment.Id);
 
         // handle webhooks
         foreach (var envId in envIds)
         {
-            _ = _webhookHandler.HandleAsync(
+            _ = webhookHandler.HandleAsync(
                 envId,
                 notification.Segment,
                 notification.DataChange,
@@ -84,7 +65,7 @@ public class OnSegmentDeletedHandler : INotificationHandler<OnSegmentDeleted>
             );
         }
 
-        // the other datacenters delete it too; last, so that a failure to publish does not skip the webhooks
-        await _changePublisher.PublishDeletedAsync(envIds, segment.Id);
+        // publish segment deletion message
+        await changePublisher.PublishDeletedAsync(envIds, segment.Id);
     }
 }

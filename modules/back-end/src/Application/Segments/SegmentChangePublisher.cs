@@ -8,10 +8,13 @@ namespace Application.Segments;
 
 public interface ISegmentChangePublisher
 {
+    /// <summary>
+    /// Publishes a segment change message.
+    /// </summary>
     Task PublishAsync(OnSegmentChange notification);
 
     /// <summary>
-    /// Tells every datacenter that the segment was deleted, so each removes it from its own Redis.
+    /// Publishes a segment deletion message.
     /// </summary>
     Task PublishDeletedAsync(ICollection<Guid> envIds, Guid segmentId);
 }
@@ -43,7 +46,7 @@ public class DirectSegmentChangePublisher(
         }
     }
 
-    // Without the control plane there is a single Redis, which the delete handler has already updated.
+    // no-op for now
     public Task PublishDeletedAsync(ICollection<Guid> envIds, Guid segmentId) => Task.CompletedTask;
 }
 
