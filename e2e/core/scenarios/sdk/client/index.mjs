@@ -18,6 +18,8 @@ export async function testClientSdk(stack) {
       for (const [index, role] of ['tester', 'guest'].entries()) {
         console.log(`[sdk-client] Initializing ${role} browser session`);
         const context = await browser.newContext();
+        // The localhost probe connects to the ELS on 127.0.0.1.
+        await context.grantPermissions(['local-network-access'], { origin: stack.ui });
         const page = await context.newPage();
         const errors = [];
         page.on('pageerror', error => errors.push(error.message));

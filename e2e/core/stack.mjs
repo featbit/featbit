@@ -176,17 +176,32 @@ export async function initDbs(stack) {
   }
 }
 
-export async function waitFor(label, fn, timeout = 90_000) {
+export async function waitFor(label, fn, timeout = 90_000, { interval = 1000, onRetry } = {}) {
   const deadline = Date.now() + timeout;
   let last;
+  let attempt = 0;
   while (Date.now() < deadline) {
-    try { return await fn(); } catch (error) {
+    let timer;
+    try {
+      // A pending promise (and AbortSignal.timeout) does not keep Node alive.
+      // This referenced timer also bounds callbacks that never settle.
+      return await Promise.race([
+        Promise.resolve().then(fn),
+        new Promise((_, reject) => {
+          timer = setTimeout(() => reject(new Error('Operation did not settle before the deadline')), deadline - Date.now());
+        }),
+      ]);
+    } catch (error) {
       if (error?.retryable === false) throw error;
       last = error;
+      onRetry?.(error, ++attempt);
+    } finally {
+      clearTimeout(timer);
     }
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    const remaining = deadline - Date.now();
+    if (remaining > 0) await new Promise(resolve => setTimeout(resolve, Math.min(interval, remaining)));
   }
-  throw new Error(`${label} timed out: ${last?.message}`);
+  throw new Error(`${label} timed out: ${last?.message}`, { cause: last });
 }
 
 export async function workspaceId(stack) {
@@ -198,15 +213,39 @@ export async function workspaceId(stack) {
     'print(db.getSiblingDB("featbit").Workspaces.findOne()._id.toUUID().toString().match(/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}/i)[0])']);
 }
 
-export async function ready(stack) {
-  for (const base of [stack.api, stack.els]) await waitFor(base, async () => {
-    const response = await fetch(`${base}/health/readiness`, { signal: AbortSignal.timeout(5000) });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-  });
-  await waitFor(stack.ui, async () => {
-    const response = await fetch(`${stack.ui}/health`, { signal: AbortSignal.timeout(5000) });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-  });
+export async function ready(stack, { timeout = 90_000, requestTimeout = 5000, interval = 1000 } = {}) {
+  for (const url of [`${stack.api}/health/readiness`, `${stack.els}/health/readiness`, `${stack.ui}/health`]) {
+    const deadline = Date.now() + timeout;
+    await waitFor(url, async () => {
+      const controller = new AbortController();
+      let timer;
+      try {
+        await Promise.race([
+          (async () => {
+            const response = await fetch(url, { signal: controller.signal });
+            // Drain the body before reusing the connection, including error responses.
+            await response.text();
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          })(),
+          new Promise((_, reject) => {
+            timer = setTimeout(() => {
+              const error = new Error(`Request timed out after ${requestTimeout}ms`);
+              reject(error);
+              controller.abort(error);
+            }, Math.max(1, Math.min(requestTimeout, deadline - Date.now())));
+          }),
+        ]);
+      } finally {
+        clearTimeout(timer);
+        controller.abort();
+      }
+    }, timeout, { interval, onRetry: (error, attempt) => {
+      const cause = error.cause;
+      console.warn(`[readiness] ${url}: attempt ${attempt} failed: ${error.message}`
+        + (cause ? ` (${cause.code ?? cause.name}: ${cause.message})` : ''));
+    } });
+    console.log(`[readiness] ${url}: ready`);
+  }
 }
 
 export async function logs(stack) {
