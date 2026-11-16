@@ -27,7 +27,6 @@ public static class RowSerializer
         writer.WriteBoolean("isEnabled", (bool)row["is_enabled"]);
         writer.WriteString("disabledVariationId", row["disabled_variation_id"] as string);
         writer.WriteJsonString("fallthrough", row["fallthrough"] as string);
-        writer.WriteBoolean("exptIncludeAllTargets", (bool)row["expt_include_all_targets"]);
         writer.WriteBoolean(
             "insightsEnabled",
             !row.TryGetValue("insights_enabled", out var insightsEnabled) || insightsEnabled is not false

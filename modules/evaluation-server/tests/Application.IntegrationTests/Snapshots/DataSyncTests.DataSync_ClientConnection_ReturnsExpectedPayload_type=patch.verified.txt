@@ -20,7 +20,6 @@
             value: false
           }
         ],
-        sendToExperiment: true,
         insightsEnabled: false,
         timestamp: 1674885485421
       }

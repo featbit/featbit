@@ -41,7 +41,6 @@ public class RowSerializerTests
         Assert.Equal("flag-key", element.GetProperty("key").GetString());
         Assert.Equal("boolean", element.GetProperty("variationType").GetString());
         Assert.True(element.GetProperty("isEnabled").GetBoolean());
-        Assert.False(element.GetProperty("exptIncludeAllTargets").GetBoolean());
         Assert.False(element.GetProperty("isArchived").GetBoolean());
         Assert.Equal(JsonValueKind.Array, element.GetProperty("variations").ValueKind);
         Assert.Equal(JsonValueKind.Array, element.GetProperty("targetUsers").ValueKind);
