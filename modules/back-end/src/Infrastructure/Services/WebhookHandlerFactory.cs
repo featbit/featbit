@@ -28,7 +28,8 @@ internal static class WebhookHandlerFactory
             {
                 throw new InvalidOperationException(
                     $"{AllowedHostsSetting} has the entry '{host}', which is not a host name. " +
-                    "List the name only, without a scheme, port, path or wildcard.");
+                    "List the name only, without a scheme, port, path or wildcard."
+                );
             }
         }
 
@@ -53,7 +54,9 @@ internal static class WebhookHandlerFactory
             catch (FormatException ex)
             {
                 throw new InvalidOperationException(
-                    $"{AllowedAddressesSetting} has the entry '{address}', which is not an IP address or CIDR range.", ex);
+                    $"{AllowedAddressesSetting} has the entry '{address}', which is not an IP address or CIDR range.",
+                    ex
+                );
             }
         }
 
@@ -95,7 +98,8 @@ internal static class WebhookHandlerFactory
         {
             throw new InvalidOperationException(
                 $"{setting} must be given as one comma-separated value, and not as indexed keys such as " +
-                $"{setting.Replace(":", "__")}__0.");
+                $"{setting.Replace(":", "__")}__0."
+            );
         }
 
         return (configuration[setting] ?? string.Empty)
