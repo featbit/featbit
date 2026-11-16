@@ -57,6 +57,7 @@ function ResourceSelectionHarness({
 
 describe("ResourceSelection", () => {
   beforeEach(() => {
+    Element.prototype.scrollIntoView = vi.fn()
     mocks.fetchAccessTokenResources.mockReset()
     mocks.fetchAccessTokenResources.mockResolvedValue([
       {
@@ -88,6 +89,15 @@ describe("ResourceSelection", () => {
     )
 
     fireEvent.click(await screen.findByText("Production segment"))
+    expect(onChange).not.toHaveBeenCalled()
+    fireEvent.keyDown(searchInput, { key: "Escape" })
+    fireEvent.click(screen.getByRole("button", { name: "Add resource" }))
+    expect(
+      await screen.findByRole("option", { name: /Production segment/ })
+    ).toHaveAttribute("data-checked", "false")
+    fireEvent.click(await screen.findByText("Production segment"))
+    expect(onChange).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole("button", { name: "Done" }))
     expect(onChange).toHaveBeenCalledWith(["project/store:segment/production"])
   })
 
@@ -225,6 +235,8 @@ describe("ResourceSelection", () => {
 
       fireEvent.click(screen.getByRole("button", { name: "Apply" }))
 
+      expect(onChange).not.toHaveBeenCalled()
+      fireEvent.click(await screen.findByRole("button", { name: "Done" }))
       await waitFor(() => expect(onChange).toHaveBeenCalledWith([expectedRn]))
       expect(onSubmit).not.toHaveBeenCalled()
     }

@@ -31,18 +31,19 @@ function ResourcePickerPopover({
   resourceType,
   resources,
   onChange,
-  onAddCustomRn,
   children,
 }: {
   portalContainer: RefObject<HTMLDivElement | null>
   resourceType: ResourceType
   resources: string[]
   onChange: (resources: string[]) => void
-  onAddCustomRn?: () => void
   children: ReactElement
 }) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
+  const [draft, setDraft] = useState(resources)
+  const [addingCustomRn, setAddingCustomRn] = useState(false)
+  const canAddCustomRn = isEditableResourceType(resourceType)
   const [search, setSearch] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
 
@@ -59,95 +60,149 @@ function ResourcePickerPopover({
   })
 
   function selectResource(resource: PolicyResource) {
-    onChange(
-      resources.includes(resource.rn)
-        ? resources.filter((item) => item !== resource.rn)
-        : [...resources, resource.rn]
+    setDraft(
+      draft.includes(resource.rn)
+        ? draft.filter((item) => item !== resource.rn)
+        : [...draft, resource.rn]
     )
   }
 
+  const options = [...(resourcesQuery.data ?? [])]
+  for (const rn of draft) {
+    if (!options.some((resource) => resource.rn === rn)) {
+      options.push({
+        id: rn,
+        rn,
+        name: resourcePathLabel(rn),
+        type: resourceType,
+      })
+    }
+  }
+
   return (
-    <Popover
-      open={open}
-      onOpenChange={(nextOpen) => {
-        setOpen(nextOpen)
-        if (nextOpen) setSearch("")
-      }}
-    >
-      <PopoverTrigger render={children} />
-      <StablePopoverContent
-        portalContainer={portalContainer}
-        align="start"
-        className="w-96 p-0"
+    <>
+      <Popover
+        open={open}
+        onOpenChange={(nextOpen) => {
+          setOpen(nextOpen)
+          if (nextOpen) {
+            setSearch("")
+            setDraft(resources)
+          }
+        }}
       >
-        <Command shouldFilter={false}>
-          <CommandInput
-            value={search}
-            onValueChange={setSearch}
-            placeholder={t("accessTokens.permissions.searchResources")}
-          />
-          <CommandList>
-            {resourcesQuery.isFetching ? (
-              <div className="flex items-center justify-center gap-2 py-8 text-sm text-muted-foreground">
-                <LoaderCircle className="size-4 animate-spin" />
-                {t("accessTokens.permissions.loadingResources")}
-              </div>
-            ) : null}
-            {!resourcesQuery.isFetching ? (
-              <CommandEmpty>
-                {t("accessTokens.permissions.noResources")}
-              </CommandEmpty>
-            ) : null}
-            <CommandGroup
-              heading={t("accessTokens.permissions.availableResources")}
-            >
-              {(resourcesQuery.data ?? []).map((resource) => {
-                const selected = resources.includes(resource.rn)
-                return (
-                  <CommandItem
-                    key={resource.rn}
-                    value={resource.rn}
-                    data-checked={selected}
-                    onSelect={() => selectResource(resource)}
-                  >
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate">{resource.name}</span>
-                      <span className="block truncate font-mono text-xs text-muted-foreground">
-                        {resource.rn}
-                      </span>
-                    </span>
-                  </CommandItem>
-                )
-              })}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-        <div
-          className={cn(
-            "flex items-center border-t p-2",
-            onAddCustomRn ? "justify-between" : "justify-end"
-          )}
+        <PopoverTrigger render={children} />
+        <StablePopoverContent
+          portalContainer={portalContainer}
+          align="start"
+          className="w-96 p-0"
         >
-          {onAddCustomRn ? (
+          <Command shouldFilter={false}>
+            <CommandInput
+              value={search}
+              onValueChange={setSearch}
+              placeholder={t("accessTokens.permissions.searchResources")}
+            />
+            <CommandList>
+              {resourcesQuery.isFetching ? (
+                <div className="flex items-center justify-center gap-2 py-8 text-sm text-muted-foreground">
+                  <LoaderCircle className="size-4 animate-spin" />
+                  {t("accessTokens.permissions.loadingResources")}
+                </div>
+              ) : null}
+              {!resourcesQuery.isFetching ? (
+                <CommandEmpty>
+                  {t("accessTokens.permissions.noResources")}
+                </CommandEmpty>
+              ) : null}
+              <CommandGroup
+                heading={t("accessTokens.permissions.availableResources")}
+              >
+                {options
+                  .filter((resource) =>
+                    `${resource.name} ${resource.rn}`
+                      .toLowerCase()
+                      .includes(search.trim().toLowerCase())
+                  )
+                  .map((resource) => {
+                    const selected = draft.includes(resource.rn)
+                    return (
+                      <CommandItem
+                        key={resource.rn}
+                        value={resource.rn}
+                        data-checked={selected}
+                        onSelect={() => selectResource(resource)}
+                      >
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate">
+                            {resource.name}
+                          </span>
+                          <span className="block truncate font-mono text-xs text-muted-foreground">
+                            {resource.rn}
+                          </span>
+                        </span>
+                      </CommandItem>
+                    )
+                  })}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+          <div
+            className={cn(
+              "flex items-center border-t p-2",
+              canAddCustomRn ? "justify-between" : "justify-end"
+            )}
+          >
+            {canAddCustomRn ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setOpen(false)
+                  setAddingCustomRn(true)
+                }}
+              >
+                <Plus className="size-3.5" />
+                {t("accessTokens.permissions.addCustomRn")}
+              </Button>
+            ) : null}
             <Button
               type="button"
-              variant="outline"
               size="sm"
               onClick={() => {
+                onChange(draft)
                 setOpen(false)
-                onAddCustomRn()
               }}
             >
-              <Plus className="size-3.5" />
-              {t("accessTokens.permissions.addCustomRn")}
+              {t("accessTokens.permissions.done")}
             </Button>
-          ) : null}
-          <Button type="button" size="sm" onClick={() => setOpen(false)}>
-            {t("accessTokens.permissions.done")}
-          </Button>
-        </div>
-      </StablePopoverContent>
-    </Popover>
+          </div>
+        </StablePopoverContent>
+      </Popover>
+      {addingCustomRn && canAddCustomRn ? (
+        <ResourceRnEditorDialog
+          open
+          resourceType={resourceType}
+          rn={RESOURCE_PATTERNS[resourceType]}
+          selectedResources={draft}
+          onOpenChange={(nextOpen) => {
+            if (!nextOpen) {
+              setAddingCustomRn(false)
+              setOpen(true)
+            }
+          }}
+          onApply={(rn) => {
+            setDraft((current) =>
+              current.includes(rn) ? current : [...current, rn]
+            )
+            setSearch("")
+            setAddingCustomRn(false)
+            setOpen(true)
+          }}
+        />
+      ) : null}
+    </>
   )
 }
 
@@ -168,7 +223,7 @@ export function ResourceSelection({
 }) {
   const { t } = useTranslation()
   const [editingResource, setEditingResource] = useState<{
-    originalRn?: string
+    originalRn: string
     rn: string
   } | null>(null)
   const canEditResourceRn = isEditableResourceType(resourceType)
@@ -187,14 +242,6 @@ export function ResourceSelection({
             resourceType={resourceType}
             resources={resources}
             onChange={onChange}
-            onAddCustomRn={
-              canEditResourceRn
-                ? () =>
-                    setEditingResource({
-                      rn: RESOURCE_PATTERNS[resourceType],
-                    })
-                : undefined
-            }
           >
             <Button type="button" variant="outline" size="sm">
               <Plus className="size-3.5" />
@@ -290,11 +337,9 @@ export function ResourceSelection({
           }}
           onApply={(nextRn) => {
             onChange(
-              editingResource.originalRn
-                ? resources.map((resource) =>
-                    resource === editingResource.originalRn ? nextRn : resource
-                  )
-                : [...resources, nextRn]
+              resources.map((resource) =>
+                resource === editingResource.originalRn ? nextRn : resource
+              )
             )
             setEditingResource(null)
           }}

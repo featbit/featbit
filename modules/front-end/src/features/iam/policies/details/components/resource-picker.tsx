@@ -1,4 +1,4 @@
-import { Globe2, ListChecks } from "lucide-react"
+import { Globe2, ListChecks, Plus } from "lucide-react"
 import { useEffect, useId, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useQueryClient } from "@tanstack/react-query"
@@ -57,7 +57,7 @@ export function ResourcePicker({
   const [options, setOptions] = useState<PolicyResource[]>([])
   const [draft, setDraft] = useState<string[]>(resources)
   const [editingResource, setEditingResource] = useState<{
-    name: string
+    originalRn?: string
     rn: string
   } | null>(null)
 
@@ -109,14 +109,14 @@ export function ResourcePicker({
 
   const selectedResources = useMemo(
     () =>
-      draft.map((rn) => {
+      resources.map((rn) => {
         const matchedOption = options.find((item) => item.rn === rn)
         return {
           rn,
           name: resolvedResourceDisplayName(rn, matchedOption?.name),
         }
       }),
-    [draft, options]
+    [resources, options]
   )
 
   function changeMode(next: ScopeMode) {
@@ -139,22 +139,27 @@ export function ResourcePicker({
   }
 
   function removeSelected(rn: string) {
-    updateDraft(draft.filter((item) => item !== rn))
+    onChange(resources.filter((item) => item !== rn))
   }
 
   function updateDraft(next: string[]) {
     setDraft(next)
     if (next.length === 0) setFilter("all")
-    onChange(next)
   }
 
   function updateResourceRn(nextRn: string) {
     if (!editingResource) return
-    updateDraft(
+    const update = editingResource.originalRn ? onChange : updateDraft
+    update(
       nextRn === generalPattern
         ? [generalPattern]
-        : draft.map((rn) => (rn === editingResource.rn ? nextRn : rn))
+        : editingResource.originalRn
+          ? resources.map((rn) =>
+              rn === editingResource.originalRn ? nextRn : rn
+            )
+          : [...draft, nextRn]
     )
+    if (!editingResource.originalRn) setOpen(true)
     setEditingResource(null)
   }
 
@@ -272,7 +277,7 @@ export function ResourcePicker({
               heading={t(
                 "iam.policies.details.permissionsEditor.selectedResourcesHeading",
                 {
-                  count: draft.length,
+                  count: resources.length,
                   type: selectedResourceType,
                 }
               )}
@@ -291,7 +296,9 @@ export function ResourcePicker({
                   { name: resource.name }
                 )
               }
-              onEdit={setEditingResource}
+              onEdit={(resource) =>
+                setEditingResource({ originalRn: resource.rn, rn: resource.rn })
+              }
               removeLabel={(resource) =>
                 t(
                   "iam.policies.details.permissionsEditor.removeSelectedResource",
@@ -374,16 +381,32 @@ export function ResourcePicker({
                 />
               </Command>
               <div className="flex items-center justify-between border-t p-2">
+                {isEditableResourceType(resourceType) ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={disabled}
+                    onClick={() => {
+                      setOpen(false)
+                      setEditingResource({ rn: generalPattern })
+                    }}
+                  >
+                    <Plus className="size-3.5" />
+                    {t("iam.policies.details.permissionsEditor.addCustomRn")}
+                  </Button>
+                ) : null}
                 <Button
                   type="button"
-                  variant="ghost"
                   size="sm"
-                  onClick={() => updateDraft([])}
-                  disabled={!draft.length}
+                  className="ml-auto"
+                  onClick={() => {
+                    onChange(
+                      draft.includes(generalPattern) ? [generalPattern] : draft
+                    )
+                    setOpen(false)
+                  }}
                 >
-                  {t("iam.policies.details.permissionsEditor.clearAll")}
-                </Button>
-                <Button type="button" size="sm" onClick={() => setOpen(false)}>
                   {t("iam.policies.details.permissionsEditor.done")}
                 </Button>
               </div>
@@ -394,9 +417,12 @@ export function ResourcePicker({
               open
               resourceType={resourceType}
               rn={editingResource.rn}
-              selectedResources={draft}
+              selectedResources={editingResource.originalRn ? resources : draft}
               onOpenChange={(nextOpen) => {
-                if (!nextOpen) setEditingResource(null)
+                if (!nextOpen) {
+                  if (!editingResource.originalRn) setOpen(true)
+                  setEditingResource(null)
+                }
               }}
               onApply={updateResourceRn}
             />

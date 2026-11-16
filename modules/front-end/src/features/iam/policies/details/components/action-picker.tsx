@@ -32,6 +32,7 @@ export function ActionPicker({
   const { t } = useTranslation()
   const modeDescriptionId = useId()
   const [open, setOpen] = useState(false)
+  const [draft, setDraft] = useState(statement.actions)
   const [filter, setFilter] = useState<SelectionFilter>("all")
   const [search, setSearch] = useState("")
   const available = actionsForStatement(statement).filter(
@@ -52,7 +53,7 @@ export function ActionPicker({
     const query = search.trim().toLowerCase()
     const filtered =
       filter === "selected"
-        ? available.filter((item) => statement.actions.includes(item.name))
+        ? available.filter((item) => draft.includes(item.name))
         : available
     if (!query) return filtered
     return filtered.filter((item) =>
@@ -68,13 +69,13 @@ export function ActionPicker({
   }
 
   function toggle(name: string) {
-    const next = statement.actions.includes(name)
-      ? statement.actions.filter((item) => item !== name)
+    const next = draft.includes(name)
+      ? draft.filter((item) => item !== name)
       : name === "*"
         ? ["*"]
-        : [...statement.actions.filter((item) => item !== "*"), name]
+        : [...draft.filter((item) => item !== "*"), name]
     if (next.length === 0) setFilter("all")
-    onChange(next)
+    setDraft(next)
   }
 
   function changeMode(next: ActionMode) {
@@ -171,7 +172,10 @@ export function ActionPicker({
           open={open}
           onOpenChange={(nextOpen) => {
             setOpen(nextOpen)
-            if (nextOpen) setFilter("all")
+            if (nextOpen) {
+              setDraft(statement.actions)
+              setFilter("all")
+            }
           }}
         >
           <SelectedItemsField
@@ -194,7 +198,9 @@ export function ActionPicker({
                 name: action.label,
               })
             }
-            onRemove={(action) => toggle(action.name)}
+            onRemove={(action) =>
+              onChange(statement.actions.filter((name) => name !== action.name))
+            }
             isItemDisabled={(action) => action.locked}
             disabled={disabled}
             invalid={invalid}
@@ -220,13 +226,13 @@ export function ActionPicker({
                     count,
                   })
                 }
-                selectedCount={statement.actions.length}
+                selectedCount={draft.length}
               />
               <SelectableCommandList
                 items={visible}
                 getKey={(item) => item.name}
                 getValue={(item) => item.name}
-                isSelected={(item) => statement.actions.includes(item.name)}
+                isSelected={(item) => draft.includes(item.name)}
                 isDisabled={(item) =>
                   Boolean(item.fineGrained && !fineGrainedGranted)
                 }
@@ -269,20 +275,15 @@ export function ActionPicker({
                 }}
               />
             </Command>
-            <div className="flex items-center justify-between border-t p-2">
+            <div className="flex items-center justify-end border-t p-2">
               <Button
                 type="button"
-                variant="ghost"
                 size="sm"
                 onClick={() => {
-                  setFilter("all")
-                  onChange([])
+                  onChange(draft)
+                  setOpen(false)
                 }}
-                disabled={!statement.actions.length}
               >
-                {t("iam.policies.details.permissionsEditor.clearAll")}
-              </Button>
-              <Button type="button" size="sm" onClick={() => setOpen(false)}>
                 {t("iam.policies.details.permissionsEditor.done")}
               </Button>
             </div>

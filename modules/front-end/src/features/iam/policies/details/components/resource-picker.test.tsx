@@ -31,6 +31,218 @@ beforeAll(() => {
 })
 
 describe("ResourcePicker", () => {
+  it.each([
+    {
+      resourceType: "project" as const,
+      label: "Project",
+      anyLabel: "Any project",
+      rn: "project/shop",
+    },
+    {
+      resourceType: "env" as const,
+      label: "Environment",
+      anyLabel: "Any environment",
+      rn: "project/*:env/production",
+    },
+  ])(
+    "adds a custom $resourceType RN only after Done",
+    async ({ resourceType, label, anyLabel, rn }) => {
+      mocks.fetchPolicyResourceOptions.mockResolvedValue([])
+      const onChange = vi.fn()
+      render(
+        <QueryClientProvider client={new QueryClient()}>
+          <ResourcePicker
+            resourceType={resourceType}
+            resources={[]}
+            onChange={onChange}
+          />
+        </QueryClientProvider>
+      )
+      fireEvent.click(screen.getByRole("button", { name: "Manage" }))
+      fireEvent.click(screen.getByRole("button", { name: "Add custom RN" }))
+      await waitFor(() =>
+        expect(screen.getByRole("button", { name: "Apply" })).toBeEnabled()
+      )
+      expect(screen.queryByLabelText("Tags")).not.toBeInTheDocument()
+      fireEvent.click(screen.getByRole("checkbox", { name: anyLabel }))
+      await waitFor(() =>
+        expect(screen.getByRole("button", { name: "Apply" })).toBeDisabled()
+      )
+      fireEvent.change(screen.getByLabelText(label), {
+        target: { value: resourceType === "project" ? "shop" : "production" },
+      })
+      await waitFor(() =>
+        expect(screen.getByRole("button", { name: "Apply" })).toBeEnabled()
+      )
+      expect(screen.getByLabelText("Resulting resource RN")).toHaveValue(rn)
+      fireEvent.click(screen.getByRole("button", { name: "Apply" }))
+      expect(onChange).not.toHaveBeenCalled()
+      fireEvent.click(await screen.findByRole("button", { name: "Done" }))
+      expect(onChange).toHaveBeenCalledWith([rn])
+    }
+  )
+
+  it("keeps selections pending until Done and discards dismissed changes", async () => {
+    const flag = {
+      ...resource,
+      rn: "project/shop:env/prod:flag/checkout",
+      type: "flag",
+    }
+    mocks.fetchPolicyResourceOptions.mockResolvedValue([flag])
+    const onChange = vi.fn()
+    function Harness() {
+      const [resources, setResources] = useState<string[]>([])
+      return (
+        <ResourcePicker
+          resourceType="flag"
+          resources={resources}
+          onChange={(next) => {
+            setResources(next)
+            onChange(next)
+          }}
+        />
+      )
+    }
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <Harness />
+      </QueryClientProvider>
+    )
+    fireEvent.click(screen.getByRole("button", { name: "Manage" }))
+    fireEvent.click(await screen.findByRole("option", { name: /Production/ }))
+    expect(onChange).not.toHaveBeenCalled()
+    expect(
+      screen.queryByRole("button", { name: /Edit resource name for checkout/ })
+    ).not.toBeInTheDocument()
+    fireEvent.keyDown(screen.getByPlaceholderText(/Search resources/), {
+      key: "Escape",
+    })
+    fireEvent.click(screen.getByRole("button", { name: "Manage" }))
+    expect(
+      screen.getByRole("tab", { name: "Selected (0)" })
+    ).toBeInTheDocument()
+    fireEvent.click(await screen.findByRole("option", { name: /Production/ }))
+    fireEvent.click(screen.getByRole("button", { name: "Done" }))
+    expect(onChange).toHaveBeenLastCalledWith([flag.rn])
+    expect(
+      screen.getByRole("button", { name: /Edit resource name for/ })
+    ).toBeInTheDocument()
+  })
+
+  it.each(["flag", "segment"] as const)(
+    "adds, validates, edits and removes a custom %s RN",
+    async (resourceType) => {
+      mocks.fetchPolicyResourceOptions.mockResolvedValue([])
+      const queryClient = new QueryClient()
+      const onChange = vi.fn()
+      const existingRn = `project/shop:env/prod:${resourceType}/existing`
+      const customRn = `project/*:env/*:${resourceType}/checkout;beta`
+
+      function Harness() {
+        const [resources, setResources] = useState([existingRn])
+        return (
+          <ResourcePicker
+            resourceType={resourceType}
+            resources={resources}
+            onChange={(next) => {
+              setResources(next)
+              onChange(next)
+            }}
+          />
+        )
+      }
+
+      render(
+        <QueryClientProvider client={queryClient}>
+          <Harness />
+        </QueryClientProvider>
+      )
+
+      async function openCustomEditor() {
+        fireEvent.click(screen.getByRole("button", { name: "Manage" }))
+        fireEvent.click(
+          await screen.findByRole("button", { name: "Add custom RN" })
+        )
+        await screen.findByRole("heading", { name: "Edit resource scope (RN)" })
+        await waitFor(() =>
+          expect(screen.getByRole("button", { name: "Apply" })).toBeEnabled()
+        )
+      }
+
+      async function enterCustomRn() {
+        const label = resourceType === "flag" ? "Feature flag" : "Segment"
+        fireEvent.click(
+          screen.getByRole("checkbox", {
+            name: resourceType === "flag" ? "Any feature flag" : "Any segment",
+          })
+        )
+        await waitFor(() =>
+          expect(screen.getByRole("button", { name: "Apply" })).toBeDisabled()
+        )
+        fireEvent.change(screen.getByLabelText(label), {
+          target: { value: "checkout" },
+        })
+        fireEvent.change(screen.getByLabelText("Tags"), {
+          target: { value: "beta" },
+        })
+        await waitFor(() =>
+          expect(screen.getByLabelText("Resulting resource RN")).toHaveValue(
+            customRn
+          )
+        )
+      }
+
+      await openCustomEditor()
+      fireEvent.click(screen.getByRole("button", { name: "Cancel" }))
+      expect(onChange).not.toHaveBeenCalled()
+      fireEvent.click(screen.getByRole("button", { name: "Done" }))
+      onChange.mockClear()
+
+      await openCustomEditor()
+      await enterCustomRn()
+      await waitFor(() =>
+        expect(screen.getByRole("button", { name: "Apply" })).toBeEnabled()
+      )
+      fireEvent.click(screen.getByRole("button", { name: "Apply" }))
+      expect(onChange).not.toHaveBeenCalled()
+      expect(
+        screen.queryByRole("button", {
+          name: /Edit resource name for checkout/,
+        })
+      ).not.toBeInTheDocument()
+      fireEvent.click(await screen.findByRole("button", { name: "Done" }))
+      await waitFor(() =>
+        expect(onChange).toHaveBeenLastCalledWith([existingRn, customRn])
+      )
+      expect(screen.getByText(customRn)).toBeInTheDocument()
+
+      await openCustomEditor()
+      await enterCustomRn()
+      expect(screen.getByRole("button", { name: "Apply" })).toBeDisabled()
+      fireEvent.click(screen.getByRole("button", { name: "Cancel" }))
+      fireEvent.click(screen.getByRole("button", { name: "Done" }))
+
+      fireEvent.click(
+        screen.getByRole("button", { name: /Edit resource name for checkout/ })
+      )
+      fireEvent.change(screen.getByLabelText("Tags"), {
+        target: { value: "release" },
+      })
+      await waitFor(() =>
+        expect(screen.getByRole("button", { name: "Apply" })).toBeEnabled()
+      )
+      fireEvent.click(screen.getByRole("button", { name: "Apply" }))
+      await waitFor(() =>
+        expect(onChange).toHaveBeenLastCalledWith([
+          existingRn,
+          customRn.replace(";beta", ";release"),
+        ])
+      )
+      fireEvent.click(screen.getByRole("button", { name: /Remove.*checkout/ }))
+      expect(onChange).toHaveBeenLastCalledWith([existingRn])
+    }
+  )
+
   it("returns to all resources after removing the last selected resource", async () => {
     mocks.fetchPolicyResourceOptions.mockResolvedValue([resource])
     const queryClient = new QueryClient({
