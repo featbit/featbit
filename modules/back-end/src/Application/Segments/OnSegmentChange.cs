@@ -56,7 +56,7 @@ public class OnSegmentChangeHandler(
     ICacheService cache,
     IAuditLogService auditLogService,
     IWebhookHandler webhookHandler,
-    ISegmentChangePublisher segmentChangePublisher,
+    ISegmentChangePublisher changePublisher,
     IConfiguration configuration)
     : INotificationHandler<OnSegmentChange>
 {
@@ -71,7 +71,7 @@ public class OnSegmentChangeHandler(
         // update cache
         await cache.UpsertSegmentAsync(envIds, segment);
 
-        await segmentChangePublisher.PublishAsync(notification);
+        await changePublisher.PublishAsync(notification);
 
         if (!configuration.UseControlPlane())
         {
