@@ -12,6 +12,6 @@
   },
   "devDependencies": {
     "@featbit/js-client-sdk": "4.3.6",
-    "@playwright/test": "1.56.1"
+    "@playwright/test": "1.65.1"
   }
 }
