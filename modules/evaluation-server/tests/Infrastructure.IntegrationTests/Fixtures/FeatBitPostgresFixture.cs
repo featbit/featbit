@@ -16,6 +16,8 @@ namespace Infrastructure.IntegrationTests.Fixtures;
 /// the <c>create database featbit</c> bootstrap statement to the default
 /// <c>postgres</c> database — everything else (table DDL, constraints,
 /// indexes, ALTERs across versions) runs verbatim.
+/// After initialization, the fixture applies the separately deployed migration
+/// that removes the obsolete experiment column.
 /// </summary>
 public sealed class FeatBitPostgresFixture : IAsyncLifetime
 {
@@ -49,6 +51,12 @@ public sealed class FeatBitPostgresFixture : IAsyncLifetime
         }.ToString();
 
         await ApplyInitScriptsAsync(bootstrapConnStr);
+
+        // Production deploys this migration separately from the init scripts.
+        // Apply it here too so tests exercise the migrated schema on a clean checkout.
+        await using var conn = new NpgsqlConnection(ConnectionString);
+        await conn.OpenAsync();
+        await ExecuteAsync(conn, "ALTER TABLE feature_flags DROP COLUMN IF EXISTS expt_include_all_targets;");
     }
 
     public async Task DisposeAsync()
