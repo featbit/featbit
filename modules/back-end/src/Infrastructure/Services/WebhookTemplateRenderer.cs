@@ -6,11 +6,13 @@ using HandlebarsDotNet.IO;
 
 namespace Infrastructure.Services;
 
-internal static class LegacyWebhookTemplateData
+internal static class WebhookTemplateRenderer
 {
     public static string Render(string template, Dictionary<string, object> source)
     {
-        var data = ForRendering(template, source);
+        var data = PrepareLegacyCompatibilityData(template, source);
+        // Returning the original object means no legacy defaults were needed;
+        // preserve the existing global Handlebars rendering behavior.
         if (ReferenceEquals(data, source)) return Handlebars.Compile(template)(source);
 
         // Keep booleans false for conditionals, but emit JSON-compatible lowercase text.
@@ -23,8 +25,9 @@ internal static class LegacyWebhookTemplateData
 
     // Only explicitly referenced legacy properties are supplied, and only in a
     // private rendering copy. New templates and persisted flag data stay unchanged.
-    private static Dictionary<string, object> ForRendering(string template, Dictionary<string, object> source)
+    private static Dictionary<string, object> PrepareLegacyCompatibilityData(string template, Dictionary<string, object> source)
     {
+        // Inspect Handlebars expressions rather than plain JSON property names.
         var references = Regex.Matches(template, @"\{\{[^{}]*\}\}")
             .Select(match => match.Value).ToArray();
         bool References(string name) => references.Any(expression =>
@@ -33,6 +36,7 @@ internal static class LegacyWebhookTemplateData
         var allTargets = References("exptIncludeAllTargets");
         var included = References("includedInExpt");
         var rollout = References("exptRollout");
+        // Unaffected templates and non-flag events keep the original rendering context.
         if ((!allTargets && !included && !rollout) ||
             !source.TryGetValue("data", out var value) ||
             value is not Dictionary<string, object> data ||
@@ -41,8 +45,11 @@ internal static class LegacyWebhookTemplateData
             return source;
         }
 
+        // Deep-copy the flag before adding defaults so shared event data is never mutated.
         var flag = (Dictionary<string, object>)Copy(
             JsonSerializer.SerializeToElement(data["object"], ReusableJsonSerializerOptions.Web));
+        // Detection is by field name, not full path: a referenced nested field is
+        // supplied on every existing rule/fallthrough at its original schema location.
         if (allTargets) flag.TryAdd("exptIncludeAllTargets", false);
         if (flag.TryGetValue("rules", out var rules) && rules is object[] ruleArray)
         {
@@ -51,11 +58,13 @@ internal static class LegacyWebhookTemplateData
         if (flag.TryGetValue("fallthrough", out var fallthrough) &&
             fallthrough is Dictionary<string, object> defaultRule) AddRuleDefaults(defaultRule);
 
+        // Replace only the flag in shallow copies of the outer context dictionaries.
         return new Dictionary<string, object>(source)
         {
             ["data"] = new Dictionary<string, object>(data) { ["object"] = flag }
         };
 
+        // Fill missing legacy values only; preserve any values already present.
         void AddRuleDefaults(Dictionary<string, object> rule)
         {
             if (included) rule.TryAdd("includedInExpt", false);

@@ -37,7 +37,7 @@ public class WebhookSender : IWebhookSender
         JsonDocument jsonDocument;
         try
         {
-            payload = LegacyWebhookTemplateData.Render(webhook.PayloadTemplate, dataObject);
+            payload = WebhookTemplateRenderer.Render(webhook.PayloadTemplate, dataObject);
             jsonDocument = JsonDocument.Parse(payload);
         }
         catch (Exception ex)
