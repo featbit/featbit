@@ -483,14 +483,12 @@ public class FeatureFlagMcpToolsTests
         {
             TargetUsers = [],
             Rules = [],
-            ExptIncludeAllTargets = true,
             Fallthrough = new Fallthrough
             {
-                IncludedInExpt = true,
                 Variations =
                 [
-                    new RolloutVariation { Id = controlVariationId, Rollout = [0, 0.9], ExptRollout = 0.9 },
-                    new RolloutVariation { Id = treatmentVariationId, Rollout = [0.9, 1], ExptRollout = 0.1 }
+                    new RolloutVariation { Id = controlVariationId, Rollout = [0, 0.9] },
+                    new RolloutVariation { Id = treatmentVariationId, Rollout = [0.9, 1] }
                 ]
             }
         };
@@ -524,13 +522,11 @@ public class FeatureFlagMcpToolsTests
             Tags = [],
             Fallthrough = new Fallthrough
             {
-                IncludedInExpt = true,
                 Variations =
                 [
-                    new RolloutVariation { Id = controlVariationId, Rollout = [0, 1], ExptRollout = 1 }
+                    new RolloutVariation { Id = controlVariationId, Rollout = [0, 1] }
                 ]
             },
-            ExptIncludeAllTargets = true
         };
     }
 }

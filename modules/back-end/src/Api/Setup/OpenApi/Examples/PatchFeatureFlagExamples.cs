@@ -120,7 +120,6 @@ public class PatchFeatureFlagExamples : IOpenApiExamplesProvider
                         id = "f5a5629e-523d-459e-b0b0-f4996e32842a",
                         name = "Rule 2",
                         dispatchKey = "name",
-                        includedInExpt = false,
                         conditions = new[]
                         {
                             new
@@ -140,7 +139,6 @@ public class PatchFeatureFlagExamples : IOpenApiExamplesProvider
                                     0,
                                     0.64
                                 },
-                                exptRollout = 1
                             },
                             new
                             {
@@ -150,7 +148,6 @@ public class PatchFeatureFlagExamples : IOpenApiExamplesProvider
                                     0.64,
                                     1
                                 },
-                                exptRollout = 1
                             }
                         }
                     }

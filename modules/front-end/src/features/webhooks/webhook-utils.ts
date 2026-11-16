@@ -135,7 +135,6 @@ function testData(event: string) {
         isEnabled: true,
         disabledVariationId: "false",
         fallthrough: { variations: [{ id: "true", rollout: [0, 1] }] },
-        exptIncludeAllTargets: true,
         isArchived: false,
       },
     },

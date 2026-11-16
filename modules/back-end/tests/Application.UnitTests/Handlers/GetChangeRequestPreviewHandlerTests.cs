@@ -47,7 +47,6 @@ public class GetChangeRequestPreviewHandlerTests
                         }
                     ]
                 },
-                ExptIncludeAllTargets = false
             },
             creatorId);
         var draft = new FlagDraft(envId, flagId, dataChange, creatorId)

@@ -14,11 +14,6 @@ public class RolloutVariation
     /// </summary>
     public double[] Rollout { get; set; }
 
-    /// <summary>
-    /// The rollout percentage for experiments.
-    /// </summary>
-    public double ExptRollout { get; set; }
-
     public bool IsValid(ICollection<Variation> flagVariations)
     {
         if (flagVariations.IsNullOrEmpty())

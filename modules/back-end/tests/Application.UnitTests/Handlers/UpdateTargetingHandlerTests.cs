@@ -36,7 +36,6 @@ public class UpdateTargetingHandlerTests
         TargetUsers = flag.TargetUsers,
         Rules = flag.Rules,
         Fallthrough = flag.Fallthrough,
-        ExptIncludeAllTargets = flag.ExptIncludeAllTargets
     };
 
     private static PolicyStatement[] Allow(string action) =>

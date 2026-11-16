@@ -23,7 +23,6 @@ const saved: FeatureFlag = {
     variations: [{ id: "on", rollout: [0, 1] }],
     dispatchKey: "keyId",
   },
-  exptIncludeAllTargets: false,
 }
 
 const targetingDraft: FlagTargeting = {
@@ -34,7 +33,6 @@ const targetingDraft: FlagTargeting = {
     variations: [{ id: "off", rollout: [0, 1] }],
     dispatchKey: "keyId",
   },
-  exptIncludeAllTargets: false,
 }
 
 describe("flag tab state", () => {

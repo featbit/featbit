@@ -20,11 +20,6 @@ public class TargetRule
     public string DispatchKey { get; set; }
 
     /// <summary>
-    /// Whether the rule is included in experiments.
-    /// </summary>
-    public bool IncludedInExpt { get; set; }
-
-    /// <summary>
     /// The conditions for the rule.
     /// </summary>
     public ICollection<Condition> Conditions { get; set; }

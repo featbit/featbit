@@ -24,11 +24,6 @@ public class FlagTargeting
     /// </summary>
     public Fallthrough Fallthrough { get; set; }
 
-    /// <summary>
-    /// Whether all targets should be included in experiments related to this feature flag. Defaults to `true`.
-    /// </summary>
-    public bool ExptIncludeAllTargets { get; set; } = true;
-
     public bool IsValid(ICollection<Variation> flagVariations)
     {
         // flag variations not null and not empty

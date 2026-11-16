@@ -140,11 +140,11 @@ public class PostgresStoreTests : IntegrationTestBase, IAsyncLifetime
             """
             INSERT INTO feature_flags
               (id, env_id, revision, name, description, key, variation_type, variations, target_users, rules,
-               is_enabled, disabled_variation_id, fallthrough, expt_include_all_targets, tags, is_archived,
+               is_enabled, disabled_variation_id, fallthrough, tags, is_archived,
                created_at, updated_at, creator_id, updator_id)
             VALUES
               (@id, @envId, @revision, @name, '', @key, 'string', '[]'::jsonb, '[]'::jsonb, '[]'::jsonb,
-               true, '', '{}'::jsonb, false, ARRAY[]::text[], false,
+               true, '', '{}'::jsonb, ARRAY[]::text[], false,
                @createdAt, @updatedAt, @creatorId, @updatorId);
             """,
             new

@@ -34,8 +34,6 @@ public class FeatureFlag : FullAuditedEntity
 
     public Fallthrough Fallthrough { get; set; }
 
-    public bool ExptIncludeAllTargets { get; set; }
-
     /// <summary>
     /// Whether evaluation insights are collected for this flag. Defaults to true; a stored flag without
     /// the field is treated as enabled.
@@ -103,18 +101,15 @@ public class FeatureFlag : FullAuditedEntity
         DisabledVariationId = disabledVariationId;
         Fallthrough = new Fallthrough
         {
-            IncludedInExpt = true,
             Variations = new List<RolloutVariation>
             {
                 new()
                 {
                     Id = enabledVariationId,
                     Rollout = [0, 1],
-                    ExptRollout = 1
                 }
             }
         };
-        ExptIncludeAllTargets = true;
         InsightsEnabled = true;
 
         Tags = tags ?? [];
@@ -256,7 +251,6 @@ public class FeatureFlag : FullAuditedEntity
         TargetUsers = targeting.TargetUsers;
         Rules = targeting.Rules;
         Fallthrough = targeting.Fallthrough;
-        ExptIncludeAllTargets = targeting.ExptIncludeAllTargets;
         MarkAsUpdated(currentUserId);
 
         return dataChange.To(this);
@@ -430,7 +424,6 @@ public class FeatureFlag : FullAuditedEntity
         IsEnabled = promoted.IsEnabled;
         DisabledVariationId = promoted.DisabledVariationId;
         Fallthrough = promoted.Fallthrough;
-        ExptIncludeAllTargets = promoted.ExptIncludeAllTargets;
         InsightsEnabled = promoted.InsightsEnabled;
         Tags = promoted.Tags;
         IsArchived = promoted.IsArchived;

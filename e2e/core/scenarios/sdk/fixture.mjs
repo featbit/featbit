@@ -41,17 +41,16 @@ export async function sdkFixture(stack, kind, run) {
   const target = async property => {
     const latest = await api(`${flagBase}/${flagKey}`);
     const rule = {
-      id: randomUUID(), name: 'SDK live update', includedInExpt: false,
+      id: randomUUID(), name: 'SDK live update',
       conditions: [property],
-      variations: [{ id: values[1].id, rollout: [0, 1], exptRollout: 0 }],
+      variations: [{ id: values[1].id, rollout: [0, 1] }],
     };
     await api(`${flagBase}/${flagKey}/targeting`, {
       revision: latest.revision,
       targeting: {
         disabledVariationId: values[0].id, targetUsers: [], rules: [rule],
-        fallthrough: { includedInExpt: false,
-          variations: [{ id: values[0].id, rollout: [0, 1], exptRollout: 0 }] },
-        exptIncludeAllTargets: false,
+        fallthrough: {
+          variations: [{ id: values[0].id, rollout: [0, 1] }] },
       },
       comment: runId,
     }, 'PUT');

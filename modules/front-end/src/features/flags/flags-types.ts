@@ -43,7 +43,6 @@ export type FeatureFlag = {
   rules?: FlagRule[]
   fallthrough?: FlagFallthrough | null
   disabledVariationId?: string
-  exptIncludeAllTargets?: boolean
 }
 
 export type FlagVariation = {
@@ -80,7 +79,6 @@ export type FlagTargetUsers = {
 }
 
 export type FlagFallthrough = {
-  includedInExpt?: boolean
   variations: FlagRuleVariation[]
   dispatchKey?: string | null
   isNotPercentageRollout?: boolean
@@ -91,7 +89,6 @@ export type FlagTargeting = {
   targetUsers: FlagTargetUsers[]
   rules: FlagRule[]
   fallthrough: FlagFallthrough
-  exptIncludeAllTargets: boolean
 }
 
 export type RunningExperiment = {

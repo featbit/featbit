@@ -8,11 +8,6 @@ public class Fallthrough
     public string DispatchKey { get; set; }
 
     /// <summary>
-    /// Whether the default rule is included in experiments.
-    /// </summary>
-    public bool IncludedInExpt { get; set; }
-
-    /// <summary>
     /// The served variations.
     /// </summary>
     public ICollection<RolloutVariation> Variations { get; set; }
