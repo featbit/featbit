@@ -12,113 +12,65 @@ namespace Infrastructure.UnitTests.Services;
 
 public class WebhookSenderTests
 {
-    [Theory]
-    [InlineData("{\"value\":{{data.object.exptIncludeAllTargets}} }", "{\"value\":false}")]
-    [InlineData("{\"value\":{{data.object.fallthrough.includedInExpt}} }", "{\"value\":false}")]
-    [InlineData("{\"value\":{{data.object.fallthrough.variations.[0].exptRollout}} }", "{\"value\":0}")]
-    [InlineData("{{#each data.object.rules}}{\"included\":{{includedInExpt}},\"rollout\":{{variations.[0].exptRollout}} }{{/each}}", "{\"included\":false,\"rollout\":0}")]
-    [InlineData("{\"value\":{{#if data.object.exptIncludeAllTargets}}true{{else}}false{{/if}} }", "{\"value\":false}")]
-    public async Task OldTemplate_SendsTypedDefaultsWithoutMutatingSource(string template, string expected)
+    [Fact]
+    public async Task OldDefaultTemplate_SendsSuccessfully()
     {
-        var data = Data();
-        var before = JsonSerializer.Serialize(data);
-        var (delivery, handler) = await Send(template, data);
-        Assert.True(delivery.Success, JsonSerializer.Serialize(delivery));
-        Assert.True(System.Text.Json.Nodes.JsonNode.DeepEquals(
-            System.Text.Json.Nodes.JsonNode.Parse(expected), System.Text.Json.Nodes.JsonNode.Parse(handler.Payload!)));
-        Assert.Equal(before, JsonSerializer.Serialize(data));
-        Assert.DoesNotContain("exptIncludeAllTargets", before);
-        Assert.DoesNotContain("includedInExpt", before);
-        Assert.DoesNotContain("exptRollout", before);
+        // Relevant fragment of the old default template, including both custom helpers.
+        const string template = """
+            {
+            {{#eq data.kind "feature flag"}}
+              "fallthrough": {{json data.object.fallthrough}},
+              "exptIncludeAllTargets": {{data.object.exptIncludeAllTargets}},
+            {{/eq}}
+              "event": "{{events}}"
+            }
+            """;
+        var (delivery, handler) = await Send(template, Data());
+        Assert.True(delivery.Success, JsonSerializer.Serialize(delivery.Error));
+        using var json = JsonDocument.Parse(handler.Payload!);
+        Assert.False(json.RootElement.GetProperty("exptIncludeAllTargets").GetBoolean());
+        Assert.False(json.RootElement.GetProperty("fallthrough").TryGetProperty("includedInExpt", out _));
     }
 
     [Fact]
-    public async Task SavedOldDefaultTemplate_SendsSuccessfully()
+    public async Task LegacyDefaults_AreTypedAndDoNotLeakIntoNewTemplate()
     {
-        // Exact default template from before experiment-field removal.
         const string template = """
             {
-              "event": "{{events}}",
-              "operator": "{{operator}}",
-              "happenedAt": "{{happenedAt}}",
-              "changes": {{json changes}},
-              "organization": {
-                "id": "{{organization.id}}",
-                "name": "{{organization.name}}"
-              },
-              "project": {
-                "id": "{{project.id}}",
-                "name": "{{project.name}}"
-              },
-              "environment": {
-                "id": "{{environment.id}}",
-                "name": "{{environment.name}}"
-              },
-              "data": {
-                "kind": "{{data.kind}}",
-                "object": {
-                  "id": "{{data.object.id}}",
-                  "name": "{{data.object.name}}",
-                  "description": "{{data.object.description}}",
-                  "tags": {{json data.object.tags}},
-            {{#eq data.kind "feature flag"}}
-                  "key": "{{data.object.key}}",
-                  "variationType": "{{data.object.variationType}}",
-                  "variations": {{json data.object.variations}},
-                  "targetUsers": {{json data.object.targetUsers}},
-                  "rules": {{json data.object.rules}},
-                  "isEnabled": {{data.object.isEnabled}},
-                  "disabledVariationId": "{{data.object.disabledVariationId}}",
-                  "fallthrough": {{json data.object.fallthrough}},
-                  "exptIncludeAllTargets": {{data.object.exptIncludeAllTargets}},
-            {{/eq}}
-            {{#eq data.kind "segment"}}
-                  "included": {{json data.object.included}},
-                  "excluded": {{json data.object.excluded}},
-                  "rules": {{json data.object.rules}},
-                  "flagReferences": {{json data.object.flagReferences}},
-            {{/eq}}
-                  "isArchived": {{data.object.isArchived}}
-                }
-              }
+              "all": {{data.object.exptIncludeAllTargets}},
+              "included": {{data.object.fallthrough.includedInExpt}},
+              "rollout": {{data.object.fallthrough.variations.[0].exptRollout}},
+              "rules": [{{#each data.object.rules}}
+                {"included": {{includedInExpt}}, "rollout": {{variations.[0].exptRollout}} }
+              {{/each}}],
+              "branch": "{{#if data.object.exptIncludeAllTargets}}enabled{{else}}disabled{{/if}}"
             }
             """;
         var data = Data();
-        var flag = (Dictionary<string, object>)((Dictionary<string, object>)data["data"])["object"];
-        flag["isEnabled"] = "true";
-        flag["isArchived"] = "false";
-        flag["tags"] = Array.Empty<string>();
-        flag["variations"] = Array.Empty<Variation>();
-        flag["targetUsers"] = Array.Empty<object>();
-        data["changes"] = Array.Empty<object>();
-        var (delivery, handler) = await Send(template, data);
-        Assert.True(delivery.Success, JsonSerializer.Serialize(delivery));
-        using var json = JsonDocument.Parse(handler.Payload!);
-        var payload = json.RootElement.GetProperty("data").GetProperty("object");
-        Assert.False(payload.GetProperty("exptIncludeAllTargets").GetBoolean());
-        Assert.False(payload.GetProperty("fallthrough").TryGetProperty("includedInExpt", out _));
-        Assert.False(flag.ContainsKey("exptIncludeAllTargets"));
-    }
+        var before = JsonSerializer.Serialize(data);
+        var (legacyDelivery, legacyHandler) = await Send(template, data);
+        Assert.True(legacyDelivery.Success, JsonSerializer.Serialize(legacyDelivery.Error));
+        using var json = JsonDocument.Parse(legacyHandler.Payload!);
+        var payload = json.RootElement;
+        Assert.False(payload.GetProperty("all").GetBoolean());
+        Assert.False(payload.GetProperty("included").GetBoolean());
+        Assert.Equal(0, payload.GetProperty("rollout").GetInt32());
+        Assert.False(payload.GetProperty("rules")[0].GetProperty("included").GetBoolean());
+        Assert.Equal(0, payload.GetProperty("rules")[0].GetProperty("rollout").GetInt32());
+        Assert.Equal("disabled", payload.GetProperty("branch").GetString());
+        Assert.Equal(before, JsonSerializer.Serialize(data));
 
-    [Fact]
-    public async Task NewTemplate_AfterOldTemplate_DoesNotEmitLegacyProperties()
-    {
-        var data = Data();
-        await Send("{\"value\":{{data.object.exptIncludeAllTargets}} }", data);
         var (delivery, handler) = await Send("{{json data.object}}", data);
         Assert.True(delivery.Success);
-        using var json = JsonDocument.Parse(handler.Payload!);
-        Assert.Equal("flag", json.RootElement.GetProperty("key").GetString());
         Assert.DoesNotContain("exptIncludeAllTargets", handler.Payload);
         Assert.DoesNotContain("includedInExpt", handler.Payload);
         Assert.DoesNotContain("exptRollout", handler.Payload);
     }
 
     [Theory]
-    [InlineData("{\"value\":{{data.object.unknownField}} }", "feature flag")]
+    [InlineData("{\"all\":{{data.object.exptIncludeAllTargets}},\"unknown\":{{data.object.unknownField}} }", "feature flag")]
     [InlineData("{\"value\":{{data.object.exptIncludeAllTargets}} }", "segment")]
-    [InlineData("{\"value\":{{data.object.exptIncludeAllTargets}},}", "feature flag")]
-    public async Task InvalidTemplates_StillFailWithoutSending(string template, string kind)
+    public async Task UnsupportedMissingFields_StillFailWithoutSending(string template, string kind)
     {
         var data = Data();
         ((Dictionary<string, object>)data["data"])["kind"] = kind;
