@@ -434,4 +434,87 @@ public class CacheReconcilerTests
         VerifyBackfill("west", ConsistencyMode.BestEffort, Times.Once());
         VerifyBackfill("east", ConsistencyMode.BestEffort, Times.Once());
     }
+
+    // ----- a prune that was left for later -----
+
+    private void VerifyPrune(string dcId, ConsistencyMode mode, Times times) =>
+        _backfiller.Verify(
+            b => b.PruneDcAsync(dcId, mode, It.IsAny<CommittedSnapshot>(), It.IsAny<CancellationToken>()),
+            times);
+
+    [Fact]
+    public async Task PruneDueForAConnectedDc_PrunesItFromAFreshSnapshot_WithoutBackfillingAgain()
+    {
+        var sut = CreateSut(new[] { Dc("east", () => true) });
+        await sut.RunOnceAsync(); // east is seen and backfilled
+        _backfiller.Setup(b => b.TakeDcsDueForPrune()).Returns(["east"]);
+
+        await sut.RunOnceAsync();
+
+        VerifyPrune("east", ConsistencyMode.BestEffort, Times.Once());
+        VerifyBackfill("east", ConsistencyMode.BestEffort, Times.Once());
+        VerifySnapshotFetch(Times.Exactly(2));
+    }
+
+    [Fact]
+    public async Task PruneDueForADisconnectedDc_IsLeftAlone()
+    {
+        var connected = true;
+        var sut = CreateSut(new[] { Dc("east", () => connected) });
+        await sut.RunOnceAsync();
+        connected = false;
+        _backfiller.Setup(b => b.TakeDcsDueForPrune()).Returns(["east"]);
+
+        await sut.RunOnceAsync();
+
+        VerifyPrune("east", ConsistencyMode.BestEffort, Times.Never());
+        VerifySnapshotFetch(Times.Once());
+    }
+
+    [Fact]
+    public async Task PruneDueAlongsideANewlyReachableDc_SharesOneSnapshotFetch()
+    {
+        var westConnected = false;
+        var sut = CreateSut(new[] { Dc("east", () => true), Dc("west", () => westConnected) });
+        await sut.RunOnceAsync(); // east is seen and backfilled; west is not reachable yet
+        westConnected = true;
+        _backfiller.Setup(b => b.TakeDcsDueForPrune()).Returns(["east"]);
+
+        await sut.RunOnceAsync();
+
+        VerifySnapshotFetch(Times.Exactly(2)); // one at the start, one for west and the prune together
+        VerifyBackfill("west", ConsistencyMode.BestEffort, Times.Once());
+        VerifyPrune("east", ConsistencyMode.BestEffort, Times.Once());
+    }
+
+    [Fact]
+    public async Task PruneDueForADcThatIsAlsoNewlyReachable_IsNotPrunedSeparately()
+    {
+        var connected = true;
+        var sut = CreateSut(new[] { Dc("east", () => connected) });
+        await sut.RunOnceAsync();
+        connected = false;
+        await sut.RunOnceAsync();
+        connected = true; // east comes back this tick: that is a reconcile, which prunes as part of the backfill
+        _backfiller.Setup(b => b.TakeDcsDueForPrune()).Returns(["east"]);
+
+        await sut.RunOnceAsync();
+
+        VerifyPrune("east", ConsistencyMode.BestEffort, Times.Never());
+    }
+
+    [Fact]
+    public async Task APruneThatFails_DoesNotStopTheOtherDcsFromBeingPruned()
+    {
+        var sut = CreateSut(new[] { Dc("east", () => true), Dc("west", () => true) });
+        await sut.RunOnceAsync();
+        _backfiller.Setup(b => b.TakeDcsDueForPrune()).Returns(["east", "west"]);
+        _backfiller
+            .Setup(b => b.PruneDcAsync("east", It.IsAny<ConsistencyMode>(), It.IsAny<CommittedSnapshot>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new InvalidOperationException("boom"));
+
+        await sut.RunOnceAsync();
+
+        VerifyPrune("west", ConsistencyMode.BestEffort, Times.Once());
+    }
 }

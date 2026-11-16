@@ -1,4 +1,5 @@
 using Application.Caches;
+using Application.ControlPlane;
 using Domain.ControlPlane;
 using Domain.Environments;
 using Domain.FeatureFlags;
@@ -98,6 +99,20 @@ public class CompositeRedisCacheService(
 
     public Task DeleteSegmentAsync(ICollection<Guid> envIds, Guid segmentId) =>
         BroadcastAsync(s => s.DeleteSegmentAsync(envIds, segmentId), nameof(DeleteSegmentAsync));
+
+    // ICacheService reads: return the LOCAL DC's answer (first instance), like the staged probes above.
+    // The DC backfiller reaches each DC through the TARGETED ...FromDcAsync / ...InDcAsync methods below.
+    public Task<IReadOnlyDictionary<Guid, long>> GetFlagIndexAsync(Guid envId) =>
+        cacheServices.First().Service.GetFlagIndexAsync(envId);
+
+    public Task<IReadOnlyDictionary<Guid, long>> GetSegmentIndexAsync(Guid envId) =>
+        cacheServices.First().Service.GetSegmentIndexAsync(envId);
+
+    public Task<bool> IsFlagArchivedAsync(Guid id, ConsistencyMode mode) =>
+        cacheServices.First().Service.IsFlagArchivedAsync(id, mode);
+
+    public Task<bool> IsSegmentArchivedAsync(Guid id, ConsistencyMode mode) =>
+        cacheServices.First().Service.IsSegmentArchivedAsync(id, mode);
 
     public Task UpsertLicenseAsync(Workspace workspace) =>
         BroadcastAsync(s => s.UpsertLicenseAsync(workspace), nameof(UpsertLicenseAsync));
@@ -328,6 +343,91 @@ public class CompositeRedisCacheService(
     /// </summary>
     public Task UpsertSecretToDcAsync(string dcId, ResourceDescriptor resourceDescriptor, Secret secret) =>
         TargetedAsync(dcId, s => s.UpsertSecretAsync(resourceDescriptor, secret), nameof(UpsertSecretToDcAsync));
+
+    /// <summary>
+    /// Targeted read: the flag index of ONE DC's Redis for an environment (id and index score of every flag
+    /// it lists). Returns <c>null</c> if no DC matches <paramref name="dcId"/> or the read fails, so a caller
+    /// can tell "could not read" from "empty".
+    /// </summary>
+    public Task<IReadOnlyDictionary<Guid, long>?> GetFlagIndexFromDcAsync(string dcId, Guid envId) =>
+        TargetedReadAsync(dcId, s => s.GetFlagIndexAsync(envId), nameof(GetFlagIndexFromDcAsync));
+
+    /// <summary>Segment counterpart of <see cref="GetFlagIndexFromDcAsync"/>.</summary>
+    public Task<IReadOnlyDictionary<Guid, long>?> GetSegmentIndexFromDcAsync(string dcId, Guid envId) =>
+        TargetedReadAsync(dcId, s => s.GetSegmentIndexAsync(envId), nameof(GetSegmentIndexFromDcAsync));
+
+    /// <summary>
+    /// Targeted probe: whether ONE DC's Redis holds the flag and its value is archived. <c>false</c> for an
+    /// unknown DC, a failed read or a missing value, so "not archived" is the answer whenever it is uncertain.
+    /// </summary>
+    public Task<bool> IsFlagArchivedInDcAsync(string dcId, Guid id, ConsistencyMode mode) =>
+        TargetedAsync(dcId, s => s.IsFlagArchivedAsync(id, mode), nameof(IsFlagArchivedInDcAsync));
+
+    /// <summary>Segment counterpart of <see cref="IsFlagArchivedInDcAsync"/>.</summary>
+    public Task<bool> IsSegmentArchivedInDcAsync(string dcId, Guid id, ConsistencyMode mode) =>
+        TargetedAsync(dcId, s => s.IsSegmentArchivedAsync(id, mode), nameof(IsSegmentArchivedInDcAsync));
+
+    /// <summary>
+    /// Targeted delete: removes a flag from ONE DC's Redis, unlike the broadcast <see cref="DeleteFlagAsync"/>.
+    /// Returns whether the delete ran; <c>false</c> for an unknown DC or a swallowed failure.
+    /// </summary>
+    public Task<bool> DeleteFlagFromDcAsync(string dcId, Guid envId, Guid flagId) =>
+        TargetedAsync(
+            dcId,
+            async s =>
+            {
+                await s.DeleteFlagAsync(envId, flagId);
+                return true;
+            },
+            nameof(DeleteFlagFromDcAsync));
+
+    /// <summary>Segment counterpart of <see cref="DeleteFlagFromDcAsync"/>.</summary>
+    public Task<bool> DeleteSegmentFromDcAsync(string dcId, ICollection<Guid> envIds, Guid segmentId) =>
+        TargetedAsync(
+            dcId,
+            async s =>
+            {
+                await s.DeleteSegmentAsync(envIds, segmentId);
+                return true;
+            },
+            nameof(DeleteSegmentFromDcAsync));
+
+    /// <summary>
+    /// Runs a read against one DC's cache. Returns <c>null</c> if no DC matches <paramref name="dcId"/> or the read fails,
+    /// so that a caller can tell an unreadable answer from an empty one.
+    /// </summary>
+    private async Task<T?> TargetedReadAsync<T>(string dcId, Func<ICacheService, Task<T>> read, string operationName)
+        where T : class
+    {
+        var dc = cacheServices.FirstOrDefault(c => c.DcId == dcId);
+        if (dc == null)
+        {
+            logger.LogWarning(
+                "Targeted cache read '{Operation}' requested for unknown DC {DcId}; no matching cache instance.",
+                operationName,
+                dcId);
+            return null;
+        }
+
+        try
+        {
+            return await read(dc.Service);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(
+                ex,
+                "Redis cache targeted read '{Operation}' failed for DC {DcId} (implementation {CacheService}).",
+                operationName,
+                dc.DcId,
+                dc.Service.GetType().FullName);
+            return null;
+        }
+    }
 
     private async Task TargetedAsync(string dcId, Func<ICacheService, Task> action, string operationName)
     {
