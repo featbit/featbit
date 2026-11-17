@@ -1,4 +1,5 @@
 import { z } from "zod"
+import { parseCustomDatetime } from "./custom-datetime"
 import type {
   FlagSettingsValues,
   FlagSettingsReviewChange,
@@ -147,8 +148,7 @@ export function validateCustomValues(
             : control.type === "checkbox"
               ? typeof value === "boolean"
               : control.type === "datetime"
-                ? typeof value === "string" &&
-                  Number.isFinite(Date.parse(value))
+                ? Boolean(parseCustomDatetime(value))
                 : typeof value === "string"
       return valid
         ? []

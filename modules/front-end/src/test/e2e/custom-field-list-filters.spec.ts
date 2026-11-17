@@ -3,6 +3,7 @@ import { expect, test, type Locator, type Page } from "@playwright/test"
 const settingsUrl =
   "/en/feature-flags/rainy-day-rescue/settings?preview=flag-settings"
 const listUrl = "/en/feature-flags?preview=flag-settings"
+test.use({ locale: "zh-CN" })
 
 async function addControl(
   page: Page,
@@ -176,6 +177,20 @@ test("maintains List values at project scope and adds at most two explicit custo
     .click()
   await page.getByLabel("From", { exact: true }).fill("2026-12-01T00:00")
   await page.getByLabel("To", { exact: true }).fill("2026-12-31T23:59")
+  await page
+    .getByRole("button", { name: "Choose date and time", exact: true })
+    .first()
+    .click()
+  await expect(page.getByText("December 2026", { exact: true })).toBeVisible()
+  await page.getByRole("button", { name: /December 15/ }).click()
+  await page.getByLabel("Hour (24h)", { exact: true }).click()
+  await page.getByRole("option", { name: "09", exact: true }).click()
+  await page.getByLabel("Minute", { exact: true }).click()
+  await page.getByRole("option", { name: "30", exact: true }).click()
+  await page.getByRole("button", { name: "Done", exact: true }).click()
+  await expect(page.getByLabel("From", { exact: true })).toHaveValue(
+    "2026-12-15 09:30"
+  )
   await page.getByRole("button", { name: "Apply filter", exact: true }).click()
   await expect(flag).toBeVisible()
   await expect(page.getByTestId("custom-field-filter")).toHaveCount(2)

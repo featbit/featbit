@@ -13,15 +13,18 @@ export function DocSelect({
   options,
   id,
   placeholder,
+  disabled,
 }: {
   value: string
   onChange: (value: string) => void
   options: { value: string; label: string }[]
   id?: string
   placeholder?: string
+  disabled?: boolean
 }) {
   return (
     <Select
+      disabled={disabled}
       value={value || null}
       onValueChange={(next) => onChange(next ?? "")}
       items={options}

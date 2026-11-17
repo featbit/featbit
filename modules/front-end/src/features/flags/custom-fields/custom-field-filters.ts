@@ -3,6 +3,7 @@ import type {
   CustomField,
   CustomFieldValues,
 } from "./custom-fields-model"
+import { parseCustomDatetime } from "./custom-datetime"
 
 export const maxCustomFieldFilters = 2
 export type FilterControl = {
@@ -60,7 +61,9 @@ export function comparisonValue(
   value: string
 ): number {
   if (!value.trim()) return NaN
-  return type === "number" ? Number(value) : Date.parse(value)
+  return type === "number"
+    ? Number(value)
+    : (parseCustomDatetime(value)?.getTime() ?? NaN)
 }
 
 export function filterConditionIssue(

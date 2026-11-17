@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { CustomListInput } from "./custom-list-input"
+import { CustomDatetimeInput } from "./custom-datetime-input"
 import {
   DescriptionContent,
   DescriptionEditor,
@@ -12,7 +13,6 @@ import { FieldError } from "../documentation/components/documentation-ui"
 import { useDocumentationCopy } from "../documentation/use-documentation-copy"
 import {
   controlText,
-  toLocalDatetime,
   type CustomField,
   type CustomFieldValues,
   type FlagSettingsFormValues,
@@ -144,22 +144,16 @@ export function CustomFieldInputs({
                         />
                       )
                     return (
-                      <Input
+                      <CustomDatetimeInput
                         id={id}
-                        type="datetime-local"
                         disabled={disabled}
-                        value={toLocalDatetime(input.value)}
-                        onChange={(event) => {
-                          const date = new Date(event.target.value)
-                          input.onChange(
-                            Number.isFinite(date.getTime())
-                              ? date.toISOString()
-                              : ""
-                          )
-                        }}
+                        value={
+                          typeof input.value === "string" ? input.value : ""
+                        }
+                        onChange={input.onChange}
                         onBlur={input.onBlur}
-                        ref={input.ref}
-                        aria-invalid={!!error}
+                        inputRef={input.ref}
+                        invalid={!!error}
                       />
                     )
                   }}

@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label"
 import { DocSelect } from "../../documentation/components/documentation-ui"
 import { useDocumentationCopy } from "../../documentation/use-documentation-copy"
 import { CustomListInput } from "../../custom-fields/custom-list-input"
+import { CustomDatetimeInput } from "../../custom-fields/custom-datetime-input"
 import type {
   ComparisonFilterCondition,
   CustomFilterCondition,
@@ -75,20 +76,35 @@ export function CustomFieldFilterValues({
             <Label htmlFor={`${id}-${bound}`}>
               {t(`filters.${draft.operator === "range" ? bound : "value"}`)}
             </Label>
-            <Input
-              id={`${id}-${bound}`}
-              type={control.type === "number" ? "number" : "datetime-local"}
-              step={control.type === "number" ? "any" : 60}
-              value={draft[bound]}
-              onInput={(event) => {
-                const value = event.currentTarget.value
-                setDraft((current) =>
-                  current.operator === "any"
-                    ? current
-                    : { ...current, [bound]: value }
-                )
-              }}
-            />
+            {control.type === "datetime" ? (
+              <CustomDatetimeInput
+                id={`${id}-${bound}`}
+                value={draft[bound]}
+                invalid={invalid}
+                onChange={(value) =>
+                  setDraft((current) =>
+                    current.operator === "any"
+                      ? current
+                      : { ...current, [bound]: value }
+                  )
+                }
+              />
+            ) : (
+              <Input
+                id={`${id}-${bound}`}
+                type="number"
+                step="any"
+                value={draft[bound]}
+                onInput={(event) => {
+                  const value = event.currentTarget.value
+                  setDraft((current) =>
+                    current.operator === "any"
+                      ? current
+                      : { ...current, [bound]: value }
+                  )
+                }}
+              />
+            )}
           </div>
         ))}
       </div>

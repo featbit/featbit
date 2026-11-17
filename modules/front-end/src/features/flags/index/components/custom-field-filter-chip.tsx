@@ -98,7 +98,11 @@ export function CustomFieldFilterChip({
             {control.name}: <span className="font-medium">{summary}</span>
           </span>
         </PopoverTrigger>
-        <PopoverContent align="start" className="w-80 space-y-4">
+        <PopoverContent
+          align="start"
+          sideOffset={8}
+          className="w-80 space-y-4 p-4"
+        >
           <p className="text-sm font-medium">{control.name}</p>
           <CustomFieldFilterValues
             id={id}
