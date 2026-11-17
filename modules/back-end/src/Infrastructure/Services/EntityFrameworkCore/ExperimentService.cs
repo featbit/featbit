@@ -1148,7 +1148,7 @@ public class ExperimentService(
         return sections;
     }
 
-    private static Dictionary<string, object?>? ComputeMetricSection(
+    internal static Dictionary<string, object?>? ComputeMetricSection(
         string label,
         Dictionary<string, object> metricData,
         string control,
@@ -1426,13 +1426,20 @@ public class ExperimentService(
         }
 
         var zHalf = NormalPpf(0.975);
-        var chanceToWin = NormalSf(0, muRel, seRel);
+        // The relative posterior keeps its signed-ratio presentation, but decisions
+        // follow the absolute metric direction even when the control mean is negative.
+        var posteriorAbs = muRel * meanA;
+        var seAbs = seRel * Math.Abs(meanA);
+        var chanceToWin = NormalSf(0, posteriorAbs, seAbs);
         if (inverse)
         {
             chanceToWin = 1 - chanceToWin;
         }
 
-        var (riskCtrl, riskTrt) = Risk(muRel, seRel);
+        var (riskCtrl, riskTrt) = Risk(posteriorAbs, seAbs);
+        // Preserve risk units as fractions of the control magnitude.
+        riskCtrl /= Math.Abs(meanA);
+        riskTrt /= Math.Abs(meanA);
         if (inverse)
         {
             (riskCtrl, riskTrt) = (riskTrt, riskCtrl);
@@ -1452,7 +1459,7 @@ public class ExperimentService(
 
     private static BayesianComparison DeterministicComparison(double muRel, double muAbs, bool inverse)
     {
-        var chanceToWin = muRel switch
+        var chanceToWin = muAbs switch
         {
             > 0 => 1,
             < 0 => 0,
@@ -1464,8 +1471,8 @@ public class ExperimentService(
             chanceToWin = 1 - chanceToWin;
         }
 
-        var riskCtrl = muRel > 0 ? muRel : 0;
-        var riskTrt = muRel < 0 ? -muRel : 0;
+        var riskCtrl = muAbs > 0 ? Math.Abs(muRel) : 0;
+        var riskTrt = muAbs < 0 ? Math.Abs(muRel) : 0;
         if (inverse)
         {
             (riskCtrl, riskTrt) = (riskTrt, riskCtrl);
@@ -1794,7 +1801,7 @@ public class ExperimentService(
 
     private sealed record GuardrailDefinition(string Event, string MetricType, string MetricAgg, bool Inverse, string Key, Guid MetricId, string MetricKey);
 
-    private sealed record GaussianPrior(double Mean, double Variance, bool Proper);
+    internal sealed record GaussianPrior(double Mean, double Variance, bool Proper);
 
     private sealed record BayesianComparison(
         string? Error,
