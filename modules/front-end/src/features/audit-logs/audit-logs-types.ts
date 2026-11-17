@@ -5,7 +5,10 @@ export type AuditInstruction = {
   value: unknown
 }
 
-export type AuditDataChange = { previous?: string; current?: string }
+export type AuditDataChange = {
+  previous?: string
+  current?: string
+}
 
 export type ChangeRequestDecisionAuditSnapshot = {
   changeRequestId: string
@@ -32,18 +35,22 @@ export type PagedAuditLogs = {
   totalCount: number
 }
 
-export type AuditUser = {
-  id: string
-  name: string
-  email: string
-}
+export const AuditLogScopes = {
+  Environment: "Environment",
+  Organization: "Organization",
+  Workspace: "Workspace",
+} as const
 
-export type AuditLogFilters = {
-  query: string
-  creatorId?: string
-  refType?: string
-  refId?: string
+export type AuditLogScope = (typeof AuditLogScopes)[keyof typeof AuditLogScopes]
+
+export type AuditLogQueryFilter = {
+  scope: AuditLogScope
+  scopeId: string
   crossEnvironment?: boolean
+  query?: string
+  creatorId?: string
+  refTypes?: string[]
+  refId?: string
   from?: number
   to?: number
 }

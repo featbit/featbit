@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using System.Text;
 using System.Text.Json.Nodes;
+using Domain.Secrets;
 using Domain.Shared;
 
 namespace Infrastructure.Fakes;

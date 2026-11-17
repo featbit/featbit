@@ -1,10 +1,14 @@
+import { useSyncExternalStore } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { CircleAlert, ShieldAlert } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Outlet } from "react-router-dom"
 import { UnavailablePage } from "@/components/unavailable-page"
 import { Skeleton } from "@/components/ui/skeleton"
-import { getCurrentOrganization } from "@/features/layout/layout-context"
+import {
+  getCurrentOrganization,
+  onCurrentOrganizationChanged,
+} from "@/features/layout/layout-context"
 import { currentUserPoliciesQueryOptions } from "./current-user-policy-query"
 import { canUseAction } from "./current-user-permissions"
 
@@ -12,7 +16,10 @@ const IAM_RESOURCE_RN = "iam/*"
 const MANAGE_IAM_ACTION = "CanManageIAM"
 
 export function IamRouteGuard() {
-  const organizationId = getCurrentOrganization()?.id ?? ""
+  const organizationId = useSyncExternalStore(
+    onCurrentOrganizationChanged,
+    () => getCurrentOrganization()?.id ?? ""
+  )
   const policiesQuery = useQuery(
     currentUserPoliciesQueryOptions(organizationId)
   )

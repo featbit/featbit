@@ -1,24 +1,24 @@
+using Domain.Policies;
+
 namespace Application.Environments;
 
 public class GetEnvironment : IRequest<EnvironmentVm>
 {
     public Guid Id { get; set; }
+
+    public PolicyStatement[] Permissions { get; set; } = [];
 }
 
-public class GetEnvironmentHandler : IRequestHandler<GetEnvironment, EnvironmentVm>
+public class GetEnvironmentHandler(IEnvironmentService envService, IResourceService resourceService, IMapper mapper)
+    : IRequestHandler<GetEnvironment, EnvironmentVm>
 {
-    private readonly IEnvironmentService _service;
-    private readonly IMapper _mapper;
-
-    public GetEnvironmentHandler(IEnvironmentService service, IMapper mapper)
-    {
-        _service = service;
-        _mapper = mapper;
-    }
-
     public async Task<EnvironmentVm> Handle(GetEnvironment request, CancellationToken cancellationToken)
     {
-        var env = await _service.GetAsync(request.Id);
-        return _mapper.Map<EnvironmentVm>(env);
+        var env = await envService.GetAsync(request.Id);
+
+        var resourceRn = await resourceService.GetEnvRnAsync(env.Id);
+        env.Sanitize(resourceRn, request.Permissions);
+
+        return mapper.Map<EnvironmentVm>(env);
     }
 }

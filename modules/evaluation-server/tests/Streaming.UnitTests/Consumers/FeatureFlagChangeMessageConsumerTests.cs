@@ -1,6 +1,6 @@
 using System.Net.WebSockets;
 using System.Text.Json;
-using Domain.Shared;
+using Domain.Secrets;
 using Microsoft.Extensions.Logging.Testing;
 using Moq;
 using Streaming.Connections;

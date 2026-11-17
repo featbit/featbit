@@ -6,15 +6,9 @@ import {
   formatDuration,
   hasEvaluationEvents,
   maskSecret,
-  toFlagKey,
 } from "./get-started-utils"
 
 describe("get started utilities", () => {
-  it("builds a stable feature flag key from a display name", () => {
-    expect(toFlagKey("  Checkout redesign!  ")).toBe("checkout-redesign")
-    expect(toFlagKey("Release__Mode")).toBe("release-mode")
-  })
-
   it("creates the fixed Boolean preset used by onboarding", () => {
     const ids = ["variation-true", "variation-false"]
     const payload = createBooleanFlagPayload(

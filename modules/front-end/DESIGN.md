@@ -103,7 +103,7 @@ FeatBit's React interface is a professional desktop workbench for developers, PM
 
 The system uses shadcn/ui base-nova with Tailwind CSS variables, Base UI primitives, lucide-react icons, and Inter Variable. It should feel friendly enough to guide a team through setup and recovery paths, but never like a marketing page. Product pages are desktop-first and should preserve a low-noise, operational rhythm.
 
-The visual language rejects Angular/ng-zorro cloning, large FeatBit-green surfaces, decorative SaaS gloss, dashboard screenshots as decoration, AI-themed messaging, and cellphone-first polish unless explicitly requested.
+The visual language rejects large FeatBit-green surfaces, decorative SaaS gloss, dashboard screenshots as decoration, AI-themed messaging, and cellphone-first polish unless explicitly requested.
 
 **Key Characteristics:**
 - Compact desktop density with generous enough spacing for repeated daily use.
@@ -228,8 +228,8 @@ The workspace shell uses a simple page header, workspace key subtitle, tab row, 
 - **Do** design authenticated product pages for professional desktop workflows first.
 
 ### Don't:
-- **Don't** recreate the Angular/ng-zorro visual system one-to-one, including its old green-dominant palette, legacy spacing, or control styling.
-- **Don't** copy the old Angular login background or old illustration card.
+- **Don't** use green-dominant palettes or component spacing and control styling that diverge from the shared design tokens.
+- **Don't** introduce login backgrounds or illustration cards outside the saved login and SSO design contracts.
 - **Don't** use marketing-page composition inside authenticated product pages: oversized hero sections, decorative card-heavy layouts, gratuitous motion, layout screenshots as decoration, AI-themed messaging, or large areas of brand color.
 - **Don't** hide operational state behind generic SaaS gloss. Feature flags, targeting, billing/license state, IAM, audit logs, and workspace settings must expose risk, context, and next actions directly.
 - **Don't** optimize authenticated product pages for cellphone use unless explicitly requested.

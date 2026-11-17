@@ -5,7 +5,11 @@ namespace Domain.AuditLogs;
 
 public class AuditLog : Entity
 {
-    public Guid EnvId { get; set; }
+    public Guid WorkspaceId { get; set; }
+
+    public Guid? OrganizationId { get; set; }
+
+    public Guid? EnvId { get; set; }
 
     public string RefId { get; set; }
 
@@ -24,7 +28,9 @@ public class AuditLog : Entity
     public DateTime CreatedAt { get; set; }
 
     public AuditLog(
-        Guid envId,
+        Guid workspaceId,
+        Guid? organizationId,
+        Guid? envId,
         string refId,
         string refType,
         string keyword,
@@ -43,6 +49,8 @@ public class AuditLog : Entity
             throw new ArgumentOutOfRangeException(nameof(operation));
         }
 
+        WorkspaceId = workspaceId;
+        OrganizationId = organizationId;
         EnvId = envId;
 
         RefId = refId;
@@ -58,12 +66,16 @@ public class AuditLog : Entity
 
     public static AuditLog For(
         FeatureFlag flag,
+        Guid workspaceId,
+        Guid? organizationId,
         string operation,
         DataChange dataChange,
         string comment,
         Guid creatorId)
     {
         var auditLog = new AuditLog(
+            workspaceId,
+            organizationId,
             flag.EnvId,
             flag.Id.ToString(),
             AuditLogRefTypes.FeatureFlag,
@@ -79,12 +91,16 @@ public class AuditLog : Entity
 
     public static AuditLog For(
         Segment segment,
+        Guid workspaceId,
+        Guid? organizationId,
         string operation,
         DataChange dataChange,
         string comment,
         Guid creatorId)
     {
         var auditLog = new AuditLog(
+            workspaceId,
+            organizationId,
             segment.EnvId,
             segment.Id.ToString(),
             AuditLogRefTypes.Segment,

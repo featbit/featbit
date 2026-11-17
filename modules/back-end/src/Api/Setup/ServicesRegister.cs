@@ -3,7 +3,7 @@ using Api.Authentication.OAuth;
 using Api.Authentication.OpenIdConnect;
 using Api.Authorization;
 using Api.Mcp;
-using Api.Swagger;
+using Api.Setup.OpenApi;
 using Application.Services;
 using Domain.Workspaces;
 using Domain.Policies;
@@ -11,11 +11,8 @@ using Infrastructure;
 using Infrastructure.Services;
 using Infrastructure.ReleaseHealth;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
-using Swashbuckle.AspNetCore.Filters;
-using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace Api.Setup;
 
@@ -27,7 +24,9 @@ public static class ServicesRegister
         builder.Services.AddSerilog((_, lc) => ConfigureSerilog.Configure(lc, builder.Configuration));
 
         // add services for controllers
-        builder.Services.AddControllers();
+        builder.Services.AddControllers().ConfigureApiBehaviorOptions(options =>
+            options.InvalidModelStateResponseFactory = ModelValidationResponse.Create
+        );
 
         // add mcp server & tools
         builder.Services
@@ -46,7 +45,7 @@ public static class ServicesRegister
             {
                 // add the versioned api explorer, which also adds IApiVersionDescriptionProvider service
                 // note: the specified format code will format the version as "'v'major[.minor][-status]"
-                options.GroupNameFormat = "'v'VVV";
+                options.GroupNameFormat = OpenApiSetup.ApiGroupNameFormat;
 
                 // note: this option is only necessary when versioning by url segment. the SubstitutionFormat
                 // can also be used to control the format of the API version in route templates
@@ -63,10 +62,8 @@ public static class ServicesRegister
                 .AllowCredentials();
         }));
 
-        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-        builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
-        builder.Services.AddSwaggerGen(options => options.CustomSchemaIds(type => SwashbuckleSchemaHelper.GetSchemaId(type)));
-        builder.Services.AddSwaggerExamplesFromAssemblyOf<Program>();
+        // OpenApi: one document per API version, plus a filtered public "OpenApi" document.
+        builder.Services.AddBackendOpenApi();
 
         // health check dependencies
         builder.Services.AddHealthChecks().AddReadinessChecks(builder.Configuration);
@@ -124,6 +121,7 @@ public static class ServicesRegister
             .AddOpenApi(Schemes.OpenApi);
 
         // authorization
+        builder.Services.AddScoped<ITenantAccessValidator, TenantAccessValidator>();
         LicenseVerifier.ImportPublicKey(builder.Configuration["PublicKey"]);
         builder.Services.AddTransient<ILicenseService, LicenseService>();
         builder.Services.AddScoped<IRequestPermissions, RequestPermissions>();

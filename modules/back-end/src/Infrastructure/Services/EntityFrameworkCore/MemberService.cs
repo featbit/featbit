@@ -1,3 +1,4 @@
+using Domain.AuditLogs;
 using Application.Bases.Exceptions;
 using Application.Bases.Models;
 using Application.Members;
@@ -12,6 +13,28 @@ namespace Infrastructure.Services.EntityFrameworkCore;
 
 public class MemberService(AppDbContext dbContext) : IMemberService
 {
+    public async Task<MemberAuditSnapshot?> GetAuditSnapshotAsync(Guid id, Guid? organizationId, Guid workspaceId)
+    {
+        var exists = organizationId.HasValue
+            ? await dbContext.Set<OrganizationUser>().AsNoTracking().AnyAsync(x => x.OrganizationId == organizationId && x.UserId == id)
+            : await dbContext.Set<WorkspaceUser>().AsNoTracking().AnyAsync(x => x.WorkspaceId == workspaceId && x.UserId == id);
+        if (!exists) return null;
+        // Project only audit-safe fields; never serialize User or Member credentials.
+        var identity = await dbContext.Set<User>().AsNoTracking().Where(x => x.Id == id)
+            .Select(x => new { x.Id, x.Name, x.Email }).FirstOrDefaultAsync();
+        if (identity == null) return null;
+        var groupIds = await dbContext.Set<GroupMember>().AsNoTracking().Where(x => x.OrganizationId == organizationId && x.MemberId == id)
+            .Select(x => x.GroupId).ToListAsync();
+        var policyIds = await dbContext.Set<MemberPolicy>().AsNoTracking().Where(x => x.OrganizationId == organizationId && x.MemberId == id)
+            .Select(x => x.PolicyId).ToListAsync();
+        var groups = await dbContext.Set<Group>().AsNoTracking().Where(x => groupIds.Contains(x.Id))
+            .Select(x => new IamAuditReference(x.Id, x.Name, "group/" + x.Name)).ToListAsync();
+        var policies = await dbContext.Set<Policy>().AsNoTracking().Where(x => policyIds.Contains(x.Id))
+            .Select(x => new PolicyAuditReference(x.Id, x.Name, "policy/" + x.Key, x.Type)).ToListAsync();
+        return new MemberAuditSnapshot(identity.Id, identity.Name, $"member/{identity.Email}", identity.Email,
+            groups.OrderBy(x => x.Id).ToArray(), policies.OrderBy(x => x.Id).ToArray());
+    }
+
     private IQueryable<TEntity> QueryableOf<TEntity>() where TEntity : class => dbContext.Set<TEntity>().AsQueryable();
     private DbSet<TEntity> SetOf<TEntity>() where TEntity : class => dbContext.Set<TEntity>();
 

@@ -28,6 +28,7 @@ export function ProjectInventory({
   canUpdateEnvironment,
   canDeleteEnvironment,
   canCreateSecret,
+  canViewSecret,
   onSearchChange,
   onCreateProject,
   onEditProject,
@@ -53,6 +54,10 @@ export function ProjectInventory({
     environment: ProjectEnvironment
   ) => boolean
   canDeleteEnvironment: (
+    project: OrganizationProject,
+    environment: ProjectEnvironment
+  ) => boolean
+  canViewSecret: (
     project: OrganizationProject,
     environment: ProjectEnvironment
   ) => boolean
@@ -187,6 +192,7 @@ export function ProjectInventory({
                   canCreateEnvironment={canCreateEnvironment(project)}
                   canUpdateEnvironment={canUpdateEnvironment}
                   canDeleteEnvironment={canDeleteEnvironment}
+                  canViewSecret={canViewSecret}
                   canCreateSecret={canCreateSecret}
                   onToggleSort={(field) =>
                     toggleEnvironmentSort(project.id, field)

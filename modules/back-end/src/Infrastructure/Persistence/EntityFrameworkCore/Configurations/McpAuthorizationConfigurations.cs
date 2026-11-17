@@ -50,7 +50,6 @@ public class McpAccessTokenSessionConfiguration : IEntityTypeConfiguration<McpAc
 
         builder.HasIndex(x => x.TokenId).IsUnique();
         builder.HasIndex(x => x.ExpiresAt);
-        builder.HasIndex(x => x.RevokedAt);
 
         builder.Property(x => x.TokenId).HasMaxLength(128).IsRequired();
         builder.Property(x => x.ClientId).HasMaxLength(256).IsRequired();

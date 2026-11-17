@@ -9,6 +9,7 @@ import type {
   FeatureFlag,
   PendingFlagChange,
   PagedFeatureFlags,
+  RunningExperiment,
   FlagVariation,
 } from "./flags-types"
 
@@ -20,10 +21,25 @@ export function fetchFeatureFlag(envId: string, key: string) {
   return fetchApi<FeatureFlag>(`${flagsPath(envId)}/${encodeURIComponent(key)}`)
 }
 
+export function fetchFeatureFlagById(
+  envId: string,
+  id: string,
+  signal?: AbortSignal
+) {
+  return fetchApi<FeatureFlag>(
+    `${flagsPath(envId)}/by-id/${encodeURIComponent(id)}`,
+    { signal }
+  )
+}
+
 export function updateFeatureFlagGeneral(
   envId: string,
   key: string,
-  input: { name: string; description: string; tags: string[] },
+  input: {
+    name: string
+    description: string
+    tags: string[]
+  },
   comment = ""
 ) {
   return fetchApi<string>(
@@ -33,6 +49,12 @@ export function updateFeatureFlagGeneral(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...input, comment }),
     }
+  )
+}
+
+export function fetchRunningExperiments(envId: string, key: string) {
+  return fetchApi<RunningExperiment[]>(
+    `${flagsPath(envId)}/${encodeURIComponent(key)}/running-experiments`
   )
 }
 
@@ -267,6 +289,22 @@ export function copyFeatureFlagSettings(
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ options }),
+    }
+  )
+}
+
+export function updateFeatureFlagInsightCollection(
+  envId: string,
+  key: string,
+  enabled: boolean,
+  comment: string
+) {
+  return fetchApi<string>(
+    `${flagsPath(envId)}/${encodeURIComponent(key)}/insight-collection`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ enabled, comment }),
     }
   )
 }

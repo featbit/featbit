@@ -43,14 +43,19 @@ public class ClientSdkFlag
 
     public bool SendToExperiment { get; set; }
 
+    public bool InsightsEnabled { get; set; }
+
     public long Timestamp { get; set; }
 
     public ClientSdkFlag(JsonElement flag, UserVariation userVariation, Variation[] allVariations)
     {
-        Id = flag.GetProperty("key").GetString()!;
-        VariationType = flag.GetProperty("variationType").GetString() ?? "string";
+        var reader = EntityJsonReader.FeatureFlag;
+
+        Id = reader.GetRequiredString(flag, "key");
+        VariationType = reader.GetNullableString(flag, "variationType") ?? "string";
         VariationOptions = allVariations;
-        Timestamp = flag.GetProperty("updatedAt").GetDateTimeOffset().ToUnixTimeMilliseconds();
+        Timestamp = reader.GetRequiredDateTimeOffset(flag, "updatedAt").ToUnixTimeMilliseconds();
+        InsightsEnabled = EntityJsonReader.TryGetBoolean(flag, "insightsEnabled") ?? true;
 
         Variation = userVariation.Variation?.Value;
         VariationId = userVariation.Variation?.Id;

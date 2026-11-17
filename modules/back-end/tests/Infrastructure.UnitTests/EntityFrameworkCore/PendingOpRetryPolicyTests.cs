@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using Infrastructure.Services.EntityFrameworkCore;
 
 namespace Infrastructure.UnitTests.EntityFrameworkCore;
@@ -28,25 +27,11 @@ public class PendingOpRetryPolicyTests
     [InlineData(1)]
     [InlineData(2)]
     [InlineData(8)]
-    public async Task DelayAsync_Waits_Within_The_Documented_Jitter_Range(int attemptNumber)
+    public void GetDelayMilliseconds_Is_Within_The_Documented_Jitter_Range(int attemptNumber)
     {
-        // Documented formula: Random.Shared.Next(10, 50) * attemptNumber milliseconds, so the
-        // elapsed wall-clock time should fall within [10 * attemptNumber, 50 * attemptNumber),
-        // with generous slack on both sides for scheduler/timer overhead so this stays
-        // non-flaky under CI load.
-        var minExpectedMs = 10 * attemptNumber;
-        var maxExpectedMs = 50 * attemptNumber;
+        var delay = PendingOpRetryPolicy.GetDelayMilliseconds(attemptNumber);
 
-        var stopwatch = Stopwatch.StartNew();
-        await PendingOpRetryPolicy.DelayAsync(attemptNumber);
-        stopwatch.Stop();
-
-        Assert.True(
-            stopwatch.ElapsedMilliseconds >= minExpectedMs - 5,
-            $"Expected at least ~{minExpectedMs}ms, got {stopwatch.ElapsedMilliseconds}ms for attempt {attemptNumber}.");
-        Assert.True(
-            stopwatch.ElapsedMilliseconds <= maxExpectedMs + 250,
-            $"Expected at most ~{maxExpectedMs}ms (+ scheduler slack), got {stopwatch.ElapsedMilliseconds}ms for attempt {attemptNumber}.");
+        Assert.InRange(delay, 10 * attemptNumber, 49 * attemptNumber);
     }
 
     [Fact]

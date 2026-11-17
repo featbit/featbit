@@ -196,7 +196,8 @@ data:
                         "UpdateEnvSettings",
                         "CreateEnvSecret",
                         "DeleteEnvSecret",
-                        "UpdateEnvSecret"
+                        "UpdateEnvSecret",
+                        "ViewEnvSecret"
                     ],
                     resources: ["project/*:env/*"]
                 }
@@ -242,6 +243,13 @@ data:
                         "CanAccessProject"
                     ],
                     resources: ["project/*"]
+                },
+                {
+                    _id: getUUIDString(),
+                    resourceType: "env",
+                    effect: "allow",
+                    actions: ["CanAccessEnv", "ViewEnvSecret"],
+                    resources: ["project/*:env/*"]
                 }
             ],
             createdAt: new Date(),

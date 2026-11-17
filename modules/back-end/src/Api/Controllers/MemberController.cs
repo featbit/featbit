@@ -255,6 +255,7 @@ public class MemberController : ApiControllerBase
     {
         var request = new AddMemberPolicy
         {
+            WorkspaceId = WorkspaceId,
             OrganizationId = OrgId,
             MemberId = memberId,
             PolicyId = policyId
@@ -273,6 +274,7 @@ public class MemberController : ApiControllerBase
     {
         var request = new RemoveMemberPolicy
         {
+            WorkspaceId = WorkspaceId,
             OrganizationId = OrgId,
             MemberId = memberId,
             PolicyId = policyId

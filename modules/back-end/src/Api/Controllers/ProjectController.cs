@@ -62,9 +62,10 @@ public class ProjectController : ApiControllerBase
     [OpenApi]
     [HttpPost]
     [Authorize(Permissions.CreateProject)]
-    public async Task<ApiResponse<ProjectWithEnvs>> CreateAsync(CreateProject request)
+    public async Task<ApiResponse<ProjectWithEnvs>> CreateAsync(CreateProjectPayload payload)
     {
-        request.OrganizationId = OrgId;
+        var permissions = await GetRequestPermissionsAsync();
+        var request = new CreateProject(OrgId, payload, permissions);
 
         var projectWithEnvs = await Mediator.Send(request);
         return Ok(projectWithEnvs);

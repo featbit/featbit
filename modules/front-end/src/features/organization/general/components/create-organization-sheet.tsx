@@ -17,7 +17,7 @@ import {
   Field,
   OrganizationInput,
 } from "@/features/organization/general/components/organization-form-fields"
-import { slugify } from "@/features/organization/organization-utils"
+import { slugify } from "@/lib/slugify"
 
 export type CreateOrganizationValues = {
   name: string

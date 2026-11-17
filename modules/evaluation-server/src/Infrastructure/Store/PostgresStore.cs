@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Dapper;
+using Domain.Secrets;
 using Domain.Shared;
 using Infrastructure.Persistence.Postgres;
 using Npgsql;

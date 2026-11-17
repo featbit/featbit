@@ -53,7 +53,7 @@ public class ReleaseHealthMonitorsController(ReleaseHealthService service, IFeat
         var before = await service.Monitor(OrgId, projectId, envId, flag, ct);
         var after = await mutate(flag);
         if (after.Revision != before.Revision)
-            await auditLogs.AddOneAsync(AuditLog.For(flag, Operations.Update,
+            await auditLogs.AddOneAsync(AuditLog.For(flag, WorkspaceId, OrgId, Operations.Update,
                 new DataChange(AuditSnapshot(flag, before)).To(AuditSnapshot(flag, after)),
                 "Release Health: " + operation, CurrentUser.Id));
         return Ok(after);

@@ -1,7 +1,7 @@
 ﻿using System.Net.WebSockets;
 using Domain.ControlPlane;
 using Domain.EndUsers;
-using Domain.Shared;
+using Domain.Secrets;
 using Streaming.Protocol;
 
 namespace Streaming.Connections;

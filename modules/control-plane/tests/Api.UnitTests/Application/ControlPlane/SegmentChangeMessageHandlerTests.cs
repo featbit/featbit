@@ -1,10 +1,13 @@
 using System.Collections.ObjectModel;
+using System.Text.Json;
 using Api.Application.ControlPlane;
 using Application.Caches;
 using Application.Segments;
 using Application.Services;
+using Domain.AuditLogs;
 using Domain.Messages;
 using Domain.Segments;
+using Domain.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Testing;
 using Moq;
@@ -49,12 +52,13 @@ public class SegmentChangeMessageHandlerTests
 
     private static string BuildMessage(
         Guid env1, Guid env2, Guid segmentId, DateTime updatedAt,
-        Guid? operatorId = null, string? operation = null, bool? isTargetingChange = null)
+        Guid? operatorId = null, string? operation = null, bool? isTargetingChange = null, Guid? organizationId = null)
     {
         var notification = operatorId is null && operation is null && isTargetingChange is null
             ? "{}"
             : $$"""
                 {
+                  "organizationId": {{JsonSerializer.Serialize(organizationId)}},
                   "operatorId": "{{operatorId}}",
                   "operation": "{{operation}}",
                   "isTargetingChange": {{(isTargetingChange!.Value ? "true" : "false")}}
@@ -69,6 +73,31 @@ public class SegmentChangeMessageHandlerTests
                    "region": "{{Region}}"
                  }
                  """;
+    }
+
+    [Fact]
+    public async Task HandleAsync_BestEffort_PreservesAuditOwnershipForAffectedFlags()
+    {
+        var workspaceId = Guid.NewGuid();
+        var organizationId = Guid.NewGuid();
+        var operatorId = Guid.NewGuid();
+        var segment = new Segment { Id = Guid.NewGuid(), WorkspaceId = workspaceId };
+        var affectedFlags = new Collection<FlagReference> { new() };
+        _segSvc.Setup(x => x.GetAffectedFlagsAsync(It.IsAny<Guid>(), It.IsAny<OnSegmentChange>()))
+            .ReturnsAsync(affectedFlags);
+        var payload = JsonSerializer.Serialize(new
+        {
+            segmentNonSpecific = segment,
+            envIds = new[] { Guid.NewGuid() },
+            notification = new OnSegmentChange(segment, workspaceId, organizationId, Operations.Update,
+                new DataChange(), operatorId, isTargetingChange: true),
+            region = Region
+        }, ReusableJsonSerializerOptions.Web);
+
+        await CreateSut("BestEffort").HandleAsync(payload);
+
+        _ff.Verify(x => x.OnSegmentUpdatedAsync(workspaceId, organizationId,
+            It.Is<Segment>(s => s.Id == segment.Id), operatorId, affectedFlags), Times.Once);
     }
 
     [Fact]
@@ -113,7 +142,7 @@ public class SegmentChangeMessageHandlerTests
         _cache.Verify(x => x.UpsertSegmentAsync(It.IsAny<ICollection<Guid>>(), It.IsAny<Segment>()), Times.Once);
 
         _ff.Verify(
-            x => x.OnSegmentUpdatedAsync(It.IsAny<Segment>(), It.IsAny<Guid>(), It.IsAny<ICollection<FlagReference>>()),
+            x => x.OnSegmentUpdatedAsync(It.IsAny<Guid>(), It.IsAny<Guid?>(), It.IsAny<Segment>(), It.IsAny<Guid>(), It.IsAny<ICollection<FlagReference>>()),
             Times.Never);
 
         _segSvc.Verify(
@@ -164,12 +193,13 @@ public class SegmentChangeMessageHandlerTests
         // isTargetingChange = false) so the assertions below can't be satisfied by accident with
         // the legacy hardcoded reconstruction values (Guid.Empty / Update / true).
         var operatorId = Guid.NewGuid();
+        var organizationId = Guid.NewGuid();
         const string operation = "Archive";
         const bool isTargetingChange = false;
 
         var payload = BuildMessage(
             env1, env2, segmentId, updatedAt,
-            operatorId: operatorId, operation: operation, isTargetingChange: isTargetingChange);
+            operatorId: operatorId, operation: operation, isTargetingChange: isTargetingChange, organizationId: organizationId);
 
         await sut.HandleAsync(payload);
 
@@ -183,13 +213,14 @@ public class SegmentChangeMessageHandlerTests
                 expectedTs,
                 operatorId,
                 operation,
-                isTargetingChange),
+                isTargetingChange,
+                organizationId),
             Times.Once);
 
         // GatedCommit must hold the affected-flags / segment-change propagation for the coordinator.
         _cache.Verify(x => x.UpsertSegmentAsync(It.IsAny<ICollection<Guid>>(), It.IsAny<Segment>()), Times.Never);
         _ff.Verify(
-            x => x.OnSegmentUpdatedAsync(It.IsAny<Segment>(), It.IsAny<Guid>(), It.IsAny<ICollection<FlagReference>>()),
+            x => x.OnSegmentUpdatedAsync(It.IsAny<Guid>(), It.IsAny<Guid?>(), It.IsAny<Segment>(), It.IsAny<Guid>(), It.IsAny<ICollection<FlagReference>>()),
             Times.Never);
         _segSvc.Verify(
             x => x.PublishChangeMessage(
@@ -198,5 +229,55 @@ public class SegmentChangeMessageHandlerTests
         _segSvc.Verify(
             x => x.GetAffectedFlagsAsync(It.IsAny<Guid>(), It.IsAny<OnSegmentChange>()),
             Times.Never);
+    }
+
+    private static string BuildDeleteMessage(Guid[] envIds, Guid segmentId, string? region = Region)
+        => JsonSerializer.Serialize(
+            new { deleted = new { envIds, id = segmentId }, region },
+            ReusableJsonSerializerOptions.Web);
+
+    [Fact]
+    public async Task HandleAsync_Deleted_DeletesTheSegmentFromEveryDcAndPublishesNothing()
+    {
+        var sut = CreateSut();
+        Guid[] envIds = [Guid.NewGuid(), Guid.NewGuid()];
+        var segmentId = Guid.NewGuid();
+
+        await sut.HandleAsync(BuildDeleteMessage(envIds, segmentId));
+
+        _cache.Verify(
+            x => x.DeleteSegmentAsync(It.Is<ICollection<Guid>>(ids => ids.SequenceEqual(envIds)), segmentId),
+            Times.Once);
+        _cache.Verify(
+            x => x.UpsertSegmentAsync(It.IsAny<ICollection<Guid>>(), It.IsAny<Segment>()), Times.Never);
+        _producer.Verify(
+            x => x.PublishAsync(It.IsAny<string>(), It.IsAny<It.IsAnyType>()), Times.Never);
+    }
+
+    [Theory]
+    [InlineData("another-region")]
+    [InlineData(null)]
+    public async Task HandleAsync_Deleted_ForAnotherRegion_DoesNothing(string? region)
+    {
+        var sut = CreateSut();
+
+        await sut.HandleAsync(BuildDeleteMessage([Guid.NewGuid()], Guid.NewGuid(), region));
+
+        _cache.Verify(
+            x => x.DeleteSegmentAsync(It.IsAny<ICollection<Guid>>(), It.IsAny<Guid>()), Times.Never);
+    }
+
+    [Theory]
+    [InlineData("""{"deleted":{"id":"3f2c3f64-6d6a-4f4b-9f0a-1d7c2f8c9a01"},"region":"us-east-1"}""")]
+    [InlineData("""{"deleted":{"envIds":["3f2c3f64-6d6a-4f4b-9f0a-1d7c2f8c9a01"]},"region":"us-east-1"}""")]
+    [InlineData("""{"deleted":{"envIds":["3f2c3f64-6d6a-4f4b-9f0a-1d7c2f8c9a01"],"id":"5b8d7a10-1c2e-4d3f-8a9b-0c1d2e3f4a5b"}}""")]
+    public async Task HandleAsync_DeletedWithMissingFields_Throws(string payload)
+    {
+        var sut = CreateSut();
+
+        await Assert.ThrowsAsync<InvalidDataException>(() => sut.HandleAsync(payload));
+
+        _cache.Verify(
+            x => x.DeleteSegmentAsync(It.IsAny<ICollection<Guid>>(), It.IsAny<Guid>()), Times.Never);
     }
 }

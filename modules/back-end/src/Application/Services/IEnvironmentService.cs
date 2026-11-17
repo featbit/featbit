@@ -5,6 +5,8 @@ namespace Application.Services;
 
 public interface IEnvironmentService : IService<Environment>
 {
+    Task<Domain.Organizations.Organization> GetOrganizationAsync(Guid envId);
+
     Task<string[]> GetServesAsync(string[] scopes);
 
     Task<RpSecret[]> GetRpSecretsAsync(Guid[] envIds);

@@ -1,3 +1,7 @@
+using Application.AuditLogs;
+using Application.Users;
+using Domain.AuditLogs;
+
 namespace Application.Members;
 
 public class RemoveFromOrganization : IRequest<bool>
@@ -12,11 +16,16 @@ public class RemoveFromOrganization : IRequest<bool>
 public class RemoveFromOrganizationHandler(
     IOrganizationService organizationService,
     IMemberService memberService,
-    ISender mediator) : IRequestHandler<RemoveFromOrganization, bool>
+    ISender mediator, IPublisher publisher, ICurrentUser currentUser) : IRequestHandler<RemoveFromOrganization, bool>
 {
     public async Task<bool> Handle(RemoveFromOrganization request, CancellationToken cancellationToken)
     {
+        var previous = await memberService.GetAuditSnapshotAsync(request.MemberId, request.OrganizationId, request.WorkspaceId);
+        var change = new DataChange(previous);
         await memberService.DeleteAsync(request.OrganizationId, request.MemberId);
+
+        await publisher.Publish(new OnIamResourceChanged(request.WorkspaceId, request.OrganizationId,
+            AuditLogRefTypes.Member, Operations.RemoveFromOrganization, previous, change.To(null), currentUser.Id), cancellationToken);
 
         var organizations = 
             await organizationService.GetUserOrganizationsAsync(request.WorkspaceId, request.MemberId);

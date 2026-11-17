@@ -1,26 +1,13 @@
+import { useListQuery, useListSearch } from "@/lib/use-list-query"
+import { ListPaginationControls } from "@/components/list-pagination-controls"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import {
-  CircleAlert,
-  ChevronLeft,
-  ChevronRight,
-  Plus,
-  Search,
-  Waypoints,
-} from "lucide-react"
-import { useCallback, useEffect, useState } from "react"
+import { CircleAlert, Plus, Search, Waypoints } from "lucide-react"
+import { useCallback, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { UnavailablePage } from "@/components/unavailable-page"
 import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
 import { currentUserPoliciesQueryOptions } from "@/features/iam/current-user-policy-query"
 import {
@@ -59,23 +46,23 @@ export function RelayProxiesPage() {
   const queryClient = useQueryClient()
   const workspace = getCurrentWorkspace()
   const organizationId = getCurrentOrganization()?.id ?? ""
-  const [search, setSearch] = useState("")
-  const [debouncedSearch, setDebouncedSearch] = useState("")
-  const [pageIndex, setPageIndex] = useState(1)
-  const [pageSize, setPageSize] = useState(10)
+  const {
+    searchParams,
+    updateParams,
+    pageIndex,
+    pageSize,
+    setPageIndex,
+    setPageSize,
+  } = useListQuery()
+  const { search, setSearch, debouncedSearch } = useListSearch(
+    searchParams,
+    updateParams
+  )
   const [sheet, setSheet] = useState<SheetState>(null)
   const [removeTarget, setRemoveTarget] = useState<RelayProxy | null>(null)
   const [createdRelayProxy, setCreatedRelayProxy] = useState<RelayProxy | null>(
     null
   )
-
-  useEffect(() => {
-    const timeout = window.setTimeout(() => {
-      setDebouncedSearch(search.trim())
-      setPageIndex(1)
-    }, 300)
-    return () => window.clearTimeout(timeout)
-  }, [search])
 
   const permissionsQuery = useQuery({
     ...currentUserPoliciesQueryOptions<UserPolicy>(organizationId),
@@ -158,7 +145,6 @@ export function RelayProxiesPage() {
   })
 
   const data = listQuery.data ?? { totalCount: 0, items: [] }
-  const pageCount = Math.max(1, Math.ceil(data.totalCount / pageSize))
   const from = data.totalCount === 0 ? 0 : (pageIndex - 1) * pageSize + 1
   const to = Math.min(pageIndex * pageSize, data.totalCount)
 
@@ -288,51 +274,19 @@ export function RelayProxiesPage() {
               total: data.totalCount,
             })}
           </span>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="icon-sm"
-              disabled={pageIndex <= 1}
-              onClick={() => setPageIndex((current) => current - 1)}
-            >
-              <ChevronLeft />
-              <span className="sr-only">{t("relayProxies.previous")}</span>
-            </Button>
-            <span className="min-w-14 text-center text-foreground">
-              {pageIndex} / {pageCount}
-            </span>
-            <Button
-              variant="outline"
-              size="icon-sm"
-              disabled={pageIndex >= pageCount}
-              onClick={() => setPageIndex((current) => current + 1)}
-            >
-              <ChevronRight />
-              <span className="sr-only">{t("relayProxies.next")}</span>
-            </Button>
-            <Select
-              value={String(pageSize)}
-              onValueChange={(value) => {
-                setPageSize(Number(value))
-                setPageIndex(1)
-              }}
-            >
-              <SelectTrigger className="w-32">
-                <SelectValue>
-                  {t("relayProxies.perPage", { count: pageSize })}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  {[10, 20, 30].map((size) => (
-                    <SelectItem key={size} value={String(size)}>
-                      {t("relayProxies.perPage", { count: size })}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div>
+          <ListPaginationControls
+            pageIndex={pageIndex}
+            pageSize={pageSize}
+            totalCount={data.totalCount}
+            onPageIndexChange={setPageIndex}
+            onPageSizeChange={(size) => {
+              setPageSize(size)
+              setPageIndex(1)
+            }}
+            perPage={(count) => t("relayProxies.perPage", { count })}
+            previousLabel={t("relayProxies.previous")}
+            nextLabel={t("relayProxies.next")}
+          />
         </div>
       )}
 

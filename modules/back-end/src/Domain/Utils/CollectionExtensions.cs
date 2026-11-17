@@ -2,6 +2,8 @@ namespace Domain.Utils;
 
 public static class CollectionExtensions
 {
+    public static bool IsNullOrEmpty<T>(this ICollection<T> collection) => collection == null || collection.Count == 0;
+
     public static bool AreEquivalent<T>(this ICollection<T> source, ICollection<T> destination)
     {
         if (source == null && destination == null)

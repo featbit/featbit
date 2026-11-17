@@ -1,6 +1,6 @@
 namespace Domain.Targeting;
 
-public class OperatorTypes
+public static class OperatorTypes
 {
     // numeric
     public const string LessThan = "LessThan";
@@ -31,4 +31,32 @@ public class OperatorTypes
     // is true/ is false
     public const string IsTrue = "IsTrue";
     public const string IsFalse = "IsFalse";
+
+    public static readonly string[] All =
+    [
+        LessThan,
+        BiggerThan,
+        LessEqualThan,
+        BiggerEqualThan,
+
+        Equal,
+        NotEqual,
+
+        Contains,
+        NotContain,
+
+        StartsWith,
+        EndsWith,
+
+        MatchRegex,
+        NotMatchRegex,
+
+        IsOneOf,
+        NotOneOf,
+
+        IsTrue,
+        IsFalse
+    ];
+
+    public static bool IsDefined(string op) => All.Contains(op);
 }

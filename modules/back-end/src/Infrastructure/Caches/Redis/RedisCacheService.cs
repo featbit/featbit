@@ -188,6 +188,11 @@ public class RedisCacheService(IRedisClient redis) : ICacheService
         // delete cache
         var cacheKey = RedisKeys.Flag(flagId);
         await Redis.KeyDeleteAsync(cacheKey);
+
+        // delete the committed version (B1 stage/commit storage, GatedCommit only)
+        await DeleteCommittedVersionAsync(
+            RedisKeys.FlagCommittedPointer(flagId),
+            ts => RedisKeys.FlagVersion(flagId, ts));
     }
 
     public async Task UpsertSegmentAsync(ICollection<Guid> envIds, Segment segment)
@@ -303,6 +308,11 @@ public class RedisCacheService(IRedisClient redis) : ICacheService
         return Redis.KeyExistsAsync(RedisKeys.SegmentVersion(id, ts));
     }
 
+    /// <summary>
+    /// Removes the segment from the index of every environment it belongs to and deletes its value key. Under
+    /// <c>GatedCommit</c> it also deletes the committed version; the committed pointer stays, so that an older version
+    /// committed later cannot make the segment servable again.
+    /// </summary>
     public async Task DeleteSegmentAsync(ICollection<Guid> envIds, Guid segmentId)
     {
         // delete index first
@@ -315,6 +325,32 @@ public class RedisCacheService(IRedisClient redis) : ICacheService
         // delete cache
         var cacheKey = RedisKeys.Segment(segmentId);
         await Redis.KeyDeleteAsync(cacheKey);
+
+        // delete the committed version (B2 stage/commit storage, GatedCommit only)
+        await DeleteCommittedVersionAsync(
+            RedisKeys.SegmentCommittedPointer(segmentId),
+            ts => RedisKeys.SegmentVersion(segmentId, ts));
+    }
+
+    /// <summary>
+    /// Deletes the committed versioned value key an object's committed pointer refers to. Only
+    /// <c>GatedCommit</c> writes a pointer, so in any other mode this is a single read that finds nothing.
+    /// <para>
+    /// The pointer itself stays, on purpose. It keeps rejecting an older version that is committed after the
+    /// delete (for example by a backfill that read the database before the object was deleted), so such a
+    /// version cannot make the object servable again, and <see cref="Infrastructure.AppService.StagedFlagGcWorker"/>
+    /// only collects the older versions of an object that still has a pointer.
+    /// </para>
+    /// A staged version that was never committed is not found this way, because finding it would take a scan of
+    /// the keyspace, so it stays in Redis.
+    /// </summary>
+    private async Task DeleteCommittedVersionAsync(RedisKey pointerKey, Func<long, RedisKey> versionKey)
+    {
+        var pointer = await Redis.StringGetAsync(pointerKey);
+        if (pointer.HasValue && pointer.TryParse(out long ts))
+        {
+            await Redis.KeyDeleteAsync(versionKey(ts));
+        }
     }
 
     public async Task UpsertLicenseAsync(Workspace workspace)
@@ -394,9 +430,11 @@ public class RedisCacheService(IRedisClient redis) : ICacheService
 
     public async Task DeletePodConnection(Guid podId)
     {
-        await Redis.HashDeleteAsync(RedisKeys.Heartbeats, podId.ToString());
-
         await DeletePodClients(podId);
+
+        // Remove the heartbeat entry last: if the cleanup above fails, the pod is still listed as stale
+        // and the next health check tries again.
+        await Redis.HashDeleteAsync(RedisKeys.Heartbeats, podId.ToString());
     }
 
     public async Task<List<HealthMessage>> GetAllHealthMessages()
@@ -421,10 +459,14 @@ public class RedisCacheService(IRedisClient redis) : ICacheService
         return result;
     }
 
+    /// <summary>
+    /// Deletes the connection keys that belong to the pod with this heartbeat id, on every non-replica endpoint of this
+    /// Redis. The keys are read as a stream and handled in batches, so the memory used does not grow with the number of
+    /// connection keys in Redis.
+    /// </summary>
     private async Task DeletePodClients(Guid heartbeatId)
     {
         var heartbeatIdString = heartbeatId.ToString();
-        var connectionKeys = new List<RedisKey>();
 
         foreach (var endPoint in redis.Connection.GetEndPoints())
         {
@@ -434,32 +476,12 @@ public class RedisCacheService(IRedisClient redis) : ICacheService
                 continue;
             }
 
-            await foreach (var key in server.KeysAsync(pattern: RedisKeys.ConnectionPattern, pageSize: 250))
-            {
-                connectionKeys.Add(key);
-            }
-        }
-
-        if (connectionKeys.Count == 0)
-        {
-            return;
-        }
-
-        var heartbeatLookups = connectionKeys
-            .Select(key => Redis.HashGetAsync(key, "heartbeatId"))
-            .ToArray();
-
-        var heartbeatValues = await Task.WhenAll(heartbeatLookups);
-
-        var connectionsToRemove = connectionKeys
-            .Zip(heartbeatValues, (key, value) => (Key: key, Value: value))
-            .Where(x => x.Value.HasValue && x.Value == heartbeatIdString)
-            .Select(x => x.Key)
-            .ToArray();
-
-        if (connectionsToRemove.Length > 0)
-        {
-            await Redis.KeyDeleteAsync(connectionsToRemove);
+            // Work in bounded batches so the memory used does not grow with the number of connection keys in Redis.
+            await PodConnectionCleanup.RemoveOwnedByAsync(
+                server.KeysAsync(pattern: RedisKeys.ConnectionPattern, pageSize: 250),
+                heartbeatIdString,
+                keys => Task.WhenAll(keys.Select(key => Redis.HashGetAsync(key, "heartbeatId"))),
+                keys => Redis.KeyDeleteAsync(keys));
         }
     }
 }

@@ -1,0 +1,120 @@
+import { render, screen } from "@testing-library/react"
+import { MemoryRouter } from "react-router-dom"
+import { describe, expect, it, vi } from "vitest"
+import "@/lib/i18n/i18n"
+import type { ExperimentListRow } from "../experiment-list-state"
+import { ExperimentsTable } from "./experiments-table"
+
+const experiment: ExperimentListRow = {
+  id: "experiment-1",
+  name: "Checkout optimization",
+  description: "Reduce friction from cart to completed order",
+  stage: "hypothesis",
+  listState: { key: "measuring" },
+  flagId: "flag-1",
+  flagKey: "checkout-redesign",
+  flagName: "Checkout redesign",
+  envId: "env-1",
+  runCount: 3,
+  runMethodSummary: "Bayesian",
+  createdAt: "2026-08-20T08:00:00Z",
+  updatedAt: "2026-08-29T08:42:00Z",
+}
+
+describe("ExperimentsTable", () => {
+  it("shows the approved experiment summary and only a Details action", () => {
+    render(
+      <MemoryRouter>
+        <ExperimentsTable
+          items={[experiment]}
+          loading={false}
+          filtered={false}
+          lang="en"
+          detailsHref={(id) => `/en/experiments/${id}`}
+          onClearFilters={vi.fn()}
+          onCreate={vi.fn()}
+        />
+      </MemoryRouter>
+    )
+
+    expect(screen.getByText("Checkout optimization")).toHaveAttribute(
+      "href",
+      "/en/experiments/experiment-1"
+    )
+    expect(screen.getByText("3 runs")).toBeInTheDocument()
+    expect(screen.getByText("Bayesian A/B/n")).toBeInTheDocument()
+    expect(screen.getByText("Measuring")).toBeInTheDocument()
+    expect(screen.getByRole("link", { name: "Details" })).toHaveAttribute(
+      "href",
+      "/en/experiments/experiment-1"
+    )
+    expect(screen.queryByText("Delete")).not.toBeInTheDocument()
+    expect(screen.queryByText("Archive")).not.toBeInTheDocument()
+
+    const flagLink = screen.getByRole("link", { name: "Checkout redesign" })
+    expect(flagLink).toHaveAttribute(
+      "href",
+      "/en/feature-flags/checkout-redesign/targeting"
+    )
+    expect(flagLink).toHaveAttribute("target", "_blank")
+    expect(flagLink).toHaveAttribute("rel", "noopener noreferrer")
+    expect(screen.getByText("checkout-redesign").closest("a, button")).toBeNull()
+  })
+
+  it("shows unbound and no-run states without inventing a method", () => {
+    render(
+      <MemoryRouter>
+        <ExperimentsTable
+          items={[
+            {
+              ...experiment,
+              flagId: null,
+              flagKey: null,
+              flagName: null,
+              runCount: 0,
+              runMethodSummary: null,
+              stage: "hypothesis",
+              listState: { key: "hypothesis" },
+            },
+          ]}
+          loading={false}
+          filtered={false}
+          lang="en"
+          detailsHref={(id) => `/en/experiments/${id}`}
+          onClearFilters={vi.fn()}
+          onCreate={vi.fn()}
+        />
+      </MemoryRouter>
+    )
+
+    expect(screen.getByText("Not bound")).toBeInTheDocument()
+    expect(screen.getByText("No runs")).toBeInTheDocument()
+    expect(screen.getByText("Intent & Hypothesis")).toBeInTheDocument()
+    expect(screen.queryByText("Bayesian A/B/n")).not.toBeInTheDocument()
+  })
+
+  it.each([
+    [{ key: "waitDecision" }, "Wait decision"],
+    [{ key: "decision", decision: "ROLLBACK" }, "ROLLBACK"],
+    [{ key: "learnt" }, "Learnt"],
+  ] as const)(
+    "renders the derived state %s instead of the saved stage",
+    (listState, label) => {
+      render(
+        <MemoryRouter>
+          <ExperimentsTable
+            items={[{ ...experiment, listState }]}
+            loading={false}
+            filtered={false}
+            lang="en"
+            detailsHref={(id) => `/en/experiments/${id}`}
+            onClearFilters={vi.fn()}
+            onCreate={vi.fn()}
+          />
+        </MemoryRouter>
+      )
+      expect(screen.getByText(label)).toBeInTheDocument()
+      expect(screen.queryByText("Intent & Hypothesis")).not.toBeInTheDocument()
+    }
+  )
+})

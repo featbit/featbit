@@ -1,9 +1,30 @@
-﻿using Domain.Insights;
+using Domain.Insights;
 
 namespace Domain.UnitTests.Insights;
 
 public class MetricInsightTests
 {
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData(" \t\n")]
+    [InlineData("FlagValue")]
+    public void IsValid_WithMissingOrReservedType_ReturnsFalse(string? type)
+    {
+        var insight = new MetricInsight { Type = type, EventName = "purchase" };
+        Assert.False(insight.IsValid());
+    }
+
+    [Theory]
+    [InlineData("Custom")]
+    [InlineData("Click")]
+    [InlineData("flagvalue")]
+    public void IsValid_WithNonReservedType_ReturnsTrue(string type)
+    {
+        var insight = new MetricInsight { Type = type, EventName = "purchase" };
+        Assert.True(insight.IsValid());
+    }
+
     [Theory]
     [InlineData("my-event")]
     [InlineData("event_123")]
@@ -12,7 +33,7 @@ public class MetricInsightTests
     [InlineData("ALLCAPS")]
     public void IsValid_WithValidEventName_ReturnsTrue(string eventName)
     {
-        var insight = new MetricInsight { EventName = eventName };
+        var insight = new MetricInsight { Type = "Custom", EventName = eventName };
         Assert.True(insight.IsValid());
     }
 
@@ -23,7 +44,7 @@ public class MetricInsightTests
     [InlineData("\t")]
     public void IsValid_WithInvalidEventName_ReturnsFalse(string? eventName)
     {
-        var insight = new MetricInsight { EventName = eventName! };
+        var insight = new MetricInsight { Type = "Custom", EventName = eventName! };
         Assert.False(insight.IsValid());
     }
 
@@ -43,7 +64,7 @@ public class MetricInsightTests
     [InlineData("event\0name")]                    // null byte
     public void IsValid_WithInvalidOrMaliciousEventName_ReturnsFalse(string eventName)
     {
-        var insight = new MetricInsight { EventName = eventName };
+        var insight = new MetricInsight { Type = "Custom", EventName = eventName };
         Assert.False(insight.IsValid());
     }
 }

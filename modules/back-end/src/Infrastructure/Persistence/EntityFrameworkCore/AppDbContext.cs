@@ -38,7 +38,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.ApplyConfiguration(new ExperimentRunConfiguration());
         modelBuilder.ApplyConfiguration(new ExperimentLayerConfiguration());
         modelBuilder.ApplyConfiguration(new ExperimentMetricConfiguration());
-        modelBuilder.ApplyConfiguration(new ExperimentActivityConfiguration());
         modelBuilder.ApplyConfiguration(new ExperimentExposureEventConfiguration());
         modelBuilder.ApplyConfiguration(new ExperimentMetricEventConfiguration());
         modelBuilder.ApplyConfiguration(new ExperimentRunAssignmentConfiguration());

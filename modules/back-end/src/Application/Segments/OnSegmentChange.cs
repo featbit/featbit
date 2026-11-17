@@ -7,6 +7,10 @@ namespace Application.Segments;
 
 public class OnSegmentChange : INotification
 {
+    public Guid WorkspaceId { get; }
+
+    public Guid? OrganizationId { get; }
+
     public Segment Segment { get; set; }
 
     public string Operation { get; set; }
@@ -21,12 +25,16 @@ public class OnSegmentChange : INotification
 
     public OnSegmentChange(
         Segment segment,
+        Guid workspaceId,
+        Guid? organizationId,
         string operation,
         DataChange dataChange,
         Guid operatorId,
         string comment = "",
         bool isTargetingChange = false)
     {
+        WorkspaceId = workspaceId;
+        OrganizationId = organizationId;
         Segment = segment;
         Operation = operation;
         DataChange = dataChange;
@@ -37,7 +45,7 @@ public class OnSegmentChange : INotification
 
     public AuditLog GetAuditLog()
     {
-        var auditLog = AuditLog.For(Segment, Operation, DataChange, Comment, OperatorId);
+        var auditLog = AuditLog.For(Segment, WorkspaceId, OrganizationId, Operation, DataChange, Comment, OperatorId);
 
         return auditLog;
     }
@@ -48,7 +56,7 @@ public class OnSegmentChangeHandler(
     ICacheService cache,
     IAuditLogService auditLogService,
     IWebhookHandler webhookHandler,
-    ISegmentChangePublisher segmentChangePublisher,
+    ISegmentChangePublisher changePublisher,
     IConfiguration configuration)
     : INotificationHandler<OnSegmentChange>
 {
@@ -63,7 +71,7 @@ public class OnSegmentChangeHandler(
         // update cache
         await cache.UpsertSegmentAsync(envIds, segment);
 
-        await segmentChangePublisher.PublishAsync(notification);
+        await changePublisher.PublishAsync(notification);
 
         if (!configuration.UseControlPlane())
         {

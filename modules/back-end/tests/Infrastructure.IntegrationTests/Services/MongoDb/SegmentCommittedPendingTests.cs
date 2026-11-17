@@ -130,17 +130,19 @@ public sealed class SegmentCommittedPendingTests : IntegrationTestBase, IAsyncLi
 
         var pendingValue = CreateSegment("s1-attribution", "new");
         var operatorId = Guid.NewGuid();
+        var organizationId = Guid.NewGuid();
         const string operation = Operations.Archive;
         const bool isTargetingChange = false;
 
         await _sut.SetPendingAsync(
             committed.Id, pendingValue, version: 2,
-            operatorId: operatorId, operation: operation, isTargetingChange: isTargetingChange);
+            operatorId: operatorId, operation: operation, isTargetingChange: isTargetingChange, organizationId: organizationId);
 
         // the attribution context roundtrips on the raw (staged) read
         var raw = await _sut.GetAsync(committed.Id);
         Assert.NotNull(raw.Pending);
         Assert.Equal(operatorId, raw.Pending!.OperatorId);
+        Assert.Equal(organizationId, raw.Pending.OrganizationId);
         Assert.Equal(operation, raw.Pending.Operation);
         Assert.Equal(isTargetingChange, raw.Pending.IsTargetingChange);
 

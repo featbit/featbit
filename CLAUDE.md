@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 FeatBit is a self-hosted feature flag management platform with a microservices architecture. Its services communicate via pluggable message queues:
 
 ```
-UI (Angular 19) → API Server (.NET 10) → Message Queue → Evaluation Server (.NET 10)
+UI (React 19 + Vite) → API Server (.NET 10) → Message Queue → Evaluation Server (.NET 10)
 
 Control Plane (.NET 10) — optional broker between API and Evaluation Servers
 ```
@@ -15,7 +15,7 @@ Control Plane (.NET 10) — optional broker between API and Evaluation Servers
 ### Service Locations
 | Service | Path | Port |
 |---|---|---|
-| Frontend UI | `modules/front-end/` | 4200 (dev) |
+| Frontend UI | `modules/front-end/` | 5173 (dev) |
 | API Server | `modules/back-end/` | 5000 |
 | Evaluation Server | `modules/evaluation-server/` | 5100 |
 | Control Plane | `modules/control-plane/` | — |
@@ -46,13 +46,12 @@ Health endpoints on all .NET services: `/health/liveness`, `/health/readiness`
 
 ### Frontend (modules/front-end/)
 ```bash
-npm install
-npm run start          # Dev server (English) at localhost:4200
-npm run start:zh       # Dev server (Chinese) at localhost:4201
-npm run build:prod     # Production build
-npm run test           # Unit tests (Jasmine/Karma)
-npm run test-coverage  # Coverage report
-npm run i18n           # Extract i18n strings and validate translations
+npm ci
+npm run dev            # Vite dev server at localhost:5173
+npm run build          # Type-check and production build
+npm test               # Vitest unit and component tests
+npm run test:e2e       # Playwright browser tests
+npm run test:e2e:containers # API/frontend container tests
 ```
 
 ### .NET Services (back-end / evaluation-server / control-plane)
@@ -100,7 +99,7 @@ Default dev credentials: `test@featbit.com` / `123456`
 - `SSOEnabled`, `WorkspaceId`, `OAuthConfig__*`
 
 ### Frontend Environment
-Config at `modules/front-end/src/environments/`. API base URL is set via `environment.ts` (dev) or injected at container startup via `config.js`.
+Runtime configuration is loaded from `assets/env.js`. Edit `modules/front-end/public/assets/env.js` for local development; containers generate it from `public/assets/env.template.js`. See `modules/front-end/README.md` for supported variables.
 
 ### Evaluation Server Rate Limiting
 Configurable per-endpoint rate limiting via `RateLimit__*` env vars.
@@ -113,7 +112,7 @@ GitHub Actions workflows run on push/PR to `main` for path-filtered changes:
 - `build-and-test-api.yml` — dotnet restore → build → test
 - `build-and-test-els.yml` — same for Evaluation Server
 - `build-and-test-control-plane.yml` — same for Control Plane
-- `ui-change-validations.yml` — npm ci → i18n → build
+- `build-and-test-frontend.yml` — Vitest and container E2E tests
 - `publish-docker-images.yml` — manual trigger; builds multi-platform (amd64/arm64) images to Docker Hub
 
 Kubernetes manifests are in `kubernetes/` (standard, pro, demo, minikube variants).

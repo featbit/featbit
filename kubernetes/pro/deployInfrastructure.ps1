@@ -31,6 +31,8 @@ kubectl apply -f .\infrastructure\redis-pod.yaml
 
 kubectl apply -f .\infrastructure\clickhouse-configmap-etc.yaml
 
+kubectl apply -f .\infrastructure\clickhouse-init-configMap.yaml
+
 kubectl apply -f .\infrastructure\clickhouse-server-persistentvolumeclaim.yaml
 
 kubectl apply -f .\infrastructure\clickhouse-server-service.yaml

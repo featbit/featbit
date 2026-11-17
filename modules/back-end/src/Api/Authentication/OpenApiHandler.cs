@@ -38,7 +38,7 @@ public class OpenApiHandler(
                 return AuthenticateResult.Fail("invalid-access-token");
             }
 
-            // set workspace, organization id header & store permissions
+            // set workspace, organization id header
             var org = await organizationService.GetAsync(accessToken.OrganizationId);
             // Access-token permissions belong to one organization. Never let a supplied
             // header apply those permissions to another organization or workspace.

@@ -27,6 +27,7 @@ export function SecretsSheet({
   open,
   project,
   environment,
+  canViewSecret,
   canCreateSecret,
   canUpdateSecret,
   canDeleteSecret,
@@ -39,6 +40,7 @@ export function SecretsSheet({
   open: boolean
   project: OrganizationProject | null
   environment: ProjectEnvironment | null
+  canViewSecret: boolean
   canCreateSecret: boolean
   canUpdateSecret: boolean
   canDeleteSecret: boolean
@@ -54,7 +56,7 @@ export function SecretsSheet({
     : t("organization.projects.columns.secrets")
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open && canViewSecret} onOpenChange={onOpenChange}>
       <SheetContent className="gap-0 p-0 data-[side=right]:w-[min(100vw,520px)] data-[side=right]:sm:max-w-[520px]">
         <SheetHeader className="border-b px-6 py-5 pr-12">
           <SheetTitle>{title}</SheetTitle>
@@ -64,7 +66,7 @@ export function SecretsSheet({
             </SheetDescription>
           ) : null}
         </SheetHeader>
-        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-2">
           <div className="mb-4 flex justify-end">
             {environment && canCreateSecret ? (
               <Button

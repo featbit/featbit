@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { MemoryRouter } from "react-router-dom"
 import { fireEvent, render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { fetchCurrentUserPolicies } from "@/features/iam/current-user-permissions"
@@ -44,7 +45,9 @@ function renderPage() {
 
   return render(
     <QueryClientProvider client={queryClient}>
-      <RelayProxiesPage />
+      <MemoryRouter>
+        <RelayProxiesPage />
+      </MemoryRouter>
     </QueryClientProvider>
   )
 }

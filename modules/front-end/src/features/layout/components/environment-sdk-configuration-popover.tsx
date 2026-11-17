@@ -106,6 +106,7 @@ export function EnvironmentSdkConfigurationPopover({
   projectName,
   environmentName,
   secrets,
+  canViewSecrets,
   manageHref,
   disabled = false,
 }: {
@@ -113,6 +114,7 @@ export function EnvironmentSdkConfigurationPopover({
   onOpenChange: (open: boolean) => void
   projectName: string
   environmentName: string
+  canViewSecrets: boolean
   secrets: readonly EnvironmentSecret[]
   manageHref: string
   disabled?: boolean
@@ -267,73 +269,77 @@ export function EnvironmentSdkConfigurationPopover({
             })}
           </div>
 
-          <DropdownMenuSeparator className="mx-0 my-0" />
+          {canViewSecrets ? (
+            <>
+              <DropdownMenuSeparator className="mx-0 my-0" />
 
-          <div className="p-1.5">
-            <div className="flex items-center justify-between px-2 py-1.5">
-              <p className="text-xs font-medium text-muted-foreground">
-                {t("layout.context.environmentSecrets")}
-              </p>
-              <span className="text-xs text-muted-foreground tabular-nums">
-                {secrets.length}
-              </span>
-            </div>
-            <div className="max-h-48 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] overflow-y-auto">
-              {secrets.length ? (
-                secrets.map((secret) => {
-                  const copyId = `secret:${secret.id}`
+              <div className="p-1.5">
+                <div className="flex items-center justify-between px-2 py-1.5">
+                  <p className="text-xs font-medium text-muted-foreground">
+                    {t("layout.context.environmentSecrets")}
+                  </p>
+                  <span className="text-xs text-muted-foreground tabular-nums">
+                    {secrets.length}
+                  </span>
+                </div>
+                <div className="max-h-48 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] overflow-y-auto">
+                  {secrets.length ? (
+                    secrets.map((secret) => {
+                      const copyId = `secret:${secret.id}`
 
-                  return (
-                    <DropdownMenuItem
-                      key={secret.id}
-                      closeOnClick={false}
-                      className="min-h-12 items-center rounded-md px-2.5 py-2"
-                      aria-label={t("layout.context.copyValue", {
-                        name: secret.name,
-                      })}
-                      onClick={() =>
-                        void copyValue({
-                          id: copyId,
-                          name: secret.name,
-                          value: secret.value,
-                        })
-                      }
-                    >
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="truncate font-medium">
-                            {secret.name}
-                          </span>
-                          <SecretTypeBadge type={secret.type} />
-                        </div>
-                        <code className="mt-0.5 block truncate font-mono text-xs text-muted-foreground">
-                          {maskSecret(secret.value)}
-                        </code>
-                      </div>
-                      <CopyStatus
-                        copied={copiedValueId === copyId}
-                        copiedLabel={t("layout.context.copied")}
-                      />
-                    </DropdownMenuItem>
-                  )
-                })
-              ) : (
-                <p className="px-3 py-6 text-center text-sm text-muted-foreground">
-                  {t("layout.context.noEnvironmentSecrets")}
-                </p>
-              )}
-            </div>
-          </div>
+                      return (
+                        <DropdownMenuItem
+                          key={secret.id}
+                          closeOnClick={false}
+                          className="min-h-12 items-center rounded-md px-2.5 py-2"
+                          aria-label={t("layout.context.copyValue", {
+                            name: secret.name,
+                          })}
+                          onClick={() =>
+                            void copyValue({
+                              id: copyId,
+                              name: secret.name,
+                              value: secret.value,
+                            })
+                          }
+                        >
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="truncate font-medium">
+                                {secret.name}
+                              </span>
+                              <SecretTypeBadge type={secret.type} />
+                            </div>
+                            <code className="mt-0.5 block truncate font-mono text-xs text-muted-foreground">
+                              {maskSecret(secret.value)}
+                            </code>
+                          </div>
+                          <CopyStatus
+                            copied={copiedValueId === copyId}
+                            copiedLabel={t("layout.context.copied")}
+                          />
+                        </DropdownMenuItem>
+                      )
+                    })
+                  ) : (
+                    <p className="px-3 py-6 text-center text-sm text-muted-foreground">
+                      {t("layout.context.noEnvironmentSecrets")}
+                    </p>
+                  )}
+                </div>
+              </div>
 
-          <DropdownMenuSeparator className="mx-0 my-0" />
-          <DropdownMenuItem
-            className="m-1.5 h-9 px-2 text-muted-foreground"
-            render={<Link to={manageHref} />}
-            onClick={() => handleOpenChange(false)}
-          >
-            <Settings className="size-4" />
-            {t("layout.context.manageSecrets")}
-          </DropdownMenuItem>
+              <DropdownMenuSeparator className="mx-0 my-0" />
+              <DropdownMenuItem
+                className="m-1.5 h-9 px-2 text-muted-foreground"
+                render={<Link to={manageHref} />}
+                onClick={() => handleOpenChange(false)}
+              >
+                <Settings className="size-4" />
+                {t("layout.context.manageSecrets")}
+              </DropdownMenuItem>
+            </>
+          ) : null}
         </DropdownMenuContent>
       </DropdownMenu>
     </TooltipProvider>

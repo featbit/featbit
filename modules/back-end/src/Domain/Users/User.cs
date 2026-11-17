@@ -14,6 +14,11 @@ public class User : AuditedEntity
 
     public string InitialPassword { get; set; }
 
+    // for efcore deserialization
+    private User()
+    {
+    }
+
     /// <summary>
     /// for test project use only
     /// </summary>

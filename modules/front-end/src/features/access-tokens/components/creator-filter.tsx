@@ -17,7 +17,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
-import { fetchAccessTokenCreators } from "../access-tokens-api"
+import { fetchOrganizationMembers } from "@/features/organization/organization-members-api"
 import type { AccessTokenCreator } from "../access-token-types"
 
 function creatorLabel(creator: AccessTokenCreator) {
@@ -43,7 +43,7 @@ export function CreatorFilter({
 
   const creatorsQuery = useQuery({
     queryKey: ["access-token-creators", debouncedSearch],
-    queryFn: () => fetchAccessTokenCreators(debouncedSearch),
+    queryFn: () => fetchOrganizationMembers({ searchText: debouncedSearch }),
     enabled: open,
     staleTime: 30_000,
   })

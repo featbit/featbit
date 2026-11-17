@@ -563,7 +563,7 @@ For UI:
 - `EVALUATION_URL=https://featbit-eval.east.local` - External HTTPS URL
 
 **Important Notes:**
-- The UI is a client-side Angular application that runs in the browser, so it requires external HTTPS URLs, not internal Kubernetes service names
+- The UI is a client-side React application that runs in the browser, so it requires external HTTPS URLs, not internal Kubernetes service names
 - FeatBit Pro can use either MongoDB OR PostgreSQL for the database backend, not both simultaneously
 - For this deployment, we use MongoDB exclusively via the `DbProvider=MongoDb` setting
 - The message queue uses Kafka via the `MqProvider=Kafka` setting

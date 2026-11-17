@@ -6,6 +6,95 @@ namespace Domain.UnitTests.FeatureFlags;
 
 public class TargetingRulesDifferTests
 {
+    [Theory]
+    [InlineData("keyId", 0.49)]
+    [InlineData("name", 0.75)]
+    public void PrefersExactMatchAfterRuleWithSameConditions(string firstDispatchKey, double firstSplit)
+    {
+        TargetRule Rule(string id, string dispatchKey, double split, string prefix) => new()
+        {
+            Id = id,
+            DispatchKey = dispatchKey,
+            Conditions = [new Condition { Property = "keyId", Op = "Equal", Value = "abc" }],
+            Variations =
+            [
+                new RolloutVariation { Id = prefix + "true", Rollout = [0, split] },
+                new RolloutVariation { Id = prefix + "false", Rollout = [split, 1] }
+            ]
+        };
+        var sourceRule = Rule("source", "name", 0.49, "s-");
+        var first = Rule("first", firstDispatchKey, firstSplit, "t-");
+        var exact = Rule("exact", "name", 0.49, "t-");
+        var source = CreateFeatureFlag(
+            [new Variation { Id = "s-true", Value = "true" }, new Variation { Id = "s-false", Value = "false" }],
+            [sourceRule]);
+        var target = CreateFeatureFlag(
+            [new Variation { Id = "t-true", Value = "true" }, new Variation { Id = "t-false", Value = "false" }],
+            [first, exact]);
+
+        var diffs = FlagDiffer.CompareRules(source, target, []);
+
+        var sourceDiff = Assert.Single(diffs, diff => diff.Source != null);
+        Assert.Same(exact, sourceDiff.Target);
+        Assert.False(sourceDiff.IsDifferent);
+        Assert.Contains(diffs, diff => diff.Source == null && diff.Target == first && diff.IsDifferent);
+
+        var options = new FlagSettingCopyOptions(false, new(false, CopyModes.Append),
+            new(true, CopyModes.Append), false, false);
+        FlagCopyHelper.CopySettings(new FlagCopyContext(source, target, [], options));
+        Assert.Equal(new[] { first, exact }, target.Rules);
+    }
+
+    [Theory]
+    [InlineData("keyId", "email", true)]
+    [InlineData("email", "keyId", true)]
+    [InlineData(null, "email", true)]
+    [InlineData("email", null, true)]
+    [InlineData("email", "email", false)]
+    [InlineData(null, "keyId", false)]
+    [InlineData("keyId", null, false)]
+    [InlineData("", "keyId", false)]
+    [InlineData("keyId", " ", false)]
+    public void CompareDispatchKeys(string? sourceDispatchKey, string? targetDispatchKey, bool expectedDifference)
+    {
+        var sourceRule = new TargetRule
+        {
+            Id = "source-rule",
+            DispatchKey = sourceDispatchKey,
+            Conditions = [new Condition { Property = "country", Op = "Equal", Value = "US" }],
+            Variations =
+            [
+                new RolloutVariation { Id = "source-true", Rollout = [0, 0.5] },
+                new RolloutVariation { Id = "source-false", Rollout = [0.5, 1] }
+            ]
+        };
+        var targetRule = new TargetRule
+        {
+            Id = "target-rule",
+            DispatchKey = targetDispatchKey,
+            Conditions = [new Condition { Property = "country", Op = "Equal", Value = "US" }],
+            Variations =
+            [
+                new RolloutVariation { Id = "target-true", Rollout = [0, 0.5] },
+                new RolloutVariation { Id = "target-false", Rollout = [0.5, 1] }
+            ]
+        };
+        var sourceFlag = CreateFeatureFlag(
+            [new Variation { Id = "source-true", Value = "true" }, new Variation { Id = "source-false", Value = "false" }],
+            [sourceRule]
+        );
+        var targetFlag = CreateFeatureFlag(
+            [new Variation { Id = "target-true", Value = "true" }, new Variation { Id = "target-false", Value = "false" }],
+            [targetRule]
+        );
+
+        var diff = Assert.Single(FlagDiffer.CompareRules(sourceFlag, targetFlag, []));
+
+        Assert.Same(sourceRule, diff.Source);
+        Assert.Same(targetRule, diff.Target);
+        Assert.Equal(expectedDifference, diff.IsDifferent);
+    }
+
     [Fact]
     public void NoRules()
     {
@@ -430,9 +519,12 @@ public class TargetingRulesDifferTests
 
         var diffs = FlagDiffer.CompareRules(sourceFlag, targetFlag, []);
 
-        Assert.Equal(2, diffs.Count);
+        Assert.Equal(3, diffs.Count);
         Assert.True(diffs[0].IsDifferent);
+        Assert.Null(diffs[0].Target);
         Assert.False(diffs[1].IsDifferent);
+        Assert.Null(diffs[2].Source);
+        Assert.Same(targetFlag.Rules.First(), diffs[2].Target);
     }
 
     [Fact]

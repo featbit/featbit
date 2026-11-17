@@ -15,7 +15,7 @@ namespace Application.IntegrationTests.Controllers;
 [Collection(nameof(TestApp))]
 public class AccessTokenControllerTests : IClassFixture<PermissionCheckTestApp>
 {
-    private static readonly Guid OrganizationId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+    private static readonly Guid OrganizationId = TestWorkspace.OrganizationId;
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
     private readonly PermissionCheckTestApp _app;
@@ -36,7 +36,6 @@ public class AccessTokenControllerTests : IClassFixture<PermissionCheckTestApp>
             .Setup(sender => sender.Send(It.IsAny<GetAccessTokenList>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expected);
         var client = await _app.CreateAuthenticatedClientAsync();
-        client.DefaultRequestHeaders.Add(ApiConstants.OrgIdHeaderKey, OrganizationId.ToString());
 
         var response = await client.GetAsync("/api/v1/access-tokens?pageIndex=0&pageSize=10");
 
@@ -57,7 +56,6 @@ public class AccessTokenControllerTests : IClassFixture<PermissionCheckTestApp>
     {
         _app.PermissionChecker.Grant = false;
         var client = await _app.CreateAuthenticatedClientAsync();
-        client.DefaultRequestHeaders.Add(ApiConstants.OrgIdHeaderKey, OrganizationId.ToString());
 
         var response = await client.GetAsync("/api/v1/access-tokens?pageIndex=0&pageSize=10");
 

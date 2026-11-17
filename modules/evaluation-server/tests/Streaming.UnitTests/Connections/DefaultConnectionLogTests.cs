@@ -1,4 +1,4 @@
-using Domain.Shared;
+using Domain.Secrets;
 using Microsoft.Extensions.Logging.Testing;
 using Streaming.Connections;
 using Streaming.UnitTests.Builders;

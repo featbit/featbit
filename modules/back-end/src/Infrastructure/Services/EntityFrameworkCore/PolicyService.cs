@@ -1,3 +1,4 @@
+using Domain.AuditLogs;
 using Application.Bases.Exceptions;
 using Application.Bases.Models;
 using Application.Policies;
@@ -12,6 +13,25 @@ namespace Infrastructure.Services.EntityFrameworkCore;
 
 public class PolicyService(AppDbContext dbContext) : EntityFrameworkCoreService<Policy>(dbContext), IPolicyService
 {
+    public async Task<PolicyAuditSnapshot?> GetAuditSnapshotAsync(Guid id)
+    {
+        var policy = await DbContext.Set<Policy>().AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+        if (policy == null) return null;
+        var memberIds = await DbContext.Set<MemberPolicy>().AsNoTracking().Where(x => x.PolicyId == id).Select(x => x.MemberId).ToListAsync();
+        var groupIds = await DbContext.Set<GroupPolicy>().AsNoTracking().Where(x => x.PolicyId == id).Select(x => x.GroupId).ToListAsync();
+        var members = await DbContext.Set<User>().AsNoTracking().Where(x => memberIds.Contains(x.Id))
+            .Select(x => new IamAuditReference(x.Id, x.Name, "member/" + x.Email)).ToListAsync();
+        var groups = await DbContext.Set<Group>().AsNoTracking().Where(x => groupIds.Contains(x.Id))
+            .Select(x => new IamAuditReference(x.Id, x.Name, "group/" + x.Name)).ToListAsync();
+        var statements = policy.Statements.OrderBy(x => x.Id).Select(x => new PolicyStatement
+        {
+            Id = x.Id, ResourceType = x.ResourceType, Effect = x.Effect,
+            Actions = x.Actions.Distinct().Order().ToArray(), Resources = x.Resources.Distinct().Order().ToArray()
+        }).ToArray();
+        return new PolicyAuditSnapshot(policy.Id, policy.Name, $"policy/{policy.Key}", policy.Description,
+            statements, members.OrderBy(x => x.Id).ToArray(), groups.OrderBy(x => x.Id).ToArray());
+    }
+
     public async Task DeleteAsync(Guid id)
     {
         // delete policy

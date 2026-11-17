@@ -6,6 +6,10 @@ namespace Application.FeatureFlags;
 
 public class CopyFlagSettings : IRequest<bool>
 {
+    public Guid WorkspaceId { get; set; }
+
+    public Guid OrgId { get; set; }
+
     public string Key { get; set; }
 
     public Guid SourceEnvId { get; set; }
@@ -38,8 +42,7 @@ public class CopyFlagSettingsHandler(
         var projectEnv = await envService.GetProjectEnvAsync(request.SourceEnvId);
 
         // publish on feature flag change notification
-        var notification = new OnFeatureFlagChanged(
-            target, Operations.Update, dataChange, currentUser.Id, $"Copy flag settings from \"{projectEnv}\""
+        var notification = new OnFeatureFlagChanged(target, request.WorkspaceId, request.OrgId, Operations.Update, dataChange, currentUser.Id, $"Copy flag settings from \"{projectEnv}\""
         );
         await publisher.Publish(notification, cancellationToken);
 

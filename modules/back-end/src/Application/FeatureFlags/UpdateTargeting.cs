@@ -24,6 +24,8 @@ public class UpdateTargetingPayload : ResourceChangeRequest
 
 public class UpdateTargeting : UpdateTargetingPayload, IRequest<Guid>
 {
+    public Guid WorkspaceId { get; set; }
+
     public Guid OrgId { get; set; }
 
     public Guid EnvId { get; set; }
@@ -55,12 +57,6 @@ public class UpdateTargetingValidator : AbstractValidator<UpdateTargeting>
     {
         RuleFor(x => x.Targeting)
             .NotNull().WithErrorCode(ErrorCodes.Required("targeting"));
-
-        When(x => x.Targeting is not null, () =>
-        {
-            RuleFor(x => x.Targeting.DisabledVariationId)
-                .NotEmpty().WithErrorCode(ErrorCodes.Required("disabledVariationId"));
-        });
     }
 }
 
@@ -79,6 +75,8 @@ public class UpdateTargetingHandler(
             throw new ConflictException(nameof(FeatureFlag), flag.Id);
         }
 
+        FlagTargetingValidator.EnsureValid(request.Targeting, flag.Variations);
+
         var dataChange = flag.UpdateTargeting(request.Targeting, currentUser.Id);
 
         await permissionGuard.EnsureFlagChangeAllowedAsync(flag, dataChange, request.Permissions);
@@ -88,6 +86,8 @@ public class UpdateTargetingHandler(
         // publish on feature flag change notification
         var notification = new OnFeatureFlagChanged(
             flag,
+            request.WorkspaceId,
+            request.OrgId,
             Operations.Update,
             dataChange,
             currentUser.Id,

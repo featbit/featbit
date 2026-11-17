@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useParams } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
-import { Alert, AlertAction, AlertDescription } from "@/components/ui/alert"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
   getCurrentWorkspace,
@@ -149,16 +149,28 @@ export function UsagePage() {
         />
 
         {hasError ? (
-          <Alert variant="destructive">
+          <Alert
+            variant="destructive"
+            className="flex items-center justify-between gap-3"
+          >
             <AlertDescription>
-              {t("workspace.usage.failedToLoad")}
+              {isSaas && cycleQuery.isError ? (
+                <div>{t("workspace.usage.failedToLoadBillingCycle")}</div>
+              ) : null}
+              {usageQuery.isError ? (
+                <div>{t("workspace.usage.failedToLoad")}</div>
+              ) : null}
             </AlertDescription>
-            <AlertAction>
-              <Button type="button" variant="outline" size="sm" onClick={retry}>
-                <RefreshCw className="size-3.5" />
-                {t("workspace.usage.retry")}
-              </Button>
-            </AlertAction>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="shrink-0"
+              onClick={retry}
+            >
+              <RefreshCw className="size-3.5" />
+              {t("workspace.usage.retry")}
+            </Button>
           </Alert>
         ) : null}
 

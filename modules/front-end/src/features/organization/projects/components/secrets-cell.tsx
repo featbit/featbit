@@ -66,18 +66,20 @@ function SecretValue({
 export function SecretsCell({
   environment,
   canAddSecret,
+  canViewSecret,
   onAddSecret,
   onCopySecret,
   onViewSecrets,
 }: {
   environment: ProjectEnvironment
   canAddSecret: boolean
+  canViewSecret: boolean
   onAddSecret: (environment: ProjectEnvironment) => void
   onCopySecret: (value: string) => void
   onViewSecrets: (environment: ProjectEnvironment) => void
 }) {
   const { t } = useTranslation()
-  const visibleSecrets = environment.secrets.slice(0, 2)
+  const visibleSecrets = canViewSecret ? environment.secrets.slice(0, 2) : []
   const hiddenCount = Math.max(
     environment.secrets.length - visibleSecrets.length,
     0
@@ -91,7 +93,7 @@ export function SecretsCell({
         ))
       ) : (
         <div className="text-xs text-muted-foreground">
-          {t("organization.projects.emptySecrets")}
+          {canViewSecret ? t("organization.projects.emptySecrets") : "—"}
         </div>
       )}
       <div className="flex items-center gap-2">
@@ -107,7 +109,7 @@ export function SecretsCell({
             {t("organization.projects.actions.addSecret")}
           </Button>
         ) : null}
-        {environment.secrets.length > 0 ? (
+        {canViewSecret && environment.secrets.length > 0 ? (
           <Button
             type="button"
             variant="ghost"
@@ -118,7 +120,7 @@ export function SecretsCell({
             {t("organization.projects.actions.viewSecrets")}
           </Button>
         ) : null}
-        {hiddenCount > 0 ? (
+        {canViewSecret && hiddenCount > 0 ? (
           <span className="text-xs text-muted-foreground">
             {t("organization.projects.moreSecrets", { count: hiddenCount })}
           </span>

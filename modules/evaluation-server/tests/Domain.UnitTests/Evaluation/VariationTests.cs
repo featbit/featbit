@@ -16,19 +16,35 @@ public class VariationTests
     }
 
     [Theory]
-    // obviously invalid
-    [InlineData("")]
     [InlineData("not-a-guid")]
     [InlineData("12345")]
-    [InlineData("550e8400-e29b-41d4-a716-44665544000Z")] // invalid hex char
-    // injection attempts
-    [InlineData("'; DROP TABLE variations; --")]          // SQL injection
-    [InlineData("<script>alert(1)</script>")]              // XSS
-    [InlineData("../../etc/passwd")]                       // path traversal
-    [InlineData("${7*7}")]                                 // template injection
-    public void IsValid_WithInvalidOrMaliciousId_ReturnsFalse(string id)
+    [InlineData("variation-a")]
+    public void IsValid_WithCustomId_ReturnsTrue(string id)
     {
         var variation = new Variation(id, "value");
+        Assert.True(variation.IsValid());
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData("\t\r\n")]
+    public void IsValid_WithNullOrWhitespaceId_ReturnsFalse(string? id)
+    {
+        var variation = new Variation(id!, "value");
         Assert.False(variation.IsValid());
+    }
+
+    [Fact]
+    public void IsValid_WithNullValue_ReturnsFalse()
+    {
+        Assert.False(new Variation("variation-a", null!).IsValid());
+    }
+
+    [Fact]
+    public void IsValid_WithEmptyValue_ReturnsTrue()
+    {
+        Assert.True(new Variation("variation-a", "").IsValid());
     }
 }

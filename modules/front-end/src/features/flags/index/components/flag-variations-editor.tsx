@@ -1,6 +1,7 @@
-import { Braces, Plus, Trash2 } from "lucide-react"
+import type { ReactNode } from "react"
+import { Braces, Info, Plus, Trash2 } from "lucide-react"
 import { useState } from "react"
-import { Trans, useTranslation } from "react-i18next"
+import { useTranslation } from "react-i18next"
 import {
   AlertDialog,
   AlertDialogContent,
@@ -13,6 +14,11 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import {
   Select,
   SelectContent,
   SelectGroup,
@@ -20,7 +26,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
 import { FlagJsonEditorDialog } from "./flag-json-editor-dialog"
 import {
   createDefaultFlagVariationSettings,
@@ -34,13 +39,15 @@ import {
 export function FlagVariationsEditor({
   value,
   disabled,
-  showErrors,
   onChange,
   onNestedSurfaceOpenChange,
+  behaviorSettings,
+  showErrors,
 }: {
+  showErrors: boolean
+  behaviorSettings: ReactNode
   value: FlagVariationSettingsDraft
   disabled: boolean
-  showErrors: boolean
   onChange: (value: FlagVariationSettingsDraft) => void
   onNestedSurfaceOpenChange?: (open: boolean) => void
 }) {
@@ -51,6 +58,9 @@ export function FlagVariationsEditor({
     null
   )
   const [jsonEditorIndex, setJsonEditorIndex] = useState<number | null>(null)
+  const [editedFields, setEditedFields] = useState<
+    Record<string, Partial<Record<"name" | "value", boolean>>>
+  >({})
   const untitledVariation = t("featureFlags.variationsEditor.untitled")
   const enabledVariation = value.variations.find(
     (variation) => variation.id === value.enabledVariationId
@@ -93,6 +103,7 @@ export function FlagVariationsEditor({
 
   function applyVariationType(variationType: FlagVariationType) {
     const nextValue = createDefaultFlagVariationSettings(variationType)
+    setEditedFields({})
     onChange({ ...nextValue, isEnabled: value.isEnabled })
     setTypeConfirmation(null)
   }
@@ -102,6 +113,11 @@ export function FlagVariationsEditor({
     field: "name" | "value",
     fieldValue: string
   ) {
+    const id = value.variations[index].id
+    setEditedFields((fields) => ({
+      ...fields,
+      [id]: { ...fields[id], [field]: true },
+    }))
     onChange({
       ...value,
       variations: value.variations.map((variation, variationIndex) =>
@@ -113,12 +129,13 @@ export function FlagVariationsEditor({
   }
 
   function addVariation() {
+    const id = crypto.randomUUID()
     onChange({
       ...value,
       variations: [
         ...value.variations,
         {
-          id: crypto.randomUUID(),
+          id,
           name: "",
           value: value.variationType === "json" ? "{}" : "",
         },
@@ -177,13 +194,25 @@ export function FlagVariationsEditor({
   return (
     <>
       <div className="space-y-5">
-        <section className="space-y-4 border-t pt-5">
-          <h3 className="text-base font-semibold text-foreground">
-            {t("featureFlags.variationsEditor.title")}
-          </h3>
-
+        <section className="space-y-4">
+          <div className="flex items-center gap-1.5">
+            <h3 className="text-base font-semibold text-foreground">
+              {t("featureFlags.variationsEditor.title")}
+            </h3>
+            <Tooltip>
+              <TooltipTrigger
+                type="button"
+                className="text-muted-foreground hover:text-foreground"
+                aria-label={t("featureFlags.variationsEditor.typeHelp")}
+              >
+                <Info className="size-3.5" />
+              </TooltipTrigger>
+              <TooltipContent>
+                {t("featureFlags.variationsEditor.typeHelp")}
+              </TooltipContent>
+            </Tooltip>
+          </div>
           <div className="space-y-2">
-            <Label>{t("featureFlags.variationsEditor.type")}</Label>
             <Select
               value={value.variationType}
               disabled={disabled}
@@ -197,7 +226,7 @@ export function FlagVariationsEditor({
                 }
               }}
             >
-              <SelectTrigger className="w-full sm:max-w-[280px]">
+              <SelectTrigger className="w-44 shrink-0">
                 <SelectValue>{value.variationType.toUpperCase()}</SelectValue>
               </SelectTrigger>
               <SelectContent>
@@ -210,32 +239,21 @@ export function FlagVariationsEditor({
                 </SelectGroup>
               </SelectContent>
             </Select>
-            <p className="text-xs text-muted-foreground">
-              {t("featureFlags.variationsEditor.typeHelp")}
-            </p>
           </div>
 
           <div className="space-y-2">
-            <Label>{t("featureFlags.variationsEditor.variations")}</Label>
             <div className="overflow-hidden rounded-md border">
-              {value.variationType === "json" ? (
-                <div className="grid grid-cols-[minmax(0,1fr)_2rem] gap-2 bg-muted/40 px-2 py-1.5 text-xs font-medium text-muted-foreground">
-                  <span>{t("featureFlags.variationsEditor.nameAndJson")}</span>
-                  <span />
-                </div>
-              ) : (
-                <div
-                  className={
-                    value.variationType === "boolean"
-                      ? "grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-2 bg-muted/40 px-2 py-1.5 text-xs font-medium text-muted-foreground"
-                      : "grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_2rem] gap-2 bg-muted/40 px-2 py-1.5 text-xs font-medium text-muted-foreground"
-                  }
-                >
-                  <span>{t("featureFlags.variationsEditor.name")}</span>
-                  <span>{t("featureFlags.variationsEditor.value")}</span>
-                  {value.variationType === "boolean" ? null : <span />}
-                </div>
-              )}
+              <div
+                className={
+                  value.variationType === "boolean"
+                    ? "grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-2 bg-muted/40 px-2 py-1.5 text-xs font-medium text-muted-foreground"
+                    : "grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_2rem] gap-2 bg-muted/40 px-2 py-1.5 text-xs font-medium text-muted-foreground"
+                }
+              >
+                <span>{t("featureFlags.variationsEditor.name")}</span>
+                <span>{t("featureFlags.variationsEditor.value")}</span>
+                {value.variationType === "boolean" ? null : <span />}
+              </div>
               <div className="divide-y">
                 {value.variations.map((variation, index) => {
                   const nameInvalid = !variation.name.trim()
@@ -251,11 +269,9 @@ export function FlagVariationsEditor({
                     <div
                       key={variation.id}
                       className={
-                        isJson
-                          ? "grid grid-cols-[minmax(0,1fr)_2rem] gap-2 p-2"
-                          : isBoolean
-                            ? "grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-2 p-2"
-                            : "grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_2rem] gap-2 p-2"
+                        isBoolean
+                          ? "grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-2 p-2"
+                          : "grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_2rem] gap-2 p-2"
                       }
                     >
                       <div className="space-y-1">
@@ -267,7 +283,8 @@ export function FlagVariationsEditor({
                             updateVariation(index, "name", event.target.value)
                           }
                         />
-                        {showErrors && nameInvalid ? (
+                        {(showErrors || editedFields[variation.id]?.name) &&
+                        nameInvalid ? (
                           <p className="text-xs text-destructive">
                             {t("featureFlags.variationsEditor.nameRequired")}
                           </p>
@@ -292,35 +309,21 @@ export function FlagVariationsEditor({
                               )
                             }
                           />
-                          {showErrors && valueError ? (
+                          {(showErrors || editedFields[variation.id]?.value) &&
+                          valueError ? (
                             <p className="text-xs text-destructive">
                               {valueErrorMessage(valueError)}
                             </p>
                           ) : null}
                         </div>
                       )}
-                      {canDelete ? (
-                        <Button
-                          type="button"
-                          size="icon-sm"
-                          variant="ghost"
-                          className="self-center"
-                          disabled={disabled}
-                          aria-label={t("featureFlags.variationsEditor.delete")}
-                          onClick={() => requestRemoveVariation(index)}
-                        >
-                          <Trash2 />
-                        </Button>
-                      ) : !isBoolean ? (
-                        <span />
-                      ) : null}
                       {isJson ? (
-                        <div className="col-span-2 space-y-1">
+                        <div className="min-w-0 space-y-1">
                           <Button
                             type="button"
                             variant="outline"
                             disabled={disabled}
-                            className="h-10 w-full justify-between gap-3 px-3 text-left"
+                            className="h-8 w-full justify-between gap-3 px-3 text-left"
                             aria-label={t(
                               "featureFlags.variationsEditor.editJsonFor",
                               { name: variation.name || untitledVariation }
@@ -335,12 +338,28 @@ export function FlagVariationsEditor({
                               {t("featureFlags.variationsEditor.editJson")}
                             </span>
                           </Button>
-                          {showErrors && valueError ? (
+                          {(showErrors || editedFields[variation.id]?.value) &&
+                          valueError ? (
                             <p className="text-xs text-destructive">
                               {valueErrorMessage(valueError)}
                             </p>
                           ) : null}
                         </div>
+                      ) : null}
+                      {canDelete ? (
+                        <Button
+                          type="button"
+                          size="icon-sm"
+                          variant="ghost"
+                          className="mt-0.5 self-start"
+                          disabled={disabled}
+                          aria-label={t("featureFlags.variationsEditor.delete")}
+                          onClick={() => requestRemoveVariation(index)}
+                        >
+                          <Trash2 />
+                        </Button>
+                      ) : !isBoolean ? (
+                        <span />
                       ) : null}
                     </div>
                   )
@@ -362,11 +381,11 @@ export function FlagVariationsEditor({
           </div>
         </section>
 
-        <section className="space-y-4 border-t pt-5">
+        <section className="space-y-4">
           <h3 className="text-base font-semibold text-foreground">
-            {t("featureFlags.variationsEditor.defaultRule")}
+            {t("featureFlags.editor.behavior")}
           </h3>
-          <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-3">
             <DefaultVariationSelect
               label={t("featureFlags.variationsEditor.serveWhenOn")}
               value={value.enabledVariationId}
@@ -390,27 +409,7 @@ export function FlagVariationsEditor({
               }
             />
           </div>
-
-          <label className="flex w-full items-center justify-between rounded-md border px-3 py-3 sm:max-w-[420px]">
-            <span>
-              <span className="block text-sm font-medium">
-                {t("featureFlags.variationsEditor.turnOn")}
-              </span>
-              <span className="text-xs text-muted-foreground">
-                <Trans
-                  i18nKey="featureFlags.variationsEditor.turnOnHelp"
-                  components={{
-                    strong: <span className="font-medium text-foreground" />,
-                  }}
-                />
-              </span>
-            </span>
-            <Switch
-              checked={value.isEnabled}
-              disabled={disabled}
-              onCheckedChange={(isEnabled) => onChange({ ...value, isEnabled })}
-            />
-          </label>
+          {behaviorSettings}
         </section>
       </div>
 
@@ -543,7 +542,7 @@ function DefaultVariationSelect({
           if (nextValue) onChange(nextValue)
         }}
       >
-        <SelectTrigger className="w-full sm:max-w-[420px]">
+        <SelectTrigger className="w-full">
           <SelectValue>{selectedName || untitledVariation}</SelectValue>
         </SelectTrigger>
         <SelectContent>

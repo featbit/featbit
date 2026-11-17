@@ -99,7 +99,7 @@ public class InsightService(AppDbContext dbContext) : IInsightService
     {
         await using var writer = await connection.BeginBinaryImportAsync("""
             COPY experiment_exposure_events
-                (id, env_id, flag_key, user_key, variation_id, variation_value, exposed_at, properties, created_at)
+                (id, env_id, flag_key, user_key, variation_id, variation_value, exposed_at, created_at)
             FROM STDIN (FORMAT BINARY)
             """);
 
@@ -126,7 +126,6 @@ public class InsightService(AppDbContext dbContext) : IInsightService
             }
 
             await writer.WriteAsync(exposure.ExposedAt, NpgsqlDbType.TimestampTz);
-            await writer.WriteAsync(exposure.Properties, NpgsqlDbType.Jsonb);
             await writer.WriteAsync(exposure.CreatedAt, NpgsqlDbType.TimestampTz);
         }
 
@@ -137,7 +136,7 @@ public class InsightService(AppDbContext dbContext) : IInsightService
     {
         await using var writer = await connection.BeginBinaryImportAsync("""
             COPY experiment_metric_events
-                (id, env_id, user_key, event_name, event_type, numeric_value, occurred_at, properties, created_at)
+                (id, env_id, user_key, event_name, event_type, numeric_value, application_type, occurred_at, created_at)
             FROM STDIN (FORMAT BINARY)
             """);
 
@@ -155,8 +154,16 @@ public class InsightService(AppDbContext dbContext) : IInsightService
             await writer.WriteAsync(metric.EventName, NpgsqlDbType.Varchar);
             await writer.WriteAsync(metric.EventType, NpgsqlDbType.Varchar);
             await writer.WriteAsync(metric.NumericValue, NpgsqlDbType.Double);
+            if (metric.ApplicationType is null)
+            {
+                await writer.WriteNullAsync();
+            }
+            else
+            {
+                await writer.WriteAsync(metric.ApplicationType, NpgsqlDbType.Varchar);
+            }
+
             await writer.WriteAsync(metric.OccurredAt, NpgsqlDbType.TimestampTz);
-            await writer.WriteAsync(metric.Properties, NpgsqlDbType.Jsonb);
             await writer.WriteAsync(metric.CreatedAt, NpgsqlDbType.TimestampTz);
         }
 

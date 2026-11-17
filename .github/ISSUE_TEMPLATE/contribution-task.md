@@ -16,6 +16,8 @@ assignees: ''
 
 Please read the [doc](../../Development.md) to set up your development environment.
 
+For React UI work, follow the [frontend development guide](../../modules/front-end/README.md) and [frontend instructions](../../modules/front-end/AGENTS.md).
+
 # Deadline
 
 We usually give 2 weeks for a feature request, which means you have 2 weeks to implement the feature starting from the
@@ -28,11 +30,15 @@ day it is assigned to you. If you have any difficulties, please contact us in [D
 3. Implement the task based on Description and Scope mentioned above.
 4. Submit your PR
 
-If the feature is UI related, make sure you complete the following tasks before submit your PR:
+For UI changes, complete the following before submitting your PR. Run frontend commands from `modules/front-end`:
 
-- merge featbit main branch into your working branch
-- run `npm run i18n`
-- commit **messages.xlf & messages.zh.xlf** file changes (if any)
+- Merge the FeatBit main branch into your working branch.
+- Implement React UI changes in `modules/front-end`.
+- For UI text changes, update both English and Chinese strings in `src/lib/i18n/resources/` and commit the changed resource files.
+- Run `npm run build`, `npm run lint`, and `npm test`. The test suite includes existing i18n tests.
+- For browser behavior changes, run the relevant Playwright tests with `npm run test:e2e`. For API/frontend integration or container changes, run `npm run test:e2e:containers`, which builds both application images from local source.
+- Install Chromium with `npx playwright install chromium` before browser tests, and ensure Docker is running for container E2E.
+- Include the validation commands and results in your PR. Use `modules/front-end/package.json` to verify available scripts.
 
 # Contribution points
 

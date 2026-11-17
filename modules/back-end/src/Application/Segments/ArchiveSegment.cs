@@ -8,6 +8,10 @@ namespace Application.Segments;
 
 public class ArchiveSegment : ResourceChangeRequest, IRequest<bool>
 {
+    public Guid WorkspaceId { get; set; }
+
+    public Guid OrgId { get; set; }
+
     public Guid EnvId { get; set; }
 
     public Guid Id { get; set; }
@@ -49,8 +53,11 @@ public class ArchiveSegmentHandler : IRequestHandler<ArchiveSegment, bool>
         await _service.UpdateAsync(segment);
 
         // publish on segment archived notification
+
         var notification = new OnSegmentChange(
             segment,
+            request.WorkspaceId,
+            request.OrgId,
             Operations.Archive,
             dataChange,
             _currentUser.Id,

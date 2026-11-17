@@ -6,6 +6,10 @@ namespace Application.FeatureFlags;
 
 public class OnFeatureFlagDeleted : INotification
 {
+    public Guid WorkspaceId { get; }
+
+    public Guid OrganizationId { get; }
+
     public FeatureFlag Flag { get; set; }
 
     public Guid OperatorId { get; set; }
@@ -14,8 +18,10 @@ public class OnFeatureFlagDeleted : INotification
 
     public string Comment { get; set; }
 
-    public OnFeatureFlagDeleted(FeatureFlag flag, Guid operatorId, string comment = "")
+    public OnFeatureFlagDeleted(FeatureFlag flag, Guid workspaceId, Guid organizationId, Guid operatorId, string comment = "")
     {
+        WorkspaceId = workspaceId;
+        OrganizationId = organizationId;
         Flag = flag;
         OperatorId = operatorId;
         Comment = comment;
@@ -24,38 +30,32 @@ public class OnFeatureFlagDeleted : INotification
 
     public AuditLog GetAuditLog()
     {
-        var auditLog = AuditLog.For(Flag, Operations.Remove, DataChange, Comment, OperatorId);
+        var auditLog = AuditLog.For(Flag, WorkspaceId, OrganizationId, Operations.Remove, DataChange, Comment, OperatorId);
         return auditLog;
     }
 }
 
-public class OnFeatureFlagDeletedHandler : INotificationHandler<OnFeatureFlagDeleted>
+public class OnFeatureFlagDeletedHandler(
+    ICacheService cache,
+    IAuditLogService auditLogService,
+    IWebhookHandler webhookHandler,
+    IFeatureFlagChangePublisher changePublisher)
+    : INotificationHandler<OnFeatureFlagDeleted>
 {
-    private readonly ICacheService _cache;
-    private readonly IAuditLogService _auditLogService;
-    private readonly IWebhookHandler _webhookHandler;
-
-    public OnFeatureFlagDeletedHandler(
-        ICacheService cache,
-        IAuditLogService auditLogService,
-        IWebhookHandler webhookHandler)
-    {
-        _cache = cache;
-        _auditLogService = auditLogService;
-        _webhookHandler = webhookHandler;
-    }
-
     public async Task Handle(OnFeatureFlagDeleted notification, CancellationToken cancellationToken)
     {
         // write audit log
-        await _auditLogService.AddOneAsync(notification.GetAuditLog());
+        await auditLogService.AddOneAsync(notification.GetAuditLog());
 
         // delete cache
         var envId = notification.Flag.EnvId;
         var flagId = notification.Flag.Id;
-        await _cache.DeleteFlagAsync(envId, flagId);
+        await cache.DeleteFlagAsync(envId, flagId);
 
         // handle webhooks
-        _ = _webhookHandler.HandleAsync(notification.Flag, notification.DataChange, notification.OperatorId);
+        _ = webhookHandler.HandleAsync(notification.Flag, notification.DataChange, notification.OperatorId);
+
+        // publish flag deletion message
+        await changePublisher.PublishDeletedAsync(envId, flagId);
     }
 }

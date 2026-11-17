@@ -62,6 +62,81 @@ function flag(): FeatureFlag {
 }
 
 describe("feature flag targeting utilities", () => {
+  it.each([
+    ["aaaaaaaa-1111", "bbbbbbbb-2222", "aaaaaaaa", "bbbbbbbb"],
+    ["aaaaaaaa-1111", "aaaaaaaa-2222", "aaaaaaaa-1111", "aaaaaaaa-2222"],
+  ])("distinguishes same-name rules with stable unique IDs (%s, %s)", (firstId, secondId, firstLabel, secondLabel) => {
+    const previous = flag()
+    const rule = previous.rules![0]
+    previous.rules = [
+      { ...rule, id: firstId, name: "Same name" },
+      { ...structuredClone(rule), id: secondId, name: "Same name" },
+      { ...structuredClone(rule), id: "unique-rule", name: "Unique name" },
+    ]
+    const current = structuredClone(previous)
+    current.rules = [current.rules![1], current.rules![0], current.rules![2]]
+    expect(targetingReviewChanges(previous, current, reviewLabels)).toEqual([
+      expect.objectContaining({
+        kind: "order",
+        previous: `Same name (${firstLabel}) → Same name (${secondLabel}) → Unique name`,
+        current: `Same name (${secondLabel}) → Same name (${firstLabel}) → Unique name`,
+      }),
+    ])
+  })
+
+  it("reviews rule reordering and preserves the order in the save payload", () => {
+    const previous = flag()
+    previous.rules!.push({
+      ...structuredClone(previous.rules![0]),
+      id: "rule-2",
+      name: "Second rule",
+    })
+    const current = structuredClone(previous)
+    current.rules!.reverse()
+
+    expect(targetingReviewChanges(previous, current, reviewLabels)).toEqual([
+      {
+        kind: "order",
+        label: "ruleOrder",
+        action: "updated",
+        previous: "Enterprise accounts → Second rule",
+        current: "Second rule → Enterprise accounts",
+      },
+    ])
+    expect(targetingOf(current).rules.map((rule) => rule.id)).toEqual([
+      "rule-2",
+      "rule-1",
+    ])
+    current.rules!.reverse()
+    expect(targetingReviewChanges(previous, current, reviewLabels)).toEqual([])
+  })
+
+  it("detects reordering alongside additions without treating insertion alone as reordering", () => {
+    const previous = flag()
+    previous.rules!.push({
+      ...structuredClone(previous.rules![0]),
+      id: "rule-2",
+      name: "Second rule",
+    })
+    const current = structuredClone(previous)
+    current.rules!.unshift({
+      ...structuredClone(previous.rules![0]),
+      id: "rule-3",
+      name: "Third rule",
+    })
+    expect(
+      targetingReviewChanges(previous, current, reviewLabels).map(
+        (change) => change.kind
+      )
+    ).toEqual(["rule"])
+    current.rules!.reverse()
+    expect(
+      targetingReviewChanges(previous, current, reviewLabels).map(
+        (change) => change.kind
+      )
+    ).toEqual(["rule", "order"])
+  })
+
   it("round-trips rollout percentages", () => {
     const rollout = rolloutFromPercentages([
       { id: "control", percentage: 75 },

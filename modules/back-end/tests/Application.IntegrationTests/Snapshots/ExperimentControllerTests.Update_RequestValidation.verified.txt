@@ -7,7 +7,7 @@
   },
   Content: {
     Headers: {
-      Content-Length: 91,
+      Content-Length: 97,
       Content-Type: application/json; charset=utf-8,
       Expires: -1
     },
@@ -15,7 +15,7 @@
       data: null,
       errors: [
         primaryMetric_is_invalid,
-        guardrails_is_invalid
+        guardrailMetrics_is_invalid
       ],
       success: false
     }

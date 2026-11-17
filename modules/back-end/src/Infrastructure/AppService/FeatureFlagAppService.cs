@@ -1,7 +1,9 @@
 using Application.Caches;
+using Application.Bases.Exceptions;
 using Application.FeatureFlags;
 using Domain.AuditLogs;
 using Domain.Segments;
+using Domain.SemanticPatch;
 using MediatR;
 
 namespace Infrastructure.AppService;
@@ -28,7 +30,7 @@ public class FeatureFlagAppService : IFeatureFlagAppService
         _publisher = publisher;
     }
 
-    public async Task ApplyDraftAsync(Guid draftId, string operation, Guid operatorId)
+    public async Task ApplyDraftAsync(Guid workspaceId, Guid orgId, Guid draftId, string operation, Guid operatorId)
     {
         // check draft status
         var draft = await _flagDraftService.GetAsync(draftId);
@@ -39,7 +41,16 @@ public class FeatureFlagAppService : IFeatureFlagAppService
 
         // apply flag draft
         var flag = await _flagService.GetAsync(draft.FlagId);
-        var dataChange = flag.ApplyDraft(draft);
+        DataChange dataChange;
+        try
+        {
+            dataChange = flag.ApplyDraft(draft);
+        }
+        catch (FlagInstructionConflictException)
+        {
+            throw new ConflictException(nameof(Domain.FeatureFlags.FeatureFlag), flag.Id);
+        }
+
         await _flagService.UpdateAsync(flag);
 
         // update draft status
@@ -47,13 +58,12 @@ public class FeatureFlagAppService : IFeatureFlagAppService
         await _flagDraftService.UpdateAsync(draft);
 
         // publish on feature flag change notification
-        var notification = new OnFeatureFlagChanged(
-            flag, operation, dataChange, operatorId, draft.Comment
+        var notification = new OnFeatureFlagChanged(flag, workspaceId, orgId, operation, dataChange, operatorId, draft.Comment
         );
         await _publisher.Publish(notification);
     }
 
-    public async Task OnSegmentUpdatedAsync(Segment segment, Guid operatorId, ICollection<FlagReference> flagReferences)
+    public async Task OnSegmentUpdatedAsync(Guid workspaceId, Guid? orgId, Segment segment, Guid operatorId, ICollection<FlagReference> flagReferences)
     {
         // mark flags as updated
         var flagIds = flagReferences.Select(x => x.Id).ToArray();
@@ -73,6 +83,8 @@ public class FeatureFlagAppService : IFeatureFlagAppService
 
             var auditLog = AuditLog.For(
                 flag,
+                workspaceId,
+                orgId,
                 Operations.Update,
                 dataChange,
                 $"Referenced segment '{segment.Name}' has been updated.",

@@ -18,7 +18,7 @@ public class QueryExperimentStats : IRequest<ExperimentStatsVm>
     public int? TrafficOffset { get; set; }
     public string LayerId { get; set; }
     public string ControlVariant { get; set; }
-    public string TreatmentVariants { get; set; }
+    public string[] TreatmentVariants { get; set; } = [];
     public string LayerKey { get; set; }
     public string AllocationKeySelector { get; set; }
     public double? SliceStart { get; set; }
@@ -31,7 +31,7 @@ public class QueryExperimentStats : IRequest<ExperimentStatsVm>
 
 public class QueryExperimentStatsValidator : AbstractValidator<QueryExperimentStats>
 {
-    private static readonly string[] MetricTypes = ["binary", "continuous"];
+    private static readonly string[] MetricTypes = ["binary", "numeric"];
     private static readonly string[] MetricAggs = ["once", "count", "sum", "average"];
 
     public QueryExperimentStatsValidator()

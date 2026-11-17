@@ -15,7 +15,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { Textarea } from "@/components/ui/textarea"
-import { slugify } from "@/features/organization/organization-utils"
+import { slugify } from "@/lib/slugify"
 import type { ProjectEnvironment } from "@/features/organization/projects/projects-api"
 import { Field } from "./form-field"
 
@@ -44,7 +44,10 @@ export function EnvironmentSheet({
   const schema = useMemo(
     () =>
       z.object({
-        name: z.string().trim().min(1, t("organization.validation.nameRequired")),
+        name: z
+          .string()
+          .trim()
+          .min(1, t("organization.validation.nameRequired")),
         key: z.string().trim().min(1, t("organization.validation.keyRequired")),
         description: z.string(),
         requireChangeComment: z.boolean(),

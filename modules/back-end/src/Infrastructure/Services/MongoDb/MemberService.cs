@@ -1,3 +1,4 @@
+using Domain.AuditLogs;
 using Application.Bases.Exceptions;
 using Application.Bases.Models;
 using Application.Members;
@@ -13,6 +14,28 @@ namespace Infrastructure.Services.MongoDb;
 
 public class MemberService(MongoDbClient mongoDb) : IMemberService
 {
+    public async Task<MemberAuditSnapshot?> GetAuditSnapshotAsync(Guid id, Guid? organizationId, Guid workspaceId)
+    {
+        var exists = organizationId.HasValue
+            ? await mongoDb.QueryableOf<OrganizationUser>().AnyAsync(x => x.OrganizationId == organizationId && x.UserId == id)
+            : await mongoDb.QueryableOf<WorkspaceUser>().AnyAsync(x => x.WorkspaceId == workspaceId && x.UserId == id);
+        if (!exists) return null;
+        // Project only audit-safe fields; never serialize User or Member credentials.
+        var identity = await mongoDb.QueryableOf<User>().Where(x => x.Id == id)
+            .Select(x => new { x.Id, x.Name, x.Email }).FirstOrDefaultAsync();
+        if (identity == null) return null;
+        var groupIds = await mongoDb.QueryableOf<GroupMember>().Where(x => x.OrganizationId == organizationId && x.MemberId == id)
+            .Select(x => x.GroupId).ToListAsync();
+        var policyIds = await mongoDb.QueryableOf<MemberPolicy>().Where(x => x.OrganizationId == organizationId && x.MemberId == id)
+            .Select(x => x.PolicyId).ToListAsync();
+        var groups = await mongoDb.QueryableOf<Group>().Where(x => groupIds.Contains(x.Id))
+            .Select(x => new IamAuditReference(x.Id, x.Name, "group/" + x.Name)).ToListAsync();
+        var policies = await mongoDb.QueryableOf<Policy>().Where(x => policyIds.Contains(x.Id))
+            .Select(x => new PolicyAuditReference(x.Id, x.Name, "policy/" + x.Key, x.Type)).ToListAsync();
+        return new MemberAuditSnapshot(identity.Id, identity.Name, $"member/{identity.Email}", identity.Email,
+            groups.OrderBy(x => x.Id).ToArray(), policies.OrderBy(x => x.Id).ToArray());
+    }
+
     public async Task<Member> GetAsync(Guid organizationId, Guid memberId)
     {
         var users = mongoDb.QueryableOf<User>();

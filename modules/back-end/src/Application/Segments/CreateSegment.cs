@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Application.Bases;
 using Application.Bases.Exceptions;
 using Application.Users;
@@ -9,6 +10,8 @@ namespace Application.Segments;
 
 public class CreateSegment : IRequest<Segment>
 {
+    public Guid OrgId { get; set; }
+
     /// <summary>
     /// The ID of the workspace the segment belongs to. Retrieved from the request header.
     /// </summary>
@@ -40,8 +43,17 @@ public class CreateSegment : IRequest<Segment>
     public string Description { get; set; }
 
     /// <summary>
-    /// The scopes where the segment is applicable.
+    /// The scopes where the segment is applicable. Required, with at least one scope. Scopes use keys, not IDs.
+    /// For an <c>environment-specific</c> segment, provide exactly one scope: the current environment's scope,
+    /// <c>organization/{orgKey}:project/{projectKey}:env/{envKey}</c>.
+    /// For a <c>shared</c> segment, provide one or more scopes; shared segments can be used across multiple
+    /// environments and require the ShareableSegment license feature. Besides an environment, a shared scope can
+    /// target an organization (<c>organization/{orgKey}</c>) or a project (<c>organization/{orgKey}:project/{projectKey}</c>).
+    /// Wildcards (<c>*</c>) are not allowed.
     /// </summary>
+    /// <example>["organization/playground:project/example-project:env/dev"]</example>
+    [Required(ErrorMessage = "scopes_is_invalid")]
+    [MinLength(1, ErrorMessage = "scopes_is_invalid")]
     public string[] Scopes { get; set; } = [];
 
     public Segment AsSegment()
@@ -108,7 +120,8 @@ public class CreateSegmentHandler : IRequestHandler<CreateSegment, Segment>
 
         // publish on segment created notification
         var dataChange = new DataChange(null).To(segment);
-        var notification = new OnSegmentChange(segment, Operations.Create, dataChange, _currentUser.Id);
+
+        var notification = new OnSegmentChange(segment, request.WorkspaceId, request.OrgId, Operations.Create, dataChange, _currentUser.Id);
         await _publisher.Publish(notification, cancellationToken);
 
         return segment;

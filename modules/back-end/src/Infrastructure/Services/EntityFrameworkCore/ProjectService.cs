@@ -92,17 +92,4 @@ public class ProjectService(AppDbContext dbContext, IEnvironmentService envServi
 
         return true;
     }
-
-    public async Task DeleteManyAsync(ICollection<Guid> projectIds)
-    {
-        // delete projects
-        await Set.Where(x => projectIds.Contains(x.Id)).ExecuteDeleteAsync();
-
-        // delete environments
-        var envIds = await QueryableOf<Environment>()
-            .Where(x => projectIds.Contains(x.ProjectId))
-            .Select(x => x.Id)
-            .ToListAsync();
-        await envService.DeleteManyAsync(envIds);
-    }
 }

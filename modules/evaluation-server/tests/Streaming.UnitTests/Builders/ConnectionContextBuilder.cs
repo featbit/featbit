@@ -1,5 +1,5 @@
 using System.Net.WebSockets;
-using Domain.Shared;
+using Domain.Secrets;
 using Moq;
 using Streaming.Connections;
 

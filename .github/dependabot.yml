@@ -9,4 +9,3 @@ updates:
     directory: "/modules/front-end"           # location of package manifest
     schedule:
       interval: "weekly"
-    target-branch: "angular19"

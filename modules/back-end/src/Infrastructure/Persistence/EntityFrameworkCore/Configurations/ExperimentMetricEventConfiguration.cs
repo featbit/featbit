@@ -11,15 +11,14 @@ public class ExperimentMetricEventConfiguration : IEntityTypeConfiguration<Exper
         builder.ToTable("experiment_metric_events");
 
         builder.HasIndex(x => new { x.EnvId, x.EventName, x.OccurredAt });
-        builder.HasIndex(x => new { x.EnvId, x.EventName, x.UserKey, x.OccurredAt });
 
         builder.Property(x => x.EnvId).HasColumnName("env_id");
         builder.Property(x => x.UserKey).HasColumnName("user_key").HasMaxLength(512).IsRequired();
         builder.Property(x => x.EventName).HasColumnName("event_name").HasMaxLength(256).IsRequired();
         builder.Property(x => x.EventType).HasColumnName("event_type").HasMaxLength(64).IsRequired();
         builder.Property(x => x.NumericValue).HasColumnName("numeric_value");
+        builder.Property(x => x.ApplicationType).HasColumnName("application_type").HasMaxLength(128);
         builder.Property(x => x.OccurredAt).HasColumnName("occurred_at");
-        builder.Property(x => x.Properties).HasColumnType("jsonb");
         builder.Property(x => x.CreatedAt).HasColumnName("created_at");
     }
 }

@@ -30,7 +30,7 @@ const projects = [
   },
 ]
 
-function renderInventory(canWrite: boolean) {
+function renderInventory(canWrite: boolean, canView = true) {
   render(
     <ProjectInventory
       projects={projects}
@@ -43,6 +43,7 @@ function renderInventory(canWrite: boolean) {
       canCreateEnvironment={() => canWrite}
       canUpdateEnvironment={() => canWrite}
       canDeleteEnvironment={() => canWrite}
+      canViewSecret={() => canView}
       canCreateSecret={() => canWrite}
       onSearchChange={vi.fn()}
       onCreateProject={vi.fn()}
@@ -60,6 +61,18 @@ function renderInventory(canWrite: boolean) {
 }
 
 describe("ProjectInventory permissions", () => {
+  it("hides keys and copy/view actions without read permission", () => {
+    renderInventory(false, false)
+    expect(screen.queryByText("Server SDK")).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", { name: "Copy secret" })
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", { name: "View secrets" })
+    ).not.toBeInTheDocument()
+    expect(screen.getByText("Production")).toBeVisible()
+  })
+
   it("hides write actions in read-only mode", () => {
     renderInventory(false)
 
@@ -109,6 +122,29 @@ describe("ProjectInventory permissions", () => {
 })
 
 describe("SecretsSheet permissions", () => {
+  it("does not expose secrets through a directly opened sheet without read permission", () => {
+    render(
+      <SecretsSheet
+        open
+        project={projects[0]}
+        environment={projects[0].environments[0]}
+        canViewSecret={false}
+        canCreateSecret={false}
+        canUpdateSecret={false}
+        canDeleteSecret={false}
+        onOpenChange={vi.fn()}
+        onAddSecret={vi.fn()}
+        onCopySecret={vi.fn()}
+        onEditSecret={vi.fn()}
+        onDeleteSecret={vi.fn()}
+      />
+    )
+    expect(screen.queryByText("Server SDK")).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", { name: "Copy secret" })
+    ).not.toBeInTheDocument()
+  })
+
   it("keeps copy available but hides secret mutations without permission", () => {
     const project = projects[0]
     const environment = project.environments[0]
@@ -118,6 +154,7 @@ describe("SecretsSheet permissions", () => {
         open
         project={project}
         environment={environment}
+        canViewSecret
         canCreateSecret={false}
         canUpdateSecret={false}
         canDeleteSecret={false}

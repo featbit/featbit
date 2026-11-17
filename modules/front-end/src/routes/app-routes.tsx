@@ -133,25 +133,26 @@ const EndUsersPage = lazy(() =>
   }))
 )
 const ExperimentsPage = lazy(() =>
-  import("@/features/release-decision/release-decision-pages").then(
+  import("@/features/expts/index/experiments-page").then((module) => ({
+    default: module.ExperimentsPage,
+  }))
+)
+const ExperimentDetailsPage = lazy(() =>
+  import("@/features/expts/details/hypothesis/experiment-details-page").then(
     (module) => ({
-      default: module.ExperimentsPage,
+      default: module.ExperimentDetailsPage,
     })
   )
 )
 const MetricsPage = lazy(() =>
-  import("@/features/release-decision/release-decision-pages").then(
-    (module) => ({
-      default: module.MetricsPage,
-    })
-  )
+  import("@/features/expt-metrics/metrics-page").then((module) => ({
+    default: module.MetricsPage,
+  }))
 )
 const LayersPage = lazy(() =>
-  import("@/features/release-decision/release-decision-pages").then(
-    (module) => ({
-      default: module.LayersPage,
-    })
-  )
+  import("@/features/expt-layers/layers-page").then((module) => ({
+    default: module.LayersPage,
+  }))
 )
 const SegmentsPage = lazy(() =>
   import("@/features/segments/index/segments-page").then((module) => ({
@@ -161,6 +162,11 @@ const SegmentsPage = lazy(() =>
 const SegmentDetailsPage = lazy(() =>
   import("@/features/segments/details/segment-details-page").then((module) => ({
     default: module.SegmentDetailsPage,
+  }))
+)
+const IamAuditLogsPage = lazy(() =>
+  import("@/features/audit-logs/iam-audit-logs-page").then((module) => ({
+    default: module.IamAuditLogsPage,
   }))
 )
 const AuditLogsPage = lazy(() =>
@@ -419,6 +425,7 @@ export function AppRoutes() {
           />
           <Route path="iam" element={<IamRouteGuard />}>
             <Route index element={<Navigate to="team" replace />} />
+            <Route path="audit-logs" element={<IamAuditLogsPage />} />
             <Route path="team" element={<TeamPage />} />
             <Route path="team/:memberId/:tab" element={<TeamDetailsPage />} />
             <Route path="groups" element={<GroupPage />} />
@@ -434,6 +441,10 @@ export function AppRoutes() {
           <Route path="webhooks" element={<WebhooksPage />} />
           <Route path="end-users" element={<EndUsersPage />} />
           <Route path="experiments" element={<ExperimentsPage />} />
+          <Route
+            path="experiments/:experimentId"
+            element={<ExperimentDetailsPage />}
+          />
           <Route path="metrics" element={<MetricsPage />} />
           <Route path="layers" element={<LayersPage />} />
           <Route path="audit-logs" element={<AuditLogsPage />} />

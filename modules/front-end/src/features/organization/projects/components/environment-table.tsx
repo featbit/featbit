@@ -87,6 +87,7 @@ export function EnvironmentTable({
   canUpdateEnvironment,
   canDeleteEnvironment,
   canCreateSecret,
+  canViewSecret,
   onToggleSort,
   onCreateEnvironment,
   onEditEnvironment,
@@ -105,6 +106,10 @@ export function EnvironmentTable({
     environment: ProjectEnvironment
   ) => boolean
   canDeleteEnvironment: (
+    project: OrganizationProject,
+    environment: ProjectEnvironment
+  ) => boolean
+  canViewSecret: (
     project: OrganizationProject,
     environment: ProjectEnvironment
   ) => boolean
@@ -243,6 +248,7 @@ export function EnvironmentTable({
                 </TableCell>
                 <TableCell className="px-4 py-2.5 align-middle">
                   <SecretsCell
+                    canViewSecret={canViewSecret(project, environment)}
                     environment={environment}
                     canAddSecret={canCreateSecret(project, environment)}
                     onAddSecret={onAddSecret}

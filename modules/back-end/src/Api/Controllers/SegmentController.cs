@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Api.Authentication;
-using Api.Swagger.Examples;
+using Api.Setup.OpenApi;
+using Api.Setup.OpenApi.Examples;
 using Application.AuditLogs;
 using Application.Bases.Models;
 using Application.Segments;
@@ -8,7 +9,6 @@ using Domain.Policies;
 using Domain.Segments;
 using Microsoft.AspNetCore.JsonPatch.SystemTextJson;
 using Microsoft.AspNetCore.JsonPatch.SystemTextJson.Operations;
-using Swashbuckle.AspNetCore.Filters;
 
 namespace Api.Controllers;
 
@@ -91,6 +91,7 @@ public class SegmentController : ApiControllerBase
         request.WorkspaceId = WorkspaceId;
         request.EnvId = envId;
 
+        request.OrgId = OrgId;
         var segment = await Mediator.Send(request);
         return Ok(segment);
     }
@@ -108,6 +109,8 @@ public class SegmentController : ApiControllerBase
     {
         request.Id = segmentId;
 
+        request.WorkspaceId = WorkspaceId;
+        request.OrgId = OrgId;
         var success = await Mediator.Send(request);
         return Ok(success);
     }
@@ -125,6 +128,8 @@ public class SegmentController : ApiControllerBase
     {
         request.Id = segmentId;
 
+        request.WorkspaceId = WorkspaceId;
+        request.OrgId = OrgId;
         var success = await Mediator.Send(request);
         return Ok(success);
     }
@@ -145,6 +150,8 @@ public class SegmentController : ApiControllerBase
         var permissions = await GetRequestPermissionsAsync();
         var request = new UpdateGeneral(segmentId, payload, permissions);
 
+        request.WorkspaceId = WorkspaceId;
+        request.OrgId = OrgId;
         var success = await Mediator.Send(request);
         return Ok(success);
     }
@@ -162,19 +169,21 @@ public class SegmentController : ApiControllerBase
         var permissions = await GetRequestPermissionsAsync();
         var request = new UpdateTargeting(segmentId, payload, permissions);
 
+        request.WorkspaceId = WorkspaceId;
+        request.OrgId = OrgId;
         var success = await Mediator.Send(request);
         return Ok(success);
     }
 
     /// <summary>
-    /// Update a segment with the JSON patch method. 
+    /// Update a segment with the JSON patch method.
     /// </summary>
     /// <remarks>
     /// Use with caution as this can make arbitrary changes to the segment, incorrect usage may lead to malformed data.
     /// Perform a partial update to a segment. The request body must be a valid JSON patch.
     /// </remarks>
     [OpenApi]
-    [SwaggerRequestExample(typeof(Operation), typeof(PatchSegmentExamples))]
+    [OpenApiRequestExamples(typeof(PatchSegmentExamples))]
     [HttpPatch("{segmentId:guid}")]
     public async Task<ApiResponse<bool>> PatchAsync(Guid segmentId, [FromBody] JsonElement jsonElement)
     {
@@ -190,6 +199,8 @@ public class SegmentController : ApiControllerBase
             Permissions = await GetRequestPermissionsAsync()
         };
 
+        request.WorkspaceId = WorkspaceId;
+        request.OrgId = OrgId;
         var result = await Mediator.Send(request);
         return result.Success ? Ok(true) : Error<bool>(result.Message);
     }
@@ -215,6 +226,8 @@ public class SegmentController : ApiControllerBase
             Comment = changeRequest?.Comment ?? string.Empty
         };
 
+        request.WorkspaceId = WorkspaceId;
+        request.OrgId = OrgId;
         var success = await Mediator.Send(request);
         return Ok(success);
     }
@@ -229,7 +242,7 @@ public class SegmentController : ApiControllerBase
     [HttpPut("{segmentId:guid}/restore")]
     [Authorize(Permissions.RestoreSegment)]
     public async Task<ApiResponse<bool>> RestoreAsync(
-        Guid segmentId, 
+        Guid segmentId,
         [FromBody] ResourceChangeRequest? changeRequest = null)
     {
         var request = new RestoreSegment
@@ -238,6 +251,8 @@ public class SegmentController : ApiControllerBase
             Comment = changeRequest?.Comment ?? string.Empty
         };
 
+        request.WorkspaceId = WorkspaceId;
+        request.OrgId = OrgId;
         var success = await Mediator.Send(request);
         return Ok(success);
     }
@@ -252,7 +267,7 @@ public class SegmentController : ApiControllerBase
     [HttpDelete("{segmentId:guid}")]
     [Authorize(Permissions.DeleteSegment)]
     public async Task<ApiResponse<bool>> DeleteAsync(
-        Guid segmentId, 
+        Guid segmentId,
         [FromBody] ResourceChangeRequest? changeRequest = null)
     {
         var request = new DeleteSegment
@@ -261,6 +276,8 @@ public class SegmentController : ApiControllerBase
             Comment = changeRequest?.Comment ?? string.Empty
         };
 
+        request.WorkspaceId = WorkspaceId;
+        request.OrgId = OrgId;
         var success = await Mediator.Send(request);
         return Ok(success);
     }
@@ -334,6 +351,8 @@ public class SegmentController : ApiControllerBase
     {
         request.Id = segmentId;
 
+        request.WorkspaceId = WorkspaceId;
+        request.OrgId = OrgId;
         var success = await Mediator.Send(request);
         return Ok(success);
     }

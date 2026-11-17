@@ -12,7 +12,7 @@ import {
 } from "@/features/workspace/license/license-utils"
 import { StatusBadge } from "@/features/workspace/license/components/status-badge"
 
-const FOREVER_LICENSE_DAYS_THRESHOLD = 366
+const FOREVER_LICENSE_DAYS_THRESHOLD = 365 * 5
 
 function ExpirationValue({
   license,

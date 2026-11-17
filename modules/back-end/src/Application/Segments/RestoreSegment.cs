@@ -6,6 +6,10 @@ namespace Application.Segments;
 
 public class RestoreSegment : ResourceChangeRequest, IRequest<bool>
 {
+    public Guid WorkspaceId { get; set; }
+
+    public Guid OrgId { get; set; }
+
     public Guid Id { get; set; }
 }
 
@@ -34,6 +38,8 @@ public class RestoreSegmentHandler : IRequestHandler<RestoreSegment, bool>
         // publish on segment change notification
         var notification = new OnSegmentChange(
             segment,
+            request.WorkspaceId,
+            request.OrgId,
             Operations.Restore,
             dataChange,
             _currentUser.Id,

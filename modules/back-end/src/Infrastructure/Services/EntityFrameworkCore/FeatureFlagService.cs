@@ -2,6 +2,7 @@ using System.Text.Json;
 using Application.Bases.Exceptions;
 using Application.Bases.Models;
 using Application.FeatureFlags;
+using Domain.Experiments;
 using Domain.FeatureFlags;
 using Domain.Segments;
 using Microsoft.EntityFrameworkCore;
@@ -108,6 +109,32 @@ public class FeatureFlagService(AppDbContext dbContext, ILogger<FeatureFlagServi
             .ToListAsync();
 
         return segments;
+    }
+
+    public async Task<IReadOnlyList<ExperimentReference>> GetRunningExperimentsAsync(Guid envId, Guid flagId)
+    {
+        var now = DateTime.UtcNow;
+
+        var experiments = await SetOf<Experiment>()
+            .Where(x => x.EnvId == envId && x.FlagId == flagId)
+            .Select(x => new { x.Id, x.Name })
+            .ToListAsync();
+        if (experiments.Count == 0)
+        {
+            return [];
+        }
+
+        var experimentIds = experiments.Select(x => x.Id).ToArray();
+        var runningIds = await SetOf<ExperimentRun>()
+            .Where(x => experimentIds.Contains(x.ExperimentId) && (x.ObservationEnd == null || x.ObservationEnd > now))
+            .Select(x => x.ExperimentId)
+            .Distinct()
+            .ToListAsync();
+
+        return experiments
+            .Where(x => runningIds.Contains(x.Id))
+            .Select(x => new ExperimentReference(x.Id, x.Name))
+            .ToArray();
     }
 
     public async Task MarkAsUpdatedAsync(ICollection<Guid> flagIds, Guid operatorId)

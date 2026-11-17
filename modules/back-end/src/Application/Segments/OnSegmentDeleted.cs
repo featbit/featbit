@@ -6,6 +6,10 @@ namespace Application.Segments;
 
 public class OnSegmentDeleted : INotification
 {
+    public Guid WorkspaceId { get; }
+
+    public Guid OrganizationId { get; }
+
     public Segment Segment { get; set; }
 
     public Guid OperatorId { get; set; }
@@ -14,8 +18,10 @@ public class OnSegmentDeleted : INotification
 
     public string Comment { get; set; }
 
-    public OnSegmentDeleted(Segment segment, Guid operatorId, string comment = "")
+    public OnSegmentDeleted(Segment segment, Guid workspaceId, Guid organizationId, Guid operatorId, string comment = "")
     {
+        WorkspaceId = workspaceId;
+        OrganizationId = organizationId;
         Segment = segment;
         OperatorId = operatorId;
         DataChange = new DataChange(segment).To(null);
@@ -24,50 +30,42 @@ public class OnSegmentDeleted : INotification
 
     public AuditLog GetAuditLog()
     {
-        var auditLog = AuditLog.For(Segment, Operations.Remove, DataChange, Comment, OperatorId);
+        var auditLog = AuditLog.For(Segment, WorkspaceId, OrganizationId, Operations.Remove, DataChange, Comment, OperatorId);
         return auditLog;
     }
 }
 
-public class OnSegmentDeletedHandler : INotificationHandler<OnSegmentDeleted>
+public class OnSegmentDeletedHandler(
+    ICacheService cache,
+    IAuditLogService auditLogService,
+    IWebhookHandler webhookHandler,
+    ISegmentService segmentService,
+    ISegmentChangePublisher changePublisher)
+    : INotificationHandler<OnSegmentDeleted>
 {
-    private readonly ICacheService _cache;
-    private readonly IAuditLogService _auditLogService;
-    private readonly IWebhookHandler _webhookHandler;
-    private readonly ISegmentService _segmentService;
-
-    public OnSegmentDeletedHandler(
-        ICacheService cache,
-        IAuditLogService auditLogService,
-        IWebhookHandler webhookHandler,
-        ISegmentService segmentService)
-    {
-        _cache = cache;
-        _auditLogService = auditLogService;
-        _webhookHandler = webhookHandler;
-        _segmentService = segmentService;
-    }
-
     public async Task Handle(OnSegmentDeleted notification, CancellationToken cancellationToken)
     {
         // write audit log
-        await _auditLogService.AddOneAsync(notification.GetAuditLog());
+        await auditLogService.AddOneAsync(notification.GetAuditLog());
 
         var segment = notification.Segment;
-        var envIds = await _segmentService.GetEnvironmentIdsAsync(segment);
+        var envIds = await segmentService.GetEnvironmentIdsAsync(segment);
 
         // delete cache
-        await _cache.DeleteSegmentAsync(envIds, segment.Id);
+        await cache.DeleteSegmentAsync(envIds, segment.Id);
 
         // handle webhooks
         foreach (var envId in envIds)
         {
-            _ = _webhookHandler.HandleAsync(
+            _ = webhookHandler.HandleAsync(
                 envId,
                 notification.Segment,
                 notification.DataChange,
                 notification.OperatorId
             );
         }
+
+        // publish segment deletion message
+        await changePublisher.PublishDeletedAsync(envIds, segment.Id);
     }
 }

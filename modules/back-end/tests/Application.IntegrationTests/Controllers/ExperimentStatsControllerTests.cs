@@ -23,7 +23,7 @@ public class ExperimentStatsControllerTests
     public async Task Query_RequestValidation()
     {
         using var factory = CreateFactory(Mock.Of<IExperimentStatsService>());
-        using var client = await _app.CreateAuthenticatedClientAsync(factory);
+        using var client = await _app.CreateAuthenticatedClientAsync(factory, includeTenantContext: true);
 
         var response = await client.PostAsJsonAsync(QueryPath, new
         {
@@ -64,7 +64,7 @@ public class ExperimentStatsControllerTests
         var service = new Mock<IExperimentStatsService>();
         service.Setup(x => x.QueryAsync(It.IsAny<QueryExperimentStats>())).ReturnsAsync(stats);
         using var factory = CreateFactory(service.Object);
-        using var client = await _app.CreateAuthenticatedClientAsync(factory);
+        using var client = await _app.CreateAuthenticatedClientAsync(factory, includeTenantContext: true);
 
         var response = await client.PostAsJsonAsync(QueryPath, new
         {

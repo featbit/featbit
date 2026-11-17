@@ -76,7 +76,7 @@ public class CompositeRedisCacheServiceTests
     }
 
     [Fact]
-    public async Task DeletePodConnection_BroadcastsToAllInstances()
+    public async Task DeletePodConnection_WhenCalled_RunsOnLocalInstanceOnly()
     {
         var podId = Guid.NewGuid();
         var sut = CreateSut();
@@ -84,7 +84,20 @@ public class CompositeRedisCacheServiceTests
         await sut.DeletePodConnection(podId);
 
         _local.Verify(s => s.DeletePodConnection(podId), Times.Once);
-        _remote.Verify(s => s.DeletePodConnection(podId), Times.Once);
+        _remote.Verify(s => s.DeletePodConnection(It.IsAny<Guid>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task DeletePodConnection_WhenLocalThrows_DoesNotBubbleAndDoesNotHitRemote()
+    {
+        _local.Setup(s => s.DeletePodConnection(It.IsAny<Guid>()))
+              .ThrowsAsync(new InvalidOperationException("boom"));
+
+        var sut = CreateSut();
+
+        await sut.DeletePodConnection(Guid.NewGuid());
+
+        _remote.Verify(s => s.DeletePodConnection(It.IsAny<Guid>()), Times.Never);
     }
 
     [Fact]

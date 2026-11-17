@@ -29,7 +29,11 @@ import {
   updateSubscription,
   type SubscriptionChangePayload,
 } from "./billing-api"
-import { CheckoutAlert, type CheckoutState } from "./components/billing-alerts"
+import {
+  CheckoutAlert,
+  PaymentFailedAlert,
+  type CheckoutState,
+} from "./components/billing-alerts"
 import { BillingInformationPanel } from "./components/billing-information-panel"
 import { InvoiceHistoryPanel } from "./components/invoice-history-panel"
 import { PricingDrawer } from "./components/pricing-drawer"
@@ -78,6 +82,7 @@ export function BillingPage() {
     queryKey: ["billing", "subscription"],
     queryFn: fetchSubscription,
     enabled: isSaas,
+    refetchOnWindowFocus: "always",
   })
   const cycleQuery = useQuery({
     queryKey: ["billing", "current-cycle"],
@@ -255,6 +260,30 @@ export function BillingPage() {
     void invoiceQuery.refetch()
   }
 
+  async function refreshPaymentStatus() {
+    const result = await subscriptionQuery.refetch()
+    if (result.isError || !result.data) {
+      toast.error(t("workspace.billing.paymentFailed.refreshError"))
+      return
+    }
+    void invoiceQuery.refetch()
+    if (result.data.status === "active") {
+      toast.success(t("workspace.billing.paymentFailed.confirmed"))
+    } else if (result.data.status === "payment_failed") {
+      if (result.data.retryPaymentState === "unavailable") {
+        toast.error(t("workspace.billing.paymentFailed.linkUnavailable"))
+      } else {
+        toast.info(
+          t(
+            result.data.retryPaymentState === "no_open_invoice"
+              ? "workspace.billing.paymentFailed.syncingDescription"
+              : "workspace.billing.paymentFailed.stillPending"
+          )
+        )
+      }
+    }
+  }
+
   function startChange(payload: SubscriptionChangePayload) {
     const nextTotal = planTotal(payload)
     const current = currentTotal(subscription)
@@ -300,6 +329,15 @@ export function BillingPage() {
               .catch(() => setCheckoutState("timeout"))
           }
         />
+
+        {subscription?.status === "payment_failed" ? (
+          <PaymentFailedAlert
+            retryPaymentUrl={subscription.retryPaymentUrl}
+            retryPaymentState={subscription.retryPaymentState}
+            isRefreshing={subscriptionQuery.isFetching}
+            onRefresh={() => void refreshPaymentStatus()}
+          />
+        ) : null}
 
         {subscriptionQuery.isError ? (
           <Alert className="flex items-center gap-4 rounded-md border-destructive/30 bg-destructive/5 px-5 py-4 text-foreground">

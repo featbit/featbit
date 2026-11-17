@@ -13,6 +13,7 @@ import {
   formatMoneyPerCycle,
   normalizePlan,
   planMeta,
+  planPriceBreakdown,
   type UsageStats,
 } from "../billing-utils"
 import { FeeRow, PeriodItem } from "./billing-display"
@@ -37,6 +38,19 @@ export function SubscriptionOverview({
   const addOnEnabled =
     subscription?.addOnFeatures?.includes(FINE_GRAINED_ACCESS) ?? false
   const total = currentTotal(subscription)
+  const fees = planPriceBreakdown({
+    plan: subscription?.plan ?? "free",
+    billingCycle: subscription?.billingCycle,
+    mau: subscription?.mau ?? subscription?.baseMau ?? plan.includedMau,
+    addOnFeatures: subscription?.addOnFeatures ?? [],
+  })
+  const isYearly =
+    subscription?.billingCycle === "yearly" ||
+    subscription?.billingCycle === "year"
+  const perCycle = (amount: number) =>
+    t(`workspace.billing.overview.${isYearly ? "perYear" : "perMonth"}`, {
+      amount: `$${amount.toLocaleString("en-US")}`,
+    })
   const isFree = normalizePlan(subscription?.plan) === "free"
   const progressColor =
     stats.used > stats.purchased
@@ -96,21 +110,31 @@ export function SubscriptionOverview({
               <h2 className="text-2xl font-semibold tracking-normal">
                 {t(plan.nameKey)}
               </h2>
-              <Badge
-                  variant="default"
-                  className="whitespace-nowrap"
-                >
-                {subscription?.billingCycle === "yearly"
+              <Badge variant="default" className="whitespace-nowrap">
+                {isYearly
                   ? t("workspace.billing.overview.yearlyBilling")
                   : t("workspace.billing.overview.monthlyBilling")}
               </Badge>
+              {subscription?.status === "payment_failed" ? (
+                <Badge
+                  variant="outline"
+                  className={
+                    subscription.retryPaymentState === "no_open_invoice"
+                      ? "bg-muted/30"
+                      : "border-destructive/30 bg-destructive/5 text-destructive"
+                  }
+                >
+                  {t(
+                    subscription.retryPaymentState === "no_open_invoice"
+                      ? "workspace.billing.paymentFailed.syncingTitle"
+                      : "workspace.billing.paymentFailed.title"
+                  )}
+                </Badge>
+              ) : null}
             </div>
             <div className="mt-2 flex items-end gap-1">
               <span className="text-2xl font-semibold">
-                {formatMoneyPerCycle(
-                  plan.basePrice,
-                  subscription?.billingCycle
-                )}
+                {formatMoneyPerCycle(total, subscription?.billingCycle)}
               </span>
             </div>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -129,7 +153,13 @@ export function SubscriptionOverview({
             ) : null}
           </div>
         </div>
-        <Button className="h-10 px-5" onClick={onManage}>
+        <Button
+          className="h-10 px-5"
+          variant={
+            subscription?.status === "payment_failed" ? "outline" : "default"
+          }
+          onClick={onManage}
+        >
           {t("workspace.billing.actions.manageSubscription")}
         </Button>
       </div>
@@ -191,25 +221,27 @@ export function SubscriptionOverview({
             label={t("workspace.billing.overview.planFee", {
               plan: t(plan.nameKey),
             })}
-            value={t("workspace.billing.overview.perMonth", {
-              amount: `$${plan.basePrice}`,
-            })}
+            value={perCycle(fees.basePrice)}
           />
+          {fees.extraMau > 0 ? (
+            <FeeRow
+              label={t("workspace.billing.overview.extraMau", {
+                mau: fees.extraMau.toLocaleString(lang),
+              })}
+              value={perCycle(fees.extraMauPrice)}
+            />
+          ) : null}
           {addOnEnabled ? (
             <FeeRow
               label={t("workspace.billing.overview.fineGrained")}
-              value={t("workspace.billing.overview.plusPerMonth", {
-                amount: "$60",
-              })}
+              value={perCycle(fees.addOnPrice)}
               info
             />
           ) : null}
           <div className="mt-3 border-t pt-3">
             <FeeRow
               label={t("workspace.billing.overview.totalCharge")}
-              value={t("workspace.billing.overview.perMonth", {
-                amount: `$${total}`,
-              })}
+              value={perCycle(total)}
               strong
             />
           </div>

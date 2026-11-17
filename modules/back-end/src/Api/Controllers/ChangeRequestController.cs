@@ -72,6 +72,7 @@ public class ChangeRequestController : ApiControllerBase
     {
         var request = new ApproveFlagChangeRequest
         {
+            WorkspaceId = WorkspaceId,
             OrgId = OrgId,
             EnvId = envId,
             Id = id,
@@ -93,6 +94,7 @@ public class ChangeRequestController : ApiControllerBase
     {
         var request = new DeclineFlagChangeRequest
         {
+            WorkspaceId = WorkspaceId,
             OrgId = OrgId,
             EnvId = envId,
             Id = id,
@@ -111,6 +113,7 @@ public class ChangeRequestController : ApiControllerBase
     {
         var request = new ApplyFlagChangeRequest
         {
+            WorkspaceId = WorkspaceId,
             OrgId = OrgId,
             EnvId = envId,
             Id = id

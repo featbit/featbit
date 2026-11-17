@@ -83,7 +83,7 @@ describe("organization api", () => {
     })
   })
 
-  it("fetches real policy and group options using angular-compatible filters", async () => {
+  it("fetches policy and group options with name and pagination filters", async () => {
     localStorage.setItem("token", "auth-token")
 
     const fetchMock = vi

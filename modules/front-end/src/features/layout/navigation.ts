@@ -144,6 +144,11 @@ export const navigationGroups: NavGroup[] = [
             href: "/iam/policies",
             icon: UserRoundKey,
           },
+          {
+            labelKey: "layout.nav.items.auditLogs",
+            href: "/iam/audit-logs",
+            icon: Logs,
+          },
         ],
       },
     ],

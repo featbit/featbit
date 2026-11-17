@@ -7,12 +7,14 @@ export function InputField({
   id,
   label,
   error,
+  description,
   className,
   children,
 }: {
   id: string
   label: string
   error?: string
+  description?: string
   className?: string
   children: React.ReactNode
 }) {
@@ -22,6 +24,11 @@ export function InputField({
         {label}
       </Label>
       {children}
+      {description ? (
+        <p id={`${id}-description`} className="text-xs text-muted-foreground">
+          {description}
+        </p>
+      ) : null}
       {error ? (
         <p className="text-xs font-medium text-destructive">{error}</p>
       ) : null}

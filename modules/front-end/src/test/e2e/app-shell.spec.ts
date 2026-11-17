@@ -1,6 +1,10 @@
 import { expect, test } from "@playwright/test"
+import { mockAuthEndpoints, setAuthenticatedUser } from "./helpers"
 
 test("renders the localized login shell", async ({ page }) => {
+  await mockAuthEndpoints(page, {
+    ssoPreCheck: { success: true, data: { isEnabled: false } },
+  })
   await page.goto("/en/login")
 
   await expect(page.getByText("Sign in to your workspace")).toBeVisible()
@@ -54,16 +58,16 @@ test("routes the application shell to get started for a first-time user", async 
     })
   })
 
-  await page.addInitScript(() => {
-    localStorage.setItem("token", "test-token")
-    localStorage.setItem(
-      "auth",
-      JSON.stringify({
-        id: "user-1",
-        name: "Test User",
-        email: "test@featbit.com",
-      })
-    )
+  await page.route("**/api/v1/envs/env-real/feature-flags?*", async (route) => {
+    await route.fulfill({
+      json: { success: true, data: { totalCount: 0, items: [] } },
+    })
+  })
+  await setAuthenticatedUser(page, {
+    id: "user-1",
+    token: "test-token",
+    name: "Test User",
+    email: "test@featbit.com",
   })
 
   await page.goto("/en")
@@ -73,5 +77,7 @@ test("routes the application shell to get started for a first-time user", async 
   await expect(page.getByText("Real Production")).toBeVisible()
   await expect(page.getByRole("link", { name: "Get Started" })).toBeVisible()
   await expect(page).toHaveURL(/\/en\/get-started$/)
-  await expect(page.getByRole("heading", { name: "Get started" })).toBeVisible()
+  await expect(
+    page.getByRole("heading", { name: "Get started", level: 1, exact: true })
+  ).toBeVisible()
 })

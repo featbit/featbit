@@ -62,7 +62,10 @@ export function InvoiceHistoryPanel({
         accessorKey: "amountPaid",
         header: t("workspace.billing.invoices.amount"),
         cell: ({ row }) => {
-          const cents = row.original.amountPaid ?? row.original.amountDue ?? 0
+          const cents =
+            row.original.status === "open"
+              ? (row.original.amountDue ?? 0)
+              : (row.original.amountPaid ?? row.original.amountDue ?? 0)
           return (
             <span className="font-medium">
               {formatCurrency(cents / 100, row.original.currency ?? "USD")}
@@ -181,13 +184,17 @@ function InvoiceStatus({ status }: { status?: string }) {
       </Badge>
     )
   }
-  if (normalized === "pending") {
+  if (normalized === "pending" || normalized === "open") {
     return (
       <Badge
         variant="outline"
         className="border-amber-300 bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-300"
       >
-        {t("workspace.billing.invoices.pending")}
+        {t(
+          normalized === "open"
+            ? "workspace.billing.invoices.open"
+            : "workspace.billing.invoices.pending"
+        )}
       </Badge>
     )
   }

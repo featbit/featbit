@@ -1,7 +1,6 @@
 using Domain.Groups;
 using Domain.Members;
 using Domain.Organizations;
-using Domain.Policies;
 using Domain.Projects;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
@@ -9,7 +8,7 @@ using Environment = Domain.Environments.Environment;
 
 namespace Infrastructure.Services.MongoDb;
 
-public class OrganizationService(MongoDbClient mongoDb, IProjectService projectService)
+public class OrganizationService(MongoDbClient mongoDb)
     : MongoDbService<Organization>(mongoDb), IOrganizationService
 {
     public async Task<string[]> GetScopesAsync(ScopeString[] scopeStrings)
@@ -100,27 +99,5 @@ public class OrganizationService(MongoDbClient mongoDb, IProjectService projectS
 
             await MongoDb.CollectionOf<GroupMember>().InsertManyAsync(groupMembers);
         }
-    }
-
-    public async Task DeleteAsync(Guid id)
-    {
-        // delete organization
-        await MongoDb.CollectionOf<Organization>().DeleteOneAsync(x => x.Id == id);
-
-        // delete organization user
-        await MongoDb.CollectionOf<OrganizationUser>().DeleteManyAsync(x => x.OrganizationId == id);
-
-        // delete organization policies & groups
-        await MongoDb.CollectionOf<Policy>().DeleteManyAsync(x => x.OrganizationId == id);
-        await MongoDb.CollectionOf<MemberPolicy>().DeleteManyAsync(x => x.OrganizationId == id);
-        await MongoDb.CollectionOf<Group>().DeleteManyAsync(x => x.OrganizationId == id);
-        await MongoDb.CollectionOf<GroupMember>().DeleteManyAsync(x => x.OrganizationId == id);
-
-        // delete projects
-        var projectIds = await MongoDb.QueryableOf<Project>()
-            .Where(x => x.OrganizationId == id)
-            .Select(x => x.Id)
-            .ToListAsync();
-        await projectService.DeleteManyAsync(projectIds);
     }
 }

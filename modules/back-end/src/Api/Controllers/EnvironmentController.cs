@@ -21,11 +21,12 @@ public class EnvironmentController : ApiControllerBase
     {
         var request = new GetEnvironment
         {
-            Id = id
+            Id = id,
+            Permissions = await GetRequestPermissionsAsync()
         };
 
-        var project = await Mediator.Send(request);
-        return Ok(project);
+        var env = await Mediator.Send(request);
+        return Ok(env);
     }
 
     /// <summary>
@@ -37,9 +38,10 @@ public class EnvironmentController : ApiControllerBase
     [OpenApi]
     [HttpPost]
     [Authorize(Permissions.CreateEnv)]
-    public async Task<ApiResponse<EnvironmentVm>> CreateAsync(Guid projectId, CreateEnvironment request)
+    public async Task<ApiResponse<EnvironmentVm>> CreateAsync(Guid projectId, CreateEnvironmentPayload payload)
     {
-        request.ProjectId = projectId;
+        var permissions = await GetRequestPermissionsAsync();
+        var request = new CreateEnvironment(projectId, payload, permissions);
 
         var env = await Mediator.Send(request);
         return Ok(env);
@@ -54,9 +56,10 @@ public class EnvironmentController : ApiControllerBase
     [OpenApi]
     [HttpPut("{id:guid}")]
     [Authorize(Permissions.UpdateEnvSettings)]
-    public async Task<ApiResponse<EnvironmentVm>> UpdateAsync(Guid id, UpdateEnvironment request)
+    public async Task<ApiResponse<EnvironmentVm>> UpdateAsync(Guid id, UpdateEnvironmentPayload payload)
     {
-        request.Id = id;
+        var permissions = await GetRequestPermissionsAsync();
+        var request = new UpdateEnvironment(id, payload, permissions);
 
         var env = await Mediator.Send(request);
         return Ok(env);

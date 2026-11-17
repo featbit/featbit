@@ -8,6 +8,10 @@ namespace Application.FeatureFlags;
 
 public class OnFeatureFlagChanged : INotification
 {
+    public Guid WorkspaceId { get; }
+
+    public Guid OrganizationId { get; }
+
     public FeatureFlag Flag { get; set; }
 
     public string Operation { get; set; }
@@ -20,11 +24,15 @@ public class OnFeatureFlagChanged : INotification
 
     public OnFeatureFlagChanged(
         FeatureFlag flag,
+        Guid workspaceId,
+        Guid organizationId,
         string operation,
         DataChange dataChange,
         Guid operatorId,
         string comment = "")
     {
+        WorkspaceId = workspaceId;
+        OrganizationId = organizationId;
         Flag = flag;
         Operation = operation;
         DataChange = dataChange;
@@ -34,7 +42,7 @@ public class OnFeatureFlagChanged : INotification
 
     public AuditLog GetAuditLog()
     {
-        var auditLog = AuditLog.For(Flag, Operation, DataChange, Comment, OperatorId);
+        var auditLog = AuditLog.For(Flag, WorkspaceId, OrganizationId, Operation, DataChange, Comment, OperatorId);
 
         return auditLog;
     }
@@ -45,7 +53,7 @@ public class OnFeatureFlagChangedHandler(
     ICacheService cache,
     IAuditLogService auditLogService,
     IWebhookHandler webhookHandler,
-    IFeatureFlagChangePublisher featureFlagChangePublisher,
+    IFeatureFlagChangePublisher changePublisher,
     IConfiguration configuration)
     : INotificationHandler<OnFeatureFlagChanged>
 {
@@ -64,7 +72,7 @@ public class OnFeatureFlagChangedHandler(
         await flagRevisionService.AddOneAsync(revision);
 
         // publish feature flag change message
-        await featureFlagChangePublisher.PublishAsync(notification);
+        await changePublisher.PublishAsync(notification);
 
         if (!configuration.UseControlPlane())
         {

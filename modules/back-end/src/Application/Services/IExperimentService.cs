@@ -1,5 +1,6 @@
 using Application.Bases.Models;
 using Application.Experiments;
+using Application.Experiments.ExperimentMetrics;
 using Domain.Experiments;
 
 namespace Application.Services;
@@ -29,7 +30,7 @@ public interface IExperimentService
         Guid id,
         ExperimentMetricsUpdate update);
 
-    Task<ExperimentDetailVm> CreateRunAsync(Guid envId, Guid id);
+    Task<ExperimentDetailVm> CreateRunAsync(Guid envId, Guid id, ExperimentRunCreate setup);
 
     Task<ExperimentDetailVm> DeleteRunAsync(Guid envId, Guid id, Guid runId);
 
@@ -56,6 +57,14 @@ public interface IExperimentService
         Guid id,
         Guid runId,
         ExperimentRunAnalyzeRequest request);
+
+    Task<IReadOnlyCollection<ExperimentRunForLayer>> GetExperimentRunsByLayersAsync(
+        Guid envId,
+        IReadOnlyCollection<ExperimentLayer> layers);
+
+    Task<IReadOnlyCollection<ExperimentWithRuns>> GetExperimentsWithRunsAsync(
+        Guid envId,
+        string nameSearchText = null);
 
     Task<PagedResult<ExperimentVm>> GetListAsync(
         Guid envId,

@@ -9,6 +9,11 @@ import {
   authContextQueryKeys,
   projectsQueryOptions,
 } from "@/features/layout/auth-context-query"
+import {
+  canUseAction,
+  environmentRn,
+} from "@/features/iam/current-user-permissions"
+import { currentUserPoliciesQueryOptions } from "@/features/iam/current-user-policy-query"
 import { ContextBar } from "@/features/layout/components/context-bar"
 import { GlobalMessageBanner } from "@/features/layout/components/global-message-banner"
 import { buildBillingGlobalMessages } from "@/features/layout/global-message"
@@ -55,6 +60,9 @@ function getEnvironmentReloadPath(pathname: string, baseHref: string) {
   const segments = pathname.split("/").filter(Boolean)
   const [lang, featureSegment] = segments
 
+  if (lang && featureSegment === "iam")
+    return getBrowserPath(pathname, baseHref)
+
   if (lang && featureSegment) {
     return getBrowserPath(`/${lang}/${featureSegment}`, baseHref)
   }
@@ -81,6 +89,9 @@ export function AuthenticatedLayout() {
   )
   const [organization, setOrganization] = useState<Organization | null>(() =>
     getCurrentOrganization()
+  )
+  const permissionsQuery = useQuery(
+    currentUserPoliciesQueryOptions(organization?.id ?? "")
   )
   const [currentProjectEnv, setCurrentProjectEnv] = useState<ProjectEnv | null>(
     () => getCurrentProjectEnv()
@@ -237,9 +248,19 @@ export function AuthenticatedLayout() {
 
           const userId = getStoredUserProfile().id ?? ""
           const organizationId = getCurrentOrganization()?.id ?? ""
-          await queryClient.invalidateQueries({
-            queryKey: authContextQueryKeys.projects(userId, organizationId),
-          })
+          await Promise.all([
+            queryClient.invalidateQueries({
+              queryKey: authContextQueryKeys.projects(userId, organizationId),
+            }),
+            // Invalidate cached flag and segment settings after project changes;
+            // inactive queries will refetch when their pages mount again.
+            queryClient.invalidateQueries({
+              queryKey: ["feature-flag-environment-settings"],
+            }),
+            queryClient.invalidateQueries({
+              queryKey: ["segment-environment-settings"],
+            }),
+          ])
           const loadedProjects = await queryClient.fetchQuery(
             projectsQueryOptions(userId, organizationId)
           )
@@ -327,6 +348,17 @@ export function AuthenticatedLayout() {
               organization={organization}
               currentProjectEnv={currentProjectEnv}
               projects={projects}
+              canViewSecrets={Boolean(
+                currentProjectEnv &&
+                canUseAction(
+                  permissionsQuery.data ?? [],
+                  environmentRn(
+                    currentProjectEnv.projectKey,
+                    currentProjectEnv.envKey
+                  ),
+                  "ViewEnvSecret"
+                )
+              )}
               onProjectEnvChange={changeCurrentProjectEnv}
             />
             <SubscriptionLicenseBadge lang={lang} workspace={workspace} />

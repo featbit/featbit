@@ -1,6 +1,6 @@
 using System.Net;
 using System.Net.WebSockets;
-using Domain.Shared;
+using Domain.Secrets;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

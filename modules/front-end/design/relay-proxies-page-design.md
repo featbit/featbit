@@ -1,6 +1,6 @@
 # Relay Proxies Page Design
 
-This document is the complete React design contract for the Relay Proxies experience: list, create, edit, view, environment selection, automatic/manual agent management, destructive confirmation, and the one-time key flow. Angular remains the functional reference for permissions, API behavior, validation, and agent operations, but the React experience must use the authenticated React visual language defined in [react-layout-design.md](react-layout-design.md), shadcn/ui, Base UI primitives, Tailwind tokens, and lucide-react.
+This document is the complete React design contract for the Relay Proxies experience: list, create, edit, view, environment selection, automatic/manual agent management, destructive confirmation, and the one-time key flow. The React experience must use the authenticated React visual language defined in [react-layout-design.md](react-layout-design.md), shadcn/ui, Base UI primitives, Tailwind tokens, and lucide-react.
 
 ## Design Asset
 
@@ -20,7 +20,7 @@ This design covers the complete Relay Proxies workflow inside the existing authe
 - Keep the current sidebar and context bar unchanged and outside the design surface.
 - Do not add page tabs, summary cards, charts, onboarding illustrations, status dashboards, or a second navigation layer.
 - Create, Edit, and View use the same right-side Sheet structure with mode- and permission-aware controls. This document also covers the Choose environments Dialog, Add/Edit manual agent Dialog, removal confirmations, and one-time key Dialog.
-- Preserve every Angular capability listed under **Functional invariants**, including behavior not expanded in the visual assets.
+- Preserve every capability listed under **Functional invariants**, including behavior not expanded in the visual assets.
 
 ## Page Purpose
 
@@ -69,11 +69,11 @@ Use the React product's restrained, neutral workbench style.
 - Use the normal `background` page surface and `foreground` text.
 - Use `muted-foreground` for the subtitle, descriptions, masked keys, timestamps, and secondary scope text.
 - Use one-pixel `border` dividers and no ambient card shadow.
-- Use the standard dark-neutral primary button; do not bring Angular's green action styling into React.
+- Use the standard dark-neutral primary button.
 - Use Inter Variable and the existing compact type scale: 24px page title, 14px body and labels, and 12px secondary metadata.
 - Keep light and dark themes structurally identical and rely on semantic tokens rather than hard-coded light-theme colors.
 
-The page should feel closest to the existing React Access Tokens and IAM Team list surfaces: a direct page header, compact toolbar, one bordered data surface, and pagination. It must not copy Angular/ng-zorro styling one-to-one.
+The page should feel closest to the existing React Access Tokens and IAM Team list surfaces: a direct page header, compact toolbar, one bordered data surface, and pagination.
 
 ## Main Page Layout
 
@@ -96,7 +96,7 @@ The toolbar has two ends and one row on desktop.
 - Use a leading Search icon and placeholder `Filter by name`.
 - Debounce changes by approximately `300ms`, reset the page index to `1`, and submit the trimmed name to the existing server-side filter.
 - Keep the entered query visible during loading and error recovery.
-- Do not add environment, agent-type, status, or sorting filters because Angular and the current API do not provide those list filters.
+- Do not add environment, agent-type, status, or sorting filters because the current API does not provide those list filters.
 
 ### Primary action
 
@@ -165,7 +165,7 @@ Create uses the same General, Scopes, Auto agents, and Manual agents sequence as
 Use a compact two-column layout when the Sheet has sufficient width.
 
 - `Name` is required in Create and Edit. Edit uses the current value as its initial form value.
-- Keep Angular's debounced duplicate-name check. Do not run a duplicate error against the unchanged original name.
+- Keep the debounced duplicate-name check. Do not run a duplicate error against the unchanged original name.
 - Show `Validating...`, `This name has been used`, or `Name validation failed` directly under the field when applicable.
 - `Description` is optional and uses a short textarea in Edit with helper text `Describe the purpose of this relay proxy.`
 - View renders the same two values in readable, neutral read-only surfaces. Remove the required marker, validation copy, resize affordance, and description helper rather than presenting disabled low-contrast controls.
@@ -269,7 +269,7 @@ Edit mode shows `Add manual agent` at the section heading and direct row actions
 - `Remove` requires confirmation before removing the agent from the pending form value.
 - The Add/Edit manual-agent form retains required Name and valid URL fields and returns the user to this Sheet after confirmation.
 
-View mode hides `Add manual agent`, `Edit`, `Sync`, and `Remove`. It retains `Check availability`, matching Angular's read-only behavior, and keeps the availability result in the standard success/error toast channel.
+View mode hides `Add manual agent`, `Edit`, `Sync`, and `Remove`. It retains `Check availability`, matching the read-only contract, and keeps the availability result in the standard success/error toast channel.
 
 ### Footer and submitting
 
@@ -368,7 +368,7 @@ After a successful create, open a non-dismissible Dialog approximately `560px` w
 
 ## Functional Invariants
 
-The migration must preserve the following Angular behavior. The main page provides the entry points, and the shared Create/Edit/View Sheet plus supporting Dialogs apply the detailed contracts above. Functional invariants remain binding even where this document does not supply a separate visual asset.
+The implementation must support the following behavior. The main page provides the entry points, and the shared Create/Edit/View Sheet plus supporting Dialogs apply the detailed contracts above. Functional invariants remain binding even where this document does not supply a separate visual asset.
 
 ### List and permissions
 

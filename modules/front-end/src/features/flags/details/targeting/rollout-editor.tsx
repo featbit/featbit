@@ -39,7 +39,7 @@ export function ServingSummary({
   return (
     <div
       data-slot="serving-summary"
-      className="flex min-w-0 w-full flex-col items-start gap-2 xl:w-auto xl:flex-row xl:items-center"
+      className="flex w-full min-w-0 flex-col items-start gap-2 xl:w-auto xl:flex-row xl:items-center"
     >
       <div className="flex h-2 w-full max-w-72 shrink-0 overflow-hidden rounded-full bg-muted xl:w-24">
         {values.map((item, index) => (
@@ -106,14 +106,13 @@ export function PercentageRolloutEditor({
       ...new Set([
         "keyId",
         "name",
+        ...(dispatchKey ? [dispatchKey] : []),
         ...properties.map((property) => property.name).filter(Boolean),
       ]),
     ],
-    [properties]
+    [properties, dispatchKey]
   )
-  const [property, setProperty] = useState(() =>
-    dispatchKey && dispatchKeys.includes(dispatchKey) ? dispatchKey : "keyId"
-  )
+  const [property, setProperty] = useState(() => dispatchKey || "keyId")
   const total = items.reduce((sum, item) => sum + item.percentage, 0)
 
   return (

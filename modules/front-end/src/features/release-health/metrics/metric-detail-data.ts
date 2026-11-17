@@ -1,5 +1,6 @@
 import { useQuery, useQueries } from "@tanstack/react-query"
 import { fetchAuditLogs } from "@/features/audit-logs/audit-logs-api"
+import { AuditLogScopes } from "@/features/audit-logs/audit-logs-types"
 import {
   releaseHealthApi,
   type LiveMetric,
@@ -44,10 +45,11 @@ export function useMetricDetailData(
         let total: number
         do {
           const page = await fetchAuditLogs(
-            scope.envId,
             {
+              scope: AuditLogScopes.Environment,
+              scopeId: scope.envId,
               query: "",
-              refType: "FeatureFlag",
+              refTypes: ["FeatureFlag"],
               refId: binding.flagId,
               from,
               to,

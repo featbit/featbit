@@ -1,7 +1,7 @@
+import { useListQuery, useListSearch } from "@/lib/use-list-query"
+import { ListPaginationControls } from "@/components/list-pagination-controls"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
-  ChevronLeft,
-  ChevronRight,
   ChevronsUpDown,
   Plus,
   Search,
@@ -10,7 +10,6 @@ import {
 import { useCallback, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { useSearchParams } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import {
   Command,
@@ -26,14 +25,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
 import { getCurrentWorkspace } from "@/features/layout/layout-context"
 import {
@@ -76,35 +67,34 @@ export function ResourceWebhooksContent() {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
   const workspace = getCurrentWorkspace()
-  const [search, setSearch] = useState("")
-  const [debouncedSearch, setDebouncedSearch] = useState("")
-  const [projectId, setProjectId] = useState("")
+  const {
+    searchParams,
+    updateParams,
+    pageIndex,
+    pageSize,
+    setPageIndex,
+    setPageSize,
+  } = useListQuery()
+  const { search, setSearch, debouncedSearch } = useListSearch(
+    searchParams,
+    updateParams
+  )
+  const projectId = searchParams.get("projectId") ?? ""
+  const setProjectId = (value: string) =>
+    updateParams({ projectId: value || null }, true)
   const [projectFilterOpen, setProjectFilterOpen] = useState(false)
-  const [pageIndex, setPageIndex] = useState(1)
-  const [pageSize, setPageSize] = useState(10)
-  const [searchParams, setSearchParams] = useSearchParams()
   const [sheet, setSheet] = useState<SheetState>(() =>
     searchParams.get("create") === "1" ? { mode: "new", webhook: null } : null
   )
   useEffect(() => {
     if (searchParams.get("create") !== "1") return
-    const next = new URLSearchParams(searchParams)
-    next.delete("create")
-    setSearchParams(next, { replace: true })
-  }, [searchParams, setSearchParams])
+    updateParams({ create: null })
+  }, [searchParams, updateParams])
   const [removeTarget, setRemoveTarget] = useState<Webhook | null>(null)
   const [debugWebhook, setDebugWebhook] = useState<DebugConfiguration | null>(
     null
   )
   const [logsWebhook, setLogsWebhook] = useState<Webhook | null>(null)
-
-  useEffect(() => {
-    const timeout = window.setTimeout(() => {
-      setDebouncedSearch(search.trim())
-      setPageIndex(1)
-    }, 300)
-    return () => window.clearTimeout(timeout)
-  }, [search])
 
   const projectsQuery = useQuery({
     queryKey: ["webhook-projects", workspace?.id ?? ""],
@@ -177,7 +167,6 @@ export function ResourceWebhooksContent() {
   })
 
   const data = listQuery.data ?? { totalCount: 0, items: [] }
-  const pageCount = Math.max(1, Math.ceil(data.totalCount / pageSize))
   const from = data.totalCount === 0 ? 0 : (pageIndex - 1) * pageSize + 1
   const to = Math.min(pageIndex * pageSize, data.totalCount)
   const filtersActive = Boolean(debouncedSearch || projectId)
@@ -211,7 +200,8 @@ export function ResourceWebhooksContent() {
               }
             >
               <span className="truncate">
-                {selectedProject?.name ?? t("webhooks.allProjects")}
+                {selectedProject?.name ??
+                  (projectId || t("webhooks.allProjects"))}
               </span>
               <ChevronsUpDown className="size-4 shrink-0 text-muted-foreground" />
             </PopoverTrigger>
@@ -294,7 +284,7 @@ export function ResourceWebhooksContent() {
               className="mt-4"
               onClick={() => {
                 setSearch("")
-                setDebouncedSearch("")
+                updateParams({ name: null }, true)
                 setProjectId("")
                 setPageIndex(1)
               }}
@@ -334,52 +324,19 @@ export function ResourceWebhooksContent() {
           <span>
             {t("webhooks.showing", { from, to, total: data.totalCount })}
           </span>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="icon-sm"
-              disabled={pageIndex <= 1}
-              aria-label={t("webhooks.previous")}
-              onClick={() => setPageIndex((current) => current - 1)}
-            >
-              <ChevronLeft />
-            </Button>
-            <span className="min-w-14 text-center text-foreground">
-              {pageIndex} / {pageCount}
-            </span>
-            <Button
-              variant="outline"
-              size="icon-sm"
-              disabled={pageIndex >= pageCount}
-              aria-label={t("webhooks.next")}
-              onClick={() => setPageIndex((current) => current + 1)}
-            >
-              <ChevronRight />
-            </Button>
-            <Select
-              value={String(pageSize)}
-              onValueChange={(value) => {
-                if (!value) return
-                setPageSize(Number(value))
-                setPageIndex(1)
-              }}
-            >
-              <SelectTrigger className="w-32">
-                <SelectValue>
-                  {t("webhooks.perPage", { count: pageSize })}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  {[10, 20, 30].map((size) => (
-                    <SelectItem key={size} value={String(size)}>
-                      {t("webhooks.perPage", { count: size })}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div>
+          <ListPaginationControls
+            pageIndex={pageIndex}
+            pageSize={pageSize}
+            totalCount={data.totalCount}
+            onPageIndexChange={setPageIndex}
+            onPageSizeChange={(size) => {
+              setPageSize(size)
+              setPageIndex(1)
+            }}
+            perPage={(count) => t("webhooks.perPage", { count })}
+            previousLabel={t("webhooks.previous")}
+            nextLabel={t("webhooks.next")}
+          />
         </div>
       ) : null}
 

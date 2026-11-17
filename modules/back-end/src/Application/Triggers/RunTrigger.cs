@@ -14,6 +14,8 @@ public class RunTrigger : IRequest<bool>
 
 public class RunTriggerHandler : IRequestHandler<RunTrigger, bool>
 {
+    private readonly IEnvironmentService _auditEnvironments;
+
     private readonly ITriggerService _triggerService;
     private readonly IFeatureFlagService _flagService;
     private readonly IPublisher _publisher;
@@ -21,8 +23,10 @@ public class RunTriggerHandler : IRequestHandler<RunTrigger, bool>
     public RunTriggerHandler(
         ITriggerService triggerService,
         IFeatureFlagService flagService,
-        IPublisher publisher)
+        IPublisher publisher,
+        IEnvironmentService auditEnvironments)
     {
+        _auditEnvironments = auditEnvironments;
         _triggerService = triggerService;
         _flagService = flagService;
         _publisher = publisher;
@@ -57,8 +61,9 @@ public class RunTriggerHandler : IRequestHandler<RunTrigger, bool>
 
             // publish on feature flag change notification
             var comment = trigger.Action == TriggerActions.TurnOff ? "Turn off by trigger" : "Turn on by trigger";
+            var auditOwner = await _auditEnvironments.GetOrganizationAsync(flag.EnvId);
             var notification =
-                new OnFeatureFlagChanged(flag, Operations.Update, dataChange, SystemUser.Id, comment);
+                new OnFeatureFlagChanged(flag, auditOwner.WorkspaceId, auditOwner.Id, Operations.Update, dataChange, SystemUser.Id, comment);
             await _publisher.Publish(notification, cancellationToken);
         }
 

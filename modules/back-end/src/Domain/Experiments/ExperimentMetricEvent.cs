@@ -12,9 +12,9 @@ public class ExperimentMetricEvent : Entity
 
     public double NumericValue { get; set; }
 
-    public DateTime OccurredAt { get; set; }
+    public string ApplicationType { get; set; }
 
-    public string Properties { get; set; }
+    public DateTime OccurredAt { get; set; }
 
     public DateTime CreatedAt { get; set; }
 }

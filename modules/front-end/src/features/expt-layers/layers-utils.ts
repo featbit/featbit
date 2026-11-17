@@ -1,0 +1,8 @@
+export function runColor(index: number) {
+  return [
+    "bg-blue-200 dark:bg-blue-800",
+    "bg-blue-400 dark:bg-blue-600",
+    "bg-violet-400 dark:bg-violet-600",
+    "bg-indigo-300 dark:bg-indigo-700",
+  ][index % 4]
+}

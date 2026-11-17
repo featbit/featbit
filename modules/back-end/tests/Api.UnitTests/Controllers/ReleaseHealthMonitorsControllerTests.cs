@@ -65,7 +65,8 @@ public class ReleaseHealthMonitorsControllerTests
         await f.Controller.Status(f.Project.Id, f.Env.Id, f.Flag.Id, new(0, false), default);
         f.Store.Verify(x => x.PutAsync(It.Is<ReleaseHealthDocument>(d => d.ScopeId == f.Env.Id && d.Id == f.Flag.Id && d.Version == 1),
             null, It.IsAny<CancellationToken>()), Times.Once);
-        f.Audits.Verify(x => x.AddOneAsync(It.Is<AuditLog>(a => a.EnvId == f.Env.Id &&
+        f.Audits.Verify(x => x.AddOneAsync(It.Is<AuditLog>(a => a.WorkspaceId == f.WorkspaceId &&
+            a.OrganizationId == f.OrgId && a.EnvId == f.Env.Id &&
             a.RefType == AuditLogRefTypes.FeatureFlag && a.RefId == f.Flag.Id.ToString() && a.CreatorId == f.Actor &&
             a.Comment.Contains("Release Health") && a.DataChange.Current.Contains("releaseHealthMonitor") &&
             a.DataChange.Current.Contains("\"enabled\":false"))), Times.Once);
@@ -90,6 +91,7 @@ public class ReleaseHealthMonitorsControllerTests
 
     private sealed class Fixture
     {
+        public Guid WorkspaceId { get; } = Guid.NewGuid();
         public Guid OrgId { get; } = Guid.NewGuid();
         public Guid Actor { get; } = Guid.NewGuid();
         public Project Project { get; }
@@ -122,6 +124,7 @@ public class ReleaseHealthMonitorsControllerTests
             user.SetupGet(x => x.Id).Returns(Actor);
             var services = new ServiceCollection().AddSingleton(permissions.Object).AddSingleton(user.Object).BuildServiceProvider();
             var context = new DefaultHttpContext { RequestServices = services };
+            context.Request.Headers[ApiConstants.WorkspaceHeaderKey] = WorkspaceId.ToString();
             context.Request.Headers[ApiConstants.OrgIdHeaderKey] = OrgId.ToString();
             var service = new ReleaseHealthService(Store.Object, Mock.Of<ICredentialProtector>(), [], envs.Object,
                 projects.Object, NullLogger<ReleaseHealthService>.Instance);

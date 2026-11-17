@@ -1,3 +1,4 @@
+using System.Globalization;
 using Domain.Targeting;
 
 namespace Domain.UnitTests.Targeting;
@@ -26,9 +27,26 @@ public class OperatorTests
     [InlineData(OperatorTypes.LessThan, "not-a-number", "2")]
     [InlineData(OperatorTypes.LessThan, "1", "not-a-number")]
     [InlineData(OperatorTypes.BiggerThan, "NaN", "1")]
+    [InlineData(OperatorTypes.BiggerThan, "Infinity", "1")]
+    [InlineData(OperatorTypes.BiggerThan, "1e9999", "1")]
     public void IsMatch_NumericOperators_NonNumericInput_ReturnsFalse(string op, string user, string rule)
     {
         Assert.False(Operator.Get(op).IsMatch(user, rule));
+    }
+
+    [Fact]
+    public void IsMatch_NumericOperatorUnderNonDotCulture_UsesInvariantCulture()
+    {
+        var originalCulture = CultureInfo.CurrentCulture;
+        try
+        {
+            CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo("fr-FR");
+            Assert.True(Operator.Get(OperatorTypes.BiggerThan).IsMatch("10.5", "10.4"));
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = originalCulture;
+        }
     }
 
     [Theory]

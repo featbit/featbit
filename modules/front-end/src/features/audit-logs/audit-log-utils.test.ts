@@ -4,6 +4,7 @@ import {
   auditDecisionSnapshot,
   auditEventTitle,
   auditHistoryChanges,
+  auditStatusChange,
   auditLogSegmentIds,
   auditObjectIdentity,
   dayAfter,
@@ -30,6 +31,193 @@ function log(overrides: Partial<AuditLog> = {}): AuditLog {
 }
 
 describe("audit log presentation", () => {
+  it.each([
+    ["reorder only", ["b", "a", "d"], true],
+    ["reorder with additions and removals", ["b", "a", "e"], true],
+    ["move a newly added variation", ["e", "a", "b", "d"], true],
+    ["add and remove without reordering", ["a", "b", "e"], false],
+  ])("shows variation order: %s", (_scenario, ids, reordered) => {
+    const variation = (id: string) => ({
+      id,
+      name: `Variation ${id.toUpperCase()}`,
+      value: id,
+    })
+    const changes = auditHistoryChanges(
+      log({
+        dataChange: {
+          previous: JSON.stringify({
+            variations: ["a", "b", "d"].map(variation),
+          }),
+          current: JSON.stringify({ variations: ids.map(variation) }),
+        },
+      }),
+      i18n.t
+    )
+    const order = changes.find((change) => change.label === "Variation order")
+    if (reordered) {
+      expect(order).toMatchObject({
+        action: "updated",
+        literalLabel: true,
+        previous: "Variation A → Variation B → Variation D",
+        current: ids.map((id) => variation(id).name).join(" → "),
+      })
+    } else {
+      expect(order).toBeUndefined()
+    }
+    if (ids.includes("e") && !ids.includes("d")) {
+      expect(changes).toHaveLength(reordered ? 2 : 1)
+      expect(changes[0]).toMatchObject({
+        label: "Variations",
+        valueGroups: [
+          { action: "added", values: ["Variation E"] },
+          { action: "removed", values: ["Variation D"] },
+        ],
+      })
+    }
+  })
+
+  it.each(["FeatureFlag", "Segment"])(
+    "separates %s archive state from its switch",
+    (refType) => {
+      for (const enabled of [true, false]) {
+        const entry = log({
+          refType,
+          operation: "Archive",
+          dataChange: {
+            previous: JSON.stringify({ isArchived: false, isEnabled: enabled }),
+            current: JSON.stringify({ isArchived: true, isEnabled: enabled }),
+          },
+        })
+        expect(auditStatusChange(entry, i18n.t)).toEqual({
+          label: "Archive status",
+          previous: "Active",
+          current: "Archived",
+        })
+        expect(
+          auditStatusChange(
+            {
+              ...entry,
+              operation: "Restore",
+              dataChange: {
+                previous: entry.dataChange.current,
+                current: entry.dataChange.previous,
+              },
+            },
+            i18n.t
+          )
+        ).toEqual({
+          label: "Archive status",
+          previous: "Archived",
+          current: "Active",
+        })
+      }
+    }
+  )
+
+  it("only simplifies a standalone switch change and retains mixed edits", () => {
+    const entry = log({
+      dataChange: {
+        previous: '{"isEnabled":false,"name":"Before"}',
+        current: '{"isEnabled":true,"name":"Before"}',
+      },
+    })
+    expect(auditStatusChange(entry, i18n.t)).toEqual({
+      label: "Flag state",
+      previous: "OFF",
+      current: "ON",
+    })
+    expect(
+      auditStatusChange(
+        {
+          ...entry,
+          dataChange: {
+            ...entry.dataChange,
+            current: '{"isEnabled":true,"name":"After"}',
+          },
+        },
+        i18n.t
+      )
+    ).toBeNull()
+    expect(
+      auditStatusChange(
+        { ...entry, operation: "Archive", dataChange: {} },
+        i18n.t
+      )
+    ).toBeNull()
+  })
+  it.each([
+    ["Group", "AddGroupMember", "Added member"],
+    ["Policy", "ClonePolicy", "Cloned policy"],
+    ["Member", "UpdateProfile", "Updated profile"],
+  ])("uses operation for %s %s event titles", (refType, operation, title) => {
+    expect(auditEventTitle(log({ refType, operation }), i18n.t)).toBe(title)
+  })
+
+  it.each([
+    ["Group", "DeleteGroup", true],
+    ["Policy", "DeletePolicy", true],
+    ["Member", "RemoveFromOrganization", true],
+    ["Member", "RemoveFromWorkspace", true],
+    ["Group", "RemoveGroupMember", false],
+    ["Group", "RemoveGroupPolicy", false],
+    ["Member", "RemoveMemberPolicy", false],
+  ])(
+    "distinguishes resource deletion from relationship removal for %s %s",
+    (refType, operation, removed) => {
+      const identity = auditObjectIdentity(
+        log({
+          refType,
+          operation,
+          dataChange: {
+            previous: JSON.stringify({ name: "Before", rn: "group/before" }),
+            current: removed
+              ? ""
+              : JSON.stringify({ name: "After", rn: "group/after" }),
+          },
+        }),
+        "Unavailable"
+      )
+      expect(identity.removed).toBe(removed)
+      expect(identity.available).toBe(!removed)
+      expect(identity.name).toBe(removed ? "Before" : "After")
+    }
+  )
+
+  it("shows reordered rules from audit snapshots as a targeting change", () => {
+    const rules = [
+      { id: "a", name: "Rule A", conditions: [], variations: [] },
+      { id: "b", name: "Rule B", conditions: [], variations: [] },
+    ]
+    const entry = log({
+      dataChange: {
+        previous: JSON.stringify({ rules }),
+        current: JSON.stringify({ rules: [...rules].reverse() }),
+      },
+      instructions: [
+        {
+          kind: "ReorderRules",
+          value: { previous: ["a", "b"], current: ["b", "a"] },
+        },
+      ],
+    })
+    expect(auditEventTitle(entry, i18n.t)).toBe(
+      i18n.t("auditLogs.updatedTargeting")
+    )
+    expect(auditHistoryChanges(entry, i18n.t)).toEqual([
+      {
+        kind: "order",
+        label: "ruleOrder",
+        action: "updated",
+        previous: "Rule A → Rule B",
+        current: "Rule B → Rule A",
+      },
+    ])
+    // Existing logs are also rendered from their snapshots, even with no instructions.
+    expect(auditHistoryChanges({ ...entry, instructions: [] }, i18n.t)).toEqual(
+      auditHistoryChanges(entry, i18n.t)
+    )
+  })
+
   it("uses the current snapshot for active object identity", () => {
     const identity = auditObjectIdentity(
       log({
@@ -87,6 +275,26 @@ describe("audit log presentation", () => {
         i18n.t
       )
     ).toBe("Updated targeting")
+  })
+
+  it("shows an insights toggle as a settings change with old and new values", () => {
+    const before = { id: "flag-1", name: "Checkout", key: "checkout" }
+    const insightsLog = log({
+      instructions: [{ kind: "UpdateInsightsEnabled", value: false }],
+      dataChange: {
+        previous: JSON.stringify(before),
+        current: JSON.stringify({ ...before, insightsEnabled: false }),
+      },
+    })
+
+    expect(auditEventTitle(insightsLog, i18n.t)).toBe("Updated settings")
+    expect(auditHistoryChanges(insightsLog, i18n.t)).toEqual([
+      expect.objectContaining({
+        label: "Insights enabled",
+        previous: "Enabled",
+        current: "Disabled",
+      }),
+    ])
   })
 
   it("labels every change request decision as its own audit event", () => {

@@ -28,7 +28,7 @@ export function emptySsoValues(workspace: WorkspaceDetails | null): SsoFormValue
     clientSecret: workspace?.sso?.oidc?.clientSecret ?? "",
     tokenEndpoint: workspace?.sso?.oidc?.tokenEndpoint ?? "",
     clientAuthenticationMethod:
-      workspace?.sso?.oidc?.clientAuthenticationMethod ?? "Client secret basic",
+      workspace?.sso?.oidc?.clientAuthenticationMethod ?? "",
     authorizationEndpoint: workspace?.sso?.oidc?.authorizationEndpoint ?? "",
     scope: workspace?.sso?.oidc?.scope ?? "",
     userEmailClaim: workspace?.sso?.oidc?.userEmailClaim ?? "",

@@ -21,7 +21,7 @@ public class FlagDiffOverview
         TargetEnvId = targetEnvId;
         OnOffState = diff.OnOffState.IsDifferent;
         IndividualTargeting = diff.IndividualTargeting.Any(x => x.IsDifferent);
-        TargetingRule = diff.TargetingRule.Any(x => x.IsDifferent);
+        TargetingRule = diff.TargetingRule.Any(x => x.IsDifferent || x.IsOrderDifferent);
         DefaultRule = diff.DefaultRule.IsDifferent;
         OffVariation = diff.OffVariation.IsDifferent;
     }

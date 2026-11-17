@@ -27,6 +27,10 @@ public class UpdateTargetingPayload : ResourceChangeRequest
 
 public class UpdateTargeting : UpdateTargetingPayload, IRequest<bool>
 {
+    public Guid WorkspaceId { get; set; }
+
+    public Guid OrgId { get; set; }
+
     public Guid Id { get; set; }
 
     public PolicyStatement[] Permissions { get; set; }
@@ -47,11 +51,9 @@ public class UpdateTargetingValidator : AbstractValidator<UpdateTargeting>
     public UpdateTargetingValidator()
     {
         RuleFor(x => x.Rules)
-            .Must(rules =>
-            {
-                var conditions = rules.SelectMany(x => x.Conditions);
-                return conditions.All(x => !x.IsSegmentCondition());
-            }).WithErrorCode(ErrorCodes.Invalid("rules"));
+            .NotNull().WithErrorCode(ErrorCodes.Required("rules"))
+            .Must(rules => rules.All(rule => rule != null && rule.IsValid()))
+            .WithErrorCode(ErrorCodes.Invalid("rules"));
     }
 }
 
@@ -74,6 +76,8 @@ public class UpdateTargetingHandler(
         // publish on segment change notification
         var notification = new OnSegmentChange(
             segment,
+            request.WorkspaceId,
+            request.OrgId,
             Operations.Update,
             dataChange,
             currentUser.Id,

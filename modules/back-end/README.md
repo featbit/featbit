@@ -33,6 +33,8 @@ requests, and that it can connect to its dependencies (a database, message queue
 
 ## Environment Variables
 
+Configuration uses the standard .NET environment-variable format: use `__` for nested keys.
+
 ### General
 
 | Name            | Description                                                                 | Default Value |
@@ -41,6 +43,8 @@ requests, and that it can connect to its dependencies (a database, message queue
 | `DbProvider`    | Database provider, used to select **MongoDB** or **Postgres**               | `"Postgres"`  |
 | `MqProvider`    | Message Queue provider, used to select **Redis**, **Kafka** or **Postgres** | `"Postgres"`  |
 | `CacheProvider` | Cache provider, used to select **Redis** or **None**                        | `"None"`      |
+| `OLAPProvider`  | Insights query store: **MongoDb**, **Postgres**, or **ClickHouse**. Defaults to the selected `DbProvider` when unset. ClickHouse requires `MqProvider=Kafka`. | Same as `DbProvider` |
+| `SSOEnabled`    | Enable the SSO endpoint. | `false` (unset) |
 
 ## Logging
 
@@ -92,7 +96,7 @@ JWT (JSON Web Token) configuration for authentication and authorization.
 
 | Name                         | Description                                                                                      | Default Value                                                                            |
 |------------------------------|--------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------|
-| `Postgres__ConnectionString` | Postgres connection string                                                                       | `"Host=postgres;Port=5432;Username=postgres;Password=please_change_me;Database=featbit"` |
+| `Postgres__ConnectionString` | Postgres connection string                                                                       | `"Host=postgresql;Port=5432;Username=postgres;Password=please_change_me;Database=featbit"` |
 | `Postgres__Password`         | Postgres password (Optional). If provided, override the password specified in connection string. | `""`                                                                                     |
 
 ### Redis
@@ -103,6 +107,8 @@ JWT (JSON Web Token) configuration for authentication and authorization.
 | `Redis__Password`               | Redis Password (Optional). If provided, override the password specified in connection string                                                                                                                              | `""`           |
 | `Redis__PopulateLockTtlSeconds` | Lock TTL (seconds) for the startup Redis populate. Must exceed the expected populate duration; if the lock expires mid-populate a second instance can start a concurrent populate. Increase for large datasets.           | `60`           |
 | `Redis__PopulateMaxWaitSeconds` | Maximum seconds an instance will wait for another instance to finish populating Redis before throwing. Should be comfortably larger than `PopulateLockTtlSeconds` so a crashed instance's lock can expire and be retaken. | `90`           |
+| `Redis__ConnectTimeoutMs` | Redis connection timeout in milliseconds; an explicit `connectTimeout` in the connection string takes precedence. | `1500` |
+| `Redis__SyncTimeoutMs` | Redis synchronous command timeout in milliseconds; an explicit `syncTimeout` in the connection string takes precedence. | `1500` |
 
 ### Kafka
 
@@ -120,10 +126,17 @@ and [consumer configs](https://kafka.apache.org/documentation/#consumerconfigs) 
 | `Kafka__Consumer__auto.commit.interval.ms`  | The frequency in ms that the consumer offsets are auto-committed to Kafka           | `"5000"`        |
 | `Kafka__Consumer__enable.auto.offset.store` | Whether to automatically store the offset of the last message prior to calling poll | `false`         |
 
-### OLAP
+### ClickHouse
 
-| Name                | Description                       | Default Value        |
-|---------------------|-----------------------------------|----------------------|
+Set `OLAPProvider=ClickHouse` only with `MqProvider=Kafka`. In that mode the API queries ClickHouse
+for insights, and `ClickHouse__HttpEndpoint` is required. When `OLAPProvider` is unset, insights use `DbProvider`.
+
+| Name | Description | Default Value |
+|------|-------------|---------------|
+| `ClickHouse__HttpEndpoint` | ClickHouse HTTP URL (for example, `http://clickhouse-server:8123`); required with ClickHouse OLAP. | None |
+| `ClickHouse__Database` | ClickHouse database name. | `featbit` |
+| `ClickHouse__User` | ClickHouse user. | `default` |
+| `ClickHouse__Password` | ClickHouse password. | Empty |
 
 ### UsageTracking
 
@@ -131,3 +144,34 @@ and [consumer configs](https://kafka.apache.org/documentation/#consumerconfigs) 
 |----------------------------------|--------------------------------------------------------|---------------|
 | `UsageTracking__FlushIntervalMs` | Interval in milliseconds between usage data flushes    | `5000`        |
 | `UsageTracking__ChannelCapacity` | Maximum number of usage events buffered in the channel | `10000`       |
+
+### InsightsTracking
+
+| Name | Description | Default Value |
+|------|-------------|---------------|
+| `InsightsTracking__FlushIntervalMs` | Interval in milliseconds between insight event flushes (1–30000). | `1000` |
+| `InsightsTracking__ChannelCapacity` | Maximum number of insight events buffered in the channel (1–100000). | `10000` |
+| `InsightsTracking__MaxBatchSize` | Maximum events per flush (1–10000); cannot exceed channel capacity. | `1000` |
+
+### Webhook
+
+Webhook deliveries are refused when the target is not a public address (private ranges, loopback, link-local and
+the instance metadata address). To deliver to an internal service in a self-hosted installation, list its host name.
+Only what is listed is exempt; every other private target stays blocked.
+
+Each setting is one comma-separated string. Spaces around an entry and empty entries are ignored, and a repeated
+entry counts once. The indexed form (`Webhook__AllowedHosts__0`, ...) is not supported and stops the API from
+starting.
+
+| Name | Description | Default Value |
+|------|-------------|---------------|
+| `Webhook__AllowedHosts` | Host names that webhooks may target even though they resolve to a non-public address, for example `Webhook__AllowedHosts=notify.internal,chat-gateway`. A host is matched by its exact name, in any case, on any port and with or without a trailing dot; its subdomains are not matched, and wildcards are not supported. Redirects from a listed host are not followed, and requests to it do not use the proxy set in the environment (`HTTP_PROXY`, `HTTPS_PROXY`), so an internal host is reached directly without needing `NO_PROXY`. The address of a listed host is not checked, so list only hosts you control. An IP address listed here skips the address checks entirely; use `Webhook__AllowedAddresses` for a target with no stable name. An entry that is not a host name stops the API from starting. | `""` |
+| `Webhook__AllowedAddresses` | IP addresses or CIDR ranges that webhooks may target even though they are not public, for example `Webhook__AllowedAddresses=10.0.0.5,10.20.0.0/16`. Use this for a target with no stable name. Every address a name resolves to must be listed, for example both an IPv4 and an IPv6 address, so for a target addressed by name use `Webhook__AllowedHosts` instead. An entry that is not an address stops the API from starting. | `""` |
+
+### OAuth integrations
+
+| Name | Description | Default Value |
+|------|-------------|---------------|
+| `OAuthProviders__<index>__Name` | Social login provider name (`Google` or `GitHub`). Configure each provider as an indexed array entry. | None |
+| `OAuthProviders__<index>__ClientId` | OAuth client ID for the indexed provider. | None |
+| `OAuthProviders__<index>__ClientSecret` | OAuth client secret for the indexed provider. | None |

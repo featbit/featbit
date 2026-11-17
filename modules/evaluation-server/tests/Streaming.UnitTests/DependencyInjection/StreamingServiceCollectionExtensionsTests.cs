@@ -5,6 +5,7 @@ using Streaming.DependencyInjection;
 using Streaming.Messages;
 using Streaming.Services;
 using Domain.Messages;
+using Domain.Secrets;
 using Microsoft.Extensions.Internal;
 
 namespace Streaming.UnitTests.DependencyInjection;
@@ -82,11 +83,11 @@ public class StreamingServiceCollectionExtensionsTests
 
     private sealed class FakeRelayProxyService : IRelayProxyService
     {
-        public Task<Domain.Shared.SecretWithValue[]> GetSecretsAsync(string key) =>
-            Task.FromResult(Array.Empty<Domain.Shared.SecretWithValue>());
+        public Task<SecretWithValue[]> GetSecretsAsync(string key) =>
+            Task.FromResult(Array.Empty<SecretWithValue>());
 
-        public Task<Domain.Shared.Secret[]> GetServerSecretsAsync(string key) =>
-            Task.FromResult(Array.Empty<Domain.Shared.Secret>());
+        public Task<Secret[]> GetServerSecretsAsync(string key) =>
+            Task.FromResult(Array.Empty<Secret>());
 
         public Task UpdateAgentStatusAsync(string key, string agentId, string status) => Task.CompletedTask;
     }

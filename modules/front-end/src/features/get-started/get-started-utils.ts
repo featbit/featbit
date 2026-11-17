@@ -1,15 +1,6 @@
 import type { FeatureFlagInsight } from "@/features/flags/details/insights/insights-types"
 import type { FlagCreationPayload } from "@/features/flags/flags-types"
 
-export function toFlagKey(value: string) {
-  return value
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, "")
-    .replace(/[\s_-]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-}
-
 export function makeId() {
   return (
     globalThis.crypto?.randomUUID?.() ??

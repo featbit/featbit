@@ -3,6 +3,7 @@ using Api.Authorization;
 using Application.Services;
 using Application.Users;
 using Domain.Users;
+using Domain.Policies;
 using Infrastructure.Caches;
 using Infrastructure.MQ;
 using MediatR;
@@ -40,6 +41,12 @@ public class PermissionCheckTestApp : WebApplicationFactory<Program>
             collection.Replace(ServiceDescriptor.Singleton<ICurrentUser>(new TestCurrentUser(TestUser.Id)));
             collection.Replace(ServiceDescriptor.Transient<IWorkspaceService, TestWorkspaceService>());
             collection.Replace(ServiceDescriptor.Transient<IUserService, TestUserService>());
+            collection.Replace(ServiceDescriptor.Singleton(TestTenantContext.CreateOrganizationService().Object));
+            // Keep the real request-permission resolver, but isolate its database dependency.
+            var members = new Mock<IMemberService>(MockBehavior.Strict);
+            members.Setup(x => x.GetPermissionsAsync(TestWorkspace.OrganizationId, TestUser.Id))
+                .ReturnsAsync(Array.Empty<PolicyStatement>());
+            collection.Replace(ServiceDescriptor.Singleton(members.Object));
             collection.Replace(ServiceDescriptor.Transient<IRefreshTokenService, TestRefreshTokenService>());
 
             collection.Replace(ServiceDescriptor.Singleton<IPermissionChecker>(PermissionChecker));
@@ -64,6 +71,7 @@ public class PermissionCheckTestApp : WebApplicationFactory<Program>
     public async Task<HttpClient> CreateAuthenticatedClientAsync()
     {
         var client = CreateClient();
+        TestTenantContext.AddHeaders(client);
         var scopeFactory = Services.GetRequiredService<IServiceScopeFactory>();
         using var scope = scopeFactory.CreateScope();
         var identityService = scope.ServiceProvider.GetRequiredService<IIdentityService>();

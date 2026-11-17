@@ -207,7 +207,8 @@ public class SegmentService(AppDbContext dbContext, ILogger<SegmentService> logg
         long version,
         Guid operatorId = default,
         string operation = Operations.Update,
-        bool isTargetingChange = true)
+        bool isTargetingChange = true,
+        Guid? organizationId = null)
     {
         for (var attempt = 0; ; attempt++)
         {
@@ -225,7 +226,7 @@ public class SegmentService(AppDbContext dbContext, ILogger<SegmentService> logg
             }
 
             // write ONLY the pending data; committed fields stay as they are
-            segment.SetPending(pendingValue, version, operatorId, operation, isTargetingChange);
+            segment.SetPending(pendingValue, version, operatorId, operation, isTargetingChange, organizationId);
 
             try
             {

@@ -6,6 +6,10 @@ namespace Application.FeatureFlags;
 
 public class ToggleFeatureFlag : ResourceChangeRequest, IRequest<Guid>
 {
+    public Guid WorkspaceId { get; set; }
+
+    public Guid OrgId { get; set; }
+
     public Guid EnvId { get; set; }
 
     public string Key { get; set; }
@@ -42,7 +46,7 @@ public class ToggleFeatureFlagHandler : IRequestHandler<ToggleFeatureFlag, Guid>
 
         // publish on feature flag change notification
         var notification =
-            new OnFeatureFlagChanged(flag, Operations.Update, dataChange, _currentUser.Id, request.Comment);
+            new OnFeatureFlagChanged(flag, request.WorkspaceId, request.OrgId, Operations.Update, dataChange, _currentUser.Id, request.Comment);
         await _publisher.Publish(notification, cancellationToken);
 
         return flag.Revision;

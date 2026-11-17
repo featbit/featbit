@@ -6,13 +6,19 @@ on:
       - main
     paths:
       - 'modules/control-plane/**'
-      - '.github/build-and-test-control-plane.yml'
+      - 'modules/back-end/src/Application/**'
+      - 'modules/back-end/src/Domain/**'
+      - 'modules/back-end/src/Infrastructure/**'
+      - '.github/workflows/build-and-test-control-plane.yml'
   pull_request:
     branches:
       - main
     paths:
       - 'modules/control-plane/**'
-      - '.github/build-and-test-control-plane.yml'
+      - 'modules/back-end/src/Application/**'
+      - 'modules/back-end/src/Domain/**'
+      - 'modules/back-end/src/Infrastructure/**'
+      - '.github/workflows/build-and-test-control-plane.yml'
 
 jobs:
   validate:

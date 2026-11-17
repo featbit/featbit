@@ -5,6 +5,8 @@ namespace Application.FeatureFlags;
 
 public class ApproveFlagChangeRequest : IRequest<bool>
 {
+    public Guid WorkspaceId { get; set; }
+
     public Guid OrgId { get; set; }
 
     public Guid EnvId { get; set; }
@@ -67,6 +69,8 @@ public class ApproveFlagChangeRequestHandler(
         var dataChange = new DataChange().To(snapshot);
         var auditLog = AuditLog.For(
             flag,
+            request.WorkspaceId,
+            request.OrgId,
             Operations.ApproveFlagChangeRequest,
             dataChange,
             request.Comment?.Trim() ?? string.Empty,

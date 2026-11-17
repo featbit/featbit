@@ -39,7 +39,7 @@ public class GetProjectHandler(IProjectService projectService)
             let envRN = RN.ForEnv(project.Key, env.Key)
             let canAccessEnv = PolicyHelper.IsAllowed(permissions, envRN, Permissions.CanAccessEnv)
             where canAccessEnv
-            select env;
+            select env.Sanitize(envRN, permissions);
 
         return new ProjectWithEnvs
         {

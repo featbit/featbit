@@ -93,17 +93,4 @@ public class ProjectService(MongoDbClient mongoDb, IEnvironmentService envServic
 
         return true;
     }
-
-    public async Task DeleteManyAsync(ICollection<Guid> projectIds)
-    {
-        // delete projects
-        await MongoDb.CollectionOf<Project>().DeleteManyAsync(x => projectIds.Contains(x.Id));
-
-        // delete environments
-        var envIds = await MongoDb.QueryableOf<Environment>()
-            .Where(x => projectIds.Contains(x.ProjectId))
-            .Select(x => x.Id)
-            .ToListAsync();
-        await envService.DeleteManyAsync(envIds);
-    }
 }

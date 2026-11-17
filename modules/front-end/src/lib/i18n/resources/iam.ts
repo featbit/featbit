@@ -1014,6 +1014,7 @@ export const zhIam = {
     "details.permissionsEditor.actionLabels.DeleteEnvSecret": "删除环境密钥",
     "details.permissionsEditor.actionLabels.CreateEnvSecret": "创建环境密钥",
     "details.permissionsEditor.actionLabels.UpdateEnvSecret": "更新环境密钥",
+    "details.permissionsEditor.actionLabels.ViewEnvSecret": "查看环境密钥",
     "details.permissionsEditor.actionLabels.CreateFlag": "创建功能开关",
     "details.permissionsEditor.actionLabels.ArchiveFlag": "归档功能开关",
     "details.permissionsEditor.actionLabels.RestoreFlag": "恢复功能开关",

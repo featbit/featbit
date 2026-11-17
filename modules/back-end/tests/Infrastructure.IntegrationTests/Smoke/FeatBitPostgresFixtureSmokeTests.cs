@@ -1,5 +1,4 @@
 using Infrastructure.IntegrationTests.Fixtures;
-using Infrastructure.IntegrationTests.Support;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.IntegrationTests.Smoke;

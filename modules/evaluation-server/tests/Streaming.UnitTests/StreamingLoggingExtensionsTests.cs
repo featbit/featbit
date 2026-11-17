@@ -10,23 +10,13 @@ public class StreamingLoggingExtensionsTests
     [Fact]
     public void RequestRejected_FormatsMessageAndCarriesEventName()
     {
-        _logger.RequestRejected("ws://x/?token=abc", "missing-type");
+        _logger.RequestRejected("missing-type");
 
         var record = Assert.Single(_logger.Collector.GetSnapshot());
         Assert.Equal(LogLevel.Warning, record.Level);
         Assert.Equal(1, record.Id.Id);
         Assert.Equal("RequestRejected", record.Id.Name);
-        Assert.Equal("Streaming request was rejected: ws://x/?token=abc. Reason: missing-type.", record.Message);
-    }
-
-    [Fact]
-    public void RequestRejected_NullRequest_RendersAsNullPlaceholder()
-    {
-        _logger.RequestRejected(null, "no-type");
-
-        var record = Assert.Single(_logger.Collector.GetSnapshot());
-        Assert.Equal(LogLevel.Warning, record.Level);
-        Assert.Contains("no-type", record.Message);
+        Assert.Equal("Streaming request was rejected. Reason: missing-type.", record.Message);
     }
 
     [Fact]
@@ -37,7 +27,7 @@ public class StreamingLoggingExtensionsTests
         _logger.FailedToResolveHost("10.0.0.1", ex);
 
         var record = Assert.Single(_logger.Collector.GetSnapshot());
-        Assert.Equal(LogLevel.Warning, record.Level);
+        Assert.Equal(LogLevel.Debug, record.Level);
         Assert.Equal(2, record.Id.Id);
         Assert.Equal("FailedToResolveHost", record.Id.Name);
         Assert.Equal("Failed to resolve host for IP address: 10.0.0.1.", record.Message);
@@ -45,17 +35,16 @@ public class StreamingLoggingExtensionsTests
     }
 
     [Fact]
-    public void ErrorValidateRequest_FormatsMessageAndCapturesException()
+    public void RequestValidationUnavailable_CapturesException()
     {
-        var ex = new InvalidOperationException("bad");
+        var exception = new InvalidOperationException("lookup failed");
+        var logger = new FakeLogger();
 
-        _logger.ErrorValidateRequest("ws://x", ex);
+        logger.RequestValidationUnavailable("unavailable", exception);
 
-        var record = Assert.Single(_logger.Collector.GetSnapshot());
+        var record = Assert.Single(logger.Collector.GetSnapshot());
         Assert.Equal(LogLevel.Error, record.Level);
-        Assert.Equal(3, record.Id.Id);
-        Assert.Equal("ErrorValidateRequest", record.Id.Name);
-        Assert.Equal("Exception occurred while validating request: ws://x.", record.Message);
-        Assert.Same(ex, record.Exception);
+        Assert.Same(exception, record.Exception);
+        Assert.Equal("RequestValidationUnavailable", record.Id.Name);
     }
 }

@@ -28,7 +28,28 @@ export const enWorkspace = {
         "You need workspace administrator permissions to update these settings.",
     },
     sso: {
-      title: "Single sign-on",
+      title: "Single sign-on (SSO)",
+      clientIdDescription:
+        "The application ID assigned when you register FeatBit with your identity provider.",
+      clientIdPlaceholder: "Enter your client ID",
+      clientSecretDescription:
+        "The client secret generated for the FeatBit application in your identity provider.",
+      clientSecretPlaceholder: "Enter your client secret",
+      authorizationEndpointDescription:
+        "The authorization URL where users sign in with your identity provider.",
+      authorizationEndpointPlaceholder: "https://idp.example.com/authorize",
+      tokenEndpointDescription:
+        "The URL FeatBit uses to exchange the authorization code for tokens.",
+      tokenEndpointPlaceholder: "https://idp.example.com/token",
+      clientAuthenticationMethodDescription:
+        "How FeatBit authenticates to the token endpoint. Match the method configured in your identity provider.",
+      clientAuthenticationMethodPlaceholder: "Select an authentication method",
+      scopeDescription:
+        "OIDC scopes to request, separated by spaces. Include openid.",
+      scopePlaceholder: "openid profile email",
+      userEmailClaimDescription:
+        "The name of the claim in the ID token that contains the user’s email address.",
+      userEmailClaimPlaceholder: "email",
       clientId: "Client ID",
       clientSecret: "Client secret",
       tokenEndpoint: "Token endpoint",
@@ -37,16 +58,16 @@ export const enWorkspace = {
       scope: "Scope",
       userEmailClaim: "User email claim",
       helper:
-        "SSO settings are used to authenticate users via your identity provider.",
+        "Configure OpenID Connect (OIDC) to let workspace members sign in with your identity provider.",
+      setupGuide: "Setup guide",
       save: "Save SSO settings",
       showSecret: "Show client secret",
       hideSecret: "Hide client secret",
       restrictedBadge: "Restricted",
       restrictedDescription:
         "You do not have permission to view or edit SSO settings.",
-      unlicensedBadge: "License required",
       unlicensedDescription:
-        "Single sign-on is a paid feature. Add a license that includes SSO to enable it for this workspace.",
+        "Single sign-on is a paid feature. To enable it for this workspace, add a license with SSO support.",
     },
   },
   usage: {
@@ -71,6 +92,7 @@ export const enWorkspace = {
       "See which environments contribute the most to your usage",
     environment: "Environment",
     failedToLoad: "Failed to load usage data.",
+    failedToLoadBillingCycle: "Failed to load the current billing cycle.",
     retry: "Retry",
     emptyTrend: "No trend data for this period",
     emptyEnvironments: "No environment usage for this period",
@@ -162,6 +184,25 @@ export const enWorkspace = {
     },
   },
   billing: {
+    paymentFailed: {
+      title: "Payment failed",
+      syncingTitle: "Syncing subscription status",
+      syncingDescription:
+        "No outstanding invoice was found. Subscription status is awaiting confirmation. Please refresh shortly.",
+      description:
+        "We couldn’t collect your latest payment. Please complete payment to settle your invoice.",
+      returnHint: "After paying, return here to refresh your payment status.",
+      linkUnavailable:
+        "The payment link is temporarily unavailable. Please try again.",
+      payNow: "Pay now",
+      refreshStatus: "Refresh status",
+      refreshing: "Refreshing…",
+      retryLink: "Retry payment link",
+      refreshError: "Unable to refresh payment status. Please try again.",
+      confirmed: "Payment confirmed.",
+      stillPending:
+        "Payment has not been confirmed yet. If you have paid, refresh again shortly.",
+    },
     errors: {
       subscriptionTitle: "Failed to load subscription",
       subscriptionDescription:
@@ -223,6 +264,8 @@ export const enWorkspace = {
       healthy: "Usage is healthy",
       feeBreakdown: "Fee breakdown",
       planFee: "{{plan}} plan",
+      extraMau: "Extra {{mau}} MAU",
+      perYear: "{{amount}}/year",
       fineGrained: "Fine-grained Access Control",
       totalCharge: "Total charge",
       perMonth: "{{amount}}/month",
@@ -251,6 +294,7 @@ export const enWorkspace = {
       amount: "Amount",
       empty: "No invoices yet",
       paid: "Paid",
+      open: "Open",
       pending: "Pending",
       overdue: "Overdue",
       unknown: "Unknown",
@@ -508,7 +552,23 @@ export const zhWorkspace = {
       permissionNote: "需要工作区管理员权限才能更新这些设置。",
     },
     sso: {
-      title: "单点登录",
+      title: "单点登录 (SSO)",
+      clientIdDescription:
+        "在身份提供商中为 FeatBit 注册应用时分配的应用标识。",
+      clientIdPlaceholder: "请输入 client ID",
+      clientSecretDescription: "身份提供商为该应用签发的客户端密钥。",
+      clientSecretPlaceholder: "请输入 client secret",
+      authorizationEndpointDescription: "用户在身份提供商处登录的授权地址。",
+      authorizationEndpointPlaceholder: "https://idp.example.com/authorize",
+      tokenEndpointDescription: "FeatBit 用于将授权码交换为令牌的地址。",
+      tokenEndpointPlaceholder: "https://idp.example.com/token",
+      clientAuthenticationMethodDescription:
+        "FeatBit 向令牌端点验证客户端身份的方式，需与身份提供商的配置一致。",
+      clientAuthenticationMethodPlaceholder: "请选择认证方式",
+      scopeDescription: "请求的 OIDC scopes，以空格分隔，需包含 openid。",
+      scopePlaceholder: "openid profile email",
+      userEmailClaimDescription: "ID token 中包含用户邮箱地址的 claim 名称。",
+      userEmailClaimPlaceholder: "email",
       clientId: "Client ID",
       clientSecret: "Client secret",
       tokenEndpoint: "Token endpoint",
@@ -516,15 +576,16 @@ export const zhWorkspace = {
       authorizationEndpoint: "Authorization endpoint",
       scope: "Scope",
       userEmailClaim: "User email claim",
-      helper: "SSO 设置用于通过身份提供商认证用户。",
+      helper:
+        "配置 OpenID Connect (OIDC)，让工作区成员通过你的身份提供商登录。",
+      setupGuide: "配置指南",
       save: "保存 SSO 设置",
       showSecret: "显示 client secret",
       hideSecret: "隐藏 client secret",
       restrictedBadge: "受限",
       restrictedDescription: "你没有权限查看或编辑 SSO 设置。",
-      unlicensedBadge: "需要许可证",
       unlicensedDescription:
-        "单点登录是付费功能。请添加包含 SSO 的许可证以启用该功能。",
+        "单点登录是付费功能。添加支持 SSO 的许可证，即可为此工作区启用单点登录。",
     },
   },
   usage: {
@@ -548,6 +609,7 @@ export const zhWorkspace = {
     perEnvironmentSubtitle: "查看哪些环境贡献了最多用量",
     environment: "环境",
     failedToLoad: "加载用量数据失败。",
+    failedToLoadBillingCycle: "加载当前账单周期失败。",
     retry: "重试",
     emptyTrend: "当前周期没有趋势数据",
     emptyEnvironments: "当前周期没有环境用量",
@@ -637,6 +699,21 @@ export const zhWorkspace = {
     },
   },
   billing: {
+    paymentFailed: {
+      title: "支付失败",
+      syncingTitle: "订阅状态同步中",
+      syncingDescription: "当前没有待支付账单，订阅状态仍待确认，请稍后刷新。",
+      description: "本期账单未能完成扣款，请前往支付页面完成支付。",
+      returnHint: "支付完成后返回此页面刷新支付状态。",
+      linkUnavailable: "暂时无法获取支付链接，请重试。",
+      payNow: "立即支付",
+      refreshStatus: "刷新支付状态",
+      refreshing: "正在刷新…",
+      retryLink: "重试获取链接",
+      refreshError: "无法刷新支付状态，请重试。",
+      confirmed: "已确认支付成功。",
+      stillPending: "暂未确认支付成功。如果你已支付，请稍后再次刷新。",
+    },
     errors: {
       subscriptionTitle: "加载订阅失败",
       subscriptionDescription:
@@ -696,6 +773,8 @@ export const zhWorkspace = {
       healthy: "余量充足",
       feeBreakdown: "费用明细",
       planFee: "{{plan}} 套餐",
+      extraMau: "额外 {{mau}} MAU",
+      perYear: "{{amount}}/年",
       fineGrained: "细粒度访问控制",
       totalCharge: "总费用",
       perMonth: "{{amount}}/月",
@@ -724,6 +803,7 @@ export const zhWorkspace = {
       amount: "金额",
       empty: "暂无发票",
       paid: "已支付",
+      open: "待支付",
       pending: "待支付",
       overdue: "已逾期",
       unknown: "未知",

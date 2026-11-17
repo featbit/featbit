@@ -1,0 +1,61 @@
+name: Promote Docker Images to Latest
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Stable release tag (for example, 6.0.0)"
+        required: true
+        type: string
+      build-run-id:
+        description: "Successful Publish Docker Images run ID whose images passed installation/upgrade validation"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: promote-docker-images-latest
+  cancel-in-progress: false
+
+env:
+  VERSION: ${{ inputs.version }}
+  BUILD_RUN_ID: ${{ inputs.build-run-id }}
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    environment: Production
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: refs/tags/${{ inputs.version }}
+          persist-credentials: false
+      - name: Validate stable tag and source build run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 .github/scripts/release_images.py validate-promotion
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.build-run-id }}
+          pattern: release-image-*
+          merge-multiple: true
+          path: release-images
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+      - name: Preflight all images, promote by digest, and verify latest
+        run: python3 .github/scripts/release_images.py promote
+      - name: Preserve promotion and rollback record
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: latest-promotion-${{ github.run_id }}-${{ github.run_attempt }}
+          path: promotion.json
+          if-no-files-found: warn
+          retention-days: 90

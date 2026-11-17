@@ -20,7 +20,7 @@ Excluded:
 - mobile-first layout work;
 - implementation work of any kind.
 
-The Angular implementation is the functional reference only. The React page must use the compact, neutral shadcn/Base UI and Tailwind workbench language established in `front-end`. It must not reproduce the Angular timeline or ng-zorro styling.
+The React page must use the compact, neutral shadcn/Base UI and Tailwind workbench language established in `front-end`.
 
 ## Design Asset
 
@@ -93,7 +93,7 @@ Use one left-aligned toolbar row immediately above the table. Controls use the s
 ### Text search
 
 - Search icon followed by placeholder `Filter by name or comment`.
-- Preserve the Angular query contract.
+- Preserve the API query contract.
 - Search is case-insensitive according to server behavior and applies to object name/key and comment where supported by the API.
 - Debounce the normalized value by approximately 350-400ms.
 - Changing the query resets incremental loading to the first ten records.
@@ -124,7 +124,7 @@ Use one left-aligned toolbar row immediately above the table. Controls use the s
 - Keep range selection as a local draft until `Apply`.
 - Disable `Apply` until both endpoints exist.
 - `Clear` removes both endpoints together; `Cancel` restores the applied range.
-- Send the start of the first date and the start of the day after the second date, preserving the Angular inclusive-range contract.
+- Send the start of the first date and the start of the day after the second date, preserving the inclusive date-range contract.
 - The trigger displays the complete localized applied range and exposes it in its accessible name.
 
 ### Filter behavior
@@ -178,7 +178,7 @@ The name is the primary scanning target. The key uses the existing compact monos
 For removed objects:
 
 - retain the previous name and key;
-- use the restrained struck-through treatment established by Angular to communicate removal;
+- use the restrained struck-through treatment to communicate removal;
 - do not render a navigation link;
 - keep the complete audit event and change details available.
 
@@ -193,7 +193,7 @@ The Type filter and Type column use the same localized labels. Unknown server va
 
 ### Event rules
 
-Preserve all Angular operation meanings:
+Preserve all operation meanings:
 
 - `Create`;
 - `Update`;
@@ -249,7 +249,7 @@ Hide `View raw data` only when neither previous nor current snapshot exists.
 
 ## Pagination
 
-Preserve Angular incremental loading and match Segment History:
+Preserve incremental loading and match Segment History:
 
 - request ten records initially;
 - show centered outline `Load more` only when `items.length < totalCount`;
@@ -258,7 +258,7 @@ Preserve Angular incremental loading and match Segment History:
 - a filter change discards appended pages and restarts from the first page;
 - an append failure preserves all already loaded rows and provides a local retry path.
 
-Do not replace this workflow with numbered pagination in this migration.
+Do not replace this workflow with numbered pagination.
 
 ## States
 
@@ -364,7 +364,7 @@ All three surfaces must share expansion, semantic ledger, comment, raw-data, err
 
 ## Functional Invariants
 
-The React migration must preserve:
+The implementation must support:
 
 - loading audit logs from the current environment;
 - filtering by query, creator, reference type, and inclusive date range;
@@ -383,7 +383,7 @@ The React migration must preserve:
 ## Acceptance Criteria
 
 - Only the Audit Logs main page and its supporting filter popovers and Raw data Dialog are designed; sidebar and context bar remain unchanged.
-- The page follows the current React/shadcn workbench style and does not clone the Angular timeline.
+- The page follows the current React/shadcn workbench style.
 - The header subtitle is `Review changes made across this environment.` and remains unchanged when additional auditable resource types are introduced.
 - The user-filter default text is `All users`.
 - `Clear filters` remains visible at the far right of the toolbar, disabled only when every filter has its default value.
@@ -394,8 +394,8 @@ The React migration must preserve:
 - Every row is collapsed by default and expands inline.
 - The expanded section is visually and structurally identical to Segment History: `Changes`, inline count, `View raw data`, shared semantic ChangeLedger, and comment footer.
 - The expanded section has no alternate inner diff table, raw JSON, or unique global-Audit-Logs styling.
-- Text, user, type, and inclusive date filters preserve Angular behavior and reset incremental loading correctly.
+- Text, user, type, and inclusive date filters preserve documented behavior and reset incremental loading correctly.
 - `Load more` appends records and keeps already loaded results on append failure.
 - Raw data uses the shared bounded read-only MergeView.
 - Light and dark themes use semantic tokens, and English and Chinese content resolve through centralized feature resources.
-- No React or Angular implementation file is changed as part of this design-only task.
+- No implementation file is changed as part of this design-only task.

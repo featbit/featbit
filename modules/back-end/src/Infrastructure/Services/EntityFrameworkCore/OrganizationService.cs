@@ -1,14 +1,13 @@
 using Domain.Groups;
 using Domain.Members;
 using Domain.Organizations;
-using Domain.Policies;
 using Domain.Projects;
 using Microsoft.EntityFrameworkCore;
 using Environment = Domain.Environments.Environment;
 
 namespace Infrastructure.Services.EntityFrameworkCore;
 
-public class OrganizationService(AppDbContext dbContext, IProjectService projectService)
+public class OrganizationService(AppDbContext dbContext)
     : EntityFrameworkCoreService<Organization>(dbContext), IOrganizationService
 {
     public async Task<string[]> GetScopesAsync(ScopeString[] scopeStrings)
@@ -101,27 +100,5 @@ public class OrganizationService(AppDbContext dbContext, IProjectService project
         }
 
         await SaveChangesAsync();
-    }
-
-    public async Task DeleteAsync(Guid id)
-    {
-        // delete organization
-        await DeleteOneAsync(id);
-
-        // delete organization user
-        await SetOf<OrganizationUser>().Where(x => x.OrganizationId == id).ExecuteDeleteAsync();
-
-        // delete organization policies & groups
-        await SetOf<Policy>().Where(x => x.OrganizationId == id).ExecuteDeleteAsync();
-        await SetOf<MemberPolicy>().Where(x => x.OrganizationId == id).ExecuteDeleteAsync();
-        await SetOf<Group>().Where(x => x.OrganizationId == id).ExecuteDeleteAsync();
-        await SetOf<GroupMember>().Where(x => x.OrganizationId == id).ExecuteDeleteAsync();
-
-        // delete projects
-        var projectIds = await QueryableOf<Project>()
-            .Where(x => x.OrganizationId == id)
-            .Select(x => x.Id)
-            .ToListAsync();
-        await projectService.DeleteManyAsync(projectIds);
     }
 }

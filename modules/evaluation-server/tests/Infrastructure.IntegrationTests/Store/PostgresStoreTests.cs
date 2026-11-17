@@ -76,6 +76,26 @@ public class PostgresStoreTests : IntegrationTestBase, IAsyncLifetime
     }
 
     [DockerFact]
+    public async Task GetFlagsAsync_InsightsColumn_IsSerializedWithDefaultTrue()
+    {
+        var envId = Guid.NewGuid();
+        var enabled = await InsertFlagAsync(envId, "enabled", DateTimeOffset.UtcNow);
+        var disabled = await InsertFlagAsync(envId, "disabled", DateTimeOffset.UtcNow);
+        await using (var conn = await _dataSource.OpenConnectionAsync())
+        {
+            await conn.ExecuteAsync(
+                "update feature_flags set insights_enabled = false where id = @id", new { id = disabled });
+        }
+
+        var flags = (await _sut.GetFlagsAsync(envId, 0))
+            .Select(bytes => JsonSerializer.Deserialize<JsonElement>(bytes))
+            .ToDictionary(x => x.GetProperty("id").GetGuid(), x => x.GetProperty("insightsEnabled").GetBoolean());
+
+        Assert.True(flags[enabled]);
+        Assert.False(flags[disabled]);
+    }
+
+    [DockerFact]
     public async Task GetFlagsAsync_ByIds_ReturnsRequestedFlagsOnly()
     {
         var envId = Guid.NewGuid();

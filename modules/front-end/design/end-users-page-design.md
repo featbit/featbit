@@ -1,6 +1,6 @@
 # End Users Page Design
 
-This document defines the React design target for the environment-level `End Users` main page. Angular is the functional reference; the existing React Workspace `Global Users` page is the visual and interaction reference.
+This document defines the React design target for the environment-level `End Users` main page. The existing React Workspace `Global Users` page is the visual and interaction reference.
 
 Do not change the authenticated sidebar, context bar, account menu, subscription badge, or surrounding application shell. The design starts inside the existing main content area for the `/end-users` route.
 
@@ -31,16 +31,16 @@ These decisions supersede earlier exploration and are the implementation target:
 
 ## Scope And Principles
 
-- Preserve every Angular End Users capability and backend contract.
-- Redesign the presentation for the React workbench rather than cloning ng-zorro.
+- Preserve every End Users capability and backend contract.
+- Redesign the presentation for the React workbench using shared shadcn/Base UI components.
 - Match the current React Global Users table: compact controls, neutral shadcn surfaces, thin borders, restrained color, and lightweight row actions.
 - Keep the page table-first. Include the standard compact page header used by adjacent React environment pages, but do not add summary cards, avatars, decorative empty-state art, or another navigation layer.
 - Treat the current organization, project, and environment from the existing context bar as authoritative. Do not repeat that context inside the page.
 - Use the shared React patterns and native shadcn/Base UI primitives. Do not modify generated files in `src/components/ui` for feature-specific needs.
 
-## Functional Inventory From Angular
+## Functional Requirements
 
-The React migration must preserve:
+The implementation must support:
 
 - Environment-scoped user search by `name` or `keyId`, debounced by 400 ms.
 - Cursor-based user pagination with page sizes `10`, `20`, and `30`.
@@ -90,7 +90,7 @@ Do not make both `Import` and `Properties` primary. The hierarchy in the accepte
 - Include `Clear all` only when at least one optional column is selected.
 - Show `No columns found` when the local filter has no matches.
 - Do not make a user-list request when filtering this menu.
-- Persist selected property names per environment, matching Angular's `CURRENT_USER_FILTER_ATTRIBUTE(envId)` behavior.
+- Persist selected property names per environment, matching the `CURRENT_USER_FILTER_ATTRIBUTE(envId)` storage contract.
 
 ## Data Table
 
@@ -108,7 +108,7 @@ Cell behavior:
 - `Name`: primary row text and the natural entry point to Details. If empty, show muted `Unnamed user`.
 - `Key ID`: monospace or identifier styling; truncate long values and reveal the full value in a tooltip.
 - Optional property: plain text, truncated with an overflow tooltip. Missing values render a muted dash.
-- If a property value matches a configured preset value, render `Description (rawValue)`, matching Angular behavior. The raw value must remain visible because targeting rules use it.
+- If a property value matches a configured preset value, render `Description (rawValue)`. The raw value must remain visible because targeting rules use it.
 - `Actions`: compact text actions `Evaluate` and `Details`, separated by a thin vertical divider. They must remain lighter than toolbar actions.
 
 Use consistent vertical centering. Keep the table dense enough for ten rows on a typical desktop screen without making row targets cramped. Do not add avatars, badges for ordinary strings, or colored row backgrounds.
@@ -154,7 +154,7 @@ The End Users list does not have a total-count contract. Do not reuse Global Use
 
 ## Supporting Actions
 
-Supporting surfaces preserve Angular behavior and reuse the accepted Global Users overlays where their behavior is identical. Evaluate, Details, Properties, and Preset values now have accepted design assets; Import and Download remain behaviorally specified in this document.
+Supporting surfaces preserve documented behavior and reuse the accepted Global Users overlays where their behavior is identical. Evaluate, Details, Properties, and Preset values now have accepted design assets; Import and Download remain behaviorally specified in this document.
 
 ### Import Users
 
@@ -219,7 +219,7 @@ Use the Global Users profile drawer structure directly, with End Users retaining
 - Header title: `User profile`.
 - Show the selected user's name and key ID below the title, with Copy and Close actions matching Global Users.
 - Search field: `Filter by property name or value`.
-- Debounce the local property filter by approximately 100 ms, matching Angular behavior.
+- Debounce the local property filter by approximately 100 ms.
 - Use the same two-column definition rows, bordered groups, spacing, and dividers as Global Users Details; do not render table headers.
 - `Built-in properties` contains `keyId` and `name`.
 - `Custom properties` contains all customized properties.
@@ -350,7 +350,7 @@ DELETE /api/v1/envs/{envId}/end-user-properties/{propertyId}
 
 - The page changes only the End Users main content surface.
 - Visual hierarchy and density clearly match React Global Users.
-- All Angular list, import, properties, download, evaluation, segment, and detail behaviors remain reachable.
+- All list, import, properties, download, evaluation, segment, and detail behaviors remain reachable.
 - Main-page, Evaluate, Details, Properties, and Preset-values implementation matches the accepted design assets.
 - Search uses a 400 ms debounce and resets cursor pagination.
 - Display choices come from environment property definitions and persist per environment.

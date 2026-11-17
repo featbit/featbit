@@ -26,6 +26,10 @@ public class UpdateGeneralPayload : ResourceChangeRequest
 
 public class UpdateGeneral : UpdateGeneralPayload, IRequest<bool>
 {
+    public Guid WorkspaceId { get; set; }
+
+    public Guid OrgId { get; set; }
+
     public Guid Id { get; set; }
 
     public PolicyStatement[] Permissions { get; set; }
@@ -86,6 +90,8 @@ public class UpdateGeneralHandler(
 
         var notification = new OnSegmentChange(
             segment,
+            request.WorkspaceId,
+            request.OrgId,
             Operations.Update,
             dataChange,
             currentUser.Id,

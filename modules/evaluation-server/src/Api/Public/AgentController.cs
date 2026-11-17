@@ -6,9 +6,11 @@ using Microsoft.AspNetCore.RateLimiting;
 
 namespace Api.Public;
 
+[ApiController]
 [AllowAnonymous]
+[Route("api/public/agent")]
 [EnableRateLimiting(RateLimitingPolicies.Agent)]
-public class AgentController(IRelayProxyAppService rpService, ILogger<AgentController> logger) : PublicApiControllerBase
+public class AgentController(IRelayProxyAppService rpService, ILogger<AgentController> logger) : ControllerBase
 {
     [HttpPost]
     [Route("register")]

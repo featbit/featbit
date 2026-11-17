@@ -1,6 +1,6 @@
 # IAM Group Page Design
 
-This document is the React design contract for the IAM Group list page. Angular remains a functional reference for Group data and API behavior, but the React implementation must follow the current IAM Team list page structure and its shadcn/ui, Base UI, Tailwind, TanStack Table, and authenticated-shell conventions.
+This document is the React design contract for the IAM Group list page. The React implementation must follow the current IAM Team list page structure and its shadcn/ui, Base UI, Tailwind, TanStack Table, and authenticated-shell conventions.
 
 The Group detail page has a separate contract in [iam-group-detail-page-design.md](iam-group-detail-page-design.md).
 
@@ -87,7 +87,7 @@ Pagination must exactly follow the current React Team page pattern.
 
 Removing a group requires a destructive confirmation dialog that names the group and states that the operation cannot be reverted. While the request is in flight, disable the confirm action and show its saving label. On success, remove the row, update the total count, and show a translated Sonner toast.
 
-Do not use the Angular popconfirm visual treatment.
+Use the shared confirmation Dialog visual treatment.
 
 ## States
 
@@ -103,7 +103,7 @@ Do not use the Angular popconfirm visual treatment.
 - Keep the page flat. Use borders and neutral state layers instead of shadows.
 - Use current shared shadcn components without modifying generated files.
 - Keep light and dark themes structurally identical; do not hard-code light-theme colors in feature code.
-- Do not recreate Angular/ng-zorro styling or introduce FeatBit-green table/actions.
+- Use shared shadcn styling and neutral table/action colors.
 
 ## Internationalization And Accessibility
 

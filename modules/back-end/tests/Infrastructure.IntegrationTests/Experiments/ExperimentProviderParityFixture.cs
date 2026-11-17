@@ -1,14 +1,13 @@
 using System.Collections.Concurrent;
 using Application.Services;
-using Application.Users;
 using Dapper;
 using Domain.EndUsers;
 using Domain.Experiments;
 using Domain.Targeting;
+using Infrastructure.IntegrationTests.Fixtures;
 using Infrastructure.OLAP.ClickHouse;
 using Infrastructure.Persistence.EntityFrameworkCore;
 using Infrastructure.Persistence.MongoDb;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Npgsql;
 using NpgsqlTypes;
@@ -16,6 +15,7 @@ using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using Infrastructure.Services.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
+using MongoDB.Driver;
 
 namespace Infrastructure.IntegrationTests.Experiments;
 
@@ -34,7 +34,7 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
     private readonly IContainer _postgres = new ContainerBuilder("postgres:15.10")
         .WithEnvironment("POSTGRES_USER", "postgres")
         .WithEnvironment("POSTGRES_PASSWORD", "please_change_me")
-        .WithEnvironment("POSTGRES_DB", "featbit")
+        .WithEnvironment("POSTGRES_DB", "postgres")
         .WithPortBinding(5432, true)
         .WithWaitStrategy(Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(5432))
         .Build();
@@ -272,59 +272,54 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
     };
 
     public (IExperimentService ExperimentService, IExperimentMetricService MetricService)
-        CreateExperimentServices(string provider) => provider switch
+        CreateExperimentServices(string provider, IExperimentStatsService? stats = null, IFeatureFlagService? flags = null) => provider switch
     {
-        "Postgres" => CreatePostgresExperimentServices(),
-        "MongoDb" => CreateMongoExperimentServices(),
+        "Postgres" => CreatePostgresExperimentServices(stats, flags),
+        "MongoDb" => CreateMongoExperimentServices(stats, flags),
         _ => throw new ArgumentOutOfRangeException(nameof(provider), provider, null)
     };
 
     private (IExperimentService ExperimentService, IExperimentMetricService MetricService)
-        CreatePostgresExperimentServices()
+        CreatePostgresExperimentServices(IExperimentStatsService? stats, IFeatureFlagService? flags)
     {
         var dbContext = CreateDbContext();
         var metricService = new global::Infrastructure.Services.EntityFrameworkCore.ExperimentMetricService(dbContext);
         return (
             new global::Infrastructure.Services.EntityFrameworkCore.ExperimentService(
                 dbContext,
-                new global::Infrastructure.Services.EntityFrameworkCore.ExperimentStatsService(dbContext),
-                new global::Infrastructure.Services.EntityFrameworkCore.FeatureFlagService(
+                stats ?? new global::Infrastructure.Services.EntityFrameworkCore.ExperimentStatsService(dbContext),
+                flags ?? new global::Infrastructure.Services.EntityFrameworkCore.FeatureFlagService(
                     dbContext,
                     NullLogger<FeatureFlagService>.Instance),
-                metricService,
-                new FixtureCurrentUser(),
-                new global::Infrastructure.Services.EntityFrameworkCore.UserService(dbContext)),
+                metricService),
             metricService);
     }
 
     private (IExperimentService ExperimentService, IExperimentMetricService MetricService)
-        CreateMongoExperimentServices()
+        CreateMongoExperimentServices(IExperimentStatsService? stats, IFeatureFlagService? flags)
     {
         var client = CreateMongoDbClient();
         var metricService = new global::Infrastructure.Services.MongoDb.ExperimentMetricService(client);
         return (
             new global::Infrastructure.Services.MongoDb.ExperimentService(
                 client,
-                new global::Infrastructure.Services.MongoDb.ExperimentStatsService(client),
-                new global::Infrastructure.Services.MongoDb.FeatureFlagService(client),
-                metricService,
-                new FixtureCurrentUser(),
-                new global::Infrastructure.Services.MongoDb.UserService(client)),
+                stats ?? new global::Infrastructure.Services.MongoDb.ExperimentStatsService(client),
+                flags ?? new global::Infrastructure.Services.MongoDb.FeatureFlagService(client),
+                metricService),
             metricService);
     }
 
-    internal AppDbContext CreateDbContext()
+    internal IFeatureFlagService CreateFeatureFlagService(string provider) => provider switch
     {
-        var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseNpgsql(PostgresConnectionString)
-            .UseSnakeCaseNamingConvention()
-            .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
-            .Options;
+        "Postgres" => new global::Infrastructure.Services.EntityFrameworkCore.FeatureFlagService(
+            CreateDbContext(), NullLogger<FeatureFlagService>.Instance),
+        "MongoDb" => new global::Infrastructure.Services.MongoDb.FeatureFlagService(CreateMongoDbClient()),
+        _ => throw new ArgumentOutOfRangeException(nameof(provider), provider, null)
+    };
 
-        return new AppDbContext(options);
-    }
+    internal AppDbContext CreateDbContext() => AppDbContextFactory.Create(PostgresConnectionString);
 
-    private MongoDbClient CreateMongoDbClient()
+    internal MongoDbClient CreateMongoDbClient()
     {
         return new MongoDbClient(Options.Create(new MongoDbOptions
         {
@@ -352,207 +347,14 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
     private string ClickHouseHttpEndpoint =>
         $"http://localhost:{_clickHouse.GetMappedPublicPort(8123)}";
 
-    private async Task InitializePostgresAsync()
+    private Task InitializePostgresAsync()
     {
-        await using var connection = new NpgsqlConnection(PostgresConnectionString);
-        await connection.ExecuteAsync("""
-            CREATE TABLE IF NOT EXISTS experiment_exposure_events
-            (
-                id uuid primary key default gen_random_uuid(),
-                env_id uuid not null,
-                flag_key varchar(256) not null,
-                user_key varchar(512) not null,
-                variation_id varchar(256) not null,
-                variation_value varchar(512) null,
-                exposed_at timestamp with time zone not null,
-                properties jsonb null,
-                created_at timestamp with time zone not null
-            );
+        var bootstrapConnectionString = new NpgsqlConnectionStringBuilder(PostgresConnectionString)
+        {
+            Database = "postgres"
+        }.ToString();
 
-            CREATE TABLE IF NOT EXISTS experiment_metric_events
-            (
-                id uuid primary key,
-                env_id uuid not null,
-                user_key varchar(512) not null,
-                event_name varchar(256) not null,
-                event_type varchar(64) not null,
-                numeric_value double precision not null,
-                occurred_at timestamp with time zone not null,
-                properties jsonb null,
-                created_at timestamp with time zone not null
-            );
-
-            CREATE TABLE IF NOT EXISTS experiment_metrics
-            (
-                id uuid primary key,
-                featbit_env_id uuid not null,
-                name varchar(256) not null,
-                key varchar(128) not null,
-                description text null,
-                metric_type varchar(64) not null,
-                metric_agg varchar(64) not null,
-                expected_direction varchar(64) not null,
-                status varchar(64) not null,
-                created_at timestamp with time zone not null,
-                updated_at timestamp with time zone not null
-            );
-
-            CREATE TABLE IF NOT EXISTS experiments
-            (
-                id uuid primary key,
-                name varchar(256) not null,
-                description text null,
-                stage varchar(64) not null,
-                flag_key varchar(256) null,
-                featbit_project_key varchar(256) null,
-                featbit_env_id uuid null,
-                hypothesis text null,
-                access_token text null,
-                change text null,
-                constraints text null,
-                env_secret text null,
-                flag_server_url text null,
-                goal text null,
-                guardrails text null,
-                intent text null,
-                last_action text null,
-                last_learning text null,
-                open_questions text null,
-                primary_metric text null,
-                sandbox_id text null,
-                sandbox_status varchar(64) null,
-                variants text null,
-                conflict_analysis text null,
-                entry_mode varchar(64) null,
-                created_at timestamp with time zone not null,
-                updated_at timestamp with time zone not null
-            );
-
-            CREATE TABLE IF NOT EXISTS experiment_runs
-            (
-                id uuid primary key,
-                experiment_id uuid not null,
-                slug varchar(128) not null,
-                status varchar(64) not null,
-                hypothesis text null,
-                method varchar(64) null,
-                method_reason text null,
-                primary_metric_event varchar(256) null,
-                metric_description text null,
-                guardrail_events text null,
-                guardrail_descriptions text null,
-                control_variant varchar(256) null,
-                treatment_variant varchar(256) null,
-                traffic_allocation text null,
-                minimum_sample integer null,
-                observation_start timestamp with time zone null,
-                observation_end timestamp with time zone null,
-                prior_proper boolean not null default false,
-                prior_mean double precision null,
-                prior_stddev double precision null,
-                input_data text null,
-                analysis_result text null,
-                decision text null,
-                decision_summary text null,
-                decision_reason text null,
-                what_changed text null,
-                what_happened text null,
-                confirmed_or_refuted text null,
-                why_it_happened text null,
-                next_hypothesis text null,
-                run_id varchar(128) null,
-                primary_metric_agg varchar(64) null,
-                primary_metric_type varchar(64) null,
-                traffic_percent double precision null,
-                layer_id varchar(128) null,
-                audience_filters text null,
-                traffic_offset integer null,
-                layer_key varchar(128) null,
-                allocation_key_selector varchar(256) null,
-                slice_start double precision null,
-                slice_end double precision null,
-                allocation_plan text null,
-                assignment_unit_selector varchar(256) null,
-                layer_traffic_percent double precision null,
-                analysis_sampling_plan text null,
-                data_source_mode varchar(64) null,
-                customer_endpoint_config text null,
-                created_at timestamp with time zone not null,
-                updated_at timestamp with time zone not null
-            );
-
-            CREATE TABLE IF NOT EXISTS experiment_activities
-            (
-                id uuid primary key,
-                type varchar(128) not null,
-                title varchar(512) not null,
-                detail text null,
-                actor_id uuid null,
-                actor_name varchar(256) null,
-                actor_email varchar(512) null,
-                actor_type varchar(64) null,
-                created_at timestamp with time zone not null,
-                experiment_id uuid not null
-            );
-
-            CREATE TABLE IF NOT EXISTS end_users
-            (
-                env_id uuid null,
-                key_id varchar(512) not null,
-                name varchar(256) not null
-            );
-
-            CREATE TABLE IF NOT EXISTS experiment_run_assignments
-            (
-                id uuid primary key,
-                run_id uuid not null,
-                env_id uuid not null,
-                flag_key varchar(256) not null,
-                allocation_key varchar(512) not null,
-                assignment_unit varchar(512) not null,
-                user_key varchar(512) not null,
-                expected_variation_id varchar(256) not null,
-                actual_variation_id varchar(256) not null,
-                role varchar(64) not null,
-                analysis_role varchar(64) not null,
-                bucket double precision not null,
-                layer_bucket double precision null,
-                sampling_bucket double precision null,
-                included_by_sampling boolean not null default true,
-                exclusion_reason varchar(64) null,
-                assigned_at timestamp with time zone not null,
-                first_exposed_at timestamp with time zone null,
-                created_at timestamp with time zone not null,
-                updated_at timestamp with time zone not null
-            );
-
-            CREATE UNIQUE INDEX IF NOT EXISTS ix_experiment_run_assignments_run_allocation
-                ON experiment_run_assignments (run_id, allocation_key);
-
-            CREATE UNIQUE INDEX IF NOT EXISTS ix_experiment_run_assignments_run_assignment_unit
-                ON experiment_run_assignments (run_id, assignment_unit);
-
-            CREATE UNIQUE INDEX IF NOT EXISTS ix_experiment_metrics_env_key
-                ON experiment_metrics (featbit_env_id, key);
-
-            CREATE INDEX IF NOT EXISTS ix_experiment_metrics_env_status
-                ON experiment_metrics (featbit_env_id, status);
-
-            CREATE INDEX IF NOT EXISTS ix_experiments_env_updated_at
-                ON experiments (featbit_env_id, updated_at);
-
-            CREATE INDEX IF NOT EXISTS ix_experiments_featbit_project_key
-                ON experiments (featbit_project_key);
-
-            CREATE INDEX IF NOT EXISTS ix_experiments_flag_key
-                ON experiments (flag_key);
-
-            CREATE UNIQUE INDEX IF NOT EXISTS ix_experiment_runs_experiment_id_slug
-                ON experiment_runs (experiment_id, slug);
-
-            CREATE INDEX IF NOT EXISTS ix_experiment_activities_experiment_id_created_at
-                ON experiment_activities (experiment_id, created_at);
-            """);
+        return FeatBitPostgresFixture.ApplyInitScriptsAsync(bootstrapConnectionString);
     }
 
     private async Task InitializeClickHouseAsync()
@@ -571,9 +373,8 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
                 user_name String,
                 variation_id LowCardinality(String),
                 variation_value String,
-                exposed_at DateTime64(6, 'UTC'),
-                properties String,
-                created_at DateTime64(6, 'UTC') DEFAULT now64(6)
+                exposed_at DateTime64(3, 'UTC'),
+                created_at DateTime64(3, 'UTC') DEFAULT now64(3)
             )
             ENGINE = MergeTree
             PARTITION BY (env_id, toYYYYMM(exposed_at))
@@ -587,13 +388,12 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
                 id UUID,
                 env_id UUID,
                 user_key String,
-                user_name String,
                 event_name LowCardinality(String),
                 event_type LowCardinality(String),
                 numeric_value Float64,
-                occurred_at DateTime64(6, 'UTC'),
-                properties String,
-                created_at DateTime64(6, 'UTC') DEFAULT now64(6)
+                application_type LowCardinality(String) DEFAULT '',
+                occurred_at DateTime64(3, 'UTC'),
+                created_at DateTime64(3, 'UTC') DEFAULT now64(3)
             )
             ENGINE = MergeTree
             PARTITION BY (env_id, toYYYYMM(occurred_at))
@@ -651,7 +451,7 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
     {
         await using var writer = await connection.BeginBinaryImportAsync("""
             COPY experiment_exposure_events
-                (id, env_id, flag_key, user_key, variation_id, variation_value, exposed_at, properties, created_at)
+                (id, env_id, flag_key, user_key, variation_id, variation_value, exposed_at, created_at)
             FROM STDIN (FORMAT BINARY)
             """);
 
@@ -672,7 +472,6 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
                 await writer.WriteAsync(exposure.VariationValue, NpgsqlDbType.Varchar);
             }
             await writer.WriteAsync(exposure.ExposedAt, NpgsqlDbType.TimestampTz);
-            await writer.WriteAsync(exposure.Properties, NpgsqlDbType.Jsonb);
             await writer.WriteAsync(exposure.CreatedAt, NpgsqlDbType.TimestampTz);
         }
 
@@ -685,7 +484,7 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
     {
         await using var writer = await connection.BeginBinaryImportAsync("""
             COPY experiment_metric_events
-                (id, env_id, user_key, event_name, event_type, numeric_value, occurred_at, properties, created_at)
+                (id, env_id, user_key, event_name, event_type, numeric_value, occurred_at, created_at)
             FROM STDIN (FORMAT BINARY)
             """);
 
@@ -699,7 +498,6 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
             await writer.WriteAsync(metric.EventType, NpgsqlDbType.Varchar);
             await writer.WriteAsync(metric.NumericValue, NpgsqlDbType.Double);
             await writer.WriteAsync(metric.OccurredAt, NpgsqlDbType.TimestampTz);
-            await writer.WriteAsync(metric.Properties, NpgsqlDbType.Jsonb);
             await writer.WriteAsync(metric.CreatedAt, NpgsqlDbType.TimestampTz);
         }
 
@@ -710,17 +508,22 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
         NpgsqlConnection connection,
         IEnumerable<ScenarioUser> users)
     {
+        var now = DateTime.UtcNow;
         await using var writer = await connection.BeginBinaryImportAsync("""
-            COPY end_users (env_id, key_id, name)
+            COPY end_users (id, env_id, key_id, name, customized_properties, created_at, updated_at)
             FROM STDIN (FORMAT BINARY)
             """);
 
         foreach (var user in users)
         {
             await writer.StartRowAsync();
+            await writer.WriteAsync(Guid.NewGuid(), NpgsqlDbType.Uuid);
             await writer.WriteAsync(user.EnvId, NpgsqlDbType.Uuid);
             await writer.WriteAsync(user.KeyId, NpgsqlDbType.Varchar);
             await writer.WriteAsync(user.Name, NpgsqlDbType.Varchar);
+            await writer.WriteAsync("[]", NpgsqlDbType.Jsonb);
+            await writer.WriteAsync(now, NpgsqlDbType.TimestampTz);
+            await writer.WriteAsync(now, NpgsqlDbType.TimestampTz);
         }
 
         await writer.CompleteAsync();
@@ -743,7 +546,6 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
                 VariationId = x.VariationId,
                 VariationValue = x.VariationValue,
                 ExposedAt = x.ExposedAt.UtcDateTime,
-                Properties = x.Properties,
                 CreatedAt = x.CreatedAt.UtcDateTime
             }));
 
@@ -757,7 +559,6 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
                 EventType = x.EventType,
                 NumericValue = x.NumericValue,
                 OccurredAt = x.OccurredAt.UtcDateTime,
-                Properties = x.Properties,
                 CreatedAt = x.CreatedAt.UtcDateTime
             }));
 
@@ -790,14 +591,13 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
                      {ChString(exposure.VariationId)},
                      {ChString(exposure.VariationValue)},
                      {ChDateTime64(exposure.ExposedAt)},
-                     {ChString(exposure.Properties)},
                      {ChDateTime64(exposure.CreatedAt)})
                     """;
             });
 
             await clickHouse.ExecuteCommandAsync($"""
                 INSERT INTO experiment_exposure_events
-                    (id, env_id, flag_key, user_key, user_name, variation_id, variation_value, exposed_at, properties, created_at)
+                    (id, env_id, flag_key, user_key, user_name, variation_id, variation_value, exposed_at, created_at)
                 VALUES
                     {string.Join(",\n", values)}
                 """);
@@ -805,26 +605,20 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
 
         foreach (var chunk in metrics.Chunk(500))
         {
-            var values = chunk.Select(metric =>
-            {
-                var userName = userNames.GetValueOrDefault(metric.UserKey, metric.UserKey);
-                return $"""
+            var values = chunk.Select(metric => $"""
                     ({ChUuid(metric.Id)},
                      {ChUuid(metric.EnvId)},
                      {ChString(metric.UserKey)},
-                     {ChString(userName)},
                      {ChString(metric.EventName)},
                      {ChString(metric.EventType)},
                      {metric.NumericValue.ToString(System.Globalization.CultureInfo.InvariantCulture)},
                      {ChDateTime64(metric.OccurredAt)},
-                     {ChString(metric.Properties)},
                      {ChDateTime64(metric.CreatedAt)})
-                    """;
-            });
+                    """);
 
             await clickHouse.ExecuteCommandAsync($"""
                 INSERT INTO experiment_metric_events
-                    (id, env_id, user_key, user_name, event_name, event_type, numeric_value, occurred_at, properties, created_at)
+                    (id, env_id, user_key, event_name, event_type, numeric_value, occurred_at, created_at)
                 VALUES
                     {string.Join(",\n", values)}
                 """);
@@ -849,7 +643,7 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
 
     private static string ChDateTime64(DateTimeOffset value)
     {
-        return $"toDateTime64('{value.UtcDateTime:yyyy-MM-dd HH:mm:ss.ffffff}', 6, 'UTC')";
+        return $"toDateTime64('{value.UtcDateTime:yyyy-MM-dd HH:mm:ss.fff}', 3, 'UTC')";
     }
 
     private static class Scenario
@@ -996,12 +790,6 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
         private static Guid MetricGuidFromSequence(int sequence) =>
             Guid.Parse($"10000000-0000-0000-0000-{sequence:000000000000}");
     }
-
-    private sealed class FixtureCurrentUser : ICurrentUser
-    {
-        public Guid Id => Guid.Empty;
-    }
-
 }
 
 public sealed record ScenarioUser(Guid EnvId, string KeyId, string Name);
@@ -1014,8 +802,8 @@ public sealed record ScenarioExposure(
     string VariationId,
     string VariationValue,
     DateTimeOffset ExposedAt,
-    DateTimeOffset CreatedAt,
-    string Properties = "{}");
+    DateTimeOffset CreatedAt
+);
 
 public sealed record ScenarioMetric(
     Guid Id,
@@ -1025,5 +813,5 @@ public sealed record ScenarioMetric(
     string EventType,
     double NumericValue,
     DateTimeOffset OccurredAt,
-    DateTimeOffset CreatedAt,
-    string Properties = "{}");
+    DateTimeOffset CreatedAt
+);

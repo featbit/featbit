@@ -10,19 +10,22 @@ import {
   chooseProjectEnv,
   fetchProjects,
   getCurrentOrganization,
+  getCurrentWorkspace,
+  getIsSsoFirstLogin,
   localizedPath,
   persistCurrentOrganization,
   resolveLang,
   saveCurrentProjectEnv,
 } from "@/features/layout/layout-context"
+import type { Organization } from "@/features/layout/layout-types"
 import {
   completeOnboarding,
   createExampleProject,
 } from "@/features/onboarding/onboarding-api"
 import { CreationPreview } from "@/features/onboarding/components/creation-preview"
 import { OnboardingForm } from "@/features/onboarding/components/onboarding-form"
-import { slugify } from "@/features/onboarding/onboarding-utils"
 import { ApiRequestError } from "@/lib/api/authenticated-api"
+import { slugify } from "@/lib/slugify"
 
 const defaultEnvironments = ["Dev", "Prod"]
 
@@ -163,12 +166,26 @@ export function OnboardingPage() {
           environments: defaultEnvironments,
         })
 
-        persistCurrentOrganization({
+        const initializedOrganization = {
           ...currentOrganization,
           initialized: true,
           name: organizationName.trim(),
           key: organizationKey,
-        })
+        }
+        persistCurrentOrganization(initializedOrganization)
+        queryClient.setQueryData<Organization[]>(
+          authContextQueryKeys.organizations(
+            getStoredUserProfile().id ?? "",
+            getCurrentWorkspace()?.id ?? "",
+            getIsSsoFirstLogin()
+          ),
+          (organizations) =>
+            organizations?.map((organization) =>
+              organization.id === initializedOrganization.id
+                ? initializedOrganization
+                : organization
+            )
+        )
         saveCurrentProjectEnv({
           projectId: projectKey.trim(),
           projectName: projectName.trim(),
@@ -182,7 +199,7 @@ export function OnboardingPage() {
       completedHereRef.current = true
       const landingPath = getAuthenticatedLandingPath()
 
-      navigate(`${localizedPath(lang, landingPath)}?status=init`, {
+      navigate(localizedPath(lang, landingPath), {
         replace: true,
       })
     } catch (submitError) {

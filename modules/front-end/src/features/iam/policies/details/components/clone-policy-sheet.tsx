@@ -16,6 +16,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { Textarea } from "@/components/ui/textarea"
+import { slugify } from "@/lib/slugify"
 import { isPolicyKeyUsed } from "../../policy-api"
 import { clonePolicy, type PolicyDetail } from "../policy-details-api"
 
@@ -30,14 +31,6 @@ const schema = z.object({
 })
 
 type FormValues = z.infer<typeof schema>
-
-function slugify(value: string) {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9._-]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-}
 
 export function ClonePolicySheet({
   open,

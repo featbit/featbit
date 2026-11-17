@@ -17,13 +17,16 @@ public class EvalResultVariation
 
     public bool SendToExperiment { get; set; }
 
-    public EvalResultVariation(string type, UserVariation uv)
+    public bool InsightsEnabled { get; set; }
+
+    public EvalResultVariation(string type, UserVariation uv, bool insightsEnabled)
     {
         Id = uv.Variation?.Id;
         Type = type;
         Value = uv.Variation?.Value;
         MatchReason = uv.MatchReason;
         SendToExperiment = uv.SendToExperiment;
+        InsightsEnabled = insightsEnabled;
     }
 }
 
@@ -38,7 +41,10 @@ public class EvalResult
         Key = flag.GetProperty("key").GetString()!;
 
         var type = flag.GetProperty("variationType").GetString() ?? "string";
-        Variation = new EvalResultVariation(type, uv);
+        var insightsEnabled =
+            EntityJsonReader.TryGetBoolean(flag, "insightsEnabled") ?? true;
+
+        Variation = new EvalResultVariation(type, uv, insightsEnabled);
     }
 }
 

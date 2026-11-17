@@ -17,25 +17,31 @@ export function SkeletonForm() {
 export function Section({
   title,
   icon,
+  description,
   children,
   className,
 }: {
   title?: string
   icon?: React.ReactNode
+  description?: React.ReactNode
   children: React.ReactNode
   className?: string
 }) {
   return (
     <section
-      className={cn(
-        "border-b py-8 first:pt-7 last:border-b-0",
-        className
-      )}
+      className={cn("border-b py-8 first:pt-7 last:border-b-0", className)}
     >
       {title ? (
-        <div className="mb-5 flex items-center gap-3">
-          <h2 className="text-lg font-semibold tracking-normal">{title}</h2>
-          {icon}
+        <div className="mb-5">
+          <div className="flex items-center gap-3">
+            <h2 className="text-lg font-semibold tracking-normal">{title}</h2>
+            {icon}
+          </div>
+          {description ? (
+            <div className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+              {description}
+            </div>
+          ) : null}
         </div>
       ) : null}
       {children}

@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { z } from "zod"
 import { Button } from "@/components/ui/button"
+import { InsightsSettingsSection } from "./insights-settings-section"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
@@ -122,13 +123,16 @@ export function SettingsTab({
     [baseline, submittedDraft]
   )
   const archived = Boolean(flag.isArchived)
-
   const saveMutation = useMutation({
     mutationFn: async (comment: string) => {
       const revision = await updateFeatureFlagGeneral(
         envId,
         flag.key,
-        submittedDraft,
+        {
+          name: submittedDraft.name,
+          description: submittedDraft.description,
+          tags: submittedDraft.tags,
+        },
         comment
       )
       return { ...flag, ...submittedDraft, revision }
@@ -143,12 +147,13 @@ export function SettingsTab({
       void queryClient.invalidateQueries({ queryKey: ["feature-flags"] })
       void queryClient.invalidateQueries({ queryKey: ["flag-audit-logs"] })
     },
-    onError: (error) =>
+    onError: (error) => {
       toast.error(
         error instanceof ApiRequestError && error.status === 403
           ? t("featureFlags.permissionDenied")
           : t("featureFlags.operationFailed")
-      ),
+      )
+    },
   })
 
   const lifecycleMutation = useMutation({
@@ -245,25 +250,32 @@ export function SettingsTab({
             </p>
           </div>
         </div>
-
-        {!archived ? (
-          <div className="flex items-center justify-end gap-3 pt-1">
-            {dirty ? (
-              <Button
-                type="button"
-                variant="outline"
-                disabled={saveMutation.isPending}
-                onClick={() => form.reset(baseline)}
-              >
-                {t("featureFlags.detailsPage.discard")}
-              </Button>
-            ) : null}
-            <Button type="submit" disabled={saveMutation.isPending}>
-              {t("featureFlags.detailsPage.reviewAndSave")}
-            </Button>
-          </div>
-        ) : null}
       </section>
+
+      {!archived ? (
+        <div className="flex max-w-3xl items-center justify-end gap-3 pt-1">
+          {dirty ? (
+            <Button
+              type="button"
+              variant="outline"
+              disabled={saveMutation.isPending}
+              onClick={() => form.reset(baseline)}
+            >
+              {t("featureFlags.detailsPage.discard")}
+            </Button>
+          ) : null}
+          <Button type="submit" disabled={saveMutation.isPending}>
+            {t("featureFlags.detailsPage.reviewAndSave")}
+          </Button>
+        </div>
+      ) : null}
+      <InsightsSettingsSection
+        key={flag.id}
+        envId={envId}
+        flag={flag}
+        requireComment={requireComment}
+        onSaved={onSaved}
+      />
 
       <section className="max-w-3xl border-t pt-6">
         <h2 className="mb-3 text-base font-medium">

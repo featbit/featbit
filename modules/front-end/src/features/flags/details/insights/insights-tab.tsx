@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query"
-import { ChevronLeft, ChevronRight, Search } from "lucide-react"
+import { ChevronLeft, ChevronRight, Info, Search } from "lucide-react"
 import { useEffect, useMemo, useState, type ReactNode } from "react"
 import { useTranslation } from "react-i18next"
+import { Link } from "react-router-dom"
 import {
   CartesianGrid,
   Legend,
@@ -12,6 +13,12 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
+import {
+  Alert,
+  AlertAction,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -59,9 +66,11 @@ const PAGE_SIZE = 10
 export function InsightsTab({
   envId,
   flag,
+  settingsPath,
 }: {
   envId: string
   flag: FeatureFlag
+  settingsPath: string
 }) {
   const { t, i18n } = useTranslation()
   const locale = i18n.language.startsWith("zh") ? "zh-CN" : "en-US"
@@ -175,6 +184,28 @@ export function InsightsTab({
 
   return (
     <div className="space-y-6 py-6">
+      {flag.insightsEnabled === false ? (
+        <Alert className="border-blue-200 bg-blue-50 text-blue-900 dark:border-blue-900 dark:bg-blue-950 dark:text-blue-50">
+          <Info />
+          <AlertTitle>
+            {t("featureFlags.detailsPage.insights.collectionDisabled")}
+          </AlertTitle>
+          <AlertDescription>
+            {t(
+              "featureFlags.detailsPage.insights.collectionDisabledDescription"
+            )}
+          </AlertDescription>
+          <AlertAction>
+            <Button
+              variant="outline"
+              size="sm"
+              render={<Link to={settingsPath} />}
+            >
+              {t("featureFlags.detailsPage.insights.openSettings")}
+            </Button>
+          </AlertAction>
+        </Alert>
+      ) : null}
       <div className="flex flex-wrap items-center gap-2">
         <Select value={period} onValueChange={changePeriod}>
           <SelectTrigger className="w-52">

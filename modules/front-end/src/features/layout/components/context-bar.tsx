@@ -32,11 +32,13 @@ export function ContextBar({
   organization,
   currentProjectEnv,
   projects,
+  canViewSecrets,
   onProjectEnvChange,
 }: {
   organization: Organization | null
   currentProjectEnv: ProjectEnv | null
   projects: Project[]
+  canViewSecrets: boolean
   onProjectEnvChange: (projectEnv: ProjectEnv) => void
 }) {
   const { t } = useTranslation()
@@ -220,7 +222,8 @@ export function ContextBar({
         onOpenChange={handleSecretsOpenChange}
         projectName={currentProjectEnv?.projectName ?? ""}
         environmentName={currentProjectEnv?.envName ?? ""}
-        secrets={currentEnvironment?.secrets ?? []}
+        canViewSecrets={canViewSecrets}
+        secrets={canViewSecrets ? (currentEnvironment?.secrets ?? []) : []}
         manageHref={manageSecretsHref}
         disabled={!currentEnvironment}
       />

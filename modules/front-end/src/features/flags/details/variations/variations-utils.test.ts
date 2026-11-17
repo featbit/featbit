@@ -60,12 +60,12 @@ describe("variationReferences", () => {
 
 describe("variation drafts", () => {
   it("trims names when comparing stable payloads", () => {
-    expect(
-      stableVariations([{ id: "a", name: " A ", value: "a" }])
-    ).toBe(stableVariations([{ id: "a", name: "A", value: "a" }]))
+    expect(stableVariations([{ id: "a", name: " A ", value: "a" }])).toBe(
+      stableVariations([{ id: "a", name: "A", value: "a" }])
+    )
   })
 
-  it("describes add, update, remove, and reorder changes", () => {
+  it("describes grouped additions and removals alongside updates", () => {
     const changes = variationReviewChanges(
       [
         { id: "a", name: "A", value: "a" },
@@ -76,10 +76,48 @@ describe("variation drafts", () => {
         { id: "c", name: "C", value: "c" },
       ]
     )
-    expect(changes.map((change) => change.action)).toEqual([
-      "updated",
-      "added",
-      "removed",
+    expect(changes).toMatchObject([
+      {
+        kind: "variations",
+        valueGroups: [
+          { action: "added", values: ["C"] },
+          { action: "removed", values: ["A"] },
+        ],
+      },
+      { action: "updated", label: "Beta" },
     ])
+  })
+
+  it.each([
+    ["reorder only", ["b", "a", "c"], true],
+    ["reorder and add", ["b", "a", "c", "d"], true],
+    ["reorder and remove", ["c", "a"], true],
+    ["reorder, add, and remove", ["c", "a", "d"], true],
+    ["move an added variation", ["d", "a", "b", "c"], true],
+    ["append only", ["a", "b", "c", "d"], false],
+    ["remove only", ["a", "c"], false],
+    ["add and remove without reordering", ["a", "c", "d"], false],
+    ["unchanged", ["a", "b", "c"], false],
+  ])("detects order changes: %s", (_scenario, ids, reordered) => {
+    const variation = (id: string) => ({
+      id,
+      name: id.toUpperCase(),
+      value: id,
+    })
+    const previous = ["a", "b", "c"].map(variation)
+    const current = ids.map(variation)
+    const order = variationReviewChanges(previous, current).find(
+      (change) => change.label === "order"
+    )
+
+    if (reordered) {
+      expect(order).toMatchObject({
+        action: "updated",
+        previous: "A → B → C",
+        current: current.map((item) => item.name).join(" → "),
+      })
+    } else {
+      expect(order).toBeUndefined()
+    }
   })
 })

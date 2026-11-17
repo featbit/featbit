@@ -1,6 +1,6 @@
 # Workspace Usage Page Design
 
-This document defines the React design target for the Workspace `Usage` tab. Angular remains the functional reference, but React should use the authenticated React layout, shadcn/ui primitives, Tailwind tokens, lucide-react icons, TanStack Query, TanStack Table, and Recharts. Do not implement this page by copying Angular/ng-zorro structure or styling one-to-one.
+This document defines the React design target for the Workspace `Usage` tab. React should use the authenticated React layout, shadcn/ui primitives, Tailwind tokens, lucide-react icons, TanStack Query, TanStack Table, and Recharts. Use shared layout and component tokens.
 
 ## Design Assets
 
@@ -18,12 +18,12 @@ This design covers only the Workspace `Usage` tab content inside the authenticat
 - The design images include the full page only to judge the Usage tab in context. Treat any shell, sidebar, header, account, badge, or tab differences from existing layout assets as image noise, not implementation requirements.
 - The page is an operational analytics view. Keep it dense, scannable, and neutral rather than decorative.
 
-## Angular Functional Reference
+## Functional Requirements
 
-Angular currently provides these behaviors:
+Required behaviors:
 
 - Period selector supports `This month`, `Last 7 days`, and `Last 30 days`.
-- In SaaS mode, Angular loads the current billing cycle and prepends `Current billing cycle` and `Previous billing cycle` when the cycle is monthly or shorter.
+- In SaaS mode, load the current billing cycle and prepend `Current billing cycle` and `Previous billing cycle` when the cycle is monthly or shorter.
 - The selected date range is shown beside the period selector.
 - The API call uses `startDate`, `endDate`, `prevStartDate`, and `prevEndDate`.
 - Summary metrics show Unique Users, Flag Evaluations, and Custom Metrics, each with percent change against the previous period.
@@ -51,7 +51,7 @@ Controls row:
 
 - Do not repeat an inner `Usage` title or descriptive subtitle inside the tab body. The surrounding Workspace page header already provides the page context.
 - Right side: period selector and selected date range.
-- Period selector options follow Angular behavior. Use shadcn `Select`.
+- Period selector options follow documented behavior. Use shadcn `Select`.
 - Date range text is muted and right-aligned on desktop.
 - Keep the left side of this row empty on desktop so the metric cards can sit closer to the Workspace tabs.
 
@@ -165,7 +165,7 @@ Format rules:
 
 - Follow the density and layout language from [react-layout-design.md](react-layout-design.md).
 - Use neutral shadcn-style surfaces, subtle borders, and 6-8px radius.
-- Do not use Angular/ng-zorro card styling, G2 visuals, or old palette decisions as the React target.
+- Use shared shadcn card tokens, Recharts, and the current semantic palette.
 - Avoid hero-style spacing, decorative illustrations, large colored bands, and oversized typography.
 - Keep text compact but legible. Labels, values, and table content must not overflow at common desktop widths.
 
@@ -181,8 +181,8 @@ The dark design target is [workspace-usage-dark.png](workspace-usage-dark.png). 
 ## Acceptance Criteria For Later Implementation
 
 - Usage route renders under Workspace tabs and does not alter the authenticated layout.
-- Period options match Angular behavior, including SaaS billing-cycle options when eligible.
-- Selected period produces the same date filter semantics as Angular.
+- Period options match documented behavior, including SaaS billing-cycle options when eligible.
+- The selected period determines the date range used by the summary, chart, and table requests.
 - Summary cards show correct values and previous-period comparison labels.
 - Metric switching updates the Recharts line/area chart without remount artifacts.
 - The per-environment table supports metric sorting and shows value, share, and progress indicator in each metric cell.

@@ -47,12 +47,12 @@ describe("global feature translations", () => {
     await i18n.changeLanguage("zh")
 
     expect(i18n.t("webhooks.subtitle")).toBe(
-      "将功能开关和用户组事件发送到外部服务。"
+      "统一管理资源变更与 Release Health 告警的通知目标。"
     )
     expect(i18n.t("relayProxies.title")).toBe("中继代理")
     expect(i18n.t("accessTokens.title")).toBe("访问令牌")
     expect(i18n.t("auditLogs.title")).toBe("审计日志")
-    expect(i18n.t("auditLogs.keyName")).toBe("名称 / Key")
+    expect(i18n.t("auditLogs.keyName")).toBe("资源")
     expect(i18n.t("auditLogs.changeCount", { count: 2 })).toBe("2 项变更")
     expect(i18n.t("auditLogs.allUsers")).toBe("所有用户")
     expect(i18n.t("endUsers.title")).toBe("目标用户")

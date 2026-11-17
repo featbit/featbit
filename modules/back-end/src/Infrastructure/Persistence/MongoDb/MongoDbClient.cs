@@ -76,7 +76,6 @@ public class MongoDbClient
         { typeof(ExperimentRun), "ExperimentRuns" },
         { typeof(ExperimentLayer), "ExperimentLayers" },
         { typeof(ExperimentMetric), "ExperimentMetrics" },
-        { typeof(ExperimentActivity), "ExperimentActivities" },
         { typeof(ExperimentExposureEvent), "ExperimentExposureEvents" },
         { typeof(ExperimentMetricEvent), "ExperimentMetricEvents" },
         { typeof(ExperimentRunAssignment), "ExperimentRunAssignments" },

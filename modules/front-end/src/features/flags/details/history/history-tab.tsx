@@ -1,3 +1,5 @@
+import { AuditLogScopes } from "@/features/audit-logs/audit-logs-types"
+import type { OrganizationMember } from "@/features/organization/organization-members-api"
 import { useInfiniteQuery } from "@tanstack/react-query"
 import { Loader2 } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
@@ -10,10 +12,7 @@ import {
   startOfDay,
 } from "@/features/audit-logs/audit-log-utils"
 import { fetchAuditLogs } from "@/features/audit-logs/audit-logs-api"
-import type {
-  AuditLog,
-  AuditUser,
-} from "@/features/audit-logs/audit-logs-types"
+import type { AuditLog } from "@/features/audit-logs/audit-logs-types"
 import { AuditLogFilters } from "@/features/audit-logs/components/audit-log-filters"
 import { AuditLogRawDataDialog } from "@/features/audit-logs/components/audit-log-raw-data-dialog"
 import { AuditLogTable } from "@/features/audit-logs/components/audit-log-table"
@@ -35,7 +34,7 @@ export function HistoryTab({
   const locale = i18n.resolvedLanguage || lang
   const [search, setSearch] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
-  const [user, setUser] = useState<AuditUser | null>(null)
+  const [user, setUser] = useState<OrganizationMember | null>(null)
   const [range, setRange] = useState<DateRange | undefined>()
   const [rawData, setRawData] = useState<AuditLog | null>(null)
 
@@ -65,11 +64,12 @@ export function HistoryTab({
     ],
     queryFn: ({ pageParam }) =>
       fetchAuditLogs(
-        envId,
         {
+          scope: AuditLogScopes.Environment,
+          scopeId: envId,
           query: debouncedSearch,
           creatorId: user?.id,
-          refType: "FeatureFlag",
+          refTypes: ["FeatureFlag"],
           refId: flagId,
           from: range?.from ? startOfDay(range.from) : undefined,
           to: range?.to ? dayAfter(range.to) : undefined,

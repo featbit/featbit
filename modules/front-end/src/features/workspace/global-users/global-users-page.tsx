@@ -1,3 +1,4 @@
+import { useListQuery, useListSearch } from "@/lib/use-list-query"
 import { Upload } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -24,6 +25,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import {
+  getCurrentProjectEnv,
   getCurrentWorkspace,
   localizedPath,
   resolveLang,
@@ -31,7 +33,7 @@ import {
 import { WorkspaceLayout } from "@/features/workspace/components/workspace-layout"
 import { DetailsDrawer } from "@/features/workspace/global-users/components/details-drawer"
 import { DisplayColumnsMenu } from "@/features/workspace/global-users/components/display-columns-menu"
-import { EvaluateDrawer } from "@/features/workspace/global-users/components/evaluate-drawer"
+import { EvaluateSheet } from "@/features/end-users/components/evaluate-sheet"
 import { ImportUsersModal } from "@/features/workspace/global-users/components/import-users-modal"
 import { Pagination } from "@/features/workspace/global-users/components/pagination"
 import {
@@ -61,6 +63,7 @@ export function GlobalUsersPage() {
   const { t } = useTranslation()
   const params = useParams()
   const lang = resolveLang(params.lang)
+  const envId = getCurrentProjectEnv()?.envId ?? ""
   const [workspace, setWorkspace] = useState<WorkspaceDetails | null>(() =>
     getCurrentWorkspace()
   )
@@ -69,10 +72,18 @@ export function GlobalUsersPage() {
     "success"
   )
   const [statusEventId, setStatusEventId] = useState(0)
-  const [search, setSearch] = useState("")
-  const [debouncedSearch, setDebouncedSearch] = useState("")
-  const [pageIndex, setPageIndex] = useState(1)
-  const [pageSize, setPageSize] = useState(10)
+  const {
+    searchParams,
+    updateParams,
+    pageIndex,
+    pageSize,
+    setPageIndex,
+    setPageSize,
+  } = useListQuery()
+  const { search, setSearch, debouncedSearch } = useListSearch(
+    searchParams,
+    updateParams
+  )
   const [data, setData] = useState<PagedResult<GlobalUser>>({
     totalCount: 0,
     items: [],
@@ -122,14 +133,6 @@ export function GlobalUsersPage() {
       cancelled = true
     }
   }, [])
-
-  useEffect(() => {
-    const timeout = window.setTimeout(() => {
-      setDebouncedSearch(search)
-      setPageIndex(1)
-    }, 200)
-    return () => window.clearTimeout(timeout)
-  }, [search])
 
   const loadData = useCallback(() => {
     if (!isGlobalUsersLicensed) {
@@ -325,14 +328,15 @@ export function GlobalUsersPage() {
           onClose={() => setImportOpen(false)}
           onImport={onImport}
         />
-        <EvaluateDrawer
-          user={evaluateUser}
-          lang={lang}
-          onClose={() => setEvaluateUser(null)}
-          onCopied={() =>
-            showStatus(t("workspace.globalUsers.copied"), "success")
-          }
-        />
+        {evaluateUser ? (
+          <EvaluateSheet
+            key={`${envId}:${evaluateUser.id}`}
+            envId={envId}
+            user={evaluateUser}
+            lang={lang}
+            onOpenChange={(open) => !open && setEvaluateUser(null)}
+          />
+        ) : null}
         <DetailsDrawer
           user={detailsUser}
           onClose={() => setDetailsUser(null)}

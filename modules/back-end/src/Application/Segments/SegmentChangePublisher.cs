@@ -8,7 +8,15 @@ namespace Application.Segments;
 
 public interface ISegmentChangePublisher
 {
+    /// <summary>
+    /// Publishes a segment change message.
+    /// </summary>
     Task PublishAsync(OnSegmentChange notification);
+
+    /// <summary>
+    /// Publishes a segment deletion message.
+    /// </summary>
+    Task PublishDeletedAsync(ICollection<Guid> envIds, Guid segmentId);
 }
 
 public class DirectSegmentChangePublisher(
@@ -27,13 +35,19 @@ public class DirectSegmentChangePublisher(
             var affectedFlags = await segmentMessageService.GetAffectedFlagsAsync(envId, notification);
             if (affectedFlags.Count > 0)
             {
-                await featureFlagAppService.OnSegmentUpdatedAsync(segment, notification.OperatorId, affectedFlags);
+                await featureFlagAppService.OnSegmentUpdatedAsync(
+                    notification.WorkspaceId,
+                    notification.OrganizationId,
+                    segment, notification.OperatorId, affectedFlags);
             }
 
             // publish segment change message
             await segmentMessageService.PublishChangeMessage(envId, affectedFlags, segment);
         }
     }
+
+    // no-op for now
+    public Task PublishDeletedAsync(ICollection<Guid> envIds, Guid segmentId) => Task.CompletedTask;
 }
 
 public class ControlPlaneSegmentChangePublisher(
@@ -61,5 +75,18 @@ public class ControlPlaneSegmentChangePublisher(
         };
 
         await messageProducer.PublishAsync(ControlPlaneTopics.ControlPlaneSegmentChange, segmentUpsertMessage);
+    }
+
+    // Sent on the same topic as the change. The "deleted" shape has no "notification", so a control plane that
+    // does not know it rejects the message instead of treating it as a change.
+    public async Task PublishDeletedAsync(ICollection<Guid> envIds, Guid segmentId)
+    {
+        var message = new
+        {
+            deleted = new { envIds, id = segmentId },
+            region = configuration.GetRegion()
+        };
+
+        await messageProducer.PublishAsync(ControlPlaneTopics.ControlPlaneSegmentChange, message);
     }
 }

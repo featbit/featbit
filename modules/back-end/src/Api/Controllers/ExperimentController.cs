@@ -113,10 +113,11 @@ public class ExperimentController : ApiControllerBase
 
     [OpenApi]
     [HttpPost("{id:guid}/runs")]
-    public async Task<ApiResponse<ExperimentDetailVm>> CreateRunAsync(Guid envId, Guid id)
+    public async Task<ApiResponse<ExperimentDetailVm>> CreateRunAsync(Guid envId, Guid id, ExperimentRunCreate setup)
     {
         var experiment = await Mediator.Send(new CreateExperimentRun
         {
+            Setup = setup,
             EnvId = envId,
             Id = id
         });
