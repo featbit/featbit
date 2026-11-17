@@ -47,6 +47,7 @@ public static class WebhookEvents
                 FlagInstructionKind.AddRule
                     or FlagInstructionKind.RemoveRule
                     or FlagInstructionKind.SetRules
+                    or FlagInstructionKind.ReorderRules
                     or FlagInstructionKind.UpdateRuleName
                     or FlagInstructionKind.UpdateRuleDispatchKey
                     or FlagInstructionKind.AddRuleConditions
@@ -59,11 +60,12 @@ public static class WebhookEvents
 
                 FlagInstructionKind.UpdateName
                     or FlagInstructionKind.UpdateDescription
+                    or FlagInstructionKind.UpdateInsightsEnabled
                     or FlagInstructionKind.AddTags
                     or FlagInstructionKind.RemoveTags
                     => BasicInfoUpdated,
 
-                _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null)
+                _ => string.Empty
             };
         }
     }
@@ -107,7 +109,8 @@ public static class WebhookEvents
                     or SegmentInstructionKind.AddTags
                     or SegmentInstructionKind.RemoveTags
                     => BasicInfoUpdated,
-                _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null)
+
+                _ => string.Empty
             };
         }
     }
