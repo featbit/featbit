@@ -61,12 +61,18 @@ public class WebhookHandler : IGeneralWebhookHandler
             var instructions = FlagComparer.Compare(original, current).ToArray();
             events = instructions
                 .Select(x => WebhookEvents.FlagEvents.FromInstructionKind(x.Kind))
+                .Where(x => !string.IsNullOrEmpty(x))
                 .Distinct()
                 .ToArray();
             changes = instructions
                 .Select(x => InstructionDescriptor.Describe(x, original, current))
                 .Distinct()
                 .ToArray();
+        }
+
+        if (events.Length == 0)
+        {
+            return;
         }
 
         var resourceDescriptor = await _environmentService.GetResourceDescriptorAsync(flag.EnvId);
@@ -117,12 +123,18 @@ public class WebhookHandler : IGeneralWebhookHandler
             var instructions = SegmentComparer.Compare(original, current).ToArray();
             events = instructions
                 .Select(x => WebhookEvents.SegmentEvents.FromInstructionKind(x.Kind))
+                .Where(x => !string.IsNullOrEmpty(x))
                 .Distinct()
                 .ToArray();
             changes = instructions
                 .Select(x => InstructionDescriptor.Describe(x, original, current))
                 .Distinct()
                 .ToArray();
+        }
+
+        if (events.Length == 0)
+        {
+            return;
         }
 
         var resourceDescriptor = await _environmentService.GetResourceDescriptorAsync(envId);
