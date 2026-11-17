@@ -31,6 +31,32 @@ beforeAll(() => {
 })
 
 describe("ResourcePicker", () => {
+  it("keeps saved custom scopes available after unchecking them", async () => {
+    const rn = "project/shop:env/*:flag/checkout-*;beta"
+    mocks.fetchPolicyResourceOptions.mockResolvedValue([])
+    const onChange = vi.fn()
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <ResourcePicker
+          resourceType="flag"
+          resources={[rn]}
+          onChange={onChange}
+        />
+      </QueryClientProvider>
+    )
+    fireEvent.click(screen.getByRole("button", { name: "Manage" }))
+    fireEvent.click(screen.getByRole("tab", { name: "Selected (1)" }))
+    fireEvent.click(await screen.findByRole("option", { name: /checkout-\*/ }))
+    expect(screen.getByRole("tab", { name: "All" })).toHaveAttribute(
+      "aria-selected",
+      "true"
+    )
+    fireEvent.click(screen.getByRole("option", { name: /checkout-\*/ }))
+    expect(onChange).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole("button", { name: "Done" }))
+    expect(onChange).toHaveBeenCalledWith([rn])
+  })
+
   it.each([
     {
       resourceType: "project" as const,
@@ -77,6 +103,16 @@ describe("ResourcePicker", () => {
       expect(screen.getByLabelText("Resulting resource RN")).toHaveValue(rn)
       fireEvent.click(screen.getByRole("button", { name: "Apply" }))
       expect(onChange).not.toHaveBeenCalled()
+      fireEvent.click(
+        await screen.findByRole("option", {
+          name: new RegExp(rn.replaceAll("*", "\\*")),
+        })
+      )
+      fireEvent.click(
+        screen.getByRole("option", {
+          name: new RegExp(rn.replaceAll("*", "\\*")),
+        })
+      )
       fireEvent.click(await screen.findByRole("button", { name: "Done" }))
       expect(onChange).toHaveBeenCalledWith([rn])
     }

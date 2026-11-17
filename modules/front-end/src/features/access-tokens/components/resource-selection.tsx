@@ -42,6 +42,7 @@ function ResourcePickerPopover({
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const [draft, setDraft] = useState(resources)
+  const [sessionResources, setSessionResources] = useState(resources)
   const [addingCustomRn, setAddingCustomRn] = useState(false)
   const canAddCustomRn = isEditableResourceType(resourceType)
   const [search, setSearch] = useState("")
@@ -68,7 +69,7 @@ function ResourcePickerPopover({
   }
 
   const options = [...(resourcesQuery.data ?? [])]
-  for (const rn of draft) {
+  for (const rn of new Set([...sessionResources, ...draft])) {
     if (!options.some((resource) => resource.rn === rn)) {
       options.push({
         id: rn,
@@ -88,6 +89,7 @@ function ResourcePickerPopover({
           if (nextOpen) {
             setSearch("")
             setDraft(resources)
+            setSessionResources(resources)
           }
         }}
       >
@@ -193,6 +195,9 @@ function ResourcePickerPopover({
             }
           }}
           onApply={(rn) => {
+            setSessionResources((current) =>
+              current.includes(rn) ? current : [...current, rn]
+            )
             setDraft((current) =>
               current.includes(rn) ? current : [...current, rn]
             )

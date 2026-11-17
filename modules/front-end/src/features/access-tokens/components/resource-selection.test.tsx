@@ -101,6 +101,30 @@ describe("ResourceSelection", () => {
     expect(onChange).toHaveBeenCalledWith(["project/store:segment/production"])
   })
 
+  it("keeps saved custom scopes available after unchecking them", async () => {
+    const rn = "project/shop:env/*:segment/beta-*;internal"
+    const onChange = vi.fn()
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <ResourceSelectionHarness resources={[rn]} onChange={onChange} />
+      </QueryClientProvider>
+    )
+    fireEvent.click(screen.getByRole("button", { name: "Add resource" }))
+    fireEvent.click(await screen.findByRole("option", { name: /beta-\*/ }))
+    expect(screen.getByRole("option", { name: /beta-\*/ })).toHaveAttribute(
+      "data-checked",
+      "false"
+    )
+    fireEvent.click(await screen.findByText("Production segment"))
+    fireEvent.click(screen.getByRole("option", { name: /beta-\*/ }))
+    expect(onChange).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole("button", { name: "Done" }))
+    expect(onChange).toHaveBeenCalledWith([
+      "project/store:segment/production",
+      rn,
+    ])
+  })
+
   it("edits the RN of a selected resource", async () => {
     const onChange = vi.fn()
     const onSubmit = vi.fn()
@@ -236,7 +260,17 @@ describe("ResourceSelection", () => {
       fireEvent.click(screen.getByRole("button", { name: "Apply" }))
 
       expect(onChange).not.toHaveBeenCalled()
-      fireEvent.click(await screen.findByRole("button", { name: "Done" }))
+      const customOption = await screen.findByRole("option", {
+        name: new RegExp(resourceValue),
+      })
+      fireEvent.click(customOption)
+      expect(
+        screen.getByRole("option", { name: new RegExp(resourceValue) })
+      ).toHaveAttribute("data-checked", "false")
+      fireEvent.click(
+        screen.getByRole("option", { name: new RegExp(resourceValue) })
+      )
+      fireEvent.click(screen.getByRole("button", { name: "Done" }))
       await waitFor(() => expect(onChange).toHaveBeenCalledWith([expectedRn]))
       expect(onSubmit).not.toHaveBeenCalled()
     }

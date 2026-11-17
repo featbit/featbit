@@ -56,6 +56,7 @@ export function ResourcePicker({
   const [loading, setLoading] = useState(false)
   const [options, setOptions] = useState<PolicyResource[]>([])
   const [draft, setDraft] = useState<string[]>(resources)
+  const [sessionResources, setSessionResources] = useState<string[]>(resources)
   const [editingResource, setEditingResource] = useState<{
     originalRn?: string
     rn: string
@@ -84,7 +85,7 @@ export function ResourcePicker({
 
   const mergedOptions = useMemo(() => {
     const byRn = new Map(options.map((item) => [item.rn, item]))
-    draft.forEach((rn) => {
+    new Set([...sessionResources, ...draft]).forEach((rn) => {
       if (!byRn.has(rn)) {
         byRn.set(rn, {
           id: rn,
@@ -105,7 +106,7 @@ export function ResourcePicker({
           `${item.name} ${item.rn}`.toLowerCase().includes(searched)
         )
       : visible
-  }, [draft, filter, options, resourceType, search])
+  }, [draft, filter, options, resourceType, search, sessionResources])
 
   const selectedResources = useMemo(
     () =>
@@ -159,7 +160,12 @@ export function ResourcePicker({
             )
           : [...draft, nextRn]
     )
-    if (!editingResource.originalRn) setOpen(true)
+    if (!editingResource.originalRn) {
+      setSessionResources((current) =>
+        current.includes(nextRn) ? current : [...current, nextRn]
+      )
+      setOpen(true)
+    }
     setEditingResource(null)
   }
 
@@ -268,6 +274,7 @@ export function ResourcePicker({
               setLoading(next)
               if (next) {
                 setDraft(resources)
+                setSessionResources(resources)
                 setFilter("all")
               }
             }}
