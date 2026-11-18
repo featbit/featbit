@@ -67,7 +67,6 @@ describe("change requests API", () => {
         targetUsers: [],
         rules: [],
         fallthrough: { variations: [] },
-        exptIncludeAllTargets: false,
       },
       revision: "revision-1",
       reviewers: ["reviewer-1"],

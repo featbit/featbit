@@ -183,7 +183,6 @@ public class FeatureFlagMcpTools(
         current.TargetUsers = targeting.TargetUsers ?? [];
         current.Rules = targeting.Rules ?? [];
         current.Fallthrough = targeting.Fallthrough ?? throw new BusinessException(ErrorCodes.Required("fallthrough"));
-        current.ExptIncludeAllTargets = targeting.ExptIncludeAllTargets;
 
         var instructions = FlagComparer.Compare(flag, current).ToArray();
         if (instructions.Length == 0)

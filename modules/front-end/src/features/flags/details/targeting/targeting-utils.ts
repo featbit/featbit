@@ -52,7 +52,6 @@ export function targetingOf(flag: FeatureFlag): FlagTargeting {
       variations: [],
       dispatchKey: "keyId",
     },
-    exptIncludeAllTargets: flag.exptIncludeAllTargets ?? false,
   }
 }
 

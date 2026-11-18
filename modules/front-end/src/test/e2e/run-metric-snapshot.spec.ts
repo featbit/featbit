@@ -106,7 +106,7 @@ for (const width of [1366, 1920]) {
               { id: "control", name: "Original", value: "false" },
               { id: "treatment", name: "Updated", value: "true" },
             ],
-            fallthrough: { includedInExpt: false, variations: [] },
+            fallthrough: { variations: [] },
             targetUsers: [],
             rules: [],
             tags: [],

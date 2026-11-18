@@ -15,7 +15,6 @@ public class FeatureFlagConfiguration : IEntityTypeConfiguration<FeatureFlag>
         builder.Property(x => x.Revision).IsRequired();
         builder.Property(x => x.IsEnabled).IsRequired();
         builder.Property(x => x.IsArchived).IsRequired();
-        builder.Property(x => x.ExptIncludeAllTargets).IsRequired();
         builder.Property(x => x.InsightsEnabled).IsRequired();
         builder.Property(x => x.DisabledVariationId).HasMaxLength(128).IsRequired();
         builder.Property(x => x.VariationType).HasMaxLength(64).IsRequired();

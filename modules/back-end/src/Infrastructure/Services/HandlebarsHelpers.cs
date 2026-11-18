@@ -12,6 +12,12 @@ public static class HandlebarsHelpers
         Handlebars.RegisterHelper("json", JsonHelper);
     }
 
+    internal static void RegisterHelpers(IHandlebars handlebars)
+    {
+        handlebars.RegisterHelper("eq", EqualHelper);
+        handlebars.RegisterHelper("json", JsonHelper);
+    }
+
     private static readonly HandlebarsBlockHelper EqualHelper = (output, options, context, arguments) =>
     {
         if (arguments.Length != 2)

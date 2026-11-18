@@ -38,7 +38,6 @@ public class CreateFlagScheduleHandlerTests
         TargetUsers = flag.TargetUsers,
         Rules = new List<TargetRule>(),
         Fallthrough = flag.Fallthrough,
-        ExptIncludeAllTargets = flag.ExptIncludeAllTargets
     };
 
     private static (CreateFlagScheduleHandler sut,

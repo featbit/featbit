@@ -200,7 +200,6 @@ public class FlagCopyHelper
                 {
                     Id = targetVariation.Id,
                     Rollout = sv.Rollout,
-                    ExptRollout = sv.ExptRollout
                 };
             }).ToArray();
 
@@ -221,7 +220,6 @@ public class FlagCopyHelper
                 {
                     Id = targetVariation.Id,
                     Rollout = sv.Rollout,
-                    ExptRollout = sv.ExptRollout
                 };
             })
             .ToArray();

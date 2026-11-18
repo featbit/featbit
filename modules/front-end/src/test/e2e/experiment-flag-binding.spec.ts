@@ -29,7 +29,7 @@ const flags = [
     { id: "treatment", name: "Treatment", value: "true" },
   ],
   disabledVariationId: "control",
-  fallthrough: { includedInExpt: false, variations: [] },
+  fallthrough: { variations: [] },
   targetUsers: [],
   rules: [],
   tags: [],

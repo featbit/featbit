@@ -135,11 +135,40 @@ function testData(event: string) {
         isEnabled: true,
         disabledVariationId: "false",
         fallthrough: { variations: [{ id: "true", rollout: [0, 1] }] },
-        exptIncludeAllTargets: true,
         isArchived: false,
       },
     },
   }
+}
+
+function prepareLegacyCompatibilityData(
+  template: string,
+  data: ReturnType<typeof testData>
+) {
+  const flag = data.data.object
+  if (data.data.kind !== "feature flag" || !flag.fallthrough) return data
+
+  // Match the backend's field-name detection within Handlebars expressions.
+  const expressions = template.match(/\{\{[^{}]*\}\}/g) ?? []
+  const references = (name: string) =>
+    expressions.some((expression) => new RegExp(`\\b${name}\\b`).test(expression))
+  const included = references("includedInExpt")
+  const rollout = references("exptRollout")
+
+  // This data is freshly generated for each preview/send; saved templates and
+  // flag models are untouched, and new templates receive no legacy properties.
+  if (references("exptIncludeAllTargets")) {
+    Object.assign(flag, { exptIncludeAllTargets: false })
+  }
+  for (const rule of [...flag.rules, flag.fallthrough]) {
+    if (included) Object.assign(rule, { includedInExpt: false })
+    if (rollout) {
+      for (const variation of rule.variations) {
+        Object.assign(variation, { exptRollout: 0 })
+      }
+    }
+  }
+  return data
 }
 
 export function renderTestPayload(event: string, template: string) {
@@ -154,7 +183,8 @@ export function renderTestPayload(event: string, template: string) {
       return left === right ? options.fn(this) : options.inverse(this)
     }
   )
-  return runtime.compile(template)(testData(event))
+  const data = prepareLegacyCompatibilityData(template, testData(event))
+  return runtime.compile(template)(data)
 }
 
 export function validateJsonHandlebars(template: string) {

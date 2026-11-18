@@ -104,7 +104,6 @@ export const DEFAULT_PAYLOAD_TEMPLATE = `{
       "isEnabled": {{data.object.isEnabled}},
       "disabledVariationId": "{{data.object.disabledVariationId}}",
       "fallthrough": {{json data.object.fallthrough}},
-      "exptIncludeAllTargets": {{data.object.exptIncludeAllTargets}},
 {{/eq}}
 {{#eq data.kind "segment"}}
       "included": {{json data.object.included}},

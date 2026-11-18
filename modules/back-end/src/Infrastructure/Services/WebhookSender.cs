@@ -5,7 +5,6 @@ using System.Text;
 using System.Text.Json;
 using Domain.Utils;
 using Domain.Webhooks;
-using HandlebarsDotNet;
 using Microsoft.Extensions.Logging;
 using Microsoft.Security.AntiSSRF;
 
@@ -38,8 +37,7 @@ public class WebhookSender : IWebhookSender
         JsonDocument jsonDocument;
         try
         {
-            var template = Handlebars.Compile(webhook.PayloadTemplate);
-            payload = template(dataObject);
+            payload = WebhookTemplateRenderer.Render(webhook.PayloadTemplate, dataObject);
             jsonDocument = JsonDocument.Parse(payload);
         }
         catch (Exception ex)

@@ -64,6 +64,46 @@ describe("webhook utilities", () => {
     expect(validateJsonHandlebars(DEFAULT_PAYLOAD_TEMPLATE)).toBeNull()
   })
 
+  it("validates and renders the saved old default template", () => {
+    const oldTemplate = DEFAULT_PAYLOAD_TEMPLATE.replace(
+      '"fallthrough": {{json data.object.fallthrough}},',
+      '"fallthrough": {{json data.object.fallthrough}},\n"exptIncludeAllTargets": {{data.object.exptIncludeAllTargets}},'
+    )
+    expect(validateJsonHandlebars(oldTemplate)).toBeNull()
+    const flag = JSON.parse(renderTestPayload("feature_flag.toggled", oldTemplate))
+      .data.object
+    expect(flag.exptIncludeAllTargets).toBe(false)
+    expect(flag.fallthrough).not.toHaveProperty("includedInExpt")
+  })
+
+  it("uses typed legacy defaults without leaking them into new previews", () => {
+    const template = `{
+      "all": {{data.object.exptIncludeAllTargets}},
+      "included": {{data.object.fallthrough.includedInExpt}},
+      "rollout": {{data.object.fallthrough.variations.[0].exptRollout}},
+      "branch": "{{#if data.object.exptIncludeAllTargets}}on{{else}}off{{/if}}"
+    }`
+    expect(validateJsonHandlebars(template)).toBeNull()
+    expect(JSON.parse(renderTestPayload("feature_flag.toggled", template))).toEqual({
+      all: false,
+      included: false,
+      rollout: 0,
+      branch: "off",
+    })
+    const clean = renderTestPayload("feature_flag.toggled", DEFAULT_PAYLOAD_TEMPLATE)
+    expect(clean).not.toContain("exptIncludeAllTargets")
+    expect(clean).not.toContain("includedInExpt")
+    expect(clean).not.toContain("exptRollout")
+  })
+
+  it("does not hide unrelated missing fields or supply flag defaults to segments", () => {
+    const template = '{"all": {{data.object.exptIncludeAllTargets}} }'
+    expect(validateJsonHandlebars(
+      '{"all": {{data.object.exptIncludeAllTargets}}, "other": {{data.object.unknown}} }'
+    )).toBeTruthy()
+    expect(() => JSON.parse(renderTestPayload("segment.created", template))).toThrow()
+  })
+
   it("reports templates that do not produce JSON", () => {
     expect(validateJsonHandlebars("not-json")).toBeTruthy()
   })
