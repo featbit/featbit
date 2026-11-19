@@ -9,12 +9,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.13" />
-        <PackageReference Include="Scalar.AspNetCore" Version="2.18.0" />
-        <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
-        <PackageReference Include="Serilog.Sinks.OpenTelemetry" Version="4.2.0" />
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+        <PackageReference Include="Scalar.AspNetCore" />
+        <PackageReference Include="Serilog.AspNetCore" />
+        <PackageReference Include="Serilog.Sinks.OpenTelemetry" />
 
-        <PackageReference Include="Grpc.Net.Client" Version="2.80.0" />
+        <PackageReference Include="Grpc.Net.Client" />
     </ItemGroup>
 
     <ItemGroup>

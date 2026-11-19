@@ -1,4 +1,6 @@
 # Folders
+# not needed by any .NET image; keeps the shared modules/ context small
+front-end/
 **/bin/
 **/obj/
 **/deploy/
