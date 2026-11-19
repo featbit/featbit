@@ -2,6 +2,7 @@ using System.Text.Json;
 using Domain.EndUsers;
 using Domain.Messages;
 using Domain.Shared;
+using Domain.Usages;
 using Streaming.Connections;
 using Streaming.Protocol;
 using Streaming.Services;
@@ -47,6 +48,10 @@ public class DataSyncMessageHandler : IMessageHandler
             // publish end-user message
             var endUserMessage = new EndUserMessage(connection.EnvId, user);
             await _producer.PublishAsync(Topics.EndUser, endUserMessage);
+
+            var usage = new InsightUsage(connection.EnvId);
+            usage.AddUser(user.KeyId);
+            await _producer.PublishAsync(Topics.Usage, usage);
         }
 
         var payload = await _service.GetPayloadAsync(connectionContext, ctx.Data);
