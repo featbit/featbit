@@ -68,7 +68,7 @@ public class GetChangeRequestListHandlerTests
         var resourceService = new Mock<IResourceService>();
         resourceService
             .Setup(service => service.GetEnvRnAsync(envId))
-            .ReturnsAsync("project/game-runner:env/dev");
+            .ReturnsAsync(new ResourceRn("project/game-runner:env/dev", Guid.NewGuid()));
         var draftService = new Mock<IFlagDraftService>();
         draftService
             .Setup(service => service.FindManyAsync(It.IsAny<Expression<Func<FlagDraft, bool>>>()))

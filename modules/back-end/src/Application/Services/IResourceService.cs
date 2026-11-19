@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 
 using Application.Resources;
 using Domain.Resources;
@@ -9,11 +9,13 @@ public interface IResourceService
 {
     Task<IEnumerable<Resource>> GetResourcesAsync(Guid organizationId, ResourceFilter filter);
 
-    Task<string?> GetProjectRnAsync(Guid projectId);
+    Task<ResourceRn?> GetProjectRnAsync(Guid projectId);
 
-    Task<string?> GetEnvRnAsync(Guid envId);
+    Task<ResourceRn?> GetEnvRnAsync(Guid envId);
 
-    Task<string?> GetFlagRnAsync(Guid envId, string key);
+    Task<ResourceRn?> GetFlagRnAsync(Guid envId, string key);
 
-    Task<string?> GetSegmentRnAsync(Guid envId, Guid id);
+    Task<ResourceRn?> GetSegmentRnAsync(Guid envId, Guid id);
 }
+
+public sealed record ResourceRn(string Rn, Guid? OrganizationId);

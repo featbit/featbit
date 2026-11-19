@@ -1,4 +1,4 @@
-﻿using Application.Resources;
+using Application.Resources;
 using Domain.FeatureFlags;
 using Domain.Organizations;
 using Domain.Projects;
@@ -33,33 +33,30 @@ public class ResourceService(MongoDbClient mongoDb) : IResourceService
         };
     }
 
-    public async Task<string?> GetProjectRnAsync(Guid projectId)
+    public async Task<ResourceRn?> GetProjectRnAsync(Guid projectId)
     {
-        var key = await QueryableOf<Project>()
+        var project = await QueryableOf<Project>()
             .Where(x => x.Id == projectId)
-            .Select(x => x.Key)
+            .Select(x => new { x.Key, x.OrganizationId })
             .FirstOrDefaultAsync();
 
-        return string.IsNullOrWhiteSpace(key) ? null : RN.ForProject(key);
+        return project == null || string.IsNullOrWhiteSpace(project.Key)
+            ? null : new ResourceRn(RN.ForProject(project.Key), project.OrganizationId);
     }
 
-    public async Task<string?> GetEnvRnAsync(Guid envId)
+    public async Task<ResourceRn?> GetEnvRnAsync(Guid envId)
     {
         var query =
             from env in QueryableOf<Environment>()
             join project in QueryableOf<Project>() on env.ProjectId equals project.Id
             where env.Id == envId
-            select new
-            {
-                projectKey = project.Key,
-                envKey = env.Key
-            };
+            select new { project.Key, EnvKey = env.Key, project.OrganizationId };
 
         var data = await query.FirstOrDefaultAsync();
-        return data == null ? null : RN.ForEnv(data.projectKey, data.envKey);
+        return data == null ? null : new ResourceRn(RN.ForEnv(data.Key, data.EnvKey), data.OrganizationId);
     }
 
-    public async Task<string?> GetFlagRnAsync(Guid envId, string key)
+    public async Task<ResourceRn?> GetFlagRnAsync(Guid envId, string key)
     {
         var query =
             from project in QueryableOf<Project>()
@@ -69,16 +66,18 @@ public class ResourceService(MongoDbClient mongoDb) : IResourceService
             select new
             {
                 projectKey = project.Key,
+                organizationId = project.OrganizationId,
                 envKey = env.Key,
                 flagKey = flag.Key,
                 flagTags = flag.Tags
             };
 
         var data = await query.FirstOrDefaultAsync();
-        return data == null ? null : RN.ForFlag(data.projectKey, data.envKey, data.flagKey, data.flagTags);
+        return data == null ? null : new ResourceRn(
+            RN.ForFlag(data.projectKey, data.envKey, data.flagKey, data.flagTags), data.organizationId);
     }
 
-    public async Task<string?> GetSegmentRnAsync(Guid envId, Guid id)
+    public async Task<ResourceRn?> GetSegmentRnAsync(Guid envId, Guid id)
     {
         var segment = await QueryableOf<Segment>().FirstOrDefaultAsync(x => x.Id == id);
         if (segment == null)
@@ -97,13 +96,15 @@ public class ResourceService(MongoDbClient mongoDb) : IResourceService
                     select new
                     {
                         ProjectKey = project.Key,
+                        project.OrganizationId,
                         EnvKey = env.Key
                     };
 
                 var projectEnv = await query.FirstOrDefaultAsync();
                 return projectEnv == null
                     ? null
-                    : RN.ForSegment(projectEnv.ProjectKey, projectEnv.EnvKey, segment.Key, segment.Tags);
+                    : new ResourceRn(RN.ForSegment(projectEnv.ProjectKey, projectEnv.EnvKey, segment.Key, segment.Tags),
+                        projectEnv.OrganizationId);
             }
 
             case SegmentType.Shared:
@@ -116,6 +117,7 @@ public class ResourceService(MongoDbClient mongoDb) : IResourceService
                     {
                         OrganizationKey = organization.Key,
                         ProjectKey = project.Key,
+                        project.OrganizationId,
                         EnvKey = env.Key
                     };
 
@@ -129,7 +131,10 @@ public class ResourceService(MongoDbClient mongoDb) : IResourceService
                     $"organization/{projectEnv.OrganizationKey}:project/{projectEnv.ProjectKey}:env/{projectEnv.EnvKey}";
                 if (segment.Scopes.Any(scope => RN.IsInScope(envScope, scope)))
                 {
-                    return RN.ForSegment(projectEnv.ProjectKey, projectEnv.EnvKey, segment.Key, segment.Tags);
+                    // Authorize the shared segment in the accessing environment's organization.
+                    return new ResourceRn(
+                        RN.ForSegment(projectEnv.ProjectKey, projectEnv.EnvKey, segment.Key, segment.Tags),
+                        projectEnv.OrganizationId);
                 }
 
                 return null;

@@ -14,6 +14,7 @@ namespace Application.UnitTests.Handlers;
 
 public class UpdateSegmentGeneralHandlerTests
 {
+    private static readonly Guid OrganizationId = Guid.NewGuid();
     private static Segment NewSegment()
     {
         var segment = new Segment(
@@ -61,7 +62,7 @@ public class UpdateSegmentGeneralHandlerTests
                 Tags = tags ?? segment.Tags,
                 Comment = "General settings update"
             },
-            permissions);
+            permissions) { OrgId = OrganizationId };
 
     private static UpdateGeneralHandler BuildSut(
         Segment segment,
@@ -72,7 +73,7 @@ public class UpdateSegmentGeneralHandlerTests
         segmentService.Setup(x => x.GetAsync(segment.Id)).ReturnsAsync(segment);
         resourceService
             .Setup(x => x.GetSegmentRnAsync(segment.EnvId, segment.Id))
-            .ReturnsAsync("segment/*");
+            .ReturnsAsync(new ResourceRn("segment/*", OrganizationId));
 
         var currentUser = new Mock<ICurrentUser>();
         currentUser.SetupGet(x => x.Id).Returns(Guid.NewGuid());
@@ -186,7 +187,7 @@ public class UpdateSegmentGeneralHandlerTests
         Assert.True(success);
         resourceService.Verify(
             x => x.GetSegmentRnAsync(It.IsAny<Guid>(), It.IsAny<Guid>()),
-            Times.Never);
+            Times.Once);
         segmentService.Verify(x => x.UpdateAsync(It.IsAny<Segment>()), Times.Never);
         publisher.Verify(
             x => x.Publish(It.IsAny<OnSegmentChange>(), It.IsAny<CancellationToken>()),
