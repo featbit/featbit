@@ -196,6 +196,7 @@ export function FlagEditorSheet({
 
   useEffect(() => {
     if (!open) return
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Reset cached validation with the externally controlled form session.
     setKeyValidation(null)
     const cloneName = source
       ? t("featureFlags.editor.copyName", { name: source.name })
