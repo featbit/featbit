@@ -1,5 +1,5 @@
 import { spawn } from 'node:child_process';
-import { createWriteStream } from 'node:fs';
+import { createWriteStream, existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, readdir, rmdir, unlink, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
@@ -20,6 +20,15 @@ const applicationImages = {
   els: 'featbit/featbit-evaluation-server',
   ui: 'featbit/featbit-ui',
 };
+// Source from before central package management has no modules/Directory.Packages.props and builds each
+// .NET image from its own module directory. Select that layout so older refs still build with this harness.
+export function dotnetBuildEnv(repositoryRoot = root) {
+  if (existsSync(join(repositoryRoot, 'modules', 'Directory.Packages.props'))) return {};
+  return {
+    API_BUILD_CONTEXT: '../../modules/back-end', API_DOCKERFILE: 'deploy/Dockerfile',
+    ELS_BUILD_CONTEXT: '../../modules/evaluation-server', ELS_DOCKERFILE: 'deploy/Dockerfile',
+  };
+}
 const infrastructureImageKeys = ['POSTGRES_IMAGE', 'MONGO_IMAGE', 'REDIS_IMAGE', 'KAFKA_IMAGE', 'CLICKHOUSE_IMAGE'];
 
 export async function processRun(command, args, { input, env, quiet = false, logPath, timeout = 600_000 } = {}) {
@@ -102,7 +111,7 @@ export async function openStack(name, { imageVersion, runsRoot = join(directory,
     if (selected) runtimeEnv[key] = selected;
   }
   const profiles = services.map(s => s === 'mongodb' ? 'mongo' : s).join(',');
-  const composeEnv = { ...process.env, ...runtimeEnv, COMPOSE_PROFILES: profiles };
+  const composeEnv = { ...dotnetBuildEnv(), ...process.env, ...runtimeEnv, COMPOSE_PROFILES: profiles };
   for (const service of Object.keys(applicationImages)) {
     const key = `${service.toUpperCase()}_IMAGE`;
     composeEnv[key] = runtimeEnv[key] ?? `featbit-local-${service}:local`;
