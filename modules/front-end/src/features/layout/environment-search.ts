@@ -1,15 +1,24 @@
 import type { Project } from "./layout-types"
 
-function matchScore(fields: (string | undefined)[], query: string): number {
-  const values = fields.map((field) => (field ?? "").toLowerCase())
+function matchScore(values: string[], query: string): number {
   if (values.some((value) => value === query)) return 4
   if (values.some((value) => value.startsWith(query))) return 3
   if (values.some((value) => value.includes(query))) return 2
-  return query
-    .split(/\s+/)
-    .every((word) => values.some((value) => value.includes(word)))
-    ? 1
-    : 0
+  return 0
+}
+
+function resultScore(fields: string[], query: string, words: string[]): number {
+  const whole = matchScore(fields, query)
+  if (whole || words.length === 1) return whole
+
+  // Combined matches rank below whole-query matches. Each word must match.
+  let total = 0
+  for (const word of words) {
+    const score = matchScore(fields, word)
+    if (!score) return 0
+    total += score
+  }
+  return total / (4 * words.length)
 }
 
 export function searchEnvironments(
@@ -28,22 +37,27 @@ export function searchEnvironments(
     )
   }
 
+  const words = query.split(/\s+/)
   return available
     .map((project) => {
-      const fields = [project.name, project.key]
+      const fields = [project.name.toLowerCase(), project.key.toLowerCase()]
       const projectScore = matchScore(fields, query)
       const matches = project.environments
-        .map((environment) => ({
-          environment,
-          score: matchScore([environment.name, environment.key], query),
-        }))
-        .filter(
-          ({ environment }) =>
-            projectScore > 0 ||
-            matchScore([...fields, environment.name, environment.key], query) >
-              0
+        .map((environment) => {
+          const environmentFields = [
+            environment.name.toLowerCase(),
+            environment.key?.toLowerCase() ?? "",
+          ]
+          return {
+            environment,
+            score: resultScore([...fields, ...environmentFields], query, words),
+            environmentScore: matchScore(environmentFields, query),
+          }
+        })
+        .filter((match) => match.score > 0)
+        .sort(
+          (a, b) => b.score - a.score || b.environmentScore - a.environmentScore
         )
-        .sort((a, b) => b.score - a.score)
 
       return {
         project: {
@@ -51,14 +65,12 @@ export function searchEnvironments(
           environments: matches.map(({ environment }) => environment),
         },
         projectScore,
-        environmentScore: matches[0]?.score ?? 0,
+        bestScore: matches[0]?.score ?? 0,
       }
     })
     .filter(({ project }) => project.environments.length > 0)
     .sort(
-      (a, b) =>
-        b.projectScore - a.projectScore ||
-        b.environmentScore - a.environmentScore
+      (a, b) => b.bestScore - a.bestScore || b.projectScore - a.projectScore
     )
     .map(({ project }) => project)
 }

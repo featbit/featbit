@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react"
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
 import { describe, expect, it, vi } from "vitest"
 import "@/lib/i18n/i18n"
@@ -22,13 +28,13 @@ const projects: Project[] = [
   })),
 }))
 
-async function openSwitcher() {
+async function openSwitcher(availableProjects = projects) {
   const onChange = vi.fn()
   render(
     <MemoryRouter>
       <ContextBar
         organization={null}
-        projects={projects}
+        projects={availableProjects}
         currentProjectEnv={{
           projectId: projects[1].id,
           projectName: "Store Admin",
@@ -56,6 +62,33 @@ const groups = () =>
     .map((id) => document.getElementById(id!)?.textContent)
 
 describe("environment switcher search", () => {
+  it.each([
+    ["prod", ["Orders", "Product Catalog"], "prod"],
+    ["orders dev", ["Orders", "Orders Archive"], "dev"],
+  ] as const)(
+    "ranks the strongest match first for %s and selects it on Enter",
+    async (query, expectedGroups, envKey) => {
+      const catalog = {
+        id: "catalog",
+        name: "Product Catalog",
+        key: "catalog",
+        environments: [{ id: "dev", name: "Dev" }],
+      }
+      const candidates =
+        query === "prod" ? [catalog, projects[2]] : [projects[0], projects[2]]
+      const { input, onChange } = await openSwitcher([
+        ...candidates,
+        { ...projects[1], environments: [projects[1].environments[0]] },
+      ])
+      fireEvent.change(input, { target: { value: query } })
+      expect(groups()).toEqual(expectedGroups)
+      fireEvent.keyDown(input, { key: "Enter" })
+      expect(onChange).toHaveBeenCalledWith(
+        expect.objectContaining({ projectId: "orders", envKey })
+      )
+    }
+  )
+
   it("removes fuzzy matches, ranks exact projects first and selects the first result on Enter", async () => {
     const { input, onChange } = await openSwitcher()
     expect(groups()[0]).toBe("Store Admin · Current")
