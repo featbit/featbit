@@ -122,7 +122,9 @@ public class RuleMatcher(IStore store) : IRuleMatcher
     {
         var property = reader.GetRequiredString(condition, "property");
         var op = reader.GetRequiredString(condition, "op");
-        var conditionValue = reader.GetRequiredString(condition, "value");
+        var conditionValue = op is OperatorTypes.IsTrue or OperatorTypes.IsFalse
+            ? string.Empty
+            : reader.GetRequiredString(condition, "value");
 
         try
         {
