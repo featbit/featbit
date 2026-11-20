@@ -30,7 +30,7 @@ public class GetInsightsValidator : AbstractValidator<GetInsights>
 public class GetInsightsHandler(IFeatureFlagService flagService, IInsightService insightService)
     : IRequestHandler<GetInsights, IEnumerable<InsightsVm>>
 {
-    public async Task<IEnumerable<InsightsVm>> Handle(GetInsights request, CancellationToken cancellationToken)
+    public async ValueTask<IEnumerable<InsightsVm>> Handle(GetInsights request, CancellationToken cancellationToken)
     {
         var featureFlag = await flagService.GetAsync(request.EnvId, request.Filter.FeatureFlagKey);
 

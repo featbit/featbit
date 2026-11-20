@@ -7,7 +7,7 @@ public class DeleteRelayProxy : IRequest<bool>
 
 public class DeleteRelayProxyHandler(IRelayProxyService service) : IRequestHandler<DeleteRelayProxy, bool>
 {
-    public async Task<bool> Handle(DeleteRelayProxy request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(DeleteRelayProxy request, CancellationToken cancellationToken)
     {
         await service.DeleteOneAsync(request.Id);
 

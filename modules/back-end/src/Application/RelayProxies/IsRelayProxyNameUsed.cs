@@ -9,6 +9,6 @@ public class IsRelayProxyNameUsed : IRequest<bool>
 
 public class IsRelayProxyNameUsedHandler(IRelayProxyService service) : IRequestHandler<IsRelayProxyNameUsed, bool>
 {
-    public async Task<bool> Handle(IsRelayProxyNameUsed request, CancellationToken cancellationToken) =>
+    public async ValueTask<bool> Handle(IsRelayProxyNameUsed request, CancellationToken cancellationToken) =>
         await service.IsNameUsedAsync(request.OrganizationId, request.Name);
 }

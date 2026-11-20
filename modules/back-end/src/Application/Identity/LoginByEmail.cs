@@ -26,6 +26,6 @@ public class LoginByEmailValidator : AbstractValidator<LoginByEmail>
 
 public class LoginByEmailHandler(IIdentityService identityService) : IRequestHandler<LoginByEmail, LoginResult>
 {
-    public async Task<LoginResult> Handle(LoginByEmail request, CancellationToken cancellationToken) =>
+    public async ValueTask<LoginResult> Handle(LoginByEmail request, CancellationToken cancellationToken) =>
         await identityService.LoginByEmailAsync(request.Email, request.Password, request.IpAddress);
 }

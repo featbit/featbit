@@ -8,7 +8,7 @@ public class GetSubscription : IRequest<string>
 public class GetSubscriptionHandler(IBillingService billingService)
     : IRequestHandler<GetSubscription, string>
 {
-    public async Task<string> Handle(GetSubscription request, CancellationToken cancellationToken)
+    public async ValueTask<string> Handle(GetSubscription request, CancellationToken cancellationToken)
     {
         var subscription = await billingService.GetSubscriptionAsync(request.WorkspaceId);
         return subscription;

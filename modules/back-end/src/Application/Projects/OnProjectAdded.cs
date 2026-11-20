@@ -22,7 +22,7 @@ public class OnProjectAddedHandler : INotificationHandler<OnProjectAdded>
         _publisher = publisher;
     }
 
-    public async Task Handle(OnProjectAdded notification, CancellationToken cancellationToken)
+    public async ValueTask Handle(OnProjectAdded notification, CancellationToken cancellationToken)
     {
         var envs = notification.ProjectWithEnvs.Environments;
 

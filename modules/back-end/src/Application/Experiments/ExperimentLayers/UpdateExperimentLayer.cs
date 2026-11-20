@@ -11,14 +11,14 @@ public class UpdateExperimentLayer : IRequest<ExperimentLayerVm>
     public UpdateExperimentLayerRequest Request { get; set; }
 }
 
-public class UpdateExperimentLayerHandler(IExperimentLayerService service, IMapper mapper)
+public class UpdateExperimentLayerHandler(IExperimentLayerService service)
     : IRequestHandler<UpdateExperimentLayer, ExperimentLayerVm>
 {
-    public async Task<ExperimentLayerVm> Handle(
+    public async ValueTask<ExperimentLayerVm> Handle(
         UpdateExperimentLayer request,
         CancellationToken cancellationToken)
     {
         var layer = await service.UpdateAsync(request.EnvId, request.Id, request.Request);
-        return mapper.Map<ExperimentLayerVm>(layer);
+        return ExperimentLayerMapper.ToVm(layer);
     }
 }

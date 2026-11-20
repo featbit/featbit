@@ -22,7 +22,7 @@ public class CreateRelayProxyValidator : AbstractValidator<CreateRelayProxy>
 
 public class CreateRelayProxyHandler(IRelayProxyService service) : IRequestHandler<CreateRelayProxy, RelayProxy>
 {
-    public async Task<RelayProxy> Handle(CreateRelayProxy request, CancellationToken cancellationToken)
+    public async ValueTask<RelayProxy> Handle(CreateRelayProxy request, CancellationToken cancellationToken)
     {
         var relayProxy = request.AsRelayProxy();
         await service.AddOneAsync(relayProxy);

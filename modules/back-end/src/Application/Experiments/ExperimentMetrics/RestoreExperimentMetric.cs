@@ -12,7 +12,7 @@ public class RestoreExperimentMetric : IRequest<bool>
 public class RestoreExperimentMetricHandler(IExperimentMetricService service)
     : IRequestHandler<RestoreExperimentMetric, bool>
 {
-    public async Task<bool> Handle(RestoreExperimentMetric request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(RestoreExperimentMetric request, CancellationToken cancellationToken)
     {
         await service.RestoreAsync(request.EnvId, request.Id);
         return true;

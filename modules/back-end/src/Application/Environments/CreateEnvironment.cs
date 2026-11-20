@@ -67,12 +67,11 @@ public class CreateEnvironmentValidator : AbstractValidator<CreateEnvironment>
 
 public class CreateEnvironmentHandler(
     IEnvironmentService service,
-    IMapper mapper,
     IPublisher publisher,
     IResourceService resources)
     : IRequestHandler<CreateEnvironment, EnvironmentVm>
 {
-    public async Task<EnvironmentVm> Handle(CreateEnvironment request, CancellationToken cancellationToken)
+    public async ValueTask<EnvironmentVm> Handle(CreateEnvironment request, CancellationToken cancellationToken)
     {
         var keyHasBeenUsed = await service.HasKeyBeenUsedAsync(request.ProjectId, request.Key);
         if (keyHasBeenUsed)
@@ -89,6 +88,6 @@ public class CreateEnvironmentHandler(
         var resourceRn = await resources.GetEnvRnAsync(env.Id);
         env.Sanitize(resourceRn, request.Permissions);
 
-        return mapper.Map<EnvironmentVm>(env);
+        return EnvironmentMapper.ToVm(env);
     }
 }

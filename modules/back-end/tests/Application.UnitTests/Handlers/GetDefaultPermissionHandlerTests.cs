@@ -101,7 +101,7 @@ public class GetDefaultPermissionsHandlerTests
             currentUser.Object
         );
 
-        await Assert.ThrowsAsync<ForbiddenException>(() => sut.Handle(
+        await Assert.ThrowsAsync<ForbiddenException>(async () => await sut.Handle(
             new GetDefaultPermissions
             {
                 OrganizationId = organizationId

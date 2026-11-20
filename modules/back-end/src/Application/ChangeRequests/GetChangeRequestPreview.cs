@@ -19,7 +19,7 @@ public class GetChangeRequestPreviewHandler(
     IFeatureFlagService flagService)
     : IRequestHandler<GetChangeRequestPreview, ChangeRequestPreviewVm>
 {
-    public async Task<ChangeRequestPreviewVm> Handle(
+    public async ValueTask<ChangeRequestPreviewVm> Handle(
         GetChangeRequestPreview request,
         CancellationToken cancellationToken)
     {

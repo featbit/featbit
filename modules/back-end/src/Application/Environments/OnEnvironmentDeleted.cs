@@ -18,7 +18,7 @@ public class OnEnvironmentDeleted : INotification
 public class OnEnvironmentDeletedHandler(ICacheService cacheService, IMessageProducer messageProducer, IConfiguration configuration)
     : INotificationHandler<OnEnvironmentDeleted>
 {
-    public async Task Handle(OnEnvironmentDeleted notification, CancellationToken cancellationToken)
+    public async ValueTask Handle(OnEnvironmentDeleted notification, CancellationToken cancellationToken)
     {
         var env = notification.Environment;
 

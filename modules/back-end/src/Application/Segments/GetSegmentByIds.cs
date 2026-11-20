@@ -16,7 +16,7 @@ public class GetSegmentByIdsHandler : IRequestHandler<GetSegmentByIds, IEnumerab
         _service = service;
     }
 
-    public async Task<IEnumerable<Segment>> Handle(GetSegmentByIds request, CancellationToken cancellationToken)
+    public async ValueTask<IEnumerable<Segment>> Handle(GetSegmentByIds request, CancellationToken cancellationToken)
     {
         return await _service.FindManyAsync(x => request.Ids.Contains(x.Id));
     }

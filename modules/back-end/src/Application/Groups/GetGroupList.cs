@@ -12,18 +12,16 @@ public class GetGroupList : IRequest<PagedResult<GroupVm>>
 public class GetGroupListHandler : IRequestHandler<GetGroupList, PagedResult<GroupVm>>
 {
     private readonly IGroupService _service;
-    private readonly IMapper _mapper;
 
-    public GetGroupListHandler(IGroupService service, IMapper mapper)
+    public GetGroupListHandler(IGroupService service)
     {
         _service = service;
-        _mapper = mapper;
     }
 
-    public async Task<PagedResult<GroupVm>> Handle(GetGroupList request, CancellationToken cancellationToken)
+    public async ValueTask<PagedResult<GroupVm>> Handle(GetGroupList request, CancellationToken cancellationToken)
     {
         var groups = await _service.GetListAsync(request.OrganizationId, request.Filter);
 
-        return _mapper.Map<PagedResult<GroupVm>>(groups);
+        return GroupMapper.ToVm(groups);
     }
 }

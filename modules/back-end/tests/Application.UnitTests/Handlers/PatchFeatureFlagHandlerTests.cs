@@ -6,7 +6,7 @@ using Domain.AuditLogs;
 using Domain.FeatureFlags;
 using Domain.Policies;
 using Domain.Resources;
-using MediatR;
+using Mediator;
 using Microsoft.AspNetCore.JsonPatch.SystemTextJson;
 using Microsoft.AspNetCore.JsonPatch.SystemTextJson.Operations;
 

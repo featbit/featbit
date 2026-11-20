@@ -7,7 +7,7 @@ using Domain.FeatureFlags;
 using Domain.Policies;
 using Domain.Resources;
 using Domain.SemanticPatch;
-using MediatR;
+using Mediator;
 
 namespace Application.UnitTests.Handlers;
 
@@ -139,7 +139,7 @@ public class UpdateGeneralHandlerTests
             tags: field == "tags" ? ["new"] : null);
 
         await Assert.ThrowsAsync<ForbiddenException>(
-            () => sut.Handle(request, CancellationToken.None));
+            async () => await sut.Handle(request, CancellationToken.None));
 
         flagService.Verify(x => x.UpdateAsync(It.IsAny<FeatureFlag>()), Times.Never);
         publisher.Verify(

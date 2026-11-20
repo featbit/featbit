@@ -1,7 +1,7 @@
 namespace Application.Bases.Behaviours;
 
 public class ValidationBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : notnull
+    where TRequest : notnull, IMessage
 {
     private readonly IEnumerable<IValidator<TRequest>> _validators;
 
@@ -10,9 +10,9 @@ public class ValidationBehaviour<TRequest, TResponse> : IPipelineBehavior<TReque
         _validators = validators;
     }
 
-    public async Task<TResponse> Handle(
+    public async ValueTask<TResponse> Handle(
         TRequest request,
-        RequestHandlerDelegate<TResponse> next,
+        MessageHandlerDelegate<TRequest, TResponse> next,
         CancellationToken cancellationToken)
     {
         if (_validators.Any())
@@ -32,6 +32,6 @@ public class ValidationBehaviour<TRequest, TResponse> : IPipelineBehavior<TReque
             }
         }
 
-        return await next();
+        return await next(request, cancellationToken);
     }
 }

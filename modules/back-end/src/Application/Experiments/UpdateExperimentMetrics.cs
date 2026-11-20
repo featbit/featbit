@@ -85,7 +85,7 @@ public class UpdateExperimentMetricsHandler(
     IExperimentService service)
     : IRequestHandler<UpdateExperimentMetrics, ExperimentDetailVm>
 {
-    public async Task<ExperimentDetailVm> Handle(
+    public async ValueTask<ExperimentDetailVm> Handle(
         UpdateExperimentMetrics request,
         CancellationToken cancellationToken)
     {

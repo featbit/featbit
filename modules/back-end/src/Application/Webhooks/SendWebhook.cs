@@ -48,7 +48,7 @@ public class SendWebhookHandler : IRequestHandler<SendWebhook, WebhookDelivery>
         _webhookSender = webhookSender;
     }
 
-    public async Task<WebhookDelivery> Handle(SendWebhook request, CancellationToken cancellationToken)
+    public async ValueTask<WebhookDelivery> Handle(SendWebhook request, CancellationToken cancellationToken)
     {
         using var json = JsonDocument.Parse(request.Payload);
         if (request.PreventEmptyPayloads && json.RootElement.IsEmptyObject())

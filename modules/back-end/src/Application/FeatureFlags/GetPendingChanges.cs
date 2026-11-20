@@ -22,7 +22,7 @@ public class GetPendingChangesHandler(
     IFeatureFlagService flagService)
     : IRequestHandler<GetPendingChanges, IEnumerable<PendingChangesVm>>
 {
-    public async Task<IEnumerable<PendingChangesVm>> Handle(GetPendingChanges request, CancellationToken cancellationToken)
+    public async ValueTask<IEnumerable<PendingChangesVm>> Handle(GetPendingChanges request, CancellationToken cancellationToken)
     {
         var flag = await flagService.GetAsync(request.EnvId, request.Key);
 

@@ -14,11 +14,10 @@ public class GetWebhookList : IRequest<PagedResult<WebhookVm>>
 public class GetWebhookListHandler(
     IWebhookService webhookService,
     IUserService userService,
-    IOrganizationService organizationService,
-    IMapper mapper)
+    IOrganizationService organizationService)
     : IRequestHandler<GetWebhookList, PagedResult<WebhookVm>>
 {
-    public async Task<PagedResult<WebhookVm>> Handle(GetWebhookList request, CancellationToken cancellationToken)
+    public async ValueTask<PagedResult<WebhookVm>> Handle(GetWebhookList request, CancellationToken cancellationToken)
     {
         var webhooks =
             await webhookService.GetListAsync(request.OrgId, request.Filter);
@@ -26,11 +25,11 @@ public class GetWebhookListHandler(
         var creatorIds = webhooks.Items.Select(x => x.CreatorId);
         var creators = await userService.GetListAsync(creatorIds);
 
-        var webhookVms = mapper.Map<PagedResult<WebhookVm>>(webhooks);
+        var webhookVms = WebhookMapper.ToVm(webhooks);
         foreach (var webhook in webhooks.Items)
         {
             var vm = webhookVms.Items.First(x => x.Id == webhook.Id);
-            vm.Creator = mapper.Map<UserVm>(creators.FirstOrDefault(x => x.Id == webhook.CreatorId));
+            vm.Creator = UserMapper.ToVm(creators.FirstOrDefault(x => x.Id == webhook.CreatorId));
 
             var scopeStrings = vm.Scopes.Select(scope => new ScopeString(scope)).ToArray();
             vm.ScopeNames = await organizationService.GetScopesAsync(scopeStrings);

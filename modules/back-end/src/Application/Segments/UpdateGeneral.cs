@@ -65,7 +65,7 @@ public class UpdateGeneralHandler(
     IPublisher publisher)
     : IRequestHandler<UpdateGeneral, bool>
 {
-    public async Task<bool> Handle(UpdateGeneral request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(UpdateGeneral request, CancellationToken cancellationToken)
     {
         var segment = await service.GetAsync(request.Id);
         var requestedTags = request.Tags ?? [];

@@ -21,6 +21,10 @@
 
     <ItemGroup>
         <!-- Api Versioning -->
+        <PackageReference Include="Mediator.SourceGenerator">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+        </PackageReference>
         <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" />
 
         <!-- OpenApi -->

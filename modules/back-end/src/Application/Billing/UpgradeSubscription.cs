@@ -13,7 +13,7 @@ public class UpgradeSubscriptionValidator : AbstractValidator<UpgradeSubscriptio
 public class UpgradeSubscriptionHandler(IBillingService billingService)
     : IRequestHandler<UpgradeSubscription, string>
 {
-    public async Task<string> Handle(UpgradeSubscription request, CancellationToken cancellationToken)
+    public async ValueTask<string> Handle(UpgradeSubscription request, CancellationToken cancellationToken)
     {
         var response = await billingService.UpgradeSubscriptionAsync(request);
         return response;

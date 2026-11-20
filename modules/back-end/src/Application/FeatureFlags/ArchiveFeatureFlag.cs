@@ -31,7 +31,7 @@ public class ArchiveFeatureFlagHandler : IRequestHandler<ArchiveFeatureFlag, boo
         _publisher = publisher;
     }
 
-    public async Task<bool> Handle(ArchiveFeatureFlag request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(ArchiveFeatureFlag request, CancellationToken cancellationToken)
     {
         var flag = await _service.GetAsync(request.EnvId, request.Key);
         if (flag.IsArchived)

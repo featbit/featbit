@@ -6,7 +6,7 @@ using Domain.Users;
 using Domain.Policies;
 using Infrastructure.Caches;
 using Infrastructure.MQ;
-using MediatR;
+using Mediator;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;

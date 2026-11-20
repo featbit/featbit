@@ -3,7 +3,7 @@ using Application.Projects;
 using Application.Services;
 using Domain.Organizations;
 using Domain.Projects;
-using MediatR;
+using Mediator;
 using Environment = Domain.Environments.Environment;
 
 namespace Application.UnitTests.Handlers;

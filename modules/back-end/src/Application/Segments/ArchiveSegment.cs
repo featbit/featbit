@@ -36,7 +36,7 @@ public class ArchiveSegmentHandler : IRequestHandler<ArchiveSegment, bool>
         _currentUser = currentUser;
     }
 
-    public async Task<bool> Handle(ArchiveSegment request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(ArchiveSegment request, CancellationToken cancellationToken)
     {
         var flagReferences = await _mediator.Send(new GetFlagReferences
         {

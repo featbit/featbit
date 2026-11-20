@@ -13,7 +13,7 @@ public class DeleteAccessToken : IRequest<bool>
 
 public class DeleteAccessTokenHandler(IAccessTokenService service) : IRequestHandler<DeleteAccessToken, bool>
 {
-    public async Task<bool> Handle(DeleteAccessToken request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(DeleteAccessToken request, CancellationToken cancellationToken)
     {
         var accessToken = await service.GetAsync(request.Id);
 

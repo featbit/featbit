@@ -28,7 +28,7 @@ public class CompareFlagValidator : AbstractValidator<CompareFlag>
 public class CompareFlagHandler(IFeatureFlagService flagService, IResourceServiceV2 resourceService)
     : IRequestHandler<CompareFlag, CompareFlagDetail>
 {
-    public async Task<CompareFlagDetail> Handle(CompareFlag request, CancellationToken cancellationToken)
+    public async ValueTask<CompareFlagDetail> Handle(CompareFlag request, CancellationToken cancellationToken)
     {
         var sourceFlag = await flagService.GetAsync(request.SourceEnvId, request.Key);
         var targetFlag = await flagService.FindOneAsync(x => x.EnvId == request.TargetEnvId && x.Key == request.Key);

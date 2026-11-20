@@ -169,7 +169,7 @@ public class CreateExperimentRunHandler(
     IExperimentService service)
     : IRequestHandler<CreateExperimentRun, ExperimentDetailVm>
 {
-    public async Task<ExperimentDetailVm> Handle(
+    public async ValueTask<ExperimentDetailVm> Handle(
         CreateExperimentRun request,
         CancellationToken cancellationToken)
     {
@@ -181,7 +181,7 @@ public class DeleteExperimentRunHandler(
     IExperimentService service)
     : IRequestHandler<DeleteExperimentRun, ExperimentDetailVm>
 {
-    public async Task<ExperimentDetailVm> Handle(
+    public async ValueTask<ExperimentDetailVm> Handle(
         DeleteExperimentRun request,
         CancellationToken cancellationToken)
     {
@@ -193,7 +193,7 @@ public class UpdateExperimentRunAudienceHandler(
     IExperimentService service)
     : IRequestHandler<UpdateExperimentRunAudience, ExperimentDetailVm>
 {
-    public async Task<ExperimentDetailVm> Handle(
+    public async ValueTask<ExperimentDetailVm> Handle(
         UpdateExperimentRunAudience request,
         CancellationToken cancellationToken)
     {
@@ -205,7 +205,7 @@ public class UpdateExperimentRunHandler(
     IExperimentService service)
     : IRequestHandler<UpdateExperimentRun, ExperimentDetailVm>
 {
-    public async Task<ExperimentDetailVm> Handle(
+    public async ValueTask<ExperimentDetailVm> Handle(
         UpdateExperimentRun request,
         CancellationToken cancellationToken)
     {
@@ -217,7 +217,7 @@ public class UpdateExperimentRunObservationWindowHandler(
     IExperimentService service)
     : IRequestHandler<UpdateExperimentRunObservationWindow, ExperimentDetailVm>
 {
-    public async Task<ExperimentDetailVm> Handle(
+    public async ValueTask<ExperimentDetailVm> Handle(
         UpdateExperimentRunObservationWindow request,
         CancellationToken cancellationToken)
     {

@@ -97,7 +97,7 @@ public class QueryExperimentStatsValidator : AbstractValidator<QueryExperimentSt
 public class QueryExperimentStatsHandler(IExperimentStatsService service)
     : IRequestHandler<QueryExperimentStats, ExperimentStatsVm>
 {
-    public async Task<ExperimentStatsVm> Handle(QueryExperimentStats request, CancellationToken cancellationToken)
+    public async ValueTask<ExperimentStatsVm> Handle(QueryExperimentStats request, CancellationToken cancellationToken)
     {
         return await service.QueryAsync(request);
     }

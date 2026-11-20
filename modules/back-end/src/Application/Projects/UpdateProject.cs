@@ -27,15 +27,13 @@ public class UpdateProjectValidator : AbstractValidator<UpdateProject>
 public class UpdateProjectHandler : IRequestHandler<UpdateProject, ProjectVm>
 {
     private readonly IProjectService _service;
-    private readonly IMapper _mapper;
 
-    public UpdateProjectHandler(IProjectService service, IMapper mapper)
+    public UpdateProjectHandler(IProjectService service)
     {
         _service = service;
-        _mapper = mapper;
     }
 
-    public async Task<ProjectVm> Handle(UpdateProject request, CancellationToken cancellationToken)
+    public async ValueTask<ProjectVm> Handle(UpdateProject request, CancellationToken cancellationToken)
     {
         var project = await _service.GetAsync(request.Id);
 
@@ -43,6 +41,6 @@ public class UpdateProjectHandler : IRequestHandler<UpdateProject, ProjectVm>
 
         await _service.UpdateAsync(project);
 
-        return _mapper.Map<ProjectVm>(project);
+        return ProjectMapper.ToVm(project);
     }
 }

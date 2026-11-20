@@ -2,7 +2,6 @@ using Application.Bases.Models;
 using Application.Experiments;
 using Application.Experiments.ExperimentLayers;
 using Application.Services;
-using AutoMapper;
 using Domain.Experiments;
 
 namespace Application.UnitTests.Experiments;
@@ -40,8 +39,7 @@ public class GetExperimentLayersHandlerTests
             .ReturnsAsync([run]);
         var handler = new GetExperimentLayersHandler(
             layerService.Object,
-            experimentService.Object,
-            CreateMapper());
+            experimentService.Object);
 
         var result = await handler.Handle(
             new GetExperimentLayerList { EnvId = envId, Filter = filter },
@@ -73,8 +71,7 @@ public class GetExperimentLayersHandlerTests
         var experimentService = new Mock<IExperimentService>(MockBehavior.Strict);
         var handler = new GetExperimentLayersHandler(
             layerService.Object,
-            experimentService.Object,
-            CreateMapper());
+            experimentService.Object);
 
         var result = await handler.Handle(
             new GetExperimentLayerList { EnvId = envId, Filter = filter },
@@ -95,11 +92,4 @@ public class GetExperimentLayersHandlerTests
         Status = "active"
     };
 
-    private static IMapper CreateMapper()
-    {
-        var configuration = new MapperConfiguration(
-            config => config.AddProfile<Application.Experiments.ExperimentLayers.MapperProfile>());
-        configuration.AssertConfigurationIsValid();
-        return configuration.CreateMapper();
-    }
 }

@@ -12,7 +12,7 @@ public class GetFlagReferences : IRequest<IEnumerable<FlagReference>>
 public class GetFlagReferencesHandler(ISegmentService service)
     : IRequestHandler<GetFlagReferences, IEnumerable<FlagReference>>
 {
-    public async Task<IEnumerable<FlagReference>> Handle(GetFlagReferences request, CancellationToken cancellationToken)
+    public async ValueTask<IEnumerable<FlagReference>> Handle(GetFlagReferences request, CancellationToken cancellationToken)
     {
         var references = new List<FlagReference>();
 

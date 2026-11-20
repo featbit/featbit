@@ -9,15 +9,15 @@ public class GetRelayProxyList : IRequest<PagedResult<RelayProxyVm>>
     public RelayProxyFilter Filter { get; set; }
 }
 
-public class GetRelayProxyListHandler(IRelayProxyService service, IEnvironmentService envService, IMapper mapper)
+public class GetRelayProxyListHandler(IRelayProxyService service, IEnvironmentService envService)
     : IRequestHandler<GetRelayProxyList, PagedResult<RelayProxyVm>>
 {
-    public async Task<PagedResult<RelayProxyVm>> Handle(GetRelayProxyList request, CancellationToken cancellationToken)
+    public async ValueTask<PagedResult<RelayProxyVm>> Handle(GetRelayProxyList request, CancellationToken cancellationToken)
     {
         var rps =
             await service.GetListAsync(request.OrganizationId, request.Filter);
 
-        var rpVms = mapper.Map<PagedResult<RelayProxyVm>>(rps);
+        var rpVms = RelayProxyMapper.ToVm(rps);
         foreach (var rp in rpVms.Items)
         {
             rp.Serves = await envService.GetServesAsync(rp.Scopes);

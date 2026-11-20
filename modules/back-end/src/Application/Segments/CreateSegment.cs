@@ -103,7 +103,7 @@ public class CreateSegmentHandler : IRequestHandler<CreateSegment, Segment>
         _currentUser = currentUser;
     }
 
-    public async Task<Segment> Handle(CreateSegment request, CancellationToken cancellationToken)
+    public async ValueTask<Segment> Handle(CreateSegment request, CancellationToken cancellationToken)
     {
         if (request.Type == SegmentType.Shared)
         {

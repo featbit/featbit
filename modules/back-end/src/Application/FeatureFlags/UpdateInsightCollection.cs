@@ -27,7 +27,7 @@ public class UpdateInsightCollectionHandler(
     ICurrentUser currentUser,
     IPublisher publisher) : IRequestHandler<UpdateInsightCollection, Guid>
 {
-    public async Task<Guid> Handle(UpdateInsightCollection request, CancellationToken cancellationToken)
+    public async ValueTask<Guid> Handle(UpdateInsightCollection request, CancellationToken cancellationToken)
     {
         var flag = await service.GetAsync(request.EnvId, request.Key);
 

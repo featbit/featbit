@@ -12,7 +12,7 @@ public class RestoreExperimentLayer : IRequest<bool>
 public class RestoreExperimentLayerHandler(IExperimentLayerService service)
     : IRequestHandler<RestoreExperimentLayer, bool>
 {
-    public async Task<bool> Handle(RestoreExperimentLayer request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(RestoreExperimentLayer request, CancellationToken cancellationToken)
     {
         await service.RestoreAsync(request.EnvId, request.Id);
         return true;

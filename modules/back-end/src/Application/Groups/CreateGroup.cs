@@ -41,17 +41,15 @@ public class CreateGroupHandler : IRequestHandler<CreateGroup, GroupVm>
     private readonly ICurrentUser _auditActor;
 
     private readonly IGroupService _service;
-    private readonly IMapper _mapper;
 
-    public CreateGroupHandler(IGroupService service, IMapper mapper, IPublisher auditPublisher, ICurrentUser auditActor)
+    public CreateGroupHandler(IGroupService service, IPublisher auditPublisher, ICurrentUser auditActor)
     {
         _auditPublisher = auditPublisher;
         _auditActor = auditActor;
         _service = service;
-        _mapper = mapper;
     }
 
-    public async Task<GroupVm> Handle(CreateGroup request, CancellationToken cancellationToken)
+    public async ValueTask<GroupVm> Handle(CreateGroup request, CancellationToken cancellationToken)
     {
         var group = new Group(request.OrganizationId, request.Name, request.Description);
 
@@ -62,6 +60,6 @@ public class CreateGroupHandler : IRequestHandler<CreateGroup, GroupVm>
         await _auditPublisher.Publish(new OnIamResourceChanged(request.WorkspaceId, request.OrganizationId,
             AuditLogRefTypes.Group, Operations.CreateGroup, current, change.To(current), _auditActor.Id), cancellationToken);
 
-        return _mapper.Map<GroupVm>(group);
+        return GroupMapper.ToVm(group);
     }
 }

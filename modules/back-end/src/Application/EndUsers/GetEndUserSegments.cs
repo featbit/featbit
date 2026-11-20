@@ -20,7 +20,7 @@ public class GetEndUserSegmentsHandler : IRequestHandler<GetEndUserSegments, IEn
         _envAppService = envAppService;
     }
 
-    public async Task<IEnumerable<EndUserSegmentVm>> Handle(GetEndUserSegments request, CancellationToken cancellationToken)
+    public async ValueTask<IEnumerable<EndUserSegmentVm>> Handle(GetEndUserSegments request, CancellationToken cancellationToken)
     {
         var endUser = await _endUserService.GetAsync(request.Id);
         var segments = await _envAppService.GetSegmentsAsync(request.WorkspaceId, request.EnvId);

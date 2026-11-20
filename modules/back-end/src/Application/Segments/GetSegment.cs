@@ -16,7 +16,7 @@ public class GetSegmentHandler : IRequestHandler<GetSegment, Segment>
         _service = service;
     }
 
-    public async Task<Segment> Handle(GetSegment request, CancellationToken cancellationToken)
+    public async ValueTask<Segment> Handle(GetSegment request, CancellationToken cancellationToken)
     {
         return await _service.GetAsync(request.Id);
     }

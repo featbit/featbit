@@ -16,7 +16,7 @@ public class GetEndUserPropertiesHandler : IRequestHandler<GetEndUserProperties,
         _service = service;
     }
     
-    public async Task<IEnumerable<EndUserProperty>> Handle(GetEndUserProperties request, CancellationToken cancellationToken)
+    public async ValueTask<IEnumerable<EndUserProperty>> Handle(GetEndUserProperties request, CancellationToken cancellationToken)
     {
         return await _service.GetPropertiesAsync(request.EnvId);
     }

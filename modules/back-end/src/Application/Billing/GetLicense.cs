@@ -7,7 +7,7 @@ public class GetLicense : IRequest<string>
 
 public class GetLicenseHandler(IBillingService billingService) : IRequestHandler<GetLicense, string>
 {
-    public async Task<string> Handle(GetLicense request, CancellationToken cancellationToken)
+    public async ValueTask<string> Handle(GetLicense request, CancellationToken cancellationToken)
     {
         var license = await billingService.GetLicenseAsync(request.WorkspaceId);
         return license;

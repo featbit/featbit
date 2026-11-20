@@ -20,7 +20,7 @@ public class GetProjectList : IRequest<IEnumerable<ProjectWithEnvs>>
 public class GetProjectListHandler(IProjectService projectService)
     : IRequestHandler<GetProjectList, IEnumerable<ProjectWithEnvs>>
 {
-    public async Task<IEnumerable<ProjectWithEnvs>> Handle(GetProjectList request, CancellationToken cancellationToken)
+    public async ValueTask<IEnumerable<ProjectWithEnvs>> Handle(GetProjectList request, CancellationToken cancellationToken)
     {
         var projectWithEnvs = await projectService.GetListAsync(request.OrganizationId);
         var permissions = request.Permissions;

@@ -20,7 +20,7 @@ public class GetDirectPoliciesHandler : IRequestHandler<GetDirectPolicies, Paged
         _service = service;
     }
 
-    public async Task<PagedResult<MemberPolicyVm>> Handle(GetDirectPolicies request, CancellationToken cancellationToken)
+    public async ValueTask<PagedResult<MemberPolicyVm>> Handle(GetDirectPolicies request, CancellationToken cancellationToken)
     {
         var policies =
             await _service.GetDirectPoliciesAsync(request.OrganizationId, request.MemberId, request.Filter);

@@ -37,7 +37,7 @@ public class EvaluateMemberPermissionValidator : AbstractValidator<EvaluateMembe
 public class EvaluateMemberPermissionHandler(IMemberService service)
     : IRequestHandler<EvaluateMemberPermission, MemberPermissionEvaluationVm>
 {
-    public async Task<MemberPermissionEvaluationVm> Handle(
+    public async ValueTask<MemberPermissionEvaluationVm> Handle(
         EvaluateMemberPermission request,
         CancellationToken cancellationToken)
     {

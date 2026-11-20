@@ -14,7 +14,7 @@ public class ResetTriggerTokenHandler : IRequestHandler<ResetTriggerToken, strin
         _service = service;
     }
 
-    public async Task<string> Handle(ResetTriggerToken request, CancellationToken cancellationToken)
+    public async ValueTask<string> Handle(ResetTriggerToken request, CancellationToken cancellationToken)
     {
         var trigger = await _service.GetAsync(request.Id);
         trigger.ResetToken();

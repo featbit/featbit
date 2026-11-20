@@ -24,6 +24,6 @@ public class SearchEndUser : IRequest<ICollection<EndUser>>
 
 public class SearchEndUserHandler(IEndUserService service) : IRequestHandler<SearchEndUser, ICollection<EndUser>>
 {
-    public async Task<ICollection<EndUser>> Handle(SearchEndUser request, CancellationToken cancellationToken) =>
+    public async ValueTask<ICollection<EndUser>> Handle(SearchEndUser request, CancellationToken cancellationToken) =>
         await service.SearchAsync(request.WorkspaceId, request.EnvId, request.Filter);
 }

@@ -1,11 +1,10 @@
 using Application.Environments;
 using Application.Projects;
 using Application.Services;
-using AutoMapper;
 using Domain.Policies;
 using Domain.Projects;
 using Domain.Resources;
-using MediatR;
+using Mediator;
 using Environment = Domain.Environments.Environment;
 
 namespace Application.UnitTests.Handlers;
@@ -39,25 +38,19 @@ public class SecretSanitizationTests
             .Callback<Environment>(e => Assert.Equal(2, e.Secrets.Count)).Returns(Task.CompletedTask);
         service.Setup(s => s.UpdateAsync(It.IsAny<Environment>()))
             .Callback<Environment>(e => Assert.Equal(2, e.Secrets.Count)).Returns(Task.CompletedTask);
-        var mapper = new Mock<IMapper>();
-        mapper.Setup(m => m.Map<EnvironmentVm>(It.IsAny<object>())).Returns((object value) =>
-        {
-            var e = (Environment)value;
-            return new EnvironmentVm { Id = e.Id.ToString(), Secrets = e.Secrets };
-        });
         var resources = new Mock<IResourceService>();
         resources.Setup(r => r.GetEnvRnAsync(It.IsAny<Guid>())).ReturnsAsync("project/demo:env/prod");
         var publisher = new Mock<IPublisher>();
         publisher.Setup(p => p.Publish(It.IsAny<OnEnvironmentAdded>(), It.IsAny<CancellationToken>()))
             .Callback<OnEnvironmentAdded, CancellationToken>((n, _) => Assert.Equal(2, n.Environment.Secrets.Count))
-            .Returns(Task.CompletedTask);
+            .Returns(ValueTask.CompletedTask);
         var result = action switch
         {
-            "get" => await new GetEnvironmentHandler(service.Object, resources.Object, mapper.Object)
+            "get" => await new GetEnvironmentHandler(service.Object, resources.Object)
                 .Handle(new GetEnvironment { Id = env.Id, Permissions = Grants(read) }, default),
-            "create" => await new CreateEnvironmentHandler(service.Object, mapper.Object, publisher.Object, resources.Object)
+            "create" => await new CreateEnvironmentHandler(service.Object, publisher.Object, resources.Object)
                 .Handle(new CreateEnvironment(env.ProjectId, new CreateEnvironmentPayload { Name = "Production", Key = "prod" }, Grants(read)), default),
-            _ => await new UpdateEnvironmentHandler(service.Object, mapper.Object, resources.Object)
+            _ => await new UpdateEnvironmentHandler(service.Object, resources.Object)
                 .Handle(new UpdateEnvironment(env.Id, new UpdateEnvironmentPayload { Name = "Production" }, Grants(read)), default)
         };
         Assert.Equal(read ? 2 : 0, result.Secrets.Count);
@@ -82,7 +75,7 @@ public class SecretSanitizationTests
         var publisher = new Mock<IPublisher>();
         publisher.Setup(p => p.Publish(It.IsAny<OnProjectAdded>(), It.IsAny<CancellationToken>()))
             .Callback<OnProjectAdded, CancellationToken>((n, _) => Assert.Equal(2, Assert.Single(n.ProjectWithEnvs.Environments).Secrets.Count))
-            .Returns(Task.CompletedTask);
+            .Returns(ValueTask.CompletedTask);
         var result = action switch
         {
             "get" => await new GetProjectHandler(service.Object).Handle(new GetProject { Id = project.Id, Permissions = Grants(read) }, default),

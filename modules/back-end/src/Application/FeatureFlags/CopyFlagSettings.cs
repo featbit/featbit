@@ -27,7 +27,7 @@ public class CopyFlagSettingsHandler(
     IPublisher publisher)
     : IRequestHandler<CopyFlagSettings, bool>
 {
-    public async Task<bool> Handle(CopyFlagSettings request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(CopyFlagSettings request, CancellationToken cancellationToken)
     {
         var source = await flagService.GetAsync(request.SourceEnvId, request.Key);
         var target = await flagService.GetAsync(request.TargetEnvId, request.Key);

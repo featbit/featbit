@@ -28,7 +28,7 @@ public class RemoveGroupMemberHandler : IRequestHandler<RemoveGroupMember, bool>
         _service = service;
     }
     
-    public async Task<bool> Handle(RemoveGroupMember request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(RemoveGroupMember request, CancellationToken cancellationToken)
     {
         var previous = await _service.GetAuditSnapshotAsync(request.GroupId);
         var change = new DataChange(previous);

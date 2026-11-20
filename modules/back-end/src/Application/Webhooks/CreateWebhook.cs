@@ -28,16 +28,14 @@ public class CreateWebhookHandler : IRequestHandler<CreateWebhook, WebhookVm>
 {
     private readonly IWebhookService _service;
     private readonly ICurrentUser _currentUser;
-    private readonly IMapper _mapper;
 
-    public CreateWebhookHandler(IWebhookService service, ICurrentUser currentUser, IMapper mapper)
+    public CreateWebhookHandler(IWebhookService service, ICurrentUser currentUser)
     {
         _service = service;
         _currentUser = currentUser;
-        _mapper = mapper;
     }
 
-    public async Task<WebhookVm> Handle(CreateWebhook request, CancellationToken cancellationToken)
+    public async ValueTask<WebhookVm> Handle(CreateWebhook request, CancellationToken cancellationToken)
     {
         if (await _service.IsNameUsedAsync(request.OrgId, request.Name))
         {
@@ -47,7 +45,7 @@ public class CreateWebhookHandler : IRequestHandler<CreateWebhook, WebhookVm>
         var webhook = request.AsWebhook(_currentUser.Id);
         await _service.AddOneAsync(webhook);
 
-        var vm = _mapper.Map<Webhook, WebhookVm>(webhook);
+        var vm = WebhookMapper.ToVm(webhook);
         return vm;
     }
 }

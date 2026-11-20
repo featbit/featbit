@@ -14,11 +14,10 @@ public class GetMemberLookupList : IRequest<PagedResult<MemberLookupVm>>
 public class GetMemberLookupListHandler(
     IMemberService service,
     IOrganizationService organizationService,
-    ICurrentUser currentUser,
-    IMapper mapper)
+    ICurrentUser currentUser)
     : IRequestHandler<GetMemberLookupList, PagedResult<MemberLookupVm>>
 {
-    public async Task<PagedResult<MemberLookupVm>> Handle(
+    public async ValueTask<PagedResult<MemberLookupVm>> Handle(
         GetMemberLookupList request,
         CancellationToken cancellationToken)
     {
@@ -29,6 +28,6 @@ public class GetMemberLookupListHandler(
         }
 
         var members = await service.GetLookupListAsync(request.OrganizationId, request.Filter);
-        return mapper.Map<PagedResult<MemberLookupVm>>(members);
+        return MemberMapper.ToLookupVm(members);
     }
 }

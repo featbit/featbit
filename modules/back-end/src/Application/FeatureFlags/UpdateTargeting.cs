@@ -67,7 +67,7 @@ public class UpdateTargetingHandler(
     IPublisher publisher)
     : IRequestHandler<UpdateTargeting, Guid>
 {
-    public async Task<Guid> Handle(UpdateTargeting request, CancellationToken cancellationToken)
+    public async ValueTask<Guid> Handle(UpdateTargeting request, CancellationToken cancellationToken)
     {
         var flag = await flagService.GetAsync(request.EnvId, request.Key);
         if (!flag.Revision.Equals(request.Revision))

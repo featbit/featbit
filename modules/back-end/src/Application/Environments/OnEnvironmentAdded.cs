@@ -22,7 +22,7 @@ public class OnEnvironmentAddedHandler(
     IMessageProducer messageProducer)
     : INotificationHandler<OnEnvironmentAdded>
 {
-    public async Task Handle(OnEnvironmentAdded notification, CancellationToken cancellationToken)
+    public async ValueTask Handle(OnEnvironmentAdded notification, CancellationToken cancellationToken)
     {
         var env = notification.Environment;
 

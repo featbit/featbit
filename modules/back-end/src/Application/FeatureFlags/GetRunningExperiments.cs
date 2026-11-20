@@ -13,7 +13,7 @@ public class GetRunningExperiments : IRequest<IReadOnlyList<ExperimentReference>
 public class GetRunningExperimentsHandler(IFeatureFlagService service)
     : IRequestHandler<GetRunningExperiments, IReadOnlyList<ExperimentReference>>
 {
-    public async Task<IReadOnlyList<ExperimentReference>> Handle(
+    public async ValueTask<IReadOnlyList<ExperimentReference>> Handle(
         GetRunningExperiments request,
         CancellationToken cancellationToken)
     {

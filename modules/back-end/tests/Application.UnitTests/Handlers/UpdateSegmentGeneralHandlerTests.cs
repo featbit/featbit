@@ -8,7 +8,7 @@ using Domain.Resources;
 using Domain.Segments;
 using Domain.SemanticPatch;
 using Domain.Targeting;
-using MediatR;
+using Mediator;
 
 namespace Application.UnitTests.Handlers;
 
@@ -143,7 +143,7 @@ public class UpdateSegmentGeneralHandlerTests
             tags: field == "tags" ? ["new"] : null);
 
         await Assert.ThrowsAsync<ForbiddenException>(
-            () => sut.Handle(request, CancellationToken.None));
+            async () => await sut.Handle(request, CancellationToken.None));
 
         segmentService.Verify(x => x.UpdateAsync(It.IsAny<Segment>()), Times.Never);
         publisher.Verify(

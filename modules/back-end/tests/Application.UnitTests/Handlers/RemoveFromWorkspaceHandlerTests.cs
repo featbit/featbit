@@ -32,7 +32,7 @@ public class RemoveFromWorkspaceHandlerTests
             .ReturnsAsync(new[] { new Workspace { Name = "other", Key = "other" } });
 
         var sut = new RemoveFromWorkspaceHandler(
-            workspaceSvc.Object, userSvc.Object, orgSvc.Object, memberSvc.Object, Mock.Of<MediatR.IPublisher>(), Mock.Of<Application.Users.ICurrentUser>());
+            workspaceSvc.Object, userSvc.Object, orgSvc.Object, memberSvc.Object, Mock.Of<Mediator.IPublisher>(), Mock.Of<Application.Users.ICurrentUser>());
 
         var result = await sut.Handle(
             new RemoveFromWorkspace { WorkspaceId = workspaceId, MemberId = memberId },
@@ -63,7 +63,7 @@ public class RemoveFromWorkspaceHandlerTests
             .ReturnsAsync(Array.Empty<Workspace>());
 
         var sut = new RemoveFromWorkspaceHandler(
-            workspaceSvc.Object, userSvc.Object, orgSvc.Object, memberSvc.Object, Mock.Of<MediatR.IPublisher>(), Mock.Of<Application.Users.ICurrentUser>());
+            workspaceSvc.Object, userSvc.Object, orgSvc.Object, memberSvc.Object, Mock.Of<Mediator.IPublisher>(), Mock.Of<Application.Users.ICurrentUser>());
 
         var result = await sut.Handle(
             new RemoveFromWorkspace { WorkspaceId = workspaceId, MemberId = memberId },
@@ -93,7 +93,7 @@ public class RemoveFromWorkspaceHandlerTests
             .ReturnsAsync(new[] { new Workspace { Name = "w", Key = "w" } });
 
         var sut = new RemoveFromWorkspaceHandler(
-            workspaceSvc.Object, userSvc.Object, orgSvc.Object, memberSvc.Object, Mock.Of<MediatR.IPublisher>(), Mock.Of<Application.Users.ICurrentUser>());
+            workspaceSvc.Object, userSvc.Object, orgSvc.Object, memberSvc.Object, Mock.Of<Mediator.IPublisher>(), Mock.Of<Application.Users.ICurrentUser>());
 
         var result = await sut.Handle(
             new RemoveFromWorkspace { WorkspaceId = workspaceId, MemberId = memberId },
