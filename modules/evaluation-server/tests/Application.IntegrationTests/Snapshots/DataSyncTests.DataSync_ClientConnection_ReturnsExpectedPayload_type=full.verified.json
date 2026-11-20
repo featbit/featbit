@@ -1,0 +1,109 @@
+{
+  "data": {
+    "eventType": "full",
+    "featureFlags": [
+      {
+        "id": "returns-true",
+        "insightsEnabled": false,
+        "matchReason": "default",
+        "sendToExperiment": true,
+        "timestamp": 1674871495616,
+        "variation": "true",
+        "variationId": "Guid_1",
+        "variationOptions": [
+          {
+            "id": "Guid_1",
+            "value": "true"
+          },
+          {
+            "id": "Guid_2",
+            "value": "false"
+          }
+        ],
+        "variationType": "boolean"
+      },
+      {
+        "id": "return-10p-true",
+        "insightsEnabled": true,
+        "matchReason": "default",
+        "sendToExperiment": true,
+        "timestamp": 1674871694804,
+        "variation": "false",
+        "variationId": "Guid_3",
+        "variationOptions": [
+          {
+            "id": "Guid_4",
+            "value": "true"
+          },
+          {
+            "id": "Guid_3",
+            "value": "false"
+          }
+        ],
+        "variationType": "boolean"
+      },
+      {
+        "id": "individual-targeting",
+        "insightsEnabled": true,
+        "matchReason": "default",
+        "sendToExperiment": true,
+        "timestamp": 1674872452102,
+        "variation": "true",
+        "variationId": "Guid_5",
+        "variationOptions": [
+          {
+            "id": "Guid_5",
+            "value": "true"
+          },
+          {
+            "id": "Guid_6",
+            "value": "false"
+          }
+        ],
+        "variationType": "boolean"
+      },
+      {
+        "id": "two-custom-rules",
+        "insightsEnabled": true,
+        "matchReason": "default",
+        "sendToExperiment": true,
+        "timestamp": 1674884975885,
+        "variation": "true",
+        "variationId": "Guid_7",
+        "variationOptions": [
+          {
+            "id": "Guid_7",
+            "value": "true"
+          },
+          {
+            "id": "Guid_8",
+            "value": "false"
+          }
+        ],
+        "variationType": "boolean"
+      },
+      {
+        "id": "custom-rule-with-segment",
+        "insightsEnabled": false,
+        "matchReason": "default",
+        "sendToExperiment": true,
+        "timestamp": 1674885485421,
+        "variation": "true",
+        "variationId": "Guid_9",
+        "variationOptions": [
+          {
+            "id": "Guid_9",
+            "value": "true"
+          },
+          {
+            "id": "Guid_10",
+            "value": "false"
+          }
+        ],
+        "variationType": "boolean"
+      }
+    ],
+    "userKeyId": "Guid_11"
+  },
+  "messageType": "data-sync"
+}

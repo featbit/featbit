@@ -38,7 +38,7 @@ public class McpOAuthControllerTests
             "/api/v1/mcp/oauth/device/code",
             new { client_id = "", env_id = Guid.Empty });
 
-        await Verify(response);
+        await Snapshot.Match(response);
     }
 
     [Fact]
@@ -97,7 +97,7 @@ public class McpOAuthControllerTests
             access_token = accessToken
         });
 
-        await Verify(new
+        await Snapshot.Match(new
         {
             Create = await NormalizeDeviceCodeResponseAsync(createResponse),
             Pending = await NormalizeOAuthErrorResponseAsync(pendingResponse),
@@ -123,7 +123,7 @@ public class McpOAuthControllerTests
                 experiment_id = ExperimentId
             });
 
-        await Verify(await NormalizeTokenResponseAsync(response));
+        await Snapshot.Match(await NormalizeTokenResponseAsync(response));
     }
 
     [Fact]
@@ -145,7 +145,7 @@ public class McpOAuthControllerTests
             $"/api/v1/envs/99000000-0000-0000-0000-000000000001/mcp/oauth/device/authorize",
             new { user_code = userCode });
 
-        await Verify(response);
+        await Snapshot.Match(response);
     }
 
     [Fact]
@@ -158,7 +158,7 @@ public class McpOAuthControllerTests
             "/api/v1/mcp/oauth/revoke",
             new { access_token = "not-a-jwt" });
 
-        await Verify(response);
+        await Snapshot.Match(response);
     }
 
     [Fact]

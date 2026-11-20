@@ -23,7 +23,7 @@ public class BasicControllerTests
     {
         var response = await _app.GetAsync("api/v1/basic/authorized", authenticated: false);
 
-        await Verify(response);
+        await Snapshot.Match(response);
     }
 
     [Fact]
@@ -31,7 +31,7 @@ public class BasicControllerTests
     {
         var response = await _app.GetAsync("api/v1/basic/allow-anonymous", authenticated: false);
 
-        await Verify(response);
+        await Snapshot.Match(response);
     }
 
     [Fact]
@@ -39,7 +39,7 @@ public class BasicControllerTests
     {
         var response = await _app.GetAsync("api/v1/basic/authorized", authenticated: true);
 
-        await Verify(response);
+        await Snapshot.Match(response);
     }
 
     [Fact]
@@ -48,7 +48,7 @@ public class BasicControllerTests
         var v1 = await _app.GetAsync("api/v1/basic/string");
         var v2 = await _app.GetAsync("api/v2/basic/string");
 
-        await Verify(new { v1, v2 });
+        await Snapshot.Match(new { v1, v2 });
     }
 
     [Fact]
@@ -56,7 +56,7 @@ public class BasicControllerTests
     {
         var response = await _app.GetAsync("api/v1/basic/exception");
 
-        await Verify(response);
+        await Snapshot.Match(response);
     }
 
     [Fact]
@@ -64,7 +64,7 @@ public class BasicControllerTests
     {
         var response = await _app.PostAsync("api/v2/basic/bar", new Bar("1", "bar"));
 
-        await Verify(response);
+        await Snapshot.Match(response);
     }
 
     [Fact]
@@ -77,6 +77,6 @@ public class BasicControllerTests
         using var client = await _app.CreateAuthenticatedClientAsync(factory, includeTenantContext: true);
         var response = await client.GetAsync("api/v1/basic/license-feature-check");
 
-        await Verify(response);
+        await Snapshot.Match(response);
     }
 }

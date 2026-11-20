@@ -24,7 +24,7 @@ public class UserControllerTests
     {
         var response = await _app.GetAsync("/api/v1/user/profile");
 
-        await Verify(response);
+        await Snapshot.Match(response);
     }
 
     [Fact]
@@ -42,6 +42,6 @@ public class UserControllerTests
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authTokens.AccessToken);
 
         var response = await client.GetAsync("/api/v1/user/profile");
-        await Verify(response);
+        await Snapshot.Match(response);
     }
 }
