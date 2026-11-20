@@ -54,7 +54,7 @@ public class FlagChangeRequest : FullAuditedEntity
 
     public bool CanBeApprovedBy(Guid operatorId)
     {
-        if (Status == FlagChangeRequestStatus.Applied)
+        if (Status != FlagChangeRequestStatus.PendingReview)
         {
             return false;
         }
@@ -80,7 +80,7 @@ public class FlagChangeRequest : FullAuditedEntity
 
     public bool CanBeDeclinedBy(Guid operatorId)
     {
-        if (Status == FlagChangeRequestStatus.Applied)
+        if (Status != FlagChangeRequestStatus.PendingReview)
         {
             return false;
         }
@@ -98,6 +98,7 @@ public class FlagChangeRequest : FullAuditedEntity
 
     public void Approve(Guid memberId)
     {
+        if (!CanBeApprovedBy(memberId)) throw new InvalidOperationException("The change request is no longer reviewable.");
         var reviewer = Reviewers.First(r => r.MemberId == memberId);
         reviewer.Action = FlagChangeRequestAction.Approve;
         reviewer.Timestamp = DateTime.UtcNow;
@@ -109,6 +110,7 @@ public class FlagChangeRequest : FullAuditedEntity
 
     public void Decline(Guid memberId)
     {
+        if (!CanBeDeclinedBy(memberId)) throw new InvalidOperationException("The change request is no longer reviewable.");
         var reviewer = Reviewers.First(r => r.MemberId == memberId);
         reviewer.Action = FlagChangeRequestAction.Decline;
         reviewer.Timestamp = DateTime.UtcNow;

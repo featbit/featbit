@@ -63,7 +63,7 @@ public class MongoDbService<TEntity> : IService<TEntity> where TEntity : Entity
         await Collection.InsertManyAsync(entities);
     }
 
-    public async Task UpdateAsync(TEntity replacement)
+    public virtual async Task UpdateAsync(TEntity replacement)
     {
         await Collection.ReplaceOneAsync(entity => entity.Id == replacement.Id, replacement);
     }

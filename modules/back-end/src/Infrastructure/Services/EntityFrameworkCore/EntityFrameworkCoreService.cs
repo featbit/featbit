@@ -71,7 +71,7 @@ public class EntityFrameworkCoreService<TEntity>(AppDbContext dbContext) : IServ
         return await Queryable.CountAsync(predicate) > 0;
     }
 
-    public async Task UpdateAsync(TEntity segment)
+    public virtual async Task UpdateAsync(TEntity segment)
     {
         Set.Update(segment);
 

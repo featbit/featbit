@@ -57,11 +57,10 @@ public class ApproveFlagChangeRequestHandler(
         await changeRequestService.UpdateAsync(changeRequest);
 
         // update schedule status if exists
-        if (changeRequest.ScheduleId.HasValue)
+        if (changeRequest.ScheduleId.HasValue && changeRequest.Status == Domain.FlagChangeRequests.FlagChangeRequestStatus.Approved)
         {
-            var schedule = await scheduleService.GetAsync(changeRequest.ScheduleId.Value);
-            schedule.PendingExecution(currentUser.Id);
-            await scheduleService.UpdateAsync(schedule);
+            await scheduleService.TrySetReviewOutcomeAsync(changeRequest.ScheduleId.Value, changeRequest.Id,
+                true, currentUser.Id);
         }
 
         // write audit log
