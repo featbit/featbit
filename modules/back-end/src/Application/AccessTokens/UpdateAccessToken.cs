@@ -29,7 +29,7 @@ public class UpdateAccessTokenValidator : AbstractValidator<UpdateAccessToken>
     }
 }
 
-public class UpdateAccessTokenHandler(IAccessTokenService service, IMapper mapper)
+public class UpdateAccessTokenHandler(IAccessTokenService service)
     : IRequestHandler<UpdateAccessToken, AccessTokenVm>
 {
     public async Task<AccessTokenVm> Handle(UpdateAccessToken request, CancellationToken cancellationToken)
@@ -52,6 +52,6 @@ public class UpdateAccessTokenHandler(IAccessTokenService service, IMapper mappe
         accessToken.Update(request.Name, request.Permissions);
         await service.UpdateAsync(accessToken);
 
-        return mapper.Map<AccessTokenVm>(accessToken);
+        return AccessTokenMapper.ToVm(accessToken);
     }
 }

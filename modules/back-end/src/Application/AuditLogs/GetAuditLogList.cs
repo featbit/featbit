@@ -19,24 +19,21 @@ public class GetAuditLogListHandler : IRequestHandler<GetAuditLogList, PagedResu
     private readonly IAuditLogService _auditLogService;
     private readonly IUserService _userService;
     private readonly IAccessTokenService _accessTokenService;
-    private readonly IMapper _mapper;
 
     public GetAuditLogListHandler(
         IAuditLogService auditLogService,
         IUserService userService,
-        IAccessTokenService accessTokenService,
-        IMapper mapper)
+        IAccessTokenService accessTokenService)
     {
         _auditLogService = auditLogService;
         _userService = userService;
         _accessTokenService = accessTokenService;
-        _mapper = mapper;
     }
 
     public async Task<PagedResult<AuditLogVm>> Handle(GetAuditLogList request, CancellationToken cancellationToken)
     {
         var logs = await _auditLogService.GetListAsync(request.WorkspaceId, request.EnvId, request.Filter);
-        var logVms = _mapper.Map<PagedResult<AuditLogVm>>(logs);
+        var logVms = AuditLogMapper.ToVm(logs);
 
         var users = await _userService.GetListAsync(logVms.Items.Select(x => x.CreatorId));
         foreach (var item in logVms.Items)

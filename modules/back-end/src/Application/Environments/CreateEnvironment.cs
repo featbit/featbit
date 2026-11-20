@@ -67,7 +67,6 @@ public class CreateEnvironmentValidator : AbstractValidator<CreateEnvironment>
 
 public class CreateEnvironmentHandler(
     IEnvironmentService service,
-    IMapper mapper,
     IPublisher publisher,
     IResourceService resources)
     : IRequestHandler<CreateEnvironment, EnvironmentVm>
@@ -89,6 +88,6 @@ public class CreateEnvironmentHandler(
         var resourceRn = await resources.GetEnvRnAsync(env.Id);
         env.Sanitize(resourceRn, request.Permissions);
 
-        return mapper.Map<EnvironmentVm>(env);
+        return EnvironmentMapper.ToVm(env);
     }
 }

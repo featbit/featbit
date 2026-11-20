@@ -3,7 +3,6 @@ using Application.Bases.Models;
 using Application.Members;
 using Application.Services;
 using Application.Users;
-using AutoMapper;
 using Domain.Members;
 
 namespace Application.UnitTests.Handlers;
@@ -44,8 +43,7 @@ public class GetMemberLookupListHandlerTests
         var handler = new GetMemberLookupListHandler(
             memberService.Object,
             organizationService.Object,
-            currentUser.Object,
-            CreateMapper());
+            currentUser.Object);
 
         var result = await handler.Handle(
             new GetMemberLookupList
@@ -80,8 +78,7 @@ public class GetMemberLookupListHandlerTests
         var handler = new GetMemberLookupListHandler(
             memberService.Object,
             organizationService.Object,
-            currentUser.Object,
-            CreateMapper());
+            currentUser.Object);
 
         await Assert.ThrowsAsync<ForbiddenException>(() => handler.Handle(
             new GetMemberLookupList
@@ -92,10 +89,4 @@ public class GetMemberLookupListHandlerTests
             CancellationToken.None));
     }
 
-    private static IMapper CreateMapper()
-    {
-        var configuration = new MapperConfiguration(config => config.AddProfile<Members.MapperProfile>());
-        configuration.AssertConfigurationIsValid();
-        return configuration.CreateMapper();
-    }
 }
