@@ -36,5 +36,11 @@ public partial class PostgresMessageConsumer
             "Wait for {Interval} seconds before the next poll because message count {MessageCount} is less than the batch size {BatchSize}.",
             EventName = "WaitForNextPoll")]
         public static partial void WaitForNextPoll(ILogger logger, int interval, int messageCount, int batchSize);
+
+        [LoggerMessage(9, LogLevel.Warning, "Queue message {Id} lease was lost; leaving it for its current owner.")]
+        public static partial void LeaseLost(ILogger logger, long id);
+
+        [LoggerMessage(10, LogLevel.Error, "Could not renew queue message {Id} lease; leaving it for recovery.")]
+        public static partial void LeaseRenewalFailed(ILogger logger, long id, Exception exception);
     }
 }
