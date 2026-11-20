@@ -19,7 +19,7 @@ public class PostgresStoreTests : IntegrationTestBase, IAsyncLifetime
         _fixture = fixture;
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         if (!DockerAvailability.IsAvailable)
         {
@@ -34,10 +34,10 @@ public class PostgresStoreTests : IntegrationTestBase, IAsyncLifetime
         await conn.ExecuteAsync("TRUNCATE feature_flags, segments, environments, projects, organizations RESTART IDENTITY CASCADE;");
     }
 
-    public Task DisposeAsync()
+    public ValueTask DisposeAsync()
     {
         _dataSource?.Dispose();
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 
     [DockerFact]

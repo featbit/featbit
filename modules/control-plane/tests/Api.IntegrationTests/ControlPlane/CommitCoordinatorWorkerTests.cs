@@ -57,7 +57,7 @@ public sealed class CommitCoordinatorWorkerTests : IntegrationTestBase, IAsyncLi
         _redisFixture = redisFixture;
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         if (!DockerAvailability.IsAvailable)
         {
@@ -96,7 +96,7 @@ public sealed class CommitCoordinatorWorkerTests : IntegrationTestBase, IAsyncLi
             NullLogger<CompositeRedisCacheService>.Instance);
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         // flush both DC DB indexes so a shared Redis is left clean
         await _mux.GetDatabase(0).ExecuteAsync("FLUSHDB");

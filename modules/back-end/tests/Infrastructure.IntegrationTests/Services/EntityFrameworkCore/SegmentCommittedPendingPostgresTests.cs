@@ -39,7 +39,7 @@ public sealed class SegmentCommittedPendingPostgresTests : IntegrationTestBase, 
     private readonly Guid _workspaceId = Guid.NewGuid();
     private readonly Guid _envId = Guid.NewGuid();
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         if (!DockerAvailability.IsAvailable)
         {
@@ -73,7 +73,7 @@ public sealed class SegmentCommittedPendingPostgresTests : IntegrationTestBase, 
         _sut = new SegmentService(_dbContext, NullLogger<SegmentService>.Instance);
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         if (_dbContext != null!)
         {

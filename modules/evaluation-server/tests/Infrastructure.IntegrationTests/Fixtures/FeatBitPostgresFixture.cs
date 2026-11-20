@@ -33,7 +33,7 @@ public sealed class FeatBitPostgresFixture : IAsyncLifetime
 
     public string ConnectionString { get; private set; } = string.Empty;
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         if (!DockerAvailability.IsAvailable)
         {
@@ -51,7 +51,7 @@ public sealed class FeatBitPostgresFixture : IAsyncLifetime
         await ApplyInitScriptsAsync(bootstrapConnStr);
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         if (!DockerAvailability.IsAvailable)
         {

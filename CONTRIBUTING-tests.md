@@ -83,11 +83,11 @@ For a source file at `src/<Project>/<Path>/<Type>.cs`, its tests live at:
 
 | Concern | Library | Notes |
 |---|---|---|
-| Test framework | xUnit | already standard |
+| Test framework | xUnit v3 (`xunit.v3`) on Microsoft.Testing.Platform | the repo-root `global.json` opts `dotnet test` into Microsoft.Testing.Platform |
 | Mocking | Moq | `Mock<T>`, `Mock.Of<T>(...)`, `SetupSequence`/`InSequence` for ordering |
 | Logger | `Microsoft.Extensions.Diagnostics.Testing` `FakeLogger<T>` | **never** `Mock<ILogger<T>>` |
-| Snapshot | Verify.Xunit | see §7 |
-| Coverage | coverlet.collector (referenced per test project, not via `TestBase` with `PrivateAssets=all`) | |
+| Snapshot | `Snapshot` helper in `TestBase` (in-repo) | see §7 |
+| Coverage | coverlet.MTP (referenced per test project, not via `TestBase`) | |
 
 No FluentAssertions, Shouldly, NSubstitute, AutoFixture, or Bogus.
 
@@ -109,20 +109,33 @@ A clean run produces no output. Any hit must be replaced with the approved equiv
 - **Do not** ship test data from `src/`. Where production code legitimately needs deterministic seed data (e.g. the eval-server fake cache/MQ providers that power local-dev mode), put it in `src` under a non-test name (`FakeSeedData`) and forward those members through a `TestData` class in `tests/TestBase`. Tests still call `TestData.X`; production never references anything named `Test*`.
 - Randomized data generators (Bogus, AutoFixture) are not used — tests must be deterministic.
 
-## 7. Snapshot testing (Verify.Xunit)
+## 7. Snapshot testing (`Snapshot` helper)
 
-**Use Verify for:**
+**Use snapshots for:**
 
 - HTTP responses (status + headers + body together).
 - Serialization round-trips, generated SQL, generated config.
 - Output where explicit assertions would exceed ~10 `Assert` calls.
 
-**Do not use Verify for:**
+**Do not use snapshots for:**
 
 - Unit tests of single properties, booleans, counts.
 - Behavior tests where the explicit assertion documents intent better than a snapshot (e.g., `Assert.True(diff.IsDifferent)`).
 
-**Discipline:** every `*.received.txt → *.verified.txt` diff must be reviewed in the PR — never blindly accepted.
+**Usage** (`TestBase/Snapshot.cs`):
+
+```csharp
+await Snapshot.Match(response);                                   // HttpResponseMessage, or any object
+await Snapshot.Match(new { v1, v2 });                             // anonymous objects may contain responses
+await Snapshot.Match(response, scrub: x => x.StartsWith("eyJ") ? "[Scrubbed JWT]" : x);
+await Snapshot.MatchJson(json, suffix: $"type={type}");           // JSON text; suffix for theory parameters
+```
+
+The value is compared with `Snapshots/{TestClass}.{TestMethod}[_{suffix}].verified.json`. Before comparing, properties are sorted, `Set-Cookie` headers are left out, and strings holding a Guid or a date-time become `Guid_n` / `DateTime_n` / `DateTimeOffset_n`, numbered in order of first appearance.
+
+On a mismatch, or for a new test, the result is written to a `.received.json` file next to it (git-ignored) and the test fails with the first differing line. To accept the change, replace the `.verified.json` file with the `.received.json` one.
+
+**Discipline:** every `*.verified.json` diff must be reviewed in the PR — never blindly accepted.
 
 ## 8. Unit vs integration
 
@@ -145,8 +158,9 @@ If a test needs any of those, it belongs in `Application.IntegrationTests/` (in-
 
 - All three modules build and run their full test suite on every PR (`build-and-test-api.yml`, `build-and-test-els.yml`, `build-and-test-control-plane.yml`).
 - CI runs with `--filter "Category!=Integration"`, which **builds** `Infrastructure.IntegrationTests` (proving it compiles) but **skips** every test inside it. Testcontainers-backed tests are local-only — see §12.
-- Coverage is collected via `dotnet test --collect:"XPlat Code Coverage"` and published as a workflow artifact (`coverage-back-end`, `coverage-evaluation-server`, `coverage-control-plane`). **No threshold gate yet** — report only, until baselines stabilize.
-- The `coverlet.collector` package must be referenced directly by each test project (not transitively through `TestBase` with `PrivateAssets="all"`, which would silently break `dotnet test --collect:"XPlat Code Coverage"`).
+- Coverage is collected via `dotnet test --coverlet --coverlet-output-format cobertura` and published as a workflow artifact (`coverage-back-end`, `coverage-evaluation-server`, `coverage-control-plane`). **No threshold gate yet** — report only, until baselines stabilize.
+- The `coverlet.MTP` package must be referenced directly by each test project: Microsoft.Testing.Platform extensions register with the test app they are referenced by, so a transitive reference through `TestBase` adds no coverage.
+- CI also passes `--ignore-exit-code 8`. A test project whose tests are all `Category=Integration` runs zero tests under the CI filter, and Microsoft.Testing.Platform reports that as exit code 8.
 
 ### Baseline (captured 2026-06-25)
 

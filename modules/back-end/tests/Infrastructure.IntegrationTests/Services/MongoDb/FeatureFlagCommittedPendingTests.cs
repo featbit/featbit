@@ -29,7 +29,7 @@ public sealed class FeatureFlagCommittedPendingTests : IntegrationTestBase, IAsy
     private FeatureFlagService _sut = null!;
     private readonly Guid _envId = Guid.NewGuid();
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         if (!DockerAvailability.IsAvailable)
         {
@@ -52,7 +52,7 @@ public sealed class FeatureFlagCommittedPendingTests : IntegrationTestBase, IAsy
         _sut = new FeatureFlagService(_mongoDb);
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         // drop the throwaway database
         await _mongoDb.Database.Client.DropDatabaseAsync(_dbName);

@@ -34,7 +34,7 @@ public sealed class SegmentXminConcurrencyPostgresTests : IntegrationTestBase, I
     private readonly Guid _workspaceId = Guid.NewGuid();
     private readonly Guid _envId = Guid.NewGuid();
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         if (!DockerAvailability.IsAvailable)
         {
@@ -62,7 +62,7 @@ public sealed class SegmentXminConcurrencyPostgresTests : IntegrationTestBase, I
         await dbContext.Database.EnsureCreatedAsync();
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         if (_dataSource != null!)
         {

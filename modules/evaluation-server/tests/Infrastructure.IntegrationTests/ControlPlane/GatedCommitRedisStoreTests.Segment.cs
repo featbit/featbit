@@ -29,7 +29,7 @@ public class GatedCommitReadSegmentTests : IntegrationTestBase, IAsyncLifetime
         _fixture = fixture;
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         if (!DockerAvailability.IsAvailable)
         {
@@ -185,9 +185,9 @@ public class GatedCommitReadSegmentTests : IntegrationTestBase, IAsyncLifetime
         Assert.Equal(mainValue, result);
     }
 
-    public Task DisposeAsync()
+    public ValueTask DisposeAsync()
     {
         _connection?.Dispose();
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 }

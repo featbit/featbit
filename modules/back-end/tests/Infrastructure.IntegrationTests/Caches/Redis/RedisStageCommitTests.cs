@@ -23,7 +23,7 @@ public class RedisStageCommitTests : IntegrationTestBase, IAsyncLifetime
     private ConnectionMultiplexer? _mux;
     private RedisCacheService? _sut;
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         if (!DockerAvailability.IsAvailable)
         {
@@ -41,10 +41,10 @@ public class RedisStageCommitTests : IntegrationTestBase, IAsyncLifetime
         _sut = new RedisCacheService(new TestRedisClient(_mux));
     }
 
-    public Task DisposeAsync()
+    public ValueTask DisposeAsync()
     {
         _mux?.Dispose();
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 
     [DockerFact]
