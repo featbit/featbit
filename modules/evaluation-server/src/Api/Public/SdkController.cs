@@ -43,7 +43,7 @@ public class SdkController(IDataSyncService dataSyncService, IMessageProducer pr
         }
 
         var payload = await dataSyncService.GetClientSdkPayloadAsync(EnvId, endUser, timestamp);
-        // A client sync is active usage even when no flags have changed.
+
         var usage = new InsightUsage(EnvId);
         usage.AddUser(endUser.KeyId);
         await producer.PublishAsync(Topics.Usage, usage);
