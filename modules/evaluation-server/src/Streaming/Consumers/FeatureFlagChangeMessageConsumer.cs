@@ -30,7 +30,10 @@ public class FeatureFlagChangeMessageConsumer(
                 var payload = await dataSyncService.GetFlagChangePayloadAsync(connection, flag);
                 var serverMessage = new ServerMessage(MessageTypes.DataSync, payload);
 
-                await connection.SendAsync(serverMessage, cancellationToken);
+                connection.QueueSend(serverMessage, cancellationToken, error => logger.LogError(
+                    error,
+                    "Failed to send feature flag change to connection {ConnectionId} in env {EnvId}; reconnect required.",
+                    connection.Id, envId));
             }
             catch (Exception ex)
             {
