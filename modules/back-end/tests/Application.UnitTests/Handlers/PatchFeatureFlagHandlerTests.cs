@@ -1,4 +1,5 @@
 using Application.FeatureFlags;
+using Application.Bases.Exceptions;
 using Application.Policies;
 using Application.Services;
 using Application.Users;
@@ -14,6 +15,43 @@ namespace Application.UnitTests.Handlers;
 
 public class PatchFeatureFlagHandlerTests
 {
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(true, true)]
+    [InlineData(true, false)]
+    public async Task Handle_InsightsPatch_EnforcesTogglePermission(bool allowToggle, bool denyToggle)
+    {
+        var flag = NewFlag();
+        var service = new Mock<IFeatureFlagService>();
+        service.Setup(x => x.GetAsync(flag.EnvId, flag.Key)).ReturnsAsync(flag);
+        var resources = new Mock<IResourceService>();
+        resources.Setup(x => x.GetFlagRnAsync(flag.EnvId, flag.Key)).ReturnsAsync("project/p:env/e:flag/flag");
+        var publisher = new Mock<IPublisher>();
+        var sut = new PatchFeatureFlagHandler(service.Object, new PermissionGuard(resources.Object),
+            Mock.Of<ICurrentUser>(), publisher.Object);
+        var policies = new List<PolicyStatement>();
+        if (allowToggle)
+            policies.Add(new PolicyStatement { Effect = EffectType.Allow, Actions = [Permissions.ToggleFlag], Resources = ["*"] });
+        if (denyToggle)
+            policies.Add(new PolicyStatement { Effect = EffectType.Deny, Actions = [Permissions.ToggleFlag], Resources = ["*"] });
+        var patch = new JsonPatchDocument<FeatureFlag>();
+        patch.Replace(x => x.InsightsEnabled, false);
+        var request = new PatchFeatureFlag { EnvId = flag.EnvId, Key = flag.Key, Patch = patch, Permissions = policies.ToArray() };
+
+        if (allowToggle && !denyToggle)
+        {
+            Assert.True((await sut.Handle(request, CancellationToken.None)).Success);
+            service.Verify(x => x.UpdateAsync(flag), Times.Once);
+            publisher.Verify(x => x.Publish(It.IsAny<OnFeatureFlagChanged>(), It.IsAny<CancellationToken>()), Times.Once);
+        }
+        else
+        {
+            await Assert.ThrowsAsync<ForbiddenException>(() => sut.Handle(request, CancellationToken.None));
+            service.Verify(x => x.UpdateAsync(It.IsAny<FeatureFlag>()), Times.Never);
+            publisher.Verify(x => x.Publish(It.IsAny<OnFeatureFlagChanged>(), It.IsAny<CancellationToken>()), Times.Never);
+        }
+    }
+
     private static FeatureFlag NewFlag()
     {
         var on = new Variation { Id = "v-on", Name = "On", Value = "true" };

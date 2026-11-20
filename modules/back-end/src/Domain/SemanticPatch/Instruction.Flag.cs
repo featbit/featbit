@@ -28,7 +28,8 @@ public abstract class FlagInstruction : Instruction
         {
             return Kind switch
             {
-                FlagInstructionKind.TurnFlagOn or FlagInstructionKind.TurnFlagOff => Permissions.ToggleFlag,
+                FlagInstructionKind.TurnFlagOn or FlagInstructionKind.TurnFlagOff or
+                    FlagInstructionKind.UpdateInsightsEnabled => Permissions.ToggleFlag,
                 FlagInstructionKind.UpdateName => Permissions.UpdateFlagName,
                 FlagInstructionKind.UpdateDescription => Permissions.UpdateFlagDescription,
                 FlagInstructionKind.AddTags or FlagInstructionKind.RemoveTags => Permissions.UpdateFlagTags,
