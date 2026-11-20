@@ -1,16 +1,13 @@
-using System.Reflection;
 using Api.Application.ControlPlane;
 using Api.Authentication;
 using Api.Infrastructure.Caches;
 using Api.Infrastructure.MQ;
 using Api.Infrastructure.Persistence;
 using Api.Setup.OpenApi;
-using Application.Bases.Behaviours;
 using Application.Segments;
 using Application.Services;
 using Infrastructure;
 using Infrastructure.AppService;
-using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.OpenApi;
 using Serilog;
@@ -49,8 +46,7 @@ public static class ServicesRegister
 
         builder.Services.AddHealthChecks().AddReadinessChecks(builder.Configuration);
         
-        builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
-        builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));    
+        builder.Services.AddMediation();
         builder.Services.AddAuthentication("ApiKey")
             .AddScheme<AuthenticationSchemeOptions, ApiKeyAuthenticationHandler>("ApiKey", options => { });
 
