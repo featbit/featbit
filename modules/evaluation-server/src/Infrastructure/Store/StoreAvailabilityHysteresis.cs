@@ -6,15 +6,17 @@ namespace Infrastructure.Store;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A single check never changes the reported store. The reported store moves to a lower-priority store (or
-/// to <see cref="Stores.None"/>) only after <c>failureThreshold</c> consecutive checks found it worse off,
-/// and back to a higher-priority store only after <c>recoveryThreshold</c> consecutive checks found that
-/// store answering; and never sooner than <c>minimumDwell</c> after its last change. A run counts the
-/// direction of the evidence, not one particular store.
+/// A single check never changes the reported store, which is always a registered store: the one reads go
+/// to. It moves to a lower-priority store only after <c>failureThreshold</c> consecutive checks found that
+/// store answering and the reported one not, and back to a higher-priority store only after
+/// <c>recoveryThreshold</c> consecutive checks found that store answering; and never sooner than
+/// <c>minimumDwell</c> after its last change. A run counts the direction of the evidence, not one particular
+/// store.
 /// </para>
 /// <para>
-/// An inconclusive check (one this pod was too busy to time) is neither evidence for nor against the
-/// reported store: it leaves the runs as they were.
+/// Two kinds of check leave the reported store, the runs and the dwell as they were: an inconclusive one
+/// (this pod was too busy to time it), and one that found no store answering (<see cref="Stores.None"/>),
+/// since there is no store to move reads to.
 /// </para>
 /// </remarks>
 public sealed class StoreAvailabilityHysteresis
@@ -56,6 +58,13 @@ public sealed class StoreAvailabilityHysteresis
         if (observed is null)
         {
             return Decide(StoreAvailabilityDecisionKind.Inconclusive, Reported, observed);
+        }
+
+        // no store to move reads to: reads stay where they are, so neither the reported store, the runs nor
+        // the dwell change
+        if (!IsRegistered(observed))
+        {
+            return Decide(StoreAvailabilityDecisionKind.NoStoreAvailable, Reported, observed);
         }
 
         if (observed == Reported)
@@ -101,7 +110,8 @@ public sealed class StoreAvailabilityHysteresis
         _runLength = 0;
     }
 
-    // Stores.None, and anything unregistered, ranks below every registered store.
+    private bool IsRegistered(string store) => Rank(store) >= 0;
+
     private int Rank(string store)
     {
         for (var i = 0; i < _storesByPriority.Count; i++)
@@ -112,7 +122,7 @@ public sealed class StoreAvailabilityHysteresis
             }
         }
 
-        return int.MaxValue;
+        return -1;
     }
 
     private enum Direction
@@ -149,5 +159,8 @@ public enum StoreAvailabilityDecisionKind
     HeldByDwell,
 
     /// <summary>The check could not tell, because this pod was too busy to time it.</summary>
-    Inconclusive
+    Inconclusive,
+
+    /// <summary>No store answered: there is nowhere to move reads to, so the reported store stays.</summary>
+    NoStoreAvailable
 }

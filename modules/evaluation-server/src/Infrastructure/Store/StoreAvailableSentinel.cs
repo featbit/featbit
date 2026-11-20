@@ -157,11 +157,11 @@ public sealed class StoreAvailableSentinel : IHostedService
         {
             case StoreAvailabilityDecisionKind.Changed:
                 // HybridStore logs the change when the listener raises it
-                if (decision.Reported != Stores.None)
-                {
-                    _listener.SetAvailable(decision.Reported);
-                }
+                _listener.SetAvailable(decision.Reported);
+                break;
 
+            case StoreAvailabilityDecisionKind.NoStoreAvailable:
+                _logger.LogError("No available store can be used.");
                 break;
 
             case StoreAvailabilityDecisionKind.HeldByThreshold:
@@ -172,11 +172,6 @@ public sealed class StoreAvailableSentinel : IHostedService
                     decision.Reported,
                     decision.Kind);
                 break;
-        }
-
-        if (decision.Reported == Stores.None)
-        {
-            _logger.LogError("No available store can be used.");
         }
 
         return decision;
@@ -212,7 +207,9 @@ public sealed class StoreAvailableSentinel : IHostedService
         Task<bool> check;
         try
         {
-            check = store.IsAvailableAsync();
+            // run on the thread pool so the budget also covers any synchronous work before the check's
+            // first await, such as the Redis client's first connect
+            check = Task.Run(store.IsAvailableAsync);
             if (check.Wait(_timeout))
             {
                 return check.Result ? StoreCheckOutcome.Available : StoreCheckOutcome.Unavailable;

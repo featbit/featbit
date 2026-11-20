@@ -113,22 +113,39 @@ public class StoreAvailabilityHysteresisTests
     }
 
     [Fact]
-    public void NoStoreAnswering_RanksBelowEveryStore()
+    public void NoStoreAnswering_NeverChangesTheReportedStore()
     {
-        Observe(Stores.None);
-        Observe(Stores.None);
+        for (var i = 0; i < 10; i++)
+        {
+            Assert.Equal(StoreAvailabilityDecisionKind.NoStoreAvailable, Observe(Stores.None, i * 6).Kind);
+        }
 
-        Assert.Equal(StoreAvailabilityDecisionKind.Changed, Observe(Stores.None).Kind);
-        Assert.Equal(Stores.None, _hysteresis.Reported);
+        Assert.Equal(Redis, _hysteresis.Reported);
     }
 
     [Fact]
-    public void FailuresToDifferentLowerStores_CountAsOneRun()
+    public void NoStoreAnswering_LeavesTheRunAsItWas()
     {
         Observe(Postgres);
-        Observe(Stores.None);
+        Observe(Postgres);
 
+        Assert.Equal(StoreAvailabilityDecisionKind.NoStoreAvailable, Observe(Stores.None).Kind);
         Assert.Equal(StoreAvailabilityDecisionKind.Changed, Observe(Postgres).Kind);
+    }
+
+    [Fact]
+    public void FallingBackAfterNoStoreAnswered_IsNotDelayedByTheDwell()
+    {
+        // neither store answers at 0, 6 and 12 seconds, then only Postgres does
+        Observe(Stores.None, 0);
+        Observe(Stores.None, 6);
+        Observe(Stores.None, 12);
+        Observe(Postgres, 18);
+        Observe(Postgres, 24);
+
+        var decision = Observe(Postgres, 30);
+
+        Assert.Equal(StoreAvailabilityDecisionKind.Changed, decision.Kind);
         Assert.Equal(Postgres, _hysteresis.Reported);
     }
 }

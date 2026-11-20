@@ -125,16 +125,50 @@ public class StoreAvailableSentinelTests : IDisposable
     }
 
     [Fact]
-    public void WhenNoStoreAnswers_ReadsStayWhereTheyWereAndAnErrorIsLogged()
+    public void WhenNoStoreAnswers_ReadsStayWhereTheyWereAndAnErrorIsLoggedPerCheck()
     {
         SetRedis(false);
         SetPostgres(false);
 
-        Check(3);
+        Check(5);
 
         Assert.Equal(Redis, Routed);
-        Assert.Equal(LogLevel.Error, _logger.LatestRecord.Level);
-        Assert.Equal("No available store can be used.", _logger.LatestRecord.Message);
+        Assert.Equal(5, _logger.Collector.GetSnapshot().Count(r =>
+            r.Level == LogLevel.Error && r.Message == "No available store can be used."));
+    }
+
+    [Fact]
+    public void WhenOnlyTheDatabaseRecoversAfterNoStoreAnswered_ReadsMoveAfterThreeChecks()
+    {
+        SetRedis(false);
+        SetPostgres(false);
+        Check(3);
+
+        SetPostgres(true);
+        Check(2);
+        Assert.Equal(Redis, Routed);
+
+        Check(1);
+        Assert.Equal(Postgres, Routed);
+    }
+
+    [Fact]
+    public void ACheckThatBlocksBeforeItsFirstAwait_IsBoundedByTheBudget()
+    {
+        using var release = new ManualResetEventSlim();
+        _redis.Setup(x => x.IsAvailableAsync()).Returns(() =>
+        {
+            release.Wait(TimeSpan.FromSeconds(10));
+            return Task.FromResult(true);
+        });
+
+        var startedAt = DateTime.UtcNow;
+        var decision = _sentinel.CheckOnce();
+        var elapsed = DateTime.UtcNow - startedAt;
+        release.Set();
+
+        Assert.Equal(Postgres, decision.Observed);
+        Assert.True(elapsed < TimeSpan.FromSeconds(5), $"check took {elapsed}");
     }
 
     [Fact]
