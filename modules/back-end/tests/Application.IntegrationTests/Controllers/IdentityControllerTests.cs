@@ -22,7 +22,7 @@ public class IdentityControllerTests
         var request = new LoginByEmail();
         var response = await _app.PostAsync("/api/v1/identity/login-by-email", request, false);
 
-        await Verify(response);
+        await Snapshot.Match(response);
     }
 
     [Fact]
@@ -36,12 +36,10 @@ public class IdentityControllerTests
         var response = await _app.PostAsync("/api/v1/identity/login-by-email", request, false);
 
 
-        var settings = new VerifySettings();
-        settings.ScrubLinesWithReplace(
-            x => x.StartsWith("eyJ") && x.Split('.').Length == 3 ? "[Scrubbed JWT]" : x
+        await Snapshot.Match(
+            response,
+            scrub: x => x.StartsWith("eyJ") && x.Split('.').Length == 3 ? "[Scrubbed JWT]" : x
         );
-
-        await Verify(response, settings: settings);
     }
     
     [Fact]

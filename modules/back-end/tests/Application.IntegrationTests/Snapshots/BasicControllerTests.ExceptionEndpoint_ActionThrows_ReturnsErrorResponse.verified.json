@@ -1,0 +1,21 @@
+{
+  "Content": {
+    "Headers": {
+      "Content-Type": "application/json; charset=utf-8",
+      "Expires": "-1"
+    },
+    "Value": {
+      "data": null,
+      "errors": [
+        "InternalServerError"
+      ],
+      "success": false
+    }
+  },
+  "Headers": {
+    "api-supported-versions": "1.0, 2.0",
+    "Cache-Control": "no-store, no-cache",
+    "Pragma": "no-cache"
+  },
+  "Status": "500 Internal Server Error"
+}

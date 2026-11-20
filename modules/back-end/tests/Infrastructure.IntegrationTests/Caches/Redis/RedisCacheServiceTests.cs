@@ -27,7 +27,7 @@ public class RedisCacheServiceTests : IntegrationTestBase, IAsyncLifetime
     /// <summary>
     /// Connects to the shared Redis container with admin access, clears it, and builds the service under test.
     /// </summary>
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         if (!DockerAvailability.IsAvailable)
         {
@@ -48,10 +48,10 @@ public class RedisCacheServiceTests : IntegrationTestBase, IAsyncLifetime
         _sut = new RedisCacheService(clientMock.Object);
     }
 
-    public Task DisposeAsync()
+    public ValueTask DisposeAsync()
     {
         _connection?.Dispose();
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 
     [DockerFact]

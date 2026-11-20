@@ -1,0 +1,19 @@
+{
+  "Content": {
+    "Headers": {
+      "Content-Type": "application/json; charset=utf-8"
+    },
+    "Value": {
+      "data": {
+        "id": "1",
+        "name": "bar"
+      },
+      "errors": [],
+      "success": true
+    }
+  },
+  "Headers": {
+    "api-supported-versions": "1.0, 2.0"
+  },
+  "Status": "200 OK"
+}

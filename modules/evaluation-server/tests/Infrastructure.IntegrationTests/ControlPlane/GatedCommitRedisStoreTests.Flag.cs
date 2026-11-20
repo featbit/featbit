@@ -27,7 +27,7 @@ public class GatedCommitReadFlagTests : IntegrationTestBase, IAsyncLifetime
         _fixture = fixture;
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         if (!DockerAvailability.IsAvailable)
         {
@@ -143,9 +143,9 @@ public class GatedCommitReadFlagTests : IntegrationTestBase, IAsyncLifetime
         Assert.Equal(mainValue, result[0]);
     }
 
-    public Task DisposeAsync()
+    public ValueTask DisposeAsync()
     {
         _connection?.Dispose();
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 }

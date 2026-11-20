@@ -1,0 +1,18 @@
+{
+  "Content": {
+    "Headers": {
+      "Content-Type": "application/json; charset=utf-8"
+    },
+    "Value": {
+      "data": null,
+      "errors": [
+        "Unauthorized"
+      ],
+      "success": false
+    }
+  },
+  "Headers": {
+    "WWW-Authenticate": "Bearer"
+  },
+  "Status": "401 Unauthorized"
+}

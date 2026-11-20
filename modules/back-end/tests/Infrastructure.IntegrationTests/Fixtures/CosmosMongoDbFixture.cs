@@ -25,7 +25,7 @@ public sealed class CosmosMongoDbFixture : IAsyncLifetime
         $"mongodb://localhost:{Uri.EscapeDataString(EmulatorKey)}@{_container.Hostname}:{_container.GetMappedPublicPort(10255)}/admin" +
         "?tls=true&tlsInsecure=true&retrywrites=false&directConnection=true";
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         if (!DockerAvailability.IsAvailable)
         {
@@ -35,7 +35,7 @@ public sealed class CosmosMongoDbFixture : IAsyncLifetime
         await _container.StartAsync();
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         if (!DockerAvailability.IsAvailable)
         {

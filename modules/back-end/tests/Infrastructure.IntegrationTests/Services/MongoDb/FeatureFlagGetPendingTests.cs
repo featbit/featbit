@@ -28,7 +28,7 @@ public sealed class FeatureFlagGetPendingTests : IntegrationTestBase, IAsyncLife
     private MongoDbClient _mongoDb = null!;
     private FeatureFlagService _sut = null!;
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         if (!DockerAvailability.IsAvailable)
         {
@@ -51,7 +51,7 @@ public sealed class FeatureFlagGetPendingTests : IntegrationTestBase, IAsyncLife
         _sut = new FeatureFlagService(_mongoDb);
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await _mongoDb.Database.Client.DropDatabaseAsync(_dbName);
     }
