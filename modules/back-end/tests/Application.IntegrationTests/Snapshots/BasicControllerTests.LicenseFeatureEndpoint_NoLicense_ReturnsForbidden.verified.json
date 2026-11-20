@@ -1,0 +1,16 @@
+{
+  "Content": {
+    "Headers": {
+      "Content-Length": "52",
+      "Content-Type": "application/json; charset=utf-8"
+    },
+    "Value": {
+      "data": null,
+      "errors": [
+        "Forbidden"
+      ],
+      "success": false
+    }
+  },
+  "Status": "403 Forbidden"
+}

@@ -41,7 +41,7 @@ public class ExperimentControllerTests
 
         var response = await client.PostAsJsonAsync(BasePath, new { name = " " });
 
-        await Verify(response);
+        await Snapshot.Match(response);
     }
 
     [Fact]
@@ -116,7 +116,7 @@ public class ExperimentControllerTests
             guardrailMetrics = new[] { new { metricId = Guid.Empty, direction = "flat" } }
         });
 
-        await Verify(response);
+        await Snapshot.Match(response);
     }
 
     [Fact]

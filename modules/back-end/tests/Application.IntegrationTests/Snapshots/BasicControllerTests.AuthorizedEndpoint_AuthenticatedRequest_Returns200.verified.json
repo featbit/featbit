@@ -1,0 +1,19 @@
+{
+  "Content": {
+    "Headers": {
+      "Content-Length": "81",
+      "Content-Type": "application/json; charset=utf-8"
+    },
+    "Value": {
+      "data": {
+        "id": "Guid_1"
+      },
+      "errors": [],
+      "success": true
+    }
+  },
+  "Headers": {
+    "api-supported-versions": "1.0, 2.0"
+  },
+  "Status": "200 OK"
+}

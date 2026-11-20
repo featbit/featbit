@@ -25,6 +25,6 @@ public class KafkaConfigTests
         var producerConfig = proServices.GetRequiredService<ProducerConfig>();
         var consumerConfig = proServices.GetRequiredService<ConsumerConfig>();
 
-        await Verify(new { producerConfig, consumerConfig });
+        await Snapshot.Match(new { producerConfig, consumerConfig });
     }
 }

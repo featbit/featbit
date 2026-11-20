@@ -1,0 +1,151 @@
+{
+  "data": {
+    "eventType": "rp_patch",
+    "items": [
+      {
+        "envId": "Guid_1",
+        "featureFlags": [
+          {
+            "createdAt": "DateTimeOffset_1",
+            "creatorId": "Guid_2",
+            "disabledVariationId": "Guid_3",
+            "envId": "Guid_1",
+            "exptIncludeAllTargets": true,
+            "fallthrough": {
+              "dispatchKey": null,
+              "includedInExpt": true,
+              "variations": [
+                {
+                  "exptRollout": 1,
+                  "id": "Guid_4",
+                  "rollout": [
+                    0,
+                    1
+                  ]
+                }
+              ]
+            },
+            "id": "Guid_5",
+            "insightsEnabled": false,
+            "isArchived": false,
+            "isEnabled": true,
+            "key": "custom-rule-with-segment",
+            "name": "custom rule with segment",
+            "rules": [
+              {
+                "conditions": [
+                  {
+                    "op": null,
+                    "property": "User is in segment",
+                    "value": "[\"0779d76b-afc6-4886-ab65-af8c004273ad\"]"
+                  }
+                ],
+                "dispatchKey": "keyId",
+                "id": "Guid_6",
+                "includedInExpt": false,
+                "name": "Rule 1",
+                "variations": [
+                  {
+                    "exptRollout": 1,
+                    "id": "Guid_4",
+                    "rollout": [
+                      0,
+                      0.1
+                    ]
+                  },
+                  {
+                    "exptRollout": 1,
+                    "id": "Guid_3",
+                    "rollout": [
+                      0.1,
+                      1
+                    ]
+                  }
+                ]
+              },
+              {
+                "conditions": [
+                  {
+                    "op": null,
+                    "property": "User is in segment",
+                    "value": "[\"556c11b2-f08a-4e10-b0b7-af8e008125b3\"]"
+                  }
+                ],
+                "dispatchKey": null,
+                "id": "Guid_7",
+                "includedInExpt": false,
+                "name": "Rule 2",
+                "variations": [
+                  {
+                    "exptRollout": 1,
+                    "id": "Guid_3",
+                    "rollout": [
+                      0,
+                      1
+                    ]
+                  }
+                ]
+              }
+            ],
+            "tags": [],
+            "targetUsers": [],
+            "updatedAt": "DateTimeOffset_2",
+            "updatorId": "Guid_2",
+            "variations": [
+              {
+                "id": "Guid_4",
+                "name": "True",
+                "value": "true"
+              },
+              {
+                "id": "Guid_3",
+                "name": "False",
+                "value": "false"
+              }
+            ],
+            "variationType": "boolean"
+          }
+        ],
+        "secrets": [],
+        "segments": [
+          {
+            "createdAt": "DateTimeOffset_3",
+            "description": "has two rules",
+            "envId": "Guid_1",
+            "excluded": [],
+            "id": "Guid_8",
+            "included": [],
+            "isArchived": false,
+            "name": "segment-02",
+            "rules": [
+              {
+                "conditions": [
+                  {
+                    "op": "BiggerThan",
+                    "property": "age",
+                    "value": "20"
+                  }
+                ],
+                "id": "Guid_9",
+                "name": "Rule 1"
+              },
+              {
+                "conditions": [
+                  {
+                    "op": "BiggerThan",
+                    "property": "age",
+                    "value": "30"
+                  }
+                ],
+                "id": "Guid_10",
+                "name": "Rule 2"
+              }
+            ],
+            "updatedAt": "DateTimeOffset_4"
+          }
+        ]
+      }
+    ]
+  },
+  "messageType": "data-sync"
+}
