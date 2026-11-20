@@ -87,7 +87,7 @@ $imageDefs = [ordered]@{
     "api-server" = @{
         ImageName  = "featbit-api-server"
         Dockerfile = "modules/back-end/deploy/Dockerfile"
-        Context    = "modules/back-end"
+        Context    = "modules"
     }
     "ui" = @{
         ImageName  = "featbit-ui"
@@ -97,7 +97,7 @@ $imageDefs = [ordered]@{
     "evaluation-server" = @{
         ImageName  = "featbit-evaluation-server"
         Dockerfile = "modules/evaluation-server/deploy/Dockerfile"
-        Context    = "modules/evaluation-server"
+        Context    = "modules"
     }
     "control-plane" = @{
         ImageName  = "featbit-control-plane"

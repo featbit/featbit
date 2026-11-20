@@ -63,8 +63,8 @@ dotnet test -c Release --no-build --verbosity normal
 # Run a single test
 dotnet test --filter "FullyQualifiedName~TestClassName"
 
-# Build Docker image (from module root)
-docker build --progress plain -f ./deploy/Dockerfile -t featbit/api:local .
+# Build Docker image (from modules/; all .NET images share modules/Directory.Packages.props)
+docker build --progress plain -f ./back-end/deploy/Dockerfile -t featbit/api:local .
 ```
 
 ### Local Development (Docker Compose)

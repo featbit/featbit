@@ -21,25 +21,25 @@
 
     <ItemGroup>
         <!-- Api Versioning -->
-        <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="10.0.0" />
+        <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" />
 
         <!-- OpenApi -->
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.13" />
-        <PackageReference Include="Scalar.AspNetCore" Version="2.18.0" />
-        <PackageReference Include="Microsoft.Extensions.ApiDescription.Server" Version="10.0.13">
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+        <PackageReference Include="Scalar.AspNetCore" />
+        <PackageReference Include="Microsoft.Extensions.ApiDescription.Server">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
 
         <!-- Serilog -->
-        <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
-        <PackageReference Include="Serilog.Enrichers.ClientInfo" Version="2.9.0" />
-        <PackageReference Include="Serilog.Sinks.OpenTelemetry" Version="4.2.0" />
+        <PackageReference Include="Serilog.AspNetCore" />
+        <PackageReference Include="Serilog.Enrichers.ClientInfo" />
+        <PackageReference Include="Serilog.Sinks.OpenTelemetry" />
 
-        <PackageReference Include="Grpc.Net.Client" Version="2.80.0" />
-        <PackageReference Include="ModelContextProtocol.AspNetCore" Version="2.2.0" />
+        <PackageReference Include="Grpc.Net.Client" />
+        <PackageReference Include="ModelContextProtocol.AspNetCore" />
 
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.8">
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>

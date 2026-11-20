@@ -7,6 +7,7 @@ on:
     paths: &paths
       - 'modules/back-end/**'
       - 'modules/evaluation-server/**'
+      - 'modules/Directory.Packages.props'
       - 'modules/front-end/**'
       - 'infra/**'
       - 'e2e/core/**'
