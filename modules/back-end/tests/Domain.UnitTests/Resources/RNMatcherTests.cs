@@ -4,6 +4,41 @@ namespace Domain.UnitTests.Resources;
 
 public class RNMatcherTests
 {
+    [Theory]
+    [InlineData("internal,copyable", "copyable", false)]
+    [InlineData("copyable,internal", "copyable", false)]
+    [InlineData("copyable;internal", "copyable", false)]
+    [InlineData("copyable:env/other", "copyable", false)]
+    [InlineData("internal,copyable", "internal*copyable", true)]
+    [InlineData("copyable;internal", "copyable*internal", true)]
+    [InlineData("copyable:env/other", "copyable*other", true)]
+    [InlineData("internal%2Ccopyable", "internal%2Ccopyable", true)]
+    [InlineData("internal%2Ccopyable", "copyable", false)]
+    [InlineData("100%", "100%", true)]
+    [InlineData("team blue", "team blue", true)]
+    [InlineData("团队", "团队", true)]
+    public void IsMatch_EncodedResourceTag_PreservesTagBoundaries(string tag, string pattern, bool expected)
+    {
+        var flagRn = RN.ForFlag("p", "e", "f", [tag]);
+        var segmentRn = RN.ForSegment("p", "e", "s", [tag]);
+
+        Assert.Equal(expected, RNMatcher.IsMatch(flagRn, $"project/p:env/e:flag/*;{pattern}"));
+        Assert.Equal(expected, RNMatcher.IsMatch(segmentRn, $"project/p:env/e:segment/*;{pattern}"));
+    }
+
+    [Fact]
+    public void IsMatch_RealSeparateTags_StillMatchesExistingPolicies()
+    {
+        var rn = RN.ForFlag("p", "e", "f", ["internal,copyable", "approved"]);
+
+        Assert.False(RNMatcher.IsMatch(rn, "project/*:env/*:flag/*;internal,copyable"));
+        Assert.True(RNMatcher.IsMatch(rn, "project/*:env/*:flag/*;copyable,approved"));
+        Assert.True(RNMatcher.IsMatch(rn, "project/*:env/*:flag/*;app*"));
+        Assert.True(RNMatcher.IsMatch(rn, "project/*:env/*:flag/*"));
+        Assert.True(RNMatcher.IsMatch(RN.ForFlag("p", "e", "f", ["internal", "copyable"]),
+            "project/*:env/*:flag/*;copyable"));
+    }
+
     // —— Exact path matching ——
 
     [Theory]

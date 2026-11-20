@@ -32,6 +32,11 @@ public class PatchFeatureFlagHandler(
     public async Task<PatchResult> Handle(PatchFeatureFlag request, CancellationToken cancellationToken)
     {
         var flag = await flagService.GetAsync(request.EnvId, request.Key);
+        // Identity is not patchable: otherwise a permitted flag can be moved into another tenant
+        // or a different record can be selected for persistence after authorization.
+        var id = flag.Id;
+        var envId = flag.EnvId;
+        var key = flag.Key;
         var dataChange = new DataChange(flag);
 
         var error = string.Empty;
@@ -42,10 +47,15 @@ public class PatchFeatureFlagHandler(
             return PatchResult.Fail(error);
         }
 
+        if (flag.Id != id || flag.EnvId != envId || flag.Key != key)
+        {
+            return PatchResult.Fail("Flag identity cannot be changed.");
+        }
+
         flag.MarkAsUpdated(currentUser.Id);
         dataChange.To(flag);
 
-        await permissionGuard.EnsureFlagChangeAllowedAsync(flag, dataChange, request.Permissions);
+        await permissionGuard.EnsureFlagChangeAllowedAsync(request.OrgId, flag, dataChange, request.Permissions);
 
         await flagService.UpdateAsync(flag);
 

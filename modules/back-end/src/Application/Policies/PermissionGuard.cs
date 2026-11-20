@@ -1,3 +1,4 @@
+#nullable enable
 using Application.Bases.Exceptions;
 using Domain.AuditLogs;
 using Domain.FeatureFlags;
@@ -9,41 +10,44 @@ namespace Application.Policies;
 
 public class PermissionGuard(IResourceService resourceService) : IPermissionGuard
 {
-    public Task EnsureFlagChangeAllowedAsync(FeatureFlag flag, DataChange change, PolicyStatement[] permissions) =>
+    public Task EnsureFlagChangeAllowedAsync(Guid organizationId, FeatureFlag flag, DataChange change, PolicyStatement[] permissions) =>
         EnsureAllowedAsync(
+            organizationId,
             FlagComparer.Compare(change).Select(instruction => instruction.Permission),
             permissions,
             () => resourceService.GetFlagRnAsync(flag.EnvId, flag.Key)
         );
 
-    public Task EnsureSegmentChangeAllowedAsync(Segment segment, DataChange change, PolicyStatement[] permissions) =>
+    public Task EnsureSegmentChangeAllowedAsync(Guid organizationId, Segment segment, DataChange change, PolicyStatement[] permissions) =>
         EnsureAllowedAsync(
+            organizationId,
             SegmentComparer.Compare(change).Select(instruction => instruction.Permission),
             permissions,
             () => resourceService.GetSegmentRnAsync(segment.EnvId, segment.Id)
         );
 
     private static async Task EnsureAllowedAsync(
+        Guid organizationId,
         IEnumerable<string> instructionPermissions,
         PolicyStatement[] policies,
-        Func<Task<string>> resourceNameFactory)
+        Func<Task<ResourceRn?>> resourceFactory)
     {
-        var requiredPermissions = instructionPermissions
-            .Where(permission => !string.IsNullOrEmpty(permission))
-            .ToHashSet();
-
-        if (requiredPermissions.Count == 0)
-        {
-            return;
-        }
-
-        var rn = await resourceNameFactory();
-        if (string.IsNullOrEmpty(rn))
+        if (organizationId == Guid.Empty)
         {
             throw new ForbiddenException();
         }
 
-        if (requiredPermissions.Any(permission => !PolicyHelper.IsAllowed(policies, rn, permission)))
+        var resource = await resourceFactory();
+        if (resource == null || resource.OrganizationId != organizationId || string.IsNullOrWhiteSpace(resource.Rn))
+        {
+            throw new ForbiddenException();
+        }
+
+        var requiredPermissions = instructionPermissions
+            .Where(permission => !string.IsNullOrEmpty(permission))
+            .ToHashSet();
+
+        if (requiredPermissions.Any(permission => !PolicyHelper.IsAllowed(policies, resource.Rn, permission)))
         {
             throw new ForbiddenException();
         }

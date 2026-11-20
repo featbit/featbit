@@ -9,7 +9,6 @@ using Domain.Workspaces;
 using Domain.FeatureFlags;
 using Domain.Policies;
 using Microsoft.AspNetCore.JsonPatch.SystemTextJson;
-using Microsoft.AspNetCore.JsonPatch.SystemTextJson.Operations;
 
 namespace Api.Controllers;
 
@@ -432,10 +431,13 @@ public class FeatureFlagController : ApiControllerBase
 
     [Authorize(LicenseFeatures.Schedule)]
     [HttpDelete("schedules/{id:guid}")]
-    public async Task<ApiResponse<bool>> DeleteScheduleAsync(Guid id)
+    public async Task<ApiResponse<bool>> DeleteScheduleAsync(Guid envId, Guid id)
     {
         var request = new DeleteFlagSchedule
         {
+            OrgId = OrgId,
+            EnvId = envId,
+            Permissions = await GetRequestPermissionsAsync(),
             Id = id
         };
 
@@ -464,11 +466,15 @@ public class FeatureFlagController : ApiControllerBase
 
     [HttpPost("copy-to-env-precheck/{targetEnvId:guid}")]
     public async Task<ApiResponse<ICollection<CopyToEnvPrecheckResult>>> CopyToEnvPrecheckAsync(
+        Guid envId,
         Guid targetEnvId,
         [FromBody] ICollection<Guid> flagIds)
     {
         var request = new CopyToEnvPrecheck
         {
+            OrgId = OrgId,
+            SourceEnvId = envId,
+            Permissions = await GetRequestPermissionsAsync(),
             TargetEnvId = targetEnvId,
             FlagIds = flagIds
         };
@@ -480,6 +486,7 @@ public class FeatureFlagController : ApiControllerBase
     [HttpPost("copy-to-env/{targetEnvId:guid}")]
     public async Task<ApiResponse<CopyToEnvResult>> CopyToEnvAsync(Guid envId, Guid targetEnvId, CopyToEnv request)
     {
+        request.Permissions = await GetRequestPermissionsAsync();
         request.SourceEnvId = envId;
         request.TargetEnvId = targetEnvId;
         request.WorkspaceId = WorkspaceId;
@@ -513,6 +520,8 @@ public class FeatureFlagController : ApiControllerBase
     [HttpPost("compare-overview")]
     public async Task<ApiResponse<PagedResult<CompareFlagOverview>>> GetCompareOverviewAsync(Guid envId, GetCompareFlagOverview request)
     {
+        request.OrgId = OrgId;
+        request.Permissions = await GetRequestPermissionsAsync();
         request.SourceEnvId = envId;
 
         var overview = await Mediator.Send(request);
@@ -525,6 +534,8 @@ public class FeatureFlagController : ApiControllerBase
     {
         var request = new CompareFlag
         {
+            OrgId = OrgId,
+            Permissions = await GetRequestPermissionsAsync(),
             Key = key,
             SourceEnvId = envId,
             TargetEnvId = targetEnvId
@@ -538,6 +549,7 @@ public class FeatureFlagController : ApiControllerBase
     [HttpPut("{key}/copy-settings-to/{targetEnvId:guid}")]
     public async Task<ApiResponse<bool>> CopySettingsAsync(Guid envId, string key, Guid targetEnvId, CopyFlagSettings request)
     {
+        request.Permissions = await GetRequestPermissionsAsync();
         request.Key = key;
         request.SourceEnvId = envId;
         request.TargetEnvId = targetEnvId;

@@ -46,7 +46,7 @@ public class SecretSanitizationTests
             return new EnvironmentVm { Id = e.Id.ToString(), Secrets = e.Secrets };
         });
         var resources = new Mock<IResourceService>();
-        resources.Setup(r => r.GetEnvRnAsync(It.IsAny<Guid>())).ReturnsAsync("project/demo:env/prod");
+        resources.Setup(r => r.GetEnvRnAsync(It.IsAny<Guid>())).ReturnsAsync(new ResourceRn("project/demo:env/prod", Guid.NewGuid()));
         var publisher = new Mock<IPublisher>();
         publisher.Setup(p => p.Publish(It.IsAny<OnEnvironmentAdded>(), It.IsAny<CancellationToken>()))
             .Callback<OnEnvironmentAdded, CancellationToken>((n, _) => Assert.Equal(2, n.Environment.Secrets.Count))

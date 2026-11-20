@@ -64,7 +64,7 @@ public class UpdateEnvironmentHandler(IEnvironmentService service, IMapper mappe
         await service.UpdateAsync(env);
 
         var rn = await resources.GetEnvRnAsync(env.Id);
-        env.Sanitize(rn, request.Permissions);
+        env.Sanitize(rn?.Rn, request.Permissions);
 
         return mapper.Map<EnvironmentVm>(env);
     }

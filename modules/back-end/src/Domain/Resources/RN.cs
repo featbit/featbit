@@ -64,17 +64,18 @@ public static class RN
 
     public static string ForFlag(string projectKey, string envKey, string flagKey, ICollection<string> tags)
     {
-        var tagsPart = tags.Count > 0 ? $";{string.Join(",", tags)}" : string.Empty;
-
-        return $"project/{projectKey}:env/{envKey}:flag/{flagKey}{tagsPart}";
+        return WithTags($"project/{projectKey}:env/{envKey}:flag/{flagKey}", tags);
     }
 
     public static string ForSegment(string projectKey, string envKey, string segmentKey, ICollection<string> tags)
     {
-        var tagsPart = tags.Count > 0 ? $";{string.Join(",", tags)}" : string.Empty;
-
-        return $"project/{projectKey}:env/{envKey}:segment/{segmentKey}{tagsPart}";
+        return WithTags($"project/{projectKey}:env/{envKey}:segment/{segmentKey}", tags);
     }
+
+    // Encode resource tags, not policy patterns. Escape '%' as well to preserve literal encoded-looking tags.
+    public static string WithTags(string resourceRn, ICollection<string> tags) => tags.Count == 0
+        ? resourceRn
+        : $"{resourceRn};{string.Join(",", tags.Select(tag => Uri.EscapeDataString(tag ?? string.Empty)))}";
 }
 
 public record TypeKeyProps
