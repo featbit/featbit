@@ -181,11 +181,11 @@ public class FlagInstructionApplyTests
     }
 
     [Fact]
-    public void DisabledVariationInstruction_Apply_NoopWhenIdMissing()
+    public void DisabledVariationInstruction_Apply_ThrowsConflictWhenIdMissing()
     {
         var flag = MakeFlag();
 
-        new DisabledVariationInstruction("missing").Apply(flag);
+        Assert.Throws<FlagInstructionConflictException>(() => new DisabledVariationInstruction("missing").Apply(flag));
 
         Assert.Equal("v1", flag.DisabledVariationId);
     }
