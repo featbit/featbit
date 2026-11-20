@@ -18,7 +18,7 @@ public class RemoveFromWorkspaceHandler(
     IMemberService memberService, IPublisher publisher, ICurrentUser currentUser)
     : IRequestHandler<RemoveFromWorkspace, bool>
 {
-    public async Task<bool> Handle(RemoveFromWorkspace request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(RemoveFromWorkspace request, CancellationToken cancellationToken)
     {
         var workspaceSnapshot = await memberService.GetAuditSnapshotAsync(request.MemberId, null, request.WorkspaceId);
         var workspaceChange = new DataChange(workspaceSnapshot);

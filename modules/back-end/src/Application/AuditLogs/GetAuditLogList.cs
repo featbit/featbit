@@ -30,7 +30,7 @@ public class GetAuditLogListHandler : IRequestHandler<GetAuditLogList, PagedResu
         _accessTokenService = accessTokenService;
     }
 
-    public async Task<PagedResult<AuditLogVm>> Handle(GetAuditLogList request, CancellationToken cancellationToken)
+    public async ValueTask<PagedResult<AuditLogVm>> Handle(GetAuditLogList request, CancellationToken cancellationToken)
     {
         var logs = await _auditLogService.GetListAsync(request.WorkspaceId, request.EnvId, request.Filter);
         var logVms = AuditLogMapper.ToVm(logs);

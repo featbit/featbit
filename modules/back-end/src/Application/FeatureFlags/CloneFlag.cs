@@ -74,7 +74,7 @@ public class CloneFlagHandler(
     IPublisher publisher)
     : IRequestHandler<CloneFlag, bool>
 {
-    public async Task<bool> Handle(CloneFlag request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(CloneFlag request, CancellationToken cancellationToken)
     {
         var hasKeyBeenUsed = await flagService.HasKeyBeenUsedAsync(request.EnvId, request.Key);
         if (hasKeyBeenUsed)

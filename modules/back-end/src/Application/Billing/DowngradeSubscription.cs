@@ -13,7 +13,7 @@ public class DowngradeSubscriptionValidator : AbstractValidator<DowngradeSubscri
 public class DowngradeSubscriptionHandler(IBillingService billingService)
     : IRequestHandler<DowngradeSubscription, string>
 {
-    public async Task<string> Handle(DowngradeSubscription request, CancellationToken cancellationToken)
+    public async ValueTask<string> Handle(DowngradeSubscription request, CancellationToken cancellationToken)
     {
         var response = await billingService.DowngradeSubscriptionAsync(request);
         return response;

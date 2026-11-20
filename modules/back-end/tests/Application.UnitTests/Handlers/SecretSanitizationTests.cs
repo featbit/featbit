@@ -4,7 +4,7 @@ using Application.Services;
 using Domain.Policies;
 using Domain.Projects;
 using Domain.Resources;
-using MediatR;
+using Mediator;
 using Environment = Domain.Environments.Environment;
 
 namespace Application.UnitTests.Handlers;
@@ -43,7 +43,7 @@ public class SecretSanitizationTests
         var publisher = new Mock<IPublisher>();
         publisher.Setup(p => p.Publish(It.IsAny<OnEnvironmentAdded>(), It.IsAny<CancellationToken>()))
             .Callback<OnEnvironmentAdded, CancellationToken>((n, _) => Assert.Equal(2, n.Environment.Secrets.Count))
-            .Returns(Task.CompletedTask);
+            .Returns(ValueTask.CompletedTask);
         var result = action switch
         {
             "get" => await new GetEnvironmentHandler(service.Object, resources.Object)
@@ -75,7 +75,7 @@ public class SecretSanitizationTests
         var publisher = new Mock<IPublisher>();
         publisher.Setup(p => p.Publish(It.IsAny<OnProjectAdded>(), It.IsAny<CancellationToken>()))
             .Callback<OnProjectAdded, CancellationToken>((n, _) => Assert.Equal(2, Assert.Single(n.ProjectWithEnvs.Environments).Secrets.Count))
-            .Returns(Task.CompletedTask);
+            .Returns(ValueTask.CompletedTask);
         var result = action switch
         {
             "get" => await new GetProjectHandler(service.Object).Handle(new GetProject { Id = project.Id, Permissions = Grants(read) }, default),

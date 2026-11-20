@@ -3,7 +3,7 @@ using Api.Setup;
 using Application.Bases.Behaviours;
 using Domain.Messages;
 using Infrastructure.Caches.Redis;
-using MediatR;
+using Mediator;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 

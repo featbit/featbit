@@ -50,7 +50,7 @@ public class UpsertEndUserPropertyHandler : IRequestHandler<UpsertEndUserPropert
         _service = service;
     }
 
-    public async Task<EndUserProperty> Handle(UpsertEndUserProperty request, CancellationToken cancellationToken)
+    public async ValueTask<EndUserProperty> Handle(UpsertEndUserProperty request, CancellationToken cancellationToken)
     {
         return await _service.UpsertPropertyAsync(request.AsProperty());
     }

@@ -11,7 +11,7 @@ public class DownloadEndUsers : IRequest<ImportUserData>
 
 public class DownloadEndUsersHandler(IEndUserService service) : IRequestHandler<DownloadEndUsers, ImportUserData>
 {
-    public async Task<ImportUserData> Handle(DownloadEndUsers request, CancellationToken cancellationToken)
+    public async ValueTask<ImportUserData> Handle(DownloadEndUsers request, CancellationToken cancellationToken)
     {
         var users = await service.LoadEndUsersAsync(request.EnvId, request.Filter);
         var properties = await service.GetPropertiesAsync(request.EnvId);

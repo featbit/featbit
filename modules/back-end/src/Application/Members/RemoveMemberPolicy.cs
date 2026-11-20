@@ -28,7 +28,7 @@ public class RemoveMemberPolicyHandler : IRequestHandler<RemoveMemberPolicy, boo
         _service = service;
     }
 
-    public async Task<bool> Handle(RemoveMemberPolicy request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(RemoveMemberPolicy request, CancellationToken cancellationToken)
     {
         var previous = await _service.GetAuditSnapshotAsync(request.MemberId, request.OrganizationId, request.WorkspaceId);
         var change = new DataChange(previous);

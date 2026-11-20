@@ -16,7 +16,7 @@ public class IsFeatureFlagKeyUsedHandler : IRequestHandler<IsFeatureFlagKeyUsed,
         _service = service;
     }
 
-    public async Task<bool> Handle(IsFeatureFlagKeyUsed request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(IsFeatureFlagKeyUsed request, CancellationToken cancellationToken)
     {
         return await _service.HasKeyBeenUsedAsync(request.EnvId, request.Key);
     }

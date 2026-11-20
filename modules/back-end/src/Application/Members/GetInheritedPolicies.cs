@@ -20,7 +20,7 @@ public class GetInheritedPoliciesHandler : IRequestHandler<GetInheritedPolicies,
         _service = service;
     }
 
-    public async Task<PagedResult<InheritedMemberPolicy>> Handle(GetInheritedPolicies request, CancellationToken cancellationToken)
+    public async ValueTask<PagedResult<InheritedMemberPolicy>> Handle(GetInheritedPolicies request, CancellationToken cancellationToken)
     {
         var policies =
             await _service.GetInheritedPoliciesAsync(request.OrganizationId, request.MemberId, request.Filter);

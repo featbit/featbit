@@ -14,7 +14,7 @@ public class ToggleAccessTokenStatus : IRequest<bool>
 public class ToggleAccessTokenStatusHandler(IAccessTokenService service)
     : IRequestHandler<ToggleAccessTokenStatus, bool>
 {
-    public async Task<bool> Handle(ToggleAccessTokenStatus request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(ToggleAccessTokenStatus request, CancellationToken cancellationToken)
     {
         var accessToken = await service.GetAsync(request.Id);
 

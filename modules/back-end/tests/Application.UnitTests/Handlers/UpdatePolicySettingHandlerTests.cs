@@ -15,10 +15,10 @@ public class UpdatePolicySettingHandlerTests
         var sysManaged = new Policy(Guid.NewGuid(), "n", "k", "d") { Type = PolicyTypes.SysManaged };
         var service = new Mock<IPolicyService>();
         service.Setup(x => x.GetAsync(It.IsAny<Guid>())).ReturnsAsync(sysManaged);
-        var sut = new UpdatePolicySettingHandler(service.Object, Mock.Of<MediatR.IPublisher>(), Mock.Of<Application.Users.ICurrentUser>());
+        var sut = new UpdatePolicySettingHandler(service.Object, Mock.Of<Mediator.IPublisher>(), Mock.Of<Application.Users.ICurrentUser>());
 
         var ex = await Assert.ThrowsAsync<BusinessException>(
-            () => sut.Handle(new UpdatePolicySetting { PolicyId = sysManaged.Id, Name = "x" }, CancellationToken.None));
+            async () => await sut.Handle(new UpdatePolicySetting { PolicyId = sysManaged.Id, Name = "x" }, CancellationToken.None));
 
         Assert.Equal(ErrorCodes.CannotModifySysManagedPolicy, ex.Message);
         service.Verify(x => x.UpdateAsync(It.IsAny<Policy>()), Times.Never);
@@ -30,7 +30,7 @@ public class UpdatePolicySettingHandlerTests
         var policy = new Policy(Guid.NewGuid(), "n", "k", "d");
         var service = new Mock<IPolicyService>();
         service.Setup(x => x.GetAsync(It.IsAny<Guid>())).ReturnsAsync(policy);
-        var sut = new UpdatePolicySettingHandler(service.Object, Mock.Of<MediatR.IPublisher>(), Mock.Of<Application.Users.ICurrentUser>());
+        var sut = new UpdatePolicySettingHandler(service.Object, Mock.Of<Mediator.IPublisher>(), Mock.Of<Application.Users.ICurrentUser>());
 
         var result = await sut.Handle(
             new UpdatePolicySetting { PolicyId = policy.Id, Name = "new-name", Description = "new-desc" },

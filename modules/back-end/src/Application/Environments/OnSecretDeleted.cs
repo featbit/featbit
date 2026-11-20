@@ -18,7 +18,7 @@ public class OnSecretDeleted : INotification
 public class OnSecretDeletedHandler(ICacheService cache, IConfiguration configuration, IMessageProducer messageProducer)
     : INotificationHandler<OnSecretDeleted>
 {
-    public async Task Handle(OnSecretDeleted notification, CancellationToken cancellationToken)
+    public async ValueTask Handle(OnSecretDeleted notification, CancellationToken cancellationToken)
     {
         await cache.DeleteSecretAsync(notification.Secret);
         if (configuration.UseControlPlane())

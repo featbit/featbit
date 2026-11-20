@@ -32,7 +32,7 @@ public class UpdateAccessTokenValidator : AbstractValidator<UpdateAccessToken>
 public class UpdateAccessTokenHandler(IAccessTokenService service)
     : IRequestHandler<UpdateAccessToken, AccessTokenVm>
 {
-    public async Task<AccessTokenVm> Handle(UpdateAccessToken request, CancellationToken cancellationToken)
+    public async ValueTask<AccessTokenVm> Handle(UpdateAccessToken request, CancellationToken cancellationToken)
     {
         var accessToken = await service.GetAsync(request.Id);
 

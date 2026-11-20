@@ -32,7 +32,7 @@ public class RunTriggerHandler : IRequestHandler<RunTrigger, bool>
         _publisher = publisher;
     }
 
-    public async Task<bool> Handle(RunTrigger request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(RunTrigger request, CancellationToken cancellationToken)
     {
         if (!Trigger.TryParseToken(request.Token, out var id))
         {

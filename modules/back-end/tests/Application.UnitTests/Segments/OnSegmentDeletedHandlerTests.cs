@@ -64,7 +64,7 @@ public class OnSegmentDeletedHandlerTests
         var sut = CreateSut(webhookHandler: webhookHandler, segmentService: segmentService, publisher: publisher);
         var notification = new OnSegmentDeleted(segment, Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() => sut.Handle(notification, CancellationToken.None));
+        await Assert.ThrowsAsync<InvalidOperationException>(async () => await sut.Handle(notification, CancellationToken.None));
 
         foreach (var envId in envIds)
         {

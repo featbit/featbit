@@ -16,7 +16,7 @@ public class JoinOrganizationHandler(
     ISender mediator)
     : IRequestHandler<JoinOrganization, bool>
 {
-    public async Task<bool> Handle(JoinOrganization request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(JoinOrganization request, CancellationToken cancellationToken)
     {
         // Check if the user is already a member of the organization
         var exists = await organizationService.ContainsUserAsync(request.OrganizationId, currentUser.Id);

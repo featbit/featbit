@@ -25,7 +25,7 @@ public class ApproveFlagChangeRequestHandler(
     ICurrentUser currentUser)
     : IRequestHandler<ApproveFlagChangeRequest, bool>
 {
-    public async Task<bool> Handle(ApproveFlagChangeRequest request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(ApproveFlagChangeRequest request, CancellationToken cancellationToken)
     {
         var changeRequest = await changeRequestService.FindOneAsync(
             x => x.OrgId == request.OrgId && x.EnvId == request.EnvId && x.Id == request.Id

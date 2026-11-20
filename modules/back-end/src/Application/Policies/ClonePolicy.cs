@@ -61,7 +61,7 @@ public class ClonePolicyValidator : AbstractValidator<ClonePolicy>
 public class ClonePolicyHandler(IPolicyService service, IPublisher auditPublisher, ICurrentUser auditActor)
     : IRequestHandler<ClonePolicy, PolicyVm>
 {
-    public async Task<PolicyVm> Handle(ClonePolicy request, CancellationToken cancellationToken)
+    public async ValueTask<PolicyVm> Handle(ClonePolicy request, CancellationToken cancellationToken)
     {
         var hasKeyBeenUsed = await service.IsKeyUsedAsync(request.OrgId, request.Key);
         if (hasKeyBeenUsed)

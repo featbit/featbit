@@ -21,7 +21,7 @@ public class GetMemberListHandler : IRequestHandler<GetMemberList, PagedResult<M
         _currentUser = currentUser;
     }
 
-    public async Task<PagedResult<MemberVm>> Handle(GetMemberList request, CancellationToken cancellationToken)
+    public async ValueTask<PagedResult<MemberVm>> Handle(GetMemberList request, CancellationToken cancellationToken)
     {
         var members =
             await _service.GetListAsync(request.OrganizationId, request.Filter);

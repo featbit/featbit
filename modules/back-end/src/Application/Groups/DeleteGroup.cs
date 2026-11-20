@@ -26,7 +26,7 @@ public class DeleteGroupHandler : IRequestHandler<DeleteGroup, bool>
         _service = service;
     }
     
-    public async Task<bool> Handle(DeleteGroup request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(DeleteGroup request, CancellationToken cancellationToken)
     {
         var previous = await _service.GetAuditSnapshotAsync(request.Id);
         var change = new DataChange(previous);

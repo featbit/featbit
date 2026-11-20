@@ -50,7 +50,7 @@ public class UpdateGroupHandler : IRequestHandler<UpdateGroup, GroupVm>
         _service = service;
     }
 
-    public async Task<GroupVm> Handle(UpdateGroup request, CancellationToken cancellationToken)
+    public async ValueTask<GroupVm> Handle(UpdateGroup request, CancellationToken cancellationToken)
     {
         var previous = await _service.GetAuditSnapshotAsync(request.Id);
         var change = new DataChange(previous);

@@ -15,6 +15,6 @@ public class CheckAgentAvailabilityValidator : AbstractValidator<CheckAgentAvail
 public class CheckAgentAvailabilityHandler(IAgentService service)
     : IRequestHandler<CheckAgentAvailability, HttpStatusCode>
 {
-    public async Task<HttpStatusCode> Handle(CheckAgentAvailability request, CancellationToken cancellationToken)
+    public async ValueTask<HttpStatusCode> Handle(CheckAgentAvailability request, CancellationToken cancellationToken)
         => await service.CheckAvailabilityAsync(request.Host);
 }

@@ -49,7 +49,7 @@ public class CreateGroupHandler : IRequestHandler<CreateGroup, GroupVm>
         _service = service;
     }
 
-    public async Task<GroupVm> Handle(CreateGroup request, CancellationToken cancellationToken)
+    public async ValueTask<GroupVm> Handle(CreateGroup request, CancellationToken cancellationToken)
     {
         var group = new Group(request.OrganizationId, request.Name, request.Description);
 

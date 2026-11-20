@@ -58,7 +58,7 @@ public class UpdateOffVariationHandler(
     IPublisher publisher)
     : IRequestHandler<UpdateOffVariation, Guid>
 {
-    public async Task<Guid> Handle(UpdateOffVariation request, CancellationToken cancellationToken)
+    public async ValueTask<Guid> Handle(UpdateOffVariation request, CancellationToken cancellationToken)
     {
         var flag = await service.GetAsync(request.EnvId, request.Key);
         if (!flag.Revision.Equals(request.Revision))

@@ -29,7 +29,7 @@ public class PatchFeatureFlagHandler(
     IPublisher publisher)
     : IRequestHandler<PatchFeatureFlag, PatchResult>
 {
-    public async Task<PatchResult> Handle(PatchFeatureFlag request, CancellationToken cancellationToken)
+    public async ValueTask<PatchResult> Handle(PatchFeatureFlag request, CancellationToken cancellationToken)
     {
         var flag = await flagService.GetAsync(request.EnvId, request.Key);
         var dataChange = new DataChange(flag);

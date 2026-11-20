@@ -42,7 +42,7 @@ public class UpdateWorkspaceHandler : IRequestHandler<UpdateWorkspace, Workspace
         _service = service;
     }
 
-    public async Task<WorkspaceVm> Handle(UpdateWorkspace request, CancellationToken cancellationToken)
+    public async ValueTask<WorkspaceVm> Handle(UpdateWorkspace request, CancellationToken cancellationToken)
     {
         var workspace = await _service.GetAsync(request.Id);
 

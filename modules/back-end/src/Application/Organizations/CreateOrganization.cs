@@ -37,7 +37,7 @@ public class CreateOrganizationHandler : IRequestHandler<CreateOrganization, Org
         _service = service;
     }
 
-    public async Task<OrganizationVm> Handle(CreateOrganization request, CancellationToken cancellationToken)
+    public async ValueTask<OrganizationVm> Handle(CreateOrganization request, CancellationToken cancellationToken)
     {
         var keyHasBeenUsed = await _service.HasKeyBeenUsedAsync(request.WorkspaceId, request.Key);
         if (keyHasBeenUsed)

@@ -9,6 +9,6 @@ public class IsGroupNameUsed : IRequest<bool>
 
 public class IsGroupNameUsedHandler(IGroupService service) : IRequestHandler<IsGroupNameUsed, bool>
 {
-    public async Task<bool> Handle(IsGroupNameUsed request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(IsGroupNameUsed request, CancellationToken cancellationToken)
         => await service.IsNameUsedAsync(request.OrganizationId, request.Name);
 }

@@ -17,7 +17,7 @@ public class GetDefaultPermissionsHandler(
     ICurrentUser currentUser)
     : IRequestHandler<GetDefaultPermissions, DefaultPermissionsVm>
 {
-    public async Task<DefaultPermissionsVm> Handle(
+    public async ValueTask<DefaultPermissionsVm> Handle(
         GetDefaultPermissions request,
         CancellationToken cancellationToken)
     {

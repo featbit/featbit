@@ -26,7 +26,7 @@ public class UpdateWebhookHandler : IRequestHandler<UpdateWebhook, WebhookVm>
         _currentUser = currentUser;
     }
 
-    public async Task<WebhookVm> Handle(UpdateWebhook request, CancellationToken cancellationToken)
+    public async ValueTask<WebhookVm> Handle(UpdateWebhook request, CancellationToken cancellationToken)
     {
         var webhook = await _service.GetAsync(request.Id);
         webhook.Update(

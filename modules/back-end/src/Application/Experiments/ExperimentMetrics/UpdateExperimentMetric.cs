@@ -22,7 +22,7 @@ public class UpdateExperimentMetricValidator : AbstractValidator<UpdateExperimen
 public class UpdateExperimentMetricHandler(IExperimentMetricService service)
     : IRequestHandler<UpdateExperimentMetric, ExperimentMetricVm>
 {
-    public async Task<ExperimentMetricVm> Handle(
+    public async ValueTask<ExperimentMetricVm> Handle(
         UpdateExperimentMetric request,
         CancellationToken cancellationToken)
     {

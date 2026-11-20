@@ -24,7 +24,7 @@ public class GetChangeRequestListHandler(
     ICurrentUser currentUser)
     : IRequestHandler<GetChangeRequestList, ChangeRequestListVm>
 {
-    public async Task<ChangeRequestListVm> Handle(
+    public async ValueTask<ChangeRequestListVm> Handle(
         GetChangeRequestList request,
         CancellationToken cancellationToken)
     {

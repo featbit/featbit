@@ -78,8 +78,8 @@ public class UpdateOrganizationHandlerTests
         request.CurrentUserPermissions = [Allow(Permissions.UpdateOrgName)];
         var (sut, service) = BuildSut(organization);
 
-        await Assert.ThrowsAsync<ForbiddenException>(() =>
-            sut.Handle(request, CancellationToken.None));
+        await Assert.ThrowsAsync<ForbiddenException>(async () =>
+            await sut.Handle(request, CancellationToken.None));
 
         service.Verify(x => x.UpdateAsync(It.IsAny<Organization>()), Times.Never);
     }
@@ -110,8 +110,8 @@ public class UpdateOrganizationHandlerTests
         request.CurrentUserPermissions = [Allow(Permissions.UpdateOrgName)];
         var (sut, service) = BuildSut(organization);
 
-        await Assert.ThrowsAsync<ForbiddenException>(() =>
-            sut.Handle(request, CancellationToken.None));
+        await Assert.ThrowsAsync<ForbiddenException>(async () =>
+            await sut.Handle(request, CancellationToken.None));
 
         service.Verify(x => x.UpdateAsync(It.IsAny<Organization>()), Times.Never);
     }

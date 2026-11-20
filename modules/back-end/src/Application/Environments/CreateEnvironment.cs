@@ -71,7 +71,7 @@ public class CreateEnvironmentHandler(
     IResourceService resources)
     : IRequestHandler<CreateEnvironment, EnvironmentVm>
 {
-    public async Task<EnvironmentVm> Handle(CreateEnvironment request, CancellationToken cancellationToken)
+    public async ValueTask<EnvironmentVm> Handle(CreateEnvironment request, CancellationToken cancellationToken)
     {
         var keyHasBeenUsed = await service.HasKeyBeenUsedAsync(request.ProjectId, request.Key);
         if (keyHasBeenUsed)

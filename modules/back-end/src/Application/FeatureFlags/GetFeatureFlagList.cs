@@ -21,7 +21,7 @@ public class GetFeatureFlagListHandler(
     IAuditLogService auditLogService)
     : IRequestHandler<GetFeatureFlagList, PagedResult<FeatureFlagVm>>
 {
-    public async Task<PagedResult<FeatureFlagVm>> Handle(GetFeatureFlagList request, CancellationToken cancellationToken)
+    public async ValueTask<PagedResult<FeatureFlagVm>> Handle(GetFeatureFlagList request, CancellationToken cancellationToken)
     {
         var flags = await flagService.GetListAsync(request.EnvId, request.Filter);
 

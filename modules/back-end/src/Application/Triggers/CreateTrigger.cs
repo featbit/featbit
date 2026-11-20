@@ -53,7 +53,7 @@ public class CreateTriggerHandler(
     FlagPermissionGuard flagGuard)
     : IRequestHandler<CreateTrigger, Trigger>
 {
-    public async Task<Trigger> Handle(CreateTrigger request, CancellationToken cancellationToken)
+    public async ValueTask<Trigger> Handle(CreateTrigger request, CancellationToken cancellationToken)
     {
         var flag = await flagService.GetAsync(request.TargetId);
         await envGuard.EnsureAccessAsync(request.OrgId, flag.EnvId, request.Permissions);

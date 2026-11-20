@@ -25,7 +25,7 @@ public class GetTriggerListHandler(
     IFeatureFlagService flagService,
     EnvironmentPermissionGuard envGuard) : IRequestHandler<GetTriggerList, IEnumerable<Trigger>>
 {
-    public async Task<IEnumerable<Trigger>> Handle(GetTriggerList request, CancellationToken cancellationToken)
+    public async ValueTask<IEnumerable<Trigger>> Handle(GetTriggerList request, CancellationToken cancellationToken)
     {
         var flag = await flagService.GetAsync(request.TargetId);
         await envGuard.EnsureAccessAsync(request.OrgId, flag.EnvId, request.Permissions);

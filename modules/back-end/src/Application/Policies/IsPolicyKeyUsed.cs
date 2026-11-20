@@ -9,6 +9,6 @@ public class IsPolicyKeyUsed : IRequest<bool>
 
 public class IsPolicyKeyUsedHandler(IPolicyService service) : IRequestHandler<IsPolicyKeyUsed, bool>
 {
-    public async Task<bool> Handle(IsPolicyKeyUsed request, CancellationToken cancellationToken) =>
+    public async ValueTask<bool> Handle(IsPolicyKeyUsed request, CancellationToken cancellationToken) =>
         await service.IsKeyUsedAsync(request.OrganizationId, request.Key);
 }

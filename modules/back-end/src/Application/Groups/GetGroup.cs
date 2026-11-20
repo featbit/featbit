@@ -14,7 +14,7 @@ public class GetGroupHandler : IRequestHandler<GetGroup, GroupVm>
         _service = service;
     }
     
-    public async Task<GroupVm> Handle(GetGroup request, CancellationToken cancellationToken)
+    public async ValueTask<GroupVm> Handle(GetGroup request, CancellationToken cancellationToken)
     {
         var group = await _service.GetAsync(request.Id);
 

@@ -20,7 +20,7 @@ public class GetSegmentListHandler : IRequestHandler<GetSegmentList, PagedResult
         _envAppService = envAppService;
     }
 
-    public async Task<PagedResult<SegmentVm>> Handle(GetSegmentList request, CancellationToken cancellationToken)
+    public async ValueTask<PagedResult<SegmentVm>> Handle(GetSegmentList request, CancellationToken cancellationToken)
     {
         var segments = await _envAppService.GetPagedSegmentsAsync(request);
 

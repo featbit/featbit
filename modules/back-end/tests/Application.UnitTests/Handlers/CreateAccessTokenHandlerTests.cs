@@ -37,7 +37,7 @@ public class CreateAccessTokenHandlerTests
             ]
         };
 
-        var ex = await Assert.ThrowsAsync<BusinessException>(() => sut.Handle(request, CancellationToken.None));
+        var ex = await Assert.ThrowsAsync<BusinessException>(async () => await sut.Handle(request, CancellationToken.None));
 
         Assert.Equal(ErrorCodes.NameHasBeenUsed, ex.Message);
         service.Verify(x => x.AddOneAsync(It.IsAny<AccessToken>()), Times.Never);

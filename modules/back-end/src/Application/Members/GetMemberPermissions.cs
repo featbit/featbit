@@ -10,7 +10,7 @@ public class GetMemberPermissions : IRequest<IReadOnlyCollection<MemberPermissio
 public class GetMemberPermissionsHandler(IMemberService service)
     : IRequestHandler<GetMemberPermissions, IReadOnlyCollection<MemberPermissionVm>>
 {
-    public async Task<IReadOnlyCollection<MemberPermissionVm>> Handle(
+    public async ValueTask<IReadOnlyCollection<MemberPermissionVm>> Handle(
         GetMemberPermissions request,
         CancellationToken cancellationToken)
     {

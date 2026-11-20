@@ -14,7 +14,7 @@ public class GetSegment : IRequest<Segment>
 public class GetSegmentHandler(ISegmentService segmentService, SegmentPermissionGuard segmentGuard)
     : IRequestHandler<GetSegment, Segment>
 {
-    public async Task<Segment> Handle(GetSegment request, CancellationToken cancellationToken)
+    public async ValueTask<Segment> Handle(GetSegment request, CancellationToken cancellationToken)
     {
         await segmentGuard.EnsureInOrganizationAsync(request.OrgId, request.EnvId, request.Id);
 

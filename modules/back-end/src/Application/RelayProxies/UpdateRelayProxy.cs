@@ -19,7 +19,7 @@ public class UpdateRelayProxyValidator : AbstractValidator<UpdateRelayProxy>
 
 public class UpdateRelayProxyHandler(IRelayProxyService service) : IRequestHandler<UpdateRelayProxy, bool>
 {
-    public async Task<bool> Handle(UpdateRelayProxy request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(UpdateRelayProxy request, CancellationToken cancellationToken)
     {
         var relayProxy = await service.GetAsync(request.Id);
         relayProxy.Update(

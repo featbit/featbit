@@ -36,7 +36,7 @@ public class UpdateProfileHandler : IRequestHandler<UpdateProfile, Profile>
         _currentUser = currentUser;
     }
 
-    public async Task<Profile> Handle(UpdateProfile request, CancellationToken cancellationToken)
+    public async ValueTask<Profile> Handle(UpdateProfile request, CancellationToken cancellationToken)
     {
         var user = await _service.GetAsync(_currentUser.Id);
 

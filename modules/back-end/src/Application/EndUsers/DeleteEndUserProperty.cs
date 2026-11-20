@@ -14,7 +14,7 @@ public class DeleteEndUserPropertyHandler : IRequestHandler<DeleteEndUserPropert
         _service = service;
     }
 
-    public async Task<bool> Handle(DeleteEndUserProperty request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(DeleteEndUserProperty request, CancellationToken cancellationToken)
     {
         await _service.DeletePropertyAsync(request.Id);
 

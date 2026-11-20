@@ -35,7 +35,7 @@ public class DeclineFlagChangeRequestHandler(
     ICurrentUser currentUser)
     : IRequestHandler<DeclineFlagChangeRequest, bool>
 {
-    public async Task<bool> Handle(DeclineFlagChangeRequest request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(DeclineFlagChangeRequest request, CancellationToken cancellationToken)
     {
         var changeRequest = await changeRequestService.FindOneAsync(
             x => x.OrgId == request.OrgId && x.EnvId == request.EnvId && x.Id == request.Id

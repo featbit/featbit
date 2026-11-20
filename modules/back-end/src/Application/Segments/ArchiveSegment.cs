@@ -33,7 +33,7 @@ public class ArchiveSegmentHandler(
     ICurrentUser currentUser)
     : IRequestHandler<ArchiveSegment, bool>
 {
-    public async Task<bool> Handle(ArchiveSegment request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(ArchiveSegment request, CancellationToken cancellationToken)
     {
         var segment = await service.GetAsync(request.Id);
 

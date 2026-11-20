@@ -57,7 +57,7 @@ public class UpdateEnvironmentValidator : AbstractValidator<UpdateEnvironment>
 public class UpdateEnvironmentHandler(IEnvironmentService service, IResourceService resources)
     : IRequestHandler<UpdateEnvironment, EnvironmentVm>
 {
-    public async Task<EnvironmentVm> Handle(UpdateEnvironment request, CancellationToken cancellationToken)
+    public async ValueTask<EnvironmentVm> Handle(UpdateEnvironment request, CancellationToken cancellationToken)
     {
         var env = await service.GetAsync(request.Id);
         env.Update(request.Name, request.Description, request.Settings);

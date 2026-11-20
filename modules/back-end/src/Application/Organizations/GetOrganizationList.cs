@@ -12,7 +12,7 @@ public class GetOrganizationList : IRequest<IEnumerable<OrganizationVm>>
 public class GetOrganizationListHandler(IOrganizationService service)
     : IRequestHandler<GetOrganizationList, IEnumerable<OrganizationVm>>
 {
-    public async Task<IEnumerable<OrganizationVm>> Handle(GetOrganizationList request,
+    public async ValueTask<IEnumerable<OrganizationVm>> Handle(GetOrganizationList request,
         CancellationToken cancellationToken)
     {
         var organizations =

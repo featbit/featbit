@@ -29,7 +29,7 @@ public class SyncToAgentHandler(
     IAgentService agentService)
     : IRequestHandler<SyncToAgent, SyncResult>
 {
-    public async Task<SyncResult> Handle(SyncToAgent request, CancellationToken cancellationToken)
+    public async ValueTask<SyncResult> Handle(SyncToAgent request, CancellationToken cancellationToken)
     {
         var relayProxy = await relayProxyService.GetAsync(request.RelayProxyId);
 

@@ -10,6 +10,6 @@ public class GetWorkspaceUsages : IRequest<WorkspaceUsageVm>
 public class GetWorkspaceUsagesHandler(IWorkspaceService service)
     : IRequestHandler<GetWorkspaceUsages, WorkspaceUsageVm>
 {
-    public async Task<WorkspaceUsageVm> Handle(GetWorkspaceUsages request, CancellationToken cancellationToken)
+    public async ValueTask<WorkspaceUsageVm> Handle(GetWorkspaceUsages request, CancellationToken cancellationToken)
         => await service.GetUsageAsync(request.WorkspaceId, request.Filter);
 }

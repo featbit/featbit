@@ -36,7 +36,7 @@ public class DeleteSegmentHandler : IRequestHandler<DeleteSegment, bool>
         _publisher = publisher;
     }
 
-    public async Task<bool> Handle(DeleteSegment request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(DeleteSegment request, CancellationToken cancellationToken)
     {
         var segment = await _service.GetAsync(request.Id);
         if (!segment.IsArchived)

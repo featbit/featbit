@@ -12,7 +12,7 @@ public class ArchiveExperimentLayer : IRequest<bool>
 public class ArchiveExperimentLayerHandler(IExperimentLayerService service)
     : IRequestHandler<ArchiveExperimentLayer, bool>
 {
-    public async Task<bool> Handle(ArchiveExperimentLayer request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(ArchiveExperimentLayer request, CancellationToken cancellationToken)
     {
         await service.ArchiveAsync(request.EnvId, request.Id);
         return true;

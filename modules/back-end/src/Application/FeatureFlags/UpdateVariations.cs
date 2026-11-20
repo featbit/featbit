@@ -60,7 +60,7 @@ public class UpdateVariationsHandler(
     IPublisher publisher)
     : IRequestHandler<UpdateVariations, Guid>
 {
-    public async Task<Guid> Handle(UpdateVariations request, CancellationToken cancellationToken)
+    public async ValueTask<Guid> Handle(UpdateVariations request, CancellationToken cancellationToken)
     {
         var flag = await service.GetAsync(request.EnvId, request.Key);
         if (!flag.Revision.Equals(request.Revision))

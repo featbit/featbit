@@ -17,7 +17,7 @@ public class GetWebhookListHandler(
     IOrganizationService organizationService)
     : IRequestHandler<GetWebhookList, PagedResult<WebhookVm>>
 {
-    public async Task<PagedResult<WebhookVm>> Handle(GetWebhookList request, CancellationToken cancellationToken)
+    public async ValueTask<PagedResult<WebhookVm>> Handle(GetWebhookList request, CancellationToken cancellationToken)
     {
         var webhooks =
             await webhookService.GetListAsync(request.OrgId, request.Filter);

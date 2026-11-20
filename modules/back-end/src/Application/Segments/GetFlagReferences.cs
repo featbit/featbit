@@ -18,7 +18,7 @@ public class GetFlagReferencesHandler(
     EnvironmentPermissionGuard envPermissionGuard)
     : IRequestHandler<GetFlagReferences, IEnumerable<FlagReference>>
 {
-    public async Task<IEnumerable<FlagReference>> Handle(GetFlagReferences request, CancellationToken cancellationToken)
+    public async ValueTask<IEnumerable<FlagReference>> Handle(GetFlagReferences request, CancellationToken cancellationToken)
     {
         await segmentGuard.EnsureInOrganizationAsync(request.OrgId, request.EnvId, request.Id);
 

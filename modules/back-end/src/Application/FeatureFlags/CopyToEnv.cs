@@ -52,7 +52,7 @@ public class CopyToEnvHandler(
     FlagCopyChecks copyChecks)
     : IRequestHandler<CopyToEnv, CopyToEnvResult>
 {
-    public async Task<CopyToEnvResult> Handle(CopyToEnv request, CancellationToken cancellationToken)
+    public async ValueTask<CopyToEnvResult> Handle(CopyToEnv request, CancellationToken cancellationToken)
     {
         var context = new CopyToEnvContext(
             request.OrgId, request.SourceEnvId, request.TargetEnvId, request.FlagIds, request.Permissions

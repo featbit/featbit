@@ -90,7 +90,7 @@ public class CreateFlagScheduleHandlerTests
         var request = BuildRequest(flag, withChangeRequest: false);
         request.Revision = Guid.NewGuid(); // mismatch
 
-        await Assert.ThrowsAsync<ConflictException>(() => sut.Handle(request, CancellationToken.None));
+        await Assert.ThrowsAsync<ConflictException>(async () => await sut.Handle(request, CancellationToken.None));
 
         draftSvc.Verify(x => x.AddOneAsync(It.IsAny<FlagDraft>()), Times.Never);
         schedSvc.Verify(x => x.AddOneAsync(It.IsAny<FlagSchedule>()), Times.Never);
@@ -135,7 +135,7 @@ public class CreateFlagScheduleHandlerTests
             .ReturnsAsync(false);
 
         var ex = await Assert.ThrowsAsync<BusinessException>(
-            () => sut.Handle(request, CancellationToken.None));
+            async () => await sut.Handle(request, CancellationToken.None));
 
         Assert.Equal(ErrorCodes.Unauthorized, ex.Message);
 

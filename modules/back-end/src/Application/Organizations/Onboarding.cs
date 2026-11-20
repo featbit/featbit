@@ -56,7 +56,7 @@ public class OnboardingHandler : IRequestHandler<Onboarding, bool>
         _publisher = publisher;
     }
 
-    public async Task<bool> Handle(Onboarding request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(Onboarding request, CancellationToken cancellationToken)
     {
         var organization = await _organizationService.GetAsync(request.OrganizationId);
         organization.Initialize(request.OrganizationName, request.OrganizationKey);

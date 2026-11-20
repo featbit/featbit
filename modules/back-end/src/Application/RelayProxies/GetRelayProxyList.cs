@@ -12,7 +12,7 @@ public class GetRelayProxyList : IRequest<PagedResult<RelayProxyVm>>
 public class GetRelayProxyListHandler(IRelayProxyService service, IEnvironmentService envService)
     : IRequestHandler<GetRelayProxyList, PagedResult<RelayProxyVm>>
 {
-    public async Task<PagedResult<RelayProxyVm>> Handle(GetRelayProxyList request, CancellationToken cancellationToken)
+    public async ValueTask<PagedResult<RelayProxyVm>> Handle(GetRelayProxyList request, CancellationToken cancellationToken)
     {
         var rps =
             await service.GetListAsync(request.OrganizationId, request.Filter);
