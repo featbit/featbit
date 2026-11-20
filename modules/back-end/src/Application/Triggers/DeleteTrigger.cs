@@ -7,7 +7,7 @@ public class DeleteTrigger : IRequest<bool>
 
 public class DeleteTriggerHandler(ITriggerService service) : IRequestHandler<DeleteTrigger, bool>
 {
-    public async Task<bool> Handle(DeleteTrigger request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(DeleteTrigger request, CancellationToken cancellationToken)
     {
         await service.DeleteOneAsync(request.Id);
 

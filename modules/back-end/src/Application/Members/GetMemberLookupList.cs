@@ -17,7 +17,7 @@ public class GetMemberLookupListHandler(
     ICurrentUser currentUser)
     : IRequestHandler<GetMemberLookupList, PagedResult<MemberLookupVm>>
 {
-    public async Task<PagedResult<MemberLookupVm>> Handle(
+    public async ValueTask<PagedResult<MemberLookupVm>> Handle(
         GetMemberLookupList request,
         CancellationToken cancellationToken)
     {

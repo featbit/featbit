@@ -16,7 +16,7 @@ public class UpdateTriggerHandler : IRequestHandler<UpdateTrigger, bool>
         _service = service;
     }
 
-    public async Task<bool> Handle(UpdateTrigger request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(UpdateTrigger request, CancellationToken cancellationToken)
     {
         var trigger = await _service.GetAsync(request.Id);
         trigger.Update(request.IsEnabled);

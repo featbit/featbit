@@ -13,7 +13,7 @@ public class GetAccessTokenList : IRequest<PagedResult<AccessTokenVm>>
 public class GetAccessTokenListHandler(IAccessTokenService accessTokenService, IUserService userService)
     : IRequestHandler<GetAccessTokenList, PagedResult<AccessTokenVm>>
 {
-    public async Task<PagedResult<AccessTokenVm>> Handle(GetAccessTokenList request, CancellationToken cancellationToken)
+    public async ValueTask<PagedResult<AccessTokenVm>> Handle(GetAccessTokenList request, CancellationToken cancellationToken)
     {
         var accessTokens =
             await accessTokenService.GetListAsync(request.OrganizationId, request.Filter);

@@ -45,7 +45,7 @@ public class CreatePolicyValidator : AbstractValidator<CreatePolicy>
 
 public class CreatePolicyHandler(IPolicyService service, IPublisher auditPublisher, ICurrentUser auditActor) : IRequestHandler<CreatePolicy, PolicyVm>
 {
-    public async Task<PolicyVm> Handle(CreatePolicy request, CancellationToken cancellationToken)
+    public async ValueTask<PolicyVm> Handle(CreatePolicy request, CancellationToken cancellationToken)
     {
         var policy = new Policy(request.OrganizationId, request.Name, request.Key, request.Description);
 

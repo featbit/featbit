@@ -13,7 +13,7 @@ public class GetFeatureFlagById : IRequest<FeatureFlag>
 public class GetFeatureFlagByIdHandler(IFeatureFlagService service)
     : IRequestHandler<GetFeatureFlagById, FeatureFlag>
 {
-    public async Task<FeatureFlag> Handle(GetFeatureFlagById request, CancellationToken cancellationToken)
+    public async ValueTask<FeatureFlag> Handle(GetFeatureFlagById request, CancellationToken cancellationToken)
     {
         var flag = await service.FindOneAsync(flag => flag.EnvId == request.EnvId && flag.Id == request.Id);
         if (flag is null)

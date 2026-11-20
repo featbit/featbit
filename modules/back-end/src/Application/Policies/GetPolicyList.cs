@@ -18,7 +18,7 @@ public class GetPolicyListHandler : IRequestHandler<GetPolicyList, PagedResult<P
         _service = service;
     }
     
-    public async Task<PagedResult<PolicyVm>> Handle(GetPolicyList request, CancellationToken cancellationToken)
+    public async ValueTask<PagedResult<PolicyVm>> Handle(GetPolicyList request, CancellationToken cancellationToken)
     {
         var policies = await _service.GetListAsync(request.OrganizationId, request.Filter);
 

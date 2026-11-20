@@ -41,7 +41,7 @@ public class AddSecretHandler : IRequestHandler<AddSecret, Secret>
         _publisher = publisher;
     }
 
-    public async Task<Secret> Handle(AddSecret request, CancellationToken cancellationToken)
+    public async ValueTask<Secret> Handle(AddSecret request, CancellationToken cancellationToken)
     {
         var environment = await _service.GetAsync(request.EnvId);
         var secret = request.AsSecret();

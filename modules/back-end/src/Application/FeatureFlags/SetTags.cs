@@ -29,7 +29,7 @@ public class SetTags : ResourceChangeRequest, IRequest<bool>
 public class SetTagsHandler(IFeatureFlagService service, ICurrentUser currentUser, IPublisher publisher)
     : IRequestHandler<SetTags, bool>
 {
-    public async Task<bool> Handle(SetTags request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(SetTags request, CancellationToken cancellationToken)
     {
         var flag = await service.GetAsync(request.EnvId, request.Key);
         var dataChange = flag.SetTags(request.Tags, currentUser.Id);

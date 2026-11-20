@@ -13,7 +13,7 @@ public class GetWebhookDeliveryList : IRequest<PagedResult<WebhookDelivery>>
 public class GetWebhookDeliveryListHandler(IWebhookService service)
     : IRequestHandler<GetWebhookDeliveryList, PagedResult<WebhookDelivery>>
 {
-    public async Task<PagedResult<WebhookDelivery>> Handle(GetWebhookDeliveryList request, CancellationToken cancellationToken)
+    public async ValueTask<PagedResult<WebhookDelivery>> Handle(GetWebhookDeliveryList request, CancellationToken cancellationToken)
     {
         var deliveries = await service.GetDeliveriesAsync(request.WebhookId, request.Filter);
         return deliveries;

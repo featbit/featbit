@@ -15,7 +15,7 @@ public class GetExperimentMetricsHandler(
     IExperimentService experimentService)
     : IRequestHandler<GetExperimentMetricList, PagedResult<ExperimentMetricVm>>
 {
-    public async Task<PagedResult<ExperimentMetricVm>> Handle(
+    public async ValueTask<PagedResult<ExperimentMetricVm>> Handle(
         GetExperimentMetricList request,
         CancellationToken cancellationToken)
     {

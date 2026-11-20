@@ -5,7 +5,7 @@ using Application.Services;
 using Application.Users;
 using Domain.FeatureFlags;
 using Domain.SemanticPatch;
-using MediatR;
+using Mediator;
 
 namespace Application.UnitTests.Handlers;
 
@@ -76,7 +76,7 @@ public class UpdateInsightCollectionHandlerTests
         var previousUpdatorId = _flag.UpdatorId;
 
         var exception = await Assert.ThrowsAsync<BusinessException>(
-            () => _sut.Handle(Request(false), CancellationToken.None));
+            async () => await _sut.Handle(Request(false), CancellationToken.None));
 
         Assert.Equal(ErrorCodes.BusinessRuleViolation, exception.Message);
         Assert.True(_flag.InsightsEnabled);

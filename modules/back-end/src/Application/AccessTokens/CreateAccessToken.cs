@@ -37,7 +37,7 @@ public class CreateAccessTokenValidator : AbstractValidator<CreateAccessToken>
 public class CreateAccessTokenHandler(IAccessTokenService service, ICurrentUser currentUser)
     : IRequestHandler<CreateAccessToken, AccessToken>
 {
-    public async Task<AccessToken> Handle(CreateAccessToken request, CancellationToken cancellationToken)
+    public async ValueTask<AccessToken> Handle(CreateAccessToken request, CancellationToken cancellationToken)
     {
         AccessTokenAuthorization.EnsureCanManage(request.CurrentUserPermissions, request.Type);
 

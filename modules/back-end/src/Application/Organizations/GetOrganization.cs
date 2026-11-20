@@ -14,7 +14,7 @@ public class GetOrganizationHandler : IRequestHandler<GetOrganization, Organizat
         _organizationService = organizationService;
     }
 
-    public async Task<OrganizationVm> Handle(GetOrganization request, CancellationToken cancellationToken)
+    public async ValueTask<OrganizationVm> Handle(GetOrganization request, CancellationToken cancellationToken)
     {
         var organization = await _organizationService.GetAsync(request.Id);
         return OrganizationMapper.ToVm(organization);

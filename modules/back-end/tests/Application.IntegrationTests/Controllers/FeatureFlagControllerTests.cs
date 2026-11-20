@@ -5,7 +5,7 @@ using Api.Controllers;
 using Application.Bases;
 using Application.Bases.Models;
 using Application.FeatureFlags;
-using MediatR;
+using Mediator;
 using Moq;
 
 namespace Application.IntegrationTests.Controllers;

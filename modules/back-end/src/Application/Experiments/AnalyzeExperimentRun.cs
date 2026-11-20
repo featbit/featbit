@@ -20,7 +20,7 @@ public class AnalyzeExperimentRunHandler(
     IExperimentService service)
     : IRequestHandler<AnalyzeExperimentRun, ExperimentDetailVm>
 {
-    public async Task<ExperimentDetailVm> Handle(
+    public async ValueTask<ExperimentDetailVm> Handle(
         AnalyzeExperimentRun request,
         CancellationToken cancellationToken)
     {

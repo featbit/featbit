@@ -19,7 +19,7 @@ public class DeleteProjectHandler : IRequestHandler<DeleteProject, bool>
         _publisher = publisher;
     }
 
-    public async Task<bool> Handle(DeleteProject request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(DeleteProject request, CancellationToken cancellationToken)
     {
         var projectWithEnvs = await _service.GetWithEnvsAsync(request.Id);
         if (projectWithEnvs == null)

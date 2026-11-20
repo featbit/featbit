@@ -39,7 +39,7 @@ public class UpdateOrganizationValidator : AbstractValidator<UpdateOrganization>
 public class UpdateOrganizationHandler(IOrganizationService service)
     : IRequestHandler<UpdateOrganization, OrganizationVm>
 {
-    public async Task<OrganizationVm> Handle(UpdateOrganization request, CancellationToken cancellationToken)
+    public async ValueTask<OrganizationVm> Handle(UpdateOrganization request, CancellationToken cancellationToken)
     {
         var organization = await service.GetAsync(request.Id);
 

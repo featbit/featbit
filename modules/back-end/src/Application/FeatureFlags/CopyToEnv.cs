@@ -27,7 +27,7 @@ public class CopyToEnvHandler(
     IPublisher publisher)
     : IRequestHandler<CopyToEnv, CopyToEnvResult>
 {
-    public async Task<CopyToEnvResult> Handle(CopyToEnv request, CancellationToken cancellationToken)
+    public async ValueTask<CopyToEnvResult> Handle(CopyToEnv request, CancellationToken cancellationToken)
     {
         var flags = await flagService.FindManyAsync(x => request.FlagIds.Contains(x.Id));
         var precheckResults = request.PrecheckResults;

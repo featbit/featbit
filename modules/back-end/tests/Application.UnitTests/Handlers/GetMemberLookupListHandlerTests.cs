@@ -80,7 +80,7 @@ public class GetMemberLookupListHandlerTests
             organizationService.Object,
             currentUser.Object);
 
-        await Assert.ThrowsAsync<ForbiddenException>(() => handler.Handle(
+        await Assert.ThrowsAsync<ForbiddenException>(async () => await handler.Handle(
             new GetMemberLookupList
             {
                 OrganizationId = organizationId,

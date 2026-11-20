@@ -4,7 +4,7 @@ using Application.FeatureFlags;
 using Domain.AuditLogs;
 using Domain.Segments;
 using Domain.SemanticPatch;
-using MediatR;
+using Mediator;
 
 namespace Infrastructure.AppService;
 

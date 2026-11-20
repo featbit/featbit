@@ -32,7 +32,7 @@ public class UpdatePolicyStatementsHandler : IRequestHandler<UpdatePolicyStateme
         _service = service;
     }
     
-    public async Task<PolicyVm> Handle(UpdatePolicyStatements request, CancellationToken cancellationToken)
+    public async ValueTask<PolicyVm> Handle(UpdatePolicyStatements request, CancellationToken cancellationToken)
     {
         var previous = await _service.GetAuditSnapshotAsync(request.PolicyId);
         var change = new DataChange(previous);

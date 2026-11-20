@@ -57,7 +57,7 @@ public class OnFeatureFlagChangedHandler(
     IConfiguration configuration)
     : INotificationHandler<OnFeatureFlagChanged>
 {
-    public async Task Handle(OnFeatureFlagChanged notification, CancellationToken cancellationToken)
+    public async ValueTask Handle(OnFeatureFlagChanged notification, CancellationToken cancellationToken)
     {
         var flag = notification.Flag;
 

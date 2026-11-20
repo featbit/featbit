@@ -30,7 +30,7 @@ public class AddMemberPolicyHandler : IRequestHandler<AddMemberPolicy, bool>
         _service = service;
     }
     
-    public async Task<bool> Handle(AddMemberPolicy request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(AddMemberPolicy request, CancellationToken cancellationToken)
     {
         var previous = await _service.GetAuditSnapshotAsync(request.MemberId, request.OrganizationId, request.WorkspaceId);
         var change = new DataChange(previous);

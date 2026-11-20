@@ -9,7 +9,7 @@ public class GetTriggerList : IRequest<IEnumerable<Trigger>>
 
 public class GetTriggerListHandler(ITriggerService service) : IRequestHandler<GetTriggerList, IEnumerable<Trigger>>
 {
-    public async Task<IEnumerable<Trigger>> Handle(GetTriggerList request, CancellationToken cancellationToken)
+    public async ValueTask<IEnumerable<Trigger>> Handle(GetTriggerList request, CancellationToken cancellationToken)
     {
         var triggers = await service.FindManyAsync(x => x.TargetId == request.TargetId);
 

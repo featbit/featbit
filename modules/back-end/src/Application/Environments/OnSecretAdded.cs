@@ -25,7 +25,7 @@ public class OnSecretAddedHandler(
     IMessageProducer messageProducer)
     : INotificationHandler<OnSecretAdded>
 {
-    public async Task Handle(OnSecretAdded notification, CancellationToken cancellationToken)
+    public async ValueTask Handle(OnSecretAdded notification, CancellationToken cancellationToken)
     {
         var resourceDescriptor = await envService.GetResourceDescriptorAsync(notification.EnvId);
 

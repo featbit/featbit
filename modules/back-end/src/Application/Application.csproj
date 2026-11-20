@@ -15,10 +15,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <!--  Any version prior to MediatR v13.0 remains free under its original open-source license.   -->
-        <!--  We will remove this dependency in the future.  -->
         <PackageReference Include="Riok.Mapperly" ExcludeAssets="runtime" PrivateAssets="all" />
-        <PackageReference Include="MediatR" />
+        <PackageReference Include="Mediator.Abstractions" />
 
         <PackageReference Include="FluentValidation" />
         <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />

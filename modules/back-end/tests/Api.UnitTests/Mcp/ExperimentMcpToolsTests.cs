@@ -2,7 +2,7 @@ using Api.Authorization;
 using Api.Mcp;
 using Application.Experiments;
 using Application.Services;
-using MediatR;
+using Mediator;
 using Microsoft.AspNetCore.Http;
 using Moq;
 

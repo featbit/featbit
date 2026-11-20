@@ -13,6 +13,6 @@ public class GetEndUserList : IRequest<CursorPagedResult<EndUser>>
 public class GetEndUserListHandler(IEndUserService service)
     : IRequestHandler<GetEndUserList, CursorPagedResult<EndUser>>
 {
-    public async Task<CursorPagedResult<EndUser>> Handle(GetEndUserList request, CancellationToken cancellationToken) =>
+    public async ValueTask<CursorPagedResult<EndUser>> Handle(GetEndUserList request, CancellationToken cancellationToken) =>
         await service.GetListAsync(request.EnvId, request.Filter);
 }

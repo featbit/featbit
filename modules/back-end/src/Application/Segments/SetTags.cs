@@ -24,7 +24,7 @@ public class SetTags : ResourceChangeRequest, IRequest<bool>
 public class SetTagsHandler(ISegmentService service, ICurrentUser currentUser, IPublisher publisher)
     : IRequestHandler<SetTags, bool>
 {
-    public async Task<bool> Handle(SetTags request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(SetTags request, CancellationToken cancellationToken)
     {
         var segment = await service.GetAsync(request.Id);
         var dataChange = segment.SetTags(request.Tags);

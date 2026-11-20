@@ -32,7 +32,7 @@ public class UpdateDescriptionHandler(
     IPublisher publisher)
     : IRequestHandler<UpdateDescription, Guid>
 {
-    public async Task<Guid> Handle(UpdateDescription request, CancellationToken cancellationToken)
+    public async ValueTask<Guid> Handle(UpdateDescription request, CancellationToken cancellationToken)
     {
         var flag = await service.GetAsync(request.EnvId, request.Key);
         if (flag.Description == request.Description)

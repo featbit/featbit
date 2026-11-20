@@ -4,7 +4,7 @@ using Api;
 using Api.Controllers;
 using Application.Bases;
 using Application.Organizations;
-using MediatR;
+using Mediator;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Moq;

@@ -32,7 +32,7 @@ public class GetResourceListV2Handler : IRequestHandler<GetResourceListV2, IEnum
         _service = service;
     }
 
-    public async Task<IEnumerable<ResourceV2>> Handle(GetResourceListV2 request, CancellationToken cancellationToken)
+    public async ValueTask<IEnumerable<ResourceV2>> Handle(GetResourceListV2 request, CancellationToken cancellationToken)
     {
         var resources = await _service.GetResourcesAsync(request.SpaceId, request.Filter);
         return resources;

@@ -41,7 +41,7 @@ public class AccessTokenManagementAuthorizationTests
             CurrentUserPermissions = Allow(Permissions.ManageServiceAccessTokens)
         };
 
-        await Assert.ThrowsAsync<ForbiddenException>(() => sut.Handle(request, CancellationToken.None));
+        await Assert.ThrowsAsync<ForbiddenException>(async () => await sut.Handle(request, CancellationToken.None));
 
         service.Verify(x => x.FindOneAsync(It.IsAny<System.Linq.Expressions.Expression<Func<AccessToken, bool>>>()), Times.Never);
         service.Verify(x => x.UpdateAsync(It.IsAny<AccessToken>()), Times.Never);
@@ -77,7 +77,7 @@ public class AccessTokenManagementAuthorizationTests
         service.Setup(x => x.GetAsync(token.Id)).ReturnsAsync(token);
         var sut = new DeleteAccessTokenHandler(service.Object);
 
-        await Assert.ThrowsAsync<ForbiddenException>(() => sut.Handle(new DeleteAccessToken
+        await Assert.ThrowsAsync<ForbiddenException>(async () => await sut.Handle(new DeleteAccessToken
         {
             Id = token.Id,
             OrganizationId = organizationId,
@@ -95,7 +95,7 @@ public class AccessTokenManagementAuthorizationTests
         service.Setup(x => x.GetAsync(token.Id)).ReturnsAsync(token);
         var sut = new DeleteAccessTokenHandler(service.Object);
 
-        await Assert.ThrowsAsync<ForbiddenException>(() => sut.Handle(new DeleteAccessToken
+        await Assert.ThrowsAsync<ForbiddenException>(async () => await sut.Handle(new DeleteAccessToken
         {
             Id = token.Id,
             OrganizationId = Guid.NewGuid(),

@@ -27,7 +27,7 @@ public class PatchSegmentHandler(
     IPublisher publisher)
     : IRequestHandler<PatchSegment, PatchResult>
 {
-    public async Task<PatchResult> Handle(PatchSegment request, CancellationToken cancellationToken)
+    public async ValueTask<PatchResult> Handle(PatchSegment request, CancellationToken cancellationToken)
     {
         var segment = await segmentService.GetAsync(request.Id);
         var dataChange = new DataChange(segment);

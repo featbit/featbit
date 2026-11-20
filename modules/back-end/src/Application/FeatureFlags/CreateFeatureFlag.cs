@@ -146,7 +146,7 @@ public class CreateFeatureFlagHandler(
     IPublisher publisher)
     : IRequestHandler<CreateFeatureFlag, FeatureFlag>
 {
-    public async Task<FeatureFlag> Handle(CreateFeatureFlag request, CancellationToken cancellationToken)
+    public async ValueTask<FeatureFlag> Handle(CreateFeatureFlag request, CancellationToken cancellationToken)
     {
         var hasKeyBeenUsed = await service.HasKeyBeenUsedAsync(request.EnvId, request.Key);
         if (hasKeyBeenUsed)

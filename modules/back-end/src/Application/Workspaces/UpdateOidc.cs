@@ -82,7 +82,7 @@ public class UpdateSsoOidcHandler : IRequestHandler<UpdateOidc, WorkspaceVm>
         _service = service;
     }
 
-    public async Task<WorkspaceVm> Handle(UpdateOidc request, CancellationToken cancellationToken)
+    public async ValueTask<WorkspaceVm> Handle(UpdateOidc request, CancellationToken cancellationToken)
     {
         var workspace = await _service.GetAsync(request.Id);
 

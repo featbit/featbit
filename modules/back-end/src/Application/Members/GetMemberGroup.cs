@@ -20,7 +20,7 @@ public class GetMemberGroupHandler : IRequestHandler<GetMemberGroup, PagedResult
         _service = service;
     }
     
-    public async Task<PagedResult<MemberGroupVm>> Handle(GetMemberGroup request, CancellationToken cancellationToken)
+    public async ValueTask<PagedResult<MemberGroupVm>> Handle(GetMemberGroup request, CancellationToken cancellationToken)
     {
         var groups = 
             await _service.GetGroupsAsync(request.OrganizationId, request.MemberId, request.Filter);

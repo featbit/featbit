@@ -14,7 +14,7 @@ public class GetAllTagHandler : IRequestHandler<GetAllTag, ICollection<string>>
         _service = service;
     }
 
-    public async Task<ICollection<string>> Handle(GetAllTag request, CancellationToken cancellationToken)
+    public async ValueTask<ICollection<string>> Handle(GetAllTag request, CancellationToken cancellationToken)
     {
         return await _service.GetAllTagsAsync(request.EnvId);
     }

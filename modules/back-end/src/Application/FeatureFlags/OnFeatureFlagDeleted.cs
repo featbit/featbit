@@ -42,7 +42,7 @@ public class OnFeatureFlagDeletedHandler(
     IFeatureFlagChangePublisher changePublisher)
     : INotificationHandler<OnFeatureFlagDeleted>
 {
-    public async Task Handle(OnFeatureFlagDeleted notification, CancellationToken cancellationToken)
+    public async ValueTask Handle(OnFeatureFlagDeleted notification, CancellationToken cancellationToken)
     {
         // write audit log
         await auditLogService.AddOneAsync(notification.GetAuditLog());

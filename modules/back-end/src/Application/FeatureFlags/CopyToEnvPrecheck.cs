@@ -16,7 +16,7 @@ public class CopyToEnvPrecheckHandler(
     IResourceServiceV2 resourceService)
     : IRequestHandler<CopyToEnvPrecheck, ICollection<CopyToEnvPrecheckResult>>
 {
-    public async Task<ICollection<CopyToEnvPrecheckResult>> Handle(
+    public async ValueTask<ICollection<CopyToEnvPrecheckResult>> Handle(
         CopyToEnvPrecheck request,
         CancellationToken cancellationToken)
     {

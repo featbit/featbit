@@ -35,7 +35,7 @@ public class CreateTriggerHandler : IRequestHandler<CreateTrigger, Trigger>
         _service = service;
     }
 
-    public async Task<Trigger> Handle(CreateTrigger request, CancellationToken cancellationToken)
+    public async ValueTask<Trigger> Handle(CreateTrigger request, CancellationToken cancellationToken)
     {
         var trigger = new Trigger(
             Guid.NewGuid(),

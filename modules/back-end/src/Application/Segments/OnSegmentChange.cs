@@ -60,7 +60,7 @@ public class OnSegmentChangeHandler(
     IConfiguration configuration)
     : INotificationHandler<OnSegmentChange>
 {
-    public async Task Handle(OnSegmentChange notification, CancellationToken cancellationToken)
+    public async ValueTask Handle(OnSegmentChange notification, CancellationToken cancellationToken)
     {
         // write audit log
         await auditLogService.AddOneAsync(notification.GetAuditLog());

@@ -27,7 +27,7 @@ public class UpdateDescriptionHandler(
     IPublisher publisher
 ) : IRequestHandler<UpdateDescription, bool>
 {
-    public async Task<bool> Handle(UpdateDescription request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(UpdateDescription request, CancellationToken cancellationToken)
     {
         var segment = await service.GetAsync(request.Id);
         var dataChange = segment.UpdateDescription(request.Description);

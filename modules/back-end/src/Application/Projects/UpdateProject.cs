@@ -33,7 +33,7 @@ public class UpdateProjectHandler : IRequestHandler<UpdateProject, ProjectVm>
         _service = service;
     }
 
-    public async Task<ProjectVm> Handle(UpdateProject request, CancellationToken cancellationToken)
+    public async ValueTask<ProjectVm> Handle(UpdateProject request, CancellationToken cancellationToken)
     {
         var project = await _service.GetAsync(request.Id);
 

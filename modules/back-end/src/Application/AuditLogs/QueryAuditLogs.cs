@@ -57,7 +57,7 @@ public class QueryAuditLogsHandler(
     IAccessTokenService tokenService)
     : IRequestHandler<QueryAuditLogs, PagedResult<AuditLogVm>>
 {
-    public async Task<PagedResult<AuditLogVm>> Handle(QueryAuditLogs request, CancellationToken cancellationToken)
+    public async ValueTask<PagedResult<AuditLogVm>> Handle(QueryAuditLogs request, CancellationToken cancellationToken)
     {
         await accessGuard.EnsureQueryAllowedAsync(request);
 

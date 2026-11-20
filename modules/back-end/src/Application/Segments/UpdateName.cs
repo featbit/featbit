@@ -38,7 +38,7 @@ public class UpdateNameHandler(
     IPublisher publisher
 ) : IRequestHandler<UpdateName, bool>
 {
-    public async Task<bool> Handle(UpdateName request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(UpdateName request, CancellationToken cancellationToken)
     {
         var segment = await service.GetAsync(request.Id);
         var dataChange = segment.UpdateName(request.Name);

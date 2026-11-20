@@ -27,7 +27,7 @@ public class GetCompareFlagOverviewValidator : AbstractValidator<GetCompareFlagO
 public class GetCompareFlagOverviewHandler(IFeatureFlagService service)
     : IRequestHandler<GetCompareFlagOverview, PagedResult<CompareFlagOverview>>
 {
-    public async Task<PagedResult<CompareFlagOverview>> Handle(GetCompareFlagOverview request, CancellationToken cancellationToken)
+    public async ValueTask<PagedResult<CompareFlagOverview>> Handle(GetCompareFlagOverview request, CancellationToken cancellationToken)
     {
         var pagedFlags = await service.GetListAsync(request.SourceEnvId, request.Filter);
 

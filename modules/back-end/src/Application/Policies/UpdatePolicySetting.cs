@@ -52,7 +52,7 @@ public class UpdatePolicySettingHandler : IRequestHandler<UpdatePolicySetting, P
         _service = service;
     }
 
-    public async Task<PolicyVm> Handle(UpdatePolicySetting request, CancellationToken cancellationToken)
+    public async ValueTask<PolicyVm> Handle(UpdatePolicySetting request, CancellationToken cancellationToken)
     {
         var previous = await _service.GetAuditSnapshotAsync(request.PolicyId);
         var change = new DataChange(previous);

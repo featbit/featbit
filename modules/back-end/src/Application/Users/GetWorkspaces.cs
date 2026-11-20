@@ -10,7 +10,7 @@ public class GetWorkspaces : IRequest<ICollection<WorkspaceVm>>
 public class GetWorkspacesHandler(IUserService service)
     : IRequestHandler<GetWorkspaces, ICollection<WorkspaceVm>>
 {
-    public async Task<ICollection<WorkspaceVm>> Handle(GetWorkspaces request, CancellationToken cancellationToken)
+    public async ValueTask<ICollection<WorkspaceVm>> Handle(GetWorkspaces request, CancellationToken cancellationToken)
     {
         var workspace = await service.GetWorkspacesAsync(request.UserId);
         return WorkspaceMapper.ToVm(workspace);

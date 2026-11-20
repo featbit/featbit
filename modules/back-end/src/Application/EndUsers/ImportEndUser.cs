@@ -27,7 +27,7 @@ public class ImportEndUserHandler : IRequestHandler<ImportEndUser, bool>
         _service = service;
     }
 
-    public async Task<bool> Handle(ImportEndUser request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(ImportEndUser request, CancellationToken cancellationToken)
     {
         // upsert end users
         await _service.UpsertAsync(workspaceId: null, request.EnvId, request.Users);

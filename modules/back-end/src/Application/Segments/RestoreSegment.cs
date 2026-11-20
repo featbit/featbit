@@ -29,7 +29,7 @@ public class RestoreSegmentHandler : IRequestHandler<RestoreSegment, bool>
         _publisher = publisher;
     }
 
-    public async Task<bool> Handle(RestoreSegment request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(RestoreSegment request, CancellationToken cancellationToken)
     {
         var segment = await _service.GetAsync(request.Id);
         var dataChange = segment.Restore();

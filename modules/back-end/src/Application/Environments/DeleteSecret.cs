@@ -18,7 +18,7 @@ public class DeleteSecretHandler : IRequestHandler<DeleteSecret, bool>
         _publisher = publisher;
     }
 
-    public async Task<bool> Handle(DeleteSecret request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(DeleteSecret request, CancellationToken cancellationToken)
     {
         var environment = await _service.GetAsync(request.EnvId);
 

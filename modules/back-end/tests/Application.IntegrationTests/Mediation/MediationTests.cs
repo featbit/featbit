@@ -5,7 +5,7 @@ using Domain.AuditLogs;
 using Domain.Policies;
 using Domain.Resources;
 using FluentValidation;
-using MediatR;
+using Mediator;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Moq;

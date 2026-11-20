@@ -18,7 +18,7 @@ public class GetMemberPolicyHandler : IRequestHandler<GetMemberPolicy, IEnumerab
         _service = service;
     }
 
-    public async Task<IEnumerable<PolicyVm>> Handle(GetMemberPolicy request, CancellationToken cancellationToken)
+    public async ValueTask<IEnumerable<PolicyVm>> Handle(GetMemberPolicy request, CancellationToken cancellationToken)
     {
         var policies = await _service.GetPoliciesAsync(request.OrganizationId, request.MemberId);
 

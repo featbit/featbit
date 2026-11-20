@@ -20,7 +20,7 @@ public class GetGroupPolicyHandler : IRequestHandler<GetGroupPolicy, PagedResult
         _service = service;
     }
 
-    public async Task<PagedResult<GroupPolicyVm>> Handle(GetGroupPolicy request, CancellationToken cancellationToken)
+    public async ValueTask<PagedResult<GroupPolicyVm>> Handle(GetGroupPolicy request, CancellationToken cancellationToken)
     {
         var policies =
             await _service.GetPoliciesAsync(request.OrganizationId, request.GroupId, request.Filter);

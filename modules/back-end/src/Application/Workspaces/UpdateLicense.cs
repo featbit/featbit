@@ -37,7 +37,7 @@ public class UpdateLicenseHandler(
     IMessageProducer messageProducer)
     : IRequestHandler<UpdateLicense, WorkspaceVm>
 {
-    public async Task<WorkspaceVm> Handle(UpdateLicense request, CancellationToken cancellationToken)
+    public async ValueTask<WorkspaceVm> Handle(UpdateLicense request, CancellationToken cancellationToken)
     {
         if (configuration.IsSaasHosting())
         {

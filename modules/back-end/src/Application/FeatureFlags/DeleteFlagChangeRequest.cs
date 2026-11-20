@@ -8,7 +8,7 @@ public class DeleteFlagChangeRequest : IRequest<bool>
 public class DeleteFlagChangeRequestHandler(IFlagChangeRequestService service)
     : IRequestHandler<DeleteFlagChangeRequest, bool>
 {
-    public async Task<bool> Handle(DeleteFlagChangeRequest request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(DeleteFlagChangeRequest request, CancellationToken cancellationToken)
     {
         await service.DeleteOneAsync(request.Id);
 

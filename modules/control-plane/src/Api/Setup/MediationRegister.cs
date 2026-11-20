@@ -1,5 +1,4 @@
 using Application.Bases.Behaviours;
-using MediatR;
 
 namespace Api.Setup;
 
@@ -11,8 +10,13 @@ public static class MediationRegister
     /// </summary>
     public static IServiceCollection AddMediation(this IServiceCollection services)
     {
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(MediationRegister).Assembly));
-        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
+        services.AddMediator(options =>
+        {
+            options.Assemblies = [typeof(MediationRegister)];
+            options.ServiceLifetime = ServiceLifetime.Transient;
+            options.NotificationPublisherType = typeof(SequentialNotificationPublisher);
+            options.PipelineBehaviors = [typeof(ValidationBehaviour<,>)];
+        });
 
         return services;
     }

@@ -10,7 +10,7 @@ public class UpdateBillingInformation : IRequest<bool>
 public class UpdateBillingInformationHandler(IBillingService billingService)
     : IRequestHandler<UpdateBillingInformation, bool>
 {
-    public async Task<bool> Handle(UpdateBillingInformation request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(UpdateBillingInformation request, CancellationToken cancellationToken)
     {
         var success = await billingService.UpdateBillingInformationAsync(request.WorkspaceId, request.Payload);
         return success;

@@ -18,7 +18,7 @@ public class RemoveFromOrganizationHandler(
     IMemberService memberService,
     ISender mediator, IPublisher publisher, ICurrentUser currentUser) : IRequestHandler<RemoveFromOrganization, bool>
 {
-    public async Task<bool> Handle(RemoveFromOrganization request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(RemoveFromOrganization request, CancellationToken cancellationToken)
     {
         var previous = await memberService.GetAuditSnapshotAsync(request.MemberId, request.OrganizationId, request.WorkspaceId);
         var change = new DataChange(previous);

@@ -33,7 +33,7 @@ public class ResetPasswordHandler : IRequestHandler<ResetPassword, ResetPassword
         _currentUser = currentUser;
     }
 
-    public async Task<ResetPasswordResult> Handle(ResetPassword request, CancellationToken cancellationToken)
+    public async ValueTask<ResetPasswordResult> Handle(ResetPassword request, CancellationToken cancellationToken)
     {
         var user = await _userService.GetAsync(_currentUser.Id);
 

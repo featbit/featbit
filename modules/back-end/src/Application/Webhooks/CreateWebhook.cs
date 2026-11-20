@@ -35,7 +35,7 @@ public class CreateWebhookHandler : IRequestHandler<CreateWebhook, WebhookVm>
         _currentUser = currentUser;
     }
 
-    public async Task<WebhookVm> Handle(CreateWebhook request, CancellationToken cancellationToken)
+    public async ValueTask<WebhookVm> Handle(CreateWebhook request, CancellationToken cancellationToken)
     {
         if (await _service.IsNameUsedAsync(request.OrgId, request.Name))
         {

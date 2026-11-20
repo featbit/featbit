@@ -43,7 +43,7 @@ public class OnSegmentDeletedHandler(
     ISegmentChangePublisher changePublisher)
     : INotificationHandler<OnSegmentDeleted>
 {
-    public async Task Handle(OnSegmentDeleted notification, CancellationToken cancellationToken)
+    public async ValueTask Handle(OnSegmentDeleted notification, CancellationToken cancellationToken)
     {
         // write audit log
         await auditLogService.AddOneAsync(notification.GetAuditLog());

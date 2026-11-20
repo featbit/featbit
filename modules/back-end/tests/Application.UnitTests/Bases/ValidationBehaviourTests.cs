@@ -2,7 +2,7 @@ using Application.Bases;
 using Application.Bases.Behaviours;
 using FluentValidation;
 using FluentValidation.Results;
-using MediatR;
+using Mediator;
 using Moq;
 
 namespace Application.UnitTests.Bases;
@@ -17,18 +17,18 @@ public class ValidationBehaviourTests
     private static ValidationBehaviour<Request, string> CreateBehaviour(params IValidator<Request>[] validators)
         => new(validators);
 
-    private static RequestHandlerDelegate<string> NextWithResult(string result)
-        => ct => Task.FromResult(result);
+    private static MessageHandlerDelegate<Request, string> NextWithResult(string result)
+        => (_, _) => ValueTask.FromResult(result);
 
     [Fact]
     public async Task Handle_NoValidators_InvokesNextAndReturnsResult()
     {
         var sut = CreateBehaviour();
         var nextInvoked = false;
-        RequestHandlerDelegate<string> next = ct =>
+        MessageHandlerDelegate<Request, string> next = (_, _) =>
         {
             nextInvoked = true;
-            return Task.FromResult("ok");
+            return ValueTask.FromResult("ok");
         };
 
         var result = await sut.Handle(new Request(), next, CancellationToken.None);
@@ -69,14 +69,14 @@ public class ValidationBehaviourTests
         var sut = CreateBehaviour(failing.Object, passing.Object);
 
         var nextInvoked = false;
-        RequestHandlerDelegate<string> next = ct =>
+        MessageHandlerDelegate<Request, string> next = (_, _) =>
         {
             nextInvoked = true;
-            return Task.FromResult("nope");
+            return ValueTask.FromResult("nope");
         };
 
         var ex = await Assert.ThrowsAsync<ValidationException>(
-            () => sut.Handle(new Request(), next, CancellationToken.None));
+            async () => await sut.Handle(new Request(), next, CancellationToken.None).AsTask());
 
         Assert.False(nextInvoked);
         Assert.Contains(ex.Errors, e => e.ErrorCode == "name_is_required");
@@ -96,7 +96,7 @@ public class ValidationBehaviourTests
         var sut = CreateBehaviour(v1.Object, v2.Object);
 
         var ex = await Assert.ThrowsAsync<ValidationException>(
-            () => sut.Handle(new Request(), NextWithResult("x"), CancellationToken.None));
+            async () => await sut.Handle(new Request(), NextWithResult("x"), CancellationToken.None).AsTask());
 
         Assert.Equal(2, ex.Errors.Count());
     }

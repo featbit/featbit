@@ -28,7 +28,7 @@ public class GetEndUserStatsValidator : AbstractValidator<GetEndUserStats>
 public class GetEndUserStatsHandler(IFeatureFlagService flagService, IEndUserStatsService endUserStatsService)
     : IRequestHandler<GetEndUserStats, PagedResult<EndUserStatsVm>>
 {
-    public async Task<PagedResult<EndUserStatsVm>> Handle(GetEndUserStats request, CancellationToken cancellationToken)
+    public async ValueTask<PagedResult<EndUserStatsVm>> Handle(GetEndUserStats request, CancellationToken cancellationToken)
     {
         var flag = await flagService.GetAsync(request.EnvId, request.Filter.FeatureFlagKey);
 

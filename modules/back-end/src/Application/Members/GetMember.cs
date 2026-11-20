@@ -16,7 +16,7 @@ public class GetMemberHandler : IRequestHandler<GetMember, MemberVm>
         _service = service;
     }
     
-    public async Task<MemberVm> Handle(GetMember request, CancellationToken cancellationToken)
+    public async ValueTask<MemberVm> Handle(GetMember request, CancellationToken cancellationToken)
     {
         var member = await _service.GetAsync(request.OrganizationId, request.MemberId);
 

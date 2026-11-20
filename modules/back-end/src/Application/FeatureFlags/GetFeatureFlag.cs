@@ -18,7 +18,7 @@ public class GetFeatureFlagHandler : IRequestHandler<GetFeatureFlag, FeatureFlag
         _service = service;
     }
     
-    public async Task<FeatureFlag> Handle(GetFeatureFlag request, CancellationToken cancellationToken)
+    public async ValueTask<FeatureFlag> Handle(GetFeatureFlag request, CancellationToken cancellationToken)
     {
         var flag = await _service.GetAsync(request.EnvId, request.Key);
         return flag;

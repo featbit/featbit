@@ -27,7 +27,7 @@ public class CreateExperimentHandler(
     IExperimentService service)
     : IRequestHandler<CreateExperiment, ExperimentVm>
 {
-    public async Task<ExperimentVm> Handle(
+    public async ValueTask<ExperimentVm> Handle(
         CreateExperiment request,
         CancellationToken cancellationToken)
     {
