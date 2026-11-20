@@ -27,6 +27,7 @@ public class DefaultPermissionCheckerTests
         Mock<IRequestPermissions> requestPermissions) BuildSut()
     {
         var resourceSvc = new Mock<IResourceService>();
+        resourceSvc.SetReturnsDefault(Task.FromResult(true));
         var requestPermissions = new Mock<IRequestPermissions>();
         var sut = new DefaultPermissionChecker(
             resourceSvc.Object,
@@ -38,6 +39,7 @@ public class DefaultPermissionCheckerTests
     private static HttpContext BuildHttpContext(params (string key, object value)[] routeValues)
     {
         var ctx = new DefaultHttpContext();
+        ctx.Request.Headers[Api.ApiConstants.OrgIdHeaderKey] = "11111111-1111-1111-1111-111111111111";
         var rd = new RouteData();
         foreach (var (key, value) in routeValues)
         {
@@ -52,6 +54,25 @@ public class DefaultPermissionCheckerTests
     private sealed class RoutingFeature : IRoutingFeature
     {
         public RouteData? RouteData { get; set; }
+    }
+
+    [Theory]
+    [InlineData(Permissions.ToggleFlag)]
+    [InlineData(Permissions.CreateFlag)]
+    [InlineData(Permissions.DeleteEnv)]
+    [InlineData(Permissions.DeleteProject)]
+    public async Task IsGranted_ResourceOutsideSelectedOrganization_DeniesEvenWithCollidingRn(string permission)
+    {
+        var (sut, resources, permissions) = BuildSut();
+        resources.SetReturnsDefault(Task.FromResult(false));
+        resources.Setup(x => x.GetProjectRnAsync(It.IsAny<Guid>())).ReturnsAsync("project/shared");
+        resources.Setup(x => x.GetEnvRnAsync(It.IsAny<Guid>())).ReturnsAsync("project/shared:env/dev");
+        resources.Setup(x => x.GetFlagRnAsync(It.IsAny<Guid>(), It.IsAny<string>()))
+            .ReturnsAsync("project/shared:env/dev:flag/flag");
+        permissions.Setup(x => x.GetAsync(It.IsAny<HttpContext>())).ReturnsAsync(AllowStatement(permission, "*"));
+        var http = BuildHttpContext(("projectId", Guid.NewGuid()), ("envId", Guid.NewGuid()), ("key", "flag"));
+
+        Assert.False(await sut.IsGrantedAsync(http, new PermissionRequirement(permission)));
     }
 
     [Fact]

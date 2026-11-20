@@ -17,6 +17,26 @@ namespace Api.UnitTests.Authentication;
 
 public class OpenApiHandlerTests
 {
+    [Fact]
+    public async Task Authenticate_ForgedScopeHeaders_ReplacesThemWithTokenScope()
+    {
+        var org = new Organization(Guid.NewGuid(), "org", "org") { Id = Guid.NewGuid() };
+        var token = new AccessToken(org.Id, Guid.NewGuid(), "name", AccessTokenTypes.Service, permissions: []);
+        var tokens = new Mock<IAccessTokenService>();
+        tokens.Setup(x => x.FindOneAsync(It.IsAny<Expression<Func<AccessToken, bool>>>())).ReturnsAsync(token);
+        var organizations = new Mock<IOrganizationService>();
+        organizations.Setup(x => x.GetAsync(org.Id)).ReturnsAsync(org);
+        var (handler, context) = await BuildHandlerAsync(tokens, organizations, token.Token);
+        context.Request.Headers[ApiConstants.OrgIdHeaderKey] = Guid.NewGuid().ToString();
+        context.Request.Headers[ApiConstants.WorkspaceHeaderKey] = Guid.NewGuid().ToString();
+
+        var result = await handler.AuthenticateAsync();
+
+        Assert.True(result.Succeeded);
+        Assert.Equal(org.Id.ToString(), context.Request.Headers[ApiConstants.OrgIdHeaderKey]);
+        Assert.Equal(org.WorkspaceId.ToString(), context.Request.Headers[ApiConstants.WorkspaceHeaderKey]);
+    }
+
     private const string SchemeName = Schemes.OpenApi;
 
     private static async Task<(OpenApiHandler handler, HttpContext ctx)> BuildHandlerAsync(

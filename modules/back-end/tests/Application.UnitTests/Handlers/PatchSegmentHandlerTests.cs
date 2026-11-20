@@ -15,6 +15,34 @@ namespace Application.UnitTests.Handlers;
 
 public class PatchSegmentHandlerTests
 {
+    [Theory]
+    [InlineData("id")]
+    [InlineData("envId")]
+    [InlineData("workspaceId")]
+    [InlineData("type")]
+    public async Task Handle_OwnershipFieldsChanged_RejectsWithoutPersistence(string path)
+    {
+        var segment = NewSegment();
+        var service = new Mock<ISegmentService>();
+        service.Setup(x => x.GetAsync(segment.Id)).ReturnsAsync(segment);
+        var publisher = new Mock<IPublisher>(MockBehavior.Strict);
+        var guard = new Mock<IPermissionGuard>(MockBehavior.Strict);
+        var sut = new PatchSegmentHandler(service.Object, guard.Object, Mock.Of<ICurrentUser>(), publisher.Object);
+        var patch = new JsonPatchDocument<Segment>();
+        patch.Operations.Add(new Operation<Segment>
+        {
+            op = "replace", path = "/" + path,
+            value = path == "type" ? SegmentType.Shared : Guid.NewGuid().ToString()
+        });
+
+        var result = await sut.Handle(new PatchSegment { Id = segment.Id, Patch = patch }, CancellationToken.None);
+
+        Assert.False(result.Success);
+        service.Verify(x => x.UpdateAsync(It.IsAny<Segment>()), Times.Never);
+        guard.VerifyNoOtherCalls();
+        publisher.VerifyNoOtherCalls();
+    }
+
     private static Segment NewSegment() => new(
         workspaceId: Guid.NewGuid(),
         envId: Guid.NewGuid(),
