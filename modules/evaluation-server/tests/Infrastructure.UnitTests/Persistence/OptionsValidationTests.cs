@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using Infrastructure.Caches.Redis;
 using Infrastructure.Persistence;
 using Infrastructure.Persistence.MongoDb;
+using Infrastructure.Store;
 
 namespace Infrastructure.UnitTests.Persistence;
 
@@ -60,6 +61,29 @@ public class OptionsValidationTests
         var options = new RedisOptions { ConnectionString = "localhost:6379", Password = "" };
 
         Assert.Empty(Validate(options));
+    }
+
+    [Fact]
+    public void StoreAvailabilityOptions_Defaults_PassValidation()
+    {
+        Assert.Empty(Validate(new StoreAvailabilityOptions()));
+    }
+
+    [Fact]
+    public void StoreAvailabilityOptions_OutOfRange_FailsValidation()
+    {
+        var options = new StoreAvailabilityOptions
+        {
+            CheckIntervalSeconds = 0,
+            CheckTimeoutMilliseconds = 0,
+            FailureThreshold = 0,
+            RecoveryThreshold = 0,
+            MinimumDwellSeconds = -1
+        };
+
+        var results = Validate(options);
+
+        Assert.Equal(5, results.Count);
     }
 
     private static List<ValidationResult> Validate(object instance)
