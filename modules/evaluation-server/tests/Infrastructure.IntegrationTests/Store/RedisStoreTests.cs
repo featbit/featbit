@@ -21,7 +21,7 @@ public class RedisStoreTests : IntegrationTestBase, IAsyncLifetime
         _fixture = fixture;
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         if (!DockerAvailability.IsAvailable)
         {
@@ -42,10 +42,10 @@ public class RedisStoreTests : IntegrationTestBase, IAsyncLifetime
         _sut = new RedisStore(clientMock.Object, NullLogger<RedisStore>.Instance);
     }
 
-    public Task DisposeAsync()
+    public ValueTask DisposeAsync()
     {
         _connection?.Dispose();
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 
     [DockerFact]

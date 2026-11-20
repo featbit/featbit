@@ -27,7 +27,7 @@ public sealed class RedisLeaderElectorTests : IntegrationTestBase, IAsyncLifetim
         _fixture = fixture;
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         if (!DockerAvailability.IsAvailable)
         {
@@ -40,7 +40,7 @@ public sealed class RedisLeaderElectorTests : IntegrationTestBase, IAsyncLifetim
         await _mux.GetDatabase().ExecuteAsync("FLUSHDB");
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         foreach (var elector in _electors)
         {

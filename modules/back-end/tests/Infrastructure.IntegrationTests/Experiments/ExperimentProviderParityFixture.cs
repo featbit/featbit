@@ -51,7 +51,7 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
         .WithWaitStrategy(Wait.ForUnixContainer().UntilInternalTcpPortIsAvailable(8123))
         .Build();
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         DefaultTypeMap.MatchNamesWithUnderscores = true;
 
@@ -65,7 +65,7 @@ public sealed class ExperimentProviderParityFixture : IAsyncLifetime
         await InitializeClickHouseAsync();
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await Task.WhenAll(
             _postgres.DisposeAsync().AsTask(),

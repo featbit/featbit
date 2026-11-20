@@ -68,7 +68,7 @@ public sealed class SegmentCommitCoordinatorWorkerTests : IntegrationTestBase, I
         _redisFixture = redisFixture;
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         if (!DockerAvailability.IsAvailable)
         {
@@ -107,7 +107,7 @@ public sealed class SegmentCommitCoordinatorWorkerTests : IntegrationTestBase, I
             NullLogger<CompositeRedisCacheService>.Instance);
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await _mux.GetDatabase(0).ExecuteAsync("FLUSHDB");
         await _mux.GetDatabase(1).ExecuteAsync("FLUSHDB");

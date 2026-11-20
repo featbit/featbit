@@ -13,7 +13,7 @@ public sealed class KafkaFixture : IAsyncLifetime
 
     public string BootstrapServers => _container.GetBootstrapAddress();
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         if (!DockerAvailability.IsAvailable)
         {
@@ -23,7 +23,7 @@ public sealed class KafkaFixture : IAsyncLifetime
         await _container.StartAsync();
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         if (!DockerAvailability.IsAvailable)
         {

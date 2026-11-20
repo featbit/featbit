@@ -37,7 +37,7 @@ public sealed class FeatureFlagCommittedPendingPostgresTests : IntegrationTestBa
     private FeatureFlagService _sut = null!;
     private readonly Guid _envId = Guid.NewGuid();
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         if (!DockerAvailability.IsAvailable)
         {
@@ -72,7 +72,7 @@ public sealed class FeatureFlagCommittedPendingPostgresTests : IntegrationTestBa
         _sut = new FeatureFlagService(_dbContext, NullLogger<FeatureFlagService>.Instance);
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         if (_dbContext != null!)
         {
