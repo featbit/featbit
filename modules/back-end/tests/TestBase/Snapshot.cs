@@ -15,9 +15,9 @@ namespace TestBase;
 /// <remarks>
 /// <para>The JSON is made stable before comparing: object properties are sorted (case-insensitive),
 /// <see cref="HttpResponseMessage"/>s are written as status, headers and content (JSON content is
-/// parsed), <c>Set-Cookie</c> headers are left out, and strings that are a Guid or a date-time are
-/// replaced with <c>Guid_n</c> / <c>DateTime_n</c> / <c>DateTimeOffset_n</c>, numbered in order of
-/// first appearance.</para>
+/// parsed), <c>Set-Cookie</c> and <c>Content-Length</c> headers are left out, and strings that are a
+/// Guid or a date-time are replaced with <c>Guid_n</c> / <c>DateTime_n</c> / <c>DateTimeOffset_n</c>,
+/// numbered in order of first appearance.</para>
 /// <para>On a mismatch, or when there is no verified file yet, the result is written to a
 /// <c>.received.json</c> file next to it and the assertion fails. If the change is expected, replace
 /// the <c>.verified.json</c> file with the <c>.received.json</c> one.</para>
@@ -148,9 +148,6 @@ public static partial class Snapshot
             return obj;
         }
 
-        // Content-Length is only added to the headers once something asks for it.
-        _ = response.Content.Headers.ContentLength;
-
         var isJson = response.Content.Headers.ContentType?.MediaType?.Contains("json", StringComparison.OrdinalIgnoreCase) == true;
         var content = new JsonObject();
         AddHeaders(content, response.Content.Headers);
@@ -165,8 +162,10 @@ public static partial class Snapshot
         var obj = new JsonObject();
         foreach (var (name, values) in headers)
         {
-            // Cookies carry tokens and expiry times that change on every run.
-            if (name.Equals("Set-Cookie", StringComparison.OrdinalIgnoreCase))
+            // Cookies carry tokens and expiry times that change on every run, and Content-Length
+            // describes the content before it is scrubbed.
+            if (name.Equals("Set-Cookie", StringComparison.OrdinalIgnoreCase) ||
+                name.Equals("Content-Length", StringComparison.OrdinalIgnoreCase))
             {
                 continue;
             }
