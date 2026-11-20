@@ -18,6 +18,46 @@ beforeAll(() => {
 })
 
 describe("ActionPicker", () => {
+  it("commits only on Done and discards dismissed changes", () => {
+    const onChange = vi.fn()
+    function Harness() {
+      const [actions, setActions] = useState(statement.actions)
+      return (
+        <ActionPicker
+          statement={{ ...statement, actions }}
+          fineGrainedGranted
+          onChange={(next) => {
+            setActions(next)
+            onChange(next)
+          }}
+        />
+      )
+    }
+    render(<Harness />)
+    fireEvent.click(screen.getByRole("button", { name: "Manage" }))
+    expect(
+      screen.queryByRole("button", { name: "Clear all" })
+    ).not.toBeInTheDocument()
+    fireEvent.click(
+      screen.getByRole("option", { name: /Create flags.*CreateFlag/ })
+    )
+    expect(onChange).not.toHaveBeenCalled()
+    expect(screen.getByText("Selected actions (1)")).toBeInTheDocument()
+    fireEvent.keyDown(screen.getByPlaceholderText("Search actions..."), {
+      key: "Escape",
+    })
+    fireEvent.click(screen.getByRole("button", { name: "Manage" }))
+    expect(
+      screen.getByRole("tab", { name: "Selected (1)" })
+    ).toBeInTheDocument()
+    fireEvent.click(
+      screen.getByRole("option", { name: /Create flags.*CreateFlag/ })
+    )
+    fireEvent.click(screen.getByRole("button", { name: "Done" }))
+    expect(onChange).toHaveBeenLastCalledWith([])
+    expect(screen.getByText("Selected actions (0)")).toBeInTheDocument()
+  })
+
   it("filters the list to selected actions", () => {
     render(
       <ActionPicker
