@@ -35,4 +35,14 @@ public class OpenApiDocumentTests
         Assert.True(root.TryGetProperty("info", out _), "Expected the 'info' field.");
         Assert.True(root.GetProperty("paths").EnumerateObject().Any(), "Expected at least one path.");
     }
+
+    [Fact]
+    public async Task GetApiReference_Anonymous_ReturnsScalarPage()
+    {
+        var response = await _app.GetAsync("/docs", authenticated: false);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("text/html", response.Content.Headers.ContentType?.MediaType);
+        Assert.Contains("FeatBit Open Api", await response.Content.ReadAsStringAsync());
+    }
 }
