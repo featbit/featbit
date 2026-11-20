@@ -9,7 +9,7 @@ public class GetOrganizationList : IRequest<IEnumerable<OrganizationVm>>
     public bool IsSsoFirstLogin { get; set; }
 }
 
-public class GetOrganizationListHandler(IOrganizationService service, IMapper mapper)
+public class GetOrganizationListHandler(IOrganizationService service)
     : IRequestHandler<GetOrganizationList, IEnumerable<OrganizationVm>>
 {
     public async Task<IEnumerable<OrganizationVm>> Handle(GetOrganizationList request,
@@ -25,6 +25,6 @@ public class GetOrganizationListHandler(IOrganizationService service, IMapper ma
             organizations = await service.FindManyAsync(x => x.WorkspaceId == request.WorkspaceId);
         }
 
-        return mapper.Map<IEnumerable<OrganizationVm>>(organizations);
+        return OrganizationMapper.ToVm(organizations);
     }
 }

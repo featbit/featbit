@@ -14,13 +14,11 @@ public class GetMemberListHandler : IRequestHandler<GetMemberList, PagedResult<M
 {
     private readonly IMemberService _service;
     private readonly ICurrentUser _currentUser;
-    private readonly IMapper _mapper;
 
-    public GetMemberListHandler(IMemberService service, ICurrentUser currentUser, IMapper mapper)
+    public GetMemberListHandler(IMemberService service, ICurrentUser currentUser)
     {
         _service = service;
         _currentUser = currentUser;
-        _mapper = mapper;
     }
 
     public async Task<PagedResult<MemberVm>> Handle(GetMemberList request, CancellationToken cancellationToken)
@@ -37,6 +35,6 @@ public class GetMemberListHandler : IRequestHandler<GetMemberList, PagedResult<M
             }
         }
 
-        return _mapper.Map<PagedResult<MemberVm>>(members);
+        return MemberMapper.ToVm(members);
     }
 }

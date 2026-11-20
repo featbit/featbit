@@ -4,6 +4,8 @@
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>disable</Nullable>
+        <!-- Every view model member must be mapped or explicitly ignored (see Bases/Mapping/MapperDefaults.cs). -->
+        <WarningsAsErrors>$(WarningsAsErrors);RMG012</WarningsAsErrors>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <NoWarn>$(NoWarn);1591</NoWarn>
     </PropertyGroup>
@@ -13,9 +15,9 @@
     </ItemGroup>
 
     <ItemGroup>
-        <!--  Any version prior to AutoMapper v15.0 and MediatR v13.0 remains free under their original open-source licenses.   -->
-        <!--  We will remove these dependencies in the future.  -->
-        <PackageReference Include="AutoMapper" />
+        <!--  Any version prior to MediatR v13.0 remains free under its original open-source license.   -->
+        <!--  We will remove this dependency in the future.  -->
+        <PackageReference Include="Riok.Mapperly" ExcludeAssets="runtime" PrivateAssets="all" />
         <PackageReference Include="MediatR" />
 
         <PackageReference Include="FluentValidation" />

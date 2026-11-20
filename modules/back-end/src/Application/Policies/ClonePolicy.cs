@@ -58,7 +58,7 @@ public class ClonePolicyValidator : AbstractValidator<ClonePolicy>
     }
 }
 
-public class ClonePolicyHandler(IPolicyService service, IMapper mapper, IPublisher auditPublisher, ICurrentUser auditActor)
+public class ClonePolicyHandler(IPolicyService service, IPublisher auditPublisher, ICurrentUser auditActor)
     : IRequestHandler<ClonePolicy, PolicyVm>
 {
     public async Task<PolicyVm> Handle(ClonePolicy request, CancellationToken cancellationToken)
@@ -89,6 +89,6 @@ public class ClonePolicyHandler(IPolicyService service, IMapper mapper, IPublish
         await auditPublisher.Publish(new OnIamResourceChanged(request.WorkspaceId, request.OrgId,
             AuditLogRefTypes.Policy, Operations.ClonePolicy, current, change.To(current), auditActor.Id, $"Cloned from: {(request.OriginPolicyType == PolicyTypes.SysManaged ? "system-managed" : "customer-managed")} policy/{request.OriginPolicyKey}"), cancellationToken);
 
-        return mapper.Map<PolicyVm>(clonedPolicy);
+        return PolicyMapper.ToVm(clonedPolicy);
     }
 }
