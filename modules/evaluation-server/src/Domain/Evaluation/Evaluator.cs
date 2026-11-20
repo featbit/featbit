@@ -23,8 +23,6 @@ public class Evaluator(IRuleMatcher ruleMatcher) : IEvaluator
             return new FeatureFlagDisabledUserVariation(scope.GetVariation(disabledVariationId));
         }
 
-        var exptIncludeAllTargets = reader.GetRequiredBoolean(flag, "exptIncludeAllTargets");
-
         // if user is targeted
         var targetUsers = reader.GetRequiredArray(flag, "targetUsers").EnumerateArray();
         foreach (var targetUser in targetUsers)
@@ -42,7 +40,7 @@ public class Evaluator(IRuleMatcher ruleMatcher) : IEvaluator
                     var targetVariation = scope.GetVariation(
                         reader.GetRequiredString(targetUser, "variationId")
                     );
-                    return new TargetedUserVariation(targetVariation, exptIncludeAllTargets);
+                    return new TargetedUserVariation(targetVariation);
                 }
             }
         }
@@ -65,8 +63,6 @@ public class Evaluator(IRuleMatcher ruleMatcher) : IEvaluator
                     reader.GetRequiredArray(rule, "variations"),
                     dispatchKey,
                     scope.Variations,
-                    exptIncludeAllTargets,
-                    reader.GetRequiredBoolean(rule, "includedInExpt"),
                     reader.GetRequiredString(rule, "name")
                 );
             }
@@ -84,8 +80,6 @@ public class Evaluator(IRuleMatcher ruleMatcher) : IEvaluator
             reader.GetRequiredArray(fallthrough, "variations"),
             dispatchKey,
             scope.Variations,
-            exptIncludeAllTargets,
-            reader.GetRequiredBoolean(fallthrough, "includedInExpt"),
             "default"
         );
     }

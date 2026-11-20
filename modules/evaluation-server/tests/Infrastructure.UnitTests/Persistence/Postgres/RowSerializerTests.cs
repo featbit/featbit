@@ -26,7 +26,6 @@ public class RowSerializerTests
             ["is_enabled"] = true,
             ["disabled_variation_id"] = "v0",
             ["fallthrough"] = "{\"variation\":\"v1\"}",
-            ["expt_include_all_targets"] = false,
             ["tags"] = new[] { "x", "y" },
             ["updated_at"] = updatedAt,
             ["is_archived"] = false
@@ -41,7 +40,6 @@ public class RowSerializerTests
         Assert.Equal("flag-key", element.GetProperty("key").GetString());
         Assert.Equal("boolean", element.GetProperty("variationType").GetString());
         Assert.True(element.GetProperty("isEnabled").GetBoolean());
-        Assert.False(element.GetProperty("exptIncludeAllTargets").GetBoolean());
         Assert.False(element.GetProperty("isArchived").GetBoolean());
         Assert.Equal(JsonValueKind.Array, element.GetProperty("variations").ValueKind);
         Assert.Equal(JsonValueKind.Array, element.GetProperty("targetUsers").ValueKind);
@@ -147,7 +145,6 @@ public class RowSerializerTests
         ["is_enabled"] = true,
         ["disabled_variation_id"] = "v",
         ["fallthrough"] = "{}",
-        ["expt_include_all_targets"] = false,
         ["tags"] = new[] { "t" },
         ["updated_at"] = DateTime.UtcNow,
         ["is_archived"] = false

@@ -41,8 +41,6 @@ public class ClientSdkFlag
 
     public Variation[] VariationOptions { get; set; }
 
-    public bool SendToExperiment { get; set; }
-
     public bool InsightsEnabled { get; set; }
 
     public long Timestamp { get; set; }
@@ -60,6 +58,5 @@ public class ClientSdkFlag
         Variation = userVariation.Variation?.Value;
         VariationId = userVariation.Variation?.Id;
         MatchReason = userVariation.MatchReason;
-        SendToExperiment = userVariation.SendToExperiment;
     }
 }

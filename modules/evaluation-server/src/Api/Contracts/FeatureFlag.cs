@@ -15,8 +15,6 @@ public class EvalResultVariation
 
     public string MatchReason { get; set; }
 
-    public bool SendToExperiment { get; set; }
-
     public bool InsightsEnabled { get; set; }
 
     public EvalResultVariation(string type, UserVariation uv, bool insightsEnabled)
@@ -25,7 +23,6 @@ public class EvalResultVariation
         Type = type;
         Value = uv.Variation?.Value;
         MatchReason = uv.MatchReason;
-        SendToExperiment = uv.SendToExperiment;
         InsightsEnabled = insightsEnabled;
     }
 }
