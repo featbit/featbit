@@ -18,8 +18,7 @@ public class GetFeatureFlagList : IRequest<PagedResult<FeatureFlagVm>>
 public class GetFeatureFlagListHandler(
     IFeatureFlagService flagService,
     IUserService userService,
-    IAuditLogService auditLogService,
-    IMapper mapper)
+    IAuditLogService auditLogService)
     : IRequestHandler<GetFeatureFlagList, PagedResult<FeatureFlagVm>>
 {
     public async Task<PagedResult<FeatureFlagVm>> Handle(GetFeatureFlagList request, CancellationToken cancellationToken)
@@ -36,7 +35,7 @@ public class GetFeatureFlagListHandler(
 
         var users = await GetUsersAsync();
 
-        var flagVms = mapper.Map<PagedResult<FeatureFlagVm>>(flags);
+        var flagVms = FeatureFlagMapper.ToVm(flags);
         foreach (var flag in flags.Items)
         {
             var vm = flagVms.Items.First(x => x.Id == flag.Id);
@@ -44,7 +43,7 @@ public class GetFeatureFlagListHandler(
             var creator = users.FirstOrDefault(x => x.Id == flag.CreatorId);
             if (creator != null)
             {
-                vm.Creator = mapper.Map<UserVm>(creator);
+                vm.Creator = UserMapper.ToVm(creator);
             }
 
             var lastChange = lastChanges.FirstOrDefault(x => x.RefId == flag.Id.ToString());

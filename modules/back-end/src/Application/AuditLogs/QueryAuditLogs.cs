@@ -54,8 +54,7 @@ public class QueryAuditLogsHandler(
     IAuditLogService auditLogService,
     AuditLogAccessGuard accessGuard,
     IUserService userService,
-    IAccessTokenService tokenService,
-    IMapper mapper)
+    IAccessTokenService tokenService)
     : IRequestHandler<QueryAuditLogs, PagedResult<AuditLogVm>>
 {
     public async Task<PagedResult<AuditLogVm>> Handle(QueryAuditLogs request, CancellationToken cancellationToken)
@@ -73,7 +72,7 @@ public class QueryAuditLogsHandler(
         }
 
         var result = await auditLogService.GetListAsync(request.WorkspaceId, request.Filter);
-        var logVms = mapper.Map<PagedResult<AuditLogVm>>(result);
+        var logVms = AuditLogMapper.ToVm(result);
 
         var creators = await userService.GetListAsync(logVms.Items.Select(x => x.CreatorId));
         foreach (var item in logVms.Items)

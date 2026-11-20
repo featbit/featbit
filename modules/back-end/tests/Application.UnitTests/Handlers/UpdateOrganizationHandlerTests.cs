@@ -1,7 +1,6 @@
 using Application.Bases.Exceptions;
 using Application.Organizations;
 using Application.Services;
-using AutoMapper;
 using Domain.Organizations;
 using Domain.Policies;
 using Domain.Resources;
@@ -52,11 +51,7 @@ public class UpdateOrganizationHandlerTests
     {
         var service = new Mock<IOrganizationService>();
         service.Setup(x => x.GetAsync(organization.Id)).ReturnsAsync(organization);
-        var mapper = new Mock<IMapper>();
-        mapper.Setup(x => x.Map<OrganizationVm>(It.IsAny<Organization>()))
-            .Returns(new OrganizationVm());
-
-        return (new UpdateOrganizationHandler(service.Object, mapper.Object), service);
+        return (new UpdateOrganizationHandler(service.Object), service);
     }
 
     [Fact]

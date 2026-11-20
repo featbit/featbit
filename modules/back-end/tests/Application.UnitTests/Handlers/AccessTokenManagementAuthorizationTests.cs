@@ -1,7 +1,6 @@
 using Application.AccessTokens;
 using Application.Bases.Exceptions;
 using Application.Services;
-using AutoMapper;
 using Domain.AccessTokens;
 using Domain.Policies;
 using Domain.Resources;
@@ -32,8 +31,7 @@ public class AccessTokenManagementAuthorizationTests
         var token = Token(organizationId, AccessTokenTypes.Personal);
         var service = new Mock<IAccessTokenService>();
         service.Setup(x => x.GetAsync(token.Id)).ReturnsAsync(token);
-        var mapper = new Mock<IMapper>();
-        var sut = new UpdateAccessTokenHandler(service.Object, mapper.Object);
+        var sut = new UpdateAccessTokenHandler(service.Object);
 
         var request = new UpdateAccessToken
         {

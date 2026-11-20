@@ -10,7 +10,7 @@ public class GetAccessTokenList : IRequest<PagedResult<AccessTokenVm>>
     public AccessTokenFilter Filter { get; set; }
 }
 
-public class GetAccessTokenListHandler(IAccessTokenService accessTokenService, IUserService userService, IMapper mapper)
+public class GetAccessTokenListHandler(IAccessTokenService accessTokenService, IUserService userService)
     : IRequestHandler<GetAccessTokenList, PagedResult<AccessTokenVm>>
 {
     public async Task<PagedResult<AccessTokenVm>> Handle(GetAccessTokenList request, CancellationToken cancellationToken)
@@ -21,11 +21,11 @@ public class GetAccessTokenListHandler(IAccessTokenService accessTokenService, I
         var creatorIds = accessTokens.Items.Select(x => x.CreatorId);
         var creators = await userService.GetListAsync(creatorIds);
 
-        var accessTokenVms = mapper.Map<PagedResult<AccessTokenVm>>(accessTokens);
+        var accessTokenVms = AccessTokenMapper.ToVm(accessTokens);
         foreach (var accessToken in accessTokens.Items)
         {
             var accessTokenVm = accessTokenVms.Items.First(x => x.Id == accessToken.Id);
-            accessTokenVm.Creator = mapper.Map<UserVm>(creators.FirstOrDefault(x => x.Id == accessToken.CreatorId));
+            accessTokenVm.Creator = UserMapper.ToVm(creators.FirstOrDefault(x => x.Id == accessToken.CreatorId));
             accessTokenVm.Token = accessTokenVm.Token[..15] + "**************";
         }
 
