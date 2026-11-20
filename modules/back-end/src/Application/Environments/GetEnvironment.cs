@@ -9,7 +9,7 @@ public class GetEnvironment : IRequest<EnvironmentVm>
     public PolicyStatement[] Permissions { get; set; } = [];
 }
 
-public class GetEnvironmentHandler(IEnvironmentService envService, IResourceService resourceService, IMapper mapper)
+public class GetEnvironmentHandler(IEnvironmentService envService, IResourceService resourceService)
     : IRequestHandler<GetEnvironment, EnvironmentVm>
 {
     public async Task<EnvironmentVm> Handle(GetEnvironment request, CancellationToken cancellationToken)
@@ -19,6 +19,6 @@ public class GetEnvironmentHandler(IEnvironmentService envService, IResourceServ
         var resourceRn = await resourceService.GetEnvRnAsync(env.Id);
         env.Sanitize(resourceRn, request.Permissions);
 
-        return mapper.Map<EnvironmentVm>(env);
+        return EnvironmentMapper.ToVm(env);
     }
 }

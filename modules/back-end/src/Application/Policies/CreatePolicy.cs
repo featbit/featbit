@@ -43,7 +43,7 @@ public class CreatePolicyValidator : AbstractValidator<CreatePolicy>
     }
 }
 
-public class CreatePolicyHandler(IPolicyService service, IMapper mapper, IPublisher auditPublisher, ICurrentUser auditActor) : IRequestHandler<CreatePolicy, PolicyVm>
+public class CreatePolicyHandler(IPolicyService service, IPublisher auditPublisher, ICurrentUser auditActor) : IRequestHandler<CreatePolicy, PolicyVm>
 {
     public async Task<PolicyVm> Handle(CreatePolicy request, CancellationToken cancellationToken)
     {
@@ -56,6 +56,6 @@ public class CreatePolicyHandler(IPolicyService service, IMapper mapper, IPublis
         await auditPublisher.Publish(new OnIamResourceChanged(request.WorkspaceId, request.OrganizationId,
             AuditLogRefTypes.Policy, Operations.CreatePolicy, current, change.To(current), auditActor.Id), cancellationToken);
 
-        return mapper.Map<PolicyVm>(policy);
+        return PolicyMapper.ToVm(policy);
     }
 }

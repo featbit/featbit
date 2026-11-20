@@ -33,7 +33,6 @@ public class UpdateLicenseValidator : AbstractValidator<UpdateLicense>
 public class UpdateLicenseHandler(
     IWorkspaceService service,
     ICacheService cacheService,
-    IMapper mapper,
     IConfiguration configuration,
     IMessageProducer messageProducer)
     : IRequestHandler<UpdateLicense, WorkspaceVm>
@@ -59,6 +58,6 @@ public class UpdateLicenseHandler(
             await messageProducer.PublishAsync(ControlPlaneTopics.ControlPlaneLicenseChange, workspace);
         }
 
-        return mapper.Map<WorkspaceVm>(workspace);
+        return WorkspaceMapper.ToVm(workspace);
     }
 }

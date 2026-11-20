@@ -13,7 +13,7 @@ public class GetWorkspace : IRequest<WorkspaceVm>
     public PolicyStatement[] Permissions { get; set; }
 }
 
-public class GetWorkspaceHandler(IWorkspaceService service, IMapper mapper) : IRequestHandler<GetWorkspace, WorkspaceVm>
+public class GetWorkspaceHandler(IWorkspaceService service) : IRequestHandler<GetWorkspace, WorkspaceVm>
 {
     public async Task<WorkspaceVm> Handle(GetWorkspace request, CancellationToken cancellationToken)
     {
@@ -34,6 +34,6 @@ public class GetWorkspaceHandler(IWorkspaceService service, IMapper mapper) : IR
             workspace.License = null;
         }
 
-        return mapper.Map<WorkspaceVm>(workspace);
+        return WorkspaceMapper.ToVm(workspace);
     }
 }

@@ -42,14 +42,12 @@ public class UpdateGroupHandler : IRequestHandler<UpdateGroup, GroupVm>
     private readonly ICurrentUser _auditActor;
 
     private readonly IGroupService _service;
-    private readonly IMapper _mapper;
 
-    public UpdateGroupHandler(IGroupService service, IMapper mapper, IPublisher auditPublisher, ICurrentUser auditActor)
+    public UpdateGroupHandler(IGroupService service, IPublisher auditPublisher, ICurrentUser auditActor)
     {
         _auditPublisher = auditPublisher;
         _auditActor = auditActor;
         _service = service;
-        _mapper = mapper;
     }
 
     public async Task<GroupVm> Handle(UpdateGroup request, CancellationToken cancellationToken)
@@ -67,6 +65,6 @@ public class UpdateGroupHandler : IRequestHandler<UpdateGroup, GroupVm>
         await _auditPublisher.Publish(new OnIamResourceChanged(request.WorkspaceId, request.OrganizationId,
             AuditLogRefTypes.Group, Operations.UpdateGroup, current ?? previous, change.To(current), _auditActor.Id), cancellationToken);
 
-        return _mapper.Map<GroupVm>(group);
+        return GroupMapper.ToVm(group);
     }
 }

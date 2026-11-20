@@ -12,8 +12,7 @@ public class GetExperimentMetricList : IRequest<PagedResult<ExperimentMetricVm>>
 
 public class GetExperimentMetricsHandler(
     IExperimentMetricService metricService,
-    IExperimentService experimentService,
-    IMapper mapper)
+    IExperimentService experimentService)
     : IRequestHandler<GetExperimentMetricList, PagedResult<ExperimentMetricVm>>
 {
     public async Task<PagedResult<ExperimentMetricVm>> Handle(
@@ -33,7 +32,7 @@ public class GetExperimentMetricsHandler(
         }
 
         var metrics = await metricService.GetListAsync(request.EnvId, request.Filter, referencedIds);
-        var result = mapper.Map<PagedResult<ExperimentMetricVm>>(metrics);
+        var result = ExperimentMetricMapper.ToVm(metrics);
         if (metrics.Items.Count == 0)
         {
             return result;
