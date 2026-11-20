@@ -131,7 +131,7 @@ await Snapshot.Match(response, scrub: x => x.StartsWith("eyJ") ? "[Scrubbed JWT]
 await Snapshot.MatchJson(json, suffix: $"type={type}");           // JSON text; suffix for theory parameters
 ```
 
-The value is compared with `Snapshots/{TestClass}.{TestMethod}[_{suffix}].verified.json`. Before comparing, properties are sorted, `Set-Cookie` headers are left out, and strings holding a Guid or a date-time become `Guid_n` / `DateTime_n` / `DateTimeOffset_n`, numbered in order of first appearance.
+The value is compared with `Snapshots/{TestClass}.{TestMethod}[_{suffix}].verified.json`. Before comparing, properties are sorted, `Set-Cookie` and `Content-Length` headers are left out, and strings holding a Guid or a date-time become `Guid_n` / `DateTime_n` / `DateTimeOffset_n`, numbered in order of first appearance.
 
 On a mismatch, or for a new test, the result is written to a `.received.json` file next to it (git-ignored) and the test fails with the first differing line. To accept the change, replace the `.verified.json` file with the `.received.json` one.
 
