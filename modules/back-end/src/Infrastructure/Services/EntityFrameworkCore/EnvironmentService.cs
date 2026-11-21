@@ -1,5 +1,6 @@
 using Domain.EndUsers;
 using Domain.Environments;
+using Domain.ObservabilityProviders;
 using Domain.Organizations;
 using Domain.Projects;
 using Microsoft.EntityFrameworkCore;
@@ -195,6 +196,7 @@ public class EnvironmentService(AppDbContext dbContext, ILogger<EnvironmentServi
     public async Task DeleteAsync(Guid id)
     {
         await DeleteOneAsync(id);
+        await SetOf<ObservabilityProvider>().Where(x => x.EnvId == id).ExecuteDeleteAsync();
 
         // delete end users
         await SetOf<EndUser>().Where(x => x.EnvId == id).ExecuteDeleteAsync();
@@ -206,6 +208,7 @@ public class EnvironmentService(AppDbContext dbContext, ILogger<EnvironmentServi
     public async Task DeleteManyAsync(ICollection<Guid> ids)
     {
         await Set.Where(x => ids.Contains(x.Id)).ExecuteDeleteAsync();
+        await SetOf<ObservabilityProvider>().Where(x => ids.Contains(x.EnvId)).ExecuteDeleteAsync();
 
         // delete end users
         await SetOf<EndUser>().Where(x => x.EnvId != null && ids.Contains(x.EnvId.Value)).ExecuteDeleteAsync();

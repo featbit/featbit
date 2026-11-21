@@ -48,6 +48,8 @@
         <EmbeddedResource Include="..\..\..\..\infra\postgresql\docker-entrypoint-initdb.d\*.sql">
             <LogicalName>FeatBitPostgresInitDb.%(Filename)%(Extension)</LogicalName>
         </EmbeddedResource>
+        <EmbeddedResource Include="..\..\..\..\infra\mongodb\docker-entrypoint-initdb.d\v6.2.0.js"
+                          LogicalName="FeatBitMongoInitDb.v6.2.0.js" />
     </ItemGroup>
 
 </Project>

@@ -11,6 +11,7 @@ using Domain.Groups;
 using Domain.Members;
 using Domain.Mcp;
 using Domain.Organizations;
+using Domain.ObservabilityProviders;
 using Domain.Policies;
 using Domain.Projects;
 using Domain.RefreshTokens;
@@ -76,6 +77,7 @@ public class MongoDbClient
         { typeof(ExperimentRun), "ExperimentRuns" },
         { typeof(ExperimentLayer), "ExperimentLayers" },
         { typeof(ExperimentMetric), "ExperimentMetrics" },
+        { typeof(ObservabilityProvider), "ObservabilityProviders" },
         { typeof(ExperimentExposureEvent), "ExperimentExposureEvents" },
         { typeof(ExperimentMetricEvent), "ExperimentMetricEvents" },
         { typeof(ExperimentRunAssignment), "ExperimentRunAssignments" },

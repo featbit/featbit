@@ -30,6 +30,7 @@ public class AuthorizationSmokeTests
         yield return new object[] { $"/api/v1/envs/{EnvId}/end-user-properties" };
         yield return new object[] { $"/api/v1/projects/{ProjectId}/envs/{Guid.Empty}" };
         yield return new object[] { $"/api/v1/envs/{EnvId}/feature-flags" };
+        yield return new object[] { $"/api/v1/envs/{EnvId}/observability-providers" };
         yield return new object[] { "/api/v1/global-users" };
         yield return new object[] { "/api/v1/groups" };
         yield return new object[] { "/api/v1/members" };

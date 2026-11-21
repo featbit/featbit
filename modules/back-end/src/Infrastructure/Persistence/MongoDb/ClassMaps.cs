@@ -1,5 +1,6 @@
 using Domain.ControlPlane;
 using Domain.FeatureFlags;
+using Domain.ObservabilityProviders;
 using Domain.Organizations;
 using Domain.Segments;
 using Domain.Users;
@@ -41,6 +42,12 @@ public static class ClassMaps
         {
             map.AutoMap();
             map.MapMember(x => x.Origin).SetDefaultValue(UserOrigin.Local);
+        });
+
+        BsonClassMap.RegisterClassMap<ObservabilityProvider>(map =>
+        {
+            map.AutoMap();
+            map.MapMember(x => x.ConnectionConfiguration).SetSerializer(new ProviderConnectionConfigurationSerializer());
         });
 
         BsonClassMap.RegisterClassMap<Organization>(map =>

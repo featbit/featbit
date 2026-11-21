@@ -1,4 +1,5 @@
 using Testcontainers.MongoDb;
+using DotNet.Testcontainers.Containers;
 
 namespace Infrastructure.IntegrationTests.Fixtures;
 
@@ -10,6 +11,8 @@ public sealed class MongoDbFixture : IAsyncLifetime
     private readonly MongoDbContainer _container = new MongoDbBuilder("mongo:7.0").Build();
 
     public string ConnectionString => _container.GetConnectionString();
+
+    public Task<ExecResult> ExecuteScriptAsync(string script) => _container.ExecScriptAsync(script);
 
     public async Task InitializeAsync()
     {

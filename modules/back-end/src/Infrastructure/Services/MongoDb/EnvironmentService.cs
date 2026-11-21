@@ -1,5 +1,6 @@
 using Domain.EndUsers;
 using Domain.Environments;
+using Domain.ObservabilityProviders;
 using Domain.Organizations;
 using Domain.Projects;
 using Microsoft.Extensions.Logging;
@@ -200,6 +201,7 @@ public class EnvironmentService(MongoDbClient mongoDb, ILogger<EnvironmentServic
     public async Task DeleteAsync(Guid id)
     {
         await MongoDb.CollectionOf<Environment>().DeleteOneAsync(x => x.Id == id);
+        await MongoDb.CollectionOf<ObservabilityProvider>().DeleteManyAsync(x => x.EnvId == id);
 
         // delete end users
         await MongoDb.CollectionOf<EndUser>().DeleteManyAsync(x => x.EnvId == id);
@@ -211,6 +213,7 @@ public class EnvironmentService(MongoDbClient mongoDb, ILogger<EnvironmentServic
     public async Task DeleteManyAsync(ICollection<Guid> ids)
     {
         await Collection.DeleteManyAsync(x => ids.Contains(x.Id));
+        await MongoDb.CollectionOf<ObservabilityProvider>().DeleteManyAsync(x => ids.Contains(x.EnvId));
 
         // delete end users
         await MongoDb.CollectionOf<EndUser>().DeleteManyAsync(x => x.EnvId != null && ids.Contains(x.EnvId.Value));

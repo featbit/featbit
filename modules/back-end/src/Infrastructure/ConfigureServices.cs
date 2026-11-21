@@ -76,6 +76,7 @@ public static class ConfigureServices
 
         // custom services
         services.AddDbSpecificServices(configuration);
+        services.AddProviderCredentials(configuration);
         services.AddTransient<IEnvironmentAppService, AppServices.EnvironmentAppService>();
         services.AddTransient<IFeatureFlagAppService, AppServices.FeatureFlagAppService>();
         if (configuration.IsSaasHosting())
@@ -88,5 +89,15 @@ public static class ConfigureServices
         }
 
         return services;
+    }
+
+    internal static IServiceCollection AddProviderCredentials(this IServiceCollection services, IConfiguration configuration)
+    {
+        var section = configuration.GetSection(Services.ProviderCredentialOptions.Section);
+        services.AddOptionsWithValidateOnStart<Services.ProviderCredentialOptions>()
+            .Bind(section)
+            .Validate(options => !section.Exists() || options.HasValidKeyRing(),
+                "ReleaseHealth:Credentials requires an active key ID and a key ring of base64-encoded 32-byte keys.");
+        return services.AddSingleton<IProviderCredentialProtector, Services.ProviderCredentialProtector>();
     }
 }
