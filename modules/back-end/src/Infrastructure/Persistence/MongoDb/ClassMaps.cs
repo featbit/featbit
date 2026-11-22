@@ -1,5 +1,6 @@
 using Domain.ControlPlane;
 using Domain.FeatureFlags;
+using Domain.ReleaseMetricSourceConnections;
 using Domain.Organizations;
 using Domain.Segments;
 using Domain.Users;
@@ -41,6 +42,12 @@ public static class ClassMaps
         {
             map.AutoMap();
             map.MapMember(x => x.Origin).SetDefaultValue(UserOrigin.Local);
+        });
+
+        BsonClassMap.RegisterClassMap<ReleaseMetricSourceConnection>(map =>
+        {
+            map.AutoMap();
+            map.MapMember(x => x.ConnectionConfiguration).SetSerializer(new ReleaseMetricSourceConnectionSettingsSerializer());
         });
 
         BsonClassMap.RegisterClassMap<Organization>(map =>

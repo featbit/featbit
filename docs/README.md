@@ -12,3 +12,4 @@ Design documents for work that is planned or in progress. Each proposal has its 
 | --- | --- | --- |
 | [OpenTelemetry custom metrics](proposals/otel-custom-metrics/README.md) | Draft | Custom metric and trace priorities for operational stability across the API server, evaluation server, and control plane |
 | [Flag and segment change reliability](proposals/flag-segment-change-reliability-enhancement/README.md) | Draft | Reliable change persistence, message delivery, ELS processing, and WebSocket fanout |
+| [Release Health](proposals/release-health/README.md) | Draft | Environment-scoped source connections for release metrics |
