@@ -11,6 +11,12 @@ namespace Application.Policies;
 
 public class PermissionGuard(IResourcePermissionTargetResolver targetResolver) : IPermissionGuard
 {
+    public Task EnsureFlagOwnershipAsync(Guid organizationId, FeatureFlag flag) =>
+        EnsureOwnershipAsync(organizationId, () => targetResolver.ResolveFlagAsync(flag.EnvId, flag.Key));
+
+    public Task EnsureSegmentOwnershipAsync(Guid organizationId, Segment segment) =>
+        EnsureOwnershipAsync(organizationId, () => targetResolver.ResolveSegmentAsync(segment.EnvId, segment.Id));
+
     public Task EnsureFlagChangeAllowedAsync(Guid organizationId, FeatureFlag flag, DataChange change, PolicyStatement[] permissions) =>
         EnsureAllowedAsync(
             organizationId,
@@ -31,18 +37,9 @@ public class PermissionGuard(IResourcePermissionTargetResolver targetResolver) :
         Guid organizationId,
         IEnumerable<string> instructionPermissions,
         PolicyStatement[] policies,
-        Func<Task<ResourcePermissionTarget?>> rptResolver)
+        Func<Task<ResourcePermissionTarget?>> targetResolver)
     {
-        if (organizationId == Guid.Empty)
-        {
-            throw new ForbiddenException();
-        }
-
-        var permissionTarget = await rptResolver();
-        if (string.IsNullOrWhiteSpace(permissionTarget?.Rn) || permissionTarget.OrganizationId != organizationId)
-        {
-            throw new ForbiddenException();
-        }
+        var permissionTarget = await EnsureOwnershipAsync(organizationId, targetResolver);
 
         var requiredPermissions = instructionPermissions
             .Where(permission => !string.IsNullOrEmpty(permission))
@@ -52,5 +49,23 @@ public class PermissionGuard(IResourcePermissionTargetResolver targetResolver) :
         {
             throw new ForbiddenException();
         }
+    }
+
+    private static async Task<ResourcePermissionTarget> EnsureOwnershipAsync(
+        Guid organizationId,
+        Func<Task<ResourcePermissionTarget?>> targetResolver)
+    {
+        if (organizationId == Guid.Empty)
+        {
+            throw new ForbiddenException();
+        }
+
+        var permissionTarget = await targetResolver();
+        if (string.IsNullOrWhiteSpace(permissionTarget?.Rn) || permissionTarget.OrganizationId != organizationId)
+        {
+            throw new ForbiddenException();
+        }
+
+        return permissionTarget;
     }
 }

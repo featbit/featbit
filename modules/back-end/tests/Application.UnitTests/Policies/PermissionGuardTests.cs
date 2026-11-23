@@ -45,9 +45,13 @@ public class PermissionGuardTests
             ? [new() { ResourceType = ResourceTypes.All, Effect = EffectType.Allow, Actions = ["*"], Resources = ["*"] }]
             : [];
         var requestOrg = ownership == "empty-request-org" ? Guid.Empty : org;
-        Func<Task> act = () => segment
-            ? guard.EnsureSegmentChangeAllowedAsync(requestOrg, seg, change, permissions)
-            : guard.EnsureFlagChangeAllowedAsync(requestOrg, flag, change, permissions);
+        Func<Task> act = () => changed
+            ? segment
+                ? guard.EnsureSegmentChangeAllowedAsync(requestOrg, seg, change, permissions)
+                : guard.EnsureFlagChangeAllowedAsync(requestOrg, flag, change, permissions)
+            : segment
+                ? guard.EnsureSegmentOwnershipAsync(requestOrg, seg)
+                : guard.EnsureFlagOwnershipAsync(requestOrg, flag);
         if (ownership == "own") await act();
         else await Assert.ThrowsAsync<ForbiddenException>(act);
         if (ownership == "empty-request-org") targetResolver.VerifyNoOtherCalls();

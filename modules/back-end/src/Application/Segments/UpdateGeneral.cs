@@ -77,8 +77,7 @@ public class UpdateGeneralHandler(
 
         if (!nameChanged && !descriptionChanged && !tagsChanged)
         {
-            await permissionGuard.EnsureSegmentChangeAllowedAsync(
-                request.OrgId, segment, new DataChange(segment).To(segment), request.Permissions);
+            await permissionGuard.EnsureSegmentOwnershipAsync(request.OrgId, segment);
             return true;
         }
 
