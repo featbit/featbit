@@ -64,18 +64,18 @@ public class UpdateGeneralHandlerTests
     private static UpdateGeneralHandler BuildSut(
         FeatureFlag flag,
         Mock<IFeatureFlagService> flagService,
-        Mock<IResourceService> resourceService,
+        Mock<IResourcePermissionTargetResolver> targetResolver,
         Mock<IPublisher> publisher)
     {
         flagService.Setup(x => x.GetAsync(flag.EnvId, flag.Key)).ReturnsAsync(flag);
-        resourceService.Setup(x => x.GetFlagRnAsync(flag.EnvId, flag.Key)).ReturnsAsync(new ResourceRn("flag/*", OrganizationId));
+        targetResolver.Setup(x => x.ResolveFlagAsync(flag.EnvId, flag.Key)).ReturnsAsync(new ResourcePermissionTarget("flag/*", OrganizationId));
 
         var currentUser = new Mock<ICurrentUser>();
         currentUser.SetupGet(x => x.Id).Returns(Guid.NewGuid());
 
         return new UpdateGeneralHandler(
             flagService.Object,
-            new PermissionGuard(resourceService.Object),
+            new PermissionGuard(targetResolver.Object),
             currentUser.Object,
             publisher.Object);
     }
@@ -86,9 +86,9 @@ public class UpdateGeneralHandlerTests
         var flag = NewFlag();
         var previousRevision = flag.Revision;
         var flagService = new Mock<IFeatureFlagService>();
-        var resourceService = new Mock<IResourceService>();
+        var targetResolver = new Mock<IResourcePermissionTargetResolver>();
         var publisher = new Mock<IPublisher>();
-        var sut = BuildSut(flag, flagService, resourceService, publisher);
+        var sut = BuildSut(flag, flagService, targetResolver, publisher);
         var request = NewRequest(
             flag,
             Allow(
@@ -129,9 +129,9 @@ public class UpdateGeneralHandlerTests
     {
         var flag = NewFlag();
         var flagService = new Mock<IFeatureFlagService>();
-        var resourceService = new Mock<IResourceService>();
+        var targetResolver = new Mock<IResourcePermissionTargetResolver>();
         var publisher = new Mock<IPublisher>();
-        var sut = BuildSut(flag, flagService, resourceService, publisher);
+        var sut = BuildSut(flag, flagService, targetResolver, publisher);
         var request = NewRequest(
             flag,
             Allow(grantedPermission),
@@ -153,9 +153,9 @@ public class UpdateGeneralHandlerTests
     {
         var flag = NewFlag();
         var flagService = new Mock<IFeatureFlagService>();
-        var resourceService = new Mock<IResourceService>();
+        var targetResolver = new Mock<IResourcePermissionTargetResolver>();
         var publisher = new Mock<IPublisher>();
-        var sut = BuildSut(flag, flagService, resourceService, publisher);
+        var sut = BuildSut(flag, flagService, targetResolver, publisher);
         var request = NewRequest(
             flag,
             Allow(Permissions.UpdateFlagName),
@@ -172,16 +172,16 @@ public class UpdateGeneralHandlerTests
     {
         var flag = NewFlag();
         var flagService = new Mock<IFeatureFlagService>();
-        var resourceService = new Mock<IResourceService>();
+        var targetResolver = new Mock<IResourcePermissionTargetResolver>();
         var publisher = new Mock<IPublisher>();
-        var sut = BuildSut(flag, flagService, resourceService, publisher);
+        var sut = BuildSut(flag, flagService, targetResolver, publisher);
         var request = NewRequest(flag, []);
 
         var revision = await sut.Handle(request, CancellationToken.None);
 
         Assert.Equal(flag.Revision, revision);
-        resourceService.Verify(
-            x => x.GetFlagRnAsync(It.IsAny<Guid>(), It.IsAny<string>()),
+        targetResolver.Verify(
+            x => x.ResolveFlagAsync(It.IsAny<Guid>(), It.IsAny<string>()),
             Times.Once);
         flagService.Verify(x => x.UpdateAsync(It.IsAny<FeatureFlag>()), Times.Never);
         publisher.Verify(

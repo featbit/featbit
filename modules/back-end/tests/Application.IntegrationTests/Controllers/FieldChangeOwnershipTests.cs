@@ -59,8 +59,8 @@ public class FieldChangeOwnershipTests
             response = await client.PutAsJsonAsync(url + "/" + operation, body);
         }
         Assert.Equal(foreign ? HttpStatusCode.Forbidden : HttpStatusCode.OK, response.StatusCode);
-        if (segment) app.Resources.Verify(x => x.GetSegmentRnAsync(app.EnvironmentId, app.Segment.Id), Times.Once);
-        else app.Resources.Verify(x => x.GetFlagRnAsync(app.EnvironmentId, "flag"), Times.Once);
+        if (segment) app.TargetResolver.Verify(x => x.ResolveSegmentAsync(app.EnvironmentId, app.Segment.Id), Times.Once);
+        else app.TargetResolver.Verify(x => x.ResolveFlagAsync(app.EnvironmentId, "flag"), Times.Once);
         if (foreign || (!changed && operation == "general"))
         {
             app.Flags.Verify(x => x.UpdateAsync(It.IsAny<FeatureFlag>()), Times.Never);
@@ -80,7 +80,7 @@ public class FieldChangeTestApp : PermissionCheckTestApp
     public Segment Segment { get; }
     public Mock<IFeatureFlagService> Flags { get; } = new();
     public Mock<ISegmentService> Segments { get; } = new();
-    public Mock<IResourceService> Resources { get; } = new();
+    public Mock<IResourcePermissionTargetResolver> TargetResolver { get; } = new();
     public Mock<IPublisher> Publisher { get; } = new();
     public FieldChangeTestApp()
     {
@@ -97,10 +97,10 @@ public class FieldChangeTestApp : PermissionCheckTestApp
         {
             var owner = Foreign ? Guid.NewGuid() : TestWorkspace.OrganizationId;
             // Identical relative RNs intentionally make the wildcard policy match in either organization.
-            Resources.Setup(x => x.GetFlagRnAsync(EnvironmentId, "flag"))
-                .ReturnsAsync(new ResourceRn("project/p:env/e:flag/flag", owner));
-            Resources.Setup(x => x.GetSegmentRnAsync(EnvironmentId, Segment.Id))
-                .ReturnsAsync(new ResourceRn("project/p:env/e:segment/segment", owner));
+            TargetResolver.Setup(x => x.ResolveFlagAsync(EnvironmentId, "flag"))
+                .ReturnsAsync(new ResourcePermissionTarget("project/p:env/e:flag/flag", owner));
+            TargetResolver.Setup(x => x.ResolveSegmentAsync(EnvironmentId, Segment.Id))
+                .ReturnsAsync(new ResourcePermissionTarget("project/p:env/e:segment/segment", owner));
             Flags.Setup(x => x.GetAsync(EnvironmentId, "flag")).ReturnsAsync(Flag);
             Segments.Setup(x => x.GetAsync(Segment.Id)).ReturnsAsync(Segment);
             var members = new Mock<IMemberService>();
@@ -109,7 +109,7 @@ public class FieldChangeTestApp : PermissionCheckTestApp
             services.Replace(ServiceDescriptor.Singleton(members.Object));
             services.Replace(ServiceDescriptor.Singleton(Flags.Object));
             services.Replace(ServiceDescriptor.Singleton(Segments.Object));
-            services.Replace(ServiceDescriptor.Singleton(Resources.Object));
+            services.Replace(ServiceDescriptor.Singleton(TargetResolver.Object));
             services.Replace(ServiceDescriptor.Singleton(Publisher.Object));
             services.Replace(ServiceDescriptor.Scoped<ISender>(sp => sp.GetRequiredService<IMediator>()));
         });

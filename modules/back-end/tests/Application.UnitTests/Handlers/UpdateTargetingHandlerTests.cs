@@ -54,18 +54,18 @@ public class UpdateTargetingHandlerTests
     private static UpdateTargetingHandler BuildSut(
         FeatureFlag flag,
         Mock<IFeatureFlagService> flagService,
-        Mock<IResourceService> resourceService,
+        Mock<IResourcePermissionTargetResolver> targetResolver,
         Mock<IPublisher> publisher)
     {
         flagService.Setup(x => x.GetAsync(flag.EnvId, flag.Key)).ReturnsAsync(flag);
-        resourceService.Setup(x => x.GetFlagRnAsync(flag.EnvId, flag.Key)).ReturnsAsync(new ResourceRn("flag/*", OrganizationId));
+        targetResolver.Setup(x => x.ResolveFlagAsync(flag.EnvId, flag.Key)).ReturnsAsync(new ResourcePermissionTarget("flag/*", OrganizationId));
 
         var currentUser = new Mock<ICurrentUser>();
         currentUser.SetupGet(x => x.Id).Returns(Guid.NewGuid());
 
         return new UpdateTargetingHandler(
             flagService.Object,
-            new PermissionGuard(resourceService.Object),
+            new PermissionGuard(targetResolver.Object),
             currentUser.Object,
             publisher.Object);
     }
@@ -90,9 +90,9 @@ public class UpdateTargetingHandlerTests
     {
         var flag = NewFlag();
         var flagService = new Mock<IFeatureFlagService>();
-        var resourceService = new Mock<IResourceService>();
+        var targetResolver = new Mock<IResourcePermissionTargetResolver>();
         var publisher = new Mock<IPublisher>();
-        var sut = BuildSut(flag, flagService, resourceService, publisher);
+        var sut = BuildSut(flag, flagService, targetResolver, publisher);
         var request = NewRequest(
             flag,
             "v-on",
@@ -112,9 +112,9 @@ public class UpdateTargetingHandlerTests
     {
         var flag = NewFlag();
         var flagService = new Mock<IFeatureFlagService>();
-        var resourceService = new Mock<IResourceService>();
+        var targetResolver = new Mock<IResourcePermissionTargetResolver>();
         var publisher = new Mock<IPublisher>();
-        var sut = BuildSut(flag, flagService, resourceService, publisher);
+        var sut = BuildSut(flag, flagService, targetResolver, publisher);
         var request = NewRequest(
             flag,
             "v-on",
