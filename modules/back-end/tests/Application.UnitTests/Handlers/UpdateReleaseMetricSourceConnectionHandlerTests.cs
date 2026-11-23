@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Application.Bases.Exceptions;
 using Application.ReleaseMetricSourceConnections;
 using Application.Services;
 using Domain.Environments;
@@ -91,6 +92,29 @@ public class UpdateReleaseMetricSourceConnectionHandlerTests
 
         Assert.Equal("configured", configured.SecretState);
         Assert.Equal("first-reader", configured.Authentication.GetProperty("username").GetString());
+    }
+
+    [Theory]
+    [InlineData(true, typeof(ConflictException))]
+    [InlineData(false, typeof(EntityNotFoundException))]
+    public async Task Handle_ConcurrentUpdateFails_ReportsWhetherConnectionStillExists(
+        bool connectionStillExists, Type expectedException)
+    {
+        var request = new UpdateReleaseMetricSourceConnection
+        {
+            Id = _connection.Id, EnvId = _connection.EnvId, Scope = _scope, Name = "Renamed"
+        };
+        var previousUpdatedAt = _connection.UpdatedAt;
+        _service.SetupSequence(x => x.FindAsync(request.EnvId, request.Id, CancellationToken.None))
+            .ReturnsAsync(_connection)
+            .ReturnsAsync(connectionStillExists ? _connection : null);
+        _service.Setup(x => x.UpdateAsync(_connection, previousUpdatedAt, CancellationToken.None))
+            .ReturnsAsync(false);
+
+        await Assert.ThrowsAsync(expectedException, () => _handler.Handle(request, CancellationToken.None));
+
+        _service.Verify(x => x.UpdateAsync(_connection, previousUpdatedAt, CancellationToken.None), Times.Once);
+        _service.Verify(x => x.FindAsync(request.EnvId, request.Id, CancellationToken.None), Times.Exactly(2));
     }
 
     private void ExpectProtectedPassword(string password, string ciphertext)
