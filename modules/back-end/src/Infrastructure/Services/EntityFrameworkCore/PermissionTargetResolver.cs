@@ -20,7 +20,8 @@ public class PermissionTargetResolver(AppDbContext dbContext) : IPermissionTarge
             .FirstOrDefaultAsync();
 
         return project == null || string.IsNullOrWhiteSpace(project.Key)
-            ? null : new PermissionTarget(RN.ForProject(project.Key), project.OrganizationId);
+            ? null 
+            : new PermissionTarget(RN.ForProject(project.Key), project.OrganizationId);
     }
 
     public async Task<PermissionTarget?> ResolveEnvironmentAsync(Guid envId)
@@ -32,7 +33,9 @@ public class PermissionTargetResolver(AppDbContext dbContext) : IPermissionTarge
             select new { project.Key, EnvKey = env.Key, project.OrganizationId };
 
         var data = await query.FirstOrDefaultAsync();
-        return data == null ? null : new PermissionTarget(RN.ForEnv(data.Key, data.EnvKey), data.OrganizationId);
+        return data == null 
+            ? null 
+            : new PermissionTarget(RN.ForEnv(data.Key, data.EnvKey), data.OrganizationId);
     }
 
     public async Task<PermissionTarget?> ResolveFlagAsync(Guid envId, string key)
@@ -52,8 +55,12 @@ public class PermissionTargetResolver(AppDbContext dbContext) : IPermissionTarge
             };
 
         var data = await query.FirstOrDefaultAsync();
-        return data == null ? null : new PermissionTarget(
-            RN.ForFlag(data.projectKey, data.envKey, data.flagKey, data.flagTags), data.organizationId);
+        return data == null 
+            ? null
+            : new PermissionTarget(
+                RN.ForFlag(data.projectKey, data.envKey, data.flagKey, data.flagTags),
+                data.organizationId
+            );
     }
 
     public async Task<PermissionTarget?> ResolveSegmentAsync(Guid envId, Guid id)
@@ -82,8 +89,10 @@ public class PermissionTargetResolver(AppDbContext dbContext) : IPermissionTarge
                 var projectEnv = await query.FirstOrDefaultAsync();
                 return projectEnv == null
                     ? null
-                    : new PermissionTarget(RN.ForSegment(projectEnv.ProjectKey, projectEnv.EnvKey, segment.Key, segment.Tags),
-                        projectEnv.OrganizationId);
+                    : new PermissionTarget(
+                        RN.ForSegment(projectEnv.ProjectKey, projectEnv.EnvKey, segment.Key, segment.Tags),
+                        projectEnv.OrganizationId
+                    );
             }
 
             case SegmentType.Shared:
@@ -113,7 +122,8 @@ public class PermissionTargetResolver(AppDbContext dbContext) : IPermissionTarge
                     // Authorize the shared segment in the accessing environment's organization.
                     return new PermissionTarget(
                         RN.ForSegment(projectEnv.ProjectKey, projectEnv.EnvKey, segment.Key, segment.Tags),
-                        projectEnv.OrganizationId);
+                        projectEnv.OrganizationId
+                    );
                 }
 
                 return null;
