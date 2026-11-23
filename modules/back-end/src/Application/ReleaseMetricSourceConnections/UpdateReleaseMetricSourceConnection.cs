@@ -17,11 +17,14 @@ public class UpdateReleaseMetricSourceConnectionValidator : AbstractValidator<Up
     }
 }
 
-public class UpdateReleaseMetricSourceConnectionHandler(IReleaseMetricSourceConnectionService service)
+public class UpdateReleaseMetricSourceConnectionHandler(
+    IReleaseMetricSourceConnectionService service,
+    ReleaseMetricSourceConnectionAccessGuard accessGuard)
     : IRequestHandler<UpdateReleaseMetricSourceConnection, ReleaseMetricSourceConnectionVm>
 {
     public async Task<ReleaseMetricSourceConnectionVm> Handle(UpdateReleaseMetricSourceConnection request, CancellationToken cancellationToken)
     {
+        await accessGuard.GetEnvironmentAsync(request.OrgId, request.EnvId);
         var connection = await service.FindAsync(request.EnvId, request.Id, cancellationToken)
             ?? throw new EntityNotFoundException(nameof(ReleaseMetricSourceConnection), request.Id.ToString());
         connection.Update(request.Name.Trim(), request.ProviderType,

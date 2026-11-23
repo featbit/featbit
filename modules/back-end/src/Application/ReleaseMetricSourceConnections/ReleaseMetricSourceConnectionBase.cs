@@ -7,6 +7,9 @@ namespace Application.ReleaseMetricSourceConnections;
 public class ReleaseMetricSourceConnectionBase
 {
     [JsonIgnore]
+    public Guid OrgId { get; set; }
+
+    [JsonIgnore]
     public Guid EnvId { get; set; }
 
     public string Name { get; set; }

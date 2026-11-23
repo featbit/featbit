@@ -1,4 +1,5 @@
 using Application.Bases.Exceptions;
+using Application.Environments;
 using Domain.AuditLogs;
 using Domain.Policies;
 using Domain.Resources;
@@ -38,12 +39,7 @@ public class AuditLogAccessGuard(IEnvironmentService envService)
 
         async Task CheckEnvironmentAccess()
         {
-            var environment = await envService.GetResourceDescriptorAsync(filter.ScopeId);
-            if (environment == null || environment.Organization.Id != request.OrganizationId)
-            {
-                throw new ForbiddenException();
-            }
-
+            var environment = await envService.GetResourceDescriptorInOrganizationAsync(request.OrganizationId, filter.ScopeId);
             var environmentRn = RN.ForEnv(environment.Project.Key, environment.Environment.Key);
             if (!PolicyHelper.IsAllowed(request.Permissions, environmentRn, Permissions.CanAccessEnv))
             {

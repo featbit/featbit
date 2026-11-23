@@ -4,6 +4,7 @@ using Application.AuditLogs;
 using Application.Bases.Behaviours;
 using Application.FeatureFlags;
 using Application.Policies;
+using Application.ReleaseMetricSourceConnections;
 using Application.Segments;
 using Application.Users;
 using Microsoft.Extensions.Configuration;
@@ -34,6 +35,7 @@ public static class ConfigureServices
         services.AddSingleton<ICurrentUser, CurrentUser>();
         services.AddTransient<IPermissionGuard, PermissionGuard>();
         services.AddTransient<AuditLogAccessGuard>();
+        services.AddTransient<ReleaseMetricSourceConnectionAccessGuard>();
         services.AddTransient<ISegmentMessageService, SegmentMessageService>();
         if (configuration.UseControlPlane())
         {
