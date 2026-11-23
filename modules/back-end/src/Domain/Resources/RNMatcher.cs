@@ -66,12 +66,11 @@ public static class RNMatcher
             if (patternTagsPart.Length > 0)
             {
                 // pattern has tags but resource doesn't → no match (e.g. "project/foo;tagA" doesn't match "project/foo")
-                if (resourcePartCount <= 1)
+                var resourceTagsPart = resourceSegment[resourceParts[1]];
+                if (resourcePartCount <= 1 || resourceTagsPart.Length == 0)
                 {
                     return false;
                 }
-                var resourceTagsPart = resourceSegment[resourceParts[1]];
-                if (resourceTagsPart.Length == 0) return false;
 
                 var patternTagCount = patternTagsPart.Split(patternTagRanges, ',');
                 var resourceTagCount = resourceTagsPart.Split(resourceTagRanges, ',');
@@ -82,13 +81,7 @@ public static class RNMatcher
                     var patternTag = patternTagsPart[patternTagRanges[pt]];
                     for (var t = 0; t < resourceTagCount; t++)
                     {
-                        var resourceTag = resourceTagsPart[resourceTagRanges[t]];
-                        // Decode only after splitting, so delimiters within one stored tag stay literal.
-                        // Policy tags retain their existing wildcard and comma-separated OR semantics.
-                        var matches = resourceTag.Contains('%')
-                            ? MatchesWildcard(patternTag, Uri.UnescapeDataString(resourceTag.ToString()))
-                            : MatchesWildcard(patternTag, resourceTag);
-                        if (matches)
+                        if (MatchesWildcard(patternTag, resourceTagsPart[resourceTagRanges[t]]))
                         {
                             hit = true;
                             break;
