@@ -22,7 +22,8 @@ public class DataSyncMessageHandlerTests
         var producer = new Mock<IMessageProducer>();
         var service = new Mock<IDataSyncService>();
         service.Setup(s => s.GetPayloadAsync(connection, It.IsAny<JsonElement>())).ReturnsAsync(new { });
-        var handler = new DataSyncMessageHandler(producer.Object, service.Object);
+        using var deduplicator = new EndUserDeduplicator();
+        var handler = new DataSyncMessageHandler(new ReportEndUserService(producer.Object, deduplicator), service.Object);
 
         foreach (var key in new[] { "user-a", "user-b" })
         {

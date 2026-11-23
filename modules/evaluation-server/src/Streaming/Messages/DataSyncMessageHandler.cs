@@ -1,26 +1,15 @@
 using System.Text.Json;
 using Domain.EndUsers;
-using Domain.Messages;
 using Domain.Shared;
-using Domain.Usages;
 using Streaming.Connections;
 using Streaming.Protocol;
 using Streaming.Services;
 
 namespace Streaming.Messages;
 
-public class DataSyncMessageHandler : IMessageHandler
+public class DataSyncMessageHandler(IReportEndUserService reportEndUserService, IDataSyncService service) : IMessageHandler
 {
     public string Type => MessageTypes.DataSync;
-
-    private readonly IMessageProducer _producer;
-    private readonly IDataSyncService _service;
-
-    public DataSyncMessageHandler(IMessageProducer producer, IDataSyncService service)
-    {
-        _producer = producer;
-        _service = service;
-    }
 
     public async Task HandleAsync(MessageContext ctx)
     {
@@ -45,16 +34,10 @@ public class DataSyncMessageHandler : IMessageHandler
             // attach client-side sdk EndUser
             connection.AttachUser(user);
 
-            // publish end-user message
-            var endUserMessage = new EndUserMessage(connection.EnvId, user);
-            await _producer.PublishAsync(Topics.EndUser, endUserMessage);
-
-            var usage = new InsightUsage(connection.EnvId);
-            usage.AddUser(user.KeyId);
-            await _producer.PublishAsync(Topics.Usage, usage);
+            await reportEndUserService.ReportEndUserAndMauAsync(connection.EnvId, user);
         }
 
-        var payload = await _service.GetPayloadAsync(connectionContext, ctx.Data);
+        var payload = await service.GetPayloadAsync(connectionContext, ctx.Data);
         var serverMessage = new ServerMessage(MessageTypes.DataSync, payload);
         await connectionContext.SendAsync(serverMessage, ctx.CancellationToken);
     }

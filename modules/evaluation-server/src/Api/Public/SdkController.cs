@@ -2,8 +2,6 @@ using Api.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Api.RateLimiting;
 using Domain.EndUsers;
-using Domain.Messages;
-using Domain.Usages;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Streaming.Services;
@@ -12,7 +10,7 @@ namespace Api.Public;
 
 [Route("api/public/sdk")]
 [EnableRateLimiting(RateLimitingPolicies.Sdk)]
-public class SdkController(IDataSyncService dataSyncService, IMessageProducer producer) : ApiControllerBase
+public class SdkController(IDataSyncService dataSyncService, IReportEndUserService reportEndUserService) : ApiControllerBase
 {
     [HttpGet("server/latest-all")]
     [Authorize(SecretPolicies.ServerOnly)]
@@ -44,9 +42,7 @@ public class SdkController(IDataSyncService dataSyncService, IMessageProducer pr
 
         var payload = await dataSyncService.GetClientSdkPayloadAsync(EnvId, endUser, timestamp);
 
-        var usage = new InsightUsage(EnvId);
-        usage.AddUser(endUser.KeyId);
-        await producer.PublishAsync(Topics.Usage, usage);
+        await reportEndUserService.ReportEndUserAndMauAsync(EnvId, endUser);
 
         if (payload.IsEmpty())
         {
