@@ -96,7 +96,7 @@ $modulesDir = Join-Path $repoRoot "modules"
 $imageDefinitions = [ordered]@{
     "api-server" = @{
         LocalName    = "featbit-api-server"
-        BuildContext = "modules/back-end"
+        BuildContext = "modules"
         Dockerfile   = "modules/back-end/deploy/Dockerfile"
     }
     "ui" = @{
@@ -106,7 +106,7 @@ $imageDefinitions = [ordered]@{
     }
     "evaluation-server" = @{
         LocalName    = "featbit-evaluation-server"
-        BuildContext = "modules/evaluation-server"
+        BuildContext = "modules"
         Dockerfile   = "modules/evaluation-server/deploy/Dockerfile"
     }
     "control-plane" = @{

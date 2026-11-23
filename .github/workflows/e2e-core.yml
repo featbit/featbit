@@ -7,6 +7,7 @@ on:
     paths: &paths
       - 'modules/back-end/**'
       - 'modules/evaluation-server/**'
+      - 'modules/Directory.Packages.props'
       - 'modules/front-end/**'
       - 'infra/**'
       - 'e2e/core/**'
@@ -40,7 +41,7 @@ concurrency:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 90
     steps:
       - name: Validate manual inputs

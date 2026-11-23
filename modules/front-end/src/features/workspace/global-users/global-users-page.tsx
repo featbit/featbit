@@ -1,3 +1,4 @@
+import { useListQuery, useListSearch } from "@/lib/use-list-query"
 import { Upload } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -71,10 +72,18 @@ export function GlobalUsersPage() {
     "success"
   )
   const [statusEventId, setStatusEventId] = useState(0)
-  const [search, setSearch] = useState("")
-  const [debouncedSearch, setDebouncedSearch] = useState("")
-  const [pageIndex, setPageIndex] = useState(1)
-  const [pageSize, setPageSize] = useState(10)
+  const {
+    searchParams,
+    updateParams,
+    pageIndex,
+    pageSize,
+    setPageIndex,
+    setPageSize,
+  } = useListQuery()
+  const { search, setSearch, debouncedSearch } = useListSearch(
+    searchParams,
+    updateParams
+  )
   const [data, setData] = useState<PagedResult<GlobalUser>>({
     totalCount: 0,
     items: [],
@@ -124,16 +133,6 @@ export function GlobalUsersPage() {
       cancelled = true
     }
   }, [])
-
-  useEffect(() => {
-    if (search === debouncedSearch) return
-
-    const timeout = window.setTimeout(() => {
-      setDebouncedSearch(search)
-      setPageIndex(1)
-    }, 200)
-    return () => window.clearTimeout(timeout)
-  }, [search, debouncedSearch])
 
   const loadData = useCallback(() => {
     if (!isGlobalUsersLicensed) {

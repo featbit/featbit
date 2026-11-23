@@ -3,7 +3,88 @@ import { test } from 'node:test';
 import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { processRun, stopStack } from './stack.mjs';
+import { createServer } from 'node:http';
+import { dotnetBuildEnv, processRun, ready, stopStack, waitFor } from './stack.mjs';
+
+test('waitFor bounds a callback that never settles and keeps a standalone process alive', async () => {
+  const module = new URL('./stack.mjs', import.meta.url).href;
+  const script = `
+    import { waitFor } from ${JSON.stringify(module)};
+    try {
+      await waitFor('stalled callback', () => new Promise(() => {}), 30);
+      process.exitCode = 1;
+    } catch (error) {
+      console.log(error.message);
+    }
+  `;
+  const output = await processRun(process.execPath, ['--input-type=module', '-e', script], { quiet: true, timeout: 5000 });
+  assert.match(output, /stalled callback timed out: Operation did not settle/);
+});
+
+test('waitFor preserves non-retryable errors', async () => {
+  const error = Object.assign(new Error('terminal'), { retryable: false });
+  await assert.rejects(waitFor('terminal', () => { throw error; }), actual => actual === error);
+});
+
+test('readiness retries startup disconnects and unhealthy responses, draining bodies', async () => {
+  let attempts = 0;
+  const paths = [];
+  const server = createServer((request, response) => {
+    paths.push(request.url);
+    if (++attempts === 1) return request.socket.destroy();
+    response.writeHead(attempts === 2 ? 503 : 200);
+    response.write('starting');
+    setTimeout(() => response.end(' done'), 5);
+  });
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  const base = `http://127.0.0.1:${server.address().port}`;
+  try {
+    await ready({ api: base, els: base, ui: base }, { timeout: 3000, requestTimeout: 1000, interval: 5 });
+    assert.equal(attempts, 5);
+    assert.deepEqual(paths, ['/health/readiness', '/health/readiness', '/health/readiness', '/health/readiness', '/health']);
+  } finally {
+    server.closeAllConnections();
+    await new Promise(resolve => server.close(resolve));
+  }
+});
+
+test('readiness bounds stalled response bodies and aborts requests', async () => {
+  let attempts = 0;
+  const server = createServer((request, response) => {
+    attempts++;
+    response.writeHead(200);
+    response.write('never finished');
+  });
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  const base = `http://127.0.0.1:${server.address().port}`;
+  try {
+    await assert.rejects(ready({ api: base, els: base, ui: base },
+      { timeout: 200, requestTimeout: 30, interval: 5 }), /health\/readiness timed out/);
+    assert.ok(attempts > 1, 'Stalled requests should be aborted and retried');
+  } finally {
+    server.closeAllConnections();
+    await new Promise(resolve => server.close(resolve));
+  }
+});
+
+test('readiness times out even when fetch never settles or responds to abort', async () => {
+  const module = new URL('./stack.mjs', import.meta.url).href;
+  const script = `
+    import { ready } from ${JSON.stringify(module)};
+    let attempts = 0;
+    globalThis.fetch = () => { attempts++; return new Promise(() => {}); };
+    try {
+      await ready({ api: 'http://api', els: 'http://els', ui: 'http://ui' },
+        { timeout: 150, requestTimeout: 20, interval: 5 });
+      process.exitCode = 1;
+    } catch (error) {
+      if (attempts < 2) throw new Error('Request timeout did not retry');
+      console.log(error.message);
+    }
+  `;
+  const output = await processRun(process.execPath, ['--input-type=module', '-e', script], { quiet: true, timeout: 5000 });
+  assert.match(output, /http:\/\/api\/health\/readiness timed out/);
+});
 
 test('successful teardown removes stack state and its empty directory, preserving parent and evidence', async () => {
   const root = await mkdtemp(join(tmpdir(), 'featbit-teardown-'));
@@ -70,4 +151,17 @@ test('file-backed command failure includes only a bounded diagnostic tail', asyn
   } finally {
     await rm(folder, { recursive: true, force: true });
   }
+});
+
+test('dotnet image builds use the shared modules context only when the source has central package versions', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'featbit-layout-'));
+  try {
+    assert.deepEqual(dotnetBuildEnv(root), {
+      API_BUILD_CONTEXT: '../../modules/back-end', API_DOCKERFILE: 'deploy/Dockerfile',
+      ELS_BUILD_CONTEXT: '../../modules/evaluation-server', ELS_DOCKERFILE: 'deploy/Dockerfile',
+    });
+    await mkdir(join(root, 'modules'));
+    await writeFile(join(root, 'modules', 'Directory.Packages.props'), '<Project />');
+    assert.deepEqual(dotnetBuildEnv(root), {});
+  } finally { await rm(root, { recursive: true, force: true }); }
 });

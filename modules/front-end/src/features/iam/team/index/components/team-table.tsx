@@ -1,7 +1,7 @@
 import { ChevronDown, Copy } from "lucide-react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
-import { Link } from "react-router-dom"
+import { ListDetailLink as Link } from "@/components/list-detail-link"
 import { flexRender, type Table as TanStackTable } from "@tanstack/react-table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"

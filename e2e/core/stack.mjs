@@ -1,5 +1,5 @@
 import { spawn } from 'node:child_process';
-import { createWriteStream } from 'node:fs';
+import { createWriteStream, existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, readdir, rmdir, unlink, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
@@ -20,6 +20,15 @@ const applicationImages = {
   els: 'featbit/featbit-evaluation-server',
   ui: 'featbit/featbit-ui',
 };
+// Source from before central package management has no modules/Directory.Packages.props and builds each
+// .NET image from its own module directory. Select that layout so older refs still build with this harness.
+export function dotnetBuildEnv(repositoryRoot = root) {
+  if (existsSync(join(repositoryRoot, 'modules', 'Directory.Packages.props'))) return {};
+  return {
+    API_BUILD_CONTEXT: '../../modules/back-end', API_DOCKERFILE: 'deploy/Dockerfile',
+    ELS_BUILD_CONTEXT: '../../modules/evaluation-server', ELS_DOCKERFILE: 'deploy/Dockerfile',
+  };
+}
 const infrastructureImageKeys = ['POSTGRES_IMAGE', 'MONGO_IMAGE', 'REDIS_IMAGE', 'KAFKA_IMAGE', 'CLICKHOUSE_IMAGE'];
 
 export async function processRun(command, args, { input, env, quiet = false, logPath, timeout = 600_000 } = {}) {
@@ -102,7 +111,7 @@ export async function openStack(name, { imageVersion, runsRoot = join(directory,
     if (selected) runtimeEnv[key] = selected;
   }
   const profiles = services.map(s => s === 'mongodb' ? 'mongo' : s).join(',');
-  const composeEnv = { ...process.env, ...runtimeEnv, COMPOSE_PROFILES: profiles };
+  const composeEnv = { ...dotnetBuildEnv(), ...process.env, ...runtimeEnv, COMPOSE_PROFILES: profiles };
   for (const service of Object.keys(applicationImages)) {
     const key = `${service.toUpperCase()}_IMAGE`;
     composeEnv[key] = runtimeEnv[key] ?? `featbit-local-${service}:local`;
@@ -176,17 +185,32 @@ export async function initDbs(stack) {
   }
 }
 
-export async function waitFor(label, fn, timeout = 90_000) {
+export async function waitFor(label, fn, timeout = 90_000, { interval = 1000, onRetry } = {}) {
   const deadline = Date.now() + timeout;
   let last;
+  let attempt = 0;
   while (Date.now() < deadline) {
-    try { return await fn(); } catch (error) {
+    let timer;
+    try {
+      // A pending promise (and AbortSignal.timeout) does not keep Node alive.
+      // This referenced timer also bounds callbacks that never settle.
+      return await Promise.race([
+        Promise.resolve().then(fn),
+        new Promise((_, reject) => {
+          timer = setTimeout(() => reject(new Error('Operation did not settle before the deadline')), deadline - Date.now());
+        }),
+      ]);
+    } catch (error) {
       if (error?.retryable === false) throw error;
       last = error;
+      onRetry?.(error, ++attempt);
+    } finally {
+      clearTimeout(timer);
     }
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    const remaining = deadline - Date.now();
+    if (remaining > 0) await new Promise(resolve => setTimeout(resolve, Math.min(interval, remaining)));
   }
-  throw new Error(`${label} timed out: ${last?.message}`);
+  throw new Error(`${label} timed out: ${last?.message}`, { cause: last });
 }
 
 export async function workspaceId(stack) {
@@ -198,15 +222,39 @@ export async function workspaceId(stack) {
     'print(db.getSiblingDB("featbit").Workspaces.findOne()._id.toUUID().toString().match(/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}/i)[0])']);
 }
 
-export async function ready(stack) {
-  for (const base of [stack.api, stack.els]) await waitFor(base, async () => {
-    const response = await fetch(`${base}/health/readiness`, { signal: AbortSignal.timeout(5000) });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-  });
-  await waitFor(stack.ui, async () => {
-    const response = await fetch(`${stack.ui}/health`, { signal: AbortSignal.timeout(5000) });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-  });
+export async function ready(stack, { timeout = 90_000, requestTimeout = 5000, interval = 1000 } = {}) {
+  for (const url of [`${stack.api}/health/readiness`, `${stack.els}/health/readiness`, `${stack.ui}/health`]) {
+    const deadline = Date.now() + timeout;
+    await waitFor(url, async () => {
+      const controller = new AbortController();
+      let timer;
+      try {
+        await Promise.race([
+          (async () => {
+            const response = await fetch(url, { signal: controller.signal });
+            // Drain the body before reusing the connection, including error responses.
+            await response.text();
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          })(),
+          new Promise((_, reject) => {
+            timer = setTimeout(() => {
+              const error = new Error(`Request timed out after ${requestTimeout}ms`);
+              reject(error);
+              controller.abort(error);
+            }, Math.max(1, Math.min(requestTimeout, deadline - Date.now())));
+          }),
+        ]);
+      } finally {
+        clearTimeout(timer);
+        controller.abort();
+      }
+    }, timeout, { interval, onRetry: (error, attempt) => {
+      const cause = error.cause;
+      console.warn(`[readiness] ${url}: attempt ${attempt} failed: ${error.message}`
+        + (cause ? ` (${cause.code ?? cause.name}: ${cause.message})` : ''));
+    } });
+    console.log(`[readiness] ${url}: ready`);
+  }
 }
 
 export async function logs(stack) {

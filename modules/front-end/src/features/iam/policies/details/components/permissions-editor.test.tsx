@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
-import { MemoryRouter } from "react-router-dom"
+import { MemoryRouter, useLocation } from "react-router-dom"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n/i18n"
 import type { PolicyStatement } from "../permission-model"
@@ -15,14 +15,40 @@ vi.mock("../policy-details-api", async (importOriginal) => ({
   fetchPolicyResources: mocks.fetchPolicyResources,
 }))
 
-function renderEditor(statements: PolicyStatement[]) {
+vi.mock("./clone-policy-sheet", () => ({
+  ClonePolicySheet: ({
+    open,
+    onCloned,
+  }: {
+    open: boolean
+    onCloned: (policy: { id: string }) => void
+  }) =>
+    open ? (
+      <button onClick={() => onCloned({ id: "cloned-policy" })}>
+        Complete clone
+      </button>
+    ) : null,
+}))
+
+function CurrentUrl() {
+  const location = useLocation()
+  return (
+    <output data-testid="current-url">
+      {location.pathname}
+      {location.search}
+    </output>
+  )
+}
+
+function renderEditor(statements: PolicyStatement[], initialUrl = "/") {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   })
 
   return render(
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter>
+      <MemoryRouter initialEntries={[initialUrl]}>
+        <CurrentUrl />
         <PermissionsEditor
           policy={{
             id: "policy-1",
@@ -54,6 +80,22 @@ describe("PermissionsEditor resource summaries", () => {
   beforeEach(() => {
     localStorage.clear()
     mocks.fetchPolicyResources.mockReset()
+  })
+
+  it("preserves the source list URL when opening a cloned policy", () => {
+    const source = "/en/iam/policies?name=Environment&page=3&pageSize=20"
+    renderEditor(
+      [],
+      `/en/iam/policies/policy-1/permission?${new URLSearchParams({ returnTo: source })}`
+    )
+    fireEvent.click(screen.getByRole("button", { name: "Clone" }))
+    fireEvent.click(screen.getByRole("button", { name: "Complete clone" }))
+    const url = new URL(
+      screen.getByTestId("current-url").textContent!,
+      "http://localhost"
+    )
+    expect(url.pathname).toBe("/en/iam/policies/cloned-policy/permission")
+    expect(url.searchParams.get("returnTo")).toBe(source)
   })
 
   it("uses resource names in the summary and complete-list tooltip", async () => {

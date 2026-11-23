@@ -1,3 +1,4 @@
+import { useListQuery, useListSearch } from "@/lib/use-list-query"
 import { Plus, Search } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { useCallback, useEffect, useMemo, useState } from "react"
@@ -23,10 +24,18 @@ export function GroupPage() {
   const params = useParams()
   const lang = resolveLang(params.lang)
   const { t } = useTranslation()
-  const [search, setSearch] = useState("")
-  const [debouncedSearch, setDebouncedSearch] = useState("")
-  const [pageIndex, setPageIndex] = useState(1)
-  const [pageSize, setPageSize] = useState(10)
+  const {
+    searchParams,
+    updateParams,
+    pageIndex,
+    pageSize,
+    setPageIndex,
+    setPageSize,
+  } = useListQuery()
+  const { search, setSearch, debouncedSearch } = useListSearch(
+    searchParams,
+    updateParams
+  )
   const [data, setData] = useState<{ totalCount: number; items: Group[] }>({
     totalCount: 0,
     items: [],
@@ -36,16 +45,6 @@ export function GroupPage() {
   const [addOpen, setAddOpen] = useState(false)
   const [removeTarget, setRemoveTarget] = useState<Group | null>(null)
   const [removing, setRemoving] = useState(false)
-
-  useEffect(() => {
-    if (search === debouncedSearch) return
-
-    const timeout = window.setTimeout(() => {
-      setDebouncedSearch(search)
-      setPageIndex(1)
-    }, 300)
-    return () => window.clearTimeout(timeout)
-  }, [search, debouncedSearch])
 
   const loadGroups = useCallback(() => {
     setLoading(true)

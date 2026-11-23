@@ -41,7 +41,7 @@ public class FlagComparisonTests
         app.ResourcesV2.VerifyNoOtherCalls();
         // In a batch, the first target is allowed and the second is rejected.
         if (overview && !source)
-            app.Resources.Verify(x => x.GetEnvRnAsync(app.AllowedTarget), Times.Once);
+            app.TargetResolver.Verify(x => x.ResolveEnvironmentAsync(app.AllowedTarget), Times.Once);
     }
 
     [Theory]
@@ -55,10 +55,10 @@ public class FlagComparisonTests
         var client = await app.CreateAuthenticatedClientAsync();
         var response = await SendAsync(client, app, overview);
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        app.Resources.Verify(x => x.GetEnvRnAsync(app.Source), Times.Once);
-        app.Resources.Verify(x => x.GetEnvRnAsync(app.Target), Times.Once);
+        app.TargetResolver.Verify(x => x.ResolveEnvironmentAsync(app.Source), Times.Once);
+        app.TargetResolver.Verify(x => x.ResolveEnvironmentAsync(app.Target), Times.Once);
         if (overview)
-            app.Resources.Verify(x => x.GetEnvRnAsync(app.AllowedTarget), Times.Once);
+            app.TargetResolver.Verify(x => x.ResolveEnvironmentAsync(app.AllowedTarget), Times.Once);
         Assert.NotEmpty(app.Flags.Invocations);
     }
 
@@ -70,7 +70,7 @@ public class FlagComparisonTests
         var response = await client.PostAsJsonAsync($"/api/v1/envs/{app.Source}/feature-flags/compare-overview",
             new { targetEnvIds = new[] { app.Target, Guid.Empty }, filter = new { } });
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-        app.Resources.VerifyNoOtherCalls();
+        app.TargetResolver.VerifyNoOtherCalls();
         app.Flags.VerifyNoOtherCalls();
     }
 
@@ -94,7 +94,7 @@ public class FlagComparisonTestApp : PermissionCheckTestApp
     public bool FailSource { get; init; }
     public string Failure { get; init; } = "";
     public bool MissingTargetFlag { get; init; }
-    public Mock<IResourceService> Resources { get; } = new();
+    public Mock<IPermissionTargetResolver> TargetResolver { get; } = new();
     public Mock<IResourceServiceV2> ResourcesV2 { get; } = new();
     public Mock<IFeatureFlagService> Flags { get; } = new();
 
@@ -107,7 +107,7 @@ public class FlagComparisonTestApp : PermissionCheckTestApp
             string Rn(Guid id) => $"project/p:env/{id}";
             foreach (var env in new[] { Source, Target, AllowedTarget })
             {
-                ResourceRn? resource = new(Rn(env), TestWorkspace.OrganizationId);
+                PermissionTarget? resource = new(Rn(env), TestWorkspace.OrganizationId);
                 if (env == deniedEnv)
                     resource = Failure switch
                     {
@@ -117,7 +117,7 @@ public class FlagComparisonTestApp : PermissionCheckTestApp
                         "blank" => new("", TestWorkspace.OrganizationId),
                         _ => resource
                     };
-                Resources.Setup(x => x.GetEnvRnAsync(env)).ReturnsAsync(resource);
+                TargetResolver.Setup(x => x.ResolveEnvironmentAsync(env)).ReturnsAsync(resource);
             }
             var statements = new List<PolicyStatement>();
             foreach (var env in new[] { Source, Target, AllowedTarget })
@@ -142,7 +142,7 @@ public class FlagComparisonTestApp : PermissionCheckTestApp
             members.Setup(x => x.GetPermissionsAsync(TestWorkspace.OrganizationId, TestUser.Id)).ReturnsAsync(statements.ToArray());
             var license = new Mock<ILicenseService>();
             license.Setup(x => x.IsFeatureGrantedAsync(It.IsAny<Guid>(), It.IsAny<string>())).ReturnsAsync(true);
-            services.Replace(ServiceDescriptor.Singleton(Resources.Object));
+            services.Replace(ServiceDescriptor.Singleton(TargetResolver.Object));
             services.Replace(ServiceDescriptor.Singleton(ResourcesV2.Object));
             services.Replace(ServiceDescriptor.Singleton(Flags.Object));
             services.Replace(ServiceDescriptor.Singleton(members.Object));

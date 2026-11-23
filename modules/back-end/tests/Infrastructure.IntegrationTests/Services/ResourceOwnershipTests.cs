@@ -32,18 +32,18 @@ internal sealed class ResourceOwnershipData
             ["organization/org:project/project:env/env"], [], [], [], "") { Id = Guid.NewGuid() };
     }
 
-    public async Task AssertOwnership(IResourceService service)
+    public async Task AssertOwnership(IPermissionTargetResolver targetResolver)
     {
-        Assert.Equal(new ResourceRn("project/project", Organization.Id), await service.GetProjectRnAsync(Project.Id));
-        Assert.Equal(new ResourceRn("project/project:env/env", Organization.Id), await service.GetEnvRnAsync(Environment.Id));
-        Assert.Equal(new ResourceRn("project/project:env/env:flag/flag;tag", Organization.Id), await service.GetFlagRnAsync(Environment.Id, Flag.Key));
-        Assert.Equal(new ResourceRn("project/project:env/env:segment/local;tag", Organization.Id), await service.GetSegmentRnAsync(Environment.Id, Local.Id));
-        Assert.Equal(new ResourceRn("project/project:env/env:segment/shared", Organization.Id), await service.GetSegmentRnAsync(Environment.Id, Shared.Id));
-        Assert.Null(await service.GetProjectRnAsync(Guid.NewGuid()));
-        Assert.Null(await service.GetEnvRnAsync(Guid.NewGuid()));
-        Assert.Null(await service.GetFlagRnAsync(Guid.NewGuid(), Flag.Key));
-        Assert.Null(await service.GetSegmentRnAsync(Guid.NewGuid(), Local.Id));
-        Assert.Null(await service.GetSegmentRnAsync(Guid.NewGuid(), Shared.Id));
+        Assert.Equal(new PermissionTarget("project/project", Organization.Id), await targetResolver.ResolveProjectAsync(Project.Id));
+        Assert.Equal(new PermissionTarget("project/project:env/env", Organization.Id), await targetResolver.ResolveEnvironmentAsync(Environment.Id));
+        Assert.Equal(new PermissionTarget("project/project:env/env:flag/flag;tag", Organization.Id), await targetResolver.ResolveFlagAsync(Environment.Id, Flag.Key));
+        Assert.Equal(new PermissionTarget("project/project:env/env:segment/local;tag", Organization.Id), await targetResolver.ResolveSegmentAsync(Environment.Id, Local.Id));
+        Assert.Equal(new PermissionTarget("project/project:env/env:segment/shared", Organization.Id), await targetResolver.ResolveSegmentAsync(Environment.Id, Shared.Id));
+        Assert.Null(await targetResolver.ResolveProjectAsync(Guid.NewGuid()));
+        Assert.Null(await targetResolver.ResolveEnvironmentAsync(Guid.NewGuid()));
+        Assert.Null(await targetResolver.ResolveFlagAsync(Guid.NewGuid(), Flag.Key));
+        Assert.Null(await targetResolver.ResolveSegmentAsync(Guid.NewGuid(), Local.Id));
+        Assert.Null(await targetResolver.ResolveSegmentAsync(Guid.NewGuid(), Shared.Id));
     }
 }
 
@@ -57,7 +57,7 @@ public class PostgresResourceOwnershipTests(FeatBitPostgresFixture fixture) : In
         var data = new ResourceOwnershipData();
         db.AddRange(data.Organization, data.Project, data.Environment, data.Flag, data.Local, data.Shared);
         await db.SaveChangesAsync();
-        await data.AssertOwnership(new Infrastructure.Services.EntityFrameworkCore.ResourceService(db));
+        await data.AssertOwnership(new Infrastructure.Services.EntityFrameworkCore.PermissionTargetResolver(db));
     }
 }
 
@@ -75,6 +75,6 @@ public class MongoResourceOwnershipTests(MongoDbFixture fixture) : IntegrationTe
         await db.CollectionOf<Environment>().InsertOneAsync(data.Environment);
         await db.CollectionOf<FeatureFlag>().InsertOneAsync(data.Flag);
         await db.CollectionOf<Segment>().InsertManyAsync([data.Local, data.Shared]);
-        await data.AssertOwnership(new Infrastructure.Services.MongoDb.ResourceService(db));
+        await data.AssertOwnership(new Infrastructure.Services.MongoDb.PermissionTargetResolver(db));
     }
 }

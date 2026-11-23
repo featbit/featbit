@@ -24,6 +24,9 @@ public class RedisCacheServiceTests : IntegrationTestBase, IAsyncLifetime
         _fixture = fixture;
     }
 
+    /// <summary>
+    /// Connects to the shared Redis container with admin access, clears it, and builds the service under test.
+    /// </summary>
     public async Task InitializeAsync()
     {
         if (!DockerAvailability.IsAvailable)
@@ -40,6 +43,7 @@ public class RedisCacheServiceTests : IntegrationTestBase, IAsyncLifetime
 
         var clientMock = new Mock<IRedisClient>();
         clientMock.Setup(x => x.GetDatabase()).Returns(() => _connection.GetDatabase());
+        clientMock.Setup(x => x.Connection).Returns(_connection);
 
         _sut = new RedisCacheService(clientMock.Object);
     }
@@ -93,6 +97,107 @@ public class RedisCacheServiceTests : IntegrationTestBase, IAsyncLifetime
     }
 
     [DockerFact]
+    public async Task DeleteFlagAsync_CommittedVersionExists_RemovesTheVersionAndKeepsThePointer()
+    {
+        var flag = NewFlag();
+        const long ts = 1000;
+        await _sut.StageFlagAsync(flag, ts);
+        await _sut.CommitFlagAsync(flag.EnvId, flag.Id.ToString(), ts);
+
+        await _sut.DeleteFlagAsync(flag.EnvId, flag.Id);
+
+        var db = _connection.GetDatabase();
+        Assert.False(await db.KeyExistsAsync(RedisKeys.FlagVersion(flag.Id, ts)));
+        Assert.True(await db.KeyExistsAsync(RedisKeys.FlagCommittedPointer(flag.Id)));
+        Assert.Null(await db.SortedSetScoreAsync(RedisKeys.FlagIndex(flag.EnvId), flag.Id.ToString()));
+    }
+
+    [DockerFact]
+    public async Task DeleteFlagAsync_CommittedVersionExists_LeavesAnotherFlagsStateAlone()
+    {
+        var flag = NewFlag();
+        flag.Id = Guid.NewGuid();
+        var other = NewFlag(flag.EnvId);
+        other.Id = Guid.NewGuid();
+        const long ts = 1000;
+        await _sut.StageFlagAsync(flag, ts);
+        await _sut.CommitFlagAsync(flag.EnvId, flag.Id.ToString(), ts);
+        await _sut.StageFlagAsync(other, ts);
+        await _sut.CommitFlagAsync(other.EnvId, other.Id.ToString(), ts);
+
+        await _sut.DeleteFlagAsync(flag.EnvId, flag.Id);
+
+        var db = _connection.GetDatabase();
+        Assert.True(await db.KeyExistsAsync(RedisKeys.FlagVersion(other.Id, ts)));
+        Assert.True(await db.KeyExistsAsync(RedisKeys.FlagCommittedPointer(other.Id)));
+        Assert.NotNull(await db.SortedSetScoreAsync(RedisKeys.FlagIndex(other.EnvId), other.Id.ToString()));
+    }
+
+    /// <summary>
+    /// A backfill that read the database before the flag was archived and deleted commits its older version after the
+    /// delete. The flag is served only when the committed pointer resolves to an existing version, so it must not be.
+    /// </summary>
+    [DockerFact]
+    public async Task DeleteFlagAsync_AStaleCommitArrivesAfterTheDelete_DoesNotMakeTheFlagServableAgain()
+    {
+        var flag = NewFlag();
+        flag.Id = Guid.NewGuid();
+        const long staleTs = 1000;
+        const long archivedTs = 2000;
+        await _sut.StageFlagAsync(flag, staleTs);
+        await _sut.CommitFlagAsync(flag.EnvId, flag.Id.ToString(), staleTs);
+        await _sut.StageFlagAsync(flag, archivedTs);
+        await _sut.CommitFlagAsync(flag.EnvId, flag.Id.ToString(), archivedTs);
+        await _sut.DeleteFlagAsync(flag.EnvId, flag.Id);
+
+        await _sut.StageFlagAsync(flag, staleTs);
+        await _sut.CommitFlagAsync(flag.EnvId, flag.Id.ToString(), staleTs);
+
+        var db = _connection.GetDatabase();
+        var pointer = await db.StringGetAsync(RedisKeys.FlagCommittedPointer(flag.Id));
+        var servable = pointer.HasValue && await db.KeyExistsAsync(RedisKeys.FlagVersion(flag.Id, (long)pointer));
+        Assert.False(servable);
+    }
+
+    /// <summary>
+    /// Segment counterpart of the stale-commit test for flags.
+    /// </summary>
+    [DockerFact]
+    public async Task DeleteSegmentAsync_AStaleCommitArrivesAfterTheDelete_DoesNotMakeTheSegmentServableAgain()
+    {
+        var envIds = new[] { Guid.NewGuid() };
+        var segment = NewSegment();
+        segment.Id = Guid.NewGuid();
+        const long staleTs = 1000;
+        const long archivedTs = 2000;
+        await _sut.StageSegmentAsync(segment, staleTs);
+        await _sut.CommitSegmentAsync(envIds, segment.Id.ToString(), staleTs);
+        await _sut.StageSegmentAsync(segment, archivedTs);
+        await _sut.CommitSegmentAsync(envIds, segment.Id.ToString(), archivedTs);
+        await _sut.DeleteSegmentAsync(envIds, segment.Id);
+
+        await _sut.StageSegmentAsync(segment, staleTs);
+        await _sut.CommitSegmentAsync(envIds, segment.Id.ToString(), staleTs);
+
+        var db = _connection.GetDatabase();
+        var pointer = await db.StringGetAsync(RedisKeys.SegmentCommittedPointer(segment.Id));
+        var servable = pointer.HasValue && await db.KeyExistsAsync(RedisKeys.SegmentVersion(segment.Id, (long)pointer));
+        Assert.False(servable);
+    }
+
+    [DockerFact]
+    public async Task DeleteFlagAsync_PointerIsNotANumber_LeavesThePointerAlone()
+    {
+        var flag = NewFlag();
+        var db = _connection.GetDatabase();
+        await db.StringSetAsync(RedisKeys.FlagCommittedPointer(flag.Id), "not-a-timestamp");
+
+        await _sut.DeleteFlagAsync(flag.EnvId, flag.Id);
+
+        Assert.Equal("not-a-timestamp", await db.StringGetAsync(RedisKeys.FlagCommittedPointer(flag.Id)));
+    }
+
+    [DockerFact]
     public async Task UpsertSegmentAsync_WritesIndexForEachEnvironment()
     {
         var envIds = new[] { Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid() };
@@ -120,6 +225,30 @@ public class RedisCacheServiceTests : IntegrationTestBase, IAsyncLifetime
 
         var db = _connection.GetDatabase();
         Assert.False(await db.KeyExistsAsync(RedisKeys.Segment(segment.Id)));
+        foreach (var envId in envIds)
+        {
+            Assert.Null(await db.SortedSetScoreAsync(RedisKeys.SegmentIndex(envId), segment.Id.ToString()));
+        }
+    }
+
+    /// <summary>
+    /// Deleting a segment that belongs to two environments removes its committed version and its index entries, and keeps
+    /// the committed pointer.
+    /// </summary>
+    [DockerFact]
+    public async Task DeleteSegmentAsync_CommittedVersionExists_RemovesTheVersionAndKeepsThePointer()
+    {
+        var envIds = new[] { Guid.NewGuid(), Guid.NewGuid() };
+        var segment = NewSegment();
+        const long ts = 1000;
+        await _sut.StageSegmentAsync(segment, ts);
+        await _sut.CommitSegmentAsync(envIds, segment.Id.ToString(), ts);
+
+        await _sut.DeleteSegmentAsync(envIds, segment.Id);
+
+        var db = _connection.GetDatabase();
+        Assert.False(await db.KeyExistsAsync(RedisKeys.SegmentVersion(segment.Id, ts)));
+        Assert.True(await db.KeyExistsAsync(RedisKeys.SegmentCommittedPointer(segment.Id)));
         foreach (var envId in envIds)
         {
             Assert.Null(await db.SortedSetScoreAsync(RedisKeys.SegmentIndex(envId), segment.Id.ToString()));
@@ -204,6 +333,106 @@ public class RedisCacheServiceTests : IntegrationTestBase, IAsyncLifetime
         await _sut.DeleteSecretAsync(secret);
 
         Assert.False(await _connection.GetDatabase().KeyExistsAsync(RedisKeys.Secret(secret.Value)));
+    }
+
+    /// <summary>
+    /// Seeds more connection keys than one cleanup batch, interleaved between two pods, and checks that only the dead pod's
+    /// keys and heartbeat entry go while the other pod's keys and unrelated keys stay.
+    /// </summary>
+    [DockerFact]
+    public async Task DeletePodConnection_ManyConnectionKeys_RemovesOnlyTheKeysOwnedByThePod()
+    {
+        var podA = Guid.NewGuid();
+        var podB = Guid.NewGuid();
+        var db = _connection.GetDatabase();
+
+        // More keys than one cleanup batch, interleaved so that every batch holds both pods' keys.
+        const int total = 1203;
+        var ownedByA = 0;
+        for (var i = 0; i < total; i++)
+        {
+            var owner = i % 2 == 0 ? podA : podB;
+            ownedByA += owner == podA ? 1 : 0;
+            await SeedConnectionAsync($"c{i}", owner.ToString());
+        }
+
+        await db.HashSetAsync(RedisKeys.Heartbeats, podA.ToString(), "{}");
+        await db.HashSetAsync(RedisKeys.Heartbeats, podB.ToString(), "{}");
+        await db.StringSetAsync("featbit:flag:unrelated", "keep");
+
+        await _sut.DeletePodConnection(podA);
+
+        var remaining = _connection.GetServer(_connection.GetEndPoints().Single())
+            .Keys(pattern: RedisKeys.ConnectionPattern)
+            .ToArray();
+        Assert.Equal(total - ownedByA, remaining.Length);
+        foreach (var key in remaining)
+        {
+            Assert.Equal(podB.ToString(), (string?)await db.HashGetAsync(key, "heartbeatId"));
+        }
+
+        Assert.False(await db.HashExistsAsync(RedisKeys.Heartbeats, podA.ToString()));
+        Assert.True(await db.HashExistsAsync(RedisKeys.Heartbeats, podB.ToString()));
+        Assert.Equal("keep", await db.StringGetAsync("featbit:flag:unrelated"));
+    }
+
+    [DockerFact]
+    public async Task DeletePodConnection_NoConnectionKeys_DeletesTheHeartbeatEntryOnly()
+    {
+        var pod = Guid.NewGuid();
+        var db = _connection.GetDatabase();
+        await db.HashSetAsync(RedisKeys.Heartbeats, pod.ToString(), "{}");
+        await db.StringSetAsync("featbit:flag:unrelated", "keep");
+
+        await _sut.DeletePodConnection(pod);
+
+        Assert.False(await db.HashExistsAsync(RedisKeys.Heartbeats, pod.ToString()));
+        Assert.Equal("keep", await db.StringGetAsync("featbit:flag:unrelated"));
+    }
+
+    [DockerFact]
+    public async Task DeletePodConnection_ConnectionKeyWithoutHeartbeatId_KeepsTheKey()
+    {
+        var pod = Guid.NewGuid();
+        await SeedConnectionAsync("no-owner", heartbeatId: null);
+        await SeedConnectionAsync("owned", pod.ToString());
+
+        await _sut.DeletePodConnection(pod);
+
+        var db = _connection.GetDatabase();
+        Assert.True(await db.KeyExistsAsync(RedisKeys.Connection("no-owner")));
+        Assert.False(await db.KeyExistsAsync(RedisKeys.Connection("owned")));
+    }
+
+    [DockerFact]
+    public async Task DeletePodConnection_CleanupFails_KeepsTheHeartbeatEntryForTheNextCheck()
+    {
+        var pod = Guid.NewGuid();
+        var db = _connection.GetDatabase();
+        await db.HashSetAsync(RedisKeys.Heartbeats, pod.ToString(), "{}");
+
+        var failingClient = new Mock<IRedisClient>();
+        failingClient.Setup(x => x.GetDatabase()).Returns(db);
+        failingClient.Setup(x => x.Connection).Throws(new InvalidOperationException("scan failed"));
+        var sut = new RedisCacheService(failingClient.Object);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => sut.DeletePodConnection(pod));
+
+        Assert.True(await db.HashExistsAsync(RedisKeys.Heartbeats, pod.ToString()));
+    }
+
+    /// <summary>
+    /// Writes a connection key as the control plane does, with a heartbeat id only when one is given.
+    /// </summary>
+    private async Task SeedConnectionAsync(string id, string? heartbeatId)
+    {
+        var fields = new List<HashEntry> { new("id", id), new("envId", Guid.NewGuid().ToString()), new("secret", "test") };
+        if (heartbeatId is not null)
+        {
+            fields.Add(new HashEntry("heartbeatId", heartbeatId));
+        }
+
+        await _connection.GetDatabase().HashSetAsync(RedisKeys.Connection(id), fields.ToArray());
     }
 
     private static FeatureFlag NewFlag(Guid? envId = null)

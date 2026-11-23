@@ -7,7 +7,7 @@ using Domain.Resources;
 namespace Application.FeatureFlags;
 
 /// <summary>Resolves flag environments inside the authorizing organization before evaluating policies.</summary>
-public class FlagAccessGuard(IResourceService resourceService, IFeatureFlagService flagService)
+public class FlagAccessGuard(IPermissionTargetResolver targetResolver, IFeatureFlagService flagService)
 {
     private async Task<string> GetEnvironmentRnAsync(Guid organizationId, Guid envId)
     {
@@ -16,7 +16,7 @@ public class FlagAccessGuard(IResourceService resourceService, IFeatureFlagServi
             throw new ForbiddenException();
         }
 
-        var resource = await resourceService.GetEnvRnAsync(envId);
+        var resource = await targetResolver.ResolveEnvironmentAsync(envId);
         if (resource == null || resource.OrganizationId != organizationId || string.IsNullOrWhiteSpace(resource.Rn))
         {
             throw new ForbiddenException();

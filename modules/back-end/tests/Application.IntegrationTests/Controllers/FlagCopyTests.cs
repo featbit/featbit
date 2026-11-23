@@ -56,7 +56,7 @@ public class FlagCopyTests
             response = await client.PostAsJsonAsync($"/api/v1/envs/{source}/feature-flags/{(operation == "copy" ? "copy-to-env" : "copy-to-env-precheck")}/{target}", body);
         }
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-        app.Resources.VerifyNoOtherCalls(); app.Flags.VerifyNoOtherCalls();
+        app.TargetResolver.VerifyNoOtherCalls(); app.Flags.VerifyNoOtherCalls();
     }
 
     [Theory]
@@ -96,7 +96,7 @@ public class FlagCopyTestApp : PermissionCheckTestApp
     public Guid Target { get; } = Guid.NewGuid();
     public string Denied { get; init; } = "";
     public FeatureFlag Flag { get; }
-    public Mock<IResourceService> Resources { get; } = new();
+    public Mock<IPermissionTargetResolver> TargetResolver { get; } = new();
     public Mock<IFeatureFlagService> Flags { get; } = new();
     public Mock<IEndUserService> Users { get; } = new();
     public FlagCopyTestApp() => Flag = new FeatureFlag(Source, "Flag", "", "flag", false, VariationTypes.Boolean,
@@ -107,8 +107,8 @@ public class FlagCopyTestApp : PermissionCheckTestApp
         base.ConfigureWebHost(builder);
         builder.ConfigureServices(services =>
         {
-            Resources.Setup(x => x.GetEnvRnAsync(Source)).ReturnsAsync(new ResourceRn("project/p:env/source", TestWorkspace.OrganizationId));
-            Resources.Setup(x => x.GetEnvRnAsync(Target)).ReturnsAsync(new ResourceRn("project/p:env/target",
+            TargetResolver.Setup(x => x.ResolveEnvironmentAsync(Source)).ReturnsAsync(new PermissionTarget("project/p:env/source", TestWorkspace.OrganizationId));
+            TargetResolver.Setup(x => x.ResolveEnvironmentAsync(Target)).ReturnsAsync(new PermissionTarget("project/p:env/target",
                 Denied == "foreign" ? Guid.NewGuid() : TestWorkspace.OrganizationId));
             Flags.Setup(x => x.FindManyAsync(It.IsAny<Expression<Func<FeatureFlag, bool>>>()))
                 .ReturnsAsync((Expression<Func<FeatureFlag, bool>> predicate) => new[] { Flag }.Where(predicate.Compile()).ToArray());
@@ -132,7 +132,7 @@ public class FlagCopyTestApp : PermissionCheckTestApp
             members.Setup(x => x.GetPermissionsAsync(TestWorkspace.OrganizationId, TestUser.Id)).ReturnsAsync(statements.ToArray());
             var license = new Mock<ILicenseService>();
             license.Setup(x => x.IsFeatureGrantedAsync(It.IsAny<Guid>(), It.IsAny<string>())).ReturnsAsync(true);
-            services.Replace(ServiceDescriptor.Singleton(Resources.Object));
+            services.Replace(ServiceDescriptor.Singleton(TargetResolver.Object));
             services.Replace(ServiceDescriptor.Singleton(Flags.Object));
             services.Replace(ServiceDescriptor.Singleton(Users.Object));
             services.Replace(ServiceDescriptor.Singleton(resourcesV2.Object));

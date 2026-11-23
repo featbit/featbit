@@ -1,7 +1,8 @@
+import { useDetailNavigate } from "@/lib/list-navigation"
 import { Copy } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useNavigate, useParams } from "react-router-dom"
+import { useParams } from "react-router-dom"
 import { DetailBackLink } from "@/components/detail-back-link"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -36,8 +37,8 @@ const validTabs = new Set<TeamDetailTab>([
 
 export function TeamDetailsPage() {
   const params = useParams()
-  const navigate = useNavigate()
   const lang = resolveLang(params.lang)
+  const navigate = useDetailNavigate(localizedPath(lang, "/iam/team"))
   const { t } = useTranslation()
   const memberId = params.memberId ?? ""
   const requestedTab = params.tab as TeamDetailTab | undefined

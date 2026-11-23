@@ -11,6 +11,12 @@ namespace Api.ControlPlane;
 
 public static class ServiceCollectionExtensions
 {
+    /// <summary>
+    /// Registers the control-plane services of the evaluation server: the connection manager that reports connections, the
+    /// store for the consistency mode, and the heartbeat with its applied-watermark reader. The Redis reader is registered
+    /// only under <c>GatedCommit</c>, the one mode in which the control plane uses the watermarks; any other mode gets a reader
+    /// that reports none and never touches Redis.
+    /// </summary>
     public static IServiceCollection AddControlPlane(this IServiceCollection services, IConfiguration configuration)
     {
         // Replace the `DefaultConnectionManager` with `ControlPlaneConnectionManager`
@@ -44,7 +50,16 @@ public static class ServiceCollectionExtensions
         // index so all pods in a DC agree and a fresh pod is immediately correct). Only the
         // HeartbeatService consumes this, so registration is gated on UseControlPlane to keep
         // hosts without control-plane wiring from requiring IRedisClient at DI validation time.
-        services.AddSingleton<IAppliedWatermarkReader, RedisAppliedWatermarkReader>();
+        // The control plane turns the watermarks into DC leases only under GatedCommit, so in any
+        // other mode the heartbeat reports none instead of scanning Redis to build them.
+        if (configuration.GetConsistencyMode() == ConsistencyMode.GatedCommit)
+        {
+            services.AddSingleton<IAppliedWatermarkReader, RedisAppliedWatermarkReader>();
+        }
+        else
+        {
+            services.AddSingleton<IAppliedWatermarkReader, NoOpAppliedWatermarkReader>();
+        }
 
         // D5 (#22): shared singleton recording the last successful heartbeat publish, plus the
         // freshness health check that surfaces an Unhealthy self-fence signal under GatedCommit.

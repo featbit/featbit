@@ -35,45 +35,37 @@ public class OnSegmentDeleted : INotification
     }
 }
 
-public class OnSegmentDeletedHandler : INotificationHandler<OnSegmentDeleted>
+public class OnSegmentDeletedHandler(
+    ICacheService cache,
+    IAuditLogService auditLogService,
+    IWebhookHandler webhookHandler,
+    ISegmentService segmentService,
+    ISegmentChangePublisher changePublisher)
+    : INotificationHandler<OnSegmentDeleted>
 {
-    private readonly ICacheService _cache;
-    private readonly IAuditLogService _auditLogService;
-    private readonly IWebhookHandler _webhookHandler;
-    private readonly ISegmentService _segmentService;
-
-    public OnSegmentDeletedHandler(
-        ICacheService cache,
-        IAuditLogService auditLogService,
-        IWebhookHandler webhookHandler,
-        ISegmentService segmentService)
-    {
-        _cache = cache;
-        _auditLogService = auditLogService;
-        _webhookHandler = webhookHandler;
-        _segmentService = segmentService;
-    }
-
     public async Task Handle(OnSegmentDeleted notification, CancellationToken cancellationToken)
     {
         // write audit log
-        await _auditLogService.AddOneAsync(notification.GetAuditLog());
+        await auditLogService.AddOneAsync(notification.GetAuditLog());
 
         var segment = notification.Segment;
-        var envIds = await _segmentService.GetEnvironmentIdsAsync(segment);
+        var envIds = await segmentService.GetEnvironmentIdsAsync(segment);
 
         // delete cache
-        await _cache.DeleteSegmentAsync(envIds, segment.Id);
+        await cache.DeleteSegmentAsync(envIds, segment.Id);
 
         // handle webhooks
         foreach (var envId in envIds)
         {
-            _ = _webhookHandler.HandleAsync(
+            _ = webhookHandler.HandleAsync(
                 envId,
                 notification.Segment,
                 notification.DataChange,
                 notification.OperatorId
             );
         }
+
+        // publish segment deletion message
+        await changePublisher.PublishDeletedAsync(envIds, segment.Id);
     }
 }

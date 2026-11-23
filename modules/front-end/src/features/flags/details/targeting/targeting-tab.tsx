@@ -12,6 +12,12 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import { cn } from "@/lib/utils"
 import { ReviewSaveSplitButton } from "@/features/change-review/change-review-dialog"
 import type {
   SegmentEndUser,
@@ -295,6 +301,9 @@ export function TargetingTab({
     (item) => item.id === flag.disabledVariationId
   )
   const archived = Boolean(flag.isArchived)
+  const togglePermissionDenied =
+    !canToggle && !readOnly && !toggling && !archived
+  const toggleDisabled = readOnly || toggling || !canToggle || flag.isArchived
   const canEditOffVariation = canUpdateOffVariation && !archived && !readOnly
   const canEditDefault = canUpdateDefault && !archived && !readOnly
   const canEditUsers = canUpdateUsers && !archived && !readOnly
@@ -316,12 +325,34 @@ export function TargetingTab({
               {toggling ? (
                 <Loader2 className="size-4 animate-spin text-muted-foreground" />
               ) : null}
-              <Switch
-                checked={flag.isEnabled}
-                disabled={readOnly || toggling || !canToggle || flag.isArchived}
-                aria-label={t("featureFlags.detailsPage.toggleStatus")}
-                onCheckedChange={onToggle}
-              />
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <span
+                      className={cn(
+                        "inline-flex",
+                        togglePermissionDenied && "cursor-not-allowed"
+                      )}
+                    />
+                  }
+                >
+                  <Switch
+                    checked={flag.isEnabled}
+                    disabled={toggleDisabled}
+                    className={cn(
+                      !toggleDisabled && "cursor-pointer",
+                      togglePermissionDenied && "pointer-events-none"
+                    )}
+                    aria-label={t("featureFlags.detailsPage.toggleStatus")}
+                    onCheckedChange={onToggle}
+                  />
+                </TooltipTrigger>
+                {togglePermissionDenied ? (
+                  <TooltipContent>
+                    {t("featureFlags.permissionDenied")}
+                  </TooltipContent>
+                ) : null}
+              </Tooltip>
               <span className="text-sm font-semibold">
                 {t(flag.isEnabled ? "featureFlags.on" : "featureFlags.off")}
               </span>

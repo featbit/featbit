@@ -1,6 +1,6 @@
 import type { TFunction } from "i18next"
 import { Copy, Star } from "lucide-react"
-import { Link } from "react-router-dom"
+import { ListDetailLink as Link } from "@/components/list-detail-link"
 import type { ColumnDef } from "@tanstack/react-table"
 import { Button, buttonVariants } from "@/components/ui/button"
 import {

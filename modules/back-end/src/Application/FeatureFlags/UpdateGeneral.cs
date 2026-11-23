@@ -81,8 +81,7 @@ public class UpdateGeneralHandler(
 
         if (!nameChanged && !descriptionChanged && !tagsChanged)
         {
-            await permissionGuard.EnsureFlagChangeAllowedAsync(
-                request.OrgId, flag, new DataChange(flag).To(flag), request.Permissions);
+            await permissionGuard.EnsureFlagOwnershipAsync(request.OrgId, flag);
             return flag.Revision;
         }
 

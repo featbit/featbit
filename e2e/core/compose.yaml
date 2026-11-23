@@ -66,8 +66,8 @@ services:
   api:
     image: ${API_IMAGE:-featbit-local-api:local}
     build:
-      context: ../../modules/back-end
-      dockerfile: deploy/Dockerfile
+      context: ${API_BUILD_CONTEXT:-../../modules}
+      dockerfile: ${API_DOCKERFILE:-back-end/deploy/Dockerfile}
     environment: &backend-env
       ASPNETCORE_URLS: http://+:5000
       DbProvider: ${DB_PROVIDER}
@@ -87,8 +87,8 @@ services:
   els:
     image: ${ELS_IMAGE:-featbit-local-els:local}
     build:
-      context: ../../modules/evaluation-server
-      dockerfile: deploy/Dockerfile
+      context: ${ELS_BUILD_CONTEXT:-../../modules}
+      dockerfile: ${ELS_DOCKERFILE:-evaluation-server/deploy/Dockerfile}
     environment:
       <<: *backend-env
       ASPNETCORE_URLS: http://+:5100
