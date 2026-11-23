@@ -4,6 +4,7 @@ using Application.Bases.Exceptions;
 using Application.ReleaseMetricSourceConnections;
 using Application.Services;
 using Domain.AccessTokens;
+using Domain.Environments;
 using Domain.Policies;
 using Domain.Resources;
 
@@ -37,7 +38,7 @@ public class ReleaseMetricSourceConnectionController(
 
     /// <summary>Create a release metric source connection in an environment.</summary>
     /// <remarks>
-    /// Requires CanAccessEnv and UpdateEnvSettings. Supply the provider type and its non-sensitive connection settings.
+    /// Requires CanAccessEnv and UpdateEnvSettings. Supply public connection settings and use secretUpdate for write-only credentials.
     /// </remarks>
     /// <response code="400">The request is malformed or required fields are missing.</response>
     [HttpPost]
@@ -45,23 +46,24 @@ public class ReleaseMetricSourceConnectionController(
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<ApiResponse<ReleaseMetricSourceConnectionVm>> CreateAsync(Guid envId, CreateReleaseMetricSourceConnection request)
     {
-        await EnsureAccessAsync(envId, manage: true);
+        request.Scope = await EnsureAccessAsync(envId, manage: true);
         request.EnvId = envId;
         return Ok(await Mediator.Send(request, HttpContext.RequestAborted));
     }
 
     /// <summary>Update a release metric source connection's name and settings.</summary>
     /// <remarks>
-    /// Requires CanAccessEnv and UpdateEnvSettings. Send the name, provider type and full connection settings.
+    /// Requires CanAccessEnv and UpdateEnvSettings. Omit fields to keep their stored values. Use secretUpdate to replace credentials.
     /// </remarks>
     /// <response code="400">The request is malformed or required fields are missing.</response>
     /// <response code="404">The connection is missing or deleted in this environment.</response>
     [HttpPut("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ApiResponse<ReleaseMetricSourceConnectionVm>> UpdateAsync(Guid envId, Guid id, UpdateReleaseMetricSourceConnection request)
     {
-        await EnsureAccessAsync(envId, manage: true);
+        request.Scope = await EnsureAccessAsync(envId, manage: true);
         request.EnvId = envId;
         request.Id = id;
         return Ok(await Mediator.Send(request, HttpContext.RequestAborted));
@@ -78,7 +80,7 @@ public class ReleaseMetricSourceConnectionController(
         return Ok(await Mediator.Send(new DeleteReleaseMetricSourceConnection { EnvId = envId, Id = id }, HttpContext.RequestAborted));
     }
 
-    private async Task EnsureAccessAsync(Guid envId, bool manage = false)
+    private async Task<ResourceDescriptor> EnsureAccessAsync(Guid envId, bool manage = false)
     {
         // Environment resource names contain the project and environment keys, both local to an organization.
         var descriptor = await environmentService.GetResourceDescriptorAsync(envId);
@@ -101,5 +103,7 @@ public class ReleaseMetricSourceConnectionController(
         {
             throw new ForbiddenException();
         }
+
+        return descriptor;
     }
 }

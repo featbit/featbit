@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Application.Bases;
+using Domain.Environments;
 
 namespace Application.ReleaseMetricSourceConnections;
 
@@ -9,10 +10,16 @@ public class ReleaseMetricSourceConnectionBase
     [JsonIgnore]
     public Guid EnvId { get; set; }
 
-    public string Name { get; set; }
-    public string ProviderType { get; set; }
+    [JsonIgnore]
+    public ResourceDescriptor Scope { get; set; }
+
+    public string Name { get; set => field = value ?? throw new JsonException("Name must be a string."); }
+    public string ProviderType { get; set => field = value ?? throw new JsonException("Provider type must be a string."); }
     public JsonElement ProviderConfig { get; set; }
     public JsonElement Authentication { get; set; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWriting)]
+    public JsonElement SecretUpdate { get; set; }
 }
 
 public class ReleaseMetricSourceConnectionBaseValidator : AbstractValidator<ReleaseMetricSourceConnectionBase>

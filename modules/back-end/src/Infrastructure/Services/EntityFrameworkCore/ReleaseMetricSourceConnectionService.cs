@@ -34,15 +34,17 @@ public class ReleaseMetricSourceConnectionService(AppDbContext dbContext)
         }
     }
 
-    public async Task<bool> UpdateAsync(ReleaseMetricSourceConnection connection, CancellationToken ct)
+    public async Task<bool> UpdateAsync(ReleaseMetricSourceConnection connection, DateTime previousUpdatedAt, CancellationToken ct)
     {
         var updated = await Active(connection.EnvId)
-            .Where(x => x.Id == connection.Id)
+            .Where(x => x.Id == connection.Id && x.UpdatedAt == previousUpdatedAt)
             .ExecuteUpdateAsync(s => s
                 .SetProperty(x => x.Name, connection.Name)
                 .SetProperty(x => x.ProviderType, connection.ProviderType)
                 .SetProperty(x => x.ConnectionConfiguration, connection.ConnectionConfiguration)
+                .SetProperty(x => x.ProtectedCredential, connection.ProtectedCredential)
                 .SetProperty(x => x.UpdatedAt, connection.UpdatedAt), ct);
+
         return updated == 1;
     }
 
@@ -50,6 +52,7 @@ public class ReleaseMetricSourceConnectionService(AppDbContext dbContext)
     {
         var deleted = await Active(envId).Where(x => x.Id == id).ExecuteUpdateAsync(s => s
             .SetProperty(x => x.IsDeleted, true)
+            .SetProperty(x => x.ProtectedCredential, (string?)null)
             .SetProperty(x => x.UpdatedAt, DateTime.UtcNow), ct);
         return deleted == 1;
     }

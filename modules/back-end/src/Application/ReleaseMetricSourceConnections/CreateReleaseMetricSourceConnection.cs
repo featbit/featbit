@@ -14,13 +14,22 @@ public class CreateReleaseMetricSourceConnectionValidator : AbstractValidator<Cr
     }
 }
 
-public class CreateReleaseMetricSourceConnectionHandler(IReleaseMetricSourceConnectionService service)
+public class CreateReleaseMetricSourceConnectionHandler(
+    IReleaseMetricSourceConnectionService service,
+    IReleaseMetricSourceCredentialProtector protector)
     : IRequestHandler<CreateReleaseMetricSourceConnection, ReleaseMetricSourceConnectionVm>
 {
     public async Task<ReleaseMetricSourceConnectionVm> Handle(CreateReleaseMetricSourceConnection request, CancellationToken cancellationToken)
     {
         var connection = new ReleaseMetricSourceConnection(request.EnvId, request.Name.Trim(), request.ProviderType,
             new ReleaseMetricSourceConnectionSettings(request.ProviderConfig, request.Authentication));
+
+        var (credential, _) = ReleaseMetricSourceCredentialUpdate.Resolve(request, null, protector);
+        if (credential.HasValue)
+        {
+            connection.ProtectedCredential = protector.Protect(request.Scope, connection, credential.Value);
+        }
+
         await service.AddAsync(connection, cancellationToken);
         return ReleaseMetricSourceConnectionVm.From(connection);
     }
