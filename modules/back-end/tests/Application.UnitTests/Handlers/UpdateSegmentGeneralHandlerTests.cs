@@ -62,7 +62,7 @@ public class UpdateSegmentGeneralHandlerTests
                 Tags = tags ?? segment.Tags,
                 Comment = "General settings update"
             },
-            permissions) { OrgId = OrganizationId };
+            permissions) { OrgId = OrganizationId, EnvId = segment.EnvId };
 
     private static UpdateGeneralHandler BuildSut(
         Segment segment,

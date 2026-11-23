@@ -103,6 +103,7 @@ public class PermissionTargetResolver(AppDbContext dbContext) : IPermissionTarge
                     where env.Id == envId
                     select new
                     {
+                        organization.WorkspaceId,
                         OrganizationKey = organization.Key,
                         ProjectKey = project.Key,
                         project.OrganizationId,
@@ -110,7 +111,7 @@ public class PermissionTargetResolver(AppDbContext dbContext) : IPermissionTarge
                     };
 
                 var projectEnv = await query.FirstOrDefaultAsync();
-                if (projectEnv == null)
+                if (projectEnv == null || projectEnv.WorkspaceId != segment.WorkspaceId)
                 {
                     return null;
                 }

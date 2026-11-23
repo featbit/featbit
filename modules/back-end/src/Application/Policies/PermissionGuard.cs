@@ -14,8 +14,8 @@ public class PermissionGuard(IPermissionTargetResolver targetResolver) : IPermis
     public Task EnsureFlagOwnershipAsync(Guid organizationId, FeatureFlag flag) =>
         EnsureOwnershipAsync(organizationId, () => targetResolver.ResolveFlagAsync(flag.EnvId, flag.Key));
 
-    public Task EnsureSegmentOwnershipAsync(Guid organizationId, Segment segment) =>
-        EnsureOwnershipAsync(organizationId, () => targetResolver.ResolveSegmentAsync(segment.EnvId, segment.Id));
+    public Task EnsureSegmentOwnershipAsync(Guid organizationId, Guid envId, Segment segment) =>
+        EnsureOwnershipAsync(organizationId, () => targetResolver.ResolveSegmentAsync(envId, segment.Id));
 
     public Task EnsureFlagChangeAllowedAsync(Guid organizationId, FeatureFlag flag, DataChange change, PolicyStatement[] permissions) =>
         EnsureAllowedAsync(
@@ -25,12 +25,12 @@ public class PermissionGuard(IPermissionTargetResolver targetResolver) : IPermis
             () => targetResolver.ResolveFlagAsync(flag.EnvId, flag.Key)
         );
 
-    public Task EnsureSegmentChangeAllowedAsync(Guid organizationId, Segment segment, DataChange change, PolicyStatement[] permissions) =>
+    public Task EnsureSegmentChangeAllowedAsync(Guid organizationId, Guid envId, Segment segment, DataChange change, PolicyStatement[] permissions) =>
         EnsureAllowedAsync(
             organizationId,
             SegmentComparer.Compare(change).Select(instruction => instruction.Permission),
             permissions,
-            () => targetResolver.ResolveSegmentAsync(segment.EnvId, segment.Id)
+            () => targetResolver.ResolveSegmentAsync(envId, segment.Id)
         );
 
     private static async Task EnsureAllowedAsync(

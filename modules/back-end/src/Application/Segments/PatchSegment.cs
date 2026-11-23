@@ -13,6 +13,8 @@ public class PatchSegment : IRequest<PatchResult>
 
     public Guid OrgId { get; set; }
 
+    public Guid EnvId { get; set; }
+
     public Guid Id { get; set; }
 
     public JsonPatchDocument<Segment> Patch { get; set; }
@@ -48,7 +50,7 @@ public class PatchSegmentHandler(
         segment.MarkAsUpdated(currentUser.Id);
         dataChange.To(segment);
 
-        await permissionGuard.EnsureSegmentChangeAllowedAsync(request.OrgId, segment, dataChange, request.Permissions);
+        await permissionGuard.EnsureSegmentChangeAllowedAsync(request.OrgId, request.EnvId, segment, dataChange, request.Permissions);
 
         await segmentService.UpdateAsync(segment);
 

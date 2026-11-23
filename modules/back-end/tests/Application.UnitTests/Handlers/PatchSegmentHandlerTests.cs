@@ -59,7 +59,7 @@ public class PatchSegmentHandlerTests
 
         var patch = new JsonPatchDocument<Segment>();
         patch.Replace(x => x.Description, "patched");
-        var request = new PatchSegment { OrgId = OrganizationId, Id = segment.Id, Patch = patch, Permissions = AllowAll() };
+        var request = new PatchSegment { OrgId = OrganizationId, EnvId = segment.EnvId, Id = segment.Id, Patch = patch, Permissions = AllowAll() };
 
         var result = await sut.Handle(request, CancellationToken.None);
 
@@ -85,7 +85,7 @@ public class PatchSegmentHandlerTests
 
         var patch = new JsonPatchDocument<Segment>();
         patch.Replace(x => x.Included, new[] { "user-1", "user-2" });
-        var request = new PatchSegment { OrgId = OrganizationId, Id = segment.Id, Patch = patch, Permissions = AllowAll() };
+        var request = new PatchSegment { OrgId = OrganizationId, EnvId = segment.EnvId, Id = segment.Id, Patch = patch, Permissions = AllowAll() };
 
         var result = await sut.Handle(request, CancellationToken.None);
 
@@ -110,7 +110,7 @@ public class PatchSegmentHandlerTests
             op = "remove",
             path = "/nonexistent"
         });
-        var request = new PatchSegment { OrgId = OrganizationId, Id = segment.Id, Patch = patch };
+        var request = new PatchSegment { OrgId = OrganizationId, EnvId = segment.EnvId, Id = segment.Id, Patch = patch };
 
         var result = await sut.Handle(request, CancellationToken.None);
 

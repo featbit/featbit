@@ -31,6 +31,8 @@ public class UpdateTargeting : UpdateTargetingPayload, IRequest<bool>
 
     public Guid OrgId { get; set; }
 
+    public Guid EnvId { get; set; }
+
     public Guid Id { get; set; }
 
     public PolicyStatement[] Permissions { get; set; }
@@ -69,7 +71,7 @@ public class UpdateTargetingHandler(
         var segment = await service.GetAsync(request.Id);
         var dataChange = segment.UpdateTargeting(request.Included, request.Excluded, request.Rules);
 
-        await permissionGuard.EnsureSegmentChangeAllowedAsync(request.OrgId, segment, dataChange, request.Permissions);
+        await permissionGuard.EnsureSegmentChangeAllowedAsync(request.OrgId, request.EnvId, segment, dataChange, request.Permissions);
 
         await service.UpdateAsync(segment);
 

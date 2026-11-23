@@ -47,10 +47,10 @@ public class PermissionGuardTests
         var requestOrg = ownership == "empty-request-org" ? Guid.Empty : org;
         Func<Task> act = () => changed
             ? segment
-                ? guard.EnsureSegmentChangeAllowedAsync(requestOrg, seg, change, permissions)
+                ? guard.EnsureSegmentChangeAllowedAsync(requestOrg, seg.EnvId, seg, change, permissions)
                 : guard.EnsureFlagChangeAllowedAsync(requestOrg, flag, change, permissions)
             : segment
-                ? guard.EnsureSegmentOwnershipAsync(requestOrg, seg)
+                ? guard.EnsureSegmentOwnershipAsync(requestOrg, seg.EnvId, seg)
                 : guard.EnsureFlagOwnershipAsync(requestOrg, flag);
         if (ownership == "own") await act();
         else await Assert.ThrowsAsync<ForbiddenException>(act);
@@ -82,7 +82,7 @@ public class PermissionGuardTests
                     Effect = EffectType.Deny, Actions = [segment ? Permissions.UpdateSegmentName : Permissions.UpdateFlagName], Resources = ["*"] }]
             : [];
         await Assert.ThrowsAsync<ForbiddenException>(() => segment
-            ? guard.EnsureSegmentChangeAllowedAsync(org, seg, change, policies)
+            ? guard.EnsureSegmentChangeAllowedAsync(org, seg.EnvId, seg, change, policies)
             : guard.EnsureFlagChangeAllowedAsync(org, flag, change, policies));
     }
 }

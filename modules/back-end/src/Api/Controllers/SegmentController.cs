@@ -144,11 +144,12 @@ public class SegmentController : ApiControllerBase
     [OpenApi]
     [HttpPut("{segmentId:guid}/general")]
     public async Task<ApiResponse<bool>> UpdateGeneralAsync(
+        Guid envId,
         Guid segmentId,
         UpdateGeneralPayload payload)
     {
         var permissions = await GetRequestPermissionsAsync();
-        var request = new UpdateGeneral(segmentId, payload, permissions);
+        var request = new UpdateGeneral(segmentId, payload, permissions) { EnvId = envId };
 
         request.WorkspaceId = WorkspaceId;
         request.OrgId = OrgId;
@@ -164,10 +165,10 @@ public class SegmentController : ApiControllerBase
     /// </remarks>
     [OpenApi]
     [HttpPut("{segmentId:guid}/targeting")]
-    public async Task<ApiResponse<bool>> UpdateTargetingAsync(Guid segmentId, UpdateTargetingPayload payload)
+    public async Task<ApiResponse<bool>> UpdateTargetingAsync(Guid envId, Guid segmentId, UpdateTargetingPayload payload)
     {
         var permissions = await GetRequestPermissionsAsync();
-        var request = new UpdateTargeting(segmentId, payload, permissions);
+        var request = new UpdateTargeting(segmentId, payload, permissions) { EnvId = envId };
 
         request.WorkspaceId = WorkspaceId;
         request.OrgId = OrgId;
@@ -185,7 +186,7 @@ public class SegmentController : ApiControllerBase
     [OpenApi]
     [OpenApiRequestExamples(typeof(PatchSegmentExamples))]
     [HttpPatch("{segmentId:guid}")]
-    public async Task<ApiResponse<bool>> PatchAsync(Guid segmentId, [FromBody] JsonElement jsonElement)
+    public async Task<ApiResponse<bool>> PatchAsync(Guid envId, Guid segmentId, [FromBody] JsonElement jsonElement)
     {
         var patch = JsonSerializer.Deserialize<JsonPatchDocument<Segment>>(
             jsonElement.GetRawText(),
@@ -194,6 +195,7 @@ public class SegmentController : ApiControllerBase
 
         var request = new PatchSegment
         {
+            EnvId = envId,
             Id = segmentId,
             Patch = patch,
             Permissions = await GetRequestPermissionsAsync()
