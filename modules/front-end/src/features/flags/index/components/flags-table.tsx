@@ -179,11 +179,33 @@ function ServingCell({
   return (
     <div className="space-y-2.5">
       <div className="flex items-center gap-2">
-        <Switch
-          checked={flag.isEnabled}
-          disabled={pending || !allowed}
-          onCheckedChange={onToggle}
-        />
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <span
+                className={cn(
+                  "inline-flex",
+                  !allowed && !pending && "cursor-not-allowed"
+                )}
+              />
+            }
+          >
+            <Switch
+              checked={flag.isEnabled}
+              disabled={pending || !allowed}
+              className={cn(
+                !pending && allowed && "cursor-pointer",
+                !pending && !allowed && "pointer-events-none"
+              )}
+              onCheckedChange={onToggle}
+            />
+          </TooltipTrigger>
+          {!allowed && !pending ? (
+            <TooltipContent>
+              {t("featureFlags.permissionDenied")}
+            </TooltipContent>
+          ) : null}
+        </Tooltip>
         <span className="text-xs font-medium">
           {flag.isEnabled ? t("featureFlags.on") : t("featureFlags.off")}
         </span>

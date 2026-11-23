@@ -7,8 +7,8 @@
 
 ## Build & Run
 
-1. `cd ./featbit/modules/back-end`
-2. `docker build --progress plain -f ./deploy/Dockerfile -t featbit/api:local .`
+1. `cd ./featbit/modules`
+2. `docker build --progress plain -f ./back-end/deploy/Dockerfile -t featbit/api:local .`
 3. `docker run -d -p 5000:5000 --name featbit-api-local featbit/api:local`
 
 ## Default User

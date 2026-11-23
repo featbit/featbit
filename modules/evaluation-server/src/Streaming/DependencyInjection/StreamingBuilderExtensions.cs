@@ -135,6 +135,9 @@ public static class StreamingBuilderExtensions
 
             // use hybrid store if we use Redis cache
             services.AddSingleton<IStore, HybridStore>();
+            services.AddOptionsWithValidateOnStart<StoreAvailabilityOptions>()
+                .Bind(configuration.GetSection(StoreAvailabilityOptions.SectionName))
+                .ValidateDataAnnotations();
             services.AddHostedService<StoreAvailableSentinel>();
         }
     }

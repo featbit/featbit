@@ -6,6 +6,9 @@ FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG TARGETARCH
 WORKDIR /source
 
+# Central package versions shared by all .NET modules (MSBuild finds it by walking up).
+COPY Directory.Packages.props ./
+
 # Copy only solution + csproj files first for better Docker layer caching.
 # Important: don't use wildcards that flatten paths; copy into the actual project folders.
 COPY control-plane/*.slnx ./control-plane/

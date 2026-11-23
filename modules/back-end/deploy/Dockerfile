@@ -6,26 +6,31 @@ FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG TARGETARCH
 WORKDIR /source
 
+# copy central package versions; MSBuild finds it by walking up from the module directory
+COPY Directory.Packages.props ./
+
+WORKDIR /source/back-end
+
 # copy sln
-COPY *.slnx .
+COPY back-end/*.slnx .
 
 # copy src project files
-COPY src/*/*.csproj ./
+COPY back-end/src/*/*.csproj ./
 RUN for file in $(ls *.csproj); do mkdir -p src/${file%.*}/ && mv $file src/${file%.*}/; done
 
 # copy test project files
-COPY tests/*/*.csproj ./
+COPY back-end/tests/*/*.csproj ./
 RUN for file in $(ls *.csproj); do mkdir -p tests/${file%.*}/ && mv $file tests/${file%.*}/; done
 
 RUN dotnet restore -a $TARGETARCH
 
 # copy everything else
-COPY . .
+COPY back-end/. .
 
 # publish stage
 FROM build AS publish
 ARG INSTALL_DIR
-WORKDIR /source/src/Api
+WORKDIR /source/back-end/src/Api
 RUN dotnet publish -a $TARGETARCH --no-restore -o $INSTALL_DIR
 
 # final stage/image
@@ -60,7 +65,7 @@ ENV VERSION=$VERSION
 
 WORKDIR $INSTALL_DIR
 COPY --from=publish $INSTALL_DIR ./
-COPY --from=build /source/start.sh ./start.sh
+COPY --from=build /source/back-end/start.sh ./start.sh
 RUN chmod +x ./start.sh
 EXPOSE 5000
 

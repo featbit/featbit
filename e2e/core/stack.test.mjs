@@ -4,7 +4,7 @@ import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promis
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createServer } from 'node:http';
-import { processRun, ready, stopStack, waitFor } from './stack.mjs';
+import { dotnetBuildEnv, processRun, ready, stopStack, waitFor } from './stack.mjs';
 
 test('waitFor bounds a callback that never settles and keeps a standalone process alive', async () => {
   const module = new URL('./stack.mjs', import.meta.url).href;
@@ -151,4 +151,17 @@ test('file-backed command failure includes only a bounded diagnostic tail', asyn
   } finally {
     await rm(folder, { recursive: true, force: true });
   }
+});
+
+test('dotnet image builds use the shared modules context only when the source has central package versions', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'featbit-layout-'));
+  try {
+    assert.deepEqual(dotnetBuildEnv(root), {
+      API_BUILD_CONTEXT: '../../modules/back-end', API_DOCKERFILE: 'deploy/Dockerfile',
+      ELS_BUILD_CONTEXT: '../../modules/evaluation-server', ELS_DOCKERFILE: 'deploy/Dockerfile',
+    });
+    await mkdir(join(root, 'modules'));
+    await writeFile(join(root, 'modules', 'Directory.Packages.props'), '<Project />');
+    assert.deepEqual(dotnetBuildEnv(root), {});
+  } finally { await rm(root, { recursive: true, force: true }); }
 });

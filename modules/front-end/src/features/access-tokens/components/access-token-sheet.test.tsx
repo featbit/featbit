@@ -40,6 +40,7 @@ function renderWithQueryClient(element: ReactElement) {
 
 describe("AccessTokenSheet", () => {
   beforeEach(() => {
+    Element.prototype.scrollIntoView = vi.fn()
     mocks.fetchAccessTokenResources.mockReset()
     mocks.updateAccessToken.mockReset()
     sharedProps.onSaved.mockReset()
