@@ -13,11 +13,13 @@ public class UpdateReleaseMetricSourceConnection : ReleaseMetricSourceConnection
 public class UpdateReleaseMetricSourceConnectionHandler(
     IReleaseMetricSourceConnectionService service,
     IReleaseMetricSourceCredentialProtector protector,
-    IValidator<ReleaseMetricSourceConnectionBase> validator)
+    IValidator<ReleaseMetricSourceConnectionBase> validator,
+    ReleaseMetricSourceConnectionAccessGuard accessGuard)
     : IRequestHandler<UpdateReleaseMetricSourceConnection, ReleaseMetricSourceConnectionVm>
 {
     public async Task<ReleaseMetricSourceConnectionVm> Handle(UpdateReleaseMetricSourceConnection request, CancellationToken cancellationToken)
     {
+        var scope = await accessGuard.GetEnvironmentAsync(request.OrgId, request.EnvId);
         var connection = await service.FindAsync(request.EnvId, request.Id, cancellationToken)
             ?? throw new EntityNotFoundException(nameof(ReleaseMetricSourceConnection), request.Id.ToString());
 
@@ -34,12 +36,12 @@ public class UpdateReleaseMetricSourceConnectionHandler(
         validator.ValidateAndThrow(request);
 
         var previousUpdatedAt = connection.UpdatedAt;
-        var (credential, remove) = ReleaseMetricSourceCredentialUpdate.Resolve(request, connection, protector);
+        var (credential, remove) = ReleaseMetricSourceCredentialUpdate.Resolve(request, connection, scope, protector);
         connection.Update(request.Name.Trim(), request.ProviderType,
             new ReleaseMetricSourceConnectionSettings(request.ProviderConfig, request.Authentication));
         if (credential.HasValue)
         {
-            connection.ProtectedCredential = protector.Protect(request.Scope, connection, credential.Value);
+            connection.ProtectedCredential = protector.Protect(scope, connection, credential.Value);
         }
         else if (remove)
         {

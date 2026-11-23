@@ -4,6 +4,7 @@ using Application.ReleaseMetricSourceConnections;
 using Application.Services;
 using Domain.Environments;
 using Domain.ReleaseMetricSourceConnections;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.UnitTests.Controllers;
@@ -12,6 +13,21 @@ public class ReleaseMetricSourceConnectionResponseTests
 {
     private const string SubmittedSecret = "test-only-submitted-credential";
     private const string StoredCredential = "test-only-protected-credential";
+    private readonly ResourceDescriptor _scope = new()
+    {
+        Organization = new IdNameKeyProps { Id = Guid.NewGuid() },
+        Project = new IdNameKeyProps { Id = Guid.NewGuid() },
+        Environment = new IdNameKeyProps { Id = Guid.NewGuid() }
+    };
+    private readonly ReleaseMetricSourceConnectionAccessGuard _accessGuard;
+
+    public ReleaseMetricSourceConnectionResponseTests()
+    {
+        var environments = new Mock<IEnvironmentService>(MockBehavior.Strict);
+        environments.Setup(x => x.GetResourceDescriptorAsync(_scope.Environment.Id)).ReturnsAsync(_scope);
+        _accessGuard = new ReleaseMetricSourceConnectionAccessGuard(
+            environments.Object, Mock.Of<IOrganizationService>(), new HttpContextAccessor());
+    }
 
     [Theory]
     [InlineData("prometheus-compatible", """{"endpoint":"https://metrics.example.com"}""", """{"type":"bearer_token"}""", "token")]
@@ -21,8 +37,8 @@ public class ReleaseMetricSourceConnectionResponseTests
     {
         var request = new CreateReleaseMetricSourceConnection
         {
-            EnvId = Guid.NewGuid(),
-            Scope = new ResourceDescriptor(),
+            OrgId = _scope.Organization.Id,
+            EnvId = _scope.Environment.Id,
             Name = "Metrics",
             ProviderType = providerType,
             ProviderConfig = JsonSerializer.Deserialize<JsonElement>(providerConfig),
@@ -34,10 +50,11 @@ public class ReleaseMetricSourceConnectionResponseTests
             })
         };
         var protector = new Mock<IReleaseMetricSourceCredentialProtector>(MockBehavior.Strict);
-        protector.Setup(x => x.Protect(request.Scope, It.IsAny<ReleaseMetricSourceConnection>(),
+        protector.Setup(x => x.Protect(_scope, It.IsAny<ReleaseMetricSourceConnection>(),
                 It.Is<JsonElement>(credential => credential.GetProperty(secretField).GetString() == SubmittedSecret)))
             .Returns(StoredCredential);
-        var handler = new CreateReleaseMetricSourceConnectionHandler(Mock.Of<IReleaseMetricSourceConnectionService>(), protector.Object);
+        var handler = new CreateReleaseMetricSourceConnectionHandler(
+            Mock.Of<IReleaseMetricSourceConnectionService>(), protector.Object, _accessGuard);
 
         var result = await handler.Handle(request, CancellationToken.None);
 
@@ -50,7 +67,7 @@ public class ReleaseMetricSourceConnectionResponseTests
     [Fact]
     public async Task ListResponse_DistinguishesStoredCredentialFromLegacyBasicConnection()
     {
-        var envId = Guid.NewGuid();
+        var envId = _scope.Environment.Id;
         var settings = new ReleaseMetricSourceConnectionSettings(
             JsonSerializer.SerializeToElement(new { endpoint = "https://metrics.example.com" }),
             JsonSerializer.SerializeToElement(new { type = "basic", username = "reader" }));
@@ -61,9 +78,10 @@ public class ReleaseMetricSourceConnectionResponseTests
         var legacy = new ReleaseMetricSourceConnection(envId, "Legacy", "prometheus-compatible", settings);
         var service = new Mock<IReleaseMetricSourceConnectionService>();
         service.Setup(x => x.GetListAsync(envId, CancellationToken.None)).ReturnsAsync([configured, legacy]);
-        var handler = new GetReleaseMetricSourceConnectionListHandler(service.Object);
+        var handler = new GetReleaseMetricSourceConnectionListHandler(service.Object, _accessGuard);
 
-        var result = await handler.Handle(new GetReleaseMetricSourceConnectionList { EnvId = envId }, CancellationToken.None);
+        var request = new GetReleaseMetricSourceConnectionList { OrgId = _scope.Organization.Id, EnvId = envId };
+        var result = await handler.Handle(request, CancellationToken.None);
 
         var data = SerializeResponse(result);
         var connections = data.EnumerateArray().ToDictionary(item => item.GetProperty("id").GetGuid());

@@ -4,6 +4,8 @@ using Application.ReleaseMetricSourceConnections;
 using Application.Services;
 using Domain.Environments;
 using Domain.ReleaseMetricSourceConnections;
+using FluentValidation;
+using Microsoft.AspNetCore.Http;
 
 namespace Application.UnitTests.Handlers;
 
@@ -32,8 +34,12 @@ public class UpdateReleaseMetricSourceConnectionHandlerTests
         };
         _service.Setup(x => x.FindAsync(_connection.EnvId, _connection.Id, CancellationToken.None))
             .ReturnsAsync(_connection);
+        var environments = new Mock<IEnvironmentService>(MockBehavior.Strict);
+        environments.Setup(x => x.GetResourceDescriptorAsync(_scope.Environment.Id)).ReturnsAsync(_scope);
+        var accessGuard = new ReleaseMetricSourceConnectionAccessGuard(
+            environments.Object, Mock.Of<IOrganizationService>(), new HttpContextAccessor());
         _handler = new UpdateReleaseMetricSourceConnectionHandler(
-            _service.Object, _protector.Object, new ReleaseMetricSourceConnectionBaseValidator());
+            _service.Object, _protector.Object, new ReleaseMetricSourceConnectionBaseValidator(), accessGuard);
     }
 
     [Fact]
@@ -47,14 +53,59 @@ public class UpdateReleaseMetricSourceConnectionHandlerTests
     }
 
     [Fact]
-    public async Task Handle_Replace_ProtectsNewPasswordWithoutDecryptingOldCredential()
+    public async Task Handle_NewOriginWithReplacement_ProtectsNewPasswordWithoutDecryptingOldCredential()
     {
         ExpectProtectedPassword("new-password", "replacement-ciphertext");
 
         await UpdateAsync(new()
         {
+            ProviderConfig = JsonSerializer.SerializeToElement(new { endpoint = "https://other.example.com" }),
             SecretUpdate = JsonSerializer.SerializeToElement(new { operation = "replace", password = "new-password" })
         }, "replacement-ciphertext");
+    }
+
+    [Theory]
+    [InlineData("https://other.example.com", false)]
+    [InlineData("https://other.example.com", true)]
+    [InlineData("http://metrics.example.com", false)]
+    [InlineData("https://metrics.example.com:8443", true)]
+    public async Task Handle_NewOriginCannotReuseTheSavedPassword(string endpoint, bool explicitKeep)
+    {
+        var originalSettings = _connection.ConnectionConfiguration;
+        var request = new UpdateReleaseMetricSourceConnection
+        {
+            Id = _connection.Id,
+            OrgId = _scope.Organization.Id,
+            EnvId = _connection.EnvId,
+            ProviderConfig = JsonSerializer.SerializeToElement(new { endpoint })
+        };
+        if (explicitKeep)
+        {
+            request.SecretUpdate = JsonSerializer.SerializeToElement(new { operation = "keep" });
+        }
+
+        var error = await Assert.ThrowsAsync<ValidationException>(() => _handler.Handle(request, CancellationToken.None));
+
+        Assert.Contains(error.Errors, failure => failure.ErrorCode == "secretUpdate_is_invalid");
+        Assert.Same(originalSettings, _connection.ConnectionConfiguration);
+        Assert.Equal("original-ciphertext", _connection.ProtectedCredential);
+        _protector.VerifyNoOtherCalls();
+    }
+
+    [Fact]
+    public async Task Handle_NewPathOnTheSameOrigin_ReusesTheSavedPassword()
+    {
+        var credential = JsonSerializer.SerializeToElement(new { password = "old-password" });
+        _protector.Setup(x => x.Unprotect(_scope, _connection)).Returns(credential);
+        ExpectProtectedPassword("old-password", "rebound-ciphertext");
+
+        var result = await UpdateAsync(new()
+        {
+            ProviderConfig = JsonSerializer.SerializeToElement(new { endpoint = "https://METRICS.example.com:443/team-a" })
+        }, "rebound-ciphertext");
+
+        Assert.Equal("https://METRICS.example.com:443/team-a", result.ProviderConfig.GetProperty("endpoint").GetString());
+        _protector.Verify(x => x.Unprotect(_scope, _connection), Times.Once);
     }
 
     [Fact]
@@ -102,7 +153,7 @@ public class UpdateReleaseMetricSourceConnectionHandlerTests
     {
         var request = new UpdateReleaseMetricSourceConnection
         {
-            Id = _connection.Id, EnvId = _connection.EnvId, Scope = _scope, Name = "Renamed"
+            Id = _connection.Id, OrgId = _scope.Organization.Id, EnvId = _connection.EnvId, Name = "Renamed"
         };
         var previousUpdatedAt = _connection.UpdatedAt;
         _service.SetupSequence(x => x.FindAsync(request.EnvId, request.Id, CancellationToken.None))
@@ -128,8 +179,8 @@ public class UpdateReleaseMetricSourceConnectionHandlerTests
         UpdateReleaseMetricSourceConnection request, string? expectedCiphertext)
     {
         request.Id = _connection.Id;
+        request.OrgId = _scope.Organization.Id;
         request.EnvId = _connection.EnvId;
-        request.Scope = _scope;
         var previousUpdatedAt = _connection.UpdatedAt;
         _service.Setup(x => x.UpdateAsync(_connection, previousUpdatedAt, CancellationToken.None))
             .Callback<ReleaseMetricSourceConnection, DateTime, CancellationToken>(

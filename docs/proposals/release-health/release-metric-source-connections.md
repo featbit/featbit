@@ -65,10 +65,10 @@ Send `PUT` to the connection's `/{id}` URL. Omitted top-level fields retain thei
 { "name": "Production metrics" }
 ```
 
-A supplied `providerConfig` or `authentication` replaces the entire corresponding object. For example, this request moves a Prometheus connection to a new endpoint and keeps its token. FeatBit authenticates the stored credential against the old settings and encrypts it again for the new settings.
+A supplied `providerConfig` or `authentication` replaces the entire corresponding object. This request changes the path on the original Prometheus host and keeps its token. FeatBit verifies the stored credential against the old settings and encrypts it again for the new settings. If the scheme, host or effective port changes, supply a replacement Bearer token or Basic password.
 
 ```json
-{ "providerConfig": { "endpoint": "https://metrics.example.com" } }
+{ "providerConfig": { "endpoint": "https://prometheus.example.com/team-a" } }
 ```
 
 To explicitly keep a configured credential, send `"secretUpdate": { "operation": "keep" }`. This requires an existing credential for the same provider and authentication method. FeatBit decrypts that credential and re-encrypts it with the active key, even if the public settings are unchanged. Older connections saved without a credential remain readable and editable. Use `replace` to configure their first credential.

@@ -2,6 +2,7 @@
 
 using System.Text.Json;
 using Application.Bases;
+using Domain.Environments;
 using Domain.ReleaseMetricSourceConnections;
 using FluentValidation.Results;
 
@@ -11,7 +12,7 @@ internal static class ReleaseMetricSourceCredentialUpdate
 {
     internal static (JsonElement? Replacement, bool Remove) Resolve(
         ReleaseMetricSourceConnectionBase request, ReleaseMetricSourceConnection? previous,
-        IReleaseMetricSourceCredentialProtector protector)
+        ResourceDescriptor scope, IReleaseMetricSourceCredentialProtector protector)
     {
         var previousAuth = previous?.ProviderType == request.ProviderType ? previous?.ConnectionConfiguration.Authentication : null;
 
@@ -59,6 +60,11 @@ internal static class ReleaseMetricSourceCredentialUpdate
         }
 
         var settings = previous.ConnectionConfiguration;
+        if (request.ProviderType == "prometheus-compatible" &&
+            !PrometheusConnectionEndpoint.HasSameOrigin(settings.ProviderConfig, request.ProviderConfig))
+        {
+            throw Invalid("secretUpdate");
+        }
         if (operation == null && JsonElement.DeepEquals(settings.ProviderConfig, request.ProviderConfig) &&
             JsonElement.DeepEquals(settings.Authentication, request.Authentication))
         {
@@ -66,7 +72,7 @@ internal static class ReleaseMetricSourceCredentialUpdate
         }
 
         // An explicit keep re-encrypts under the active key. Changed public settings also require rebinding.
-        return (protector.Unprotect(request.Scope, previous), false);
+        return (protector.Unprotect(scope, previous), false);
     }
 
     private readonly record struct CredentialRule(

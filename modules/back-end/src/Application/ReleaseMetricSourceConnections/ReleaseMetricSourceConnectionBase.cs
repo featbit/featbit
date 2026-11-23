@@ -1,17 +1,16 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Application.Bases;
-using Domain.Environments;
 
 namespace Application.ReleaseMetricSourceConnections;
 
 public class ReleaseMetricSourceConnectionBase
 {
     [JsonIgnore]
-    public Guid EnvId { get; set; }
+    public Guid OrgId { get; set; }
 
     [JsonIgnore]
-    public ResourceDescriptor Scope { get; set; }
+    public Guid EnvId { get; set; }
 
     public string Name { get; set => field = value ?? throw new JsonException("Name must be a string."); }
     public string ProviderType { get; set => field = value ?? throw new JsonException("Provider type must be a string."); }
@@ -41,7 +40,7 @@ public class ReleaseMetricSourceConnectionBaseValidator : AbstractValidator<Rele
         When(x => x.ProviderType == Prometheus, () =>
         {
             RuleFor(x => x.ProviderConfig)
-                .Must(config => HasOnlyPublicFields(config, "endpoint"))
+                .Must(IsPrometheusConfig)
                 .WithErrorCode(ErrorCodes.Invalid("providerConfig"));
             RuleFor(x => x.Authentication)
                 .Must(auth => HasOnlyPublicFields(auth, "type", "username"))
@@ -58,6 +57,8 @@ public class ReleaseMetricSourceConnectionBaseValidator : AbstractValidator<Rele
                 .WithErrorCode(ErrorCodes.Invalid("authentication"));
         });
     }
+
+    internal static bool IsPrometheusConfig(JsonElement config) => HasOnlyPublicFields(config, "endpoint");
 
     private static bool HasOnlyPublicFields(JsonElement settings, params string[] publicFields)
     {
