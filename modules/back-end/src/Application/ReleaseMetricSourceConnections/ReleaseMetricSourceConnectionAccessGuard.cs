@@ -1,5 +1,4 @@
 using Application.Bases.Exceptions;
-using Application.Environments;
 using Domain.AccessTokens;
 using Domain.Environments;
 using Microsoft.AspNetCore.Http;
@@ -13,7 +12,11 @@ public class ReleaseMetricSourceConnectionAccessGuard(
 {
     public async Task<ResourceDescriptor> GetEnvironmentAsync(Guid orgId, Guid envId)
     {
-        var environment = await environmentService.GetResourceDescriptorInOrganizationAsync(orgId, envId);
+        var environment = await environmentService.GetResourceDescriptorAsync(envId);
+        if (environment == null || environment.Organization.Id != orgId)
+        {
+            throw new ForbiddenException();
+        }
 
         // A personal access token acts for its creator in this organization.
         var accessToken = httpContextAccessor.HttpContext?.Items[ApplicationConsts.AccessTokenItem];
