@@ -6,7 +6,7 @@ namespace Application.IntegrationTests.Stubs;
 /// <summary>
 /// Test-only <see cref="IPermissionChecker"/> that returns <see cref="Grant"/> without
 /// hitting the database. Production <see cref="DefaultPermissionChecker"/> calls
-/// <c>IResourcePermissionTargetResolver.ResolveEnvironmentAsync</c>/<c>ResolveFlagAsync</c> etc. which open EF Core
+/// <c>IPermissionTargetResolver.ResolveEnvironmentAsync</c>/<c>ResolveFlagAsync</c> etc. which open EF Core
 /// connections to Postgres; in CI there is no Postgres, so unauthenticated requests to
 /// <c>[Authorize(Permissions.X)]</c> routes would otherwise time out on EF retries.
 /// Per-test consumers can toggle <see cref="Grant"/> before each test to drive policy outcome.

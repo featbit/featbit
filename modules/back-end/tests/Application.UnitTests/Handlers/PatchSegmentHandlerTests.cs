@@ -38,10 +38,10 @@ public class PatchSegmentHandlerTests
         }
     ];
 
-    private static Mock<IResourcePermissionTargetResolver> CreateTargetResolverMock()
+    private static Mock<IPermissionTargetResolver> CreateTargetResolverMock()
     {
-        var mock = new Mock<IResourcePermissionTargetResolver>();
-        mock.Setup(x => x.ResolveSegmentAsync(It.IsAny<Guid>(), It.IsAny<Guid>())).ReturnsAsync(new ResourcePermissionTarget("segment/*", OrganizationId));
+        var mock = new Mock<IPermissionTargetResolver>();
+        mock.Setup(x => x.ResolveSegmentAsync(It.IsAny<Guid>(), It.IsAny<Guid>())).ReturnsAsync(new PermissionTarget("segment/*", OrganizationId));
         return mock;
     }
 
@@ -102,7 +102,7 @@ public class PatchSegmentHandlerTests
         var service = new Mock<ISegmentService>();
         service.Setup(x => x.GetAsync(It.IsAny<Guid>())).ReturnsAsync(segment);
         var publisher = new Mock<IPublisher>();
-        var sut = new PatchSegmentHandler(service.Object, new PermissionGuard(Mock.Of<IResourcePermissionTargetResolver>()), Mock.Of<ICurrentUser>(), publisher.Object);
+        var sut = new PatchSegmentHandler(service.Object, new PermissionGuard(Mock.Of<IPermissionTargetResolver>()), Mock.Of<ICurrentUser>(), publisher.Object);
 
         var patch = new JsonPatchDocument<Segment>();
         patch.Operations.Add(new Operation<Segment>

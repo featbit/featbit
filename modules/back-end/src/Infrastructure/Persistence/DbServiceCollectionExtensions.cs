@@ -52,7 +52,7 @@ public static class DbServiceCollectionExtensions
             services.AddTransient<IPolicyService, MongoServices.PolicyService>();
             services.AddTransient<IEnvironmentService, MongoServices.EnvironmentService>();
             services.AddTransient<IResourceService, MongoServices.ResourceService>();
-            services.AddTransient<IResourcePermissionTargetResolver, MongoServices.ResourcePermissionTargetResolver>();
+            services.AddTransient<IPermissionTargetResolver, MongoServices.PermissionTargetResolver>();
             services.AddTransient<IResourceServiceV2, MongoServices.ResourceServiceV2>();
             services.AddTransient<IEndUserService, MongoServices.EndUserService>();
             services.AddTransient<IGlobalUserService, MongoServices.GlobalUserService>();
@@ -97,7 +97,7 @@ public static class DbServiceCollectionExtensions
             services.AddTransient<IPolicyService, EntityFrameworkCoreServices.PolicyService>();
             services.AddTransient<IEnvironmentService, EntityFrameworkCoreServices.EnvironmentService>();
             services.AddTransient<IResourceService, EntityFrameworkCoreServices.ResourceService>();
-            services.AddTransient<IResourcePermissionTargetResolver, EntityFrameworkCoreServices.ResourcePermissionTargetResolver>();
+            services.AddTransient<IPermissionTargetResolver, EntityFrameworkCoreServices.PermissionTargetResolver>();
             services.AddTransient<IResourceServiceV2, EntityFrameworkCoreServices.ResourceServiceV2>();
             services.AddTransient<IEndUserService, EntityFrameworkCoreServices.EndUserService>();
             services.AddTransient<IGlobalUserService, EntityFrameworkCoreServices.GlobalUserService>();

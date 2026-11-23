@@ -27,7 +27,7 @@ public class DefaultPermissionCheckerTests
         var (sut, targetResolver, permissions) = BuildSut();
         var id = Guid.NewGuid();
         var rn = ownership == "blank-rn" ? " " : "project/p:env/e:flag/f";
-        ResourcePermissionTarget? resource = ownership == "missing-resource" ? null : new ResourcePermissionTarget(rn,
+        PermissionTarget? resource = ownership == "missing-resource" ? null : new PermissionTarget(rn,
             ownership == "missing-org" ? null : ownership == "foreign" ? Guid.NewGuid() : OrganizationId);
         targetResolver.Setup(x => x.ResolveProjectAsync(id)).ReturnsAsync(resource);
         targetResolver.Setup(x => x.ResolveEnvironmentAsync(id)).ReturnsAsync(resource);
@@ -60,10 +60,10 @@ public class DefaultPermissionCheckerTests
     ];
 
     private static (DefaultPermissionChecker sut,
-        Mock<IResourcePermissionTargetResolver> targetResolver,
+        Mock<IPermissionTargetResolver> targetResolver,
         Mock<IRequestPermissions> requestPermissions) BuildSut()
     {
-        var targetResolver = new Mock<IResourcePermissionTargetResolver>();
+        var targetResolver = new Mock<IPermissionTargetResolver>();
         var requestPermissions = new Mock<IRequestPermissions>();
         var sut = new DefaultPermissionChecker(
             targetResolver.Object,
@@ -190,7 +190,7 @@ public class DefaultPermissionCheckerTests
         var projectId = Guid.NewGuid();
         var projectRn = $"project/{projectId}";
         var (sut, targetResolver, perms) = BuildSut();
-        targetResolver.Setup(x => x.ResolveProjectAsync(projectId)).ReturnsAsync(new ResourcePermissionTarget(projectRn, OrganizationId));
+        targetResolver.Setup(x => x.ResolveProjectAsync(projectId)).ReturnsAsync(new PermissionTarget(projectRn, OrganizationId));
         perms.Setup(x => x.GetAsync(It.IsAny<HttpContext>()))
             .ReturnsAsync(AllowStatement(Permissions.DeleteProject, projectRn));
 
@@ -223,7 +223,7 @@ public class DefaultPermissionCheckerTests
         var projectId = Guid.NewGuid();
         var projectRn = $"project/{projectId}";
         var (sut, targetResolver, perms) = BuildSut();
-        targetResolver.Setup(x => x.ResolveProjectAsync(projectId)).ReturnsAsync(new ResourcePermissionTarget(projectRn, OrganizationId));
+        targetResolver.Setup(x => x.ResolveProjectAsync(projectId)).ReturnsAsync(new PermissionTarget(projectRn, OrganizationId));
         perms.Setup(x => x.GetAsync(It.IsAny<HttpContext>()))
             .ReturnsAsync(AllowStatement(Permissions.CreateEnv, projectRn));
 
@@ -241,7 +241,7 @@ public class DefaultPermissionCheckerTests
         var envId = Guid.NewGuid();
         var envRn = $"project/p:env/{envId}";
         var (sut, targetResolver, perms) = BuildSut();
-        targetResolver.Setup(x => x.ResolveEnvironmentAsync(envId)).ReturnsAsync(new ResourcePermissionTarget(envRn, OrganizationId));
+        targetResolver.Setup(x => x.ResolveEnvironmentAsync(envId)).ReturnsAsync(new PermissionTarget(envRn, OrganizationId));
         perms.Setup(x => x.GetAsync(It.IsAny<HttpContext>()))
             .ReturnsAsync(AllowStatement(Permissions.DeleteEnv, envRn));
 
@@ -275,7 +275,7 @@ public class DefaultPermissionCheckerTests
         var envRn = $"project/p:env/{envId}";
         var allFlagRN = $"{envRn}:flag/*";
         var (sut, targetResolver, perms) = BuildSut();
-        targetResolver.Setup(x => x.ResolveEnvironmentAsync(envId)).ReturnsAsync(new ResourcePermissionTarget(envRn, OrganizationId));
+        targetResolver.Setup(x => x.ResolveEnvironmentAsync(envId)).ReturnsAsync(new PermissionTarget(envRn, OrganizationId));
         perms.Setup(x => x.GetAsync(It.IsAny<HttpContext>()))
             .ReturnsAsync(AllowStatement(Permissions.CreateFlag, allFlagRN));
 
@@ -294,7 +294,7 @@ public class DefaultPermissionCheckerTests
         var key = "my-flag";
         var flagRn = $"project/p:env/{envId}:flag/{key}";
         var (sut, targetResolver, perms) = BuildSut();
-        targetResolver.Setup(x => x.ResolveFlagAsync(envId, key)).ReturnsAsync(new ResourcePermissionTarget(flagRn, OrganizationId));
+        targetResolver.Setup(x => x.ResolveFlagAsync(envId, key)).ReturnsAsync(new PermissionTarget(flagRn, OrganizationId));
         perms.Setup(x => x.GetAsync(It.IsAny<HttpContext>()))
             .ReturnsAsync(AllowStatement(Permissions.ToggleFlag, flagRn));
 
@@ -329,7 +329,7 @@ public class DefaultPermissionCheckerTests
         var envRn = $"project/p:env/{envId}";
         var allSegmentRN = $"{envRn}:segment/*";
         var (sut, targetResolver, perms) = BuildSut();
-        targetResolver.Setup(x => x.ResolveEnvironmentAsync(envId)).ReturnsAsync(new ResourcePermissionTarget(envRn, OrganizationId));
+        targetResolver.Setup(x => x.ResolveEnvironmentAsync(envId)).ReturnsAsync(new PermissionTarget(envRn, OrganizationId));
         perms.Setup(x => x.GetAsync(It.IsAny<HttpContext>()))
             .ReturnsAsync(AllowStatement(Permissions.CreateSegment, allSegmentRN));
 
@@ -349,7 +349,7 @@ public class DefaultPermissionCheckerTests
         var segmentRn = $"project/p:env/{envId}:segment/{segmentId}";
         var allSegmentRN = $"project/p:env/{envId}:segment/*";
         var (sut, targetResolver, perms) = BuildSut();
-        targetResolver.Setup(x => x.ResolveSegmentAsync(envId, segmentId)).ReturnsAsync(new ResourcePermissionTarget(segmentRn, OrganizationId));
+        targetResolver.Setup(x => x.ResolveSegmentAsync(envId, segmentId)).ReturnsAsync(new PermissionTarget(segmentRn, OrganizationId));
         perms.Setup(x => x.GetAsync(It.IsAny<HttpContext>()))
             .ReturnsAsync(AllowStatement(Permissions.DeleteSegment, allSegmentRN));
 

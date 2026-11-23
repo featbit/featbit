@@ -5,7 +5,7 @@ using Domain.Resources;
 namespace Api.Authorization;
 
 public class DefaultPermissionChecker(
-    IResourcePermissionTargetResolver targetResolver,
+    IPermissionTargetResolver targetResolver,
     IRequestPermissions requestPermissions,
     ILogger<DefaultPermissionChecker> logger)
     : IPermissionChecker
@@ -39,17 +39,17 @@ public class DefaultPermissionChecker(
         return PolicyHelper.IsAllowed(statements, permissionTarget.Rn, permission);
     }
 
-    private async ValueTask<ResourcePermissionTarget?> ResolvePermissionTargetAsync(string permission, string resourceType, HttpRequest request)
+    private async ValueTask<PermissionTarget?> ResolvePermissionTargetAsync(string permission, string resourceType, HttpRequest request)
     {
         var routeValues = request.RouteValues;
 
         return resourceType switch
         {
-            ResourceTypes.Workspace => new ResourcePermissionTarget(RN.ForWorkspace(), null),
-            ResourceTypes.Iam => new ResourcePermissionTarget(RN.ForIam(), request.OrganizationId()),
-            ResourceTypes.AccessToken => new ResourcePermissionTarget(RN.ForAccessToken(), request.OrganizationId()),
-            ResourceTypes.Organization => new ResourcePermissionTarget(RN.ForOrganization(), request.OrganizationId()),
-            ResourceTypes.RelayProxy => new ResourcePermissionTarget(RN.ForRelayProxy(), request.OrganizationId()),
+            ResourceTypes.Workspace => new PermissionTarget(RN.ForWorkspace(), null),
+            ResourceTypes.Iam => new PermissionTarget(RN.ForIam(), request.OrganizationId()),
+            ResourceTypes.AccessToken => new PermissionTarget(RN.ForAccessToken(), request.OrganizationId()),
+            ResourceTypes.Organization => new PermissionTarget(RN.ForOrganization(), request.OrganizationId()),
+            ResourceTypes.RelayProxy => new PermissionTarget(RN.ForRelayProxy(), request.OrganizationId()),
             ResourceTypes.Project => await ResolveProjectAsync(),
             ResourceTypes.Env => await ResolveEnvironmentAsync(),
             ResourceTypes.FeatureFlag => await ResolveFlagAsync(),
@@ -57,13 +57,13 @@ public class DefaultPermissionChecker(
             _ => null
         };
 
-        async Task<ResourcePermissionTarget?> ResolveProjectAsync()
+        async Task<PermissionTarget?> ResolveProjectAsync()
         {
             if (permission == Permissions.CreateProject)
             {
                 // `CreateProject` is a special case as it doesn't have projectId in route values.
                 // It operates on organization level, so we can return project level wildcard.
-                return new ResourcePermissionTarget("project/*", request.OrganizationId());
+                return new PermissionTarget("project/*", request.OrganizationId());
             }
 
             var routeValue = routeValues.TryGetValue("projectId", out var projectIdRouteValue)
@@ -92,7 +92,7 @@ public class DefaultPermissionChecker(
                 : projectTarget;
         }
 
-        async Task<ResourcePermissionTarget?> ResolveEnvironmentAsync()
+        async Task<PermissionTarget?> ResolveEnvironmentAsync()
         {
             var routeValue = routeValues.TryGetValue("envId", out var envIdRouteValue)
                 ? envIdRouteValue
@@ -112,7 +112,7 @@ public class DefaultPermissionChecker(
             return envTarget;
         }
 
-        async Task<ResourcePermissionTarget?> ResolveFlagAsync()
+        async Task<PermissionTarget?> ResolveFlagAsync()
         {
             if (!routeValues.TryGetValue("envId", out var envIdRouteValue) ||
                 !Guid.TryParse(envIdRouteValue?.ToString(), out var envId))
@@ -134,7 +134,7 @@ public class DefaultPermissionChecker(
             return flagTarget;
         }
 
-        async Task<ResourcePermissionTarget?> ResolveSegmentAsync()
+        async Task<PermissionTarget?> ResolveSegmentAsync()
         {
             if (!routeValues.TryGetValue("envId", out var envIdRouteValue) ||
                 !Guid.TryParse(envIdRouteValue?.ToString(), out var envId))

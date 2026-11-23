@@ -9,7 +9,7 @@ using Domain.SemanticPatch;
 
 namespace Application.Policies;
 
-public class PermissionGuard(IResourcePermissionTargetResolver targetResolver) : IPermissionGuard
+public class PermissionGuard(IPermissionTargetResolver targetResolver) : IPermissionGuard
 {
     public Task EnsureFlagOwnershipAsync(Guid organizationId, FeatureFlag flag) =>
         EnsureOwnershipAsync(organizationId, () => targetResolver.ResolveFlagAsync(flag.EnvId, flag.Key));
@@ -37,7 +37,7 @@ public class PermissionGuard(IResourcePermissionTargetResolver targetResolver) :
         Guid organizationId,
         IEnumerable<string> instructionPermissions,
         PolicyStatement[] policies,
-        Func<Task<ResourcePermissionTarget?>> targetResolver)
+        Func<Task<PermissionTarget?>> targetResolver)
     {
         var permissionTarget = await EnsureOwnershipAsync(organizationId, targetResolver);
 
@@ -51,9 +51,9 @@ public class PermissionGuard(IResourcePermissionTargetResolver targetResolver) :
         }
     }
 
-    private static async Task<ResourcePermissionTarget> EnsureOwnershipAsync(
+    private static async Task<PermissionTarget> EnsureOwnershipAsync(
         Guid organizationId,
-        Func<Task<ResourcePermissionTarget?>> targetResolver)
+        Func<Task<PermissionTarget?>> targetResolver)
     {
         if (organizationId == Guid.Empty)
         {

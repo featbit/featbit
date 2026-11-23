@@ -8,4 +8,4 @@ namespace Domain.Resources;
 /// The organization in which permissions are evaluated. For a shared segment, this is
 /// the organization of the environment accessing it. For a workspace target, this is null.
 /// </param>
-public sealed record ResourcePermissionTarget(string Rn, Guid? OrganizationId);
+public sealed record PermissionTarget(string Rn, Guid? OrganizationId);

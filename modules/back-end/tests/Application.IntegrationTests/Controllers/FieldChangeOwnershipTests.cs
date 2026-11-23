@@ -80,7 +80,7 @@ public class FieldChangeTestApp : PermissionCheckTestApp
     public Segment Segment { get; }
     public Mock<IFeatureFlagService> Flags { get; } = new();
     public Mock<ISegmentService> Segments { get; } = new();
-    public Mock<IResourcePermissionTargetResolver> TargetResolver { get; } = new();
+    public Mock<IPermissionTargetResolver> TargetResolver { get; } = new();
     public Mock<IPublisher> Publisher { get; } = new();
     public FieldChangeTestApp()
     {
@@ -98,9 +98,9 @@ public class FieldChangeTestApp : PermissionCheckTestApp
             var owner = Foreign ? Guid.NewGuid() : TestWorkspace.OrganizationId;
             // Identical relative RNs intentionally make the wildcard policy match in either organization.
             TargetResolver.Setup(x => x.ResolveFlagAsync(EnvironmentId, "flag"))
-                .ReturnsAsync(new ResourcePermissionTarget("project/p:env/e:flag/flag", owner));
+                .ReturnsAsync(new PermissionTarget("project/p:env/e:flag/flag", owner));
             TargetResolver.Setup(x => x.ResolveSegmentAsync(EnvironmentId, Segment.Id))
-                .ReturnsAsync(new ResourcePermissionTarget("project/p:env/e:segment/segment", owner));
+                .ReturnsAsync(new PermissionTarget("project/p:env/e:segment/segment", owner));
             Flags.Setup(x => x.GetAsync(EnvironmentId, "flag")).ReturnsAsync(Flag);
             Segments.Setup(x => x.GetAsync(Segment.Id)).ReturnsAsync(Segment);
             var members = new Mock<IMemberService>();

@@ -8,11 +8,11 @@ using Environment = Domain.Environments.Environment;
 
 namespace Infrastructure.Services.EntityFrameworkCore;
 
-public class ResourcePermissionTargetResolver(AppDbContext dbContext) : IResourcePermissionTargetResolver
+public class PermissionTargetResolver(AppDbContext dbContext) : IPermissionTargetResolver
 {
     private IQueryable<TEntity> QueryableOf<TEntity>() where TEntity : class => dbContext.Set<TEntity>().AsQueryable();
 
-    public async Task<ResourcePermissionTarget?> ResolveProjectAsync(Guid projectId)
+    public async Task<PermissionTarget?> ResolveProjectAsync(Guid projectId)
     {
         var project = await QueryableOf<Project>()
             .Where(x => x.Id == projectId)
@@ -20,10 +20,10 @@ public class ResourcePermissionTargetResolver(AppDbContext dbContext) : IResourc
             .FirstOrDefaultAsync();
 
         return project == null || string.IsNullOrWhiteSpace(project.Key)
-            ? null : new ResourcePermissionTarget(RN.ForProject(project.Key), project.OrganizationId);
+            ? null : new PermissionTarget(RN.ForProject(project.Key), project.OrganizationId);
     }
 
-    public async Task<ResourcePermissionTarget?> ResolveEnvironmentAsync(Guid envId)
+    public async Task<PermissionTarget?> ResolveEnvironmentAsync(Guid envId)
     {
         var query =
             from env in QueryableOf<Environment>()
@@ -32,10 +32,10 @@ public class ResourcePermissionTargetResolver(AppDbContext dbContext) : IResourc
             select new { project.Key, EnvKey = env.Key, project.OrganizationId };
 
         var data = await query.FirstOrDefaultAsync();
-        return data == null ? null : new ResourcePermissionTarget(RN.ForEnv(data.Key, data.EnvKey), data.OrganizationId);
+        return data == null ? null : new PermissionTarget(RN.ForEnv(data.Key, data.EnvKey), data.OrganizationId);
     }
 
-    public async Task<ResourcePermissionTarget?> ResolveFlagAsync(Guid envId, string key)
+    public async Task<PermissionTarget?> ResolveFlagAsync(Guid envId, string key)
     {
         var query =
             from project in QueryableOf<Project>()
@@ -52,11 +52,11 @@ public class ResourcePermissionTargetResolver(AppDbContext dbContext) : IResourc
             };
 
         var data = await query.FirstOrDefaultAsync();
-        return data == null ? null : new ResourcePermissionTarget(
+        return data == null ? null : new PermissionTarget(
             RN.ForFlag(data.projectKey, data.envKey, data.flagKey, data.flagTags), data.organizationId);
     }
 
-    public async Task<ResourcePermissionTarget?> ResolveSegmentAsync(Guid envId, Guid id)
+    public async Task<PermissionTarget?> ResolveSegmentAsync(Guid envId, Guid id)
     {
         var segment = await QueryableOf<Segment>().FirstOrDefaultAsync(x => x.Id == id);
         if (segment == null)
@@ -82,7 +82,7 @@ public class ResourcePermissionTargetResolver(AppDbContext dbContext) : IResourc
                 var projectEnv = await query.FirstOrDefaultAsync();
                 return projectEnv == null
                     ? null
-                    : new ResourcePermissionTarget(RN.ForSegment(projectEnv.ProjectKey, projectEnv.EnvKey, segment.Key, segment.Tags),
+                    : new PermissionTarget(RN.ForSegment(projectEnv.ProjectKey, projectEnv.EnvKey, segment.Key, segment.Tags),
                         projectEnv.OrganizationId);
             }
 
@@ -111,7 +111,7 @@ public class ResourcePermissionTargetResolver(AppDbContext dbContext) : IResourc
                 if (segment.Scopes.Any(scope => RN.IsInScope(envScope, scope)))
                 {
                     // Authorize the shared segment in the accessing environment's organization.
-                    return new ResourcePermissionTarget(
+                    return new PermissionTarget(
                         RN.ForSegment(projectEnv.ProjectKey, projectEnv.EnvKey, segment.Key, segment.Tags),
                         projectEnv.OrganizationId);
                 }

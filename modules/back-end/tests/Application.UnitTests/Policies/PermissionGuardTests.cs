@@ -29,8 +29,8 @@ public class PermissionGuardTests
     public async Task OwnershipIsValidatedRegardlessOfChanges(bool segment, bool changed, string ownership)
     {
         var org = Guid.NewGuid();
-        var targetResolver = new Mock<IResourcePermissionTargetResolver>();
-        ResourcePermissionTarget resource = ownership == "missing-resource" ? null! : new(
+        var targetResolver = new Mock<IPermissionTargetResolver>();
+        PermissionTarget resource = ownership == "missing-resource" ? null! : new(
             ownership == "blank-rn" ? " " : "project/p:env/e:flag/flag",
             ownership == "missing-org" ? null : ownership == "foreign" ? Guid.NewGuid() : org);
         targetResolver.Setup(x => x.ResolveFlagAsync(It.IsAny<Guid>(), It.IsAny<string>())).ReturnsAsync(resource);
@@ -67,9 +67,9 @@ public class PermissionGuardTests
     public async Task OwnOrganizationStillRequiresEachChangedFieldPermission(bool segment, bool explicitDeny)
     {
         var org = Guid.NewGuid();
-        var targetResolver = new Mock<IResourcePermissionTargetResolver>();
-        targetResolver.Setup(x => x.ResolveFlagAsync(It.IsAny<Guid>(), It.IsAny<string>())).ReturnsAsync(new ResourcePermissionTarget("project/p:env/e:flag/flag", org));
-        targetResolver.Setup(x => x.ResolveSegmentAsync(It.IsAny<Guid>(), It.IsAny<Guid>())).ReturnsAsync(new ResourcePermissionTarget("project/p:env/e:segment/segment", org));
+        var targetResolver = new Mock<IPermissionTargetResolver>();
+        targetResolver.Setup(x => x.ResolveFlagAsync(It.IsAny<Guid>(), It.IsAny<string>())).ReturnsAsync(new PermissionTarget("project/p:env/e:flag/flag", org));
+        targetResolver.Setup(x => x.ResolveSegmentAsync(It.IsAny<Guid>(), It.IsAny<Guid>())).ReturnsAsync(new PermissionTarget("project/p:env/e:segment/segment", org));
         var guard = new PermissionGuard(targetResolver.Object);
         var flag = NewFlag();
         var seg = NewSegment();

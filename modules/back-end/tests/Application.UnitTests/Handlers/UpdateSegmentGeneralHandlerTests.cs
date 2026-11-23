@@ -67,13 +67,13 @@ public class UpdateSegmentGeneralHandlerTests
     private static UpdateGeneralHandler BuildSut(
         Segment segment,
         Mock<ISegmentService> segmentService,
-        Mock<IResourcePermissionTargetResolver> targetResolver,
+        Mock<IPermissionTargetResolver> targetResolver,
         Mock<IPublisher> publisher)
     {
         segmentService.Setup(x => x.GetAsync(segment.Id)).ReturnsAsync(segment);
         targetResolver
             .Setup(x => x.ResolveSegmentAsync(segment.EnvId, segment.Id))
-            .ReturnsAsync(new ResourcePermissionTarget("segment/*", OrganizationId));
+            .ReturnsAsync(new PermissionTarget("segment/*", OrganizationId));
 
         var currentUser = new Mock<ICurrentUser>();
         currentUser.SetupGet(x => x.Id).Returns(Guid.NewGuid());
@@ -90,7 +90,7 @@ public class UpdateSegmentGeneralHandlerTests
     {
         var segment = NewSegment();
         var segmentService = new Mock<ISegmentService>();
-        var targetResolver = new Mock<IResourcePermissionTargetResolver>();
+        var targetResolver = new Mock<IPermissionTargetResolver>();
         var publisher = new Mock<IPublisher>();
         var sut = BuildSut(segment, segmentService, targetResolver, publisher);
         var request = NewRequest(
@@ -133,7 +133,7 @@ public class UpdateSegmentGeneralHandlerTests
     {
         var segment = NewSegment();
         var segmentService = new Mock<ISegmentService>();
-        var targetResolver = new Mock<IResourcePermissionTargetResolver>();
+        var targetResolver = new Mock<IPermissionTargetResolver>();
         var publisher = new Mock<IPublisher>();
         var sut = BuildSut(segment, segmentService, targetResolver, publisher);
         var request = NewRequest(
@@ -157,7 +157,7 @@ public class UpdateSegmentGeneralHandlerTests
     {
         var segment = NewSegment();
         var segmentService = new Mock<ISegmentService>();
-        var targetResolver = new Mock<IResourcePermissionTargetResolver>();
+        var targetResolver = new Mock<IPermissionTargetResolver>();
         var publisher = new Mock<IPublisher>();
         var sut = BuildSut(segment, segmentService, targetResolver, publisher);
         var request = NewRequest(
@@ -177,7 +177,7 @@ public class UpdateSegmentGeneralHandlerTests
     {
         var segment = NewSegment();
         var segmentService = new Mock<ISegmentService>();
-        var targetResolver = new Mock<IResourcePermissionTargetResolver>();
+        var targetResolver = new Mock<IPermissionTargetResolver>();
         var publisher = new Mock<IPublisher>();
         var sut = BuildSut(segment, segmentService, targetResolver, publisher);
         var request = NewRequest(segment, []);

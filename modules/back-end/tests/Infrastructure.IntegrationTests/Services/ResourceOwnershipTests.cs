@@ -32,13 +32,13 @@ internal sealed class ResourceOwnershipData
             ["organization/org:project/project:env/env"], [], [], [], "") { Id = Guid.NewGuid() };
     }
 
-    public async Task AssertOwnership(IResourcePermissionTargetResolver targetResolver)
+    public async Task AssertOwnership(IPermissionTargetResolver targetResolver)
     {
-        Assert.Equal(new ResourcePermissionTarget("project/project", Organization.Id), await targetResolver.ResolveProjectAsync(Project.Id));
-        Assert.Equal(new ResourcePermissionTarget("project/project:env/env", Organization.Id), await targetResolver.ResolveEnvironmentAsync(Environment.Id));
-        Assert.Equal(new ResourcePermissionTarget("project/project:env/env:flag/flag;tag", Organization.Id), await targetResolver.ResolveFlagAsync(Environment.Id, Flag.Key));
-        Assert.Equal(new ResourcePermissionTarget("project/project:env/env:segment/local;tag", Organization.Id), await targetResolver.ResolveSegmentAsync(Environment.Id, Local.Id));
-        Assert.Equal(new ResourcePermissionTarget("project/project:env/env:segment/shared", Organization.Id), await targetResolver.ResolveSegmentAsync(Environment.Id, Shared.Id));
+        Assert.Equal(new PermissionTarget("project/project", Organization.Id), await targetResolver.ResolveProjectAsync(Project.Id));
+        Assert.Equal(new PermissionTarget("project/project:env/env", Organization.Id), await targetResolver.ResolveEnvironmentAsync(Environment.Id));
+        Assert.Equal(new PermissionTarget("project/project:env/env:flag/flag;tag", Organization.Id), await targetResolver.ResolveFlagAsync(Environment.Id, Flag.Key));
+        Assert.Equal(new PermissionTarget("project/project:env/env:segment/local;tag", Organization.Id), await targetResolver.ResolveSegmentAsync(Environment.Id, Local.Id));
+        Assert.Equal(new PermissionTarget("project/project:env/env:segment/shared", Organization.Id), await targetResolver.ResolveSegmentAsync(Environment.Id, Shared.Id));
         Assert.Null(await targetResolver.ResolveProjectAsync(Guid.NewGuid()));
         Assert.Null(await targetResolver.ResolveEnvironmentAsync(Guid.NewGuid()));
         Assert.Null(await targetResolver.ResolveFlagAsync(Guid.NewGuid(), Flag.Key));
@@ -57,7 +57,7 @@ public class PostgresResourceOwnershipTests(FeatBitPostgresFixture fixture) : In
         var data = new ResourceOwnershipData();
         db.AddRange(data.Organization, data.Project, data.Environment, data.Flag, data.Local, data.Shared);
         await db.SaveChangesAsync();
-        await data.AssertOwnership(new Infrastructure.Services.EntityFrameworkCore.ResourcePermissionTargetResolver(db));
+        await data.AssertOwnership(new Infrastructure.Services.EntityFrameworkCore.PermissionTargetResolver(db));
     }
 }
 
@@ -75,6 +75,6 @@ public class MongoResourceOwnershipTests(MongoDbFixture fixture) : IntegrationTe
         await db.CollectionOf<Environment>().InsertOneAsync(data.Environment);
         await db.CollectionOf<FeatureFlag>().InsertOneAsync(data.Flag);
         await db.CollectionOf<Segment>().InsertManyAsync([data.Local, data.Shared]);
-        await data.AssertOwnership(new Infrastructure.Services.MongoDb.ResourcePermissionTargetResolver(db));
+        await data.AssertOwnership(new Infrastructure.Services.MongoDb.PermissionTargetResolver(db));
     }
 }

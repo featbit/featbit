@@ -64,11 +64,11 @@ public class UpdateGeneralHandlerTests
     private static UpdateGeneralHandler BuildSut(
         FeatureFlag flag,
         Mock<IFeatureFlagService> flagService,
-        Mock<IResourcePermissionTargetResolver> targetResolver,
+        Mock<IPermissionTargetResolver> targetResolver,
         Mock<IPublisher> publisher)
     {
         flagService.Setup(x => x.GetAsync(flag.EnvId, flag.Key)).ReturnsAsync(flag);
-        targetResolver.Setup(x => x.ResolveFlagAsync(flag.EnvId, flag.Key)).ReturnsAsync(new ResourcePermissionTarget("flag/*", OrganizationId));
+        targetResolver.Setup(x => x.ResolveFlagAsync(flag.EnvId, flag.Key)).ReturnsAsync(new PermissionTarget("flag/*", OrganizationId));
 
         var currentUser = new Mock<ICurrentUser>();
         currentUser.SetupGet(x => x.Id).Returns(Guid.NewGuid());
@@ -86,7 +86,7 @@ public class UpdateGeneralHandlerTests
         var flag = NewFlag();
         var previousRevision = flag.Revision;
         var flagService = new Mock<IFeatureFlagService>();
-        var targetResolver = new Mock<IResourcePermissionTargetResolver>();
+        var targetResolver = new Mock<IPermissionTargetResolver>();
         var publisher = new Mock<IPublisher>();
         var sut = BuildSut(flag, flagService, targetResolver, publisher);
         var request = NewRequest(
@@ -129,7 +129,7 @@ public class UpdateGeneralHandlerTests
     {
         var flag = NewFlag();
         var flagService = new Mock<IFeatureFlagService>();
-        var targetResolver = new Mock<IResourcePermissionTargetResolver>();
+        var targetResolver = new Mock<IPermissionTargetResolver>();
         var publisher = new Mock<IPublisher>();
         var sut = BuildSut(flag, flagService, targetResolver, publisher);
         var request = NewRequest(
@@ -153,7 +153,7 @@ public class UpdateGeneralHandlerTests
     {
         var flag = NewFlag();
         var flagService = new Mock<IFeatureFlagService>();
-        var targetResolver = new Mock<IResourcePermissionTargetResolver>();
+        var targetResolver = new Mock<IPermissionTargetResolver>();
         var publisher = new Mock<IPublisher>();
         var sut = BuildSut(flag, flagService, targetResolver, publisher);
         var request = NewRequest(
@@ -172,7 +172,7 @@ public class UpdateGeneralHandlerTests
     {
         var flag = NewFlag();
         var flagService = new Mock<IFeatureFlagService>();
-        var targetResolver = new Mock<IResourcePermissionTargetResolver>();
+        var targetResolver = new Mock<IPermissionTargetResolver>();
         var publisher = new Mock<IPublisher>();
         var sut = BuildSut(flag, flagService, targetResolver, publisher);
         var request = NewRequest(flag, []);
