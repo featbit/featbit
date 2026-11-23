@@ -1,27 +1,37 @@
+using Domain.Policies;
+
 namespace Application.Triggers;
 
-public class UpdateTrigger : IRequest<bool>
+public class UpdateTriggerPayload
 {
-    public Guid Id { get; set; }
-
     public bool IsEnabled { get; set; }
 }
 
-public class UpdateTriggerHandler : IRequestHandler<UpdateTrigger, bool>
+public class UpdateTrigger : UpdateTriggerPayload, IRequest<bool>
 {
-    private readonly ITriggerService _service;
-
-    public UpdateTriggerHandler(ITriggerService service)
+    public UpdateTrigger(UpdateTriggerPayload payload, Guid id, Guid orgId, PolicyStatement[] permissions)
     {
-        _service = service;
+        IsEnabled = payload.IsEnabled;
+        Id = id;
+        OrgId = orgId;
+        Permissions = permissions;
     }
 
+    public Guid Id { get; set; }
+
+    public Guid OrgId { get; set; }
+
+    public PolicyStatement[] Permissions { get; set; } = [];
+}
+
+public class UpdateTriggerHandler(ITriggerService service, TriggerAccessGuard access) : IRequestHandler<UpdateTrigger, bool>
+{
     public async Task<bool> Handle(UpdateTrigger request, CancellationToken cancellationToken)
     {
-        var trigger = await _service.GetAsync(request.Id);
+        var trigger = await access.GetAuthorizedTriggerAsync(request.OrgId, request.Permissions, request.Id);
         trigger.Update(request.IsEnabled);
 
-        await _service.UpdateAsync(trigger);
+        await service.UpdateAsync(trigger);
 
         return true;
     }

@@ -6,6 +6,7 @@ using Application.Environments;
 using Application.FeatureFlags;
 using Application.Policies;
 using Application.Segments;
+using Application.Triggers;
 using Application.Users;
 using Microsoft.Extensions.Configuration;
 
@@ -38,6 +39,7 @@ public static class ConfigureServices
         services.AddTransient<SegmentPermissionGuard>();
         services.AddTransient<SegmentCreationScopeGuard>();
         services.AddTransient<FlagCopyChecks>();
+        services.AddScoped<TriggerAccessGuard>();
         services.AddTransient<AuditLogAccessGuard>();
         services.AddTransient<ISegmentMessageService, SegmentMessageService>();
         if (configuration.UseControlPlane())
