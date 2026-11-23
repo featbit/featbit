@@ -30,6 +30,8 @@ public class UpdateGeneral : UpdateGeneralPayload, IRequest<bool>
 
     public Guid OrgId { get; set; }
 
+    public Guid EnvId { get; set; }
+
     public Guid Id { get; set; }
 
     public PolicyStatement[] Permissions { get; set; }
@@ -77,6 +79,7 @@ public class UpdateGeneralHandler(
 
         if (!nameChanged && !descriptionChanged && !tagsChanged)
         {
+            await permissionGuard.EnsureSegmentOwnershipAsync(request.OrgId, request.EnvId, segment);
             return true;
         }
 
@@ -85,7 +88,7 @@ public class UpdateGeneralHandler(
             request.Description,
             tagsChanged ? requestedTags : currentTags
         );
-        await permissionGuard.EnsureSegmentChangeAllowedAsync(segment, dataChange, request.Permissions);
+        await permissionGuard.EnsureSegmentChangeAllowedAsync(request.OrgId, request.EnvId, segment, dataChange, request.Permissions);
         await service.UpdateAsync(segment);
 
         var notification = new OnSegmentChange(

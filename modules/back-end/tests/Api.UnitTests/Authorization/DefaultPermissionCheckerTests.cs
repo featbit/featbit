@@ -10,6 +10,43 @@ namespace Api.UnitTests.Authorization;
 
 public class DefaultPermissionCheckerTests
 {
+    [Theory]
+    [InlineData("project", "own", true)]
+    [InlineData("env", "own", true)]
+    [InlineData("flag", "own", true)]
+    [InlineData("segment", "own", true)]
+    [InlineData("project", "foreign", false)]
+    [InlineData("env", "foreign", false)]
+    [InlineData("flag", "foreign", false)]
+    [InlineData("segment", "foreign", false)]
+    [InlineData("flag", "missing-org", false)]
+    [InlineData("flag", "missing-resource", false)]
+    [InlineData("flag", "blank-rn", false)]
+    public async Task ResourceOwnershipIsRequiredEvenWithWildcardPolicy(string type, string ownership, bool allowed)
+    {
+        var (sut, targetResolver, permissions) = BuildSut();
+        var id = Guid.NewGuid();
+        var rn = ownership == "blank-rn" ? " " : "project/p:env/e:flag/f";
+        PermissionTarget? resource = ownership == "missing-resource" ? null : new PermissionTarget(rn,
+            ownership == "missing-org" ? null : ownership == "foreign" ? Guid.NewGuid() : OrganizationId);
+        targetResolver.Setup(x => x.ResolveProjectAsync(id)).ReturnsAsync(resource);
+        targetResolver.Setup(x => x.ResolveEnvironmentAsync(id)).ReturnsAsync(resource);
+        targetResolver.Setup(x => x.ResolveFlagAsync(id, "f")).ReturnsAsync(resource);
+        targetResolver.Setup(x => x.ResolveSegmentAsync(id, id)).ReturnsAsync(resource);
+        permissions.Setup(x => x.GetAsync(It.IsAny<HttpContext>())).ReturnsAsync(
+            [new PolicyStatement { ResourceType = ResourceTypes.All, Effect = EffectType.Allow, Actions = ["*"], Resources = ["*"] }]);
+        var permission = type switch
+        {
+            "project" => Permissions.DeleteProject, "env" => Permissions.CanAccessEnv,
+            "segment" => Permissions.DeleteSegment, _ => Permissions.ToggleFlag
+        };
+        var context = BuildHttpContext(("projectId", id), ("envId", id), ("key", "f"), ("segmentId", id));
+        Assert.Equal(allowed, await sut.IsGrantedAsync(context, new PermissionRequirement(permission)));
+        if (!allowed) permissions.VerifyNoOtherCalls();
+    }
+
+    private static readonly Guid OrganizationId = Guid.NewGuid();
+
     private static PolicyStatement[] AllowStatement(string permission, string resourcePattern) =>
     [
         new PolicyStatement
@@ -23,21 +60,22 @@ public class DefaultPermissionCheckerTests
     ];
 
     private static (DefaultPermissionChecker sut,
-        Mock<IResourceService> resourceSvc,
+        Mock<IPermissionTargetResolver> targetResolver,
         Mock<IRequestPermissions> requestPermissions) BuildSut()
     {
-        var resourceSvc = new Mock<IResourceService>();
+        var targetResolver = new Mock<IPermissionTargetResolver>();
         var requestPermissions = new Mock<IRequestPermissions>();
         var sut = new DefaultPermissionChecker(
-            resourceSvc.Object,
+            targetResolver.Object,
             requestPermissions.Object,
             NullLogger<DefaultPermissionChecker>.Instance);
-        return (sut, resourceSvc, requestPermissions);
+        return (sut, targetResolver, requestPermissions);
     }
 
     private static HttpContext BuildHttpContext(params (string key, object value)[] routeValues)
     {
         var ctx = new DefaultHttpContext();
+        ctx.Request.Headers[Api.ApiConstants.OrgIdHeaderKey] = OrganizationId.ToString();
         var rd = new RouteData();
         foreach (var (key, value) in routeValues)
         {
@@ -151,8 +189,8 @@ public class DefaultPermissionCheckerTests
     {
         var projectId = Guid.NewGuid();
         var projectRn = $"project/{projectId}";
-        var (sut, resourceSvc, perms) = BuildSut();
-        resourceSvc.Setup(x => x.GetProjectRnAsync(projectId)).ReturnsAsync(projectRn);
+        var (sut, targetResolver, perms) = BuildSut();
+        targetResolver.Setup(x => x.ResolveProjectAsync(projectId)).ReturnsAsync(new PermissionTarget(projectRn, OrganizationId));
         perms.Setup(x => x.GetAsync(It.IsAny<HttpContext>()))
             .ReturnsAsync(AllowStatement(Permissions.DeleteProject, projectRn));
 
@@ -162,20 +200,20 @@ public class DefaultPermissionCheckerTests
         var result = await sut.IsGrantedAsync(http, req);
 
         Assert.True(result);
-        resourceSvc.Verify(x => x.GetProjectRnAsync(projectId), Times.Once);
+        targetResolver.Verify(x => x.ResolveProjectAsync(projectId), Times.Once);
     }
 
     [Fact]
     public async Task IsGranted_ProjectPermission_InvalidProjectIdInRoute_ReturnsFalseWithoutLookup()
     {
-        var (sut, resourceSvc, perms) = BuildSut();
+        var (sut, targetResolver, perms) = BuildSut();
         var req = new PermissionRequirement(Permissions.DeleteProject);
         var http = BuildHttpContext(("projectId", "not-a-guid"));
 
         var result = await sut.IsGrantedAsync(http, req);
 
         Assert.False(result);
-        resourceSvc.Verify(x => x.GetProjectRnAsync(It.IsAny<Guid>()), Times.Never);
+        targetResolver.Verify(x => x.ResolveProjectAsync(It.IsAny<Guid>()), Times.Never);
         perms.Verify(x => x.GetAsync(It.IsAny<HttpContext>()), Times.Never);
     }
 
@@ -184,8 +222,8 @@ public class DefaultPermissionCheckerTests
     {
         var projectId = Guid.NewGuid();
         var projectRn = $"project/{projectId}";
-        var (sut, resourceSvc, perms) = BuildSut();
-        resourceSvc.Setup(x => x.GetProjectRnAsync(projectId)).ReturnsAsync(projectRn);
+        var (sut, targetResolver, perms) = BuildSut();
+        targetResolver.Setup(x => x.ResolveProjectAsync(projectId)).ReturnsAsync(new PermissionTarget(projectRn, OrganizationId));
         perms.Setup(x => x.GetAsync(It.IsAny<HttpContext>()))
             .ReturnsAsync(AllowStatement(Permissions.CreateEnv, projectRn));
 
@@ -202,8 +240,8 @@ public class DefaultPermissionCheckerTests
     {
         var envId = Guid.NewGuid();
         var envRn = $"project/p:env/{envId}";
-        var (sut, resourceSvc, perms) = BuildSut();
-        resourceSvc.Setup(x => x.GetEnvRnAsync(envId)).ReturnsAsync(envRn);
+        var (sut, targetResolver, perms) = BuildSut();
+        targetResolver.Setup(x => x.ResolveEnvironmentAsync(envId)).ReturnsAsync(new PermissionTarget(envRn, OrganizationId));
         perms.Setup(x => x.GetAsync(It.IsAny<HttpContext>()))
             .ReturnsAsync(AllowStatement(Permissions.DeleteEnv, envRn));
 
@@ -213,20 +251,20 @@ public class DefaultPermissionCheckerTests
         var result = await sut.IsGrantedAsync(http, req);
 
         Assert.True(result);
-        resourceSvc.Verify(x => x.GetEnvRnAsync(envId), Times.Once);
+        targetResolver.Verify(x => x.ResolveEnvironmentAsync(envId), Times.Once);
     }
 
     [Fact]
     public async Task IsGranted_EnvPermission_InvalidEnvIdInRoute_ReturnsFalseWithoutLookup()
     {
-        var (sut, resourceSvc, perms) = BuildSut();
+        var (sut, targetResolver, perms) = BuildSut();
         var req = new PermissionRequirement(Permissions.DeleteEnv);
         var http = BuildHttpContext(("envId", "not-a-guid"));
 
         var result = await sut.IsGrantedAsync(http, req);
 
         Assert.False(result);
-        resourceSvc.Verify(x => x.GetEnvRnAsync(It.IsAny<Guid>()), Times.Never);
+        targetResolver.Verify(x => x.ResolveEnvironmentAsync(It.IsAny<Guid>()), Times.Never);
         perms.Verify(x => x.GetAsync(It.IsAny<HttpContext>()), Times.Never);
     }
 
@@ -236,8 +274,8 @@ public class DefaultPermissionCheckerTests
         var envId = Guid.NewGuid();
         var envRn = $"project/p:env/{envId}";
         var allFlagRN = $"{envRn}:flag/*";
-        var (sut, resourceSvc, perms) = BuildSut();
-        resourceSvc.Setup(x => x.GetEnvRnAsync(envId)).ReturnsAsync(envRn);
+        var (sut, targetResolver, perms) = BuildSut();
+        targetResolver.Setup(x => x.ResolveEnvironmentAsync(envId)).ReturnsAsync(new PermissionTarget(envRn, OrganizationId));
         perms.Setup(x => x.GetAsync(It.IsAny<HttpContext>()))
             .ReturnsAsync(AllowStatement(Permissions.CreateFlag, allFlagRN));
 
@@ -255,8 +293,8 @@ public class DefaultPermissionCheckerTests
         var envId = Guid.NewGuid();
         var key = "my-flag";
         var flagRn = $"project/p:env/{envId}:flag/{key}";
-        var (sut, resourceSvc, perms) = BuildSut();
-        resourceSvc.Setup(x => x.GetFlagRnAsync(envId, key)).ReturnsAsync(flagRn);
+        var (sut, targetResolver, perms) = BuildSut();
+        targetResolver.Setup(x => x.ResolveFlagAsync(envId, key)).ReturnsAsync(new PermissionTarget(flagRn, OrganizationId));
         perms.Setup(x => x.GetAsync(It.IsAny<HttpContext>()))
             .ReturnsAsync(AllowStatement(Permissions.ToggleFlag, flagRn));
 
@@ -266,21 +304,21 @@ public class DefaultPermissionCheckerTests
         var result = await sut.IsGrantedAsync(http, req);
 
         Assert.True(result);
-        resourceSvc.Verify(x => x.GetFlagRnAsync(envId, key), Times.Once);
-        resourceSvc.Verify(x => x.GetEnvRnAsync(It.IsAny<Guid>()), Times.Never);
+        targetResolver.Verify(x => x.ResolveFlagAsync(envId, key), Times.Once);
+        targetResolver.Verify(x => x.ResolveEnvironmentAsync(It.IsAny<Guid>()), Times.Never);
     }
 
     [Fact]
     public async Task IsGranted_FlagPermission_MissingEnvId_ReturnsFalse()
     {
-        var (sut, resourceSvc, perms) = BuildSut();
+        var (sut, targetResolver, perms) = BuildSut();
         var req = new PermissionRequirement(Permissions.CreateFlag);
 
         var result = await sut.IsGrantedAsync(BuildHttpContext(), req);
 
         Assert.False(result);
-        resourceSvc.Verify(x => x.GetFlagRnAsync(It.IsAny<Guid>(), It.IsAny<string>()), Times.Never);
-        resourceSvc.Verify(x => x.GetEnvRnAsync(It.IsAny<Guid>()), Times.Never);
+        targetResolver.Verify(x => x.ResolveFlagAsync(It.IsAny<Guid>(), It.IsAny<string>()), Times.Never);
+        targetResolver.Verify(x => x.ResolveEnvironmentAsync(It.IsAny<Guid>()), Times.Never);
         perms.Verify(x => x.GetAsync(It.IsAny<HttpContext>()), Times.Never);
     }
 
@@ -290,8 +328,8 @@ public class DefaultPermissionCheckerTests
         var envId = Guid.NewGuid();
         var envRn = $"project/p:env/{envId}";
         var allSegmentRN = $"{envRn}:segment/*";
-        var (sut, resourceSvc, perms) = BuildSut();
-        resourceSvc.Setup(x => x.GetEnvRnAsync(envId)).ReturnsAsync(envRn);
+        var (sut, targetResolver, perms) = BuildSut();
+        targetResolver.Setup(x => x.ResolveEnvironmentAsync(envId)).ReturnsAsync(new PermissionTarget(envRn, OrganizationId));
         perms.Setup(x => x.GetAsync(It.IsAny<HttpContext>()))
             .ReturnsAsync(AllowStatement(Permissions.CreateSegment, allSegmentRN));
 
@@ -310,8 +348,8 @@ public class DefaultPermissionCheckerTests
         var segmentId = Guid.NewGuid();
         var segmentRn = $"project/p:env/{envId}:segment/{segmentId}";
         var allSegmentRN = $"project/p:env/{envId}:segment/*";
-        var (sut, resourceSvc, perms) = BuildSut();
-        resourceSvc.Setup(x => x.GetSegmentRnAsync(envId, segmentId)).ReturnsAsync(segmentRn);
+        var (sut, targetResolver, perms) = BuildSut();
+        targetResolver.Setup(x => x.ResolveSegmentAsync(envId, segmentId)).ReturnsAsync(new PermissionTarget(segmentRn, OrganizationId));
         perms.Setup(x => x.GetAsync(It.IsAny<HttpContext>()))
             .ReturnsAsync(AllowStatement(Permissions.DeleteSegment, allSegmentRN));
 
@@ -328,7 +366,7 @@ public class DefaultPermissionCheckerTests
     [Fact]
     public async Task IsGranted_SegmentPermission_InvalidSegmentId_ReturnsFalse()
     {
-        var (sut, resourceSvc, perms) = BuildSut();
+        var (sut, targetResolver, perms) = BuildSut();
         var req = new PermissionRequirement(Permissions.DeleteSegment);
         var http = BuildHttpContext(
             ("envId", Guid.NewGuid().ToString()),
@@ -337,7 +375,7 @@ public class DefaultPermissionCheckerTests
         var result = await sut.IsGrantedAsync(http, req);
 
         Assert.False(result);
-        resourceSvc.Verify(x => x.GetSegmentRnAsync(It.IsAny<Guid>(), It.IsAny<Guid>()), Times.Never);
+        targetResolver.Verify(x => x.ResolveSegmentAsync(It.IsAny<Guid>(), It.IsAny<Guid>()), Times.Never);
         perms.Verify(x => x.GetAsync(It.IsAny<HttpContext>()), Times.Never);
     }
 }

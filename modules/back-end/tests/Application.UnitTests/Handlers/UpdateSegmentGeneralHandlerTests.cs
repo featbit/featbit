@@ -14,6 +14,7 @@ namespace Application.UnitTests.Handlers;
 
 public class UpdateSegmentGeneralHandlerTests
 {
+    private static readonly Guid OrganizationId = Guid.NewGuid();
     private static Segment NewSegment()
     {
         var segment = new Segment(
@@ -61,25 +62,25 @@ public class UpdateSegmentGeneralHandlerTests
                 Tags = tags ?? segment.Tags,
                 Comment = "General settings update"
             },
-            permissions);
+            permissions) { OrgId = OrganizationId, EnvId = segment.EnvId };
 
     private static UpdateGeneralHandler BuildSut(
         Segment segment,
         Mock<ISegmentService> segmentService,
-        Mock<IResourceService> resourceService,
+        Mock<IPermissionTargetResolver> targetResolver,
         Mock<IPublisher> publisher)
     {
         segmentService.Setup(x => x.GetAsync(segment.Id)).ReturnsAsync(segment);
-        resourceService
-            .Setup(x => x.GetSegmentRnAsync(segment.EnvId, segment.Id))
-            .ReturnsAsync("segment/*");
+        targetResolver
+            .Setup(x => x.ResolveSegmentAsync(segment.EnvId, segment.Id))
+            .ReturnsAsync(new PermissionTarget("segment/*", OrganizationId));
 
         var currentUser = new Mock<ICurrentUser>();
         currentUser.SetupGet(x => x.Id).Returns(Guid.NewGuid());
 
         return new UpdateGeneralHandler(
             segmentService.Object,
-            new PermissionGuard(resourceService.Object),
+            new PermissionGuard(targetResolver.Object),
             currentUser.Object,
             publisher.Object);
     }
@@ -89,9 +90,9 @@ public class UpdateSegmentGeneralHandlerTests
     {
         var segment = NewSegment();
         var segmentService = new Mock<ISegmentService>();
-        var resourceService = new Mock<IResourceService>();
+        var targetResolver = new Mock<IPermissionTargetResolver>();
         var publisher = new Mock<IPublisher>();
-        var sut = BuildSut(segment, segmentService, resourceService, publisher);
+        var sut = BuildSut(segment, segmentService, targetResolver, publisher);
         var request = NewRequest(
             segment,
             Allow(
@@ -132,9 +133,9 @@ public class UpdateSegmentGeneralHandlerTests
     {
         var segment = NewSegment();
         var segmentService = new Mock<ISegmentService>();
-        var resourceService = new Mock<IResourceService>();
+        var targetResolver = new Mock<IPermissionTargetResolver>();
         var publisher = new Mock<IPublisher>();
-        var sut = BuildSut(segment, segmentService, resourceService, publisher);
+        var sut = BuildSut(segment, segmentService, targetResolver, publisher);
         var request = NewRequest(
             segment,
             Allow(grantedPermission),
@@ -156,9 +157,9 @@ public class UpdateSegmentGeneralHandlerTests
     {
         var segment = NewSegment();
         var segmentService = new Mock<ISegmentService>();
-        var resourceService = new Mock<IResourceService>();
+        var targetResolver = new Mock<IPermissionTargetResolver>();
         var publisher = new Mock<IPublisher>();
-        var sut = BuildSut(segment, segmentService, resourceService, publisher);
+        var sut = BuildSut(segment, segmentService, targetResolver, publisher);
         var request = NewRequest(
             segment,
             Allow(Permissions.UpdateSegmentName),
@@ -176,17 +177,17 @@ public class UpdateSegmentGeneralHandlerTests
     {
         var segment = NewSegment();
         var segmentService = new Mock<ISegmentService>();
-        var resourceService = new Mock<IResourceService>();
+        var targetResolver = new Mock<IPermissionTargetResolver>();
         var publisher = new Mock<IPublisher>();
-        var sut = BuildSut(segment, segmentService, resourceService, publisher);
+        var sut = BuildSut(segment, segmentService, targetResolver, publisher);
         var request = NewRequest(segment, []);
 
         var success = await sut.Handle(request, CancellationToken.None);
 
         Assert.True(success);
-        resourceService.Verify(
-            x => x.GetSegmentRnAsync(It.IsAny<Guid>(), It.IsAny<Guid>()),
-            Times.Never);
+        targetResolver.Verify(
+            x => x.ResolveSegmentAsync(It.IsAny<Guid>(), It.IsAny<Guid>()),
+            Times.Once);
         segmentService.Verify(x => x.UpdateAsync(It.IsAny<Segment>()), Times.Never);
         publisher.Verify(
             x => x.Publish(It.IsAny<OnSegmentChange>(), It.IsAny<CancellationToken>()),

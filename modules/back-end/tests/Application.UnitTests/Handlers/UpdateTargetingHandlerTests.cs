@@ -12,6 +12,7 @@ namespace Application.UnitTests.Handlers;
 
 public class UpdateTargetingHandlerTests
 {
+    private static readonly Guid OrganizationId = Guid.NewGuid();
     private static FeatureFlag NewFlag()
     {
         var on = new Variation { Id = "v-on", Name = "On", Value = "true" };
@@ -53,18 +54,18 @@ public class UpdateTargetingHandlerTests
     private static UpdateTargetingHandler BuildSut(
         FeatureFlag flag,
         Mock<IFeatureFlagService> flagService,
-        Mock<IResourceService> resourceService,
+        Mock<IPermissionTargetResolver> targetResolver,
         Mock<IPublisher> publisher)
     {
         flagService.Setup(x => x.GetAsync(flag.EnvId, flag.Key)).ReturnsAsync(flag);
-        resourceService.Setup(x => x.GetFlagRnAsync(flag.EnvId, flag.Key)).ReturnsAsync("flag/*");
+        targetResolver.Setup(x => x.ResolveFlagAsync(flag.EnvId, flag.Key)).ReturnsAsync(new PermissionTarget("flag/*", OrganizationId));
 
         var currentUser = new Mock<ICurrentUser>();
         currentUser.SetupGet(x => x.Id).Returns(Guid.NewGuid());
 
         return new UpdateTargetingHandler(
             flagService.Object,
-            new PermissionGuard(resourceService.Object),
+            new PermissionGuard(targetResolver.Object),
             currentUser.Object,
             publisher.Object);
     }
@@ -82,16 +83,16 @@ public class UpdateTargetingHandlerTests
                 Revision = flag.Revision,
                 Targeting = NewTargeting(flag, disabledVariationId)
             },
-            permissions);
+            permissions) { OrgId = OrganizationId };
 
     [Fact]
     public async Task Handle_OffVariationChangedWithoutPermission_ThrowsForbidden()
     {
         var flag = NewFlag();
         var flagService = new Mock<IFeatureFlagService>();
-        var resourceService = new Mock<IResourceService>();
+        var targetResolver = new Mock<IPermissionTargetResolver>();
         var publisher = new Mock<IPublisher>();
-        var sut = BuildSut(flag, flagService, resourceService, publisher);
+        var sut = BuildSut(flag, flagService, targetResolver, publisher);
         var request = NewRequest(
             flag,
             "v-on",
@@ -111,9 +112,9 @@ public class UpdateTargetingHandlerTests
     {
         var flag = NewFlag();
         var flagService = new Mock<IFeatureFlagService>();
-        var resourceService = new Mock<IResourceService>();
+        var targetResolver = new Mock<IPermissionTargetResolver>();
         var publisher = new Mock<IPublisher>();
-        var sut = BuildSut(flag, flagService, resourceService, publisher);
+        var sut = BuildSut(flag, flagService, targetResolver, publisher);
         var request = NewRequest(
             flag,
             "v-on",

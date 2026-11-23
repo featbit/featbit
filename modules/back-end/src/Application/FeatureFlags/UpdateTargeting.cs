@@ -79,7 +79,7 @@ public class UpdateTargetingHandler(
 
         var dataChange = flag.UpdateTargeting(request.Targeting, currentUser.Id);
 
-        await permissionGuard.EnsureFlagChangeAllowedAsync(flag, dataChange, request.Permissions);
+        await permissionGuard.EnsureFlagChangeAllowedAsync(request.OrgId, flag, dataChange, request.Permissions);
 
         await flagService.UpdateAsync(flag);
 

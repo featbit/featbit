@@ -1,51 +1,71 @@
+#nullable enable
 using Application.Bases.Exceptions;
 using Domain.AuditLogs;
 using Domain.FeatureFlags;
 using Domain.Policies;
+using Domain.Resources;
 using Domain.Segments;
 using Domain.SemanticPatch;
 
 namespace Application.Policies;
 
-public class PermissionGuard(IResourceService resourceService) : IPermissionGuard
+public class PermissionGuard(IPermissionTargetResolver targetResolver) : IPermissionGuard
 {
-    public Task EnsureFlagChangeAllowedAsync(FeatureFlag flag, DataChange change, PolicyStatement[] permissions) =>
+    public Task EnsureFlagOwnershipAsync(Guid organizationId, FeatureFlag flag) =>
+        EnsureOwnershipAsync(organizationId, () => targetResolver.ResolveFlagAsync(flag.EnvId, flag.Key));
+
+    public Task EnsureSegmentOwnershipAsync(Guid organizationId, Guid envId, Segment segment) =>
+        EnsureOwnershipAsync(organizationId, () => targetResolver.ResolveSegmentAsync(envId, segment.Id));
+
+    public Task EnsureFlagChangeAllowedAsync(Guid organizationId, FeatureFlag flag, DataChange change, PolicyStatement[] permissions) =>
         EnsureAllowedAsync(
+            organizationId,
             FlagComparer.Compare(change).Select(instruction => instruction.Permission),
             permissions,
-            () => resourceService.GetFlagRnAsync(flag.EnvId, flag.Key)
+            () => targetResolver.ResolveFlagAsync(flag.EnvId, flag.Key)
         );
 
-    public Task EnsureSegmentChangeAllowedAsync(Segment segment, DataChange change, PolicyStatement[] permissions) =>
+    public Task EnsureSegmentChangeAllowedAsync(Guid organizationId, Guid envId, Segment segment, DataChange change, PolicyStatement[] permissions) =>
         EnsureAllowedAsync(
+            organizationId,
             SegmentComparer.Compare(change).Select(instruction => instruction.Permission),
             permissions,
-            () => resourceService.GetSegmentRnAsync(segment.EnvId, segment.Id)
+            () => targetResolver.ResolveSegmentAsync(envId, segment.Id)
         );
 
     private static async Task EnsureAllowedAsync(
+        Guid organizationId,
         IEnumerable<string> instructionPermissions,
         PolicyStatement[] policies,
-        Func<Task<string>> resourceNameFactory)
+        Func<Task<PermissionTarget?>> targetResolver)
     {
+        var permissionTarget = await EnsureOwnershipAsync(organizationId, targetResolver);
+
         var requiredPermissions = instructionPermissions
             .Where(permission => !string.IsNullOrEmpty(permission))
             .ToHashSet();
 
-        if (requiredPermissions.Count == 0)
+        if (requiredPermissions.Any(permission => !PolicyHelper.IsAllowed(policies, permissionTarget.Rn, permission)))
         {
-            return;
+            throw new ForbiddenException();
         }
+    }
 
-        var rn = await resourceNameFactory();
-        if (string.IsNullOrEmpty(rn))
+    private static async Task<PermissionTarget> EnsureOwnershipAsync(
+        Guid organizationId,
+        Func<Task<PermissionTarget?>> targetResolver)
+    {
+        if (organizationId == Guid.Empty)
         {
             throw new ForbiddenException();
         }
 
-        if (requiredPermissions.Any(permission => !PolicyHelper.IsAllowed(policies, rn, permission)))
+        var permissionTarget = await targetResolver();
+        if (string.IsNullOrWhiteSpace(permissionTarget?.Rn) || permissionTarget.OrganizationId != organizationId)
         {
             throw new ForbiddenException();
         }
+
+        return permissionTarget;
     }
 }

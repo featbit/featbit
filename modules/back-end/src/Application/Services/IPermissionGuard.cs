@@ -8,14 +8,24 @@ namespace Application.Services;
 public interface IPermissionGuard
 {
     /// <summary>
-    /// Throws <see cref="Bases.Exceptions.ForbiddenException"/> if the given policy statements do not grant every
-    /// permission required by the semantic instructions derived from the feature flag change.
+    /// Ensures the flag belongs to the request organization; otherwise throws ForbiddenException.
     /// </summary>
-    Task EnsureFlagChangeAllowedAsync(FeatureFlag flag, DataChange change, PolicyStatement[] permissions);
+    Task EnsureFlagOwnershipAsync(Guid organizationId, FeatureFlag flag);
 
     /// <summary>
-    /// Throws <see cref="Bases.Exceptions.ForbiddenException"/> if the given policy statements do not grant every
+    /// Ensures the segment is accessible from the given environment in the request organization; otherwise throws ForbiddenException.
+    /// </summary>
+    Task EnsureSegmentOwnershipAsync(Guid organizationId, Guid envId, Segment segment);
+
+    /// <summary>
+    /// Throws <see cref="Bases.Exceptions.ForbiddenException"/> if ownership is invalid or the given policy statements do not grant every
+    /// permission required by the semantic instructions derived from the feature flag change.
+    /// </summary>
+    Task EnsureFlagChangeAllowedAsync(Guid organizationId, FeatureFlag flag, DataChange change, PolicyStatement[] permissions);
+
+    /// <summary>
+    /// Throws <see cref="Bases.Exceptions.ForbiddenException"/> if ownership is invalid or the given policy statements do not grant every
     /// permission required by the semantic instructions derived from the segment change.
     /// </summary>
-    Task EnsureSegmentChangeAllowedAsync(Segment segment, DataChange change, PolicyStatement[] permissions);
+    Task EnsureSegmentChangeAllowedAsync(Guid organizationId, Guid envId, Segment segment, DataChange change, PolicyStatement[] permissions);
 }

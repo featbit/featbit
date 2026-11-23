@@ -45,7 +45,7 @@ public class PatchFeatureFlagHandler(
         flag.MarkAsUpdated(currentUser.Id);
         dataChange.To(flag);
 
-        await permissionGuard.EnsureFlagChangeAllowedAsync(flag, dataChange, request.Permissions);
+        await permissionGuard.EnsureFlagChangeAllowedAsync(request.OrgId, flag, dataChange, request.Permissions);
 
         await flagService.UpdateAsync(flag);
 
