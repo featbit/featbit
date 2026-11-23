@@ -40,6 +40,16 @@ public class ReleaseMetricSourceConnectionController : ApiControllerBase
         return Ok(await Mediator.Send(request, HttpContext.RequestAborted));
     }
 
+    /// <summary>Test a Prometheus-compatible connection using the current form values.</summary>
+    /// <remarks>Supply a connectionId to reuse saved settings or credentials. The probe returns its status and optional reason without saving changes.</remarks>
+    [HttpPost("test")]
+    [Authorize(Permissions.UpdateEnvSettings)]
+    public async Task<ApiResponse<ConnectionTestResult>> TestAsync(Guid envId, TestReleaseMetricSourceConnectionPayload payload)
+    {
+        var request = new TestReleaseMetricSourceConnection(OrgId, envId, payload);
+        return Ok(await Mediator.Send(request, HttpContext.RequestAborted));
+    }
+
     /// <summary>Update a release metric source connection's name and settings.</summary>
     /// <remarks>
     /// Requires CanAccessEnv and UpdateEnvSettings. Omit fields to keep their stored values. Use secretUpdate to replace credentials.

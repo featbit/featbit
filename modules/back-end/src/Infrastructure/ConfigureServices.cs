@@ -70,6 +70,9 @@ public static class ConfigureServices
 
         // http clients
         services.AddHttpClient<IAgentService, Services.AgentService>();
+        services.AddHttpClient<IPrometheusConnectionTester, Services.PrometheusConnectionTester>()
+            .RemoveAllLoggers()
+            .ConfigurePrimaryHttpMessageHandler(Services.PrometheusConnectionTester.CreateHandler);
         var webhookAllowedAddresses = Services.WebhookHandlerFactory.GetAllowedAddresses(configuration);
         var webhookAllowedHosts = Services.WebhookHandlerFactory.GetAllowedHosts(configuration);
         services

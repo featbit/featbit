@@ -2,6 +2,7 @@
 
 using System.Text.Json;
 using Application.Bases;
+using Application.Bases.Exceptions;
 using Domain.Environments;
 using Domain.ReleaseMetricSourceConnections;
 using FluentValidation.Results;
@@ -78,7 +79,66 @@ internal static class ReleaseMetricSourceCredentialUpdate
     private readonly record struct CredentialRule(
         string? Operation, bool SameMethod, Func<JsonElement, JsonElement>? ReadReplacement);
 
-    private static CredentialRule ReadPrometheus(ReleaseMetricSourceConnectionBase request, JsonElement? previousAuth)
+    internal static (string? Username, string? Password, string? BearerToken) ResolveForTest(
+        TestReleaseMetricSourceConnectionPayload payload, ReleaseMetricSourceConnection? saved,
+        ResourceDescriptor scope, IReleaseMetricSourceCredentialProtector protector, Uri endpoint)
+    {
+        var previousAuth = saved?.ProviderType == payload.ProviderType ? saved.ConnectionConfiguration.Authentication : (JsonElement?)null;
+        var (operation, sameMethod, readReplacement) = ReadPrometheus(payload, previousAuth);
+        if (readReplacement == null)
+        {
+            if (operation == null || (operation == "remove" && saved != null))
+            {
+                return (null, null, null);
+            }
+            throw Invalid("secretUpdate");
+        }
+
+        if (endpoint.Scheme != Uri.UriSchemeHttps)
+        {
+            throw Invalid("providerConfig");
+        }
+        var username = payload.Authentication.TryGetProperty("username", out var user) ? user.GetString() : null;
+        if (username != null && (username.Contains(':') || username.Any(char.IsControl)))
+        {
+            throw Invalid("authentication");
+        }
+
+        JsonElement credential;
+        if (operation == "replace")
+        {
+            credential = readReplacement(payload.SecretUpdate);
+        }
+        else
+        {
+            if (operation is not (null or "keep") || !sameMethod || saved?.ProtectedCredential == null)
+            {
+                throw Invalid("secretUpdate");
+            }
+
+            // A stored credential can be used on another path of this origin, never on a new origin.
+            if (!PrometheusConnectionEndpoint.HasSameOrigin(saved.ConnectionConfiguration.ProviderConfig, payload.ProviderConfig))
+            {
+                throw Invalid("secretUpdate");
+            }
+            credential = protector.Unprotect(scope, saved) ?? throw new BusinessException(ErrorCodes.CredentialUnavailable);
+        }
+
+        var field = username == null ? "token" : "password";
+        if (credential.ValueKind != JsonValueKind.Object || !credential.TryGetProperty(field, out var value) || !IsNonEmptyString(value))
+        {
+            throw new BusinessException(ErrorCodes.CredentialUnavailable);
+        }
+        var secret = value.GetString()!;
+        // Bearer credentials travel as HTTP header text. Basic credentials are encoded by the transport.
+        if (username == null && secret.Any(c => c is < '!' or > '~'))
+        {
+            throw Invalid("secretUpdate");
+        }
+        return username == null ? (null, null, secret) : (username, secret, null);
+    }
+
+    private static CredentialRule ReadPrometheus(ReleaseMetricSourceConnectionPayload request, JsonElement? previousAuth)
     {
         var operation = ReadOperation(request.SecretUpdate, replacementFields: 1);
         var (type, sameMethod) = ReadMethod("type", request.Authentication, previousAuth);
@@ -146,6 +206,10 @@ internal static class ReleaseMetricSourceCredentialUpdate
 
         string? Value(JsonElement auth)
         {
+            if (auth.ValueKind != JsonValueKind.Object)
+            {
+                return null;
+            }
             if (!auth.TryGetProperty(field, out var value) || value.ValueKind == JsonValueKind.Null)
             {
                 return "";

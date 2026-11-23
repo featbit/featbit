@@ -57,6 +57,40 @@ Create, update, detail and list responses include a top-level `secretState` on e
 
 The API determines this state from the presence of the protected value without decrypting it. The UI can show “Configured” and a replacement action while leaving the credential input empty.
 
+## Test a Prometheus-compatible connection
+
+Send `POST /api/v1/envs/{envId}/release-metric-source-connections/test` with the current form values. The caller needs `CanAccessEnv` and `UpdateEnvSettings` in the owning organization. The operation returns one probe result. It does not save the draft, rotate credentials or record a last-tested status.
+
+For a new connection, omit `connectionId`. This example tests an unauthenticated endpoint with a path prefix. Substitute your Prometheus base URL for the example.
+
+```json
+{
+  "providerType": "prometheus-compatible",
+  "providerConfig": { "endpoint": "https://metrics.example.com/team-a" },
+  "authentication": { "type": "none" }
+}
+```
+
+For Bearer or Basic authentication, use HTTPS and the same `authentication` and `secretUpdate` fields as on create. A form calling this endpoint should send its current values on each click and clear the displayed result when those values change.
+
+When editing, send `connectionId`. Omitted settings come from the active connection in the route's environment. A supplied `providerConfig` or `authentication` replaces that entire object for the probe. Omitting `secretUpdate` or specifying `keep` reuses the saved credential for the same authentication method and origin. To change the scheme, host or effective port while using a credential, supply a replacement. A replacement is used for that request only. To test a saved connection as it stands, send just its ID.
+
+```json
+{ "connectionId": "40000000-0000-4000-8000-000000000004" }
+```
+
+The API queries `vector(1)` at the endpoint's `/api/v1/query` path. It retains any base path prefix. Use a publicly routable address reachable from the FeatBit API. A loopback or private destination returns `unavailable` with reason `target_not_allowed`. The probe does not follow redirects. HTTP 200 means the probe produced a result. Inspect `data.status` to display the outcome.
+
+```json
+{ "success": true, "errors": [], "data": { "status": "connected", "reason": null } }
+```
+
+```json
+{ "success": true, "errors": [], "data": { "status": "unavailable", "reason": "access_denied" } }
+```
+
+An upstream authentication failure, denied request, timeout or unexpected response produces a sanitized reason. FeatBit itself returns HTTP 400 for invalid settings, 401 or 403 for authentication or authorization failures, 404 for a missing connection in this environment, and 422 when a saved credential cannot be decrypted. This endpoint currently accepts the `prometheus-compatible` provider.
+
 ## Edit or remove a connection
 
 Send `PUT` to the connection's `/{id}` URL. Omitted top-level fields retain their stored values. To rename a connection and keep its current credential, send just the name.

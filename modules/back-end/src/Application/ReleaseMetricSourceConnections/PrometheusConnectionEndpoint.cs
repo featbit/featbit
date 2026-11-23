@@ -8,6 +8,19 @@ namespace Application.ReleaseMetricSourceConnections;
 
 internal static class PrometheusConnectionEndpoint
 {
+    internal static Uri ReadForTest(JsonElement config)
+    {
+        var endpoint = Read(config);
+        var path = endpoint.AbsolutePath.TrimEnd('/');
+        if (path.EndsWith("/api/v1", StringComparison.Ordinal) ||
+            path.EndsWith("/api/v1/query", StringComparison.Ordinal) ||
+            path.EndsWith("/api/v1/query_range", StringComparison.Ordinal))
+        {
+            throw InvalidEndpoint();
+        }
+        return endpoint;
+    }
+
     internal static bool HasSameOrigin(JsonElement original, JsonElement draft)
     {
         // Unchanged legacy settings may be incomplete. Keeping them does not change the credential target.

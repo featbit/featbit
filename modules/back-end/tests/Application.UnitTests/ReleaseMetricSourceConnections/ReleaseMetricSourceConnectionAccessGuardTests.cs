@@ -64,6 +64,25 @@ public class ReleaseMetricSourceConnectionAccessGuardTests
         _organizations.VerifyAll();
     }
 
+    [Fact]
+    public async Task TestConnection_WhenPersonalTokenCreatorHasLeft_RejectsBeforeReadingConnectionOrUsingCredentials()
+    {
+        SetPersonalToken(isMember: false);
+        var connections = new Mock<IReleaseMetricSourceConnectionService>(MockBehavior.Strict);
+        var protector = new Mock<IReleaseMetricSourceCredentialProtector>(MockBehavior.Strict);
+        var tester = new Mock<IPrometheusConnectionTester>(MockBehavior.Strict);
+        var handler = new TestReleaseMetricSourceConnectionHandler(connections.Object, protector.Object, tester.Object, _guard);
+        var request = new TestReleaseMetricSourceConnection(_scope.Organization.Id, _scope.Environment.Id,
+            new TestReleaseMetricSourceConnectionPayload { ConnectionId = Guid.NewGuid() });
+
+        await Assert.ThrowsAsync<ForbiddenException>(() => handler.Handle(request, CancellationToken.None));
+
+        _organizations.VerifyAll();
+        connections.VerifyNoOtherCalls();
+        protector.VerifyNoOtherCalls();
+        tester.VerifyNoOtherCalls();
+    }
+
     private void SetPersonalToken(bool isMember)
     {
         var creatorId = Guid.NewGuid();

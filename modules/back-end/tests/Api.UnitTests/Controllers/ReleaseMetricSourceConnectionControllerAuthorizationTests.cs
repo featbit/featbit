@@ -16,6 +16,7 @@ public class ReleaseMetricSourceConnectionControllerAuthorizationTests
     [InlineData(nameof(ReleaseMetricSourceConnectionController.CreateAsync), true)]
     [InlineData(nameof(ReleaseMetricSourceConnectionController.UpdateAsync), true)]
     [InlineData(nameof(ReleaseMetricSourceConnectionController.DeleteAsync), true)]
+    [InlineData(nameof(ReleaseMetricSourceConnectionController.TestAsync), true)]
     public void Action_RequiresEnvironmentPermissions(string action, bool requiresUpdate)
     {
         var controller = typeof(ReleaseMetricSourceConnectionController);
@@ -40,8 +41,10 @@ public class ReleaseMetricSourceConnectionControllerAuthorizationTests
         var orgId = Guid.NewGuid();
         var envId = Guid.NewGuid();
         var id = Guid.NewGuid();
+        var draft = new TestReleaseMetricSourceConnectionPayload { ConnectionId = id };
         var connection = new ReleaseMetricSourceConnectionVm(id, envId, "Metrics", "prometheus-compatible",
             default, default, DateTime.UtcNow, DateTime.UtcNow);
+        var result = new ConnectionTestResult("connected", null);
         var sender = new Mock<ISender>(MockBehavior.Strict);
         var context = new DefaultHttpContext();
         context.Request.Headers[ApiConstants.OrgIdHeaderKey] = orgId.ToString();
@@ -61,6 +64,8 @@ public class ReleaseMetricSourceConnectionControllerAuthorizationTests
             context.RequestAborted)).ReturnsAsync(connection);
         sender.Setup(x => x.Send(It.Is<DeleteReleaseMetricSourceConnection>(q => q.OrgId == orgId && q.EnvId == envId && q.Id == id),
             context.RequestAborted)).ReturnsAsync(true);
+        sender.Setup(x => x.Send(It.Is<TestReleaseMetricSourceConnection>(q => q.OrgId == orgId && q.EnvId == envId && q.Payload == draft),
+            context.RequestAborted)).ReturnsAsync(result);
 
         var list = await controller.GetListAsync(envId);
         Assert.NotNull(list.Data);
@@ -69,5 +74,6 @@ public class ReleaseMetricSourceConnectionControllerAuthorizationTests
         Assert.Same(connection, (await controller.CreateAsync(envId, new())).Data);
         Assert.Same(connection, (await controller.UpdateAsync(envId, id, new())).Data);
         Assert.True((await controller.DeleteAsync(envId, id)).Data);
+        Assert.Same(result, (await controller.TestAsync(envId, draft)).Data);
     }
 }
