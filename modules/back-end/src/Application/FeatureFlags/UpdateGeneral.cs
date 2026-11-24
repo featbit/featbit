@@ -37,11 +37,15 @@ public class UpdateGeneral : UpdateGeneralPayload, IRequest<Guid>
     public PolicyStatement[] Permissions { get; set; }
 
     public UpdateGeneral(
+        Guid workspaceId,
+        Guid orgId,
         Guid envId,
         string key,
         UpdateGeneralPayload payload,
         PolicyStatement[] permissions)
     {
+        WorkspaceId = workspaceId;
+        OrgId = orgId;
         EnvId = envId;
         Key = key;
         Name = payload.Name;

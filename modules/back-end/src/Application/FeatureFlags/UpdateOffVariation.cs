@@ -7,22 +7,8 @@ using Domain.FeatureFlags;
 
 namespace Application.FeatureFlags;
 
-public class UpdateOffVariation : ResourceChangeRequest, IRequest<Guid>
+public class UpdateOffVariationPayload : ResourceChangeRequest
 {
-    public Guid WorkspaceId { get; set; }
-
-    public Guid OrgId { get; set; }
-
-    /// <summary>
-    /// The ID of the environment the feature flag belongs to. Retrieved from the URL path.
-    /// </summary>
-    public Guid EnvId { get; set; }
-
-    /// <summary>
-    /// The unique key of the feature flag. Retrieved from the URL path.
-    /// </summary>
-    public string Key { get; set; }
-
     /// <summary>
     /// The revision ID of the feature flag for optimistic concurrency control
     /// </summary>
@@ -32,6 +18,29 @@ public class UpdateOffVariation : ResourceChangeRequest, IRequest<Guid>
     /// The ID of the variation to serve when the feature flag is disabled
     /// </summary>
     public string OffVariationId { get; set; }
+}
+
+public class UpdateOffVariation : UpdateOffVariationPayload, IRequest<Guid>
+{
+    public Guid WorkspaceId { get; set; }
+
+    public Guid OrgId { get; set; }
+
+    public Guid EnvId { get; set; }
+
+    public string Key { get; set; }
+
+    public UpdateOffVariation(Guid workspaceId, Guid orgId, Guid envId, string key, UpdateOffVariationPayload payload)
+    {
+        WorkspaceId = workspaceId;
+        OrgId = orgId;
+        EnvId = envId;
+        Key = key;
+
+        Revision = payload.Revision;
+        OffVariationId = payload.OffVariationId;
+        Comment = payload.Comment;
+    }
 }
 
 public class UpdateOffVariationValidator : AbstractValidator<UpdateOffVariation>

@@ -7,22 +7,8 @@ using Domain.FeatureFlags;
 
 namespace Application.FeatureFlags;
 
-public class UpdateVariations : ResourceChangeRequest, IRequest<Guid>
+public class UpdateVariationsPayload : ResourceChangeRequest
 {
-    public Guid WorkspaceId { get; set; }
-
-    public Guid OrgId { get; set; }
-
-    /// <summary>
-    /// The ID of the environment the feature flag belongs to. Retrieved from the URL path.
-    /// </summary>
-    public Guid EnvId { get; set; }
-
-    /// <summary>
-    /// The unique key of the feature flag. Retrieved from the URL path.
-    /// </summary>
-    public string Key { get; set; }
-
     /// <summary>
     /// The revision ID of the feature flag for optimistic concurrency control
     /// </summary>
@@ -32,6 +18,29 @@ public class UpdateVariations : ResourceChangeRequest, IRequest<Guid>
     /// The collection of variations (different values the feature flag can return)
     /// </summary>
     public ICollection<Variation> Variations { get; set; }
+}
+
+public class UpdateVariations : UpdateVariationsPayload, IRequest<Guid>
+{
+    public Guid WorkspaceId { get; set; }
+
+    public Guid OrgId { get; set; }
+
+    public Guid EnvId { get; set; }
+
+    public string Key { get; set; }
+
+    public UpdateVariations(Guid workspaceId, Guid orgId, Guid envId, string key, UpdateVariationsPayload payload)
+    {
+        WorkspaceId = workspaceId;
+        OrgId = orgId;
+        EnvId = envId;
+        Key = key;
+
+        Revision = payload.Revision;
+        Variations = payload.Variations;
+        Comment = payload.Comment;
+    }
 }
 
 public class UpdateVariationsValidator : AbstractValidator<UpdateVariations>

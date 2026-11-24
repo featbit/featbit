@@ -4,21 +4,31 @@ using Domain.AuditLogs;
 
 namespace Application.Segments;
 
-public class SetTags : ResourceChangeRequest, IRequest<bool>
+public class SetTagsPayload : ResourceChangeRequest
+{
+    /// <summary>
+    /// The collection of tags to set for the segment. Tags are used for categorization and filtering of segments.
+    /// </summary>
+    public string[] Tags { get; set; }
+}
+
+public class SetTags : SetTagsPayload, IRequest<bool>
 {
     public Guid WorkspaceId { get; set; }
 
     public Guid OrgId { get; set; }
 
-    /// <summary>
-    /// The ID of the segment to set tags for. Retrieved from the URL path.
-    /// </summary>
     public Guid Id { get; set; }
 
-    /// <summary>
-    /// The collection of tags to set for the segment. Tags are used for categorization and filtering of segments.
-    /// </summary>
-    public string[] Tags { get; set; }
+    public SetTags(Guid workspaceId, Guid orgId, Guid id, SetTagsPayload payload)
+    {
+        WorkspaceId = workspaceId;
+        OrgId = orgId;
+        Id = id;
+
+        Tags = payload.Tags;
+        Comment = payload.Comment;
+    }
 }
 
 public class SetTagsHandler(ISegmentService service, ICurrentUser currentUser, IPublisher publisher)

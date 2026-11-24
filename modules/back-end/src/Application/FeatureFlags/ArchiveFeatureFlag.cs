@@ -13,6 +13,16 @@ public class ArchiveFeatureFlag : ResourceChangeRequest, IRequest<bool>
     public Guid EnvId { get; set; }
 
     public string Key { get; set; }
+
+    public ArchiveFeatureFlag(Guid workspaceId, Guid orgId, Guid envId, string key, ResourceChangeRequest payload = null)
+    {
+        WorkspaceId = workspaceId;
+        OrgId = orgId;
+        EnvId = envId;
+        Key = key;
+
+        Comment = payload?.Comment ?? string.Empty;
+    }
 }
 
 public class ArchiveFeatureFlagHandler : IRequestHandler<ArchiveFeatureFlag, bool>

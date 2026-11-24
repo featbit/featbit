@@ -4,13 +4,24 @@ using Domain.FeatureFlags;
 
 namespace Application.FeatureFlags;
 
-public class GetCompareFlagOverview : IRequest<PagedResult<CompareFlagOverview>>
+public class GetCompareFlagOverviewPayload
 {
-    public Guid SourceEnvId { get; set; }
-
     public Guid[] TargetEnvIds { get; set; }
 
     public FeatureFlagFilter Filter { get; set; }
+}
+
+public class GetCompareFlagOverview : GetCompareFlagOverviewPayload, IRequest<PagedResult<CompareFlagOverview>>
+{
+    public Guid SourceEnvId { get; set; }
+
+    public GetCompareFlagOverview(Guid sourceEnvId, GetCompareFlagOverviewPayload payload)
+    {
+        SourceEnvId = sourceEnvId;
+
+        TargetEnvIds = payload.TargetEnvIds;
+        Filter = payload.Filter;
+    }
 }
 
 public class GetCompareFlagOverviewValidator : AbstractValidator<GetCompareFlagOverview>

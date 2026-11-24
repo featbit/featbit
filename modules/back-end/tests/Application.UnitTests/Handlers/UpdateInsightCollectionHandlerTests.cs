@@ -30,10 +30,9 @@ public class UpdateInsightCollectionHandlerTests
         _sut = new UpdateInsightCollectionHandler(_flags.Object, user.Object, _publisher.Object);
     }
 
-    private UpdateInsightCollection Request(bool enabled) => new()
-    {
-        EnvId = _flag.EnvId, Key = _flag.Key, Enabled = enabled, Comment = "Insights change"
-    };
+    private UpdateInsightCollection Request(bool enabled) => new(
+        Guid.Empty, Guid.Empty, _flag.EnvId, _flag.Key,
+        new UpdateInsightCollectionPayload { Enabled = enabled, Comment = "Insights change" });
 
     [Fact]
     public async Task Handle_EnableInsights_UpdatesWithoutQueryingExperiments()

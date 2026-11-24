@@ -4,19 +4,39 @@ using Domain.FeatureFlags;
 
 namespace Application.FeatureFlags;
 
-public class CopyFlagSettings : IRequest<bool>
+public class CopyFlagSettingsPayload
+{
+    public FlagSettingCopyOptions Options { get; set; }
+}
+
+public class CopyFlagSettings : CopyFlagSettingsPayload, IRequest<bool>
 {
     public Guid WorkspaceId { get; set; }
 
     public Guid OrgId { get; set; }
 
-    public string Key { get; set; }
-
     public Guid SourceEnvId { get; set; }
 
     public Guid TargetEnvId { get; set; }
 
-    public FlagSettingCopyOptions Options { get; set; }
+    public string Key { get; set; }
+
+    public CopyFlagSettings(
+        Guid workspaceId,
+        Guid orgId,
+        Guid sourceEnvId,
+        Guid targetEnvId,
+        string key,
+        CopyFlagSettingsPayload payload)
+    {
+        WorkspaceId = workspaceId;
+        OrgId = orgId;
+        SourceEnvId = sourceEnvId;
+        TargetEnvId = targetEnvId;
+        Key = key;
+
+        Options = payload.Options;
+    }
 }
 
 public class CopyFlagSettingsHandler(

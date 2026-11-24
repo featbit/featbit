@@ -113,7 +113,7 @@ public class ModelValidationResponseTests : IDisposable
 public class ValidationProbeController : ControllerBase
 {
     [HttpPost("segment")]
-    public IActionResult Segment(CreateSegment request) => NoContent();
+    public IActionResult Segment(CreateSegmentPayload payload) => NoContent();
 
     [HttpPost("id/{id}")]
     public IActionResult Id(Guid id) => NoContent();
