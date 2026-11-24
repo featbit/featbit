@@ -12,25 +12,30 @@ public class GetFlagReferences : IRequest<IEnumerable<FlagReference>>
     public Guid Id { get; set; }
 }
 
-public class GetFlagReferencesHandler(ISegmentService service, SegmentAccessGuard access, IPermissionTargetResolver resources, IOrganizationPermissions permissions)
+public class GetFlagReferencesHandler(
+    ISegmentService segmentService,
+    IPermissionGuard permissionGuard,
+    IPermissionTargetResolver targetResolver,
+    IOrganizationPermissions permissions)
     : IRequestHandler<GetFlagReferences, IEnumerable<FlagReference>>
 {
     public async Task<IEnumerable<FlagReference>> Handle(GetFlagReferences request, CancellationToken cancellationToken)
     {
-        var references = new List<FlagReference>();
+        await permissionGuard.EnsureSegmentOwnershipAsync(request.OrgId, request.EnvId, request.Id);
 
-        await access.EnsureAccessibleAsync(request.OrgId, request.EnvId, request.Id);
-        var segment = await service.GetAsync(request.Id);
-        var envIds = await service.GetEnvironmentIdsAsync(segment);
-        foreach (var envId in envIds.Distinct())
+        var references = new List<FlagReference>();
+        var segment = await segmentService.GetAsync(request.Id);
+
+        var envIds = await segmentService.GetEnvironmentIdsAsync(segment);
+        foreach (var envId in envIds)
         {
-            var resource = await resources.ResolveEnvironmentAsync(envId);
-            if (resource == null || !resource.OrganizationId.HasValue ||
-                !PolicyHelper.IsAllowed(await permissions.GetAsync(resource.OrganizationId.Value), resource.Rn, Permissions.CanAccessEnv))
+            var target = await targetResolver.ResolveEnvironmentAsync(envId);
+            if (target is not { OrganizationId: not null } ||
+                !PolicyHelper.IsAllowed(await permissions.GetAsync(target.OrganizationId.Value), target.Rn, Permissions.CanAccessEnv))
             {
                 continue;
             }
-            var envReferences = await service.GetFlagReferencesAsync(envId, request.Id);
+            var envReferences = await segmentService.GetFlagReferencesAsync(envId, request.Id);
             references.AddRange(envReferences);
         }
 

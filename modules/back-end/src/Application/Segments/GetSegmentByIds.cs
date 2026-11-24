@@ -21,23 +21,15 @@ public class GetSegmentByIdsValidator : AbstractValidator<GetSegmentByIds>
     }
 }
 
-public class GetSegmentByIdsHandler : IRequestHandler<GetSegmentByIds, IEnumerable<Segment>>
+public class GetSegmentByIdsHandler(ISegmentService service, IPermissionGuard permissionGuard)
+    : IRequestHandler<GetSegmentByIds, IEnumerable<Segment>>
 {
-    private readonly ISegmentService _service;
-    private readonly SegmentAccessGuard _access;
-
-    public GetSegmentByIdsHandler(ISegmentService service, SegmentAccessGuard access)
-    {
-        _service = service;
-        _access = access;
-    }
-
     public async Task<IEnumerable<Segment>> Handle(GetSegmentByIds request, CancellationToken cancellationToken)
     {
         foreach (var id in request.Ids.Distinct())
         {
-            await _access.EnsureAccessibleAsync(request.OrgId, request.EnvId, id);
+            await permissionGuard.EnsureSegmentOwnershipAsync(request.OrgId, request.EnvId, id);
         }
-        return await _service.FindManyAsync(x => request.Ids.Contains(x.Id));
+        return await service.FindManyAsync(x => request.Ids.Contains(x.Id));
     }
 }

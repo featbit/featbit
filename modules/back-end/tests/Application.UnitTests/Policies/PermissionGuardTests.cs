@@ -50,7 +50,7 @@ public class PermissionGuardTests
                 ? guard.EnsureSegmentChangeAllowedAsync(requestOrg, seg.EnvId, seg, change, permissions)
                 : guard.EnsureFlagChangeAllowedAsync(requestOrg, flag, change, permissions)
             : segment
-                ? guard.EnsureSegmentOwnershipAsync(requestOrg, seg.EnvId, seg)
+                ? guard.EnsureSegmentOwnershipAsync(requestOrg, seg.EnvId, seg.Id)
                 : guard.EnsureFlagOwnershipAsync(requestOrg, flag);
         if (ownership == "own") await act();
         else await Assert.ThrowsAsync<ForbiddenException>(act);

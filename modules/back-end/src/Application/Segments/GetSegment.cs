@@ -11,20 +11,13 @@ public class GetSegment : IRequest<Segment>
     public Guid Id { get; set; }
 }
 
-public class GetSegmentHandler : IRequestHandler<GetSegment, Segment>
+public class GetSegmentHandler(ISegmentService segmentService, IPermissionGuard permissionGuard)
+    : IRequestHandler<GetSegment, Segment>
 {
-    private readonly ISegmentService _service;
-    private readonly SegmentAccessGuard _access;
-
-    public GetSegmentHandler(ISegmentService service, SegmentAccessGuard access)
-    {
-        _service = service;
-        _access = access;
-    }
-
     public async Task<Segment> Handle(GetSegment request, CancellationToken cancellationToken)
     {
-        await _access.EnsureAccessibleAsync(request.OrgId, request.EnvId, request.Id);
-        return await _service.GetAsync(request.Id);
+        await permissionGuard.EnsureSegmentOwnershipAsync(request.OrgId, request.EnvId, request.Id);
+
+        return await segmentService.GetAsync(request.Id);
     }
 }

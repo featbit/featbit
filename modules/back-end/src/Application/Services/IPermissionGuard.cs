@@ -15,7 +15,7 @@ public interface IPermissionGuard
     /// <summary>
     /// Ensures the segment is accessible from the given environment in the request organization; otherwise throws ForbiddenException.
     /// </summary>
-    Task EnsureSegmentOwnershipAsync(Guid organizationId, Guid envId, Segment segment);
+    Task EnsureSegmentOwnershipAsync(Guid organizationId, Guid envId, Guid segmentId);
 
     /// <summary>
     /// Throws <see cref="Bases.Exceptions.ForbiddenException"/> if ownership is invalid or the given policy statements do not grant every

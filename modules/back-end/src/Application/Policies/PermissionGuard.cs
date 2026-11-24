@@ -14,8 +14,8 @@ public class PermissionGuard(IPermissionTargetResolver targetResolver) : IPermis
     public Task EnsureFlagOwnershipAsync(Guid organizationId, FeatureFlag flag) =>
         EnsureOwnershipAsync(organizationId, () => targetResolver.ResolveFlagAsync(flag.EnvId, flag.Key));
 
-    public Task EnsureSegmentOwnershipAsync(Guid organizationId, Guid envId, Segment segment) =>
-        EnsureOwnershipAsync(organizationId, () => targetResolver.ResolveSegmentAsync(envId, segment.Id));
+    public Task EnsureSegmentOwnershipAsync(Guid organizationId, Guid envId, Guid segmentId) =>
+        EnsureOwnershipAsync(organizationId, () => targetResolver.ResolveSegmentAsync(envId, segmentId));
 
     public Task EnsureFlagChangeAllowedAsync(Guid organizationId, FeatureFlag flag, DataChange change, PolicyStatement[] permissions) =>
         EnsureAllowedAsync(
