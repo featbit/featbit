@@ -9,17 +9,9 @@ using Domain.FlagSchedules;
 
 namespace Application.FeatureFlags;
 
-public class CreateFlagSchedule : IRequest<bool>
+public class CreateFlagSchedulePayload
 {
-    public Guid WorkspaceId { get; set; }
-
-    public Guid OrgId { get; set; }
-
-    public Guid EnvId { get; set; }
-
     public Guid Revision { get; set; }
-
-    public string Key { get; set; }
 
     public FlagTargeting Targeting { get; set; }
 
@@ -32,6 +24,33 @@ public class CreateFlagSchedule : IRequest<bool>
     public string Reason { get; set; }
 
     public ICollection<Guid> Reviewers { get; set; }
+}
+
+public class CreateFlagSchedule : CreateFlagSchedulePayload, IRequest<bool>
+{
+    public Guid WorkspaceId { get; set; }
+
+    public Guid OrgId { get; set; }
+
+    public Guid EnvId { get; set; }
+
+    public string Key { get; set; }
+
+    public CreateFlagSchedule(Guid workspaceId, Guid orgId, Guid envId, string key, CreateFlagSchedulePayload payload)
+    {
+        WorkspaceId = workspaceId;
+        OrgId = orgId;
+        EnvId = envId;
+        Key = key;
+
+        Revision = payload.Revision;
+        Targeting = payload.Targeting;
+        Title = payload.Title;
+        ScheduledTime = payload.ScheduledTime;
+        WithChangeRequest = payload.WithChangeRequest;
+        Reason = payload.Reason;
+        Reviewers = payload.Reviewers;
+    }
 }
 
 public class CreateFlagScheduleValidator : AbstractValidator<CreateFlagSchedule>

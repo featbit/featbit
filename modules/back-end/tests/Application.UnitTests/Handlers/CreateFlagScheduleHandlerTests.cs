@@ -69,20 +69,18 @@ public class CreateFlagScheduleHandlerTests
         return (sut, flagSvc, licenseSvc, schedSvc, crSvc, draftSvc);
     }
 
-    private static CreateFlagSchedule BuildRequest(FeatureFlag flag, bool withChangeRequest) => new()
-    {
-        WorkspaceId = Guid.NewGuid(),
-        OrgId = Guid.NewGuid(),
-        EnvId = flag.EnvId,
-        Revision = flag.Revision,
-        Key = flag.Key,
-        Targeting = NewTargeting(flag),
-        Title = "schedule",
-        ScheduledTime = DateTime.UtcNow.AddHours(1),
-        WithChangeRequest = withChangeRequest,
-        Reason = "reason",
-        Reviewers = new[] { Guid.NewGuid() }
-    };
+    private static CreateFlagSchedule BuildRequest(FeatureFlag flag, bool withChangeRequest) => new(
+        Guid.NewGuid(), Guid.NewGuid(), flag.EnvId, flag.Key,
+        new CreateFlagSchedulePayload
+        {
+            Revision = flag.Revision,
+            Targeting = NewTargeting(flag),
+            Title = "schedule",
+            ScheduledTime = DateTime.UtcNow.AddHours(1),
+            WithChangeRequest = withChangeRequest,
+            Reason = "reason",
+            Reviewers = new[] { Guid.NewGuid() }
+        });
 
     [Fact]
     public async Task Handle_RevisionMismatch_ThrowsConflictAndDoesNotPersistAnything()

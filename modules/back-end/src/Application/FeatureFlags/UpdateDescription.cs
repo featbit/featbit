@@ -4,26 +4,34 @@ using Domain.AuditLogs;
 
 namespace Application.FeatureFlags;
 
-public class UpdateDescription : ResourceChangeRequest, IRequest<Guid>
+public class UpdateDescriptionPayload : ResourceChangeRequest
+{
+    /// <summary>
+    /// The new description for the feature flag
+    /// </summary>
+    public string Description { get; set; }
+}
+
+public class UpdateDescription : UpdateDescriptionPayload, IRequest<Guid>
 {
     public Guid WorkspaceId { get; set; }
 
     public Guid OrgId { get; set; }
 
-    /// <summary>
-    /// The ID of the environment the feature flag belongs to. Retrieved from the URL path.
-    /// </summary>
     public Guid EnvId { get; set; }
 
-    /// <summary>
-    /// The unique key of the feature flag. Retrieved from the URL path.
-    /// </summary>
     public string Key { get; set; }
 
-    /// <summary>
-    /// The new description for the feature flag
-    /// </summary>
-    public string Description { get; set; }
+    public UpdateDescription(Guid workspaceId, Guid orgId, Guid envId, string key, UpdateDescriptionPayload payload)
+    {
+        WorkspaceId = workspaceId;
+        OrgId = orgId;
+        EnvId = envId;
+        Key = key;
+
+        Description = payload.Description;
+        Comment = payload.Comment;
+    }
 }
 
 public class UpdateDescriptionHandler(

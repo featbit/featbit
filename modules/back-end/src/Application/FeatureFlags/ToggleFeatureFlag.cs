@@ -15,6 +15,23 @@ public class ToggleFeatureFlag : ResourceChangeRequest, IRequest<Guid>
     public string Key { get; set; }
 
     public bool Status { get; set; }
+
+    public ToggleFeatureFlag(
+        Guid workspaceId,
+        Guid orgId,
+        Guid envId,
+        string key,
+        bool status,
+        ResourceChangeRequest payload = null)
+    {
+        WorkspaceId = workspaceId;
+        OrgId = orgId;
+        EnvId = envId;
+        Key = key;
+        Status = status;
+
+        Comment = payload?.Comment ?? string.Empty;
+    }
 }
 
 public class ToggleFeatureFlagHandler : IRequestHandler<ToggleFeatureFlag, Guid>

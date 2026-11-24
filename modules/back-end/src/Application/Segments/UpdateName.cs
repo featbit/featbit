@@ -5,21 +5,31 @@ using Domain.AuditLogs;
 
 namespace Application.Segments;
 
-public class UpdateName : ResourceChangeRequest, IRequest<bool>
+public class UpdateNamePayload : ResourceChangeRequest
+{
+    /// <summary>
+    /// The new name for the segment.
+    /// </summary>
+    public string Name { get; set; }
+}
+
+public class UpdateName : UpdateNamePayload, IRequest<bool>
 {
     public Guid WorkspaceId { get; set; }
 
     public Guid OrgId { get; set; }
 
-    /// <summary>
-    /// The ID of the segment to update. Retrieved from the URL path.
-    /// </summary>
     public Guid Id { get; set; }
 
-    /// <summary>
-    /// The new name for the segment.
-    /// </summary>
-    public string Name { get; set; }
+    public UpdateName(Guid workspaceId, Guid orgId, Guid id, UpdateNamePayload payload)
+    {
+        WorkspaceId = workspaceId;
+        OrgId = orgId;
+        Id = id;
+
+        Name = payload.Name;
+        Comment = payload.Comment;
+    }
 }
 
 public class UpdateNameValidator : AbstractValidator<UpdateName>

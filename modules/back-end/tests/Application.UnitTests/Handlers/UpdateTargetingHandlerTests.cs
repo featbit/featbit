@@ -75,6 +75,7 @@ public class UpdateTargetingHandlerTests
         string disabledVariationId,
         PolicyStatement[] permissions) =>
         new(
+            Guid.Empty,
             Guid.NewGuid(),
             flag.EnvId,
             flag.Key,

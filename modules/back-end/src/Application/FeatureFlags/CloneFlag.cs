@@ -9,16 +9,6 @@ namespace Application.FeatureFlags;
 public class CloneFlagPayload
 {
     /// <summary>
-    /// The ID of the environment the feature flag belongs to. Retrieved from the URL path.
-    /// </summary>
-    public Guid EnvId { get; set; }
-
-    /// <summary>
-    /// The unique key of the feature flag to clone from. Retrieved from the URL path.
-    /// </summary>
-    public string OriginFlagKey { get; set; }
-
-    /// <summary>
     /// The name for the cloned feature flag
     /// </summary>
     public string Name { get; set; }
@@ -45,16 +35,21 @@ public class CloneFlag : CloneFlagPayload, IRequest<bool>
 
     public Guid OrgId { get; set; }
 
-    public CloneFlag(Guid  workspaceId, Guid orgId, CloneFlagPayload payload)
+    public Guid EnvId { get; set; }
+
+    public string OriginFlagKey { get; set; }
+
+    public CloneFlag(Guid workspaceId, Guid orgId, Guid envId, string originFlagKey, CloneFlagPayload payload)
     {
         WorkspaceId = workspaceId;
         OrgId = orgId;
+        EnvId = envId;
+        OriginFlagKey = originFlagKey;
+
         Name = payload.Name;
         Key = payload.Key;
         Description = payload.Description;
         Tags = payload.Tags;
-        EnvId = payload.EnvId;
-        OriginFlagKey = payload.OriginFlagKey;
     }
 }
 

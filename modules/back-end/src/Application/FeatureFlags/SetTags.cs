@@ -4,26 +4,34 @@ using Domain.AuditLogs;
 
 namespace Application.FeatureFlags;
 
-public class SetTags : ResourceChangeRequest, IRequest<bool>
+public class SetTagsPayload : ResourceChangeRequest
+{
+    /// <summary>
+    /// The collection of tags to set for the feature flag. Tags are used for categorization and filtering of feature flags.
+    /// </summary>
+    public string[] Tags { get; set; }
+}
+
+public class SetTags : SetTagsPayload, IRequest<bool>
 {
     public Guid WorkspaceId { get; set; }
 
     public Guid OrgId { get; set; }
 
-    /// <summary>
-    /// The ID of the environment the feature flag belongs to. Retrieved from the URL path.
-    /// </summary>
     public Guid EnvId { get; set; }
 
-    /// <summary>
-    /// The unique key of the feature flag. Retrieved from the URL path.
-    /// </summary>
     public string Key { get; set; }
 
-    /// <summary>
-    /// The collection of tags to set for the feature flag. Tags are used for categorization and filtering of feature flags.
-    /// </summary>
-    public string[] Tags { get; set; }
+    public SetTags(Guid workspaceId, Guid orgId, Guid envId, string key, SetTagsPayload payload)
+    {
+        WorkspaceId = workspaceId;
+        OrgId = orgId;
+        EnvId = envId;
+        Key = key;
+
+        Tags = payload.Tags;
+        Comment = payload.Comment;
+    }
 }
 
 public class SetTagsHandler(IFeatureFlagService service, ICurrentUser currentUser, IPublisher publisher)

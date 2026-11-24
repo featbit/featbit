@@ -35,12 +35,14 @@ public class UpdateTargeting : UpdateTargetingPayload, IRequest<Guid>
     public PolicyStatement[] Permissions { get; set; }
 
     public UpdateTargeting(
+        Guid workspaceId,
         Guid orgId,
         Guid envId,
         string key,
         UpdateTargetingPayload payload,
         PolicyStatement[] permissions)
     {
+        WorkspaceId = workspaceId;
         OrgId = orgId;
         EnvId = envId;
         Key = key;

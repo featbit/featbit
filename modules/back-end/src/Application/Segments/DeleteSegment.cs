@@ -12,6 +12,15 @@ public class DeleteSegment : ResourceChangeRequest, IRequest<bool>
     public Guid OrgId { get; set; }
 
     public Guid Id { get; set; }
+
+    public DeleteSegment(Guid workspaceId, Guid orgId, Guid id, ResourceChangeRequest payload = null)
+    {
+        WorkspaceId = workspaceId;
+        OrgId = orgId;
+        Id = id;
+
+        Comment = payload?.Comment ?? string.Empty;
+    }
 }
 
 public class DeleteSegmentHandler : IRequestHandler<DeleteSegment, bool>

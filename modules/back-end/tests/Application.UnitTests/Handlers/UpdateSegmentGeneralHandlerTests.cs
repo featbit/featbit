@@ -54,6 +54,9 @@ public class UpdateSegmentGeneralHandlerTests
         string? description = null,
         string[]? tags = null) =>
         new(
+            segment.WorkspaceId,
+            OrganizationId,
+            segment.EnvId,
             segment.Id,
             new UpdateGeneralPayload
             {
@@ -62,7 +65,7 @@ public class UpdateSegmentGeneralHandlerTests
                 Tags = tags ?? segment.Tags,
                 Comment = "General settings update"
             },
-            permissions) { OrgId = OrganizationId, EnvId = segment.EnvId };
+            permissions);
 
     private static UpdateGeneralHandler BuildSut(
         Segment segment,

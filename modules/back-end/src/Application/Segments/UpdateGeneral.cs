@@ -37,16 +37,23 @@ public class UpdateGeneral : UpdateGeneralPayload, IRequest<bool>
     public PolicyStatement[] Permissions { get; set; }
 
     public UpdateGeneral(
+        Guid workspaceId,
+        Guid orgId,
+        Guid envId,
         Guid segmentId,
         UpdateGeneralPayload payload,
         PolicyStatement[] permissions)
     {
+        WorkspaceId = workspaceId;
+        OrgId = orgId;
+        EnvId = envId;
         Id = segmentId;
+        Permissions = permissions;
+
         Name = payload.Name;
         Description = payload.Description;
         Tags = payload.Tags;
         Comment = payload.Comment;
-        Permissions = permissions;
     }
 }
 
