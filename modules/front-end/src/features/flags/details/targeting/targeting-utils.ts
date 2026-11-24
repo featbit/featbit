@@ -1,3 +1,4 @@
+import { isValidSemVerCondition } from "@/features/targeting/semver"
 import type { ChangeReviewItem } from "@/features/change-review/change-review-types"
 import {
   isSegmentConditionProperty,
@@ -298,13 +299,17 @@ export function targetingReviewChanges(
       idsByName.set(rule.name, ids)
     }
     const ambiguousIds = new Set(
-      [...idsByName.values()].filter((ids) => ids.size > 1).flatMap((ids) => [...ids])
+      [...idsByName.values()]
+        .filter((ids) => ids.size > 1)
+        .flatMap((ids) => [...ids])
     )
     const allIds = [...new Set(rules.map((rule) => rule.id))]
     const orderLabel = (rule: FlagRule) => {
       if (!ambiguousIds.has(rule.id)) return rule.name
       const prefix = rule.id.slice(0, 8)
-      const id = allIds.some((other) => other !== rule.id && other.startsWith(prefix))
+      const id = allIds.some(
+        (other) => other !== rule.id && other.startsWith(prefix)
+      )
         ? rule.id
         : prefix
       return `${rule.name} (${id})`
@@ -356,6 +361,7 @@ export function validateTargeting(
     else if (
       rule.conditions.some(
         (item) =>
+          !isValidSemVerCondition(item) ||
           !item.property ||
           (isSegmentConditionProperty(item.property)
             ? segmentConditionValues(item).length === 0

@@ -1,3 +1,4 @@
+using Domain.Targeting;
 using Application.FeatureFlags;
 using Application.Policies;
 using Application.Services;
@@ -101,5 +102,22 @@ public class PatchFeatureFlagHandlerTests
         publisher.Verify(
             x => x.Publish(It.IsAny<OnFeatureFlagChanged>(), It.IsAny<CancellationToken>()),
             Times.Never);
+    }
+
+    [Fact]
+    public async Task Handle_InvalidSemVerPatch_DoesNotPersist()
+    {
+        var flag = NewFlag();
+        var service = new Mock<IFeatureFlagService>();
+        service.Setup(x => x.GetAsync(It.IsAny<Guid>(), It.IsAny<string>())).ReturnsAsync(flag);
+        var publisher = new Mock<IPublisher>();
+        var sut = new PatchFeatureFlagHandler(service.Object, new PermissionGuard(Mock.Of<IResourceService>()), Mock.Of<ICurrentUser>(), publisher.Object);
+        var patch = new JsonPatchDocument<FeatureFlag>();
+        patch.Replace(x => x.Rules, new List<TargetRule>
+        {
+            new() { Id = "rule", Conditions = [new Condition { Id = "condition", Property = "version", Op = "SemVerBiggerThan", Value = "bad" }] }
+        });
+        await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => sut.Handle(new PatchFeatureFlag { Patch = patch }, CancellationToken.None));
+        service.Verify(x => x.UpdateAsync(It.IsAny<FeatureFlag>()), Times.Never);
     }
 }

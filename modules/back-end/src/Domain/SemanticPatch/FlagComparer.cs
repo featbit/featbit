@@ -414,10 +414,9 @@ public static class FlagComparer
         }
 
         // for multiValueOps, we just need compare values
-        var multiValueOps = new[] { OperatorTypes.IsOneOf, OperatorTypes.NotOneOf };
         if (original.Property == current.Property &&
             original.Op == current.Op &&
-            multiValueOps.Contains(original.Op) &&
+            OperatorTypes.IsMultiValue(original.Op) &&
             original.Value != current.Value)
         {
             CompareConditionValues();

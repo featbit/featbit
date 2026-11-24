@@ -35,7 +35,11 @@ const properties: SegmentUserProperty[] = [
   },
 ]
 
-function renderEditor() {
+function renderEditor(
+  op = "IsOneOf",
+  value = JSON.stringify(["legacy"]),
+  property = "country"
+) {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { retry: false },
@@ -50,9 +54,9 @@ function renderEditor() {
       conditions: [
         {
           id: "condition-1",
-          property: "country",
-          op: "IsOneOf",
-          value: JSON.stringify(["legacy"]),
+          property,
+          op,
+          value,
         },
       ],
     })
@@ -138,5 +142,53 @@ describe("RuleEditor multi-value behavior", () => {
     selectOperator("is true")
 
     expect(screen.getByTestId("condition-value")).toHaveTextContent("IsTrue")
+  })
+})
+
+describe("SemVer rule editing", () => {
+  it("preserves values between comparisons and flags invalid versions", () => {
+    renderEditor("SemVerLessThan", "1.2", "plan")
+    selectOperator("SemVer >=")
+    expect(screen.getByTestId("condition-value")).toHaveTextContent("1.2")
+    fireEvent.change(screen.getByPlaceholderText("2.3.0"), {
+      target: { value: "1.2.3.4" },
+    })
+    expect(screen.getByPlaceholderText("2.3.0")).toHaveAttribute(
+      "aria-invalid",
+      "true"
+    )
+    expect(screen.getByText(/Enter valid versions/)).toBeVisible()
+  })
+
+  it("requires an explicit choice before reducing a list to one value", () => {
+    renderEditor("SemVerIsOneOf", '["1.2","2.0.0"]', "plan")
+    selectOperator("SemVer >=")
+    expect(screen.getByTestId("condition-value")).toHaveTextContent(
+      '["1.2","2.0.0"]'
+    )
+    fireEvent.click(screen.getByRole("button", { name: "2.0.0" }))
+    expect(screen.getByTestId("condition-value")).toHaveTextContent("2.0.0")
+    expect(screen.getByPlaceholderText("2.3.0")).toHaveValue("2.0.0")
+  })
+
+  it("preserves case-sensitive versions and commits pending input on close", () => {
+    renderEditor("SemVerIsOneOf", '["1.2.0-BETA"]', "plan")
+    fireEvent.click(screen.getByRole("combobox", { name: "Select values" }))
+    fireEvent.change(screen.getByPlaceholderText("Search values"), {
+      target: { value: "1.2.0-beta" },
+    })
+    fireEvent.click(screen.getByRole("option", { name: 'Add "1.2.0-beta"' }))
+    expect(screen.getByTestId("condition-value")).toHaveTextContent(
+      '["1.2.0-BETA","1.2.0-beta"]'
+    )
+    fireEvent.click(screen.getByRole("combobox", { name: "Select values" }))
+    fireEvent.change(screen.getByPlaceholderText("Search values"), {
+      target: { value: "invalid" },
+    })
+    fireEvent.keyDown(screen.getByPlaceholderText("Search values"), {
+      key: "Escape",
+    })
+    expect(screen.getByTestId("condition-value")).toHaveTextContent('"invalid"')
+    expect(screen.getByText(/Enter valid versions/)).toBeVisible()
   })
 })

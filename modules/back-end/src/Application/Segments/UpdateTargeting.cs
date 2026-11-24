@@ -52,8 +52,13 @@ public class UpdateTargetingValidator : AbstractValidator<UpdateTargeting>
     {
         RuleFor(x => x.Rules)
             .NotNull().WithErrorCode(ErrorCodes.Required("rules"))
-            .Must(rules => rules.All(rule => rule != null && rule.IsValid()))
+            .Must(rules => rules != null && rules.All(rule => rule != null && rule.IsValid()))
             .WithErrorCode(ErrorCodes.Invalid("rules"));
+        RuleFor(x => x.Rules).Custom((rules, context) =>
+        {
+            foreach (var failure in SemVerConditionValidator.Validate(rules?.Select(rule => rule?.Conditions)))
+                context.AddFailure(failure);
+        });
     }
 }
 

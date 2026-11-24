@@ -2,6 +2,14 @@ namespace Domain.Targeting;
 
 public static class OperatorTypes
 {
+    // semantic versions
+    public const string SemVerIsOneOf = "SemVerIsOneOf";
+    public const string SemVerNotOneOf = "SemVerNotOneOf";
+    public const string SemVerLessThan = "SemVerLessThan";
+    public const string SemVerLessEqualThan = "SemVerLessEqualThan";
+    public const string SemVerBiggerThan = "SemVerBiggerThan";
+    public const string SemVerBiggerEqualThan = "SemVerBiggerEqualThan";
+
     // numeric
     public const string LessThan = "LessThan";
     public const string BiggerThan = "BiggerThan";
@@ -34,6 +42,12 @@ public static class OperatorTypes
 
     public static readonly string[] All =
     [
+        SemVerIsOneOf,
+        SemVerNotOneOf,
+        SemVerLessThan,
+        SemVerLessEqualThan,
+        SemVerBiggerThan,
+        SemVerBiggerEqualThan,
         LessThan,
         BiggerThan,
         LessEqualThan,
@@ -57,6 +71,10 @@ public static class OperatorTypes
         IsTrue,
         IsFalse
     ];
+
+    public static bool IsSemVer(string op) => op is SemVerIsOneOf or SemVerNotOneOf or SemVerLessThan or SemVerLessEqualThan or SemVerBiggerThan or SemVerBiggerEqualThan;
+
+    public static bool IsMultiValue(string op) => op is IsOneOf or NotOneOf or SemVerIsOneOf or SemVerNotOneOf;
 
     public static bool IsDefined(string op) => All.Contains(op);
 }

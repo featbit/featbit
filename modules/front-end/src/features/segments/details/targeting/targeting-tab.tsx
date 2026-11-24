@@ -1,3 +1,4 @@
+import { isValidSemVerCondition } from "@/features/targeting/semver"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Plus } from "lucide-react"
 import { useMemo, useState } from "react"
@@ -149,6 +150,16 @@ export function TargetingTab({
               onClick={() => {
                 if (!canUpdateRules && !canUpdateUsers) {
                   toast.error(t("segments.permissionDenied"))
+                  return
+                }
+                if (
+                  draft.rules.some((rule) =>
+                    rule.conditions.some(
+                      (condition) => !isValidSemVerCondition(condition)
+                    )
+                  )
+                ) {
+                  toast.error(t("targeting.rules.semVerInvalid"))
                   return
                 }
                 setReviewOpen(true)

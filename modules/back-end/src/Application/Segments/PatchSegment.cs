@@ -1,4 +1,5 @@
 using Domain.AuditLogs;
+using Application.Bases;
 using Application.Users;
 using Application.Bases.Models;
 using Domain.Policies;
@@ -44,6 +45,8 @@ public class PatchSegmentHandler(
         {
             return PatchResult.Fail(error);
         }
+
+        SemVerConditionValidator.EnsureValid(segment.Rules?.Select(rule => rule?.Conditions));
 
         segment.MarkAsUpdated(currentUser.Id);
         dataChange.To(segment);

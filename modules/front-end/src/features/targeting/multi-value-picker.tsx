@@ -19,23 +19,28 @@ import type { SegmentUserProperty } from "@/features/segments/segments-types"
 
 type PresetValue = SegmentUserProperty["presetValues"][number]
 
-function valueKey(value: string) {
-  return value.toLocaleLowerCase()
-}
-
 export function MultiValuePicker({
   values,
   presetValues,
   presetOnly,
   disabled,
   onChange,
+  semanticVersion = false,
 }: {
+  semanticVersion?: boolean
   values: string[]
   presetValues: PresetValue[]
   presetOnly: boolean
   disabled: boolean
   onChange: (values: string[]) => void
 }) {
+  const valueKey = useMemo(
+    () =>
+      semanticVersion
+        ? (value: string) => value
+        : (value: string) => value.toLocaleLowerCase(),
+    [semanticVersion]
+  )
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState("")
@@ -52,12 +57,12 @@ export function MultiValuePicker({
       }
     })
     return [...presets.values()]
-  }, [initialValues, presetValues])
+  }, [initialValues, presetValues, valueKey])
   const labels = new Map(
     catalog.map((preset) => [valueKey(preset.value), preset.description])
   )
   const selectedKeys = new Set(values.map(valueKey))
-  const query = search.trim()
+  const query = semanticVersion ? search : search.trim()
   const normalizedQuery = valueKey(query)
   const availableValues = catalog.filter(
     (preset) =>
@@ -108,7 +113,17 @@ export function MultiValuePicker({
         open={open}
         onOpenChange={(nextOpen) => {
           setOpen(nextOpen)
-          if (!nextOpen) setSearch("")
+          if (!nextOpen) {
+            // Commit typed versions before a save click can discard unconfirmed input.
+            if (
+              semanticVersion &&
+              !presetOnly &&
+              query &&
+              !selectedKeys.has(valueKey(query))
+            )
+              onChange([...values, query])
+            setSearch("")
+          }
         }}
       >
         <PopoverTrigger

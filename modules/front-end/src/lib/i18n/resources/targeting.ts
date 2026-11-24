@@ -41,7 +41,21 @@ export const enTargeting = {
     noValues: "No preset values found",
     addValue: 'Add "{{value}}"',
     removeValue: "Remove {{value}}",
+    semVerGroup: "Semantic version",
+    semVerHelp:
+      "Examples: 2.3, 2.3.0, 2.3.0-beta.1. 2.3 compares as 2.3.0; build metadata is ignored.",
+    semVerInvalid:
+      "Enter valid versions such as 2.3.0 (up to 256 characters). Lists require 1–100 versions; spaces, v prefixes and ranges are not supported.",
+    semVerChoose: "Choose the version to keep for the single-value operator.",
+    cancelSwitch: "Cancel switch",
     operators: {
+      SemVerIsOneOf: "SemVer is one of",
+      SemVerNotOneOf: "SemVer is not one of",
+      SemVerLessThan: "SemVer <",
+      SemVerLessEqualThan: "SemVer <=",
+      SemVerBiggerThan: "SemVer >",
+      SemVerBiggerEqualThan: "SemVer >=",
+
       Equal: "equals",
       NotEqual: "does not equal",
       LessThan: "is less than",
@@ -113,7 +127,21 @@ export const zhTargeting: typeof enTargeting = {
     noValues: "未找到预设值",
     addValue: "添加“{{value}}”",
     removeValue: "移除 {{value}}",
+    semVerGroup: "语义化版本",
+    semVerHelp:
+      "支持 2.3、2.3.0、2.3.0-beta.1。2.3 按 2.3.0 比较，忽略构建元数据。",
+    semVerInvalid:
+      "请输入有效版本，例如 2.3.0（最多 256 个字符）。列表需要 1–100 个版本；不支持空格、v 前缀或范围表达式。",
+    semVerChoose: "请选择切换为单值操作符后保留的版本。",
+    cancelSwitch: "取消切换",
     operators: {
+      SemVerIsOneOf: "版本属于",
+      SemVerNotOneOf: "版本不属于",
+      SemVerLessThan: "版本小于",
+      SemVerLessEqualThan: "版本小于等于",
+      SemVerBiggerThan: "版本大于",
+      SemVerBiggerEqualThan: "版本大于等于",
+
       Equal: "等于",
       NotEqual: "不等于",
       LessThan: "小于",

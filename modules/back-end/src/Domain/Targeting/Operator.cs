@@ -162,8 +162,31 @@ public class Operator
         IsTrue, IsFalse
     };
 
+    private static bool MatchSemanticVersion(string op, string userValue, string ruleValue)
+    {
+        if (!SemanticVersion.TryParse(userValue, out var user)) return false;
+        if (OperatorTypes.IsMultiValue(op))
+        {
+            if (!SemanticVersion.TryParseList(ruleValue, out var versions)) return false;
+            var matches = versions.Any(version => user.CompareTo(version) == 0);
+            return op == OperatorTypes.SemVerIsOneOf ? matches : !matches;
+        }
+        if (!SemanticVersion.TryParse(ruleValue, out var rule)) return false;
+        var comparison = user.CompareTo(rule);
+        return op switch
+        {
+            OperatorTypes.SemVerLessThan => comparison < 0,
+            OperatorTypes.SemVerLessEqualThan => comparison <= 0,
+            OperatorTypes.SemVerBiggerThan => comparison > 0,
+            OperatorTypes.SemVerBiggerEqualThan => comparison >= 0,
+            _ => false
+        };
+    }
+
     public static Operator Get(string operation)
     {
+        if (OperatorTypes.IsSemVer(operation))
+            return new Operator(operation, (user, rule) => MatchSemanticVersion(operation, user, rule));
         var theOperator = All.FirstOrDefault(x => x.Operation == operation);
 
         // unrecognized operators are treated as non-matches, not errors

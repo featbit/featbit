@@ -1,3 +1,10 @@
+import { useState } from "react"
+import {
+  isMultiValueOperator,
+  isSemVerOperator,
+  isValidSemVerCondition,
+  semVerOperators,
+} from "./semver"
 import { GripVertical, Plus, Trash2, X } from "lucide-react"
 import type { DragEvent, KeyboardEvent, ReactNode } from "react"
 import { useTranslation } from "react-i18next"
@@ -7,6 +14,7 @@ import {
   Select,
   SelectContent,
   SelectGroup,
+  SelectLabel,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -78,6 +86,10 @@ export function RuleEditor({
   footer?: ReactNode
 }) {
   const { t } = useTranslation()
+  const [pendingOperator, setPendingOperator] = useState<{
+    id: string
+    op: string
+  } | null>(null)
   function handleReorderKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
     if (event.key === "ArrowUp" && canMoveUp) {
       event.preventDefault()
@@ -137,8 +149,7 @@ export function RuleEditor({
           const property = properties.find(
             (candidate) => candidate.name === condition.property
           )
-          const multiValue =
-            condition.op === "IsOneOf" || condition.op === "NotOneOf"
+          const multiValue = isMultiValueOperator(condition.op)
           const valueDisabled =
             condition.op === "IsTrue" || condition.op === "IsFalse"
           return (
@@ -199,8 +210,20 @@ export function RuleEditor({
                       disabled={disabled}
                       onValueChange={(op) => {
                         if (!op) return
-                        const nextValues =
-                          op === "IsOneOf" || op === "NotOneOf"
+                        const semVerTransition =
+                          isSemVerOperator(op) || isSemVerOperator(condition.op)
+                        if (
+                          semVerTransition &&
+                          !isMultiValueOperator(op) &&
+                          values.length > 1
+                        ) {
+                          setPendingOperator({ id: condition.id, op })
+                          return
+                        }
+                        setPendingOperator(null)
+                        const nextValues = semVerTransition
+                          ? values.filter((value) => value !== "")
+                          : isMultiValueOperator(op)
                             ? []
                             : op === "IsTrue" || op === "IsFalse"
                               ? [op]
@@ -231,45 +254,116 @@ export function RuleEditor({
                             </SelectItem>
                           ))}
                         </SelectGroup>
+                        <SelectGroup>
+                          <SelectLabel>
+                            {t("targeting.rules.semVerGroup")}
+                          </SelectLabel>
+                          {semVerOperators.map((operator) => (
+                            <SelectItem key={operator} value={operator}>
+                              {t(`targeting.rules.operators.${operator}`)}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
                       </SelectContent>
                     </Select>
-                    {multiValue ? (
-                      <MultiValuePicker
-                        key={condition.property}
-                        values={values}
-                        presetValues={property?.presetValues ?? []}
-                        presetOnly={property?.usePresetValuesOnly ?? false}
-                        disabled={disabled}
-                        onChange={(nextValues) =>
-                          onChange({
-                            ...rule,
-                            conditions: rule.conditions.map((item) =>
-                              item.id === condition.id
-                                ? withConditionValues(item, nextValues)
-                                : item
-                            ),
-                          })
-                        }
-                      />
-                    ) : (
-                      <Input
-                        value={valueDisabled ? "" : values.join(", ")}
-                        disabled={disabled || valueDisabled}
-                        placeholder={t("targeting.rules.value")}
-                        onChange={(event) =>
-                          onChange({
-                            ...rule,
-                            conditions: rule.conditions.map((item) =>
-                              item.id === condition.id
-                                ? withConditionValues(item, [
-                                    event.target.value,
-                                  ])
-                                : item
-                            ),
-                          })
-                        }
-                      />
-                    )}
+                    <div className="min-w-0 space-y-1">
+                      {multiValue ? (
+                        <MultiValuePicker
+                          key={`${condition.property}-${isSemVerOperator(condition.op)}`}
+                          semanticVersion={isSemVerOperator(condition.op)}
+                          values={values}
+                          presetValues={property?.presetValues ?? []}
+                          presetOnly={property?.usePresetValuesOnly ?? false}
+                          disabled={disabled}
+                          onChange={(nextValues) =>
+                            onChange({
+                              ...rule,
+                              conditions: rule.conditions.map((item) =>
+                                item.id === condition.id
+                                  ? withConditionValues(item, nextValues)
+                                  : item
+                              ),
+                            })
+                          }
+                        />
+                      ) : (
+                        <Input
+                          value={valueDisabled ? "" : values.join(", ")}
+                          disabled={disabled || valueDisabled}
+                          placeholder={
+                            isSemVerOperator(condition.op)
+                              ? "2.3.0"
+                              : t("targeting.rules.value")
+                          }
+                          aria-invalid={!isValidSemVerCondition(condition)}
+                          onChange={(event) =>
+                            onChange({
+                              ...rule,
+                              conditions: rule.conditions.map((item) =>
+                                item.id === condition.id
+                                  ? withConditionValues(item, [
+                                      event.target.value,
+                                    ])
+                                  : item
+                              ),
+                            })
+                          }
+                        />
+                      )}
+                      {isSemVerOperator(condition.op) && (
+                        <p
+                          className={
+                            isValidSemVerCondition(condition)
+                              ? "text-xs text-muted-foreground"
+                              : "text-xs text-destructive"
+                          }
+                        >
+                          {t(
+                            isValidSemVerCondition(condition)
+                              ? "targeting.rules.semVerHelp"
+                              : "targeting.rules.semVerInvalid"
+                          )}
+                        </p>
+                      )}
+                      {pendingOperator?.id === condition.id && (
+                        <div className="space-y-1 text-xs">
+                          <p>{t("targeting.rules.semVerChoose")}</p>
+                          {values.map((value) => (
+                            <Button
+                              key={value}
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              disabled={disabled}
+                              onClick={() => {
+                                onChange({
+                                  ...rule,
+                                  conditions: rule.conditions.map((item) =>
+                                    item.id === condition.id
+                                      ? withConditionValues(
+                                          { ...item, op: pendingOperator.op },
+                                          [value]
+                                        )
+                                      : item
+                                  ),
+                                })
+                                setPendingOperator(null)
+                              }}
+                            >
+                              {value}
+                            </Button>
+                          ))}
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => setPendingOperator(null)}
+                          >
+                            {t("targeting.rules.cancelSwitch")}
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </>
                 )}
                 <Button

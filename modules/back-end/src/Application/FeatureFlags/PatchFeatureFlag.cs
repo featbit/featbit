@@ -1,4 +1,5 @@
 using Domain.AuditLogs;
+using Application.Bases;
 using Application.Users;
 using Application.Bases.Models;
 using Domain.FeatureFlags;
@@ -41,6 +42,8 @@ public class PatchFeatureFlagHandler(
         {
             return PatchResult.Fail(error);
         }
+
+        SemVerConditionValidator.EnsureValid(flag.Rules?.Select(rule => rule?.Conditions));
 
         flag.MarkAsUpdated(currentUser.Id);
         dataChange.To(flag);

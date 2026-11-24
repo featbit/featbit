@@ -120,4 +120,21 @@ public class PatchSegmentHandlerTests
             x => x.Publish(It.IsAny<OnSegmentChange>(), It.IsAny<CancellationToken>()),
             Times.Never);
     }
+
+    [Fact]
+    public async Task Handle_InvalidSemVerPatch_DoesNotPersist()
+    {
+        var segment = NewSegment();
+        var service = new Mock<ISegmentService>();
+        service.Setup(x => x.GetAsync(It.IsAny<Guid>())).ReturnsAsync(segment);
+        var publisher = new Mock<IPublisher>();
+        var sut = new PatchSegmentHandler(service.Object, new PermissionGuard(Mock.Of<IResourceService>()), Mock.Of<ICurrentUser>(), publisher.Object);
+        var patch = new JsonPatchDocument<Segment>();
+        patch.Replace(x => x.Rules, new List<MatchRule>
+        {
+            new() { Id = "rule", Conditions = [new Condition { Id = "condition", Property = "version", Op = "SemVerBiggerThan", Value = "bad" }] }
+        });
+        await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => sut.Handle(new PatchSegment { Patch = patch }, CancellationToken.None));
+        service.Verify(x => x.UpdateAsync(It.IsAny<Segment>()), Times.Never);
+    }
 }
