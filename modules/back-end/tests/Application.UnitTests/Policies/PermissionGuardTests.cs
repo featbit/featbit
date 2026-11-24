@@ -1,6 +1,7 @@
 using Application.Bases.Exceptions;
 using Application.Policies;
 using Application.Services;
+using Application.Segments;
 using Domain.AuditLogs;
 using Domain.FeatureFlags;
 using Domain.Policies;
@@ -36,6 +37,7 @@ public class PermissionGuardTests
         targetResolver.Setup(x => x.ResolveFlagAsync(It.IsAny<Guid>(), It.IsAny<string>())).ReturnsAsync(resource);
         targetResolver.Setup(x => x.ResolveSegmentAsync(It.IsAny<Guid>(), It.IsAny<Guid>())).ReturnsAsync(resource);
         var guard = new PermissionGuard(targetResolver.Object);
+        var segmentGuard = new SegmentPermissionGuard(targetResolver.Object);
         var flag = NewFlag();
         var seg = NewSegment();
         var change = new DataChange(segment ? (object)seg : flag);
@@ -47,10 +49,10 @@ public class PermissionGuardTests
         var requestOrg = ownership == "empty-request-org" ? Guid.Empty : org;
         Func<Task> act = () => changed
             ? segment
-                ? guard.EnsureSegmentChangeAllowedAsync(requestOrg, seg.EnvId, seg, change, permissions)
+                ? segmentGuard.EnsureChangeAllowedAsync(requestOrg, seg.EnvId, seg.Id, change, permissions)
                 : guard.EnsureFlagChangeAllowedAsync(requestOrg, flag, change, permissions)
             : segment
-                ? guard.EnsureSegmentOwnershipAsync(requestOrg, seg.EnvId, seg.Id)
+                ? segmentGuard.EnsureAccessibleAsync(requestOrg, seg.EnvId, seg.Id)
                 : guard.EnsureFlagOwnershipAsync(requestOrg, flag);
         if (ownership == "own") await act();
         else await Assert.ThrowsAsync<ForbiddenException>(act);
@@ -71,6 +73,7 @@ public class PermissionGuardTests
         targetResolver.Setup(x => x.ResolveFlagAsync(It.IsAny<Guid>(), It.IsAny<string>())).ReturnsAsync(new PermissionTarget("project/p:env/e:flag/flag", org));
         targetResolver.Setup(x => x.ResolveSegmentAsync(It.IsAny<Guid>(), It.IsAny<Guid>())).ReturnsAsync(new PermissionTarget("project/p:env/e:segment/segment", org));
         var guard = new PermissionGuard(targetResolver.Object);
+        var segmentGuard = new SegmentPermissionGuard(targetResolver.Object);
         var flag = NewFlag();
         var seg = NewSegment();
         var change = new DataChange(segment ? (object)seg : flag);
@@ -82,7 +85,7 @@ public class PermissionGuardTests
                     Effect = EffectType.Deny, Actions = [segment ? Permissions.UpdateSegmentName : Permissions.UpdateFlagName], Resources = ["*"] }]
             : [];
         await Assert.ThrowsAsync<ForbiddenException>(() => segment
-            ? guard.EnsureSegmentChangeAllowedAsync(org, seg.EnvId, seg, change, policies)
+            ? segmentGuard.EnsureChangeAllowedAsync(org, seg.EnvId, seg.Id, change, policies)
             : guard.EnsureFlagChangeAllowedAsync(org, flag, change, policies));
     }
 }

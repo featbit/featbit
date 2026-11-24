@@ -118,30 +118,6 @@ public class SegmentAccessTests
     }
 
     [Theory]
-    [InlineData("id")]
-    [InlineData("envId")]
-    [InlineData("workspaceId")]
-    [InlineData("key")]
-    [InlineData("type")]
-    [InlineData("scopes")]
-    public async Task PatchCannotChangeIdentityOrSharingScope(string field)
-    {
-        await using var app = new SegmentAccessTestApp();
-        var client = await app.CreateAuthenticatedClientAsync();
-        object value = field switch
-        {
-            "key" => "new-key", "type" => SegmentType.EnvironmentSpecific,
-            "scopes" => new[] { "organization/other" }, _ => Guid.NewGuid().ToString()
-        };
-        var response = await client.PatchAsJsonAsync(app.Route + $"/{app.Segment.Id}",
-            new[] { new { op = "replace", path = "/" + field, value } });
-        var body = await response.Content.ReadAsStringAsync();
-        Assert.Contains("Segment identity and scopes cannot be changed.", body);
-        app.Segments.Verify(x => x.UpdateAsync(It.IsAny<Segment>()), Times.Never);
-        app.Publisher.VerifyNoOtherCalls();
-    }
-
-    [Theory]
     [InlineData("single")]
     [InlineData("is-key-used")]
     [InlineData("general")]

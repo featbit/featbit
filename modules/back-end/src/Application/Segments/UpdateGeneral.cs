@@ -69,7 +69,7 @@ public class UpdateGeneralValidator : AbstractValidator<UpdateGeneral>
 
 public class UpdateGeneralHandler(
     ISegmentService service,
-    IPermissionGuard permissionGuard,
+    SegmentPermissionGuard permissionGuard,
     ICurrentUser currentUser,
     IPublisher publisher)
     : IRequestHandler<UpdateGeneral, bool>
@@ -86,7 +86,7 @@ public class UpdateGeneralHandler(
 
         if (!nameChanged && !descriptionChanged && !tagsChanged)
         {
-            await permissionGuard.EnsureSegmentOwnershipAsync(request.OrgId, request.EnvId, request.Id);
+            await permissionGuard.EnsureAccessibleAsync(request.OrgId, request.EnvId, request.Id);
             return true;
         }
 
@@ -95,7 +95,7 @@ public class UpdateGeneralHandler(
             request.Description,
             tagsChanged ? requestedTags : currentTags
         );
-        await permissionGuard.EnsureSegmentChangeAllowedAsync(request.OrgId, request.EnvId, segment, dataChange, request.Permissions);
+        await permissionGuard.EnsureChangeAllowedAsync(request.OrgId, request.EnvId, request.Id, dataChange, request.Permissions);
         await service.UpdateAsync(segment);
 
         var notification = new OnSegmentChange(

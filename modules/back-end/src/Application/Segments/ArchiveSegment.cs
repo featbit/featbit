@@ -27,48 +27,42 @@ public class ArchiveSegment : ResourceChangeRequest, IRequest<bool>
     }
 }
 
-public class ArchiveSegmentHandler : IRequestHandler<ArchiveSegment, bool>
+public class ArchiveSegmentHandler(
+    ISegmentService service,
+    IPublisher publisher,
+    ICurrentUser currentUser)
+    : IRequestHandler<ArchiveSegment, bool>
 {
-    private readonly ISegmentService _service;
-    private readonly IPublisher _publisher;
-    private readonly ICurrentUser _currentUser;
-
-    public ArchiveSegmentHandler(
-        ISegmentService service,
-        IPublisher publisher,
-        ICurrentUser currentUser)
-    {
-        _service = service;
-        _publisher = publisher;
-        _currentUser = currentUser;
-    }
-
     public async Task<bool> Handle(ArchiveSegment request, CancellationToken cancellationToken)
     {
-        var segment = await _service.GetAsync(request.Id);
-        foreach (var envId in await _service.GetEnvironmentIdsAsync(segment))
+        var segment = await service.GetAsync(request.Id);
+
+        // check if the segment is being used in any environment before archiving
+        var envIds = await service.GetEnvironmentIdsAsync(segment);
+        foreach (var envId in envIds)
         {
-            if ((await _service.GetFlagReferencesAsync(envId, segment.Id)).Any())
+            var flagReferences = await service.GetFlagReferencesAsync(envId, segment.Id);
+            if (flagReferences.Count != 0)
             {
                 throw new BusinessException(ErrorCodes.SegmentIsBeingUsed);
             }
         }
+
         var dataChange = segment.Archive();
-        await _service.UpdateAsync(segment);
+        await service.UpdateAsync(segment);
 
         // publish on segment archived notification
-
         var notification = new OnSegmentChange(
             segment,
             request.WorkspaceId,
             request.OrgId,
             Operations.Archive,
             dataChange,
-            _currentUser.Id,
+            currentUser.Id,
             comment: request.Comment,
             isTargetingChange: false
         );
-        await _publisher.Publish(notification, cancellationToken);
+        await publisher.Publish(notification, cancellationToken);
 
         return true;
     }

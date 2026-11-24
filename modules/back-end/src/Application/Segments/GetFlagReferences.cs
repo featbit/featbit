@@ -14,14 +14,14 @@ public class GetFlagReferences : IRequest<IEnumerable<FlagReference>>
 
 public class GetFlagReferencesHandler(
     ISegmentService segmentService,
-    IPermissionGuard permissionGuard,
+    SegmentPermissionGuard permissionGuard,
     IPermissionTargetResolver targetResolver,
     IOrganizationPermissions permissions)
     : IRequestHandler<GetFlagReferences, IEnumerable<FlagReference>>
 {
     public async Task<IEnumerable<FlagReference>> Handle(GetFlagReferences request, CancellationToken cancellationToken)
     {
-        await permissionGuard.EnsureSegmentOwnershipAsync(request.OrgId, request.EnvId, request.Id);
+        await permissionGuard.EnsureAccessibleAsync(request.OrgId, request.EnvId, request.Id);
 
         var references = new List<FlagReference>();
         var segment = await segmentService.GetAsync(request.Id);
