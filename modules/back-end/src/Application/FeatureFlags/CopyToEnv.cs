@@ -1,8 +1,6 @@
 using Application.Users;
-using Application.Bases;
 using Domain.AuditLogs;
 using Domain.FeatureFlags;
-using Domain.Policies;
 
 namespace Application.FeatureFlags;
 
@@ -18,8 +16,6 @@ public class CopyToEnv : CopyToEnvPayload, IRequest<CopyToEnvResult>
     public Guid WorkspaceId { get; set; }
 
     public Guid OrgId { get; set; }
-
-    public PolicyStatement[] Permissions { get; set; } = [];
 
     public Guid SourceEnvId { get; set; }
 
@@ -37,37 +33,18 @@ public class CopyToEnv : CopyToEnvPayload, IRequest<CopyToEnvResult>
     }
 }
 
-public class CopyToEnvValidator : AbstractValidator<CopyToEnv>
-{
-    public CopyToEnvValidator()
-    {
-        RuleFor(x => x.FlagIds).NotEmpty().WithErrorCode(ErrorCodes.Invalid("flagIds"));
-        RuleFor(x => x.SourceEnvId).NotEmpty().WithErrorCode(ErrorCodes.Invalid("sourceEnvId"));
-        RuleFor(x => x.TargetEnvId)
-            .NotEmpty().WithErrorCode(ErrorCodes.Invalid("targetEnvId"))
-            .NotEqual(x => x.SourceEnvId)
-            .WithErrorCode(ErrorCodes.Invalid("targetEnvId"));
-    }
-}
-
 public class CopyToEnvHandler(
     IFeatureFlagService flagService,
     IEndUserService endUserService,
     IEnvironmentService envService,
     ICurrentUser currentUser,
-    IPublisher publisher,
-    FlagAccessGuard access,
-    FlagCopyPrecheck precheck)
+    IPublisher publisher)
     : IRequestHandler<CopyToEnv, CopyToEnvResult>
 {
     public async Task<CopyToEnvResult> Handle(CopyToEnv request, CancellationToken cancellationToken)
     {
-        var flags = await access.GetAuthorizedFlagsForCopyAsync(request.OrgId, request.SourceEnvId,
-            request.TargetEnvId, request.FlagIds, request.Permissions);
-        // Recompute validation and derived properties; the client only chooses which flags/rules to copy.
-        var precheckResults = await precheck.CheckAsync(flags, request.TargetEnvId);
-        var copiedCount = 0;
-        var newProperties = new HashSet<string>();
+        var flags = await flagService.FindManyAsync(x => request.FlagIds.Contains(x.Id));
+        var precheckResults = request.PrecheckResults;
 
         var projectEnv = await envService.GetProjectEnvAsync(request.SourceEnvId);
         foreach (var flag in flags)
@@ -75,28 +52,24 @@ public class CopyToEnvHandler(
             await CopyAsync(flag);
         }
 
-        var newPropertiesToAdd = newProperties.ToArray();
+        var newPropertiesToAdd = precheckResults.SelectMany(x => x.NewProperties).Distinct().ToArray();
         if (newPropertiesToAdd.Length > 0)
         {
             await endUserService.AddNewPropertiesAsync(request.TargetEnvId, newPropertiesToAdd);
         }
 
-        return new CopyToEnvResult(copiedCount);
+        return new CopyToEnvResult(flags.Count);
 
         async Task CopyAsync(FeatureFlag flag)
         {
             var precheckResult = precheckResults.FirstOrDefault(x => x.Id == flag.Id);
-            var selection = request.PrecheckResults?.FirstOrDefault(x => x.Id == flag.Id);
-            if (precheckResult is not { KeyCheck: true } || selection is not { KeyCheck: true })
+            if (precheckResult is not { KeyCheck: true })
             {
                 return;
             }
 
-            var keepRules = precheckResult.TargetRuleCheck && selection.TargetRuleCheck;
-            if (keepRules) newProperties.UnionWith(precheckResult.NewProperties);
-            flag.CopyToEnv(request.TargetEnvId, currentUser.Id, keepRules);
+            flag.CopyToEnv(request.TargetEnvId, currentUser.Id, keepRules: precheckResult.TargetRuleCheck);
             await flagService.AddOneAsync(flag);
-            copiedCount++;
 
             // publish on feature flag change notification
             var dataChange = new DataChange(null).To(flag);

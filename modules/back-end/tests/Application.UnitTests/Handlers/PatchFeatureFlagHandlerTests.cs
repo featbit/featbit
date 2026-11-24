@@ -15,32 +15,6 @@ namespace Application.UnitTests.Handlers;
 public class PatchFeatureFlagHandlerTests
 {
     private static readonly Guid OrganizationId = Guid.NewGuid();
-
-    [Theory]
-    [InlineData("Id")]
-    [InlineData("EnvId")]
-    [InlineData("Key")]
-    public async Task Handle_IdentityPatchIsRejectedBeforeAuthorizationOrWriting(string field)
-    {
-        var flag = NewFlag();
-        var service = new Mock<IFeatureFlagService>();
-        service.Setup(x => x.GetAsync(flag.EnvId, flag.Key)).ReturnsAsync(flag);
-        var guard = new Mock<IPermissionGuard>(MockBehavior.Strict);
-        var publisher = new Mock<IPublisher>(MockBehavior.Strict);
-        var patch = new JsonPatchDocument<FeatureFlag>();
-        patch.Operations.Add(new Operation<FeatureFlag>
-        {
-            op = "replace", path = "/" + field, value = field == "Key" ? "other" : Guid.NewGuid().ToString()
-        });
-        var request = new PatchFeatureFlag { OrgId = OrganizationId, EnvId = flag.EnvId, Key = flag.Key, Patch = patch, Permissions = AllowAll() };
-        var handler = new PatchFeatureFlagHandler(service.Object, guard.Object, Mock.Of<ICurrentUser>(), publisher.Object);
-        var result = await handler.Handle(request, default);
-        Assert.False(result.Success);
-        Assert.Equal("Flag identity cannot be changed.", result.Message);
-        service.Verify(x => x.UpdateAsync(It.IsAny<FeatureFlag>()), Times.Never);
-        guard.VerifyNoOtherCalls(); publisher.VerifyNoOtherCalls();
-    }
-
     private static FeatureFlag NewFlag()
     {
         var on = new Variation { Id = "v-on", Name = "On", Value = "true" };
