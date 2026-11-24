@@ -94,7 +94,7 @@ public class SegmentService(AppDbContext dbContext, ILogger<SegmentService> logg
         var envIds = new List<Guid>();
         foreach (var scope in segment.Scopes)
         {
-            var (_, scopeEnvIds) = await TranslateScopeAsync(segment.WorkspaceId, scope);
+            var scopeEnvIds = await TranslateScopeAsync(segment.WorkspaceId, scope);
             envIds.AddRange(scopeEnvIds);
         }
 
@@ -153,21 +153,26 @@ public class SegmentService(AppDbContext dbContext, ILogger<SegmentService> logg
         {
             var sharedSegments = segments.Where(x => x.Type == SegmentType.Shared).ToArray();
 
+            var scopesToTranslate = sharedSegments
+                .SelectMany(segment => segment.Scopes.Select(scope => (segment.WorkspaceId, Scope: scope)))
+                .Distinct()
+                .ToArray();
+
             var scopes = new Dictionary<(Guid WorkspaceId, string Scope), ICollection<Guid>>();
+            foreach (var key in scopesToTranslate)
+            {
+                var envIds = await TranslateScopeAsync(key.WorkspaceId, key.Scope);
+                scopes.Add(key, envIds);
+            }
+
             foreach (var sharedSegment in sharedSegments)
             {
-                var envIds = new HashSet<Guid>();
-                foreach (var scope in sharedSegment.Scopes)
-                {
-                    var key = (sharedSegment.WorkspaceId, scope);
-                    if (!scopes.TryGetValue(key, out var ids))
-                    {
-                        (_, ids) = await TranslateScopeAsync(sharedSegment.WorkspaceId, scope);
-                        scopes.Add(key, ids);
-                    }
-                    envIds.UnionWith(ids);
-                }
-                caches.Add(new SegmentCache(envIds.ToArray(), sharedSegment));
+                var envIds = sharedSegment.Scopes
+                    .SelectMany(scope => scopes[(sharedSegment.WorkspaceId, scope)])
+                    .Distinct()
+                    .ToArray();
+
+                caches.Add(new SegmentCache(envIds, sharedSegment));
             }
         }
     }
@@ -335,13 +340,13 @@ public class SegmentService(AppDbContext dbContext, ILogger<SegmentService> logg
         return segments;
     }
 
-    private async Task<(string scope, ICollection<Guid> envIds)> TranslateScopeAsync(Guid workspaceId, string scope)
+    private async Task<ICollection<Guid>> TranslateScopeAsync(Guid workspaceId, string scope)
     {
         if (!RN.TryParse(scope, out var props))
         {
             logger.LogError("Segment scope '{Scope}' is not a valid RN.", scope);
 
-            return (scope, []);
+            return [];
         }
 
         var environments = QueryableOf<Environment>();
@@ -372,6 +377,6 @@ public class SegmentService(AppDbContext dbContext, ILogger<SegmentService> logg
             select env.Id;
 
         var ids = await query.ToListAsync();
-        return (scope, ids);
+        return ids;
     }
 }

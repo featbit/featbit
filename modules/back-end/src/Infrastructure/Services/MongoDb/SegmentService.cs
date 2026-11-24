@@ -108,7 +108,7 @@ public class SegmentService(MongoDbClient mongoDb, ILogger<SegmentService> logge
         var envIds = new List<Guid>();
         foreach (var scope in segment.Scopes)
         {
-            var (_, scopeEnvIds) = await TranslateScopeAsync(segment.WorkspaceId, scope);
+            var scopeEnvIds = await TranslateScopeAsync(segment.WorkspaceId, scope);
             envIds.AddRange(scopeEnvIds);
         }
 
@@ -164,9 +164,10 @@ public class SegmentService(MongoDbClient mongoDb, ILogger<SegmentService> logge
                 .SelectMany(segment => segment.Scopes.Select(scope => (segment.WorkspaceId, Scope: scope)))
                 .Distinct()
                 .ToArray();
+
             var translations = await Task.WhenAll(scopesToTranslate.Select(async key =>
             {
-                var (_, envIds) = await TranslateScopeAsync(key.WorkspaceId, key.Scope);
+                var envIds = await TranslateScopeAsync(key.WorkspaceId, key.Scope);
                 return (Key: key, EnvIds: envIds);
             }));
             var scopes = translations.ToDictionary(x => x.Key, x => x.EnvIds);
@@ -177,6 +178,7 @@ public class SegmentService(MongoDbClient mongoDb, ILogger<SegmentService> logge
                     .SelectMany(scope => scopes[(sharedSegment.WorkspaceId, scope)])
                     .Distinct()
                     .ToArray();
+
                 caches.Add(new SegmentCache(envIds, sharedSegment));
             }
         }
@@ -291,13 +293,13 @@ public class SegmentService(MongoDbClient mongoDb, ILogger<SegmentService> logge
         return segments.ToList();
     }
 
-    private async Task<(string scope, ICollection<Guid> envIds)> TranslateScopeAsync(Guid workspaceId, string scope)
+    private async Task<ICollection<Guid>> TranslateScopeAsync(Guid workspaceId, string scope)
     {
         if (!RN.TryParse(scope, out var props))
         {
             logger.LogError("Segment scope '{Scope}' is not a valid RN.", scope);
 
-            return (scope, []);
+            return [];
         }
 
         var match = new Dictionary<string, string>();
@@ -336,6 +338,6 @@ public class SegmentService(MongoDbClient mongoDb, ILogger<SegmentService> logge
             .Project(new BsonDocument("_id", 1));
 
         var documents = await query.ToListAsync();
-        return (scope, documents.Select(x => x["_id"].AsGuid).ToArray());
+        return documents.Select(x => x["_id"].AsGuid).ToArray();
     }
 }
