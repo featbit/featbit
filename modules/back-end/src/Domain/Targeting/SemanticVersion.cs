@@ -6,8 +6,12 @@ namespace Domain.Targeting;
 /// <summary>SemVer 2.0 precedence, with plain major.minor accepted as major.minor.0.</summary>
 public sealed class SemanticVersion
 {
+    // Maximum number of characters in a single version, including pre-release and build metadata.
     public const int MaxLength = 256;
+
+    // Maximum number of versions in a SemVerIsOneOf or SemVerNotOneOf condition.
     public const int MaxValues = 100;
+    
     private static readonly Regex Pattern = new(
         @"\A(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:\.(0|[1-9][0-9]*)(?:-((?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*))*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?)?\z",
         RegexOptions.CultureInvariant | RegexOptions.NonBacktracking);
@@ -35,7 +39,7 @@ public sealed class SemanticVersion
     public static bool TryParseList(string value, out SemanticVersion[] versions)
     {
         versions = [];
-        if (value == null || value.Length > MaxValues * (MaxLength * 6 + 3) + 1) return false;
+        if (string.IsNullOrWhiteSpace(value)) return false;
         try
         {
             var values = JsonSerializer.Deserialize<string[]>(value);
