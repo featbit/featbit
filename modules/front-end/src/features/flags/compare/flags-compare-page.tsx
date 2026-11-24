@@ -1,19 +1,9 @@
+import { useListQuery, useListSearch } from "@/lib/use-list-query"
 import { Popover as PopoverPrimitive } from "@base-ui/react/popover"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { AlertTriangle, ChevronsUpDown, Search } from "lucide-react"
-import {
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react"
-import {
-  useLocation,
-  useNavigate,
-  useParams,
-  useSearchParams,
-} from "react-router-dom"
+import { type ReactNode, useMemo, useState } from "react"
+import { useParams } from "react-router-dom"
 import { toast } from "sonner"
 import { useTranslation } from "react-i18next"
 import {
@@ -71,21 +61,6 @@ import type {
   FlagCompareOverview,
   PagedFlagCompareOverview,
 } from "./flags-compare-types"
-
-function positiveInt(
-  value: string | null,
-  fallback: number,
-  allowed?: number[]
-) {
-  const parsed = Number(value)
-  if (
-    !Number.isInteger(parsed) ||
-    parsed < 1 ||
-    (allowed && !allowed.includes(parsed))
-  )
-    return fallback
-  return parsed
-}
 
 function compareOverviewQueryKey(request: CompareOverviewRequest) {
   return [
@@ -265,10 +240,8 @@ export function FlagsComparePage() {
   const { lang: langParam } = useParams()
   const lang = resolveLang(langParam)
   const { t } = useTranslation()
-  const navigate = useNavigate()
-  const location = useLocation()
   const queryClient = useQueryClient()
-  const [searchParams, setSearchParams] = useSearchParams()
+  const { searchParams, updateParams, pageIndex, pageSize } = useListQuery()
   const workspace = getCurrentWorkspace()
   const organization = getCurrentOrganization() as ReturnType<
     typeof getCurrentOrganization
@@ -296,10 +269,23 @@ export function FlagsComparePage() {
       : "/workspace/license"
   )
 
-  const [search, setSearch] = useState(() => searchParams.get("name") ?? "")
-  const [debouncedSearch, setDebouncedSearch] = useState(search.trim())
-  const [draftTargetIds, setDraftTargetIds] = useState<string[]>([])
-  const [appliedTargetIds, setAppliedTargetIds] = useState<string[]>([])
+  const { search, setSearch, debouncedSearch } = useListSearch(
+    searchParams,
+    updateParams
+  )
+  const targetIdsParam = searchParams.get("targetEnvIds") ?? ""
+  const appliedTargetIds = targetIdsParam.split(",").filter(Boolean)
+  const [targetDraft, setTargetDraft] = useState({
+    source: targetIdsParam,
+    ids: appliedTargetIds,
+  })
+  if (targetDraft.source !== targetIdsParam) {
+    setTargetDraft({ source: targetIdsParam, ids: appliedTargetIds })
+  }
+  const draftTargetIds =
+    targetDraft.source === targetIdsParam ? targetDraft.ids : appliedTargetIds
+  const setDraftTargetIds = (ids: string[]) =>
+    setTargetDraft({ source: targetIdsParam, ids })
   const [reviewTarget, setReviewTarget] = useState<{
     sourceEnvId: string
     flag: FlagCompareOverview
@@ -315,34 +301,6 @@ export function FlagsComparePage() {
     () => searchParams.get("tags")?.split(",").filter(Boolean) ?? [],
     [searchParams]
   )
-  const pageIndex = positiveInt(searchParams.get("page"), 1)
-  const pageSize = positiveInt(searchParams.get("pageSize"), 10, [10, 20, 30])
-
-  const updateParams = useCallback(
-    (updates: Record<string, string | null>, resetPage = false) => {
-      setSearchParams(
-        (current) => {
-          const next = new URLSearchParams(current)
-          Object.entries(updates).forEach(([key, value]) =>
-            value ? next.set(key, value) : next.delete(key)
-          )
-          if (resetPage) next.delete("page")
-          return next
-        },
-        { replace: true }
-      )
-    },
-    [setSearchParams]
-  )
-
-  useEffect(() => {
-    const timeout = window.setTimeout(() => {
-      const value = search.trim()
-      setDebouncedSearch(value)
-      updateParams({ name: value || null }, true)
-    }, 350)
-    return () => window.clearTimeout(timeout)
-  }, [search, updateParams])
 
   const projectsQuery = useQuery({
     queryKey: ["projects", "flag-compare"],
@@ -433,8 +391,7 @@ export function FlagsComparePage() {
     },
     onSuccess: ({ data, request: nextRequest }) => {
       queryClient.setQueryData(compareOverviewQueryKey(nextRequest), data)
-      setAppliedTargetIds(nextRequest.targetEnvIds)
-      updateParams({ page: null })
+      updateParams({ targetEnvIds: nextRequest.targetEnvIds.join(",") }, true)
     },
   })
 
@@ -478,15 +435,7 @@ export function FlagsComparePage() {
   function renderHeader(className = "mb-6") {
     return (
       <header className={className}>
-        <DetailBackLink
-          to={localizedPath(lang, "/feature-flags")}
-          onClick={(event) => {
-            if (location.key !== "default") {
-              event.preventDefault()
-              navigate(-1)
-            }
-          }}
-        >
+        <DetailBackLink to={localizedPath(lang, "/feature-flags")}>
           {t("featureFlags.comparePage.back")}
         </DetailBackLink>
         <h1 className="text-2xl font-semibold tracking-normal">

@@ -15,6 +15,7 @@ namespace Application.UnitTests.Handlers;
 public class PatchFeatureFlagHandlerTests
 {
     private static readonly Guid OrganizationId = Guid.NewGuid();
+
     [Theory]
     [InlineData("Id")]
     [InlineData("EnvId")]
@@ -78,9 +79,9 @@ public class PatchFeatureFlagHandlerTests
         var operatorId = Guid.NewGuid();
         currentUser.SetupGet(x => x.Id).Returns(operatorId);
         var publisher = new Mock<IPublisher>();
-        var resourceService = new Mock<IResourceService>();
-        resourceService.Setup(x => x.GetFlagRnAsync(It.IsAny<Guid>(), It.IsAny<string>())).ReturnsAsync(new ResourceRn("flag/*", OrganizationId));
-        var sut = new PatchFeatureFlagHandler(service.Object, new PermissionGuard(resourceService.Object), currentUser.Object, publisher.Object);
+        var targetResolver = new Mock<IPermissionTargetResolver>();
+        targetResolver.Setup(x => x.ResolveFlagAsync(It.IsAny<Guid>(), It.IsAny<string>())).ReturnsAsync(new PermissionTarget("flag/*", OrganizationId));
+        var sut = new PatchFeatureFlagHandler(service.Object, new PermissionGuard(targetResolver.Object), currentUser.Object, publisher.Object);
 
         var patch = new JsonPatchDocument<FeatureFlag>();
         patch.Replace(x => x.Description, "patched");
@@ -108,7 +109,7 @@ public class PatchFeatureFlagHandlerTests
         var service = new Mock<IFeatureFlagService>();
         service.Setup(x => x.GetAsync(It.IsAny<Guid>(), It.IsAny<string>())).ReturnsAsync(flag);
         var publisher = new Mock<IPublisher>();
-        var sut = new PatchFeatureFlagHandler(service.Object, new PermissionGuard(Mock.Of<IResourceService>()), Mock.Of<ICurrentUser>(), publisher.Object);
+        var sut = new PatchFeatureFlagHandler(service.Object, new PermissionGuard(Mock.Of<IPermissionTargetResolver>()), Mock.Of<ICurrentUser>(), publisher.Object);
 
         // op against a non-existent path produces a JsonPatchError when applied
         var patch = new JsonPatchDocument<FeatureFlag>();

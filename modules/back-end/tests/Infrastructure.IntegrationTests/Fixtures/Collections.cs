@@ -1,17 +1,9 @@
-using Infrastructure.IntegrationTests.Fixtures;
-
 namespace Infrastructure.IntegrationTests.Fixtures;
 
 [CollectionDefinition(MongoCollection.Name)]
 public sealed class MongoCollection : ICollectionFixture<MongoDbFixture>
 {
     public const string Name = "Mongo";
-}
-
-[CollectionDefinition(CosmosMongoCollection.Name)]
-public sealed class CosmosMongoCollection : ICollectionFixture<CosmosMongoDbFixture>
-{
-    public const string Name = "CosmosMongo";
 }
 
 [CollectionDefinition(PostgresCollection.Name)]

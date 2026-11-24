@@ -37,16 +37,23 @@ public class UpdateGeneral : UpdateGeneralPayload, IRequest<bool>
     public PolicyStatement[] Permissions { get; set; }
 
     public UpdateGeneral(
+        Guid workspaceId,
+        Guid orgId,
+        Guid envId,
         Guid segmentId,
         UpdateGeneralPayload payload,
         PolicyStatement[] permissions)
     {
+        WorkspaceId = workspaceId;
+        OrgId = orgId;
+        EnvId = envId;
         Id = segmentId;
+        Permissions = permissions;
+
         Name = payload.Name;
         Description = payload.Description;
         Tags = payload.Tags;
         Comment = payload.Comment;
-        Permissions = permissions;
     }
 }
 
@@ -79,8 +86,7 @@ public class UpdateGeneralHandler(
 
         if (!nameChanged && !descriptionChanged && !tagsChanged)
         {
-            await permissionGuard.EnsureSegmentChangeAllowedAsync(
-                request.OrgId, request.EnvId, segment, new DataChange(segment).To(segment), request.Permissions);
+            await permissionGuard.EnsureSegmentOwnershipAsync(request.OrgId, request.EnvId, segment);
             return true;
         }
 

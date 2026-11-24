@@ -54,7 +54,7 @@ public class SegmentAccessTests
         var path = operation == "single" ? $"{app.Segment.Id}" : $"by-ids?ids={app.Segment.Id}&ids={app.Segment.Id}";
         var response = await client.GetAsync(app.Route + "/" + path);
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        app.Resources.Verify(x => x.GetSegmentRnAsync(app.EnvId, app.Segment.Id), Times.Once);
+        app.Resources.Verify(x => x.ResolveSegmentAsync(app.EnvId, app.Segment.Id), Times.Once);
         Assert.NotEqual(app.EnvId, app.Segment.EnvId);
     }
 
@@ -80,8 +80,8 @@ public class SegmentAccessTests
             response = await client.PutAsJsonAsync(app.Route + $"/{app.Segment.Id}/targeting",
                 new { included = changed ? new[] { "user" } : [], excluded = Array.Empty<string>(), rules = Array.Empty<object>() });
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        app.Resources.Verify(x => x.GetSegmentRnAsync(app.EnvId, app.Segment.Id), Times.Once);
-        app.Resources.Verify(x => x.GetSegmentRnAsync(app.Segment.EnvId, app.Segment.Id), Times.Never);
+        app.Resources.Verify(x => x.ResolveSegmentAsync(app.EnvId, app.Segment.Id), Times.Once);
+        app.Resources.Verify(x => x.ResolveSegmentAsync(app.Segment.EnvId, app.Segment.Id), Times.Never);
     }
 
     [Theory]
@@ -245,7 +245,7 @@ public class SegmentAccessTestApp : PermissionCheckTestApp
     public bool Referenced { get; init; }
     public Segment Segment { get; }
     public Mock<ISegmentService> Segments { get; } = new();
-    public Mock<IResourceService> Resources { get; } = new();
+    public Mock<IPermissionTargetResolver> Resources { get; } = new();
     public Mock<IPublisher> Publisher { get; } = new();
     public SegmentAccessTestApp() => Segment = new(TestWorkspace.Id, Guid.NewGuid(), "Segment", "segment",
         SegmentType.Shared, ["organization/org"], [], [], [], "") { Id = Guid.NewGuid(), Tags = ["team"] };
@@ -255,16 +255,16 @@ public class SegmentAccessTestApp : PermissionCheckTestApp
         base.ConfigureWebHost(builder);
         builder.ConfigureServices(services =>
         {
-            Resources.Setup(x => x.GetEnvRnAsync(EnvId)).ReturnsAsync(new ResourceRn("project/p:env/e", TestWorkspace.OrganizationId));
-            Resources.Setup(x => x.GetEnvRnAsync(OtherEnvId)).ReturnsAsync(new ResourceRn("project/p:env/e", OtherOrgId));
-            ResourceRn? rn = Failure switch
+            Resources.Setup(x => x.ResolveEnvironmentAsync(EnvId)).ReturnsAsync(new PermissionTarget("project/p:env/e", TestWorkspace.OrganizationId));
+            Resources.Setup(x => x.ResolveEnvironmentAsync(OtherEnvId)).ReturnsAsync(new PermissionTarget("project/p:env/e", OtherOrgId));
+            PermissionTarget? rn = Failure switch
             {
                 "missing" or "out-of-scope" or "workspace" => null,
                 "foreign" => new("project/p:env/e:segment/segment;team", OtherOrgId),
                 _ => new("project/p:env/e:segment/segment;team", TestWorkspace.OrganizationId)
             };
-            Resources.Setup(x => x.GetSegmentRnAsync(EnvId, Segment.Id)).ReturnsAsync(rn);
-            Resources.Setup(x => x.GetSegmentRnAsync(EnvId, AllowedId)).ReturnsAsync(new ResourceRn("project/p:env/e:segment/allowed", TestWorkspace.OrganizationId));
+            Resources.Setup(x => x.ResolveSegmentAsync(EnvId, Segment.Id)).ReturnsAsync(rn);
+            Resources.Setup(x => x.ResolveSegmentAsync(EnvId, AllowedId)).ReturnsAsync(new PermissionTarget("project/p:env/e:segment/allowed", TestWorkspace.OrganizationId));
             Segments.Setup(x => x.GetAsync(Segment.Id)).ReturnsAsync(Segment);
             Segments.Setup(x => x.FindManyAsync(It.IsAny<Expression<Func<Segment, bool>>>())).ReturnsAsync(new[] { Segment });
             Segments.Setup(x => x.GetEnvironmentIdsAsync(Segment)).ReturnsAsync(new[] { EnvId, OtherEnvId });

@@ -121,6 +121,25 @@ public class StagedFlagGcWorkerTests : IntegrationTestBase, IAsyncLifetime
         }
     }
 
+    [DockerFact]
+    public async Task RunGcOnce_FlagWasDeleted_StillCollectsItsOlderCommittedVersions()
+    {
+        var db = _mux!.GetDatabase();
+        var cache = new RedisCacheService(new TestRedisClient(_mux!));
+        var flag = new Domain.FeatureFlags.FeatureFlag { Id = Guid.NewGuid(), EnvId = Guid.NewGuid(), Key = "deleted" };
+        const long older = 1000L;
+        const long newer = 2000L;
+        await cache.StageFlagAsync(flag, older);
+        await cache.CommitFlagAsync(flag.EnvId, flag.Id.ToString(), older);
+        await cache.StageFlagAsync(flag, newer);
+        await cache.CommitFlagAsync(flag.EnvId, flag.Id.ToString(), newer);
+        await cache.DeleteFlagAsync(flag.EnvId, flag.Id);
+
+        await CreateSut().RunGcOnceAsync();
+
+        Assert.False(await db.KeyExistsAsync(RedisKeys.FlagVersion(flag.Id, older)));
+    }
+
     private StagedFlagGcWorker CreateSut()
     {
         // GatedCommit so the worker is enabled; RunGcOnceAsync runs the sweep regardless of timer.

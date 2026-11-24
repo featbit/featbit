@@ -1,3 +1,4 @@
+import { useListReturnUrl } from "@/lib/list-navigation"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { ChevronLeft } from "lucide-react"
 import { useEffect, useState } from "react"
@@ -100,7 +101,7 @@ export function ExperimentDetailsPage() {
   const queryClient = useQueryClient()
   const projectEnv = getCurrentProjectEnv()
   const envId = projectEnv?.envId ?? ""
-  const backHref = localizedPath(lang, "/experiments")
+  const backHref = useListReturnUrl(localizedPath(lang, "/experiments"))
   const [settingsActive, setSettingsActive] = useState(false)
   const [agentSetupOpen, setAgentSetupOpen] = useState(false)
   const selectedRunId = searchParams.get("runId") ?? undefined

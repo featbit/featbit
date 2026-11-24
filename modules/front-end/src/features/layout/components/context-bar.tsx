@@ -17,6 +17,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { EnvironmentSdkConfigurationPopover } from "@/features/layout/components/environment-sdk-configuration-popover"
+import { searchEnvironments } from "@/features/layout/environment-search"
 import {
   localizedPath,
   projectEnvFromSelection,
@@ -47,26 +48,23 @@ export function ContextBar({
   const [environmentOpen, setEnvironmentOpen] = useState(false)
   const [secretsOpen, setSecretsOpen] = useState(false)
   const [search, setSearch] = useState("")
+  const [activeItem, setActiveItem] = useState("")
 
-  const orderedProjects = useMemo(() => {
-    const availableProjects = projects.filter(
-      (project) => project.environments.length > 0
-    )
-    const currentProject = availableProjects.find(
-      (project) => project.id === currentProjectEnv?.projectId
-    )
+  const orderedProjects = useMemo(
+    () => searchEnvironments(projects, search, currentProjectEnv?.projectId),
+    [currentProjectEnv?.projectId, projects, search]
+  )
+  const itemValues = orderedProjects.flatMap((project) =>
+    project.environments.map((environment) => `${project.id}:${environment.id}`)
+  )
+  const commandValue = itemValues.includes(activeItem)
+    ? activeItem
+    : (itemValues[0] ?? "")
 
-    if (!currentProject) {
-      return availableProjects
-    }
-
-    return [
-      currentProject,
-      ...availableProjects.filter(
-        (project) => project.id !== currentProject.id
-      ),
-    ]
-  }, [currentProjectEnv?.projectId, projects])
+  function handleSearchChange(value: string) {
+    setSearch(value)
+    setActiveItem("")
+  }
 
   const currentEnvironment = useMemo(() => {
     const currentProject = projects.find(
@@ -100,7 +98,7 @@ export function ContextBar({
       setSecretsOpen(false)
     }
     if (!nextOpen) {
-      setSearch("")
+      handleSearchChange("")
     }
   }
 
@@ -108,7 +106,7 @@ export function ContextBar({
     setSecretsOpen(nextOpen)
     if (nextOpen) {
       setEnvironmentOpen(false)
-      setSearch("")
+      handleSearchChange("")
     }
   }
 
@@ -144,12 +142,17 @@ export function ContextBar({
           sideOffset={8}
           className="w-[19rem] rounded-lg border-border/80 p-0 shadow-lg"
         >
-          <Command className="h-auto w-full rounded-lg p-0 [&_[data-slot=command-input-wrapper]]:p-0">
+          <Command
+            shouldFilter={false}
+            value={commandValue}
+            onValueChange={setActiveItem}
+            className="h-auto w-full rounded-lg p-0 [&_[data-slot=command-input-wrapper]]:p-0"
+          >
             <div className="p-3">
               <CommandInput
                 value={search}
                 placeholder={t("layout.context.searchEnvironments")}
-                onValueChange={setSearch}
+                onValueChange={handleSearchChange}
               />
             </div>
             <CommandList className="max-h-72 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent]">
@@ -176,7 +179,7 @@ export function ContextBar({
                       return (
                         <CommandItem
                           key={`${project.id}:${environment.id}`}
-                          value={`${project.name} ${project.key} ${environment.name} ${environment.key} ${project.id} ${environment.id}`}
+                          value={`${project.id}:${environment.id}`}
                           data-checked={selected}
                           className="h-9 rounded-md px-3 py-0 leading-none data-[checked=true]:bg-accent data-[checked=true]:text-accent-foreground"
                           onSelect={() => {

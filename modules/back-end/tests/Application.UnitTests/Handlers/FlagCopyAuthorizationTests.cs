@@ -16,7 +16,7 @@ namespace Application.UnitTests.Handlers;
 public class FlagCopyAuthorizationTests
 {
     private readonly Guid _org = Guid.NewGuid(), _source = Guid.NewGuid(), _target = Guid.NewGuid();
-    private readonly Mock<IResourceService> _resources = new();
+    private readonly Mock<IPermissionTargetResolver> _resources = new();
     private readonly Mock<IFeatureFlagService> _flags = new();
     private readonly List<FeatureFlag> _stored = [];
     private readonly FlagAccessGuard _guard;
@@ -30,8 +30,8 @@ public class FlagCopyAuthorizationTests
 
     public FlagCopyAuthorizationTests()
     {
-        _resources.Setup(x => x.GetEnvRnAsync(_source)).ReturnsAsync(new ResourceRn("project/p:env/source", _org));
-        _resources.Setup(x => x.GetEnvRnAsync(_target)).ReturnsAsync(new ResourceRn("project/p:env/target", _org));
+        _resources.Setup(x => x.ResolveEnvironmentAsync(_source)).ReturnsAsync(new PermissionTarget("project/p:env/source", _org));
+        _resources.Setup(x => x.ResolveEnvironmentAsync(_target)).ReturnsAsync(new PermissionTarget("project/p:env/target", _org));
         _flags.Setup(x => x.FindManyAsync(It.IsAny<Expression<Func<FeatureFlag, bool>>>()))
             .ReturnsAsync((Expression<Func<FeatureFlag, bool>> predicate) => _stored.Where(predicate.Compile()).ToArray());
         _guard = new FlagAccessGuard(_resources.Object, _flags.Object);
@@ -53,12 +53,12 @@ public class FlagCopyAuthorizationTests
     [InlineData("blank-rn")]
     public async Task InvalidEnvironmentOwnership_IsDeniedEvenWithAllPolicy(string invalid)
     {
-        ResourceRn resource = invalid switch
+        PermissionTarget resource = invalid switch
         {
             "missing" => null!, "foreign" => new("project/p:env/source", Guid.NewGuid()),
             "null-org" => new("project/p:env/source", null), _ => new(" ", _org)
         };
-        _resources.Setup(x => x.GetEnvRnAsync(_source)).ReturnsAsync(resource);
+        _resources.Setup(x => x.ResolveEnvironmentAsync(_source)).ReturnsAsync(resource);
         await Assert.ThrowsAsync<ForbiddenException>(() => _guard.EnsureEnvironmentAccessAsync(_org, _source, All));
     }
 
@@ -134,11 +134,11 @@ public class FlagCopyAuthorizationTests
             { OrgId = _org, SourceEnvId = _source, TargetEnvId = _target, FlagIds = ids, Permissions = permissions }, default));
         else
             await Assert.ThrowsAsync<ForbiddenException>(() => new CopyToEnvHandler(_flags.Object, users.Object, envs.Object,
-                Mock.Of<ICurrentUser>(), publisher.Object, _guard, precheck).Handle(new()
+                Mock.Of<ICurrentUser>(), publisher.Object, _guard, precheck).Handle(new CopyToEnv(Guid.Empty, _org, _source, _target, new CopyToEnvPayload
             {
-                OrgId = _org, SourceEnvId = _source, TargetEnvId = _target, FlagIds = ids, Permissions = permissions,
+                FlagIds = ids,
                 PrecheckResults = ids.Select(id => new CopyToEnvPrecheckResult { Id = id, KeyCheck = true, TargetRuleCheck = true }).ToArray()
-            }, default));
+            }) { Permissions = permissions }, default));
         _flags.Verify(x => x.FindManyAsync(It.IsAny<Expression<Func<FeatureFlag, bool>>>()), Times.Once);
         _flags.VerifyNoOtherCalls();
         users.VerifyNoOtherCalls(); resources.VerifyNoOtherCalls(); envs.VerifyNoOtherCalls(); publisher.VerifyNoOtherCalls();
@@ -174,8 +174,8 @@ public class FlagCopyAuthorizationTests
         for (var call = 1; call <= 2; call++)
         {
             Assert.Equal(2, (await _guard.GetAuthorizedFlagsForCopyAsync(_org, _source, _target, [a.Id, a.Id, b.Id], All)).Count);
-            _resources.Verify(x => x.GetEnvRnAsync(_source), Times.Exactly(call));
-            _resources.Verify(x => x.GetEnvRnAsync(_target), Times.Exactly(call));
+            _resources.Verify(x => x.ResolveEnvironmentAsync(_source), Times.Exactly(call));
+            _resources.Verify(x => x.ResolveEnvironmentAsync(_target), Times.Exactly(call));
         }
     }
 
@@ -193,11 +193,11 @@ public class FlagCopyAuthorizationTests
         _flags.Setup(x => x.GetRelatedSegmentsAsync(It.IsAny<ICollection<FeatureFlag>>())).ReturnsAsync(Array.Empty<Segment>());
         var handler = new CopyToEnvHandler(_flags.Object, users.Object, Mock.Of<IEnvironmentService>(), Mock.Of<ICurrentUser>(),
             Mock.Of<IPublisher>(), _guard, new FlagCopyPrecheck(_flags.Object, users.Object, resources.Object));
-        var result = await handler.Handle(new()
+        var result = await handler.Handle(new CopyToEnv(Guid.Empty, _org, _source, _target, new CopyToEnvPayload
         {
-            OrgId = _org, SourceEnvId = _source, TargetEnvId = _target, FlagIds = [flag.Id], Permissions = All,
+            FlagIds = [flag.Id],
             PrecheckResults = [new() { Id = flag.Id, KeyCheck = true, TargetRuleCheck = true, NewProperties = ["forged"] }]
-        }, default);
+        }) { Permissions = All }, default);
         Assert.Equal(duplicate ? 0 : 1, result.CopiedCount);
         _flags.Verify(x => x.AddOneAsync(It.IsAny<FeatureFlag>()), duplicate ? Times.Never() : Times.Once());
         users.Verify(x => x.AddNewPropertiesAsync(It.IsAny<Guid>(), It.IsAny<ICollection<string>>()), Times.Never);
@@ -211,16 +211,15 @@ public class FlagCopyAuthorizationTests
         _flags.Setup(x => x.GetAsync(_source, "flag")).ReturnsAsync(source);
         _flags.Setup(x => x.GetAsync(_target, "flag")).ReturnsAsync(target);
         _flags.Setup(x => x.GetRelatedSegmentsAsync(It.IsAny<ICollection<FeatureFlag>>())).ReturnsAsync(Array.Empty<Segment>());
-        _resources.Setup(x => x.GetFlagRnAsync(_target, "flag")).ReturnsAsync(new ResourceRn("project/p:env/target:flag/flag", _org));
+        _resources.Setup(x => x.ResolveFlagAsync(_target, "flag")).ReturnsAsync(new PermissionTarget("project/p:env/target:flag/flag", _org));
         var users = new Mock<IEndUserService>(MockBehavior.Strict);
         var publisher = new Mock<IPublisher>(MockBehavior.Strict);
         var handler = new CopyFlagSettingsHandler(_flags.Object, users.Object, Mock.Of<IEnvironmentService>(), Mock.Of<ICurrentUser>(),
             publisher.Object, _guard, new PermissionGuard(_resources.Object));
-        await Assert.ThrowsAsync<ForbiddenException>(() => handler.Handle(new()
+        await Assert.ThrowsAsync<ForbiddenException>(() => handler.Handle(new CopyFlagSettings(Guid.Empty, _org, _source, _target, "flag", new CopyFlagSettingsPayload
         {
-            OrgId = _org, SourceEnvId = _source, TargetEnvId = _target, Key = "flag", Permissions = [EnvAccess],
             Options = new(false, new(false, CopyModes.Overwrite), new(false, CopyModes.Overwrite), false, false)
-        }, default));
+        }) { Permissions = [EnvAccess] }, default));
         _flags.Verify(x => x.UpdateAsync(It.IsAny<FeatureFlag>()), Times.Never);
         users.VerifyNoOtherCalls(); publisher.VerifyNoOtherCalls();
     }

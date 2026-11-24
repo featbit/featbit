@@ -1,7 +1,8 @@
+import { useListQuery, useListSearch } from "@/lib/use-list-query"
 import { ListPaginationControls } from "@/components/list-pagination-controls"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { CircleAlert, Plus, Search, Waypoints } from "lucide-react"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -45,25 +46,23 @@ export function RelayProxiesPage() {
   const queryClient = useQueryClient()
   const workspace = getCurrentWorkspace()
   const organizationId = getCurrentOrganization()?.id ?? ""
-  const [search, setSearch] = useState("")
-  const [debouncedSearch, setDebouncedSearch] = useState("")
-  const [pageIndex, setPageIndex] = useState(1)
-  const [pageSize, setPageSize] = useState(10)
+  const {
+    searchParams,
+    updateParams,
+    pageIndex,
+    pageSize,
+    setPageIndex,
+    setPageSize,
+  } = useListQuery()
+  const { search, setSearch, debouncedSearch } = useListSearch(
+    searchParams,
+    updateParams
+  )
   const [sheet, setSheet] = useState<SheetState>(null)
   const [removeTarget, setRemoveTarget] = useState<RelayProxy | null>(null)
   const [createdRelayProxy, setCreatedRelayProxy] = useState<RelayProxy | null>(
     null
   )
-
-  useEffect(() => {
-    if (search.trim() === debouncedSearch) return
-
-    const timeout = window.setTimeout(() => {
-      setDebouncedSearch(search.trim())
-      setPageIndex(1)
-    }, 300)
-    return () => window.clearTimeout(timeout)
-  }, [search, debouncedSearch])
 
   const permissionsQuery = useQuery({
     ...currentUserPoliciesQueryOptions<UserPolicy>(organizationId),

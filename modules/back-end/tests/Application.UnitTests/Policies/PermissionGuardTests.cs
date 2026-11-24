@@ -29,13 +29,13 @@ public class PermissionGuardTests
     public async Task OwnershipIsValidatedRegardlessOfChanges(bool segment, bool changed, string ownership)
     {
         var org = Guid.NewGuid();
-        var resources = new Mock<IResourceService>();
-        ResourceRn resource = ownership == "missing-resource" ? null! : new(
+        var targetResolver = new Mock<IPermissionTargetResolver>();
+        PermissionTarget resource = ownership == "missing-resource" ? null! : new(
             ownership == "blank-rn" ? " " : "project/p:env/e:flag/flag",
             ownership == "missing-org" ? null : ownership == "foreign" ? Guid.NewGuid() : org);
-        resources.Setup(x => x.GetFlagRnAsync(It.IsAny<Guid>(), It.IsAny<string>())).ReturnsAsync(resource);
-        resources.Setup(x => x.GetSegmentRnAsync(It.IsAny<Guid>(), It.IsAny<Guid>())).ReturnsAsync(resource);
-        var guard = new PermissionGuard(resources.Object);
+        targetResolver.Setup(x => x.ResolveFlagAsync(It.IsAny<Guid>(), It.IsAny<string>())).ReturnsAsync(resource);
+        targetResolver.Setup(x => x.ResolveSegmentAsync(It.IsAny<Guid>(), It.IsAny<Guid>())).ReturnsAsync(resource);
+        var guard = new PermissionGuard(targetResolver.Object);
         var flag = NewFlag();
         var seg = NewSegment();
         var change = new DataChange(segment ? (object)seg : flag);
@@ -45,14 +45,18 @@ public class PermissionGuardTests
             ? [new() { ResourceType = ResourceTypes.All, Effect = EffectType.Allow, Actions = ["*"], Resources = ["*"] }]
             : [];
         var requestOrg = ownership == "empty-request-org" ? Guid.Empty : org;
-        Func<Task> act = () => segment
-            ? guard.EnsureSegmentChangeAllowedAsync(requestOrg, seg.EnvId, seg, change, permissions)
-            : guard.EnsureFlagChangeAllowedAsync(requestOrg, flag, change, permissions);
+        Func<Task> act = () => changed
+            ? segment
+                ? guard.EnsureSegmentChangeAllowedAsync(requestOrg, seg.EnvId, seg, change, permissions)
+                : guard.EnsureFlagChangeAllowedAsync(requestOrg, flag, change, permissions)
+            : segment
+                ? guard.EnsureSegmentOwnershipAsync(requestOrg, seg.EnvId, seg)
+                : guard.EnsureFlagOwnershipAsync(requestOrg, flag);
         if (ownership == "own") await act();
         else await Assert.ThrowsAsync<ForbiddenException>(act);
-        if (ownership == "empty-request-org") resources.VerifyNoOtherCalls();
-        else if (segment) resources.Verify(x => x.GetSegmentRnAsync(seg.EnvId, seg.Id), Times.Once);
-        else resources.Verify(x => x.GetFlagRnAsync(flag.EnvId, flag.Key), Times.Once);
+        if (ownership == "empty-request-org") targetResolver.VerifyNoOtherCalls();
+        else if (segment) targetResolver.Verify(x => x.ResolveSegmentAsync(seg.EnvId, seg.Id), Times.Once);
+        else targetResolver.Verify(x => x.ResolveFlagAsync(flag.EnvId, flag.Key), Times.Once);
     }
 
     [Theory]
@@ -63,10 +67,10 @@ public class PermissionGuardTests
     public async Task OwnOrganizationStillRequiresEachChangedFieldPermission(bool segment, bool explicitDeny)
     {
         var org = Guid.NewGuid();
-        var resources = new Mock<IResourceService>();
-        resources.Setup(x => x.GetFlagRnAsync(It.IsAny<Guid>(), It.IsAny<string>())).ReturnsAsync(new ResourceRn("project/p:env/e:flag/flag", org));
-        resources.Setup(x => x.GetSegmentRnAsync(It.IsAny<Guid>(), It.IsAny<Guid>())).ReturnsAsync(new ResourceRn("project/p:env/e:segment/segment", org));
-        var guard = new PermissionGuard(resources.Object);
+        var targetResolver = new Mock<IPermissionTargetResolver>();
+        targetResolver.Setup(x => x.ResolveFlagAsync(It.IsAny<Guid>(), It.IsAny<string>())).ReturnsAsync(new PermissionTarget("project/p:env/e:flag/flag", org));
+        targetResolver.Setup(x => x.ResolveSegmentAsync(It.IsAny<Guid>(), It.IsAny<Guid>())).ReturnsAsync(new PermissionTarget("project/p:env/e:segment/segment", org));
+        var guard = new PermissionGuard(targetResolver.Object);
         var flag = NewFlag();
         var seg = NewSegment();
         var change = new DataChange(segment ? (object)seg : flag);

@@ -59,7 +59,7 @@ public class DeleteFlagScheduleTests
         var client = await app.CreateAuthenticatedClientAsync();
         var response = await client.DeleteAsync($"/api/v1/envs/{app.EnvId}/feature-flags/schedules/{app.ScheduleId}");
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        app.Resources.Verify(x => x.GetFlagRnAsync(app.EnvId, "flag"), Times.Once);
+        app.Resources.Verify(x => x.ResolveFlagAsync(app.EnvId, "flag"), Times.Once);
         app.Schedules.Verify(x => x.DeleteAsync(app.ScheduleId), Times.Once);
         app.Schedules.Verify(x => x.DeleteAsync(It.Is<Guid>(id => id != app.ScheduleId)), Times.Never);
     }
@@ -81,7 +81,7 @@ public class DeleteFlagScheduleTestApp : PermissionCheckTestApp
     public Guid EnvId { get; } = Guid.NewGuid();
     public Guid ScheduleId { get; } = Guid.NewGuid();
     public Mock<IFlagScheduleService> Schedules { get; } = new();
-    public Mock<IResourceService> Resources { get; } = new();
+    public Mock<IPermissionTargetResolver> Resources { get; } = new();
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -115,7 +115,7 @@ public class DeleteFlagScheduleTestApp : PermissionCheckTestApp
             drafts.Setup(x => x.FindOneAsync(It.IsAny<Expression<Func<FlagDraft, bool>>>()))
                 .ReturnsAsync((Expression<Func<FlagDraft, bool>> predicate) =>
                     Scenario != "draft-missing" && predicate.Compile()(draft) ? draft : null);
-            ResourceRn? resource = Scenario switch
+            PermissionTarget? resource = Scenario switch
             {
                 "resource-missing" => null,
                 "resource-org" or "noop-foreign" => new("project/p:env/e:flag/flag;team", Guid.NewGuid()),
@@ -123,7 +123,7 @@ public class DeleteFlagScheduleTestApp : PermissionCheckTestApp
                 "resource-blank" => new("", TestWorkspace.OrganizationId),
                 _ => new("project/p:env/e:flag/flag;team", TestWorkspace.OrganizationId)
             };
-            Resources.Setup(x => x.GetFlagRnAsync(EnvId, "flag")).ReturnsAsync(resource);
+            Resources.Setup(x => x.ResolveFlagAsync(EnvId, "flag")).ReturnsAsync(resource);
             var statements = new List<PolicyStatement>();
             var pattern = Scenario switch
             {

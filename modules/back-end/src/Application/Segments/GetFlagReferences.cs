@@ -12,7 +12,7 @@ public class GetFlagReferences : IRequest<IEnumerable<FlagReference>>
     public Guid Id { get; set; }
 }
 
-public class GetFlagReferencesHandler(ISegmentService service, SegmentAccessGuard access, IResourceService resources, IOrganizationPermissions permissions)
+public class GetFlagReferencesHandler(ISegmentService service, SegmentAccessGuard access, IPermissionTargetResolver resources, IOrganizationPermissions permissions)
     : IRequestHandler<GetFlagReferences, IEnumerable<FlagReference>>
 {
     public async Task<IEnumerable<FlagReference>> Handle(GetFlagReferences request, CancellationToken cancellationToken)
@@ -24,7 +24,7 @@ public class GetFlagReferencesHandler(ISegmentService service, SegmentAccessGuar
         var envIds = await service.GetEnvironmentIdsAsync(segment);
         foreach (var envId in envIds.Distinct())
         {
-            var resource = await resources.GetEnvRnAsync(envId);
+            var resource = await resources.ResolveEnvironmentAsync(envId);
             if (resource == null || !resource.OrganizationId.HasValue ||
                 !PolicyHelper.IsAllowed(await permissions.GetAsync(resource.OrganizationId.Value), resource.Rn, Permissions.CanAccessEnv))
             {

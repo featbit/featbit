@@ -28,7 +28,7 @@ import {
 import { localizedPath } from "@/features/layout/layout-context"
 import type { Lang } from "@/features/layout/layout-types"
 import { cn } from "@/lib/utils"
-import { Link } from "react-router-dom"
+import { ListDetailLink as Link } from "@/components/list-detail-link"
 import type { FeatureFlag, FlagUser } from "../../flags-types"
 import { variationMarkerColor } from "../../variation-colors"
 
@@ -179,11 +179,33 @@ function ServingCell({
   return (
     <div className="space-y-2.5">
       <div className="flex items-center gap-2">
-        <Switch
-          checked={flag.isEnabled}
-          disabled={pending || !allowed}
-          onCheckedChange={onToggle}
-        />
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <span
+                className={cn(
+                  "inline-flex",
+                  !allowed && !pending && "cursor-not-allowed"
+                )}
+              />
+            }
+          >
+            <Switch
+              checked={flag.isEnabled}
+              disabled={pending || !allowed}
+              className={cn(
+                !pending && allowed && "cursor-pointer",
+                !pending && !allowed && "pointer-events-none"
+              )}
+              onCheckedChange={onToggle}
+            />
+          </TooltipTrigger>
+          {!allowed && !pending ? (
+            <TooltipContent>
+              {t("featureFlags.permissionDenied")}
+            </TooltipContent>
+          ) : null}
+        </Tooltip>
         <span className="text-xs font-medium">
           {flag.isEnabled ? t("featureFlags.on") : t("featureFlags.off")}
         </span>

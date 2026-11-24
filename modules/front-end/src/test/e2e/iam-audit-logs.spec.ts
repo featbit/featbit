@@ -265,10 +265,12 @@ test("switching organization resets IAM filters and uses the new organization co
       json: { success: true, data: { items: [], totalCount: 0 } },
     })
   })
-  await page.goto("/en/iam/audit-logs")
+  await page.goto(
+    "/en/iam/audit-logs?query=Initial&creatorId=admin&creatorName=Admin&refType=Group&from=2026-10-01&to=2026-10-31"
+  )
   await expect(
-    page.getByText("IAM changes in this organization will appear here.")
-  ).toBeVisible()
+    page.getByPlaceholder("Filter by resource or comment")
+  ).toHaveValue("Initial")
   await page
     .getByPlaceholder("Filter by resource or comment")
     .fill("Engineering")
@@ -298,6 +300,21 @@ test("switching organization resets IAM filters and uses the new organization co
   await expect
     .poll(() => requests.some((x) => x.org === "org-2" && x.query === ""))
     .toBe(true)
+  const params = new URL(page.url()).searchParams
+  for (const key of [
+    "query",
+    "creatorId",
+    "creatorName",
+    "refType",
+    "from",
+    "to",
+  ]) {
+    expect(params.has(key)).toBe(false)
+  }
+  await page.reload()
+  await expect(
+    page.getByPlaceholder("Filter by resource or comment")
+  ).toHaveValue("")
   await page.getByRole("combobox").filter({ hasText: "All types" }).click()
   await expect(
     page.getByRole("option", { name: "Team", exact: true })

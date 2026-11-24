@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/tooltip"
 import { localizedProjectEnvPath } from "@/features/layout/layout-context"
 import type { Lang, ProjectEnv } from "@/features/layout/layout-types"
-import { Link } from "react-router-dom"
+import { ListDetailLink as Link } from "@/components/list-detail-link"
 import { useTranslation } from "react-i18next"
 import type {
   CompareEnvironment,

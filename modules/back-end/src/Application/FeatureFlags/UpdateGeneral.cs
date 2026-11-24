@@ -37,11 +37,15 @@ public class UpdateGeneral : UpdateGeneralPayload, IRequest<Guid>
     public PolicyStatement[] Permissions { get; set; }
 
     public UpdateGeneral(
+        Guid workspaceId,
+        Guid orgId,
         Guid envId,
         string key,
         UpdateGeneralPayload payload,
         PolicyStatement[] permissions)
     {
+        WorkspaceId = workspaceId;
+        OrgId = orgId;
         EnvId = envId;
         Key = key;
         Name = payload.Name;
@@ -81,8 +85,7 @@ public class UpdateGeneralHandler(
 
         if (!nameChanged && !descriptionChanged && !tagsChanged)
         {
-            await permissionGuard.EnsureFlagChangeAllowedAsync(
-                request.OrgId, flag, new DataChange(flag).To(flag), request.Permissions);
+            await permissionGuard.EnsureFlagOwnershipAsync(request.OrgId, flag);
             return flag.Revision;
         }
 

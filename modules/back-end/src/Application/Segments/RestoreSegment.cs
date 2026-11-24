@@ -11,6 +11,15 @@ public class RestoreSegment : ResourceChangeRequest, IRequest<bool>
     public Guid OrgId { get; set; }
 
     public Guid Id { get; set; }
+
+    public RestoreSegment(Guid workspaceId, Guid orgId, Guid id, ResourceChangeRequest payload = null)
+    {
+        WorkspaceId = workspaceId;
+        OrgId = orgId;
+        Id = id;
+
+        Comment = payload?.Comment ?? string.Empty;
+    }
 }
 
 public class RestoreSegmentHandler : IRequestHandler<RestoreSegment, bool>

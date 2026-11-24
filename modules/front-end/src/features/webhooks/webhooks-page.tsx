@@ -1,3 +1,4 @@
+import { useListQuery, useListSearch } from "@/lib/use-list-query"
 import { ListPaginationControls } from "@/components/list-pagination-controls"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
@@ -6,7 +7,7 @@ import {
   Search,
   Webhook as WebhookIcon,
 } from "lucide-react"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -66,28 +67,28 @@ export function WebhooksPage() {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
   const workspace = getCurrentWorkspace()
-  const [search, setSearch] = useState("")
-  const [debouncedSearch, setDebouncedSearch] = useState("")
-  const [projectId, setProjectId] = useState("")
+  const {
+    searchParams,
+    updateParams,
+    pageIndex,
+    pageSize,
+    setPageIndex,
+    setPageSize,
+  } = useListQuery()
+  const { search, setSearch, debouncedSearch } = useListSearch(
+    searchParams,
+    updateParams
+  )
+  const projectId = searchParams.get("projectId") ?? ""
+  const setProjectId = (value: string) =>
+    updateParams({ projectId: value || null }, true)
   const [projectFilterOpen, setProjectFilterOpen] = useState(false)
-  const [pageIndex, setPageIndex] = useState(1)
-  const [pageSize, setPageSize] = useState(10)
   const [sheet, setSheet] = useState<SheetState>(null)
   const [removeTarget, setRemoveTarget] = useState<Webhook | null>(null)
   const [debugWebhook, setDebugWebhook] = useState<DebugConfiguration | null>(
     null
   )
   const [logsWebhook, setLogsWebhook] = useState<Webhook | null>(null)
-
-  useEffect(() => {
-    if (search.trim() === debouncedSearch) return
-
-    const timeout = window.setTimeout(() => {
-      setDebouncedSearch(search.trim())
-      setPageIndex(1)
-    }, 300)
-    return () => window.clearTimeout(timeout)
-  }, [search, debouncedSearch])
 
   const projectsQuery = useQuery({
     queryKey: ["webhook-projects", workspace?.id ?? ""],
@@ -202,7 +203,8 @@ export function WebhooksPage() {
               }
             >
               <span className="truncate">
-                {selectedProject?.name ?? t("webhooks.allProjects")}
+                {selectedProject?.name ??
+                  (projectId || t("webhooks.allProjects"))}
               </span>
               <ChevronsUpDown className="size-4 shrink-0 text-muted-foreground" />
             </PopoverTrigger>
@@ -285,7 +287,7 @@ export function WebhooksPage() {
               className="mt-4"
               onClick={() => {
                 setSearch("")
-                setDebouncedSearch("")
+                updateParams({ name: null }, true)
                 setProjectId("")
                 setPageIndex(1)
               }}

@@ -1,7 +1,8 @@
+import { useDetailNavigate } from "@/lib/list-navigation"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useNavigate, useParams } from "react-router-dom"
+import { useParams } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { TooltipProvider } from "@/components/ui/tooltip"
@@ -39,9 +40,9 @@ type DetailsTab = "targeting" | "settings" | "history"
 export function SegmentDetailsPage() {
   const { t } = useTranslation()
   const params = useParams()
-  const navigate = useNavigate()
   const queryClient = useQueryClient()
   const lang = resolveLang(params.lang)
+  const navigate = useDetailNavigate(localizedPath(lang, "/segments"))
   const segmentId = decodeURIComponent(params.segmentId ?? "")
   const requestedTab = params.tab
   const activeTab = (

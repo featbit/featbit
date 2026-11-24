@@ -215,7 +215,7 @@ public class CreateSegmentHandlerTests
             Publisher.VerifyNoOtherCalls();
         }
 
-        public CreateSegment Request(string scope) => new()
-        { WorkspaceId = Workspace, OrgId = RequestOrg, EnvId = Guid.NewGuid(), Name = "Segment", Key = "s", Type = SegmentType.Shared, Scopes = [scope] };
+        public CreateSegment Request(string scope) => new(Workspace, RequestOrg, Guid.NewGuid(), new CreateSegmentPayload
+        { Name = "Segment", Key = "s", Type = SegmentType.Shared, Scopes = [scope] });
     }
 }

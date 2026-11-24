@@ -96,7 +96,7 @@ public class FlagCopyTestApp : PermissionCheckTestApp
     public Guid Target { get; } = Guid.NewGuid();
     public string Denied { get; init; } = "";
     public FeatureFlag Flag { get; }
-    public Mock<IResourceService> Resources { get; } = new();
+    public Mock<IPermissionTargetResolver> Resources { get; } = new();
     public Mock<IFeatureFlagService> Flags { get; } = new();
     public Mock<IEndUserService> Users { get; } = new();
     public FlagCopyTestApp() => Flag = new FeatureFlag(Source, "Flag", "", "flag", false, VariationTypes.Boolean,
@@ -107,8 +107,8 @@ public class FlagCopyTestApp : PermissionCheckTestApp
         base.ConfigureWebHost(builder);
         builder.ConfigureServices(services =>
         {
-            Resources.Setup(x => x.GetEnvRnAsync(Source)).ReturnsAsync(new ResourceRn("project/p:env/source", TestWorkspace.OrganizationId));
-            Resources.Setup(x => x.GetEnvRnAsync(Target)).ReturnsAsync(new ResourceRn("project/p:env/target",
+            Resources.Setup(x => x.ResolveEnvironmentAsync(Source)).ReturnsAsync(new PermissionTarget("project/p:env/source", TestWorkspace.OrganizationId));
+            Resources.Setup(x => x.ResolveEnvironmentAsync(Target)).ReturnsAsync(new PermissionTarget("project/p:env/target",
                 Denied == "foreign" ? Guid.NewGuid() : TestWorkspace.OrganizationId));
             Flags.Setup(x => x.FindManyAsync(It.IsAny<Expression<Func<FeatureFlag, bool>>>()))
                 .ReturnsAsync((Expression<Func<FeatureFlag, bool>> predicate) => new[] { Flag }.Where(predicate.Compile()).ToArray());

@@ -10,20 +10,8 @@ using Domain.Workspaces;
 
 namespace Application.Segments;
 
-public class CreateSegment : IRequest<Segment>
+public class CreateSegmentPayload
 {
-    public Guid OrgId { get; set; }
-
-    /// <summary>
-    /// The ID of the workspace the segment belongs to. Retrieved from the request header.
-    /// </summary>
-    public Guid WorkspaceId { get; set; }
-
-    /// <summary>
-    /// The ID of the environment the segment belongs to. Retrieved from URL path.
-    /// </summary>
-    public Guid EnvId { get; set; }
-
     /// <summary>
     /// The type of the segment. Can be "environment-specific" or "shared".
     /// </summary>
@@ -57,6 +45,28 @@ public class CreateSegment : IRequest<Segment>
     [Required(ErrorMessage = "scopes_is_invalid")]
     [MinLength(1, ErrorMessage = "scopes_is_invalid")]
     public string[] Scopes { get; set; } = [];
+}
+
+public class CreateSegment : CreateSegmentPayload, IRequest<Segment>
+{
+    public Guid WorkspaceId { get; set; }
+
+    public Guid OrgId { get; set; }
+
+    public Guid EnvId { get; set; }
+
+    public CreateSegment(Guid workspaceId, Guid orgId, Guid envId, CreateSegmentPayload payload)
+    {
+        WorkspaceId = workspaceId;
+        OrgId = orgId;
+        EnvId = envId;
+
+        Type = payload.Type;
+        Name = payload.Name;
+        Key = payload.Key;
+        Description = payload.Description;
+        Scopes = payload.Scopes;
+    }
 
     public Segment AsSegment()
     {

@@ -89,7 +89,7 @@ export function ListPaginationControls({
                   {page}
                 </Button>
               ) : (
-                <PaginationEllipsis />
+                <PaginationEllipsis className="relative" />
               )}
             </PaginationItem>
           ))}

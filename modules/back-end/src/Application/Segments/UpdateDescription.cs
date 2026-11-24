@@ -4,21 +4,31 @@ using Domain.AuditLogs;
 
 namespace Application.Segments;
 
-public class UpdateDescription : ResourceChangeRequest, IRequest<bool>
+public class UpdateDescriptionPayload : ResourceChangeRequest
+{
+    /// <summary>
+    /// The new description for the segment.
+    /// </summary>
+    public string Description { get; set; }
+}
+
+public class UpdateDescription : UpdateDescriptionPayload, IRequest<bool>
 {
     public Guid WorkspaceId { get; set; }
 
     public Guid OrgId { get; set; }
 
-    /// <summary>
-    /// The ID of the segment to update. Retrieved from the URL path.
-    /// </summary>
     public Guid Id { get; set; }
 
-    /// <summary>
-    /// The new description for the segment.
-    /// </summary>
-    public string Description { get; set; }
+    public UpdateDescription(Guid workspaceId, Guid orgId, Guid id, UpdateDescriptionPayload payload)
+    {
+        WorkspaceId = workspaceId;
+        OrgId = orgId;
+        Id = id;
+
+        Description = payload.Description;
+        Comment = payload.Comment;
+    }
 }
 
 public class UpdateDescriptionHandler(

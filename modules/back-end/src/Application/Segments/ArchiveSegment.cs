@@ -15,6 +15,16 @@ public class ArchiveSegment : ResourceChangeRequest, IRequest<bool>
     public Guid EnvId { get; set; }
 
     public Guid Id { get; set; }
+
+    public ArchiveSegment(Guid workspaceId, Guid orgId, Guid envId, Guid id, ResourceChangeRequest payload = null)
+    {
+        WorkspaceId = workspaceId;
+        OrgId = orgId;
+        EnvId = envId;
+        Id = id;
+
+        Comment = payload?.Comment ?? string.Empty;
+    }
 }
 
 public class ArchiveSegmentHandler : IRequestHandler<ArchiveSegment, bool>

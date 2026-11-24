@@ -1,6 +1,7 @@
+import { useDetailNavigate } from "@/lib/list-navigation"
 import { useCallback, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useNavigate, useParams } from "react-router-dom"
+import { useParams } from "react-router-dom"
 import { toast } from "sonner"
 import { DetailBackLink } from "@/components/detail-back-link"
 import { Badge } from "@/components/ui/badge"
@@ -28,9 +29,9 @@ const validTabs = new Set<PolicyDetailTab>(["permission", "team", "groups"])
 
 export function PolicyDetailsPage() {
   const params = useParams()
-  const navigate = useNavigate()
   const { t } = useTranslation()
   const lang = resolveLang(params.lang)
+  const navigate = useDetailNavigate(localizedPath(lang, "/iam/policies"))
   const policyId = params.policyId ?? ""
   const requestedTab = params.tab as PolicyDetailTab | undefined
   const activeTab =

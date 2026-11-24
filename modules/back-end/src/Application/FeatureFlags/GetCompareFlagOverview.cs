@@ -2,23 +2,31 @@ using Application.Bases;
 using Application.Bases.Models;
 using Domain.FeatureFlags;
 using Domain.Policies;
-using System.Text.Json.Serialization;
 
 namespace Application.FeatureFlags;
 
-public class GetCompareFlagOverview : IRequest<PagedResult<CompareFlagOverview>>
+public class GetCompareFlagOverviewPayload
 {
-    [JsonIgnore]
+    public Guid[] TargetEnvIds { get; set; }
+
+    public FeatureFlagFilter Filter { get; set; }
+}
+
+public class GetCompareFlagOverview : GetCompareFlagOverviewPayload, IRequest<PagedResult<CompareFlagOverview>>
+{
     public Guid OrgId { get; set; }
 
-    [JsonIgnore]
     public PolicyStatement[] Permissions { get; set; } = [];
 
     public Guid SourceEnvId { get; set; }
 
-    public Guid[] TargetEnvIds { get; set; }
+    public GetCompareFlagOverview(Guid sourceEnvId, GetCompareFlagOverviewPayload payload)
+    {
+        SourceEnvId = sourceEnvId;
 
-    public FeatureFlagFilter Filter { get; set; }
+        TargetEnvIds = payload.TargetEnvIds;
+        Filter = payload.Filter;
+    }
 }
 
 public class GetCompareFlagOverviewValidator : AbstractValidator<GetCompareFlagOverview>

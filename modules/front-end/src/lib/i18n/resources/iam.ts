@@ -402,6 +402,7 @@ export const enIam = {
     "details.permissionsEditor.selectedResourcesHeading":
       "Selected {{type}} ({{count}})",
     "details.permissionsEditor.manageResources": "Manage",
+    "details.permissionsEditor.addCustomRn": "Add custom RN",
     "details.permissionsEditor.editSelectedResourceRn":
       "Edit resource name for {{name}}",
     "details.permissionsEditor.editResourceRn": "Edit RN",
@@ -433,7 +434,6 @@ export const enIam = {
       "Every action for this resource type",
     "details.permissionsEditor.moreActions": "{{count}} more actions",
     "details.permissionsEditor.moreResources": "{{count}} more resources",
-    "details.permissionsEditor.clearAll": "Clear all",
     "details.permissionsEditor.done": "Done",
     "details.permissionsEditor.rnEditor.title": "Edit resource scope (RN)",
     "details.permissionsEditor.rnEditor.description":
@@ -904,6 +904,7 @@ export const zhIam = {
     "details.permissionsEditor.selectedResourcesHeading":
       "已选择的{{type}}（{{count}}）",
     "details.permissionsEditor.manageResources": "管理",
+    "details.permissionsEditor.addCustomRn": "添加自定义 RN",
     "details.permissionsEditor.editSelectedResourceRn":
       "编辑 {{name}} 的资源名称",
     "details.permissionsEditor.editResourceRn": "编辑 RN",
@@ -933,7 +934,6 @@ export const zhIam = {
     "details.permissionsEditor.allActionsSummary": "包含此资源类型的所有操作",
     "details.permissionsEditor.moreActions": "另外 {{count}} 项操作",
     "details.permissionsEditor.moreResources": "另外 {{count}} 项资源",
-    "details.permissionsEditor.clearAll": "清除全部",
     "details.permissionsEditor.done": "完成",
     "details.permissionsEditor.rnEditor.title": "编辑资源范围 (RN)",
     "details.permissionsEditor.rnEditor.description":

@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'modules/control-plane/**'
+      - 'modules/Directory.Packages.props'
       - 'modules/back-end/src/Application/**'
       - 'modules/back-end/src/Domain/**'
       - 'modules/back-end/src/Infrastructure/**'
@@ -15,6 +16,7 @@ on:
       - main
     paths:
       - 'modules/control-plane/**'
+      - 'modules/Directory.Packages.props'
       - 'modules/back-end/src/Application/**'
       - 'modules/back-end/src/Domain/**'
       - 'modules/back-end/src/Infrastructure/**'

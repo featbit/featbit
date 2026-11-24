@@ -37,14 +37,24 @@ public class UpdateTargeting : UpdateTargetingPayload, IRequest<bool>
 
     public PolicyStatement[] Permissions { get; set; }
 
-    public UpdateTargeting(Guid segmentId, UpdateTargetingPayload payload, PolicyStatement[] permissions)
+    public UpdateTargeting(
+        Guid workspaceId,
+        Guid orgId,
+        Guid envId,
+        Guid segmentId,
+        UpdateTargetingPayload payload,
+        PolicyStatement[] permissions)
     {
+        WorkspaceId = workspaceId;
+        OrgId = orgId;
+        EnvId = envId;
         Id = segmentId;
+        Permissions = permissions;
+
         Included = payload.Included;
         Excluded = payload.Excluded;
         Rules = payload.Rules;
         Comment = payload.Comment;
-        Permissions = permissions;
     }
 }
 
@@ -71,7 +81,13 @@ public class UpdateTargetingHandler(
         var segment = await service.GetAsync(request.Id);
         var dataChange = segment.UpdateTargeting(request.Included, request.Excluded, request.Rules);
 
-        await permissionGuard.EnsureSegmentChangeAllowedAsync(request.OrgId, request.EnvId, segment, dataChange, request.Permissions);
+        await permissionGuard.EnsureSegmentChangeAllowedAsync(
+            request.OrgId,
+            request.EnvId,
+            segment,
+            dataChange,
+            request.Permissions
+        );
 
         await service.UpdateAsync(segment);
 

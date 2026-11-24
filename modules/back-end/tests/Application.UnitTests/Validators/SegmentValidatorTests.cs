@@ -21,18 +21,22 @@ public class SegmentValidatorTests
     [InlineData(null, false)]
     public void ScopeShapeIsValidated(string? scope, bool valid)
     {
-        var request = new CreateSegment { Name = "S", Key = "s", Type = SegmentType.Shared, Scopes = [scope!] };
+        var request = new CreateSegment(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), new CreateSegmentPayload
+        {
+            Name = "S", Key = "s", Type = SegmentType.Shared, Scopes = [scope!]
+        });
         Assert.Equal(valid, new CreateSegmentValidator().Validate(request).IsValid);
     }
 
 
-    private static CreateSegment ValidCreate() => new()
+    private static CreateSegment ValidCreate() => new(
+        Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), new CreateSegmentPayload
     {
         Type = SegmentType.EnvironmentSpecific,
         Name = "seg",
         Key = "seg-key",
         Scopes = new[] { "organization/o:project/x:env/y" }
-    };
+    });
 
     [Fact]
     public void CreateSegment_AllFieldsValid_NoErrors()
@@ -89,12 +93,12 @@ public class SegmentValidatorTests
     [Fact]
     public void CreateSegment_ScopesOmitted_ScopesInvalidError()
     {
-        var req = new CreateSegment
+        var req = new CreateSegment(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), new CreateSegmentPayload
         {
             Type = SegmentType.EnvironmentSpecific,
             Name = "seg",
             Key = "seg-key"
-        };
+        });
 
         var result = new CreateSegmentValidator().Validate(req);
 
@@ -115,7 +119,7 @@ public class SegmentValidatorTests
     [Fact]
     public void UpdateName_NameProvided_NoErrors()
     {
-        var result = new Application.Segments.UpdateNameValidator().Validate(new Application.Segments.UpdateName { Name = "x" });
+        var result = new Application.Segments.UpdateNameValidator().Validate(new Application.Segments.UpdateName(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), new UpdateNamePayload { Name = "x" }));
 
         Assert.True(result.IsValid);
     }
@@ -123,7 +127,7 @@ public class SegmentValidatorTests
     [Fact]
     public void UpdateName_LongerThan128_NameInvalidError()
     {
-        var result = new Application.Segments.UpdateNameValidator().Validate(new Application.Segments.UpdateName { Name = new string('x', 129) });
+        var result = new Application.Segments.UpdateNameValidator().Validate(new Application.Segments.UpdateName(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), new UpdateNamePayload { Name = new string('x', 129) }));
 
         Assert.Contains(result.Errors, e => e.ErrorCode == ErrorCodes.Invalid("name"));
     }
@@ -132,7 +136,7 @@ public class SegmentValidatorTests
     public void UpdateGeneral_EmptyName_NameRequiredError()
     {
         var request = new UpdateGeneral(
-            Guid.NewGuid(),
+            Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(),
             new UpdateGeneralPayload
             {
                 Name = string.Empty,
@@ -154,7 +158,7 @@ public class SegmentValidatorTests
             Id = "r1",
             Conditions = new[] { new Condition { Id = "c", Property = "email", Op = OperatorTypes.Equal, Value = "x" } }
         };
-        var request = new UpdateTargeting(Guid.NewGuid(), new UpdateTargetingPayload { Rules = new[] { rule } }, Array.Empty<Domain.Policies.PolicyStatement>());
+        var request = new UpdateTargeting(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), new UpdateTargetingPayload { Rules = new[] { rule } }, Array.Empty<Domain.Policies.PolicyStatement>());
 
         var result = new UpdateTargetingValidator().Validate(request);
 
@@ -169,7 +173,7 @@ public class SegmentValidatorTests
             Id = "r1",
             Conditions = new[] { new Condition { Id = "c", Property = SegmentConsts.ConditionProperties.First(), Op = "is in", Value = "[]" } }
         };
-        var request = new UpdateTargeting(Guid.NewGuid(), new UpdateTargetingPayload { Rules = new[] { rule } }, Array.Empty<Domain.Policies.PolicyStatement>());
+        var request = new UpdateTargeting(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), new UpdateTargetingPayload { Rules = new[] { rule } }, Array.Empty<Domain.Policies.PolicyStatement>());
 
         var result = new UpdateTargetingValidator().Validate(request);
 
@@ -188,7 +192,7 @@ public class SegmentValidatorTests
             Conditions = new[] { new Condition { Id = "c", Property = property, Op = op, Value = value } }
         };
         var request = new UpdateTargeting(
-            Guid.NewGuid(),
+            Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(),
             new UpdateTargetingPayload { Rules = new[] { rule } },
             Array.Empty<Domain.Policies.PolicyStatement>()
         );

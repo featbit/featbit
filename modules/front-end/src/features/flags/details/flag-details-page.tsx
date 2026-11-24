@@ -1,7 +1,8 @@
+import { useDetailNavigate, useDetailHref } from "@/lib/list-navigation"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useNavigate, useParams, useSearchParams } from "react-router-dom"
+import { useParams, useSearchParams } from "react-router-dom"
 import { toast } from "sonner"
 import { LicenseGateDialog } from "@/components/license-gate-card"
 import { Button } from "@/components/ui/button"
@@ -94,10 +95,10 @@ import {
 export function FlagDetailsPage() {
   const { t } = useTranslation()
   const params = useParams()
-  const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const queryClient = useQueryClient()
   const lang = resolveLang(params.lang)
+  const navigate = useDetailNavigate(localizedPath(lang, "/feature-flags"))
   const flagKey = decodeURIComponent(params.flagKey ?? "")
   const activeTab =
     params.tab === "history" ||
@@ -120,6 +121,7 @@ export function FlagDetailsPage() {
   )
   const envId = projectEnv?.envId ?? ""
   const basePath = localizedPath(lang, "/feature-flags")
+  const detailHref = useDetailHref()
   const manageLicenseHref = localizedPath(
     lang,
     getRuntimeEnv().hostingMode === "saas"
@@ -584,7 +586,9 @@ export function FlagDetailsPage() {
           <InsightsTab
             envId={envId}
             flag={saved}
-            settingsPath={`${basePath}/${encodeURIComponent(saved.key)}/settings`}
+            settingsPath={detailHref(
+              `${basePath}/${encodeURIComponent(saved.key)}/settings`
+            )}
           />
         ) : activeTab === "settings" ? (
           <SettingsTab

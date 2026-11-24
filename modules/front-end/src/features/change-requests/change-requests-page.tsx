@@ -4,10 +4,12 @@ import {
   useQueryClient,
 } from "@tanstack/react-query"
 import { Loader2 } from "lucide-react"
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useParams, useSearchParams } from "react-router-dom"
+import { useParams } from "react-router-dom"
 import { toast } from "sonner"
+import { useListQuery, useListSearch } from "@/lib/use-list-query"
+import { memberFilter, memberFilterParams } from "@/lib/list-filter-values"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { TooltipProvider } from "@/components/ui/tooltip"
@@ -60,7 +62,7 @@ function ChangeRequestsHeader({ className }: { className?: string }) {
 export function ChangeRequestsPage() {
   const { t } = useTranslation()
   const { lang: langParam } = useParams()
-  const [searchParams, setSearchParams] = useSearchParams()
+  const { searchParams, updateParams } = useListQuery()
   const lang = resolveLang(langParam)
   const projectEnv = getCurrentProjectEnv()
   const workspace = getCurrentWorkspace()
@@ -69,11 +71,31 @@ export function ChangeRequestsPage() {
   const focusedChangeRequestId =
     searchParams.get("changeRequestId")?.trim() ?? ""
   const queryClient = useQueryClient()
-  const [query, setQuery] = useState("")
-  const [debouncedQuery, setDebouncedQuery] = useState("")
-  const [author, setAuthor] = useState<OrganizationMember | null>(null)
-  const [reviewer, setReviewer] = useState<OrganizationMember | null>(null)
-  const [status, setStatus] = useState<ChangeRequestStatus>()
+  const {
+    search: query,
+    setSearch: setQuery,
+    debouncedSearch: debouncedQuery,
+  } = useListSearch(searchParams, updateParams, "query")
+  const author = memberFilter(searchParams, "creator")
+  const reviewer = memberFilter(searchParams, "reviewer")
+  const requestedStatus = searchParams.get("status")
+  const status = ["PendingReview", "Approved", "Declined", "Applied"].includes(
+    requestedStatus ?? ""
+  )
+    ? (requestedStatus as ChangeRequestStatus)
+    : undefined
+  const setAuthor = (member: OrganizationMember | null) =>
+    updateParams({
+      query: query.trim() || null,
+      ...memberFilterParams("creator", member),
+    })
+  const setReviewer = (member: OrganizationMember | null) =>
+    updateParams({
+      query: query.trim() || null,
+      ...memberFilterParams("reviewer", member),
+    })
+  const setStatus = (value: ChangeRequestStatus | undefined) =>
+    updateParams({ query: query.trim() || null, status: value ?? null })
   const [decisionTarget, setDecisionTarget] = useState<{
     item: ChangeRequestItem
     action: Extract<ChangeRequestAction, "approve" | "decline">
@@ -90,14 +112,6 @@ export function ChangeRequestsPage() {
       ? "/workspace/billing"
       : "/workspace/license"
   )
-
-  useEffect(() => {
-    const timeout = window.setTimeout(
-      () => setDebouncedQuery(query.trim()),
-      350
-    )
-    return () => window.clearTimeout(timeout)
-  }, [query])
 
   const filtersApplied = Boolean(
     focusedChangeRequestId || query.trim() || author || reviewer || status
@@ -194,13 +208,13 @@ export function ChangeRequestsPage() {
 
   function clearFilters() {
     setQuery("")
-    setDebouncedQuery("")
-    setAuthor(null)
-    setReviewer(null)
-    setStatus(undefined)
-    const nextSearchParams = new URLSearchParams(searchParams)
-    nextSearchParams.delete("changeRequestId")
-    setSearchParams(nextSearchParams, { replace: true })
+    updateParams({
+      query: null,
+      ...memberFilterParams("creator", null),
+      ...memberFilterParams("reviewer", null),
+      status: null,
+      changeRequestId: null,
+    })
   }
 
   if (!envId) {

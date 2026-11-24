@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next"
-import { Link } from "react-router-dom"
+import { ListDetailLink as Link } from "@/components/list-detail-link"
 import { Badge } from "@/components/ui/badge"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
