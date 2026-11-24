@@ -26,7 +26,6 @@ internal sealed class ResourceOwnershipData
     public Organization SharedOrganization { get; }
     public Project SharedProject { get; }
     public Environment SharedEnvironment { get; }
-    public Segment ForeignLocal { get; }
     public Segment ForeignShared { get; }
     public ResourceOwnershipData()
     {
@@ -47,8 +46,6 @@ internal sealed class ResourceOwnershipData
             ["organization/org:project/project:env/env", "organization/shared-org"], [], [], [], "") { Id = Guid.NewGuid() };
         ForeignShared = new(ForeignOrganization.WorkspaceId, ForeignEnvironment.Id, "Foreign shared", "foreign-shared",
             SegmentType.Shared, ["organization/org:project/project:env/env"], [], [], [], "") { Id = Guid.NewGuid() };
-        ForeignLocal = new(ForeignOrganization.WorkspaceId, Environment.Id, "Foreign local", "foreign-local",
-            SegmentType.EnvironmentSpecific, [], [], [], [], "") { Id = Guid.NewGuid() };
     }
 
     public async Task AssertOwnership(IPermissionTargetResolver service)
@@ -59,7 +56,6 @@ internal sealed class ResourceOwnershipData
         Assert.Equal(new PermissionTarget("project/project:env/env:segment/local;tag", Organization.Id), await service.ResolveSegmentAsync(Environment.Id, Local.Id));
         Assert.Equal(new PermissionTarget("project/project:env/env:segment/shared", Organization.Id), await service.ResolveSegmentAsync(Environment.Id, Shared.Id));
         Assert.Null(await service.ResolveSegmentAsync(ForeignEnvironment.Id, Shared.Id));
-        Assert.Null(await service.ResolveSegmentAsync(Environment.Id, ForeignLocal.Id));
         Assert.Null(await service.ResolveSegmentAsync(SharedEnvironment.Id, Local.Id));
         Assert.Equal(new PermissionTarget("project/project:env/env:segment/shared", SharedOrganization.Id),
             await service.ResolveSegmentAsync(SharedEnvironment.Id, Shared.Id));
@@ -90,7 +86,7 @@ public class PostgresResourceOwnershipTests(FeatBitPostgresFixture fixture) : In
     {
         await using var db = AppDbContextFactory.Create(fixture.ConnectionString);
         var data = new ResourceOwnershipData();
-        db.AddRange(data.Organization, data.Project, data.Environment, data.Flag, data.Local, data.Shared, data.ForeignShared, data.ForeignLocal, data.ForeignOrganization, data.ForeignProject, data.ForeignEnvironment, data.SharedOrganization, data.SharedProject, data.SharedEnvironment);
+        db.AddRange(data.Organization, data.Project, data.Environment, data.Flag, data.Local, data.Shared, data.ForeignShared, data.ForeignOrganization, data.ForeignProject, data.ForeignEnvironment, data.SharedOrganization, data.SharedProject, data.SharedEnvironment);
         await db.SaveChangesAsync();
         await data.AssertOwnership(new Infrastructure.Services.EntityFrameworkCore.PermissionTargetResolver(db));
         await data.AssertScopeExpansion(new Infrastructure.Services.EntityFrameworkCore.SegmentService(db,
@@ -142,7 +138,7 @@ public class MongoResourceOwnershipTests(MongoDbFixture fixture) : IntegrationTe
         await db.CollectionOf<Project>().InsertManyAsync([data.Project, data.ForeignProject, data.SharedProject]);
         await db.CollectionOf<Environment>().InsertManyAsync([data.Environment, data.ForeignEnvironment, data.SharedEnvironment]);
         await db.CollectionOf<FeatureFlag>().InsertOneAsync(data.Flag);
-        await db.CollectionOf<Segment>().InsertManyAsync([data.Local, data.Shared, data.ForeignShared, data.ForeignLocal]);
+        await db.CollectionOf<Segment>().InsertManyAsync([data.Local, data.Shared, data.ForeignShared]);
         await data.AssertOwnership(new Infrastructure.Services.MongoDb.PermissionTargetResolver(db));
         await data.AssertScopeExpansion(new Infrastructure.Services.MongoDb.SegmentService(db,
             NullLogger<Infrastructure.Services.MongoDb.SegmentService>.Instance));

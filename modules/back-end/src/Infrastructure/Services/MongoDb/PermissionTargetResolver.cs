@@ -78,8 +78,7 @@ public class PermissionTargetResolver(MongoDbClient mongoDb) : IPermissionTarget
                 var query =
                     from project in QueryableOf<Project>()
                     join env in QueryableOf<Environment>() on project.Id equals env.ProjectId
-                    join organization in QueryableOf<Organization>() on project.OrganizationId equals organization.Id
-                    where env.Id == envId && organization.WorkspaceId == segment.WorkspaceId
+                    where env.Id == envId
                     select new
                     {
                         ProjectKey = project.Key,

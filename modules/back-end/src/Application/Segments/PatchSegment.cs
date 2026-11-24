@@ -33,8 +33,6 @@ public class PatchSegmentHandler(
     {
         var segment = await segmentService.GetAsync(request.Id);
         var dataChange = new DataChange(segment);
-        var identity = (segment.Id, segment.WorkspaceId, segment.EnvId, segment.Key, segment.Type);
-        var scopes = segment.Scopes.ToArray();
 
         var targetingPaths = new[] { "/included", "/excluded", "/rules" };
         var isTargetingChange = request.Patch.Operations.Any(op =>
@@ -48,13 +46,6 @@ public class PatchSegmentHandler(
         {
             return PatchResult.Fail(error);
         }
-
-        if (identity != (segment.Id, segment.WorkspaceId, segment.EnvId, segment.Key, segment.Type) ||
-            !scopes.SequenceEqual(segment.Scopes ?? []))
-        {
-            return PatchResult.Fail("Segment identity and scopes cannot be changed.");
-        }
-
         segment.MarkAsUpdated(currentUser.Id);
         dataChange.To(segment);
 
