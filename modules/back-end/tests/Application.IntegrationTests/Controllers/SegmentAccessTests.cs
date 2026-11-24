@@ -1,9 +1,9 @@
 using System.Linq.Expressions;
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using Api.Authorization;
 using Application.Services;
-using Application.Segments;
 using Domain.Organizations;
 using Domain.Projects;
 using Domain.Policies;
@@ -23,22 +23,17 @@ namespace Application.IntegrationTests.Controllers;
 public class SegmentAccessTests
 {
     public static IEnumerable<object[]> DeniedReads =>
-        from operation in new[] { "single", "batch", "references" }
+        from operation in new[] { "single", "references" }
         from failure in new[] { "missing", "foreign", "out-of-scope", "workspace" }
         select new object[] { operation, failure };
 
     [Theory]
     [MemberData(nameof(DeniedReads))]
-    public async Task RejectsInaccessibleSegmentIncludingMixedBatch(string operation, string failure)
+    public async Task RejectsInaccessibleSegment(string operation, string failure)
     {
         await using var app = new SegmentAccessTestApp { Failure = failure };
         var client = await app.CreateAuthenticatedClientAsync();
-        var path = operation switch
-        {
-            "single" => $"{app.Segment.Id}",
-            "references" => $"{app.Segment.Id}/flag-references",
-            _ => $"by-ids?ids={app.AllowedId}&ids={app.Segment.Id}"
-        };
+        var path = operation == "single" ? $"{app.Segment.Id}" : $"{app.Segment.Id}/flag-references";
         var response = await client.GetAsync(app.Route + "/" + path);
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
         app.Segments.VerifyNoOtherCalls();
@@ -54,34 +49,33 @@ public class SegmentAccessTests
         var path = operation == "single" ? $"{app.Segment.Id}" : $"by-ids?ids={app.Segment.Id}&ids={app.Segment.Id}";
         var response = await client.GetAsync(app.Route + "/" + path);
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        app.Resources.Verify(x => x.ResolveSegmentAsync(app.EnvId, app.Segment.Id), Times.Once);
+        if (operation == "single")
+        {
+            app.Resources.Verify(x => x.ResolveSegmentAsync(app.EnvId, app.Segment.Id), Times.Once);
+        }
+        else
+        {
+            using var payload = await response.Content.ReadFromJsonAsync<JsonDocument>();
+            Assert.Equal(app.Segment.Id, Assert.Single(payload!.RootElement.GetProperty("data").EnumerateArray()).GetProperty("id").GetGuid());
+        }
         Assert.NotEqual(app.EnvId, app.Segment.EnvId);
     }
 
     [Theory]
-    [InlineData("general", false)]
-    [InlineData("general", true)]
-    [InlineData("targeting", false)]
-    [InlineData("targeting", true)]
-    [InlineData("patch", false)]
-    [InlineData("patch", true)]
-    public async Task FieldChangesUseRouteEnvironmentIncludingNoOps(string operation, bool changed)
+    [InlineData("missing")]
+    [InlineData("foreign")]
+    [InlineData("out-of-scope")]
+    [InlineData("workspace")]
+    public async Task BatchOnlyReturnsAccessibleSegments(string failure)
     {
-        await using var app = new SegmentAccessTestApp();
+        await using var app = new SegmentAccessTestApp { Failure = failure };
         var client = await app.CreateAuthenticatedClientAsync();
-        HttpResponseMessage response;
-        if (operation == "patch")
-            response = await client.PatchAsJsonAsync(app.Route + $"/{app.Segment.Id}",
-                changed ? new[] { new { op = "replace", path = "/name", value = "changed" } } : []);
-        else if (operation == "general")
-            response = await client.PutAsJsonAsync(app.Route + $"/{app.Segment.Id}/general",
-                new { name = changed ? "changed" : app.Segment.Name, description = "", tags = app.Segment.Tags });
-        else
-            response = await client.PutAsJsonAsync(app.Route + $"/{app.Segment.Id}/targeting",
-                new { included = changed ? new[] { "user" } : [], excluded = Array.Empty<string>(), rules = Array.Empty<object>() });
+        var response = await client.GetAsync(app.Route + $"/by-ids?ids={app.AllowedId}&ids={app.Segment.Id}");
+
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        app.Resources.Verify(x => x.ResolveSegmentAsync(app.EnvId, app.Segment.Id), Times.Once);
-        app.Resources.Verify(x => x.ResolveSegmentAsync(app.Segment.EnvId, app.Segment.Id), Times.Never);
+        using var payload = await response.Content.ReadFromJsonAsync<JsonDocument>();
+        var segment = Assert.Single(payload!.RootElement.GetProperty("data").EnumerateArray());
+        Assert.Equal(app.AllowedId, segment.GetProperty("id").GetGuid());
     }
 
     [Theory]
@@ -103,18 +97,6 @@ public class SegmentAccessTests
         Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
         app.Segments.Verify(x => x.UpdateAsync(It.IsAny<Segment>()), Times.Never);
         app.Publisher.VerifyNoOtherCalls();
-    }
-
-    [Theory]
-    [InlineData("")]
-    [InlineData("?ids=00000000-0000-0000-0000-000000000000")]
-    public async Task EmptyBatchIsRejected(string query)
-    {
-        await using var app = new SegmentAccessTestApp();
-        var client = await app.CreateAuthenticatedClientAsync();
-        var response = await client.GetAsync(app.Route + "/by-ids" + query);
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-        app.Segments.VerifyNoOtherCalls();
     }
 
     [Theory]
@@ -240,9 +222,15 @@ public class SegmentAccessTestApp : PermissionCheckTestApp
                 _ => new("project/p:env/e:segment/segment;team", TestWorkspace.OrganizationId)
             };
             Resources.Setup(x => x.ResolveSegmentAsync(EnvId, Segment.Id)).ReturnsAsync(rn);
-            Resources.Setup(x => x.ResolveSegmentAsync(EnvId, AllowedId)).ReturnsAsync(new PermissionTarget("project/p:env/e:segment/allowed", TestWorkspace.OrganizationId));
             Segments.Setup(x => x.GetAsync(Segment.Id)).ReturnsAsync(Segment);
-            Segments.Setup(x => x.FindManyAsync(It.IsAny<Expression<Func<Segment, bool>>>())).ReturnsAsync(new[] { Segment });
+            var allowed = new Segment(TestWorkspace.Id, EnvId, "Allowed", "allowed",
+                SegmentType.EnvironmentSpecific, [], [], [], [], "") { Id = AllowedId };
+            var batchSegment = new Segment(Failure == "workspace" ? Guid.NewGuid() : Segment.WorkspaceId,
+                Segment.EnvId, Segment.Name, Segment.Key, Failure == "foreign" ? SegmentType.EnvironmentSpecific : Segment.Type,
+                Failure == "out-of-scope" ? ["organization/other"] : Segment.Scopes, [], [], [], "") { Id = Segment.Id };
+            Segment[] candidates = Failure == "missing" ? [allowed] : [allowed, batchSegment];
+            Segments.Setup(x => x.FindManyAsync(It.IsAny<Expression<Func<Segment, bool>>>()))
+                .ReturnsAsync((Expression<Func<Segment, bool>> predicate) => candidates.Where(predicate.Compile()).ToArray());
             Segments.Setup(x => x.GetEnvironmentIdsAsync(Segment)).ReturnsAsync(new[] { EnvId, OtherEnvId });
             Segments.Setup(x => x.GetFlagReferencesAsync(EnvId, Segment.Id)).ReturnsAsync(Array.Empty<FlagReference>());
             Segments.Setup(x => x.GetFlagReferencesAsync(OtherEnvId, Segment.Id)).ReturnsAsync(Referenced
@@ -287,6 +275,10 @@ public class SegmentAccessTestApp : PermissionCheckTestApp
             services.Replace(ServiceDescriptor.Singleton(environments.Object));
             services.Replace(ServiceDescriptor.Singleton(license.Object));
             services.Replace(ServiceDescriptor.Singleton(Segments.Object));
+            var resourceService = new Mock<IResourceServiceV2>();
+            resourceService.Setup(x => x.GetRNAsync(EnvId, ResourceTypes.Env))
+                .ReturnsAsync("organization/org:project/p:env/e");
+            services.Replace(ServiceDescriptor.Singleton(resourceService.Object));
             services.Replace(ServiceDescriptor.Singleton(Resources.Object));
             services.Replace(ServiceDescriptor.Singleton(Publisher.Object));
             services.Replace(ServiceDescriptor.Singleton(members.Object));

@@ -69,7 +69,7 @@ public class SegmentController : ApiControllerBase
     {
         var request = new GetSegmentByIds
         {
-            OrgId = OrgId,
+            WorkspaceId = WorkspaceId,
             EnvId = envId,
             Ids = ids
         };
