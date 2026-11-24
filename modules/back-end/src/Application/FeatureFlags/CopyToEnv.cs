@@ -3,26 +3,45 @@ using Application.Bases;
 using Domain.AuditLogs;
 using Domain.FeatureFlags;
 using Domain.Policies;
-using System.Text.Json.Serialization;
 
 namespace Application.FeatureFlags;
 
-public class CopyToEnv : IRequest<CopyToEnvResult>
+public class CopyToEnvPayload
+{
+    public CopyToEnvPrecheckResult[] PrecheckResults { get; set; } = [];
+
+    public ICollection<Guid> FlagIds { get; set; } = Array.Empty<Guid>();
+}
+
+public class CopyToEnv : CopyToEnvPayload, IRequest<CopyToEnvResult>
 {
     public Guid WorkspaceId { get; set; }
 
-    public Guid OrgId {get; set;}
+    public Guid OrgId { get; set; }
 
-    [JsonIgnore]
-    public PolicyStatement[] Permissions { get; set; } = [];
+    public PolicyStatement[] Permissions { get; }
 
     public Guid SourceEnvId { get; set; }
 
     public Guid TargetEnvId { get; set; }
 
-    public CopyToEnvPrecheckResult[] PrecheckResults { get; set; } = [];
+    public CopyToEnv(
+        Guid workspaceId,
+        Guid orgId,
+        Guid sourceEnvId,
+        Guid targetEnvId,
+        PolicyStatement[] permissions,
+        CopyToEnvPayload payload)
+    {
+        WorkspaceId = workspaceId;
+        OrgId = orgId;
+        SourceEnvId = sourceEnvId;
+        TargetEnvId = targetEnvId;
+        Permissions = permissions;
 
-    public ICollection<Guid> FlagIds { get; set; } = Array.Empty<Guid>();
+        PrecheckResults = payload.PrecheckResults;
+        FlagIds = payload.FlagIds;
+    }
 }
 
 public class CopyToEnvValidator : AbstractValidator<CopyToEnv>

@@ -8,7 +8,6 @@ using Application.Segments;
 using Domain.Policies;
 using Domain.Segments;
 using Microsoft.AspNetCore.JsonPatch.SystemTextJson;
-using Microsoft.AspNetCore.JsonPatch.SystemTextJson.Operations;
 
 namespace Api.Controllers;
 
@@ -86,12 +85,10 @@ public class SegmentController : ApiControllerBase
     [OpenApi]
     [HttpPost]
     [Authorize(Permissions.CreateSegment)]
-    public async Task<ApiResponse<Segment>> CreateAsync(Guid envId, CreateSegment request)
+    public async Task<ApiResponse<Segment>> CreateAsync(Guid envId, CreateSegmentPayload payload)
     {
-        request.WorkspaceId = WorkspaceId;
-        request.EnvId = envId;
+        var request = new CreateSegment(WorkspaceId, OrgId, envId, payload);
 
-        request.OrgId = OrgId;
         var segment = await Mediator.Send(request);
         return Ok(segment);
     }
@@ -105,12 +102,10 @@ public class SegmentController : ApiControllerBase
     [OpenApi]
     [HttpPut("{segmentId:guid}/name")]
     [Authorize(Permissions.UpdateSegmentName)]
-    public async Task<ApiResponse<bool>> UpdateNameAsync(Guid segmentId, UpdateName request)
+    public async Task<ApiResponse<bool>> UpdateNameAsync(Guid segmentId, UpdateNamePayload payload)
     {
-        request.Id = segmentId;
+        var request = new UpdateName(WorkspaceId, OrgId, segmentId, payload);
 
-        request.WorkspaceId = WorkspaceId;
-        request.OrgId = OrgId;
         var success = await Mediator.Send(request);
         return Ok(success);
     }
@@ -124,12 +119,10 @@ public class SegmentController : ApiControllerBase
     [OpenApi]
     [HttpPut("{segmentId:guid}/description")]
     [Authorize(Permissions.UpdateSegmentDescription)]
-    public async Task<ApiResponse<bool>> UpdateDescriptionAsync(Guid segmentId, UpdateDescription request)
+    public async Task<ApiResponse<bool>> UpdateDescriptionAsync(Guid segmentId, UpdateDescriptionPayload payload)
     {
-        request.Id = segmentId;
+        var request = new UpdateDescription(WorkspaceId, OrgId, segmentId, payload);
 
-        request.WorkspaceId = WorkspaceId;
-        request.OrgId = OrgId;
         var success = await Mediator.Send(request);
         return Ok(success);
     }
@@ -149,10 +142,8 @@ public class SegmentController : ApiControllerBase
         UpdateGeneralPayload payload)
     {
         var permissions = await GetRequestPermissionsAsync();
-        var request = new UpdateGeneral(segmentId, payload, permissions) { EnvId = envId };
+        var request = new UpdateGeneral(WorkspaceId, OrgId, envId, segmentId, payload, permissions);
 
-        request.WorkspaceId = WorkspaceId;
-        request.OrgId = OrgId;
         var success = await Mediator.Send(request);
         return Ok(success);
     }
@@ -168,10 +159,8 @@ public class SegmentController : ApiControllerBase
     public async Task<ApiResponse<bool>> UpdateTargetingAsync(Guid envId, Guid segmentId, UpdateTargetingPayload payload)
     {
         var permissions = await GetRequestPermissionsAsync();
-        var request = new UpdateTargeting(segmentId, payload, permissions) { EnvId = envId };
+        var request = new UpdateTargeting(WorkspaceId, OrgId, envId, segmentId, payload, permissions);
 
-        request.WorkspaceId = WorkspaceId;
-        request.OrgId = OrgId;
         var success = await Mediator.Send(request);
         return Ok(success);
     }
@@ -195,14 +184,14 @@ public class SegmentController : ApiControllerBase
 
         var request = new PatchSegment
         {
+            WorkspaceId = WorkspaceId,
+            OrgId = OrgId,
             EnvId = envId,
             Id = segmentId,
             Patch = patch,
             Permissions = await GetRequestPermissionsAsync()
         };
 
-        request.WorkspaceId = WorkspaceId;
-        request.OrgId = OrgId;
         var result = await Mediator.Send(request);
         return result.Success ? Ok(true) : Error<bool>(result.Message);
     }
@@ -221,15 +210,8 @@ public class SegmentController : ApiControllerBase
         Guid segmentId,
         [FromBody] ResourceChangeRequest? changeRequest = null)
     {
-        var request = new ArchiveSegment
-        {
-            EnvId = envId,
-            Id = segmentId,
-            Comment = changeRequest?.Comment ?? string.Empty
-        };
+        var request = new ArchiveSegment(WorkspaceId, OrgId, envId, segmentId, changeRequest);
 
-        request.WorkspaceId = WorkspaceId;
-        request.OrgId = OrgId;
         var success = await Mediator.Send(request);
         return Ok(success);
     }
@@ -247,14 +229,8 @@ public class SegmentController : ApiControllerBase
         Guid segmentId,
         [FromBody] ResourceChangeRequest? changeRequest = null)
     {
-        var request = new RestoreSegment
-        {
-            Id = segmentId,
-            Comment = changeRequest?.Comment ?? string.Empty
-        };
+        var request = new RestoreSegment(WorkspaceId, OrgId, segmentId, changeRequest);
 
-        request.WorkspaceId = WorkspaceId;
-        request.OrgId = OrgId;
         var success = await Mediator.Send(request);
         return Ok(success);
     }
@@ -272,14 +248,8 @@ public class SegmentController : ApiControllerBase
         Guid segmentId,
         [FromBody] ResourceChangeRequest? changeRequest = null)
     {
-        var request = new DeleteSegment
-        {
-            Id = segmentId,
-            Comment = changeRequest?.Comment ?? string.Empty
-        };
+        var request = new DeleteSegment(WorkspaceId, OrgId, segmentId, changeRequest);
 
-        request.WorkspaceId = WorkspaceId;
-        request.OrgId = OrgId;
         var success = await Mediator.Send(request);
         return Ok(success);
     }
@@ -349,12 +319,10 @@ public class SegmentController : ApiControllerBase
     [OpenApi]
     [HttpPut("{segmentId:guid}/tags")]
     [Authorize(Permissions.UpdateSegmentTags)]
-    public async Task<ApiResponse<bool>> SetTagsAsync(Guid segmentId, SetTags request)
+    public async Task<ApiResponse<bool>> SetTagsAsync(Guid segmentId, SetTagsPayload payload)
     {
-        request.Id = segmentId;
+        var request = new SetTags(WorkspaceId, OrgId, segmentId, payload);
 
-        request.WorkspaceId = WorkspaceId;
-        request.OrgId = OrgId;
         var success = await Mediator.Send(request);
         return Ok(success);
     }

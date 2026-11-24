@@ -67,10 +67,8 @@ public class FlagCopyValidatorTests
         Assert.True(result.IsValid);
     }
 
-    private static CopyFlagSettings NewSettingsRequest(FlagSettingCopyOptions options) => new()
-    {
-        SourceEnvId = Guid.NewGuid(), TargetEnvId = Guid.NewGuid(), Key = "flag", Options = options
-    };
+    private static CopyFlagSettings NewSettingsRequest(FlagSettingCopyOptions options) =>
+        new(Guid.Empty, Guid.Empty, Guid.NewGuid(), Guid.NewGuid(), "flag", [], new() { Options = options });
 
     [Theory]
     [InlineData("copy", "null-ids", "FlagIds")]
@@ -110,14 +108,15 @@ public class FlagCopyValidatorTests
         ICollection<Guid> ids = invalid == "null-ids" ? null! : invalid == "empty-ids" ? [] : [Guid.NewGuid()];
         return operation switch
         {
-            "copy" => new CopyToEnvValidator().Validate(new CopyToEnv() { SourceEnvId = source, TargetEnvId = target, FlagIds = ids }),
+            "copy" => new CopyToEnvValidator().Validate(new CopyToEnv(Guid.Empty, Guid.Empty, source, target, [], new() { FlagIds = ids })),
             "preview" => new CopyToEnvPrecheckValidator().Validate(new CopyToEnvPrecheck() { SourceEnvId = source, TargetEnvId = target, FlagIds = ids }),
-            _ => new CopyFlagSettingsValidator().Validate(new CopyFlagSettings()
-            {
-                SourceEnvId = source, TargetEnvId = target,
-                Key = invalid switch { "null-key" => null!, "empty-key" => "", "blank-key" => " \t", _ => "flag" },
-                Options = invalid == "options" ? null! : new(false, new(false, "overwrite"), new(false, "overwrite"), false, false)
-            })
+            _ => new CopyFlagSettingsValidator().Validate(new CopyFlagSettings(
+                Guid.Empty, Guid.Empty, source, target,
+                invalid switch { "null-key" => null!, "empty-key" => "", "blank-key" => " \t", _ => "flag" },
+                [], new()
+                {
+                    Options = invalid == "options" ? null! : new(false, new(false, "overwrite"), new(false, "overwrite"), false, false)
+                }))
         };
     }
 }

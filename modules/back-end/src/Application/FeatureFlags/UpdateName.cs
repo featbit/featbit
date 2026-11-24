@@ -5,26 +5,34 @@ using Domain.AuditLogs;
 
 namespace Application.FeatureFlags;
 
-public class UpdateName : ResourceChangeRequest, IRequest<Guid>
+public class UpdateNamePayload : ResourceChangeRequest
+{
+    /// <summary>
+    /// The new name for the feature flag
+    /// </summary>
+    public string Name { get; set; }
+}
+
+public class UpdateName : UpdateNamePayload, IRequest<Guid>
 {
     public Guid WorkspaceId { get; set; }
 
     public Guid OrgId { get; set; }
 
-    /// <summary>
-    /// The ID of the environment the feature flag belongs to. Retrieved from the URL path.
-    /// </summary>
     public Guid EnvId { get; set; }
 
-    /// <summary>
-    /// The unique key of the feature flag. Retrieved from the URL path.
-    /// </summary>
     public string Key { get; set; }
 
-    /// <summary>
-    /// The new name for the feature flag
-    /// </summary>
-    public string Name { get; set; }
+    public UpdateName(Guid workspaceId, Guid orgId, Guid envId, string key, UpdateNamePayload payload)
+    {
+        WorkspaceId = workspaceId;
+        OrgId = orgId;
+        EnvId = envId;
+        Key = key;
+
+        Name = payload.Name;
+        Comment = payload.Comment;
+    }
 }
 
 public class UpdateNameValidator : AbstractValidator<UpdateName>

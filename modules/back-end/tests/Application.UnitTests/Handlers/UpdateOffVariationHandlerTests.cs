@@ -36,7 +36,9 @@ public class UpdateOffVariationHandlerTests
         var currentUser = new Mock<ICurrentUser>();
         var publisher = new Mock<IPublisher>();
         var sut = new UpdateOffVariationHandler(service.Object, currentUser.Object, publisher.Object);
-        var request = new UpdateOffVariation { Revision = Guid.NewGuid(), OffVariationId = "v-on" };
+        var request = new UpdateOffVariation(
+            Guid.Empty, Guid.Empty, flag.EnvId, flag.Key,
+            new UpdateOffVariationPayload { Revision = Guid.NewGuid(), OffVariationId = "v-on" });
 
         await Assert.ThrowsAsync<ConflictException>(() => sut.Handle(request, CancellationToken.None));
 
@@ -53,7 +55,9 @@ public class UpdateOffVariationHandlerTests
         currentUser.SetupGet(x => x.Id).Returns(Guid.NewGuid());
         var publisher = new Mock<IPublisher>();
         var sut = new UpdateOffVariationHandler(service.Object, currentUser.Object, publisher.Object);
-        var request = new UpdateOffVariation { Revision = flag.Revision, OffVariationId = "v-on" };
+        var request = new UpdateOffVariation(
+            Guid.Empty, Guid.Empty, flag.EnvId, flag.Key,
+            new UpdateOffVariationPayload { Revision = flag.Revision, OffVariationId = "v-on" });
 
         var newRevision = await sut.Handle(request, CancellationToken.None);
 

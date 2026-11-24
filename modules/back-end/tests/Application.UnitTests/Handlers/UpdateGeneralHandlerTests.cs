@@ -50,6 +50,8 @@ public class UpdateGeneralHandlerTests
         string? description = null,
         string[]? tags = null) =>
         new(
+            Guid.Empty,
+            OrganizationId,
             flag.EnvId,
             flag.Key,
             new UpdateGeneralPayload
@@ -59,7 +61,7 @@ public class UpdateGeneralHandlerTests
                 Tags = tags ?? flag.Tags,
                 Comment = "General settings update"
             },
-            permissions) { OrgId = OrganizationId };
+            permissions);
 
     private static UpdateGeneralHandler BuildSut(
         FeatureFlag flag,

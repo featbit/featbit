@@ -20,6 +20,22 @@ public class UpdateInsightCollection : UpdateInsightCollectionPayload, IRequest<
     public Guid EnvId { get; set; }
 
     public string Key { get; set; }
+
+    public UpdateInsightCollection(
+        Guid workspaceId,
+        Guid orgId,
+        Guid envId,
+        string key,
+        UpdateInsightCollectionPayload payload)
+    {
+        WorkspaceId = workspaceId;
+        OrgId = orgId;
+        EnvId = envId;
+        Key = key;
+
+        Enabled = payload.Enabled;
+        Comment = payload.Comment;
+    }
 }
 
 public class UpdateInsightCollectionHandler(

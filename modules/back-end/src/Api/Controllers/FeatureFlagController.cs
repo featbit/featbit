@@ -144,14 +144,7 @@ public class FeatureFlagController : ApiControllerBase
         string key,
         [FromBody] ResourceChangeRequest? changeRequest = null)
     {
-        var request = new ArchiveFeatureFlag
-        {
-            WorkspaceId = WorkspaceId,
-            OrgId = OrgId,
-            EnvId = envId,
-            Key = key,
-            Comment = changeRequest?.Comment ?? string.Empty
-        };
+        var request = new ArchiveFeatureFlag(WorkspaceId, OrgId, envId, key, changeRequest);
 
         var success = await Mediator.Send(request);
         return Ok(success);
@@ -171,15 +164,8 @@ public class FeatureFlagController : ApiControllerBase
         string key,
         [FromBody] ResourceChangeRequest? changeRequest = null)
     {
-        var request = new RestoreFeatureFlag
-        {
-            EnvId = envId,
-            Key = key,
-            Comment = changeRequest?.Comment ?? string.Empty
-        };
+        var request = new RestoreFeatureFlag(WorkspaceId, OrgId, envId, key, changeRequest);
 
-        request.WorkspaceId = WorkspaceId;
-        request.OrgId = OrgId;
         var success = await Mediator.Send(request);
         return Ok(success);
     }
@@ -198,15 +184,8 @@ public class FeatureFlagController : ApiControllerBase
         string key,
         [FromBody] ResourceChangeRequest? changeRequest = null)
     {
-        var request = new DeleteFeatureFlag
-        {
-            EnvId = envId,
-            Key = key,
-            Comment = changeRequest?.Comment ?? string.Empty
-        };
+        var request = new DeleteFeatureFlag(WorkspaceId, OrgId, envId, key, changeRequest);
 
-        request.WorkspaceId = WorkspaceId;
-        request.OrgId = OrgId;
         var success = await Mediator.Send(request);
         return Ok(success);
     }
@@ -226,16 +205,8 @@ public class FeatureFlagController : ApiControllerBase
         bool status,
         [FromBody] ResourceChangeRequest? changeRequest = null)
     {
-        var request = new ToggleFeatureFlag
-        {
-            EnvId = envId,
-            Key = key,
-            Status = status,
-            Comment = changeRequest?.Comment ?? string.Empty
-        };
+        var request = new ToggleFeatureFlag(WorkspaceId, OrgId, envId, key, status, changeRequest);
 
-        request.WorkspaceId = WorkspaceId;
-        request.OrgId = OrgId;
         var revision = await Mediator.Send(request);
         return Ok(revision);
     }
@@ -249,13 +220,10 @@ public class FeatureFlagController : ApiControllerBase
     [OpenApi]
     [HttpPut("{key}/name")]
     [Authorize(Permissions.UpdateFlagName)]
-    public async Task<ApiResponse<Guid>> UpdateNameAsync(Guid envId, string key, UpdateName request)
+    public async Task<ApiResponse<Guid>> UpdateNameAsync(Guid envId, string key, UpdateNamePayload payload)
     {
-        request.Key = key;
-        request.EnvId = envId;
+        var request = new UpdateName(WorkspaceId, OrgId, envId, key, payload);
 
-        request.WorkspaceId = WorkspaceId;
-        request.OrgId = OrgId;
         var revision = await Mediator.Send(request);
         return Ok(revision);
     }
@@ -269,13 +237,13 @@ public class FeatureFlagController : ApiControllerBase
     [OpenApi]
     [HttpPut("{key}/description")]
     [Authorize(Permissions.UpdateFlagDescription)]
-    public async Task<ApiResponse<Guid>> UpdateDescriptionAsync(Guid envId, string key, UpdateDescription request)
+    public async Task<ApiResponse<Guid>> UpdateDescriptionAsync(
+        Guid envId,
+        string key,
+        UpdateDescriptionPayload payload)
     {
-        request.Key = key;
-        request.EnvId = envId;
+        var request = new UpdateDescription(WorkspaceId, OrgId, envId, key, payload);
 
-        request.WorkspaceId = WorkspaceId;
-        request.OrgId = OrgId;
         var revision = await Mediator.Send(request);
         return Ok(revision);
     }
@@ -295,10 +263,8 @@ public class FeatureFlagController : ApiControllerBase
         UpdateGeneralPayload payload)
     {
         var permissions = await GetRequestPermissionsAsync();
-        var request = new UpdateGeneral(envId, key, payload, permissions);
+        var request = new UpdateGeneral(WorkspaceId, OrgId, envId, key, payload, permissions);
 
-        request.WorkspaceId = WorkspaceId;
-        request.OrgId = OrgId;
         var revision = await Mediator.Send(request);
         return Ok(revision);
     }
@@ -309,18 +275,13 @@ public class FeatureFlagController : ApiControllerBase
     [OpenApi]
     [HttpPut("{key}/insight-collection")]
     [Authorize(Permissions.CanAccessEnv)]
-    public async Task<ApiResponse<Guid>> UpdateInsightCollectionAsync(Guid envId, string key, UpdateInsightCollectionPayload payload)
+    public async Task<ApiResponse<Guid>> UpdateInsightCollectionAsync(
+        Guid envId,
+        string key,
+        UpdateInsightCollectionPayload payload)
     {
-        var request = new UpdateInsightCollection
-        {
-            EnvId = envId,
-            Key = key,
-            Enabled = payload.Enabled,
-            Comment = payload.Comment
-        };
+        var request = new UpdateInsightCollection(WorkspaceId, OrgId, envId, key, payload);
 
-        request.WorkspaceId = WorkspaceId;
-        request.OrgId = OrgId;
         return Ok(await Mediator.Send(request));
     }
 
@@ -333,13 +294,13 @@ public class FeatureFlagController : ApiControllerBase
     [OpenApi]
     [HttpPut("{key}/off-variation")]
     [Authorize(Permissions.UpdateFlagOffVariation)]
-    public async Task<ApiResponse<Guid>> UpdateOffVariationAsync(Guid envId, string key, UpdateOffVariation request)
+    public async Task<ApiResponse<Guid>> UpdateOffVariationAsync(
+        Guid envId,
+        string key,
+        UpdateOffVariationPayload payload)
     {
-        request.Key = key;
-        request.EnvId = envId;
+        var request = new UpdateOffVariation(WorkspaceId, OrgId, envId, key, payload);
 
-        request.WorkspaceId = WorkspaceId;
-        request.OrgId = OrgId;
         var revision = await Mediator.Send(request);
         return Ok(revision);
     }
@@ -363,14 +324,14 @@ public class FeatureFlagController : ApiControllerBase
 
         var request = new PatchFeatureFlag
         {
+            WorkspaceId = WorkspaceId,
+            OrgId = OrgId,
             EnvId = envId,
             Key = key,
             Patch = patch,
             Permissions =  await GetRequestPermissionsAsync()
         };
 
-        request.WorkspaceId = WorkspaceId;
-        request.OrgId = OrgId;
         var result = await Mediator.Send(request);
         return result.Success ? Ok(true) : Error<bool>(result.Message);
     }
@@ -384,13 +345,10 @@ public class FeatureFlagController : ApiControllerBase
     [OpenApi]
     [HttpPut("{key}/variations")]
     [Authorize(Permissions.UpdateFlagVariations)]
-    public async Task<ApiResponse<Guid>> UpdateVariationsAsync(Guid envId, string key, UpdateVariations request)
+    public async Task<ApiResponse<Guid>> UpdateVariationsAsync(Guid envId, string key, UpdateVariationsPayload payload)
     {
-        request.Key = key;
-        request.EnvId = envId;
+        var request = new UpdateVariations(WorkspaceId, OrgId, envId, key, payload);
 
-        request.WorkspaceId = WorkspaceId;
-        request.OrgId = OrgId;
         var revision = await Mediator.Send(request);
         return Ok(revision);
     }
@@ -418,12 +376,9 @@ public class FeatureFlagController : ApiControllerBase
 
     [Authorize(LicenseFeatures.Schedule)]
     [HttpPost("{key}/schedules")]
-    public async Task<ApiResponse<bool>> CreateScheduleAsync(Guid envId, string key, CreateFlagSchedule request)
+    public async Task<ApiResponse<bool>> CreateScheduleAsync(Guid envId, string key, CreateFlagSchedulePayload payload)
     {
-        request.WorkspaceId = WorkspaceId;
-        request.OrgId = OrgId;
-        request.Key = key;
-        request.EnvId = envId;
+        var request = new CreateFlagSchedule(WorkspaceId, OrgId, envId, key, payload);
 
         var success = await Mediator.Send(request);
         return Ok(success);
@@ -453,10 +408,8 @@ public class FeatureFlagController : ApiControllerBase
     public async Task<ApiResponse<Guid>> UpdateTargetingAsync(Guid envId, string key, UpdateTargetingPayload payload)
     {
         var permissions = await GetRequestPermissionsAsync();
-        var request = new UpdateTargeting(OrgId, envId, key, payload, permissions);
+        var request = new UpdateTargeting(WorkspaceId, OrgId, envId, key, payload, permissions);
 
-        request.WorkspaceId = WorkspaceId;
-        request.OrgId = OrgId;
         var revision = await Mediator.Send(request);
         return Ok(revision);
     }
@@ -481,13 +434,13 @@ public class FeatureFlagController : ApiControllerBase
     }
 
     [HttpPost("copy-to-env/{targetEnvId:guid}")]
-    public async Task<ApiResponse<CopyToEnvResult>> CopyToEnvAsync(Guid envId, Guid targetEnvId, CopyToEnv request)
+    public async Task<ApiResponse<CopyToEnvResult>> CopyToEnvAsync(
+        Guid envId,
+        Guid targetEnvId,
+        CopyToEnvPayload payload)
     {
-        request.Permissions = await GetRequestPermissionsAsync();
-        request.SourceEnvId = envId;
-        request.TargetEnvId = targetEnvId;
-        request.WorkspaceId = WorkspaceId;
-        request.OrgId = OrgId;
+        var permissions = await GetRequestPermissionsAsync();
+        var request = new CopyToEnv(WorkspaceId, OrgId, envId, targetEnvId, permissions, payload);
 
         var copyToEnvResult = await Mediator.Send(request);
         return Ok(copyToEnvResult);
@@ -504,10 +457,7 @@ public class FeatureFlagController : ApiControllerBase
     [Authorize(Permissions.CloneFlag)]
     public async Task<ApiResponse<bool>> CloneAsync(Guid envId, string key, CloneFlagPayload payload)
     {
-        payload.EnvId = envId;
-        payload.OriginFlagKey = key;
-
-        var request = new CloneFlag(WorkspaceId, OrgId, payload);
+        var request = new CloneFlag(WorkspaceId, OrgId, envId, key, payload);
 
         var flag = await Mediator.Send(request);
         return Ok(flag);
@@ -515,11 +465,12 @@ public class FeatureFlagController : ApiControllerBase
 
     [Authorize(LicenseFeatures.FlagComparison)]
     [HttpPost("compare-overview")]
-    public async Task<ApiResponse<PagedResult<CompareFlagOverview>>> GetCompareOverviewAsync(Guid envId, GetCompareFlagOverview request)
+    public async Task<ApiResponse<PagedResult<CompareFlagOverview>>> GetCompareOverviewAsync(
+        Guid envId,
+        GetCompareFlagOverviewPayload payload)
     {
-        request.OrgId = OrgId;
-        request.Permissions = await GetRequestPermissionsAsync();
-        request.SourceEnvId = envId;
+        var permissions = await GetRequestPermissionsAsync();
+        var request = new GetCompareFlagOverview(OrgId, envId, permissions, payload);
 
         var overview = await Mediator.Send(request);
         return Ok(overview);
@@ -544,14 +495,14 @@ public class FeatureFlagController : ApiControllerBase
 
     [Authorize(LicenseFeatures.FlagComparison)]
     [HttpPut("{key}/copy-settings-to/{targetEnvId:guid}")]
-    public async Task<ApiResponse<bool>> CopySettingsAsync(Guid envId, string key, Guid targetEnvId, CopyFlagSettings request)
+    public async Task<ApiResponse<bool>> CopySettingsAsync(
+        Guid envId,
+        string key,
+        Guid targetEnvId,
+        CopyFlagSettingsPayload payload)
     {
-        request.Permissions = await GetRequestPermissionsAsync();
-        request.Key = key;
-        request.SourceEnvId = envId;
-        request.TargetEnvId = targetEnvId;
-        request.WorkspaceId = WorkspaceId;
-        request.OrgId = OrgId;
+        var permissions = await GetRequestPermissionsAsync();
+        var request = new CopyFlagSettings(WorkspaceId, OrgId, envId, targetEnvId, key, permissions, payload);
 
         var success = await Mediator.Send(request);
         return Ok(success);
@@ -586,13 +537,10 @@ public class FeatureFlagController : ApiControllerBase
     [OpenApi]
     [HttpPut("{key}/tags")]
     [Authorize(Permissions.UpdateFlagTags)]
-    public async Task<ApiResponse<bool>> SetTagsAsync(Guid envId, string key, SetTags request)
+    public async Task<ApiResponse<bool>> SetTagsAsync(Guid envId, string key, SetTagsPayload payload)
     {
-        request.EnvId = envId;
-        request.Key = key;
+        var request = new SetTags(WorkspaceId, OrgId, envId, key, payload);
 
-        request.WorkspaceId = WorkspaceId;
-        request.OrgId = OrgId;
         var success = await Mediator.Send(request);
         return Ok(success);
     }

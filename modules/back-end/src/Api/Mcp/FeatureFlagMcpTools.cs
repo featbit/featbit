@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using Api.Authorization;
+using Application.AuditLogs;
 using Application.Bases;
 using Application.Bases.Exceptions;
 using Application.FeatureFlags;
@@ -70,15 +71,14 @@ public class FeatureFlagMcpTools(
         var envId = await ResolveAuthorizedEnvIdAsync(experimentId);
         await EnsurePermissionAsync(envId, Permissions.ToggleFlag, key);
 
-        var revision = await mediator.Send(new ToggleFeatureFlag
-        {
-            WorkspaceId = GetHttpContext().Request.WorkspaceId(),
-            OrgId = GetHttpContext().Request.OrganizationId(),
-            EnvId = envId,
-            Key = key,
-            Status = request.IsEnabled!.Value,
-            Comment = request.Comment ?? string.Empty
-        });
+        var revision = await mediator.Send(new ToggleFeatureFlag(
+            GetHttpContext().Request.WorkspaceId(),
+            GetHttpContext().Request.OrganizationId(),
+            envId,
+            key,
+            request.IsEnabled!.Value,
+            new ResourceChangeRequest { Comment = request.Comment }
+        ));
 
         return new FeatureFlagToggleResult
         {
@@ -112,12 +112,13 @@ public class FeatureFlagMcpTools(
                 Comment = request.Comment ?? string.Empty
             };
             var revision = await mediator.Send(new UpdateTargeting(
+                GetHttpContext().Request.WorkspaceId(),
                 GetHttpContext().Request.OrganizationId(),
                 envId,
                 key,
                 payload,
                 await requestPermissions.GetAsync(GetHttpContext())
-            ) { WorkspaceId = GetHttpContext().Request.WorkspaceId() });
+            ));
 
             return new FeatureFlagTargetingUpdateResult
             {

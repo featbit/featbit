@@ -14,6 +14,16 @@ public class DeleteFeatureFlag : ResourceChangeRequest, IRequest<bool>
     public Guid EnvId { get; set; }
 
     public string Key { get; set; }
+
+    public DeleteFeatureFlag(Guid workspaceId, Guid orgId, Guid envId, string key, ResourceChangeRequest payload = null)
+    {
+        WorkspaceId = workspaceId;
+        OrgId = orgId;
+        EnvId = envId;
+        Key = key;
+
+        Comment = payload?.Comment ?? string.Empty;
+    }
 }
 
 public class DeleteFeatureFlagHandler : IRequestHandler<DeleteFeatureFlag, bool>

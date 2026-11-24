@@ -94,7 +94,11 @@ public class FeatureFlagValidatorTests
     [Fact]
     public void UpdateName_LongerThan128_NameInvalidError()
     {
-        var result = new UpdateNameValidator().Validate(new UpdateName { Name = new string('x', 129) });
+        var request = new UpdateName(
+            Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "flag",
+            new UpdateNamePayload { Name = new string('x', 129) });
+
+        var result = new UpdateNameValidator().Validate(request);
 
         Assert.Contains(result.Errors, e => e.ErrorCode == ErrorCodes.Invalid("name"));
     }
@@ -103,6 +107,8 @@ public class FeatureFlagValidatorTests
     public void UpdateGeneral_EmptyName_NameRequiredError()
     {
         var request = new UpdateGeneral(
+            Guid.NewGuid(),
+            Guid.NewGuid(),
             Guid.NewGuid(),
             "flag",
             new UpdateGeneralPayload
@@ -121,7 +127,11 @@ public class FeatureFlagValidatorTests
     [Fact]
     public void UpdateOffVariation_Empty_OffVariationIdRequiredError()
     {
-        var result = new UpdateOffVariationValidator().Validate(new UpdateOffVariation { OffVariationId = string.Empty });
+        var request = new UpdateOffVariation(
+            Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "flag",
+            new UpdateOffVariationPayload { OffVariationId = string.Empty });
+
+        var result = new UpdateOffVariationValidator().Validate(request);
 
         Assert.Contains(result.Errors, e => e.ErrorCode == ErrorCodes.Required("offVariationId"));
     }
@@ -129,7 +139,9 @@ public class FeatureFlagValidatorTests
     [Fact]
     public void UpdateVariations_NullValueOk_VariationsValid()
     {
-        var req = new UpdateVariations { Variations = new[] { V("a") } };
+        var req = new UpdateVariations(
+            Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "flag",
+            new UpdateVariationsPayload { Variations = new[] { V("a") } });
 
         var result = new UpdateVariationsValidator().Validate(req);
 
@@ -139,7 +151,9 @@ public class FeatureFlagValidatorTests
     [Fact]
     public void UpdateVariations_OneInvalid_VariationsInvalidError()
     {
-        var req = new UpdateVariations { Variations = new[] { V("a"), new Variation { Id = "" } } };
+        var req = new UpdateVariations(
+            Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "flag",
+            new UpdateVariationsPayload { Variations = new[] { V("a"), new Variation { Id = "" } } });
 
         var result = new UpdateVariationsValidator().Validate(req);
 
@@ -167,7 +181,8 @@ public class FeatureFlagValidatorTests
     [Fact]
     public void GetCompareFlagOverview_MissingTargets_TargetEnvIdsInvalidError()
     {
-        var req = new GetCompareFlagOverview { SourceEnvId = Guid.NewGuid(), TargetEnvIds = Array.Empty<Guid>() };
+        var req = new GetCompareFlagOverview(
+            Guid.NewGuid(), Guid.NewGuid(), [], new GetCompareFlagOverviewPayload { TargetEnvIds = [] });
 
         var result = new GetCompareFlagOverviewValidator().Validate(req);
 
@@ -177,7 +192,9 @@ public class FeatureFlagValidatorTests
     [Fact]
     public void CloneFlag_InvalidKeyChars_KeyInvalidError()
     {
-        var req = new CloneFlag(Guid.NewGuid(), Guid.NewGuid(), new CloneFlagPayload { Name = "n", Key = "bad key" });
+        var req = new CloneFlag(
+            Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), "origin",
+            new CloneFlagPayload { Name = "n", Key = "bad key" });
 
         var result = new CloneFlagValidator().Validate(req);
 
