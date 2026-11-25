@@ -16,16 +16,42 @@ public class OrganizationPermissions(
     public async Task<PolicyStatement[]> GetAsync(Guid organizationId)
     {
         var context = contextAccessor.HttpContext;
-        if (context == null || organizationId == Guid.Empty) return [];
-        if (organizationId == context.Request.OrganizationId()) return await requestPermissions.GetAsync(context);
+        if (context == null || organizationId == Guid.Empty)
+        {
+            return [];
+        }
+
+        // If the requested organization matches the one in the current context, use the request permissions directly.
+        if (organizationId == context.Request.OrganizationId())
+        {
+            return await requestPermissions.GetAsync(context);
+        }
+
         // Access tokens are bound to a single organization, including personal tokens.
-        if (context.User.Identity?.AuthenticationType != Schemes.JwtBearer) return [];
-        if (_permissions.TryGetValue(organizationId, out var cached)) return cached;
+        if (context.User.Identity?.AuthenticationType != Schemes.JwtBearer)
+        {
+            return [];
+        }
+
+        if (_permissions.TryGetValue(organizationId, out var cached))
+        {
+            return cached;
+        }
+
         var userClaim = context.User.FindFirst(UserClaims.Id)?.Value;
-        if (!Guid.TryParse(userClaim, out var userId)) return [];
+        if (!Guid.TryParse(userClaim, out var userId))
+        {
+            return [];
+        }
+
         var organization = await organizations.FindOneAsync(x =>
-            x.Id == organizationId && x.WorkspaceId == context.Request.WorkspaceId());
-        if (organization == null || !await organizations.ContainsUserAsync(organizationId, userId)) return [];
+            x.Id == organizationId && x.WorkspaceId == context.Request.WorkspaceId()
+        );
+        if (organization == null || !await organizations.ContainsUserAsync(organizationId, userId))
+        {
+            return [];
+        }
+
         var policies = await members.GetPermissionsAsync(organizationId, userId);
         _permissions.Add(organizationId, policies);
         return policies;
