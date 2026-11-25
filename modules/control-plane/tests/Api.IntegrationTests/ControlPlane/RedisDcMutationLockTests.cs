@@ -127,6 +127,57 @@ public sealed class RedisDcMutationLockTests : IntegrationTestBase, IAsyncLifeti
         Assert.Null(await CreateLock().TryAcquireAsync(DcId));
     }
 
+    /// <summary>A client whose commands can be made to fail, as when the connection to the DC's Redis drops.</summary>
+    private sealed class FailingRedisClient(IConnectionMultiplexer connection) : IRedisClient
+    {
+        public bool Fail { get; set; }
+
+        public IConnectionMultiplexer Connection { get; } = connection;
+
+        public IDatabase GetDatabase() =>
+            Fail ? throw new RedisConnectionException(ConnectionFailureType.SocketFailure, "down") : Connection.GetDatabase();
+    }
+
+    /// <summary>
+    /// A holder whose renewals fail must stop counting the lock as held before the lock can expire and be taken by another
+    /// replica, not after: here at TTL minus one renew interval (2 s), while the key still exists until 3 s.
+    /// </summary>
+    [DockerFact]
+    public async Task Lease_WhoseRenewalsFail_StopsBeingHeldBeforeTheLockCanExpire()
+    {
+        var client = new FailingRedisClient(_mux);
+        var dcLock = new RedisDcMutationLock(
+            [new DcRedisConnection(DcId, client, IsLocal: true)],
+            NullLogger<RedisDcMutationLock>.Instance,
+            ttl: TimeSpan.FromSeconds(3),
+            renewInterval: TimeSpan.FromSeconds(1));
+        var lease = await dcLock.TryAcquireAsync(DcId);
+        Assert.NotNull(lease);
+        client.Fail = true;
+
+        await Task.Delay(TimeSpan.FromSeconds(1.2));
+        Assert.True(lease.IsHeld);
+        await Task.Delay(TimeSpan.FromSeconds(1.2)); // 2.4 s after taking it
+
+        Assert.False(lease.IsHeld);
+        Assert.True(await _mux.GetDatabase().KeyExistsAsync(RedisDcMutationLock.LockKey(DcId))); // not expired yet
+        client.Fail = false;
+        await lease.DisposeAsync();
+    }
+
+    [DockerFact]
+    public async Task PrunedRecord_CannotBeRead_ReturnsNullRatherThanAnEmptyRecord()
+    {
+        var client = new FailingRedisClient(_mux);
+        var dcLock = new RedisDcMutationLock(
+            [new DcRedisConnection(DcId, client, IsLocal: true)], NullLogger<RedisDcMutationLock>.Instance);
+        await using var lease = await dcLock.AcquireAsync(DcId);
+        client.Fail = true;
+
+        Assert.Null(await lease.ReadPrunedAsync(DateTimeOffset.UtcNow.AddHours(-1)));
+        client.Fail = false;
+    }
+
     [DockerFact]
     public async Task PrunedRecord_IsSharedBetweenReplicas_AndForgetsOldEntries()
     {
@@ -142,6 +193,7 @@ public sealed class RedisDcMutationLockTests : IntegrationTestBase, IAsyncLifeti
         await using var other = await CreateLock().AcquireAsync(DcId);
         var pruned = await other.ReadPrunedAsync(now.AddHours(-1));
 
+        Assert.NotNull(pruned);
         Assert.Equal([recent], pruned.Keys);
         Assert.Equal(now.ToUnixTimeMilliseconds(), pruned[recent].ToUnixTimeMilliseconds());
         Assert.False(await _mux.GetDatabase().HashExistsAsync(RedisDcMutationLock.PrunedKey(DcId), old.ToString()));

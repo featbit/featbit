@@ -3,14 +3,21 @@ using Api.Infrastructure.Caches;
 namespace Api.Application.ControlPlane;
 
 /// <summary>
+/// Thrown by a backfill that may not write a DC's flags and segments because it does not hold the DC's lock, or cannot
+/// read what was pruned from the DC. Its callers try again later.
+/// </summary>
+public sealed class DcLockUnavailableException(string message) : Exception(message);
+
+/// <summary>
 /// A lease on one DC's Redis, held by a backfill or a prune of that DC. Disposing it releases the lock. It also gives
 /// access to the DC's shared record of what prunes removed and when, which every replica reads and writes.
 /// </summary>
 public interface IDcLease : IAsyncDisposable
 {
     /// <summary>
-    /// Whether the lock is still held. It turns <c>false</c> when renewing fails for long enough that the lock may have
-    /// expired and been taken by another replica, or when the lock could not be taken at all.
+    /// Whether the lock is still held. It turns <c>false</c> when the lock could not be taken, when a renewal finds another
+    /// holder, and when the last confirmed renewal is older than the TTL minus one renew interval, so that a holder stops
+    /// before its lock can expire and be taken by another replica, not after.
     /// </summary>
     bool IsHeld { get; }
 
@@ -22,9 +29,10 @@ public interface IDcLease : IAsyncDisposable
 
     /// <summary>
     /// Reads what prunes on any replica removed from the DC, and when, forgetting what was removed before
-    /// <paramref name="forgetBefore"/>. Returns an empty map if the record cannot be read.
+    /// <paramref name="forgetBefore"/>. Returns <c>null</c> if the record cannot be read: an unreadable record is not an
+    /// empty one, and a backfill must not write from a snapshot without it.
     /// </summary>
-    Task<IReadOnlyDictionary<Guid, DateTimeOffset>> ReadPrunedAsync(DateTimeOffset forgetBefore);
+    Task<IReadOnlyDictionary<Guid, DateTimeOffset>?> ReadPrunedAsync(DateTimeOffset forgetBefore);
 }
 
 /// <summary>
@@ -39,9 +47,8 @@ public interface IDcMutationLock
 {
     /// <summary>
     /// Waits until the lock for <paramref name="dcId"/> is free and takes it. If the lock cannot be used (an unknown DC,
-    /// or a Redis error), it logs and returns a lease whose <see cref="IDcLease.IsHeld"/> is <c>false</c>, so that a
-    /// backfill still runs: its writes go to the same Redis and are only-advance guarded, while a prune, which needs the
-    /// lock to delete anything, cannot run against that Redis either.
+    /// or a Redis error), it logs and returns a lease whose <see cref="IDcLease.IsHeld"/> is <c>false</c>; the caller
+    /// then must not change the DC's flags or segments.
     /// </summary>
     Task<IDcLease> AcquireAsync(string dcId, CancellationToken cancellationToken = default);
 
@@ -88,15 +95,16 @@ public sealed class RedisDcMutationLock(
             cancellationToken.ThrowIfCancellationRequested();
             try
             {
+                var attemptedAt = Environment.TickCount64;
                 if (await connection.Client.GetDatabase().LockTakeAsync(LockKey(dcId), token, _ttl))
                 {
-                    return new Lease(this, connection, dcId, token);
+                    return new Lease(this, connection, dcId, token, attemptedAt);
                 }
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 _logger.LogWarning(
-                    ex, "DC lock: could not take the lock for DC {DcId}; continuing without it.", dcId);
+                    ex, "DC lock: could not take the lock for DC {DcId}.", dcId);
                 return NotHeld.Instance;
             }
 
@@ -115,8 +123,9 @@ public sealed class RedisDcMutationLock(
         var token = Guid.NewGuid().ToString("N");
         try
         {
+            var attemptedAt = Environment.TickCount64;
             return await connection.Client.GetDatabase().LockTakeAsync(LockKey(dcId), token, _ttl)
-                ? new Lease(this, connection, dcId, token)
+                ? new Lease(this, connection, dcId, token, attemptedAt)
                 : null;
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
@@ -145,8 +154,8 @@ public sealed class RedisDcMutationLock(
 
         public Task<bool> RecordPrunedAsync(Guid id, DateTimeOffset at) => Task.FromResult(false);
 
-        public Task<IReadOnlyDictionary<Guid, DateTimeOffset>> ReadPrunedAsync(DateTimeOffset forgetBefore) =>
-            Task.FromResult<IReadOnlyDictionary<Guid, DateTimeOffset>>(new Dictionary<Guid, DateTimeOffset>());
+        public Task<IReadOnlyDictionary<Guid, DateTimeOffset>?> ReadPrunedAsync(DateTimeOffset forgetBefore) =>
+            Task.FromResult<IReadOnlyDictionary<Guid, DateTimeOffset>?>(null);
 
         public ValueTask DisposeAsync() => ValueTask.CompletedTask;
     }
@@ -161,16 +170,25 @@ public sealed class RedisDcMutationLock(
         private readonly Task _renewing;
         private volatile bool _held = true;
 
-        public Lease(RedisDcMutationLock owner, DcRedisConnection connection, string dcId, string token)
+        // When the lock was last known to be held for a full TTL from then on: the start of the take or extension that
+        // succeeded (Environment.TickCount64, so a wall-clock change does not move it).
+        private long _confirmedAt;
+
+        public Lease(RedisDcMutationLock owner, DcRedisConnection connection, string dcId, string token, long takenAt)
         {
             _owner = owner;
             _connection = connection;
             _dcId = dcId;
             _token = token;
+            _confirmedAt = takenAt;
             _renewing = Task.Run(RenewAsync);
         }
 
-        public bool IsHeld => _held;
+        // Held until a renewal finds another holder, and only while the lock has more than one renew interval left before
+        // it could expire, so a holder whose renewals fail stops before another replica can take the lock.
+        public bool IsHeld =>
+            _held && Environment.TickCount64 - Interlocked.Read(ref _confirmedAt)
+            < (_owner._ttl - _owner._renewInterval).TotalMilliseconds;
 
         public async Task<bool> RecordPrunedAsync(Guid id, DateTimeOffset at)
         {
@@ -188,7 +206,7 @@ public sealed class RedisDcMutationLock(
             }
         }
 
-        public async Task<IReadOnlyDictionary<Guid, DateTimeOffset>> ReadPrunedAsync(DateTimeOffset forgetBefore)
+        public async Task<IReadOnlyDictionary<Guid, DateTimeOffset>?> ReadPrunedAsync(DateTimeOffset forgetBefore)
         {
             var result = new Dictionary<Guid, DateTimeOffset>();
             try
@@ -222,6 +240,7 @@ public sealed class RedisDcMutationLock(
             {
                 _owner._logger.LogWarning(
                     ex, "DC lock: could not read what was pruned from DC {DcId}.", _dcId);
+                return null;
             }
 
             return result;
@@ -231,7 +250,6 @@ public sealed class RedisDcMutationLock(
         // extensions keep failing until the TTL since the last good one has passed.
         private async Task RenewAsync()
         {
-            var lastRenewed = DateTimeOffset.UtcNow;
             while (!_stop.IsCancellationRequested)
             {
                 try
@@ -245,9 +263,10 @@ public sealed class RedisDcMutationLock(
 
                 try
                 {
+                    var attemptedAt = Environment.TickCount64;
                     if (await _connection.Client.GetDatabase().LockExtendAsync(LockKey(_dcId), _token, _owner._ttl))
                     {
-                        lastRenewed = DateTimeOffset.UtcNow;
+                        Interlocked.Exchange(ref _confirmedAt, attemptedAt);
                         continue;
                     }
 
@@ -257,7 +276,7 @@ public sealed class RedisDcMutationLock(
                 }
                 catch (Exception ex)
                 {
-                    if (DateTimeOffset.UtcNow - lastRenewed >= _owner._ttl)
+                    if (Environment.TickCount64 - Interlocked.Read(ref _confirmedAt) >= _owner._ttl.TotalMilliseconds)
                     {
                         _owner._logger.LogWarning(
                             ex, "DC lock: the lock for DC {DcId} could not be renewed and may have expired.", _dcId);

@@ -433,15 +433,23 @@ public sealed class DcBackfiller(
         var snapshotTakenAt = snapshot.TakenAt ?? _time.GetUtcNow();
 
         // What prunes on any replica removed from this DC. The lock is held for the whole run, so no prune adds to it
-        // meanwhile and one read is enough.
-        var sharedPruned = lease is { IsHeld: true }
-            ? await lease.ReadPrunedAsync(_time.GetUtcNow() - PrunedMarkerRetention)
-            : NoSharedMarkers;
+        // meanwhile and one read is enough. Without the lock, or without the record, a prune on another replica may have
+        // removed something this snapshot still holds, and writing it would bring it back; the backfill fails instead and
+        // its caller tries again later.
+        var sharedPruned = NoSharedMarkers;
+        if (lease is not null)
+        {
+            EnsureStillHeld(lease, dcId);
+            sharedPruned = await lease.ReadPrunedAsync(_time.GetUtcNow() - PrunedMarkerRetention)
+                           ?? throw new DcLockUnavailableException(
+                               $"What was pruned from DC {dcId} could not be read; not backfilling it now.");
+        }
 
         var acceptedFlags = 0;
         foreach (var flag in snapshot.Flags)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            EnsureStillHeld(lease, dcId);
 
             // Something a prune removed from this DC after the snapshot was read must not be written back from it.
             if (WasPrunedSince(dcId, flag.Id, snapshotTakenAt, sharedPruned))
@@ -482,6 +490,7 @@ public sealed class DcBackfiller(
         foreach (var segment in snapshot.Segments)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            EnsureStillHeld(lease, dcId);
 
             if (WasPrunedSince(dcId, segment.Id, snapshotTakenAt, sharedPruned))
             {
@@ -1072,6 +1081,19 @@ public sealed class DcBackfiller(
         || (sharedPruned.TryGetValue(id, out var sharedAt) && sharedAt > snapshotTakenAt - SharedMarkerClockSkew);
 
     private static readonly TimeSpan SharedMarkerClockSkew = TimeSpan.FromMinutes(1);
+
+    /// <summary>
+    /// Stops a backfill whose lock is not held (it could not be taken, or it was lost), before it writes another flag or
+    /// segment: another replica may hold the lock by now and have pruned what this snapshot still holds.
+    /// </summary>
+    private static void EnsureStillHeld(IDcLease? lease, string dcId)
+    {
+        if (lease is { IsHeld: false })
+        {
+            throw new DcLockUnavailableException(
+                $"The lock for DC {dcId} is not held; not writing its flags and segments now.");
+        }
+    }
 
     private static readonly IReadOnlyDictionary<Guid, DateTimeOffset> NoSharedMarkers = new Dictionary<Guid, DateTimeOffset>();
 

@@ -400,6 +400,8 @@ public class DcBackfillerTests
 
         public bool CannotRecord { get; set; }
 
+        public bool CannotRead { get; set; }
+
         public bool Lost { get; set; }
 
         public async Task<IDcLease> AcquireAsync(string dcId, CancellationToken cancellationToken = default)
@@ -435,11 +437,16 @@ public class DcBackfillerTests
                 return Task.FromResult(true);
             }
 
-            public Task<IReadOnlyDictionary<Guid, DateTimeOffset>> ReadPrunedAsync(DateTimeOffset forgetBefore)
+            public Task<IReadOnlyDictionary<Guid, DateTimeOffset>?> ReadPrunedAsync(DateTimeOffset forgetBefore)
             {
+                if (!taken || owner.CannotRead)
+                {
+                    return Task.FromResult<IReadOnlyDictionary<Guid, DateTimeOffset>?>(null);
+                }
+
                 lock (owner.Pruned)
                 {
-                    return Task.FromResult<IReadOnlyDictionary<Guid, DateTimeOffset>>(
+                    return Task.FromResult<IReadOnlyDictionary<Guid, DateTimeOffset>?>(
                         owner.Pruned.Where(e => e.Value >= forgetBefore).ToDictionary());
                 }
             }
@@ -1695,24 +1702,69 @@ public class DcBackfillerTests
     }
 
     /// <summary>
-    /// If the DC's lock cannot be used, the backfill still writes (its writes go to the same Redis and are only-advance
-    /// guarded) but removes nothing, and the prune looks again.
+    /// Without the DC's lock, a prune on another replica may have removed something the snapshot still holds, so the
+    /// backfill writes no flag or segment and fails, for its caller to try again.
     /// </summary>
     [Fact]
-    public async Task BackfillDcAsync_LockCannotBeTaken_StillWritesButRemovesNothing()
+    public async Task BackfillDcAsync_LockCannotBeTaken_WritesNothingAndFails()
+    {
+        var f = CreatePruneFixture(dcLock: new FakeDcLock { CannotBeTaken = true });
+        f.East.Setup(s => s.UpsertFlagIfNewerAsync(It.IsAny<FeatureFlag>())).ReturnsAsync(true);
+
+        await Assert.ThrowsAsync<DcLockUnavailableException>(
+            () => f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot));
+
+        f.East.Verify(s => s.UpsertFlagIfNewerAsync(It.IsAny<FeatureFlag>()), Times.Never);
+        f.East.Verify(s => s.GetFlagIndexAsync(It.IsAny<Guid>()), Times.Never);
+    }
+
+    /// <summary>
+    /// An unreadable pruned record is not an empty one: the backfill writes nothing and fails.
+    /// </summary>
+    [Fact]
+    public async Task BackfillDcAsync_PrunedRecordCannotBeRead_WritesNothingAndFails()
+    {
+        var f = CreatePruneFixture(dcLock: new FakeDcLock { CannotRead = true });
+        f.East.Setup(s => s.UpsertFlagIfNewerAsync(It.IsAny<FeatureFlag>())).ReturnsAsync(true);
+
+        await Assert.ThrowsAsync<DcLockUnavailableException>(
+            () => f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot));
+
+        f.East.Verify(s => s.UpsertFlagIfNewerAsync(It.IsAny<FeatureFlag>()), Times.Never);
+    }
+
+    /// <summary>
+    /// A backfill whose lock is lost part way stops before its next write, since another replica may hold the lock and
+    /// prune by then.
+    /// </summary>
+    [Fact]
+    public async Task BackfillDcAsync_LockIsLostPartWay_StopsWritingAndFails()
+    {
+        var dcLock = new FakeDcLock();
+        var f = CreatePruneFixture(dcLock: dcLock);
+        f.East.Setup(s => s.UpsertFlagIfNewerAsync(It.IsAny<FeatureFlag>()))
+            .Callback(() => dcLock.Lost = true) // lost right after the first write
+            .ReturnsAsync(true);
+
+        await Assert.ThrowsAsync<DcLockUnavailableException>(
+            () => f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot));
+
+        f.East.Verify(s => s.UpsertFlagIfNewerAsync(It.IsAny<FeatureFlag>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task BackfillDcAsync_LockCannotBeTaken_FreesTheDcForTheNextAttempt()
     {
         var dcLock = new FakeDcLock { CannotBeTaken = true };
         var f = CreatePruneFixture(dcLock: dcLock);
-        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ReturnsAsync(Index((Guid.NewGuid(), OldScore)));
         f.East.Setup(s => s.UpsertFlagIfNewerAsync(It.IsAny<FeatureFlag>())).ReturnsAsync(true);
+        await Assert.ThrowsAsync<DcLockUnavailableException>(
+            () => f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot));
 
+        dcLock.CannotBeTaken = false;
         var result = await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
 
-        Assert.Equal(2, result); // both live flags written, nothing pruned
-        f.East.Verify(s => s.GetFlagIndexAsync(It.IsAny<Guid>()), Times.Never); // the prune did not start
-        f.East.Verify(s => s.DeleteFlagAsync(It.IsAny<Guid>(), It.IsAny<Guid>()), Times.Never);
-        f.Time.Advance(TimeSpan.FromSeconds(61));
-        Assert.Equal(["east"], f.Sut.TakeDcsDueForPrune());
+        Assert.Equal(2, result); // not coalesced with the failed attempt, and both live flags written
     }
 
     [Fact]
