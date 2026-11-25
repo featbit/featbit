@@ -179,7 +179,8 @@ public sealed class DcBackfiller(
     IMessageProducer messageProducer,
     IConfiguration configuration,
     ILogger<DcBackfiller> logger,
-    TimeProvider? timeProvider = null) : IDcBackfiller
+    TimeProvider? timeProvider = null,
+    IDcMutationLock? dcMutationLock = null) : IDcBackfiller
 {
     private const string PruneSection = "ControlPlane:CacheReconcile:PruneDeleted";
     private const int DefaultMaxRemovalsPerRun = 200;
@@ -291,14 +292,30 @@ public sealed class DcBackfiller(
 
             try
             {
-                var removed = await PruneSafelyAsync(dcId, mode, snapshot, composite, cancellationToken);
-                if (removed > 0)
+                // The same, across replicas: a backfill or prune of this DC on another replica holds the DC's lock.
+                IDcLease? lease = null;
+                if (dcMutationLock is not null)
                 {
-                    // The DC's clients may hold what was removed, as the backfill's own refresh would have told them.
-                    await PublishClientRefreshAsync(dcId);
+                    lease = await dcMutationLock.TryAcquireAsync(dcId, cancellationToken);
+                    if (lease is null)
+                    {
+                        logger.LogDebug(
+                            "DC prune: DC {DcId} is locked by a backfill or prune elsewhere; skipping.", dcId);
+                        return IDcBackfiller.Skipped;
+                    }
                 }
 
-                return removed;
+                await using (lease)
+                {
+                    var removed = await PruneSafelyAsync(dcId, mode, snapshot, composite, lease, cancellationToken);
+                    if (removed > 0)
+                    {
+                        // The DC's clients may hold what was removed, as the backfill's own refresh would have told them.
+                        await PublishClientRefreshAsync(dcId);
+                    }
+
+                    return removed;
+                }
             }
             finally
             {
@@ -372,7 +389,11 @@ public sealed class DcBackfiller(
             await gate.WaitAsync(cancellationToken);
             try
             {
-                return await RunBackfillAsync(dcId, mode, snapshot, composite, cancellationToken);
+                // The same, across replicas: wait for a backfill or prune of this DC on another replica to finish.
+                await using var lease = dcMutationLock is null
+                    ? null
+                    : await dcMutationLock.AcquireAsync(dcId, cancellationToken);
+                return await RunBackfillAsync(dcId, mode, snapshot, composite, lease, cancellationToken);
             }
             finally
             {
@@ -398,6 +419,7 @@ public sealed class DcBackfiller(
         ConsistencyMode mode,
         CommittedSnapshot snapshot,
         CompositeRedisCacheService composite,
+        IDcLease? lease,
         CancellationToken cancellationToken)
     {
         // #105: "repaired" must report writes the only-advance guard actually ACCEPTED, not merely
@@ -410,13 +432,19 @@ public sealed class DcBackfiller(
         // A snapshot without a time is taken to be as old as this run.
         var snapshotTakenAt = snapshot.TakenAt ?? _time.GetUtcNow();
 
+        // What prunes on any replica removed from this DC. The lock is held for the whole run, so no prune adds to it
+        // meanwhile and one read is enough.
+        var sharedPruned = lease is { IsHeld: true }
+            ? await lease.ReadPrunedAsync(_time.GetUtcNow() - PrunedMarkerRetention)
+            : NoSharedMarkers;
+
         var acceptedFlags = 0;
         foreach (var flag in snapshot.Flags)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
             // Something a prune removed from this DC after the snapshot was read must not be written back from it.
-            if (WasPrunedSince(dcId, flag.Id, snapshotTakenAt))
+            if (WasPrunedSince(dcId, flag.Id, snapshotTakenAt, sharedPruned))
             {
                 logger.LogDebug(
                     "DC backfill: not writing flag {FlagId} to DC {DcId}; a prune removed it after the snapshot was taken.",
@@ -455,7 +483,7 @@ public sealed class DcBackfiller(
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (WasPrunedSince(dcId, segment.Id, snapshotTakenAt))
+            if (WasPrunedSince(dcId, segment.Id, snapshotTakenAt, sharedPruned))
             {
                 logger.LogDebug(
                     "DC backfill: not writing segment {SegmentId} to DC {DcId}; a prune removed it after the snapshot was taken.",
@@ -502,7 +530,7 @@ public sealed class DcBackfiller(
         // Remove what this DC still lists for flags and segments the source of truth no longer has, i.e.
         // a delete this DC missed (see PruneDeletedAsync). A failure here must not fail the backfill that
         // already repaired the DC, so it is logged and the backfill carries on.
-        var pruned = await PruneSafelyAsync(dcId, mode, snapshot, composite, cancellationToken);
+        var pruned = await PruneSafelyAsync(dcId, mode, snapshot, composite, lease, cancellationToken);
 
         // #105: report ACCEPTED vs ATTEMPTED so the log is honest about how much of this backfill
         // actually changed state — a DC that was already fully synced legitimately shows 0/N
@@ -565,12 +593,21 @@ public sealed class DcBackfiller(
         ConsistencyMode mode,
         CommittedSnapshot snapshot,
         CompositeRedisCacheService composite,
+        IDcLease? lease,
         CancellationToken cancellationToken)
     {
         var pruneMode = ReadPruneMode(logInvalid: true);
         if (pruneMode == PruneMode.Off)
         {
             return new PruneOutcome(0, null);
+        }
+
+        // Without the DC's lock, a backfill on another replica could write back what this removes, so nothing is
+        // removed and the prune looks again in a minute.
+        if (lease is { IsHeld: false })
+        {
+            logger.LogWarning("DC backfill: DC {DcId}'s lock is not held; not pruning it now.", dcId);
+            return new PruneOutcome(0, _time.GetUtcNow().AddSeconds(UnreadableIndexRetrySeconds));
         }
 
         if (snapshot.Flags.Count == 0 && snapshot.Segments.Count == 0)
@@ -844,10 +881,46 @@ public sealed class DcBackfiller(
             return new PruneOutcome(0, retryAt);
         }
 
-        // 3. Remove, in this DC only.
+        // 3. Remove, in this DC only. If the DC's lock is lost part way, another replica may be writing to the DC, so the
+        // rest waits for the next look.
+        bool LockLost()
+        {
+            if (lease is not { IsHeld: false })
+            {
+                return false;
+            }
+
+            logger.LogWarning("DC backfill: lost DC {DcId}'s lock while pruning; stopping until the next look.", dcId);
+            Defer(now.AddSeconds(UnreadableIndexRetrySeconds));
+            return true;
+        }
+
+        // Every replica's backfill reads the DC's shared record of what was pruned, so the removal is recorded there
+        // first; an entry whose removal could not be recorded is not removed, and is looked at again.
+        async Task<bool> RecordPrunedAsync(Guid id)
+        {
+            if (lease is null || await lease.RecordPrunedAsync(id, _time.GetUtcNow()))
+            {
+                return true;
+            }
+
+            Defer(now.AddSeconds(UnreadableIndexRetrySeconds));
+            return false;
+        }
+
         var removed = 0;
         foreach (var (envId, id) in flagsToRemove)
         {
+            if (LockLost())
+            {
+                return new PruneOutcome(removed, retryAt);
+            }
+
+            if (!await RecordPrunedAsync(id))
+            {
+                continue;
+            }
+
             MarkPruned(dcId, id); // before the delete, so a backfill with an older snapshot does not write it back
             if (await composite.DeleteFlagFromDcAsync(dcId, envId, id))
             {
@@ -867,6 +940,16 @@ public sealed class DcBackfiller(
 
         foreach (var (id, envs) in segmentsToRemove)
         {
+            if (LockLost())
+            {
+                return new PruneOutcome(removed, retryAt);
+            }
+
+            if (!await RecordPrunedAsync(id))
+            {
+                continue;
+            }
+
             MarkPruned(dcId, id);
             if (await composite.DeleteSegmentFromDcAsync(dcId, envs, id))
             {
@@ -894,6 +977,7 @@ public sealed class DcBackfiller(
         ConsistencyMode mode,
         CommittedSnapshot snapshot,
         CompositeRedisCacheService composite,
+        IDcLease? lease,
         CancellationToken cancellationToken)
     {
         // A snapshot without a time is taken to be as new as this run, as the backfill does.
@@ -901,7 +985,7 @@ public sealed class DcBackfiller(
 
         try
         {
-            var outcome = await PruneDeletedAsync(dcId, mode, snapshot, composite, cancellationToken);
+            var outcome = await PruneDeletedAsync(dcId, mode, snapshot, composite, lease, cancellationToken);
             RecordPruneOutcome(dcId, snapshotTakenAt, outcome.RetryAt);
             return outcome.Removed;
         }
@@ -972,9 +1056,21 @@ public sealed class DcBackfiller(
     /// <summary>
     /// Whether a prune removed <paramref name="id"/> from <paramref name="dcId"/> after
     /// <paramref name="snapshotTakenAt"/>, so that a snapshot taken then must not write it back.
+    /// <para>
+    /// <paramref name="sharedPruned"/> is the DC's record of what prunes on any replica removed. Those times come from
+    /// another replica's clock, so they are compared with a margin for clock skew: an entry pruned up to
+    /// <see cref="SharedMarkerClockSkew"/> before the snapshot was taken is also skipped. Skipping is the safe side, since
+    /// a pruned entry was confirmed absent from the database and ids are never reused.
+    /// </para>
     /// </summary>
-    private bool WasPrunedSince(string dcId, Guid id, DateTimeOffset snapshotTakenAt) =>
-        _prunedAt.TryGetValue((dcId, id), out var prunedAt) && prunedAt > snapshotTakenAt;
+    private bool WasPrunedSince(
+        string dcId, Guid id, DateTimeOffset snapshotTakenAt, IReadOnlyDictionary<Guid, DateTimeOffset> sharedPruned) =>
+        (_prunedAt.TryGetValue((dcId, id), out var prunedAt) && prunedAt > snapshotTakenAt)
+        || (sharedPruned.TryGetValue(id, out var sharedAt) && sharedAt > snapshotTakenAt - SharedMarkerClockSkew);
+
+    private static readonly TimeSpan SharedMarkerClockSkew = TimeSpan.FromMinutes(1);
+
+    private static readonly IReadOnlyDictionary<Guid, DateTimeOffset> NoSharedMarkers = new Dictionary<Guid, DateTimeOffset>();
 
     /// <summary>
     /// Reads the prune mode. A dry run when the setting is absent or blank: the step reports what it would remove and

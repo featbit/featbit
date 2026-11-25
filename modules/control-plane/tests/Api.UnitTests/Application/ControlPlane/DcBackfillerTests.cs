@@ -65,14 +65,16 @@ public class DcBackfillerTests
         ICacheService compositeCache,
         IServiceScopeFactory? scopeFactory = null,
         IConfiguration? configuration = null,
-        TimeProvider? timeProvider = null) =>
+        TimeProvider? timeProvider = null,
+        IDcMutationLock? dcLock = null) =>
         new(
             scopeFactory ?? Mock.Of<IServiceScopeFactory>(),
             compositeCache,
             _producer.Object,
             configuration ?? PruneSettings("Off"),
             NullLogger<DcBackfiller>.Instance,
-            timeProvider);
+            timeProvider,
+            dcLock);
 
     /// <summary>
     /// Builds the pruning settings, leaving out any value that is not given.
@@ -339,11 +341,13 @@ public class DcBackfillerTests
         CommittedSnapshot Snapshot,
         Guid EnvA,
         Guid EnvB,
-        FakeTimeProvider Time);
+        FakeTimeProvider Time,
+        Func<IDcMutationLock, DcBackfiller> Replica);
 
     // East is the DC under test and lists whatever a test sets up. Every value it holds is archived and the
-    // database holds nothing beyond the snapshot, so a test changes only the one thing it is about.
-    private PruneFixture CreatePruneFixture(string? mode = "On", int? maxRemovals = null)
+    // database holds nothing beyond the snapshot, so a test changes only the one thing it is about. Replica builds
+    // another backfiller over the same Redis and database, as a second control-plane replica, with the given lock.
+    private PruneFixture CreatePruneFixture(string? mode = "On", int? maxRemovals = null, IDcMutationLock? dcLock = null)
     {
         var east = new Mock<ICacheService>();
         // An index that nothing was set up for is empty, as in Redis, not unreadable (a null answer).
@@ -373,13 +377,83 @@ public class DcBackfillerTests
         var snapshot = EmptySnapshot with { Flags = [liveA, liveB] };
 
         var time = new FakeTimeProvider(Now);
-        var sut = CreateSut(
-            composite,
-            services.BuildServiceProvider().GetRequiredService<IServiceScopeFactory>(),
-            PruneSettings(mode, maxRemovals),
-            time);
+        var scopes = services.BuildServiceProvider().GetRequiredService<IServiceScopeFactory>();
+        var settings = PruneSettings(mode, maxRemovals);
+        var sut = CreateSut(composite, scopes, settings, time, dcLock);
 
-        return new PruneFixture(sut, east, west, flags, segments, snapshot, liveA.EnvId, liveB.EnvId, time);
+        return new PruneFixture(
+            sut, east, west, flags, segments, snapshot, liveA.EnvId, liveB.EnvId, time,
+            replicaLock => CreateSut(composite, scopes, settings, time, replicaLock));
+    }
+
+    /// <summary>
+    /// An in-memory <see cref="IDcMutationLock"/> for one DC, shared by the backfillers of a test as the Redis lock is
+    /// shared by replicas. It can fail to be taken, fail to record a removal, or be lost while held.
+    /// </summary>
+    private sealed class FakeDcLock : IDcMutationLock
+    {
+        private readonly SemaphoreSlim _lock = new(1, 1);
+
+        public Dictionary<Guid, DateTimeOffset> Pruned { get; } = new();
+
+        public bool CannotBeTaken { get; set; }
+
+        public bool CannotRecord { get; set; }
+
+        public bool Lost { get; set; }
+
+        public async Task<IDcLease> AcquireAsync(string dcId, CancellationToken cancellationToken = default)
+        {
+            if (CannotBeTaken)
+            {
+                return new Lease(this, taken: false);
+            }
+
+            await _lock.WaitAsync(cancellationToken);
+            return new Lease(this, taken: true);
+        }
+
+        public Task<IDcLease?> TryAcquireAsync(string dcId, CancellationToken cancellationToken = default) =>
+            Task.FromResult<IDcLease?>(!CannotBeTaken && _lock.Wait(0) ? new Lease(this, taken: true) : null);
+
+        private sealed class Lease(FakeDcLock owner, bool taken) : IDcLease
+        {
+            public bool IsHeld => taken && !owner.Lost;
+
+            public Task<bool> RecordPrunedAsync(Guid id, DateTimeOffset at)
+            {
+                if (!taken || owner.CannotRecord)
+                {
+                    return Task.FromResult(false);
+                }
+
+                lock (owner.Pruned)
+                {
+                    owner.Pruned[id] = at;
+                }
+
+                return Task.FromResult(true);
+            }
+
+            public Task<IReadOnlyDictionary<Guid, DateTimeOffset>> ReadPrunedAsync(DateTimeOffset forgetBefore)
+            {
+                lock (owner.Pruned)
+                {
+                    return Task.FromResult<IReadOnlyDictionary<Guid, DateTimeOffset>>(
+                        owner.Pruned.Where(e => e.Value >= forgetBefore).ToDictionary());
+                }
+            }
+
+            public ValueTask DisposeAsync()
+            {
+                if (taken)
+                {
+                    owner._lock.Release();
+                }
+
+                return ValueTask.CompletedTask;
+            }
+        }
     }
 
     [Fact]
@@ -1485,5 +1559,179 @@ public class DcBackfillerTests
 
         f.East.Verify(s => s.IsFlagArchivedAsync(orphanFlag, mode), Times.Once);
         f.East.Verify(s => s.IsSegmentArchivedAsync(orphanSegment, mode), Times.Once);
+    }
+
+    // ----- several control-plane replicas -----
+
+    /// <summary>
+    /// One replica pruned a flag; another backfills the DC from a snapshot read before the delete. The second replica
+    /// never saw the prune, so only the DC's shared record tells it not to write the flag back.
+    /// </summary>
+    [Fact]
+    public async Task BackfillDcAsync_AnotherReplicaPrunedAfterTheSnapshotWasTaken_DoesNotWriteItBack()
+    {
+        var dcLock = new FakeDcLock();
+        var f = CreatePruneFixture(dcLock: dcLock);
+        var orphan = Guid.NewGuid();
+        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ReturnsAsync(Index((orphan, OldScore)));
+        await f.Sut.PruneDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+        var otherReplica = f.Replica(dcLock);
+        var staleSnapshot = f.Snapshot with
+        {
+            Flags = [.. f.Snapshot.Flags, StaleFlag(orphan, f.EnvA)],
+            TakenAt = Now.AddMinutes(-5)
+        };
+
+        await otherReplica.BackfillDcAsync("east", ConsistencyMode.BestEffort, staleSnapshot);
+
+        Assert.True(dcLock.Pruned.ContainsKey(orphan));
+        f.East.Verify(s => s.UpsertFlagIfNewerAsync(It.Is<FeatureFlag>(x => x.Id == orphan)), Times.Never);
+    }
+
+    /// <summary>
+    /// The shared record's time comes from another replica's clock. A snapshot that looks up to a minute newer than the
+    /// prune may come from a clock running ahead, so it still does not write the flag back; one taken well after the prune
+    /// does, since the database had the flag again by then.
+    /// </summary>
+    [Theory]
+    [InlineData(30, false)]
+    [InlineData(120, true)]
+    public async Task BackfillDcAsync_ASnapshotNewerThanAnotherReplicasPrune_AllowsForClockSkew(int secondsAfterPrune, bool written)
+    {
+        var dcLock = new FakeDcLock();
+        var f = CreatePruneFixture(dcLock: dcLock);
+        var orphan = Guid.NewGuid();
+        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ReturnsAsync(Index((orphan, OldScore)));
+        await f.Sut.PruneDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+        var snapshot = f.Snapshot with
+        {
+            Flags = [.. f.Snapshot.Flags, StaleFlag(orphan, f.EnvA)],
+            TakenAt = Now.AddSeconds(secondsAfterPrune)
+        };
+
+        await f.Replica(dcLock).BackfillDcAsync("east", ConsistencyMode.BestEffort, snapshot);
+
+        f.East.Verify(
+            s => s.UpsertFlagIfNewerAsync(It.Is<FeatureFlag>(x => x.Id == orphan)),
+            written ? Times.Once() : Times.Never());
+    }
+
+    [Fact]
+    public async Task BackfillDcAsync_WhileAnotherReplicaPrunesTheDc_WaitsForIt()
+    {
+        var dcLock = new FakeDcLock();
+        var f = CreatePruneFixture(dcLock: dcLock);
+        var gate = new TaskCompletionSource();
+        var calls = 0;
+        f.East.Setup(s => s.GetFlagIndexAsync(It.IsAny<Guid>()))
+            .Returns(async () =>
+            {
+                if (Interlocked.Increment(ref calls) == 1)
+                {
+                    await gate.Task; // the other replica's prune is held here
+                }
+
+                return Index();
+            });
+        f.East.Setup(s => s.UpsertFlagIfNewerAsync(It.IsAny<FeatureFlag>())).ReturnsAsync(true);
+        var prune = f.Replica(dcLock).PruneDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        var backfill = f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        await Task.Delay(100);
+        Assert.False(backfill.IsCompleted);
+        f.East.Verify(s => s.UpsertFlagIfNewerAsync(It.IsAny<FeatureFlag>()), Times.Never);
+        gate.SetResult();
+        await prune;
+        Assert.Equal(2, await backfill);
+    }
+
+    [Fact]
+    public async Task PruneDcAsync_WhileAnotherReplicaBackfillsTheDc_ReturnsSkipped()
+    {
+        var dcLock = new FakeDcLock();
+        var f = CreatePruneFixture(dcLock: dcLock);
+        var gate = new TaskCompletionSource();
+        f.East.Setup(s => s.UpsertFlagIfNewerAsync(It.IsAny<FeatureFlag>()))
+            .Returns(async () =>
+            {
+                await gate.Task;
+                return true;
+            });
+        var backfill = f.Replica(dcLock).BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        var result = await f.Sut.PruneDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        Assert.Equal(IDcBackfiller.Skipped, result);
+        gate.SetResult();
+        await backfill;
+    }
+
+    [Fact]
+    public async Task PruneDcAsync_LockIsLostPartWay_StopsRemovingAndLooksAgain()
+    {
+        var dcLock = new FakeDcLock();
+        var f = CreatePruneFixture(dcLock: dcLock);
+        var first = Guid.NewGuid();
+        var second = Guid.NewGuid();
+        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ReturnsAsync(Index((first, OldScore), (second, OldScore)));
+        f.East.Setup(s => s.DeleteFlagAsync(f.EnvA, It.IsAny<Guid>()))
+            .Callback(() => dcLock.Lost = true) // lost right after the first removal
+            .Returns(Task.CompletedTask);
+
+        var removed = await f.Sut.PruneDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        Assert.Equal(1, removed);
+        f.East.Verify(s => s.DeleteFlagAsync(f.EnvA, It.IsAny<Guid>()), Times.Once);
+        f.Time.Advance(TimeSpan.FromSeconds(61));
+        Assert.Equal(["east"], f.Sut.TakeDcsDueForPrune());
+    }
+
+    /// <summary>
+    /// If the DC's lock cannot be used, the backfill still writes (its writes go to the same Redis and are only-advance
+    /// guarded) but removes nothing, and the prune looks again.
+    /// </summary>
+    [Fact]
+    public async Task BackfillDcAsync_LockCannotBeTaken_StillWritesButRemovesNothing()
+    {
+        var dcLock = new FakeDcLock { CannotBeTaken = true };
+        var f = CreatePruneFixture(dcLock: dcLock);
+        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ReturnsAsync(Index((Guid.NewGuid(), OldScore)));
+        f.East.Setup(s => s.UpsertFlagIfNewerAsync(It.IsAny<FeatureFlag>())).ReturnsAsync(true);
+
+        var result = await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        Assert.Equal(2, result); // both live flags written, nothing pruned
+        f.East.Verify(s => s.GetFlagIndexAsync(It.IsAny<Guid>()), Times.Never); // the prune did not start
+        f.East.Verify(s => s.DeleteFlagAsync(It.IsAny<Guid>(), It.IsAny<Guid>()), Times.Never);
+        f.Time.Advance(TimeSpan.FromSeconds(61));
+        Assert.Equal(["east"], f.Sut.TakeDcsDueForPrune());
+    }
+
+    [Fact]
+    public async Task PruneDcAsync_LockCannotBeTaken_ReturnsSkipped()
+    {
+        var f = CreatePruneFixture(dcLock: new FakeDcLock { CannotBeTaken = true });
+
+        var result = await f.Sut.PruneDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        Assert.Equal(IDcBackfiller.Skipped, result);
+    }
+
+    /// <summary>
+    /// A removal that other replicas could not learn about is not made.
+    /// </summary>
+    [Fact]
+    public async Task PruneDcAsync_RemovalCannotBeRecordedForOtherReplicas_RemovesNothingAndLooksAgain()
+    {
+        var f = CreatePruneFixture(dcLock: new FakeDcLock { CannotRecord = true });
+        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ReturnsAsync(Index((Guid.NewGuid(), OldScore)));
+
+        var removed = await f.Sut.PruneDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        Assert.Equal(0, removed);
+        f.East.Verify(s => s.DeleteFlagAsync(It.IsAny<Guid>(), It.IsAny<Guid>()), Times.Never);
+        f.Time.Advance(TimeSpan.FromSeconds(61));
+        Assert.Equal(["east"], f.Sut.TakeDcsDueForPrune());
     }
 }

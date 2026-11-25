@@ -39,7 +39,11 @@ pruned while the source of truth holds no flags and no segments at all, because 
 cannot be told apart from a database where everything was deleted; the entries of the last
 deleted flag or segment are therefore removed only once another flag or segment exists. By default
 (`ControlPlane:CacheReconcile:PruneDeleted:Mode` is `DryRun`) it only logs what it would remove.
-Set the mode to `On` to remove the entries, or to `Off` to disable the step.
+Set the mode to `On` to remove the entries, or to `Off` to disable the step. With several
+control-plane replicas, a backfill and a prune of the same DC never run at once: each holds a lock
+in that DC's Redis (`featbit:control-plane:dc-mutation-lock:{dcId}`), and what a prune removed is
+recorded there (`featbit:control-plane:pruned:{dcId}`) so that no replica writes it back from an
+older snapshot.
 
 The consistency background workers — commit coordinator, recovery worker, DcId consistency
 checker — run on every instance by default; their operations are idempotent and version-guarded,
