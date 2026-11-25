@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Domain.AuditLogs;
+using Domain.EndUsers;
 using Domain.FeatureFlags;
 using Domain.Segments;
 using Domain.Targeting;
@@ -187,9 +188,16 @@ public static class FlagComparer
         }
 
         // compare dispatch key
-        if (original.DispatchKey != current.DispatchKey && current.DispatchKey != null)
+        var originalDispatchKey = string.IsNullOrWhiteSpace(original.DispatchKey)
+            ? EndUserConsts.KeyId
+            : original.DispatchKey;
+        var currentDispatchKey = string.IsNullOrWhiteSpace(current.DispatchKey)
+            ? EndUserConsts.KeyId
+            : current.DispatchKey;
+
+        if (originalDispatchKey != currentDispatchKey)
         {
-            instructions.Add(new UpdateDefaultRuleDispatchKeyInstruction(current.DispatchKey));
+            instructions.Add(new UpdateDefaultRuleDispatchKeyInstruction(currentDispatchKey));
         }
 
         return instructions;

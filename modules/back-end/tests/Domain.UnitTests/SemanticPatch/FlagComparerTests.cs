@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Domain.AuditLogs;
 using Domain.FeatureFlags;
+using Domain.Policies;
 using Domain.SemanticPatch;
 using Domain.Segments;
 using Domain.Targeting;
@@ -145,18 +146,33 @@ public class FlagComparerTests
         Assert.IsType<UpdateDefaultRuleVariationOrRolloutInstruction>(result[0]);
     }
 
-    [Fact]
-    public void CompareFallthrough_DispatchKeyChanged_EmitsDispatchKeyInstruction()
+    [Theory]
+    [InlineData("k1", "k2", "k2")]
+    [InlineData("k1", null, "keyId")]
+    [InlineData("k1", " ", "keyId")]
+    [InlineData("keyId", null, null)]
+    [InlineData(" ", "keyId", null)]
+    [InlineData("", null, null)]
+    [InlineData(null, "", null)]
+    [InlineData(" ", "", null)]
+    public void CompareFallthrough_DispatchKey_EmitsInstructionForEffectiveChange(
+        string? originalDispatchKey, string? currentDispatchKey, string? expected)
     {
         var rollout = new List<RolloutVariation> { Rollout("v1") };
-        var original = new Fallthrough { Variations = rollout, DispatchKey = "k1" };
-        var current = new Fallthrough { Variations = rollout, DispatchKey = "k2" };
+        var original = new Fallthrough { Variations = rollout, DispatchKey = originalDispatchKey };
+        var current = new Fallthrough { Variations = rollout, DispatchKey = currentDispatchKey };
 
         var result = FlagComparer.CompareFallthrough(original, current).ToList();
 
-        Assert.Single(result);
-        var inst = Assert.IsType<UpdateDefaultRuleDispatchKeyInstruction>(result[0]);
-        Assert.Equal("k2", inst.Value);
+        if (expected == null)
+        {
+            Assert.Empty(result);
+            return;
+        }
+
+        var inst = Assert.IsType<UpdateDefaultRuleDispatchKeyInstruction>(Assert.Single(result));
+        Assert.Equal(expected, inst.Value);
+        Assert.Equal(Permissions.UpdateFlagDefaultRule, inst.Permission);
     }
 
     [Fact]
