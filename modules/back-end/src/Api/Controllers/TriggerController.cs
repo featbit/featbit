@@ -9,7 +9,8 @@ public class TriggerController : ApiControllerBase
     [HttpGet]
     public async Task<ApiResponse<IEnumerable<Trigger>>> GetListAsync(Guid targetId)
     {
-        var request = new GetTriggerList(targetId, OrgId, await GetRequestPermissionsAsync());
+        var permissions = await GetRequestPermissionsAsync();
+        var request = new GetTriggerList(targetId, OrgId, permissions);
 
         var triggers = await Mediator.Send(request);
         return Ok(triggers);
@@ -18,7 +19,8 @@ public class TriggerController : ApiControllerBase
     [HttpPost]
     public async Task<ApiResponse<Trigger>> CreateAsync(CreateTriggerPayload payload)
     {
-        var request = new CreateTrigger(payload, OrgId, await GetRequestPermissionsAsync());
+        var permissions = await GetRequestPermissionsAsync();
+        var request = new CreateTrigger(payload, OrgId, permissions);
 
         var trigger = await Mediator.Send(request);
 
@@ -28,7 +30,8 @@ public class TriggerController : ApiControllerBase
     [HttpPut("{id:guid}")]
     public async Task<ApiResponse<bool>> UpdateAsync(Guid id, UpdateTriggerPayload payload)
     {
-        var request = new UpdateTrigger(payload, id, OrgId, await GetRequestPermissionsAsync());
+        var permissions = await GetRequestPermissionsAsync();
+        var request = new UpdateTrigger(payload, id, OrgId, permissions);
 
         var success = await Mediator.Send(request);
         return Ok(success);
@@ -37,7 +40,8 @@ public class TriggerController : ApiControllerBase
     [HttpPut("{id:guid}/reset-token")]
     public async Task<ApiResponse<string>> ResetTokenAsync(Guid id)
     {
-        var request = new ResetTriggerToken(id, OrgId, await GetRequestPermissionsAsync());
+        var permissions = await GetRequestPermissionsAsync();
+        var request = new ResetTriggerToken(id, OrgId, permissions);
 
         var newToken = await Mediator.Send(request);
         return Ok(newToken);
@@ -46,7 +50,8 @@ public class TriggerController : ApiControllerBase
     [HttpDelete("{id:guid}")]
     public async Task<ApiResponse<bool>> DeleteAsync(Guid id)
     {
-        var request = new DeleteTrigger(id, OrgId, await GetRequestPermissionsAsync());
+        var permissions = await GetRequestPermissionsAsync();
+        var request = new DeleteTrigger(id, OrgId, permissions);
 
         var success = await Mediator.Send(request);
         return Ok(success);

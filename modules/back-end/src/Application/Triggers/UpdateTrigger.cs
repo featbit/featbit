@@ -1,3 +1,5 @@
+using Application.Environments;
+using Application.FeatureFlags;
 using Domain.Policies;
 
 namespace Application.Triggers;
@@ -24,14 +26,23 @@ public class UpdateTrigger : UpdateTriggerPayload, IRequest<bool>
     public PolicyStatement[] Permissions { get; set; } = [];
 }
 
-public class UpdateTriggerHandler(ITriggerService service, TriggerAccessGuard access) : IRequestHandler<UpdateTrigger, bool>
+public class UpdateTriggerHandler(
+    ITriggerService triggerService,
+    IFeatureFlagService flagService,
+    EnvironmentPermissionGuard envGuard,
+    FlagPermissionGuard flagGuard) : IRequestHandler<UpdateTrigger, bool>
 {
     public async Task<bool> Handle(UpdateTrigger request, CancellationToken cancellationToken)
     {
-        var trigger = await access.GetAuthorizedTriggerAsync(request.OrgId, request.Permissions, request.Id);
+        var trigger = await triggerService.GetAsync(request.Id);
+
+        var flag = await flagService.GetAsync(trigger.TargetId);
+        await envGuard.EnsureAccessAsync(request.OrgId, flag.EnvId, request.Permissions);
+        await flagGuard.EnsureToggleAllowedAsync(request.OrgId, flag, request.Permissions);
+
         trigger.Update(request.IsEnabled);
 
-        await service.UpdateAsync(trigger);
+        await triggerService.UpdateAsync(trigger);
 
         return true;
     }

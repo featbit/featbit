@@ -11,10 +11,18 @@ public class FlagPermissionGuard(IPermissionTargetResolver targetResolver)
     public Task EnsureInOrganizationAsync(Guid organizationId, FeatureFlag flag) =>
         PermissionGuard.ResolveAccessibleTargetAsync(organizationId, () => targetResolver.ResolveFlagAsync(flag.EnvId, flag.Key));
 
-    public Task EnsureFlagChangeAllowedAsync(Guid organizationId, FeatureFlag flag, DataChange change, PolicyStatement[] permissions) =>
+    public Task EnsureChangeAllowedAsync(Guid organizationId, FeatureFlag flag, DataChange change, PolicyStatement[] permissions) =>
         PermissionGuard.EnsureAllowedAsync(
             organizationId,
             FlagComparer.Compare(change).Select(instruction => instruction.Permission),
+            permissions,
+            () => targetResolver.ResolveFlagAsync(flag.EnvId, flag.Key)
+        );
+
+    public Task EnsureToggleAllowedAsync(Guid organizationId, FeatureFlag flag, PolicyStatement[] permissions) =>
+        PermissionGuard.EnsureAllowedAsync(
+            organizationId,
+            [Permissions.ToggleFlag],
             permissions,
             () => targetResolver.ResolveFlagAsync(flag.EnvId, flag.Key)
         );

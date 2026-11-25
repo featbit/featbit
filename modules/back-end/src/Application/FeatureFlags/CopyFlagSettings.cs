@@ -67,7 +67,7 @@ public class CopyFlagSettingsHandler(
         var context = new FlagCopyContext(source, target, relatedSegments, request.Options);
         var dataChange = target.CopySettingsFrom(context, currentUser.Id);
 
-        await flagGuard.EnsureFlagChangeAllowedAsync(request.OrgId, target, dataChange, request.Permissions);
+        await flagGuard.EnsureChangeAllowedAsync(request.OrgId, target, dataChange, request.Permissions);
 
         await flagService.UpdateAsync(target);
 

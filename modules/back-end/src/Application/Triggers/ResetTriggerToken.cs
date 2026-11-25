@@ -1,3 +1,5 @@
+using Application.Environments;
+using Application.FeatureFlags;
 using Domain.Policies;
 
 namespace Application.Triggers;
@@ -18,14 +20,23 @@ public class ResetTriggerToken : IRequest<string>
     public Guid Id { get; set; }
 }
 
-public class ResetTriggerTokenHandler(ITriggerService service, TriggerAccessGuard access) : IRequestHandler<ResetTriggerToken, string>
+public class ResetTriggerTokenHandler(
+    ITriggerService triggerService,
+    IFeatureFlagService flagService,
+    EnvironmentPermissionGuard envGuard,
+    FlagPermissionGuard flagGuard) : IRequestHandler<ResetTriggerToken, string>
 {
     public async Task<string> Handle(ResetTriggerToken request, CancellationToken cancellationToken)
     {
-        var trigger = await access.GetAuthorizedTriggerAsync(request.OrgId, request.Permissions, request.Id);
+        var trigger = await triggerService.GetAsync(request.Id);
+
+        var flag = await flagService.GetAsync(trigger.TargetId);
+        await envGuard.EnsureAccessAsync(request.OrgId, flag.EnvId, request.Permissions);
+        await flagGuard.EnsureToggleAllowedAsync(request.OrgId, flag, request.Permissions);
+
         trigger.ResetToken();
 
-        await service.UpdateAsync(trigger);
+        await triggerService.UpdateAsync(trigger);
 
         return trigger.Token;
     }

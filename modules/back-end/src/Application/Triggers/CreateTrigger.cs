@@ -1,4 +1,6 @@
 using Application.Bases;
+using Application.Environments;
+using Application.FeatureFlags;
 using Domain.Triggers;
 using Domain.Policies;
 
@@ -44,20 +46,18 @@ public class CreateTriggerValidator : AbstractValidator<CreateTrigger>
     }
 }
 
-public class CreateTriggerHandler : IRequestHandler<CreateTrigger, Trigger>
+public class CreateTriggerHandler(
+    ITriggerService triggerService,
+    IFeatureFlagService flagService,
+    EnvironmentPermissionGuard envGuard,
+    FlagPermissionGuard flagGuard)
+    : IRequestHandler<CreateTrigger, Trigger>
 {
-    private readonly ITriggerService _service;
-    private readonly TriggerAccessGuard _access;
-
-    public CreateTriggerHandler(ITriggerService service, TriggerAccessGuard access)
-    {
-        _service = service;
-        _access = access;
-    }
-
     public async Task<Trigger> Handle(CreateTrigger request, CancellationToken cancellationToken)
     {
-        await _access.EnsureTargetAccessAsync(request.OrgId, request.Permissions, request.TargetId, Permissions.ToggleFlag);
+        var flag = await flagService.GetAsync(request.TargetId);
+        await envGuard.EnsureAccessAsync(request.OrgId, flag.EnvId, request.Permissions);
+        await flagGuard.EnsureToggleAllowedAsync(request.OrgId, flag, request.Permissions);
 
         var trigger = new Trigger(
             Guid.NewGuid(),
@@ -67,7 +67,7 @@ public class CreateTriggerHandler : IRequestHandler<CreateTrigger, Trigger>
             request.Description
         );
 
-        await _service.AddOneAsync(trigger);
+        await triggerService.AddOneAsync(trigger);
 
         return trigger;
     }
