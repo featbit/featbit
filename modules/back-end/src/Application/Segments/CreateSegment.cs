@@ -90,49 +90,50 @@ public class CreateSegmentValidator : AbstractValidator<CreateSegment>
 
         RuleFor(x => x.Scopes)
             .NotEmpty().WithErrorCode(ErrorCodes.Invalid("scopes"))
-            .Must(scopes => !scopes.Any(x => x.Contains('*'))).WithErrorCode(ErrorCodes.Invalid("scopes"));
+            .Must((request, scopes) =>
+            {
+                if (request.Type == SegmentType.EnvironmentSpecific)
+                {
+                    return scopes.Length == 1 && SegmentScope.IsValidEnvironmentScope(scopes[0]);
+                }
+
+                return scopes.All(SegmentScope.IsValidScope);
+            })
+            .WithErrorCode(ErrorCodes.Invalid("scopes"));
     }
 }
 
-public class CreateSegmentHandler : IRequestHandler<CreateSegment, Segment>
+public class CreateSegmentHandler(
+    ISegmentService segmentService,
+    ILicenseService licenseService,
+    IPublisher publisher,
+    ICurrentUser currentUser,
+    SegmentCreationScopeGuard scopeGuard)
+    : IRequestHandler<CreateSegment, Segment>
 {
-    private readonly ISegmentService _segmentService;
-    private readonly ILicenseService _licenseService;
-    private readonly IPublisher _publisher;
-    private readonly ICurrentUser _currentUser;
-
-    public CreateSegmentHandler(
-        ISegmentService segmentService,
-        ILicenseService licenseService,
-        IPublisher publisher,
-        ICurrentUser currentUser)
-    {
-        _segmentService = segmentService;
-        _licenseService = licenseService;
-        _publisher = publisher;
-        _currentUser = currentUser;
-    }
-
     public async Task<Segment> Handle(CreateSegment request, CancellationToken cancellationToken)
     {
         if (request.Type == SegmentType.Shared)
         {
             var isShareableSegmentGranted =
-                await _licenseService.IsFeatureGrantedAsync(request.WorkspaceId, LicenseFeatures.ShareableSegment);
+                await licenseService.IsFeatureGrantedAsync(request.WorkspaceId, LicenseFeatures.ShareableSegment);
             if (!isShareableSegmentGranted)
             {
                 throw new BusinessException(ErrorCodes.Unauthorized);
             }
         }
 
+        // ensure scopes are allowed for the current user
+        await scopeGuard.EnsureAllowedAsync(request);
+
         var segment = request.AsSegment();
-        await _segmentService.AddOneAsync(segment);
+        await segmentService.AddOneAsync(segment);
 
         // publish on segment created notification
         var dataChange = new DataChange(null).To(segment);
 
-        var notification = new OnSegmentChange(segment, request.WorkspaceId, request.OrgId, Operations.Create, dataChange, _currentUser.Id);
-        await _publisher.Publish(notification, cancellationToken);
+        var notification = new OnSegmentChange(segment, request.WorkspaceId, request.OrgId, Operations.Create, dataChange, currentUser.Id);
+        await publisher.Publish(notification, cancellationToken);
 
         return segment;
     }

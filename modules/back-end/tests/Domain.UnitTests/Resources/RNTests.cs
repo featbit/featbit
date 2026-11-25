@@ -63,10 +63,13 @@ public class RNTests
     [InlineData("abc")]
     [InlineData("organization")]
     [InlineData("organization/")]
+    [InlineData("organization/o:")]
+    [InlineData("organization/o:project/p:env/e:")]
     public void TryParse_InvalidOrEmptyRnString_ReturnsFalse(string? rnString)
     {
-        var success = RN.TryParse(rnString, out _);
+        var success = RN.TryParse(rnString, out var props);
         Assert.False(success);
+        Assert.Empty(props);
     }
 
     [Theory]

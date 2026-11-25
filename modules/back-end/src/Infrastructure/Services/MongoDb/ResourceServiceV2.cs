@@ -195,6 +195,6 @@ public class ResourceServiceV2(MongoDbClient mongoDb) : IResourceServiceV2
             };
 
         var resource = await query.FirstOrDefaultAsync();
-        return resource.Rn;
+        return resource?.Rn ?? string.Empty;
     }
 }

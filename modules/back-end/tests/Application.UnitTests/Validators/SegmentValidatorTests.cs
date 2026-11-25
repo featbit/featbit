@@ -13,7 +13,7 @@ public class SegmentValidatorTests
         Type = SegmentType.EnvironmentSpecific,
         Name = "seg",
         Key = "seg-key",
-        Scopes = new[] { "project/x:env/y" }
+        Scopes = ["organization/o:project/x:env/y"]
     });
 
     [Fact]
@@ -180,4 +180,19 @@ public class SegmentValidatorTests
         Assert.Contains(result.Errors, e => e.ErrorCode == ErrorCodes.Invalid("rules"));
     }
 
+    [Theory]
+    [InlineData(SegmentType.EnvironmentSpecific, false, new[] { "organization/o:project/p" })]
+    [InlineData(SegmentType.EnvironmentSpecific, false, new[] { "organization/o:project/p:env/e", "organization/o:project/p:env/other" })]
+    [InlineData(SegmentType.Shared, true, new[] { "organization/o", "organization/o:project/p", "organization/o:project/p:env/e" })]
+    public void CreateSegment_ValidatesScopesByType(string type, bool valid, string[] scopes)
+    {
+        var request = ValidCreate();
+        request.Type = type;
+        request.Scopes = scopes;
+
+        var result = new CreateSegmentValidator().Validate(request);
+
+        string[] expectedErrors = valid ? [] : [ErrorCodes.Invalid("scopes")];
+        Assert.Equal(expectedErrors, result.Errors.Select(error => error.ErrorCode));
+    }
 }

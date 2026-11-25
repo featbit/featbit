@@ -5,7 +5,7 @@ public static class RN
     public static bool TryParse(string rnString, out ICollection<TypeKeyProps> props)
     {
         props = [];
-        if (string.IsNullOrWhiteSpace(rnString))
+        if (string.IsNullOrWhiteSpace(rnString) || rnString.EndsWith(':'))
         {
             return false;
         }

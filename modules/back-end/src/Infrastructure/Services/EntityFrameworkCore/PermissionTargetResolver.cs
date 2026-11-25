@@ -20,7 +20,7 @@ public class PermissionTargetResolver(AppDbContext dbContext) : IPermissionTarge
             .FirstOrDefaultAsync();
 
         return project == null || string.IsNullOrWhiteSpace(project.Key)
-            ? null 
+            ? null
             : new PermissionTarget(RN.ForProject(project.Key), project.OrganizationId);
     }
 
@@ -33,8 +33,8 @@ public class PermissionTargetResolver(AppDbContext dbContext) : IPermissionTarge
             select new { project.Key, EnvKey = env.Key, project.OrganizationId };
 
         var data = await query.FirstOrDefaultAsync();
-        return data == null 
-            ? null 
+        return data == null
+            ? null
             : new PermissionTarget(RN.ForEnv(data.Key, data.EnvKey), data.OrganizationId);
     }
 
@@ -55,7 +55,7 @@ public class PermissionTargetResolver(AppDbContext dbContext) : IPermissionTarge
             };
 
         var data = await query.FirstOrDefaultAsync();
-        return data == null 
+        return data == null
             ? null
             : new PermissionTarget(
                 RN.ForFlag(data.projectKey, data.envKey, data.flagKey, data.flagTags),
