@@ -111,7 +111,8 @@ public class PatchFeatureFlagHandlerTests
         var service = new Mock<IFeatureFlagService>();
         service.Setup(x => x.GetAsync(It.IsAny<Guid>(), It.IsAny<string>())).ReturnsAsync(flag);
         var publisher = new Mock<IPublisher>();
-        var sut = new PatchFeatureFlagHandler(service.Object, Mock.Of<IPermissionGuard>(), Mock.Of<ICurrentUser>(), publisher.Object);
+        // Invalid SemVer must return before the permission guard is used.
+        var sut = new PatchFeatureFlagHandler(service.Object, null!, Mock.Of<ICurrentUser>(), publisher.Object);
         var patch = new JsonPatchDocument<FeatureFlag>();
         patch.Replace(x => x.Rules, new List<TargetRule>
         {
