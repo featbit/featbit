@@ -34,7 +34,10 @@ example because the DC was unreachable when the delete was relayed. An entry is 
 is absent from the snapshot, older than `MinAgeSeconds`, archived in that DC, and still absent from
 the database when asked again; more than `MaxRemovalsPerRun` such entries at once means none are
 removed. An entry that is still too recent, or that sits in an index which could not be read, is
-looked at again later by the reconciler, so it does not wait for the next reconnect. By default
+looked at again later by the reconciler, so it does not wait for the next reconnect. Nothing is
+pruned while the source of truth holds no flags and no segments at all, because an empty read
+cannot be told apart from a database where everything was deleted; the entries of the last
+deleted flag or segment are therefore removed only once another flag or segment exists. By default
 (`ControlPlane:CacheReconcile:PruneDeleted:Mode` is `DryRun`) it only logs what it would remove.
 Set the mode to `On` to remove the entries, or to `Off` to disable the step.
 

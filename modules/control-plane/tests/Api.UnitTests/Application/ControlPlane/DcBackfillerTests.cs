@@ -468,6 +468,24 @@ public class DcBackfillerTests
         f.East.Verify(s => s.DeleteFlagAsync(It.IsAny<Guid>(), It.IsAny<Guid>()), Times.Never);
     }
 
+    /// <summary>
+    /// An environment can lose its last flag, segment and SDK key. It is still in the environment list, so the entries
+    /// its index still lists are found; otherwise adding a key later would make them servable again.
+    /// </summary>
+    [Fact]
+    public async Task BackfillDcAsync_EnvironmentWithNothingLeftButItsListing_IsStillChecked()
+    {
+        var f = CreatePruneFixture();
+        var emptyEnv = Guid.NewGuid();
+        var orphan = Guid.NewGuid();
+        f.East.Setup(s => s.GetFlagIndexAsync(emptyEnv)).ReturnsAsync(Index((orphan, OldScore)));
+        var snapshot = f.Snapshot with { EnvironmentIds = [f.EnvA, f.EnvB, emptyEnv] };
+
+        await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, snapshot);
+
+        f.East.Verify(s => s.DeleteFlagAsync(emptyEnv, orphan), Times.Once);
+    }
+
     [Fact]
     public async Task BackfillDcAsync_EnvironmentWithNoFlagsLeft_IsFoundThroughItsSecrets()
     {
@@ -722,6 +740,105 @@ public class DcBackfillerTests
     }
 
     [Fact]
+    public async Task BackfillDcAsync_ArchivedStateOfAFlagCannotBeRead_RemovesNothingAndIsRetriedInAMinute()
+    {
+        var f = CreatePruneFixture();
+        var orphan = Guid.NewGuid();
+        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ReturnsAsync(Index((orphan, OldScore)));
+        f.East.Setup(s => s.IsFlagArchivedAsync(orphan, It.IsAny<ConsistencyMode>())).ThrowsAsync(new TimeoutException("redis"));
+
+        await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        f.East.Verify(s => s.DeleteFlagAsync(It.IsAny<Guid>(), It.IsAny<Guid>()), Times.Never);
+        f.Time.Advance(TimeSpan.FromSeconds(61));
+        Assert.Equal(["east"], f.Sut.TakeDcsDueForPrune());
+
+        // The read works a minute later, and the flag is removed.
+        f.East.Setup(s => s.IsFlagArchivedAsync(orphan, It.IsAny<ConsistencyMode>())).ReturnsAsync(true);
+        await f.Sut.PruneDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+        f.East.Verify(s => s.DeleteFlagAsync(f.EnvA, orphan), Times.Once);
+    }
+
+    [Fact]
+    public async Task BackfillDcAsync_ArchivedStateOfASegmentCannotBeRead_RemovesNothingAndIsRetriedInAMinute()
+    {
+        var f = CreatePruneFixture();
+        var orphan = Guid.NewGuid();
+        f.East.Setup(s => s.GetSegmentIndexAsync(f.EnvA)).ReturnsAsync(Index((orphan, OldScore)));
+        f.East.Setup(s => s.IsSegmentArchivedAsync(orphan, It.IsAny<ConsistencyMode>())).ThrowsAsync(new TimeoutException("redis"));
+
+        await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        f.East.Verify(s => s.DeleteSegmentAsync(It.IsAny<ICollection<Guid>>(), It.IsAny<Guid>()), Times.Never);
+        f.Time.Advance(TimeSpan.FromSeconds(61));
+        Assert.Equal(["east"], f.Sut.TakeDcsDueForPrune());
+    }
+
+    /// <summary>
+    /// A removal can fail after the index entry is gone but before the value is. The index no longer lists the flag, so
+    /// the next prune finishes the removal from what it remembers, without asking for an archived state the value may no
+    /// longer have.
+    /// </summary>
+    [Fact]
+    public async Task PruneDcAsync_AFlagRemovalFailedPartWay_IsFinishedAlthoughTheIndexNoLongerListsIt()
+    {
+        var f = CreatePruneFixture();
+        var orphan = Guid.NewGuid();
+        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ReturnsAsync(Index((orphan, OldScore)));
+        f.East.Setup(s => s.DeleteFlagAsync(f.EnvA, orphan)).ThrowsAsync(new TimeoutException("redis"));
+        await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        // The index entry went before the failure; the value is gone too, so it no longer reads as archived.
+        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ReturnsAsync(Index());
+        f.East.Setup(s => s.IsFlagArchivedAsync(orphan, It.IsAny<ConsistencyMode>())).ReturnsAsync(false);
+        f.East.Setup(s => s.DeleteFlagAsync(f.EnvA, orphan)).Returns(Task.CompletedTask);
+        f.Time.Advance(TimeSpan.FromSeconds(61));
+        var removed = await f.Sut.PruneDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        Assert.Equal(1, removed);
+        f.East.Verify(s => s.DeleteFlagAsync(f.EnvA, orphan), Times.Exactly(2));
+
+        // Finished: a later prune does not try again.
+        await f.Sut.PruneDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+        f.East.Verify(s => s.DeleteFlagAsync(f.EnvA, orphan), Times.Exactly(2));
+    }
+
+    [Fact]
+    public async Task PruneDcAsync_ASegmentRemovalFailedPartWay_IsFinishedAlthoughNoIndexListsIt()
+    {
+        var f = CreatePruneFixture();
+        var orphan = Guid.NewGuid();
+        f.East.Setup(s => s.GetSegmentIndexAsync(f.EnvA)).ReturnsAsync(Index((orphan, OldScore)));
+        f.East.Setup(s => s.DeleteSegmentAsync(It.IsAny<ICollection<Guid>>(), orphan)).ThrowsAsync(new TimeoutException("redis"));
+        await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        f.East.Setup(s => s.GetSegmentIndexAsync(f.EnvA)).ReturnsAsync(Index());
+        f.East.Setup(s => s.DeleteSegmentAsync(It.IsAny<ICollection<Guid>>(), orphan)).Returns(Task.CompletedTask);
+        var removed = await f.Sut.PruneDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        Assert.Equal(1, removed);
+        f.East.Verify(
+            s => s.DeleteSegmentAsync(It.Is<ICollection<Guid>>(ids => ids.SequenceEqual(new[] { f.EnvA })), orphan),
+            Times.Exactly(2));
+    }
+
+    [Fact]
+    public async Task PruneDcAsync_AFlagWhoseRemovalFailedIsBackInTheDatabase_IsNotRemoved()
+    {
+        var f = CreatePruneFixture();
+        var orphan = Guid.NewGuid();
+        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ReturnsAsync(Index((orphan, OldScore)));
+        f.East.Setup(s => s.DeleteFlagAsync(f.EnvA, orphan)).ThrowsAsync(new TimeoutException("redis"));
+        await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ReturnsAsync(Index());
+        f.Flags.Setup(s => s.AnyAsync(It.IsAny<Expression<Func<FeatureFlag, bool>>>())).ReturnsAsync(true);
+        await f.Sut.PruneDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        f.East.Verify(s => s.DeleteFlagAsync(f.EnvA, orphan), Times.Once); // only the failed first attempt
+    }
+
+    [Fact]
     public async Task BackfillDcAsync_PruningThrows_IsRetriedInAMinute()
     {
         var f = CreatePruneFixture();
@@ -812,13 +929,12 @@ public class DcBackfillerTests
 
     /// <summary>
     /// A skipped backfill is taken to mean that another backfill is repairing the DC. A prune does not repair what a
-    /// backfill writes, so it must never make a backfill look like a duplicate.
+    /// backfill writes, so it must never make a backfill look like a duplicate. The backfill waits for the prune
+    /// instead, so the two never change the DC's Redis at the same time.
     /// </summary>
     [Fact]
-    public async Task BackfillDcAsync_WhileAPruneOfThatDcIsInFlight_IsNotSkipped()
+    public async Task BackfillDcAsync_WhileAPruneOfThatDcIsInFlight_WaitsForItAndIsNotSkipped()
     {
-        // A skipped backfill is taken to mean that another backfill is repairing the DC. A prune does not repair
-        // what a backfill writes, so it must never make a backfill look like a duplicate.
         var f = CreatePruneFixture();
         var gate = new TaskCompletionSource();
         var calls = 0;
@@ -835,12 +951,54 @@ public class DcBackfillerTests
         f.East.Setup(s => s.UpsertFlagIfNewerAsync(It.IsAny<FeatureFlag>())).ReturnsAsync(true);
         var prune = f.Sut.PruneDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
 
-        var backfill = await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+        var backfill = f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
 
-        Assert.NotEqual(IDcBackfiller.Skipped, backfill);
-        Assert.Equal(2, backfill); // both live flags were written
+        await Task.Delay(100);
+        Assert.False(backfill.IsCompleted);
+        f.East.Verify(s => s.UpsertFlagIfNewerAsync(It.IsAny<FeatureFlag>()), Times.Never); // nothing written yet
         gate.SetResult();
         await prune;
+        Assert.Equal(2, await backfill); // both live flags were written once the prune finished
+    }
+
+    /// <summary>
+    /// A backfill that read the database before a prune-only pass removed an entry must not write it back, even when it
+    /// started while that prune was running.
+    /// </summary>
+    [Fact]
+    public async Task BackfillDcAsync_StartedWhileAPruneRemovesAnEntryItsSnapshotHolds_DoesNotWriteItBack()
+    {
+        var f = CreatePruneFixture();
+        var orphan = Guid.NewGuid();
+        var gate = new TaskCompletionSource();
+        var calls = 0;
+        f.East.Setup(s => s.GetFlagIndexAsync(It.IsAny<Guid>()))
+            .Returns(async () =>
+            {
+                if (Interlocked.Increment(ref calls) == 1)
+                {
+                    await gate.Task; // the prune is held before it removes anything
+                }
+
+                return Index((orphan, OldScore));
+            });
+        f.East.Setup(s => s.UpsertFlagIfNewerAsync(It.IsAny<FeatureFlag>())).ReturnsAsync(true);
+        var staleSnapshot = f.Snapshot with
+        {
+            Flags = [.. f.Snapshot.Flags, StaleFlag(orphan, f.EnvA)],
+            TakenAt = Now.AddMinutes(-1)
+        };
+        var pruneSnapshot = f.Snapshot with { Flags = [f.Snapshot.Flags[0]] }; // one environment, one held read
+        var prune = f.Sut.PruneDcAsync("east", ConsistencyMode.BestEffort, pruneSnapshot);
+
+        var backfill = f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, staleSnapshot);
+        await Task.Delay(100);
+        gate.SetResult();
+        await prune;
+        await backfill;
+
+        f.East.Verify(s => s.DeleteFlagAsync(f.EnvA, orphan), Times.Once);
+        f.East.Verify(s => s.UpsertFlagIfNewerAsync(It.Is<FeatureFlag>(x => x.Id == orphan)), Times.Never);
     }
 
     /// <summary>
@@ -878,9 +1036,12 @@ public class DcBackfillerTests
     [InlineData("Disabled")]
     [InlineData("5")]
     [InlineData("-1")]
+    [InlineData("2")]
+    [InlineData("Off, On")]
+    [InlineData("DryRun,On")]
     public async Task BackfillDcAsync_ModeIsNotOneOfTheModes_SwitchesPruningOff(string mode)
     {
-        // A typo, or a number that Enum.TryParse would accept as an undefined mode, must not enable deletion.
+        // A typo, a number, or a list of names (which Enum.TryParse would combine into On) must not enable deletion.
         var f = CreatePruneFixture(mode: mode);
         f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ReturnsAsync(Index((Guid.NewGuid(), OldScore)));
 
@@ -935,71 +1096,69 @@ public class DcBackfillerTests
         f.East.Verify(s => s.DeleteFlagAsync(It.IsAny<Guid>(), It.IsAny<Guid>()), Times.Never);
     }
 
-    // ----- overlapping prunes and stale snapshots -----
+    // ----- prunes from snapshots of different ages -----
 
     /// <summary>
-    /// The prune that started last has the newest snapshot, so an earlier prune that finishes after it, with nothing left
-    /// for later, must not clear the retry that the later run scheduled.
+    /// A prune from a newer snapshot left a deleted entry for later. A backfill whose snapshot is older still holds that
+    /// entry, sees it as live, and finds nothing to leave for later; it runs after the prune, but must not clear the
+    /// retry, or the entry stays until the next reconnect.
     /// </summary>
     [Fact]
-    public async Task BackfillDcAsync_AnEarlierPruneFinishingLast_DoesNotClearWhatALaterRunLeftForLater()
+    public async Task BackfillDcAsync_AnOlderSnapshotRunningLater_DoesNotClearWhatANewerPruneLeftForLater()
     {
         var f = CreatePruneFixture();
-        var gate = new TaskCompletionSource();
-        var calls = 0;
-        f.East.Setup(s => s.GetFlagIndexAsync(It.IsAny<Guid>()))
-            .Returns(async () =>
-            {
-                if (Interlocked.Increment(ref calls) == 1)
-                {
-                    await gate.Task; // the earlier prune is held here, and finds nothing
-                    return Index();
-                }
+        var deleted = Guid.NewGuid();
+        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ReturnsAsync(Index((deleted, RecentScore)));
+        await f.Sut.PruneDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot with { TakenAt = Now });
+        var olderSnapshot = f.Snapshot with
+        {
+            Flags = [.. f.Snapshot.Flags, StaleFlag(deleted, f.EnvA)], // read before the flag was deleted
+            TakenAt = Now.AddMinutes(-5)
+        };
 
-                return Index((Guid.NewGuid(), RecentScore)); // later runs find a recent entry and leave it for later
-            });
-        // The earlier prune knows one environment only, so it makes one read: the held one.
-        var earlierSnapshot = f.Snapshot with { Flags = [f.Snapshot.Flags[0]] };
-        var earlier = f.Sut.PruneDcAsync("east", ConsistencyMode.BestEffort, earlierSnapshot);
-
-        await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
-        gate.SetResult();
-        await earlier; // finishes last, with nothing left for later
+        await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, olderSnapshot);
 
         f.Time.Advance(TimeSpan.FromMinutes(10));
         Assert.Equal(["east"], f.Sut.TakeDcsDueForPrune());
     }
 
     /// <summary>
-    /// An earlier prune may bring the retry schedule forward but never push back a sooner retry that a later run set.
+    /// A prune from an older snapshot may bring the retry schedule forward but never push back a sooner retry that a prune
+    /// from a newer snapshot set.
     /// </summary>
     [Fact]
-    public async Task BackfillDcAsync_AnEarlierPruneWithALaterRetry_DoesNotPushBackASoonerOne()
+    public async Task BackfillDcAsync_AnOlderSnapshotWithALaterRetry_DoesNotPushBackASoonerOne()
     {
         var f = CreatePruneFixture();
-        var gate = new TaskCompletionSource();
-        var calls = 0;
         var tenSecondsOld = Now.AddSeconds(-10).ToUnixTimeMilliseconds();
+        var calls = 0;
         f.East.Setup(s => s.GetFlagIndexAsync(It.IsAny<Guid>()))
-            .Returns(async () =>
-            {
-                if (Interlocked.Increment(ref calls) == 1)
-                {
-                    await gate.Task;
-                    return Index((Guid.NewGuid(), tenSecondsOld)); // eligible in about 591 seconds
-                }
+            .ReturnsAsync(() => Interlocked.Increment(ref calls) == 1
+                ? Index((Guid.NewGuid(), RecentScore)) // the newer prune: eligible in about 541 seconds
+                : Index((Guid.NewGuid(), tenSecondsOld))); // the older run: eligible in about 591 seconds
+        await f.Sut.PruneDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot with { Flags = [f.Snapshot.Flags[0]], TakenAt = Now });
 
-                return Index((Guid.NewGuid(), RecentScore)); // eligible in about 541 seconds
-            });
-        var earlierSnapshot = f.Snapshot with { Flags = [f.Snapshot.Flags[0]] };
-        var earlier = f.Sut.PruneDcAsync("east", ConsistencyMode.BestEffort, earlierSnapshot);
+        await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot with { TakenAt = Now.AddMinutes(-5) });
 
-        await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
-        gate.SetResult();
-        await earlier;
-
-        f.Time.Advance(TimeSpan.FromSeconds(545)); // after the later run's retry, before the earlier one's
+        f.Time.Advance(TimeSpan.FromSeconds(545)); // after the newer prune's retry, before the older run's
         Assert.Equal(["east"], f.Sut.TakeDcsDueForPrune());
+    }
+
+    /// <summary>
+    /// A prune from a newer snapshot that finds nothing left for later does clear the schedule an older one set.
+    /// </summary>
+    [Fact]
+    public async Task PruneDcAsync_ANewerSnapshotWithNothingLeftForLater_ClearsTheSchedule()
+    {
+        var f = CreatePruneFixture();
+        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ReturnsAsync(Index((Guid.NewGuid(), RecentScore)));
+        await f.Sut.PruneDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot with { TakenAt = Now.AddMinutes(-5) });
+        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ReturnsAsync(Index());
+
+        await f.Sut.PruneDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot with { TakenAt = Now });
+
+        f.Time.Advance(TimeSpan.FromDays(1));
+        Assert.Empty(f.Sut.TakeDcsDueForPrune());
     }
 
     // A prune removes an entry's index score along with the entry, and that score is what makes the only-advance

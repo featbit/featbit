@@ -357,15 +357,16 @@ public class CompositeRedisCacheService(
         TargetedReadAsync(dcId, s => s.GetSegmentIndexAsync(envId), nameof(GetSegmentIndexFromDcAsync));
 
     /// <summary>
-    /// Targeted probe: whether ONE DC's Redis holds the flag and its value is archived. <c>false</c> for an
-    /// unknown DC, a failed read or a missing value, so "not archived" is the answer whenever it is uncertain.
+    /// Targeted probe: whether ONE DC's Redis holds the flag and its value is archived. <c>false</c> when the value
+    /// was read and is missing or not archived; <c>null</c> for an unknown DC or a failed read, so that a caller can
+    /// tell an answer it could not get from a negative one.
     /// </summary>
-    public Task<bool> IsFlagArchivedInDcAsync(string dcId, Guid id, ConsistencyMode mode) =>
-        TargetedAsync(dcId, s => s.IsFlagArchivedAsync(id, mode), nameof(IsFlagArchivedInDcAsync));
+    public Task<bool?> IsFlagArchivedInDcAsync(string dcId, Guid id, ConsistencyMode mode) =>
+        TargetedProbeAsync(dcId, s => s.IsFlagArchivedAsync(id, mode), nameof(IsFlagArchivedInDcAsync));
 
     /// <summary>Segment counterpart of <see cref="IsFlagArchivedInDcAsync"/>.</summary>
-    public Task<bool> IsSegmentArchivedInDcAsync(string dcId, Guid id, ConsistencyMode mode) =>
-        TargetedAsync(dcId, s => s.IsSegmentArchivedAsync(id, mode), nameof(IsSegmentArchivedInDcAsync));
+    public Task<bool?> IsSegmentArchivedInDcAsync(string dcId, Guid id, ConsistencyMode mode) =>
+        TargetedProbeAsync(dcId, s => s.IsSegmentArchivedAsync(id, mode), nameof(IsSegmentArchivedInDcAsync));
 
     /// <summary>
     /// Targeted delete: removes a flag from ONE DC's Redis, unlike the broadcast <see cref="DeleteFlagAsync"/>.
@@ -427,6 +428,16 @@ public class CompositeRedisCacheService(
                 dc.Service.GetType().FullName);
             return null;
         }
+    }
+
+    /// <summary>
+    /// Runs a yes/no read against one DC's cache. Returns <c>null</c> if no DC matches <paramref name="dcId"/> or the
+    /// read fails, like <see cref="TargetedReadAsync{T}"/>.
+    /// </summary>
+    private async Task<bool?> TargetedProbeAsync(string dcId, Func<ICacheService, Task<bool>> probe, string operationName)
+    {
+        var answer = await TargetedReadAsync(dcId, async s => Tuple.Create(await probe(s)), operationName);
+        return answer?.Item1;
     }
 
     private async Task TargetedAsync(string dcId, Func<ICacheService, Task> action, string operationName)

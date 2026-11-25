@@ -390,7 +390,8 @@ public class RedisCacheService(IRedisClient redis) : ICacheService
     /// <summary>
     /// Reads the value that is current for the consistency mode and reports whether it is archived. Under <c>GatedCommit</c>
     /// that is the version the committed pointer refers to (the plain value when there is no pointer); under
-    /// <c>BestEffort</c> it is the plain value only. A missing or unreadable value is reported as not archived.
+    /// <c>BestEffort</c> it is the plain value only. A missing value, or one that is not a JSON object, is reported as
+    /// not archived.
     /// </summary>
     private async Task<bool> IsArchivedAsync(
         ConsistencyMode mode, RedisKey valueKey, RedisKey pointerKey, Func<long, RedisKey> versionKey)
@@ -417,7 +418,9 @@ public class RedisCacheService(IRedisClient redis) : ICacheService
         try
         {
             using var document = JsonDocument.Parse((byte[])value!);
-            return document.RootElement.TryGetProperty("isArchived", out var archived)
+            // TryGetProperty throws on anything but an object, such as a cached [] or null.
+            return document.RootElement.ValueKind == JsonValueKind.Object
+                   && document.RootElement.TryGetProperty("isArchived", out var archived)
                    && archived.ValueKind == JsonValueKind.True;
         }
         catch (JsonException)

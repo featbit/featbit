@@ -443,17 +443,19 @@ public class RedisCacheServiceTests : IntegrationTestBase, IAsyncLifetime
         first.Id = Guid.NewGuid();
         var second = NewFlag(first.EnvId);
         second.Id = Guid.NewGuid();
+        second.UpdatedAt = first.UpdatedAt.AddMinutes(-5); // a different score, so a mixed-up reader fails
         await _sut.UpsertFlagAsync(first);
         await _sut.UpsertFlagAsync(second);
 
         var index = await _sut.GetFlagIndexAsync(first.EnvId);
 
         var db = _connection.GetDatabase();
+        var firstScore = (long)(await db.SortedSetScoreAsync(RedisKeys.FlagIndex(first.EnvId), first.Id.ToString()))!.Value;
+        var secondScore = (long)(await db.SortedSetScoreAsync(RedisKeys.FlagIndex(first.EnvId), second.Id.ToString()))!.Value;
+        Assert.NotEqual(firstScore, secondScore);
         Assert.Equal(2, index.Count);
-        Assert.Equal(
-            (long)(await db.SortedSetScoreAsync(RedisKeys.FlagIndex(first.EnvId), first.Id.ToString()))!.Value,
-            index[first.Id]);
-        Assert.True(index.ContainsKey(second.Id));
+        Assert.Equal(firstScore, index[first.Id]);
+        Assert.Equal(secondScore, index[second.Id]);
     }
 
     [DockerFact]
@@ -506,6 +508,21 @@ public class RedisCacheServiceTests : IntegrationTestBase, IAsyncLifetime
     public async Task IsFlagArchivedAsync_NoValueIsCached_ReturnsFalse()
     {
         Assert.False(await _sut.IsFlagArchivedAsync(Guid.NewGuid(), ConsistencyMode.BestEffort));
+    }
+
+    /// <summary>
+    /// JSON that parses but is not an object, such as <c>[]</c> or <c>null</c>, is not an archived value.
+    /// </summary>
+    [DockerTheory]
+    [InlineData("[]")]
+    [InlineData("null")]
+    [InlineData("true")]
+    public async Task IsFlagArchivedAsync_ValueIsNotAJsonObject_ReturnsFalse(string json)
+    {
+        var id = Guid.NewGuid();
+        await _connection.GetDatabase().StringSetAsync(RedisKeys.Flag(id), json);
+
+        Assert.False(await _sut.IsFlagArchivedAsync(id, ConsistencyMode.BestEffort));
     }
 
     [DockerFact]

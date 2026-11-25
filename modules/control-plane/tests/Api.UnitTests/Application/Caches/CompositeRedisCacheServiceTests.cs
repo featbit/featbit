@@ -241,11 +241,34 @@ public class CompositeRedisCacheServiceTests
     }
 
     [Fact]
-    public async Task IsSegmentArchivedInDcAsync_UnknownDc_ReturnsFalse()
+    public async Task IsFlagArchivedInDcAsync_ValueIsNotArchived_ReturnsFalse()
+    {
+        var id = Guid.NewGuid();
+        _remote.Setup(s => s.IsFlagArchivedAsync(id, ConsistencyMode.BestEffort)).ReturnsAsync(false);
+        var sut = CreateSut();
+
+        Assert.False(await sut.IsFlagArchivedInDcAsync(RemoteDcId, id, ConsistencyMode.BestEffort));
+    }
+
+    /// <summary>
+    /// An answer that could not be read is not a "no", so the prune can look again instead of treating it as one.
+    /// </summary>
+    [Fact]
+    public async Task IsFlagArchivedInDcAsync_ReadFails_ReturnsNull()
+    {
+        _remote.Setup(s => s.IsFlagArchivedAsync(It.IsAny<Guid>(), It.IsAny<ConsistencyMode>()))
+            .ThrowsAsync(new TimeoutException("redis"));
+        var sut = CreateSut();
+
+        Assert.Null(await sut.IsFlagArchivedInDcAsync(RemoteDcId, Guid.NewGuid(), ConsistencyMode.BestEffort));
+    }
+
+    [Fact]
+    public async Task IsSegmentArchivedInDcAsync_UnknownDc_ReturnsNull()
     {
         var sut = CreateSut();
 
-        Assert.False(await sut.IsSegmentArchivedInDcAsync("dc-does-not-exist", Guid.NewGuid(), ConsistencyMode.BestEffort));
+        Assert.Null(await sut.IsSegmentArchivedInDcAsync("dc-does-not-exist", Guid.NewGuid(), ConsistencyMode.BestEffort));
     }
 
     [Fact]
