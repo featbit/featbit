@@ -165,8 +165,7 @@ public class Operator
         
         if (op is OperatorTypes.SemVerIsOneOf or OperatorTypes.SemVerNotOneOf)
         {
-            // Validate the entire list before checking. An empty list or an invalid
-            // entry returns false directly.
+            // Invalid or empty lists never match, even for NotOneOf.
             if (!SemanticVersion.TryParseList(ruleValue, out var versions))
             {
                 return false;
@@ -178,7 +177,7 @@ public class Operator
             return op == OperatorTypes.SemVerIsOneOf ? matches : !matches;
         }
         
-        // Ordering operators take one version, not a JSON list.
+        // <, <=, >, and >= compare against a single version.
         if (!SemanticVersion.TryParse(ruleValue, out var rule))
         {
             return false;
