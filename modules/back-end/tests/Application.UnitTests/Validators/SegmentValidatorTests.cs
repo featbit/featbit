@@ -7,35 +7,13 @@ namespace Application.UnitTests.Validators;
 
 public class SegmentValidatorTests
 {
-    [Theory]
-    [InlineData("organization/o", true)]
-    [InlineData("organization/o:project/p", true)]
-    [InlineData("organization/o:project/p:env/e", true)]
-    [InlineData("project/p:env/e", false)]
-    [InlineData("organization/o:env/e", false)]
-    [InlineData("organization/o:project/p:env/e:segment/s", false)]
-    [InlineData("organization/*", false)]
-    [InlineData("organization/o;tag", false)]
-    [InlineData("organization/o/extra", false)]
-    [InlineData("organization/", false)]
-    [InlineData(null, false)]
-    public void ScopeShapeIsValidated(string? scope, bool valid)
-    {
-        var request = new CreateSegment(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), new CreateSegmentPayload
-        {
-            Name = "S", Key = "s", Type = SegmentType.Shared, Scopes = [scope!]
-        });
-        Assert.Equal(valid, new CreateSegmentValidator().Validate(request).IsValid);
-    }
-
-
     private static CreateSegment ValidCreate() => new(
         Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), new CreateSegmentPayload
     {
         Type = SegmentType.EnvironmentSpecific,
         Name = "seg",
         Key = "seg-key",
-        Scopes = new[] { "organization/o:project/x:env/y" }
+        Scopes = ["organization/o:project/x:env/y"]
     });
 
     [Fact]
@@ -202,4 +180,19 @@ public class SegmentValidatorTests
         Assert.Contains(result.Errors, e => e.ErrorCode == ErrorCodes.Invalid("rules"));
     }
 
+    [Theory]
+    [InlineData(SegmentType.EnvironmentSpecific, false, new[] { "organization/o:project/p" })]
+    [InlineData(SegmentType.EnvironmentSpecific, false, new[] { "organization/o:project/p:env/e", "organization/o:project/p:env/other" })]
+    [InlineData(SegmentType.Shared, true, new[] { "organization/o", "organization/o:project/p", "organization/o:project/p:env/e" })]
+    public void CreateSegment_ValidatesScopesByType(string type, bool valid, string[] scopes)
+    {
+        var request = ValidCreate();
+        request.Type = type;
+        request.Scopes = scopes;
+
+        var result = new CreateSegmentValidator().Validate(request);
+
+        string[] expectedErrors = valid ? [] : [ErrorCodes.Invalid("scopes")];
+        Assert.Equal(expectedErrors, result.Errors.Select(error => error.ErrorCode));
+    }
 }

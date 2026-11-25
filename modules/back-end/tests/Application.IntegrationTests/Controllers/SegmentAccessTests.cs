@@ -133,12 +133,15 @@ public class SegmentAccessTests
     [InlineData(true)]
     public async Task ReferencesOnlyIncludeEnvironmentsAuthorizedInTheirOwnOrganization(bool foreignAccess)
     {
-        await using var app = new SegmentAccessTestApp { ForeignAccess = foreignAccess };
+        await using var app = new SegmentAccessTestApp { ForeignAccess = foreignAccess, Referenced = true, CurrentEnvironmentReferenced = true };
         var client = await app.CreateAuthenticatedClientAsync();
         var response = await client.GetAsync(app.Route + $"/{app.Segment.Id}/flag-references");
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        app.Segments.Verify(x => x.GetFlagReferencesAsync(app.EnvId, app.Segment.Id), Times.Once);
-        app.Segments.Verify(x => x.GetFlagReferencesAsync(app.OtherEnvId, app.Segment.Id), foreignAccess ? Times.Once : Times.Never);
+        using var payload = await response.Content.ReadFromJsonAsync<JsonDocument>();
+        var references = payload!.RootElement.GetProperty("data").EnumerateArray();
+        var environmentIds = references.Select(reference => reference.GetProperty("envId").GetGuid());
+        Guid[] expected = foreignAccess ? [app.EnvId, app.OtherEnvId] : [app.EnvId];
+        Assert.Equal(expected.Order(), environmentIds.Order());
     }
 
     [Theory]
@@ -147,7 +150,7 @@ public class SegmentAccessTests
     [InlineData(true, false, false)]
     public async Task CreationChecksEveryScopeBeforeWriting(bool crossOrganization, bool foreignAccess, bool allowed)
     {
-        await using var app = new SegmentAccessTestApp { ForeignAccess = foreignAccess };
+        await using var app = new SegmentAccessTestApp { ForeignAccess = foreignAccess, Referenced = true, CurrentEnvironmentReferenced = true };
         var client = await app.CreateAuthenticatedClientAsync();
         var scopes = crossOrganization
             ? new[] { "organization/org:project/p:env/e", "organization/other:project/p:env/e" }
@@ -201,6 +204,7 @@ public class SegmentAccessTestApp : PermissionCheckTestApp
     public string Failure { get; init; } = "";
     public bool ForeignAccess { get; init; }
     public bool Referenced { get; init; }
+    public bool CurrentEnvironmentReferenced { get; init; }
     public Segment Segment { get; }
     public Mock<ISegmentService> Segments { get; } = new();
     public Mock<IPermissionTargetResolver> Resources { get; } = new();
@@ -232,7 +236,8 @@ public class SegmentAccessTestApp : PermissionCheckTestApp
             Segments.Setup(x => x.FindManyAsync(It.IsAny<Expression<Func<Segment, bool>>>()))
                 .ReturnsAsync((Expression<Func<Segment, bool>> predicate) => candidates.Where(predicate.Compile()).ToArray());
             Segments.Setup(x => x.GetEnvironmentIdsAsync(Segment)).ReturnsAsync(new[] { EnvId, OtherEnvId });
-            Segments.Setup(x => x.GetFlagReferencesAsync(EnvId, Segment.Id)).ReturnsAsync(Array.Empty<FlagReference>());
+            Segments.Setup(x => x.GetFlagReferencesAsync(EnvId, Segment.Id)).ReturnsAsync(CurrentEnvironmentReferenced
+                ? new[] { new FlagReference { EnvId = EnvId, Key = "current", Name = "Current", Id = Guid.NewGuid() } } : []);
             Segments.Setup(x => x.GetFlagReferencesAsync(OtherEnvId, Segment.Id)).ReturnsAsync(Referenced
                 ? new[] { new FlagReference { EnvId = OtherEnvId, Key = "flag", Name = "Flag", Id = Guid.NewGuid() } } : []);
             var policies = new List<PolicyStatement>();
