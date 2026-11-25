@@ -124,6 +124,49 @@ public class Operator
 
     #endregion
 
+    #region semantic version
+
+    public static readonly Operator SemVerIsOneOf =
+        new(OperatorTypes.SemVerIsOneOf, (user, rule) => MatchSemanticVersion(OperatorTypes.SemVerIsOneOf, user, rule));
+
+    public static readonly Operator SemVerNotOneOf =
+        new(OperatorTypes.SemVerNotOneOf, (user, rule) => MatchSemanticVersion(OperatorTypes.SemVerNotOneOf, user, rule));
+
+    public static readonly Operator SemVerLessThan =
+        new(OperatorTypes.SemVerLessThan, (user, rule) => MatchSemanticVersion(OperatorTypes.SemVerLessThan, user, rule));
+
+    public static readonly Operator SemVerLessEqualThan =
+        new(OperatorTypes.SemVerLessEqualThan, (user, rule) => MatchSemanticVersion(OperatorTypes.SemVerLessEqualThan, user, rule));
+
+    public static readonly Operator SemVerBiggerThan =
+        new(OperatorTypes.SemVerBiggerThan, (user, rule) => MatchSemanticVersion(OperatorTypes.SemVerBiggerThan, user, rule));
+
+    public static readonly Operator SemVerBiggerEqualThan =
+        new(OperatorTypes.SemVerBiggerEqualThan, (user, rule) => MatchSemanticVersion(OperatorTypes.SemVerBiggerEqualThan, user, rule));
+
+    private static bool MatchSemanticVersion(string op, string userValue, string ruleValue)
+    {
+        if (!SemanticVersion.TryParse(userValue, out var user)) return false;
+        if (op is OperatorTypes.SemVerIsOneOf or OperatorTypes.SemVerNotOneOf)
+        {
+            if (!SemanticVersion.TryParseList(ruleValue, out var versions)) return false;
+            var matches = versions.Any(version => user.CompareTo(version) == 0);
+            return op == OperatorTypes.SemVerIsOneOf ? matches : !matches;
+        }
+        if (!SemanticVersion.TryParse(ruleValue, out var rule)) return false;
+        var comparison = user.CompareTo(rule);
+        return op switch
+        {
+            OperatorTypes.SemVerLessThan => comparison < 0,
+            OperatorTypes.SemVerLessEqualThan => comparison <= 0,
+            OperatorTypes.SemVerBiggerThan => comparison > 0,
+            OperatorTypes.SemVerBiggerEqualThan => comparison >= 0,
+            _ => false
+        };
+    }
+
+    #endregion
+
     #region is true/ is false (no rule value)
 
     public static readonly Operator IsTrue = new(
@@ -157,6 +200,10 @@ public class Operator
 
         // is one of/ not one of
         IsOneOf, NotOneOf,
+
+        // semantic version
+        SemVerIsOneOf, SemVerNotOneOf,
+        SemVerLessThan, SemVerLessEqualThan, SemVerBiggerThan, SemVerBiggerEqualThan,
 
         // is true/ is false
         IsTrue, IsFalse

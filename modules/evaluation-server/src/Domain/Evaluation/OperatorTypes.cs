@@ -28,6 +28,14 @@ public class OperatorTypes
     public const string IsOneOf = "IsOneOf";
     public const string NotOneOf = "NotOneOf";
 
+    // semantic version
+    public const string SemVerIsOneOf = "SemVerIsOneOf";
+    public const string SemVerNotOneOf = "SemVerNotOneOf";
+    public const string SemVerLessThan = "SemVerLessThan";
+    public const string SemVerLessEqualThan = "SemVerLessEqualThan";
+    public const string SemVerBiggerThan = "SemVerBiggerThan";
+    public const string SemVerBiggerEqualThan = "SemVerBiggerEqualThan";
+
     // is true/ is false
     public const string IsTrue = "IsTrue";
     public const string IsFalse = "IsFalse";
