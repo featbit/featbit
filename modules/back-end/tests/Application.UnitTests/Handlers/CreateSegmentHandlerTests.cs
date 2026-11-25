@@ -182,8 +182,8 @@ public class CreateSegmentHandlerTests
             if (deny != null) policies.Add(deny);
             Permissions.Setup(x => x.GetAsync(Org.Id)).ReturnsAsync(policies.ToArray());
             License.Setup(x => x.IsFeatureGrantedAsync(Workspace, LicenseFeatures.ShareableSegment)).ReturnsAsync(true);
-            Handler = new(Segments.Object, License.Object, Publisher.Object, Mock.Of<ICurrentUser>(),
-                orgs.Object, projects.Object, envs.Object, Permissions.Object);
+            var scopeGuard = new SegmentCreationScopeGuard(orgs.Object, projects.Object, envs.Object, Permissions.Object);
+            Handler = new(Segments.Object, License.Object, Publisher.Object, Mock.Of<ICurrentUser>(), scopeGuard);
         }
         public async Task CreateAsync(CreateSegment request)
         {

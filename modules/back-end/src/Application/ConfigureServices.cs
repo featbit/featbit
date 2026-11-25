@@ -36,6 +36,7 @@ public static class ConfigureServices
         services.AddTransient<IPermissionGuard, PermissionGuard>();
         services.AddTransient<EnvironmentPermissionGuard>();
         services.AddTransient<SegmentPermissionGuard>();
+        services.AddTransient<SegmentCreationScopeGuard>();
         services.AddTransient<AuditLogAccessGuard>();
         services.AddTransient<ISegmentMessageService, SegmentMessageService>();
         if (configuration.UseControlPlane())
