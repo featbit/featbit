@@ -1,21 +1,45 @@
 #nullable enable
-using Domain.AuditLogs;
-using Domain.FeatureFlags;
+using Application.Bases.Exceptions;
 using Domain.Policies;
-using Domain.SemanticPatch;
+using Domain.Resources;
 
 namespace Application.Policies;
 
-public class PermissionGuard(IPermissionTargetResolver targetResolver) : IPermissionGuard
+internal static class PermissionGuard
 {
-    public Task EnsureFlagOwnershipAsync(Guid organizationId, FeatureFlag flag) =>
-        PermissionChecks.ResolveAccessibleTargetAsync(organizationId, () => targetResolver.ResolveFlagAsync(flag.EnvId, flag.Key));
+    internal static async Task EnsureAllowedAsync(
+        Guid organizationId,
+        IEnumerable<string> instructionPermissions,
+        PolicyStatement[] policies,
+        Func<Task<PermissionTarget?>> targetResolver)
+    {
+        var permissionTarget = await ResolveAccessibleTargetAsync(organizationId, targetResolver);
 
-    public Task EnsureFlagChangeAllowedAsync(Guid organizationId, FeatureFlag flag, DataChange change, PolicyStatement[] permissions) =>
-        PermissionChecks.EnsureAllowedAsync(
-            organizationId,
-            FlagComparer.Compare(change).Select(instruction => instruction.Permission),
-            permissions,
-            () => targetResolver.ResolveFlagAsync(flag.EnvId, flag.Key)
-        );
+        var requiredPermissions = instructionPermissions
+            .Where(permission => !string.IsNullOrEmpty(permission))
+            .ToHashSet();
+
+        if (requiredPermissions.Any(permission => !PolicyHelper.IsAllowed(policies, permissionTarget.Rn, permission)))
+        {
+            throw new ForbiddenException();
+        }
+    }
+
+    internal static async Task<PermissionTarget> ResolveAccessibleTargetAsync(
+        Guid organizationId,
+        Func<Task<PermissionTarget?>> targetResolver)
+    {
+        if (organizationId == Guid.Empty)
+        {
+            throw new ForbiddenException();
+        }
+
+        var permissionTarget = await targetResolver();
+        if (string.IsNullOrWhiteSpace(permissionTarget?.Rn) || permissionTarget.OrganizationId != organizationId)
+        {
+            throw new ForbiddenException();
+        }
+
+        return permissionTarget;
+    }
 }

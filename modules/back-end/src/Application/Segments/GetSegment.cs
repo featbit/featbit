@@ -11,12 +11,12 @@ public class GetSegment : IRequest<Segment>
     public Guid Id { get; set; }
 }
 
-public class GetSegmentHandler(ISegmentService segmentService, SegmentPermissionGuard permissionGuard)
+public class GetSegmentHandler(ISegmentService segmentService, SegmentPermissionGuard segmentGuard)
     : IRequestHandler<GetSegment, Segment>
 {
     public async Task<Segment> Handle(GetSegment request, CancellationToken cancellationToken)
     {
-        await permissionGuard.EnsureAccessibleAsync(request.OrgId, request.EnvId, request.Id);
+        await segmentGuard.EnsureInOrganizationAsync(request.OrgId, request.EnvId, request.Id);
 
         return await segmentService.GetAsync(request.Id);
     }

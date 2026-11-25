@@ -24,7 +24,7 @@ public class PatchFeatureFlag : IRequest<PatchResult>
 
 public class PatchFeatureFlagHandler(
     IFeatureFlagService flagService,
-    IPermissionGuard permissionGuard,
+    FlagPermissionGuard permissionGuard,
     ICurrentUser currentUser,
     IPublisher publisher)
     : IRequestHandler<PatchFeatureFlag, PatchResult>

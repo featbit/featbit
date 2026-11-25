@@ -1,63 +1,29 @@
-#nullable enable
 using Application.Bases.Exceptions;
+using Application.Environments;
 using Domain.Policies;
 using Domain.FeatureFlags;
 
 namespace Application.FeatureFlags;
 
-/// <summary>Resolves flag environments inside the authorizing organization before evaluating policies.</summary>
-public class FlagAccessGuard(IPermissionTargetResolver targetResolver, IFeatureFlagService flagService)
+public class FlagAccessGuard(EnvironmentPermissionGuard environmentAccess, IFeatureFlagService flagService)
 {
-    private async Task<string> GetEnvironmentRnAsync(Guid organizationId, Guid envId)
-    {
-        if (organizationId == Guid.Empty)
-        {
-            throw new ForbiddenException();
-        }
-
-        var resource = await targetResolver.ResolveEnvironmentAsync(envId);
-        if (resource == null || resource.OrganizationId != organizationId || string.IsNullOrWhiteSpace(resource.Rn))
-        {
-            throw new ForbiddenException();
-        }
-
-        return resource.Rn;
-    }
-
-    public async Task EnsureEnvironmentAccessAsync(Guid organizationId, Guid envId, PolicyStatement[] statements)
-    {
-        var rn = await GetEnvironmentRnAsync(organizationId, envId);
-        EnsureAllowed(rn, statements, Permissions.CanAccessEnv);
-    }
-
-    private static void EnsureAllowed(string rn, PolicyStatement[] statements,
-        string permission, string? flagKey = null, ICollection<string>? tags = null)
-    {
-        if (flagKey != null)
-        {
-            rn += $":flag/{flagKey}";
-            if (tags is { Count: > 0 }) rn += $";{string.Join(",", tags)}";
-        }
-
-        if (!PolicyHelper.IsAllowed(statements, rn, permission))
-        {
-            throw new ForbiddenException();
-        }
-    }
-
     public async Task<ICollection<FeatureFlag>> GetAuthorizedFlagsForCopyAsync(
         Guid orgId, Guid sourceEnvId, Guid targetEnvId, ICollection<Guid> ids, PolicyStatement[] statements)
     {
-        var sourceRn = await GetEnvironmentRnAsync(orgId, sourceEnvId);
-        EnsureAllowed(sourceRn, statements, Permissions.CanAccessEnv);
-        var targetRn = await GetEnvironmentRnAsync(orgId, targetEnvId);
-        EnsureAllowed(targetRn, statements, Permissions.CanAccessEnv);
+        var sourceRn = await environmentAccess.EnsureAccessAsync(orgId, sourceEnvId, statements);
+        await environmentAccess.EnsureAccessAsync(orgId, targetEnvId, statements);
         var distinctIds = ids.Distinct().ToArray();
         var sources = await flagService.FindManyAsync(x => distinctIds.Contains(x.Id) && x.EnvId == sourceEnvId);
         if (sources.Count != distinctIds.Length) throw new ForbiddenException();
         foreach (var flag in sources)
         {
-            EnsureAllowed(sourceRn, statements, Permissions.CopyFlagTo, flag.Key, flag.Tags);
+            var flagRn = $"{sourceRn}:flag/{flag.Key}";
+            if (flag.Tags is { Length: > 0 }) flagRn += $";{string.Join(",", flag.Tags)}";
+
+            if (!PolicyHelper.IsAllowed(statements, flagRn, Permissions.CopyFlagTo))
+            {
+                throw new ForbiddenException();
+            }
         }
         return sources;
     }

@@ -1,4 +1,5 @@
 using Application.Bases;
+using Application.Environments;
 using Application.Bases.Models;
 using Domain.FeatureFlags;
 using Domain.Policies;
@@ -48,15 +49,15 @@ public class GetCompareFlagOverviewValidator : AbstractValidator<GetCompareFlagO
     }
 }
 
-public class GetCompareFlagOverviewHandler(IFeatureFlagService service, FlagAccessGuard access)
+public class GetCompareFlagOverviewHandler(IFeatureFlagService service, EnvironmentPermissionGuard access)
     : IRequestHandler<GetCompareFlagOverview, PagedResult<CompareFlagOverview>>
 {
     public async Task<PagedResult<CompareFlagOverview>> Handle(GetCompareFlagOverview request, CancellationToken cancellationToken)
     {
-        await access.EnsureEnvironmentAccessAsync(request.OrgId, request.SourceEnvId, request.Permissions);
+        await access.EnsureAccessAsync(request.OrgId, request.SourceEnvId, request.Permissions);
         foreach (var targetEnvId in request.TargetEnvIds.Distinct())
         {
-            await access.EnsureEnvironmentAccessAsync(request.OrgId, targetEnvId, request.Permissions);
+            await access.EnsureAccessAsync(request.OrgId, targetEnvId, request.Permissions);
         }
 
         var pagedFlags = await service.GetListAsync(request.SourceEnvId, request.Filter);

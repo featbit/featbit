@@ -1,14 +1,14 @@
 using Application.Bases.Exceptions;
-using Application.Policies;
+using Application.FeatureFlags;
 using Application.Services;
 using Domain.AuditLogs;
 using Domain.FeatureFlags;
 using Domain.Policies;
 using Domain.Resources;
 
-namespace Application.UnitTests.Policies;
+namespace Application.UnitTests.FeatureFlags;
 
-public class PermissionGuardTests
+public class FlagPermissionGuardTests
 {
     private static FeatureFlag NewFlag() => new(Guid.NewGuid(), "before", "", "flag", false, VariationTypes.Boolean,
         [new() { Id = "off", Value = "false" }, new() { Id = "on", Value = "true" }],
@@ -29,7 +29,7 @@ public class PermissionGuardTests
             ownership == "blank-rn" ? " " : "project/p:env/e:flag/flag",
             ownership == "missing-org" ? null : ownership == "foreign" ? Guid.NewGuid() : org);
         targetResolver.Setup(x => x.ResolveFlagAsync(It.IsAny<Guid>(), It.IsAny<string>())).ReturnsAsync(resource);
-        var guard = new PermissionGuard(targetResolver.Object);
+        var guard = new FlagPermissionGuard(targetResolver.Object);
         var flag = NewFlag();
         var change = new DataChange(flag);
         if (changed) flag.Name = "after";
@@ -40,7 +40,7 @@ public class PermissionGuardTests
         var requestOrg = ownership == "empty-request-org" ? Guid.Empty : org;
         Func<Task> act = () => changed
             ? guard.EnsureFlagChangeAllowedAsync(requestOrg, flag, change, permissions)
-            : guard.EnsureFlagOwnershipAsync(requestOrg, flag);
+            : guard.EnsureInOrganizationAsync(requestOrg, flag);
         if (ownership == "own") await act();
         else await Assert.ThrowsAsync<ForbiddenException>(act);
         if (ownership == "empty-request-org") targetResolver.VerifyNoOtherCalls();
@@ -55,7 +55,7 @@ public class PermissionGuardTests
         var org = Guid.NewGuid();
         var targetResolver = new Mock<IPermissionTargetResolver>();
         targetResolver.Setup(x => x.ResolveFlagAsync(It.IsAny<Guid>(), It.IsAny<string>())).ReturnsAsync(new PermissionTarget("project/p:env/e:flag/flag", org));
-        var guard = new PermissionGuard(targetResolver.Object);
+        var guard = new FlagPermissionGuard(targetResolver.Object);
         var flag = NewFlag();
         var change = new DataChange(flag);
         flag.Name = "after";

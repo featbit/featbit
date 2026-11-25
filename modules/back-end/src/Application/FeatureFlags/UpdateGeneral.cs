@@ -68,7 +68,7 @@ public class UpdateGeneralValidator : AbstractValidator<UpdateGeneral>
 
 public class UpdateGeneralHandler(
     IFeatureFlagService service,
-    IPermissionGuard permissionGuard,
+    FlagPermissionGuard permissionGuard,
     ICurrentUser currentUser,
     IPublisher publisher)
     : IRequestHandler<UpdateGeneral, Guid>
@@ -85,7 +85,7 @@ public class UpdateGeneralHandler(
 
         if (!nameChanged && !descriptionChanged && !tagsChanged)
         {
-            await permissionGuard.EnsureFlagOwnershipAsync(request.OrgId, flag);
+            await permissionGuard.EnsureInOrganizationAsync(request.OrgId, flag);
             return flag.Revision;
         }
 

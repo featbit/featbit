@@ -64,7 +64,7 @@ public class UpdateTargetingValidator : AbstractValidator<UpdateTargeting>
 
 public class UpdateTargetingHandler(
     IFeatureFlagService flagService,
-    IPermissionGuard permissionGuard,
+    FlagPermissionGuard permissionGuard,
     ICurrentUser currentUser,
     IPublisher publisher)
     : IRequestHandler<UpdateTargeting, Guid>

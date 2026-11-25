@@ -1,5 +1,6 @@
 using Application.Users;
 using Application.Bases;
+using Application.Environments;
 using Domain.AuditLogs;
 using Domain.FeatureFlags;
 using Domain.Policies;
@@ -80,14 +81,15 @@ public class CopyFlagSettingsHandler(
     IEnvironmentService envService,
     ICurrentUser currentUser,
     IPublisher publisher,
-    FlagAccessGuard access,
-    IPermissionGuard permissionGuard)
+    EnvironmentPermissionGuard envGuard,
+    FlagPermissionGuard permissionGuard)
     : IRequestHandler<CopyFlagSettings, bool>
 {
     public async Task<bool> Handle(CopyFlagSettings request, CancellationToken cancellationToken)
     {
-        await access.EnsureEnvironmentAccessAsync(request.OrgId, request.SourceEnvId, request.Permissions);
-        await access.EnsureEnvironmentAccessAsync(request.OrgId, request.TargetEnvId, request.Permissions);
+        await envGuard.EnsureAccessAsync(request.OrgId, request.SourceEnvId, request.Permissions);
+        await envGuard.EnsureAccessAsync(request.OrgId, request.TargetEnvId, request.Permissions);
+
         var source = await flagService.GetAsync(request.SourceEnvId, request.Key);
         var target = await flagService.GetAsync(request.TargetEnvId, request.Key);
         var relatedSegments = await flagService.GetRelatedSegmentsAsync([source, target]);

@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
 using Application.Bases.Exceptions;
+using Application.Environments;
 using Application.FeatureFlags;
-using Application.Policies;
 using Application.Services;
 using Application.Users;
 using Domain.EndUsers;
@@ -20,6 +20,7 @@ public class FlagCopyAuthorizationTests
     private readonly Mock<IFeatureFlagService> _flags = new();
     private readonly List<FeatureFlag> _stored = [];
     private readonly FlagAccessGuard _guard;
+    private readonly EnvironmentPermissionGuard _environmentAccess;
     private static PolicyStatement Statement(string action, string rn, string effect = EffectType.Allow) => new()
     {
         ResourceType = action == Permissions.CanAccessEnv ? ResourceTypes.Env : ResourceTypes.FeatureFlag,
@@ -34,7 +35,8 @@ public class FlagCopyAuthorizationTests
         _targetResolver.Setup(x => x.ResolveEnvironmentAsync(_target)).ReturnsAsync(new PermissionTarget("project/p:env/target", _org));
         _flags.Setup(x => x.FindManyAsync(It.IsAny<Expression<Func<FeatureFlag, bool>>>()))
             .ReturnsAsync((Expression<Func<FeatureFlag, bool>> predicate) => _stored.Where(predicate.Compile()).ToArray());
-        _guard = new FlagAccessGuard(_targetResolver.Object, _flags.Object);
+        _environmentAccess = new EnvironmentPermissionGuard(_targetResolver.Object, Mock.Of<IOrganizationPermissions>());
+        _guard = new FlagAccessGuard(_environmentAccess, _flags.Object);
     }
 
     private FeatureFlag Add(Guid env, string key = "flag", params string[] tags)
@@ -59,13 +61,13 @@ public class FlagCopyAuthorizationTests
             "null-org" => new("project/p:env/source", null), _ => new(" ", _org)
         };
         _targetResolver.Setup(x => x.ResolveEnvironmentAsync(_source)).ReturnsAsync(resource);
-        await Assert.ThrowsAsync<ForbiddenException>(() => _guard.EnsureEnvironmentAccessAsync(_org, _source, All));
+        await Assert.ThrowsAsync<ForbiddenException>(() => _environmentAccess.EnsureAccessAsync(_org, _source, All));
     }
 
     [Fact]
     public async Task EmptyOrganization_IsDeniedWithoutQuerying()
     {
-        await Assert.ThrowsAsync<ForbiddenException>(() => _guard.EnsureEnvironmentAccessAsync(Guid.Empty, _source, All));
+        await Assert.ThrowsAsync<ForbiddenException>(() => _environmentAccess.EnsureAccessAsync(Guid.Empty, _source, All));
         _targetResolver.VerifyNoOtherCalls();
     }
 
@@ -216,7 +218,7 @@ public class FlagCopyAuthorizationTests
         var users = new Mock<IEndUserService>(MockBehavior.Strict);
         var publisher = new Mock<IPublisher>(MockBehavior.Strict);
         var handler = new CopyFlagSettingsHandler(_flags.Object, users.Object, Mock.Of<IEnvironmentService>(), Mock.Of<ICurrentUser>(),
-            publisher.Object, _guard, new PermissionGuard(_targetResolver.Object));
+            publisher.Object, _environmentAccess, new FlagPermissionGuard(_targetResolver.Object));
         await Assert.ThrowsAsync<ForbiddenException>(() => handler.Handle(
             new CopyFlagSettings(Guid.Empty, _org, _source, _target, "flag", [EnvAccess], new()
             {

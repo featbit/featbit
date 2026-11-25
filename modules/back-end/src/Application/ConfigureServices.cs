@@ -33,7 +33,7 @@ public static class ConfigureServices
         // custom services
         services.AddHttpContextAccessor();
         services.AddSingleton<ICurrentUser, CurrentUser>();
-        services.AddTransient<IPermissionGuard, PermissionGuard>();
+        services.AddTransient<FlagPermissionGuard>();
         services.AddTransient<EnvironmentPermissionGuard>();
         services.AddTransient<SegmentPermissionGuard>();
         services.AddTransient<SegmentCreationScopeGuard>();
