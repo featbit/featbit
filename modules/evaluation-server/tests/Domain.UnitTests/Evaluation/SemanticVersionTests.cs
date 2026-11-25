@@ -51,7 +51,7 @@ public class SemanticVersionTests
     [InlineData("1.2.0-alpha", "1.2.0-alpha.1", -1)]
     [InlineData("1.2.0-A", "1.2.0-a", -1)]
     [InlineData("99999999999999999999.0.0", "99999999999999999998.0.0", 1)]
-    public void ComparesPrecedence(string left, string right, int expected)
+    public void ComparesVersions(string left, string right, int expected)
     {
         Assert.True(SemanticVersion.TryParse(left, out var a));
         Assert.True(SemanticVersion.TryParse(right, out var b));
