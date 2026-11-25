@@ -82,7 +82,8 @@ public class PatchFeatureFlagHandlerTests
         var service = new Mock<IFeatureFlagService>();
         service.Setup(x => x.GetAsync(It.IsAny<Guid>(), It.IsAny<string>())).ReturnsAsync(flag);
         var publisher = new Mock<IPublisher>();
-        var sut = new PatchFeatureFlagHandler(service.Object, new FlagPermissionGuard(Mock.Of<IPermissionTargetResolver>()), Mock.Of<ICurrentUser>(), publisher.Object);
+        var targetResolver = Mock.Of<IPermissionTargetResolver>();
+        var sut = new PatchFeatureFlagHandler(service.Object, new FlagPermissionGuard(targetResolver), Mock.Of<ICurrentUser>(), publisher.Object);
 
         // op against a non-existent path produces a JsonPatchError when applied
         var patch = new JsonPatchDocument<FeatureFlag>();

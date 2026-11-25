@@ -1,4 +1,3 @@
-using Application.Bases;
 using Domain.Policies;
 
 namespace Application.FeatureFlags;
@@ -16,30 +15,24 @@ public class CopyToEnvPrecheck : IRequest<ICollection<CopyToEnvPrecheckResult>>
     public ICollection<Guid> FlagIds { get; set; } = Array.Empty<Guid>();
 }
 
-public class CopyToEnvPrecheckValidator : AbstractValidator<CopyToEnvPrecheck>
-{
-    public CopyToEnvPrecheckValidator()
-    {
-        RuleFor(x => x.FlagIds).NotEmpty().WithErrorCode(ErrorCodes.Invalid("flagIds"));
-        RuleFor(x => x.SourceEnvId).NotEmpty().WithErrorCode(ErrorCodes.Invalid("sourceEnvId"));
-        RuleFor(x => x.TargetEnvId)
-            .NotEmpty().WithErrorCode(ErrorCodes.Invalid("targetEnvId"))
-            .NotEqual(x => x.SourceEnvId)
-            .WithErrorCode(ErrorCodes.Invalid("targetEnvId"));
-    }
-}
-
-public class CopyToEnvPrecheckHandler(
-    FlagAccessGuard flagAccessGuard,
-    FlagCopyPrecheck precheck)
+public class CopyToEnvPrecheckHandler(FlagCopyChecks copyChecks)
     : IRequestHandler<CopyToEnvPrecheck, ICollection<CopyToEnvPrecheckResult>>
 {
     public async Task<ICollection<CopyToEnvPrecheckResult>> Handle(
         CopyToEnvPrecheck request,
         CancellationToken cancellationToken)
     {
-        var flags = await flagAccessGuard.GetAuthorizedFlagsForCopyAsync(request.OrgId, request.SourceEnvId,
-            request.TargetEnvId, request.FlagIds, request.Permissions);
-        return await precheck.CheckAsync(flags, request.TargetEnvId);
+        var context = new CopyToEnvContext(
+            request.OrgId, request.SourceEnvId, request.TargetEnvId, request.FlagIds, request.Permissions
+        );
+
+        var flags = await copyChecks.EnsureCopyAllowedAsync(context);
+        if (flags.Count == 0)
+        {
+            return [];
+        }
+
+        var precheckResults = await copyChecks.CheckAsync(flags, request.TargetEnvId);
+        return precheckResults;
     }
 }

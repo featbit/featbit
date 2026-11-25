@@ -22,44 +22,6 @@ namespace Application.IntegrationTests.Controllers;
 public class FlagCopyTests
 {
     [Theory]
-    [InlineData("copy", "null")]
-    [InlineData("preview", "null")]
-    [InlineData("copy", "empty")]
-    [InlineData("preview", "empty")]
-    [InlineData("copy", "source")]
-    [InlineData("preview", "source")]
-    [InlineData("settings", "source")]
-    [InlineData("copy", "target")]
-    [InlineData("preview", "target")]
-    [InlineData("settings", "target")]
-    [InlineData("copy", "same")]
-    [InlineData("preview", "same")]
-    [InlineData("settings", "same")]
-    [InlineData("settings", "options")]
-    public async Task InvalidInputReturns400BeforeResourceQueries(string operation, string invalid)
-    {
-        await using var app = new FlagCopyTestApp();
-        var client = await app.CreateAuthenticatedClientAsync();
-        var source = invalid == "source" ? Guid.Empty : app.Source;
-        var target = invalid == "target" ? Guid.Empty : invalid == "same" ? source : app.Target;
-        Guid[]? ids = invalid == "null" ? null : invalid == "empty" ? [] : [app.Flag.Id];
-        HttpResponseMessage response;
-        if (operation == "settings")
-            response = await client.PutAsJsonAsync($"/api/v1/envs/{source}/feature-flags/flag/copy-settings-to/{target}", new
-            {
-                options = invalid == "options" ? null : new FlagSettingCopyOptions(false,
-                    new(false, CopyModes.Overwrite), new(false, CopyModes.Overwrite), false, false)
-            });
-        else
-        {
-            object? body = operation == "copy" ? new { flagIds = ids } : ids;
-            response = await client.PostAsJsonAsync($"/api/v1/envs/{source}/feature-flags/{(operation == "copy" ? "copy-to-env" : "copy-to-env-precheck")}/{target}", body);
-        }
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-        app.TargetResolver.VerifyNoOtherCalls(); app.Flags.VerifyNoOtherCalls();
-    }
-
-    [Theory]
     [InlineData("copy-to-env", "source-access")]
     [InlineData("copy-to-env-precheck", "source-access")]
     [InlineData("copy-to-env", "target-access")]

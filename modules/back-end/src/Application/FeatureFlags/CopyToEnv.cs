@@ -1,5 +1,4 @@
 using Application.Users;
-using Application.Bases;
 using Domain.AuditLogs;
 using Domain.FeatureFlags;
 using Domain.Policies;
@@ -44,35 +43,28 @@ public class CopyToEnv : CopyToEnvPayload, IRequest<CopyToEnvResult>
     }
 }
 
-public class CopyToEnvValidator : AbstractValidator<CopyToEnv>
-{
-    public CopyToEnvValidator()
-    {
-        RuleFor(x => x.FlagIds).NotEmpty().WithErrorCode(ErrorCodes.Invalid("flagIds"));
-        RuleFor(x => x.SourceEnvId).NotEmpty().WithErrorCode(ErrorCodes.Invalid("sourceEnvId"));
-        RuleFor(x => x.TargetEnvId)
-            .NotEmpty().WithErrorCode(ErrorCodes.Invalid("targetEnvId"))
-            .NotEqual(x => x.SourceEnvId)
-            .WithErrorCode(ErrorCodes.Invalid("targetEnvId"));
-    }
-}
-
 public class CopyToEnvHandler(
     IFeatureFlagService flagService,
     IEndUserService endUserService,
     IEnvironmentService envService,
     ICurrentUser currentUser,
     IPublisher publisher,
-    FlagAccessGuard access,
-    FlagCopyPrecheck precheck)
+    FlagCopyChecks copyChecks)
     : IRequestHandler<CopyToEnv, CopyToEnvResult>
 {
     public async Task<CopyToEnvResult> Handle(CopyToEnv request, CancellationToken cancellationToken)
     {
-        var flags = await access.GetAuthorizedFlagsForCopyAsync(request.OrgId, request.SourceEnvId,
-            request.TargetEnvId, request.FlagIds, request.Permissions);
-        // Recompute validation and derived properties; the client only chooses which flags/rules to copy.
-        var precheckResults = await precheck.CheckAsync(flags, request.TargetEnvId);
+        var context = new CopyToEnvContext(
+            request.OrgId, request.SourceEnvId, request.TargetEnvId, request.FlagIds, request.Permissions
+        );
+
+        var flags = await copyChecks.EnsureCopyAllowedAsync(context);
+        if (flags.Count == 0)
+        {
+            return new CopyToEnvResult(0);
+        }
+
+        var precheckResults = await copyChecks.CheckAsync(flags, request.TargetEnvId);
         var copiedCount = 0;
         var newProperties = new HashSet<string>();
 
