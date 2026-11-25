@@ -468,6 +468,83 @@ public class DcBackfillerTests
         f.East.Verify(s => s.DeleteFlagAsync(It.IsAny<Guid>(), It.IsAny<Guid>()), Times.Never);
     }
 
+    // ----- reading the environment list for the snapshot -----
+
+    private (DcBackfiller Sut, Mock<IEnvironmentService> Environments) CreateSnapshotReader(string mode)
+    {
+        var flags = new Mock<IFeatureFlagService>();
+        flags.Setup(s => s.GetAllCommittedAsync()).ReturnsAsync(Array.Empty<FeatureFlag>());
+        var segments = new Mock<ISegmentService>();
+        segments.Setup(s => s.GetAllCommittedAsync()).ReturnsAsync(Array.Empty<Segment>());
+        var environments = new Mock<IEnvironmentService>();
+        environments.Setup(s => s.GetSecretCachesAsync()).ReturnsAsync(new List<Domain.Environments.SecretCache>());
+
+        var services = new ServiceCollection();
+        services.AddTransient(_ => flags.Object);
+        services.AddTransient(_ => segments.Object);
+        services.AddTransient(_ => environments.Object);
+        var sut = CreateSut(
+            Mock.Of<ICacheService>(),
+            services.BuildServiceProvider().GetRequiredService<IServiceScopeFactory>(),
+            PruneSettings(mode));
+        return (sut, environments);
+    }
+
+    [Fact]
+    public async Task FetchCommittedSnapshotAsync_PruningOff_DoesNotReadTheEnvironmentList()
+    {
+        var (sut, environments) = CreateSnapshotReader("Off");
+
+        var snapshot = await sut.FetchCommittedSnapshotAsync();
+
+        environments.Verify(s => s.FindManyAsync(It.IsAny<Expression<Func<Domain.Environments.Environment, bool>>>()), Times.Never);
+        Assert.Null(snapshot.EnvironmentIds);
+        Assert.False(snapshot.EnvironmentListUnreadable);
+    }
+
+    [Fact]
+    public async Task FetchCommittedSnapshotAsync_PruningOn_ListsEveryEnvironment()
+    {
+        var (sut, environments) = CreateSnapshotReader("On");
+        var env = new Domain.Environments.Environment(Guid.NewGuid(), "Dev", "dev");
+        environments.Setup(s => s.FindManyAsync(It.IsAny<Expression<Func<Domain.Environments.Environment, bool>>>()))
+            .ReturnsAsync([env]);
+
+        var snapshot = await sut.FetchCommittedSnapshotAsync();
+
+        Assert.Equal([env.Id], snapshot.EnvironmentIds);
+    }
+
+    /// <summary>
+    /// Only the prune uses the environment list, so a failed read must not fail the snapshot the backfill writes from.
+    /// </summary>
+    [Fact]
+    public async Task FetchCommittedSnapshotAsync_EnvironmentListCannotBeRead_StillReturnsTheSnapshot()
+    {
+        var (sut, environments) = CreateSnapshotReader("On");
+        environments.Setup(s => s.FindManyAsync(It.IsAny<Expression<Func<Domain.Environments.Environment, bool>>>()))
+            .ThrowsAsync(new TimeoutException("database"));
+
+        var snapshot = await sut.FetchCommittedSnapshotAsync();
+
+        Assert.Null(snapshot.EnvironmentIds); // not an empty list
+        Assert.True(snapshot.EnvironmentListUnreadable);
+    }
+
+    [Fact]
+    public async Task BackfillDcAsync_EnvironmentListWasUnreadable_PrunesTheKnownEnvironmentsAndLooksAgain()
+    {
+        var f = CreatePruneFixture();
+        var orphan = Guid.NewGuid();
+        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ReturnsAsync(Index((orphan, OldScore)));
+
+        await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot with { EnvironmentListUnreadable = true });
+
+        f.East.Verify(s => s.DeleteFlagAsync(f.EnvA, orphan), Times.Once);
+        f.Time.Advance(TimeSpan.FromSeconds(61));
+        Assert.Equal(["east"], f.Sut.TakeDcsDueForPrune());
+    }
+
     /// <summary>
     /// An environment can lose its last flag, segment and SDK key. It is still in the environment list, so the entries
     /// its index still lists are found; otherwise adding a key later would make them servable again.
@@ -822,6 +899,66 @@ public class DcBackfillerTests
             Times.Exactly(2));
     }
 
+    /// <summary>
+    /// A backfill that waited for the failing prune works from a snapshot read before the delete, so it still holds the
+    /// flag. Its own prune must keep the record, or the next prune can no longer find the leftover value.
+    /// </summary>
+    [Fact]
+    public async Task PruneDcAsync_AFailedFlagRemoval_IsKeptWhenAnOlderSnapshotStillHoldsTheFlag()
+    {
+        var f = CreatePruneFixture();
+        var orphan = Guid.NewGuid();
+        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ReturnsAsync(Index((orphan, OldScore)));
+        f.East.Setup(s => s.DeleteFlagAsync(f.EnvA, orphan)).ThrowsAsync(new TimeoutException("redis"));
+        await f.Sut.PruneDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot with { TakenAt = Now });
+
+        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ReturnsAsync(Index()); // the index entry went before the failure
+        f.East.Setup(s => s.DeleteFlagAsync(f.EnvA, orphan)).Returns(Task.CompletedTask);
+        var olderSnapshot = f.Snapshot with
+        {
+            Flags = [.. f.Snapshot.Flags, StaleFlag(orphan, f.EnvA)],
+            TakenAt = Now.AddMinutes(-1)
+        };
+        await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, olderSnapshot);
+        f.East.Verify(s => s.DeleteFlagAsync(f.EnvA, orphan), Times.Once); // the older snapshot holds it: skipped
+
+        f.Time.Advance(TimeSpan.FromSeconds(61));
+        Assert.Equal(["east"], f.Sut.TakeDcsDueForPrune());
+        var removed = await f.Sut.PruneDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        Assert.Equal(1, removed);
+        f.East.Verify(s => s.DeleteFlagAsync(f.EnvA, orphan), Times.Exactly(2));
+    }
+
+    /// <summary>
+    /// A segment whose removal failed is listed again, with a recent score, in another environment (a change message that
+    /// arrived late). It waits until that entry is old enough and is then removed from every environment.
+    /// </summary>
+    [Fact]
+    public async Task PruneDcAsync_AFailedSegmentRemovalListedRecentlyElsewhere_WaitsAndThenRemovesItEverywhere()
+    {
+        var f = CreatePruneFixture();
+        var orphan = Guid.NewGuid();
+        f.East.Setup(s => s.GetSegmentIndexAsync(f.EnvA)).ReturnsAsync(Index((orphan, OldScore)));
+        f.East.Setup(s => s.DeleteSegmentAsync(It.IsAny<ICollection<Guid>>(), orphan)).ThrowsAsync(new TimeoutException("redis"));
+        await f.Sut.PruneDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        f.East.Setup(s => s.GetSegmentIndexAsync(f.EnvA)).ReturnsAsync(Index());
+        f.East.Setup(s => s.GetSegmentIndexAsync(f.EnvB)).ReturnsAsync(Index((orphan, RecentScore)));
+        f.East.Setup(s => s.DeleteSegmentAsync(It.IsAny<ICollection<Guid>>(), orphan)).Returns(Task.CompletedTask);
+        await f.Sut.PruneDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+        f.East.Verify(s => s.DeleteSegmentAsync(It.IsAny<ICollection<Guid>>(), orphan), Times.Once); // only the failure
+
+        f.Time.Advance(TimeSpan.FromMinutes(10));
+        await f.Sut.PruneDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot);
+
+        f.East.Verify(
+            s => s.DeleteSegmentAsync(
+                It.Is<ICollection<Guid>>(ids => ids.OrderBy(i => i).SequenceEqual(new[] { f.EnvA, f.EnvB }.OrderBy(i => i))),
+                orphan),
+            Times.Once);
+    }
+
     [Fact]
     public async Task PruneDcAsync_AFlagWhoseRemovalFailedIsBackInTheDatabase_IsNotRemoved()
     {
@@ -1141,6 +1278,23 @@ public class DcBackfillerTests
         await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot with { TakenAt = Now.AddMinutes(-5) });
 
         f.Time.Advance(TimeSpan.FromSeconds(545)); // after the newer prune's retry, before the older run's
+        Assert.Equal(["east"], f.Sut.TakeDcsDueForPrune());
+    }
+
+    /// <summary>
+    /// Two snapshots taken in the same clock tick cannot be ordered, so the second prune may not clear the first one's retry.
+    /// </summary>
+    [Fact]
+    public async Task PruneDcAsync_ASnapshotFromTheSameTick_DoesNotClearTheRetry()
+    {
+        var f = CreatePruneFixture();
+        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ReturnsAsync(Index((Guid.NewGuid(), RecentScore)));
+        await f.Sut.PruneDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot with { TakenAt = Now });
+        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ReturnsAsync(Index());
+
+        await f.Sut.PruneDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot with { TakenAt = Now });
+
+        f.Time.Advance(TimeSpan.FromMinutes(10));
         Assert.Equal(["east"], f.Sut.TakeDcsDueForPrune());
     }
 

@@ -22,7 +22,8 @@ namespace Api.Application.ControlPlane;
 /// <c>RedisPopulatingService.PopulateSecretsAsync</c> does (<c>IEnvironmentService.GetSecretCachesAsync</c>)
 /// so a DC backfill's secret coverage matches startup population.
 /// <see cref="EnvironmentIds"/> lists every environment, including one with no flags, segments or secrets left, so
-/// that the prune step checks its indexes too.
+/// that the prune step checks its indexes too. It is not read while pruning is off; when the read fails,
+/// <see cref="EnvironmentListUnreadable"/> is set and the prune looks again later.
 /// </summary>
 public sealed record CommittedSnapshot(
     IReadOnlyList<FeatureFlag> Flags,
@@ -30,7 +31,8 @@ public sealed record CommittedSnapshot(
     IReadOnlyDictionary<string, ICollection<Guid>> SegmentEnvIds,
     IReadOnlyList<SecretCache> Secrets,
     DateTimeOffset? TakenAt = null,
-    IReadOnlyCollection<Guid>? EnvironmentIds = null);
+    IReadOnlyCollection<Guid>? EnvironmentIds = null,
+    bool EnvironmentListUnreadable = false);
 
 /// <summary>
 /// Backfills ONE DC's Redis with the authoritative (committed) value of every flag, segment, and
@@ -565,30 +567,7 @@ public sealed class DcBackfiller(
         CompositeRedisCacheService composite,
         CancellationToken cancellationToken)
     {
-        // A dry run when the setting is absent or blank: the step reports what it would remove and removes nothing
-        // until it is switched on. A value that is not exactly one of the mode names is a mistake (a typo, a number,
-        // or a list such as "Off, On", which Enum.TryParse would accept and combine into On), and it must not turn on
-        // a destructive step, so it switches the step off and says so.
-        var rawMode = configuration[$"{PruneSection}:Mode"];
-        var pruneMode = PruneMode.DryRun;
-        if (!string.IsNullOrWhiteSpace(rawMode))
-        {
-            var name = Enum.GetNames<PruneMode>()
-                .FirstOrDefault(n => string.Equals(n, rawMode.Trim(), StringComparison.OrdinalIgnoreCase));
-            if (name is not null)
-            {
-                pruneMode = Enum.Parse<PruneMode>(name);
-            }
-            else
-            {
-                logger.LogWarning(
-                    "DC backfill: {Setting} has the invalid value '{Value}'; pruning is off until it is fixed.",
-                    $"{PruneSection}:Mode",
-                    rawMode);
-                pruneMode = PruneMode.Off;
-            }
-        }
-
+        var pruneMode = ReadPruneMode(logInvalid: true);
         if (pruneMode == PruneMode.Off)
         {
             return new PruneOutcome(0, null);
@@ -615,6 +594,13 @@ public sealed class DcBackfiller(
         // A score is too recent until it is MinAgeSeconds old; look again a second after that.
         void DeferTooNew(long score) =>
             Defer(DateTimeOffset.FromUnixTimeMilliseconds(score).AddSeconds(minAgeSeconds + 1));
+
+        // An environment list that could not be read may have left out an environment with nothing else left; the ones
+        // known are still checked, and the prune looks again in a minute.
+        if (snapshot.EnvironmentListUnreadable)
+        {
+            Defer(now.AddSeconds(UnreadableIndexRetrySeconds));
+        }
 
         // Every environment the source of truth knows: the environment list, which includes one with no flags,
         // segments or SDK keys left, plus any environment the flags, segments and secrets refer to.
@@ -707,8 +693,10 @@ public sealed class DcBackfiller(
 
         // Entries whose removal from this DC failed part way. The index may no longer list them, so they are carried
         // over from that run rather than found again; their archived state was confirmed then, and their value may be
-        // gone now, so only the database is asked again.
-        var pendingFlags = new List<(Guid EnvId, Guid Id)>();
+        // gone now, so only the database is asked again. A record is dropped only when the removal succeeds or the
+        // database has the entry again. A snapshot that still holds the entry (one read before the delete, by a backfill
+        // that waited for the prune) does not drop it; it is skipped on this pass and looked at again.
+        var pendingFlags = new List<(Guid EnvId, Guid Id, bool InSnapshot)>();
         foreach (var ((pendingDcId, id), envId) in _pendingFlagRemovals)
         {
             if (pendingDcId != dcId)
@@ -716,17 +704,11 @@ public sealed class DcBackfiller(
                 continue;
             }
 
-            if (liveFlagIds.Contains(id))
-            {
-                _pendingFlagRemovals.TryRemove((dcId, id), out _);
-                continue;
-            }
-
             flagCandidates.Remove((envId, id));
-            pendingFlags.Add((envId, id));
+            pendingFlags.Add((envId, id, liveFlagIds.Contains(id)));
         }
 
-        var pendingSegments = new List<(Guid Id, ICollection<Guid> EnvIds)>();
+        var pendingSegments = new List<(Guid Id, ICollection<Guid> EnvIds, bool InSnapshot)>();
         foreach (var ((pendingDcId, id), envs) in _pendingSegmentRemovals)
         {
             if (pendingDcId != dcId)
@@ -734,20 +716,15 @@ public sealed class DcBackfiller(
                 continue;
             }
 
-            if (liveSegmentIds.Contains(id))
-            {
-                _pendingSegmentRemovals.TryRemove((dcId, id), out _);
-                continue;
-            }
-
-            // The same rule as above: no segment is removed while an index could not be read.
-            if (segmentIndexUnreadable)
+            // The same rules as above: no segment is removed while an index could not be read, or while any environment
+            // lists it with a recent score, which a later look covers once it ages. The record is kept for that look.
+            if (segmentIndexUnreadable || segmentsTooNew.Contains(id))
             {
                 continue;
             }
 
             var allEnvs = segmentEnvs.Remove(id, out var listed) ? envs.Union(listed).ToList() : envs;
-            pendingSegments.Add((id, allEnvs));
+            pendingSegments.Add((id, allEnvs, liveSegmentIds.Contains(id)));
         }
 
         if (flagCandidates.Count == 0 && segmentEnvs.Count == 0 && pendingFlags.Count == 0 && pendingSegments.Count == 0)
@@ -780,13 +757,19 @@ public sealed class DcBackfiller(
             }
         }
 
-        foreach (var (envId, id) in pendingFlags)
+        foreach (var (envId, id, inSnapshot) in pendingFlags)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
             if (await featureFlagService.AnyAsync(f => f.Id == id))
             {
                 _pendingFlagRemovals.TryRemove((dcId, id), out _);
+                continue;
+            }
+
+            if (inSnapshot)
+            {
+                Defer(now.AddSeconds(UnreadableIndexRetrySeconds));
                 continue;
             }
 
@@ -811,13 +794,19 @@ public sealed class DcBackfiller(
             }
         }
 
-        foreach (var (id, envs) in pendingSegments)
+        foreach (var (id, envs, inSnapshot) in pendingSegments)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
             if (await segmentService.AnyAsync(s => s.Id == id))
             {
                 _pendingSegmentRemovals.TryRemove((dcId, id), out _);
+                continue;
+            }
+
+            if (inSnapshot)
+            {
+                Defer(now.AddSeconds(UnreadableIndexRetrySeconds));
                 continue;
             }
 
@@ -930,8 +919,8 @@ public sealed class DcBackfiller(
     }
 
     /// <summary>
-    /// Records when a prune wants another look at its DC. A prune from the newest snapshot seen so far for this DC sets or
-    /// clears the schedule. One from an older snapshot, such as a backfill that read the database before a later
+    /// Records when a prune wants another look at its DC. A prune from a snapshot strictly newer than any seen so far for
+    /// this DC sets or clears the schedule. One from an older snapshot, or one taken in the same clock tick, such as a backfill that read the database before a later
     /// prune-only pass did, may bring the schedule forward but never clears or delays it: an entry it saw as live may have
     /// been deleted since, and a newer prune may have left it for later. The check and the change happen under one lock.
     /// </summary>
@@ -939,7 +928,9 @@ public sealed class DcBackfiller(
     {
         lock (_pruneScheduleLock)
         {
-            var isNewest = !_newestPruneSnapshot.TryGetValue(dcId, out var newest) || snapshotTakenAt >= newest;
+            // Strictly newer: two snapshots taken in the same clock tick cannot be ordered, so a tie keeps the schedule
+            // (at worst one extra prune) rather than letting either clear the other's retry.
+            var isNewest = !_newestPruneSnapshot.TryGetValue(dcId, out var newest) || snapshotTakenAt > newest;
             if (isNewest)
             {
                 _newestPruneSnapshot[dcId] = snapshotTakenAt;
@@ -985,6 +976,38 @@ public sealed class DcBackfiller(
     private bool WasPrunedSince(string dcId, Guid id, DateTimeOffset snapshotTakenAt) =>
         _prunedAt.TryGetValue((dcId, id), out var prunedAt) && prunedAt > snapshotTakenAt;
 
+    /// <summary>
+    /// Reads the prune mode. A dry run when the setting is absent or blank: the step reports what it would remove and
+    /// removes nothing until it is switched on. A value that is not exactly one of the mode names is a mistake (a typo, a
+    /// number, or a list such as "Off, On", which Enum.TryParse would accept and combine into On), and it must not turn on
+    /// a destructive step, so it switches the step off and, when <paramref name="logInvalid"/> is set, says so.
+    /// </summary>
+    private PruneMode ReadPruneMode(bool logInvalid)
+    {
+        var rawMode = configuration[$"{PruneSection}:Mode"];
+        if (string.IsNullOrWhiteSpace(rawMode))
+        {
+            return PruneMode.DryRun;
+        }
+
+        var name = Enum.GetNames<PruneMode>()
+            .FirstOrDefault(n => string.Equals(n, rawMode.Trim(), StringComparison.OrdinalIgnoreCase));
+        if (name is not null)
+        {
+            return Enum.Parse<PruneMode>(name);
+        }
+
+        if (logInvalid)
+        {
+            logger.LogWarning(
+                "DC backfill: {Setting} has the invalid value '{Value}'; pruning is off until it is fixed.",
+                $"{PruneSection}:Mode",
+                rawMode);
+        }
+
+        return PruneMode.Off;
+    }
+
     private readonly record struct PruneOutcome(int Removed, DateTimeOffset? RetryAt);
 
     private enum PruneMode
@@ -1028,8 +1051,24 @@ public sealed class DcBackfiller(
 
         var secretCaches = await environmentService.GetSecretCachesAsync();
 
-        // Every environment, so that the prune step also checks one with no flags, segments or secrets left.
-        var environments = await environmentService.FindManyAsync(_ => true);
+        // Every environment, so that the prune step also checks one with no flags, segments or secrets left. Only the
+        // prune uses it, so it is not read while pruning is off, and a failed read must not fail the backfill: the
+        // snapshot then says the list is missing, and the prune checks the environments it knows of and looks again.
+        IReadOnlyCollection<Guid>? environmentIds = null;
+        var environmentListUnreadable = false;
+        if (ReadPruneMode(logInvalid: false) != PruneMode.Off)
+        {
+            try
+            {
+                environmentIds = (await environmentService.FindManyAsync(_ => true)).Select(e => e.Id).ToList();
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                logger.LogWarning(
+                    ex, "DC backfill: the environment list could not be read; the prune will look again.");
+                environmentListUnreadable = true;
+            }
+        }
 
         return new CommittedSnapshot(
             allCommitted,
@@ -1037,7 +1076,8 @@ public sealed class DcBackfiller(
             segmentEnvIds,
             secretCaches.ToList(),
             takenAt,
-            environments.Select(e => e.Id).ToList());
+            environmentIds,
+            environmentListUnreadable);
     }
 
     /// <summary>
