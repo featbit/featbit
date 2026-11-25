@@ -1,4 +1,3 @@
-using Application.Policies;
 using Application.Segments;
 using Application.Services;
 using Application.Users;
@@ -55,7 +54,7 @@ public class PatchSegmentHandlerTests
         var operatorId = Guid.NewGuid();
         currentUser.SetupGet(x => x.Id).Returns(operatorId);
         var publisher = new Mock<IPublisher>();
-        var sut = new PatchSegmentHandler(service.Object, new PermissionGuard(CreateTargetResolverMock().Object), currentUser.Object, publisher.Object);
+        var sut = new PatchSegmentHandler(service.Object, new SegmentPermissionGuard(CreateTargetResolverMock().Object), currentUser.Object, publisher.Object);
 
         var patch = new JsonPatchDocument<Segment>();
         patch.Replace(x => x.Description, "patched");
@@ -81,7 +80,7 @@ public class PatchSegmentHandlerTests
         var service = new Mock<ISegmentService>();
         service.Setup(x => x.GetAsync(It.IsAny<Guid>())).ReturnsAsync(segment);
         var publisher = new Mock<IPublisher>();
-        var sut = new PatchSegmentHandler(service.Object, new PermissionGuard(CreateTargetResolverMock().Object), Mock.Of<ICurrentUser>(), publisher.Object);
+        var sut = new PatchSegmentHandler(service.Object, new SegmentPermissionGuard(CreateTargetResolverMock().Object), Mock.Of<ICurrentUser>(), publisher.Object);
 
         var patch = new JsonPatchDocument<Segment>();
         patch.Replace(x => x.Included, new[] { "user-1", "user-2" });
@@ -102,7 +101,7 @@ public class PatchSegmentHandlerTests
         var service = new Mock<ISegmentService>();
         service.Setup(x => x.GetAsync(It.IsAny<Guid>())).ReturnsAsync(segment);
         var publisher = new Mock<IPublisher>();
-        var sut = new PatchSegmentHandler(service.Object, new PermissionGuard(Mock.Of<IPermissionTargetResolver>()), Mock.Of<ICurrentUser>(), publisher.Object);
+        var sut = new PatchSegmentHandler(service.Object, new SegmentPermissionGuard(Mock.Of<IPermissionTargetResolver>()), Mock.Of<ICurrentUser>(), publisher.Object);
 
         var patch = new JsonPatchDocument<Segment>();
         patch.Operations.Add(new Operation<Segment>

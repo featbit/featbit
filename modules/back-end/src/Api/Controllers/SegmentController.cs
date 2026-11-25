@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.JsonPatch.SystemTextJson;
 
 namespace Api.Controllers;
 
+[Authorize(Permissions.CanAccessEnv)]
 [Route("api/v{version:apiVersion}/envs/{envId:guid}/segments")]
 public class SegmentController : ApiControllerBase
 {
@@ -22,11 +23,12 @@ public class SegmentController : ApiControllerBase
     /// </remarks>
     [OpenApi]
     [HttpGet("{segmentId:guid}")]
-    [Authorize(Permissions.CanAccessEnv)]
-    public async Task<ApiResponse<Segment>> GetAsync(Guid segmentId)
+    public async Task<ApiResponse<Segment>> GetAsync(Guid envId, Guid segmentId)
     {
         var request = new GetSegment
         {
+            OrgId = OrgId,
+            EnvId = envId,
             Id = segmentId
         };
 
@@ -42,7 +44,6 @@ public class SegmentController : ApiControllerBase
     /// </remarks>
     [OpenApi]
     [HttpGet]
-    [Authorize(Permissions.CanAccessEnv)]
     public async Task<ApiResponse<PagedResult<SegmentVm>>> GetListAsync(Guid envId, [FromQuery] SegmentFilter filter)
     {
         var request = new GetSegmentList
@@ -64,11 +65,12 @@ public class SegmentController : ApiControllerBase
     /// </remarks>
     [OpenApi]
     [HttpGet("by-ids")]
-    [Authorize(Permissions.CanAccessEnv)]
-    public async Task<ApiResponse<IEnumerable<Segment>>> GetByIdsAsync([FromQuery] Guid[] ids)
+    public async Task<ApiResponse<IEnumerable<Segment>>> GetByIdsAsync(Guid envId, [FromQuery] Guid[] ids)
     {
         var request = new GetSegmentByIds
         {
+            WorkspaceId = WorkspaceId,
+            EnvId = envId,
             Ids = ids
         };
 
@@ -277,11 +279,11 @@ public class SegmentController : ApiControllerBase
     /// </remarks>
     [OpenApi]
     [HttpGet("{segmentId:guid}/flag-references")]
-    [Authorize(Permissions.CanAccessEnv)]
     public async Task<ApiResponse<IEnumerable<FlagReference>>> GetFlagReferencesAsync(Guid envId, Guid segmentId)
     {
         var request = new GetFlagReferences
         {
+            OrgId = OrgId,
             EnvId = envId,
             Id = segmentId
         };
@@ -298,7 +300,6 @@ public class SegmentController : ApiControllerBase
     /// </remarks>
     [OpenApi]
     [HttpGet("all-tags")]
-    [Authorize(Permissions.CanAccessEnv)]
     public async Task<ApiResponse<ICollection<string>>> GetAllTagsAsync(Guid envId)
     {
         var request = new GetAllTag

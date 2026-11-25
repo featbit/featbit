@@ -20,7 +20,7 @@ public class PermissionTargetResolver(MongoDbClient mongoDb) : IPermissionTarget
             .FirstOrDefaultAsync();
 
         return project == null || string.IsNullOrWhiteSpace(project.Key)
-            ? null 
+            ? null
             : new PermissionTarget(RN.ForProject(project.Key), project.OrganizationId);
     }
 
@@ -33,8 +33,8 @@ public class PermissionTargetResolver(MongoDbClient mongoDb) : IPermissionTarget
             select new { project.Key, EnvKey = env.Key, project.OrganizationId };
 
         var data = await query.FirstOrDefaultAsync();
-        return data == null 
-            ? null 
+        return data == null
+            ? null
             : new PermissionTarget(RN.ForEnv(data.Key, data.EnvKey), data.OrganizationId);
     }
 

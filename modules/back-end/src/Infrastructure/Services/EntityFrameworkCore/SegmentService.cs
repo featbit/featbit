@@ -94,7 +94,7 @@ public class SegmentService(AppDbContext dbContext, ILogger<SegmentService> logg
         var envIds = new List<Guid>();
         foreach (var scope in segment.Scopes)
         {
-            var (_, scopeEnvIds) = await TranslateScopeAsync(scope);
+            var scopeEnvIds = await TranslateScopeAsync(segment.WorkspaceId, scope);
             envIds.AddRange(scopeEnvIds);
         }
 
@@ -153,20 +153,22 @@ public class SegmentService(AppDbContext dbContext, ILogger<SegmentService> logg
         {
             var sharedSegments = segments.Where(x => x.Type == SegmentType.Shared).ToArray();
 
-            var scopesToTranslate = sharedSegments.SelectMany(x => x.Scopes)
+            var scopesToTranslate = sharedSegments
+                .SelectMany(segment => segment.Scopes.Select(scope => (segment.WorkspaceId, Scope: scope)))
                 .Distinct()
                 .ToArray();
 
-            var scopes = new List<(string scope, ICollection<Guid> envIds)>();
-            foreach (var scopeToTranslate in scopesToTranslate)
+            var scopes = new Dictionary<(Guid WorkspaceId, string Scope), ICollection<Guid>>();
+            foreach (var key in scopesToTranslate)
             {
-                scopes.Add(await TranslateScopeAsync(scopeToTranslate));
+                var envIds = await TranslateScopeAsync(key.WorkspaceId, key.Scope);
+                scopes.Add(key, envIds);
             }
 
             foreach (var sharedSegment in sharedSegments)
             {
                 var envIds = sharedSegment.Scopes
-                    .SelectMany(scope => scopes.First(x => x.scope == scope).envIds)
+                    .SelectMany(scope => scopes[(sharedSegment.WorkspaceId, scope)])
                     .Distinct()
                     .ToArray();
 
@@ -338,18 +340,18 @@ public class SegmentService(AppDbContext dbContext, ILogger<SegmentService> logg
         return segments;
     }
 
-    private async Task<(string scope, ICollection<Guid> envIds)> TranslateScopeAsync(string scope)
+    private async Task<ICollection<Guid>> TranslateScopeAsync(Guid workspaceId, string scope)
     {
         if (!RN.TryParse(scope, out var props))
         {
             logger.LogError("Segment scope '{Scope}' is not a valid RN.", scope);
 
-            return (scope, []);
+            return [];
         }
 
         var environments = QueryableOf<Environment>();
         var projects = QueryableOf<Project>();
-        var organizations = QueryableOf<Organization>();
+        var organizations = QueryableOf<Organization>().Where(x => x.WorkspaceId == workspaceId);
 
         var envProp = props.FirstOrDefault(x => x.Type == ResourceTypes.Env);
         if (envProp != null && envProp.Key != "*")
@@ -375,6 +377,6 @@ public class SegmentService(AppDbContext dbContext, ILogger<SegmentService> logg
             select env.Id;
 
         var ids = await query.ToListAsync();
-        return (scope, ids);
+        return ids;
     }
 }

@@ -108,7 +108,7 @@ public class SegmentService(MongoDbClient mongoDb, ILogger<SegmentService> logge
         var envIds = new List<Guid>();
         foreach (var scope in segment.Scopes)
         {
-            var (_, scopeEnvIds) = await TranslateScopeAsync(scope);
+            var scopeEnvIds = await TranslateScopeAsync(segment.WorkspaceId, scope);
             envIds.AddRange(scopeEnvIds);
         }
 
@@ -160,17 +160,22 @@ public class SegmentService(MongoDbClient mongoDb, ILogger<SegmentService> logge
         {
             var sharedSegments = segments.Where(x => x.Type == SegmentType.Shared).ToArray();
 
-            var scopesToTranslate = sharedSegments.SelectMany(x => x.Scopes)
+            var scopesToTranslate = sharedSegments
+                .SelectMany(segment => segment.Scopes.Select(scope => (segment.WorkspaceId, Scope: scope)))
                 .Distinct()
                 .ToArray();
 
-            var translateScopeTasks = scopesToTranslate.Select(x => TranslateScopeAsync(x));
-            var scopes = await Task.WhenAll(translateScopeTasks);
+            var translations = await Task.WhenAll(scopesToTranslate.Select(async key =>
+            {
+                var envIds = await TranslateScopeAsync(key.WorkspaceId, key.Scope);
+                return (Key: key, EnvIds: envIds);
+            }));
+            var scopes = translations.ToDictionary(x => x.Key, x => x.EnvIds);
 
             foreach (var sharedSegment in sharedSegments)
             {
                 var envIds = sharedSegment.Scopes
-                    .SelectMany(scope => scopes.First(x => x.scope == scope).envIds)
+                    .SelectMany(scope => scopes[(sharedSegment.WorkspaceId, scope)])
                     .Distinct()
                     .ToArray();
 
@@ -288,13 +293,13 @@ public class SegmentService(MongoDbClient mongoDb, ILogger<SegmentService> logge
         return segments.ToList();
     }
 
-    private async Task<(string scope, ICollection<Guid> envIds)> TranslateScopeAsync(string scope)
+    private async Task<ICollection<Guid>> TranslateScopeAsync(Guid workspaceId, string scope)
     {
         if (!RN.TryParse(scope, out var props))
         {
             logger.LogError("Segment scope '{Scope}' is not a valid RN.", scope);
 
-            return (scope, []);
+            return [];
         }
 
         var match = new Dictionary<string, string>();
@@ -322,6 +327,7 @@ public class SegmentService(MongoDbClient mongoDb, ILogger<SegmentService> logge
             .Unwind("projects")
             .Lookup("Organizations", "projects.organizationId", "_id", "organizations")
             .Unwind("organizations")
+            .Match(new BsonDocument("organizations.workspaceId", new BsonBinaryData(workspaceId, GuidRepresentation.Standard)))
             .Match(new BsonDocument
             {
                 {
@@ -332,6 +338,6 @@ public class SegmentService(MongoDbClient mongoDb, ILogger<SegmentService> logge
             .Project(new BsonDocument("_id", 1));
 
         var documents = await query.ToListAsync();
-        return (scope, documents.Select(x => x["_id"].AsGuid).ToArray());
+        return documents.Select(x => x["_id"].AsGuid).ToArray();
     }
 }
