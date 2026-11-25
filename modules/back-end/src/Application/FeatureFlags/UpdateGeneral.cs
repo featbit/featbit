@@ -68,7 +68,7 @@ public class UpdateGeneralValidator : AbstractValidator<UpdateGeneral>
 
 public class UpdateGeneralHandler(
     IFeatureFlagService service,
-    FlagPermissionGuard permissionGuard,
+    FlagPermissionGuard flagGuard,
     ICurrentUser currentUser,
     IPublisher publisher)
     : IRequestHandler<UpdateGeneral, Guid>
@@ -85,7 +85,7 @@ public class UpdateGeneralHandler(
 
         if (!nameChanged && !descriptionChanged && !tagsChanged)
         {
-            await permissionGuard.EnsureInOrganizationAsync(request.OrgId, flag);
+            await flagGuard.EnsureInOrganizationAsync(request.OrgId, flag);
             return flag.Revision;
         }
 
@@ -95,7 +95,7 @@ public class UpdateGeneralHandler(
             tagsChanged ? requestedTags : currentTags,
             currentUser.Id
         );
-        await permissionGuard.EnsureFlagChangeAllowedAsync(request.OrgId, flag, dataChange, request.Permissions);
+        await flagGuard.EnsureFlagChangeAllowedAsync(request.OrgId, flag, dataChange, request.Permissions);
         await service.UpdateAsync(flag);
 
         var notification = new OnFeatureFlagChanged(

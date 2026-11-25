@@ -3,7 +3,6 @@ using Domain.Resources;
 
 namespace Application.FeatureFlags;
 
-/// <summary>Server-derived copy checks shared by preview and execution.</summary>
 public class FlagCopyPrecheck(
     IFeatureFlagService flagService,
     IEndUserService endUserService,

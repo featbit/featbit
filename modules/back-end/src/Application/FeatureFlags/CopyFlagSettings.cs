@@ -52,7 +52,7 @@ public class CopyFlagSettingsHandler(
     ICurrentUser currentUser,
     IPublisher publisher,
     EnvironmentPermissionGuard envGuard,
-    FlagPermissionGuard permissionGuard)
+    FlagPermissionGuard flagGuard)
     : IRequestHandler<CopyFlagSettings, bool>
 {
     public async Task<bool> Handle(CopyFlagSettings request, CancellationToken cancellationToken)
@@ -66,7 +66,9 @@ public class CopyFlagSettingsHandler(
 
         var context = new FlagCopyContext(source, target, relatedSegments, request.Options);
         var dataChange = target.CopySettingsFrom(context, currentUser.Id);
-        await permissionGuard.EnsureFlagChangeAllowedAsync(request.OrgId, target, dataChange, request.Permissions);
+        
+        await flagGuard.EnsureFlagChangeAllowedAsync(request.OrgId, target, dataChange, request.Permissions);
+
         await flagService.UpdateAsync(target);
 
         await AddNewPropertiesAsync();

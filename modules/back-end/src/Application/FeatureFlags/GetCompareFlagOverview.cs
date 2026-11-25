@@ -49,15 +49,15 @@ public class GetCompareFlagOverviewValidator : AbstractValidator<GetCompareFlagO
     }
 }
 
-public class GetCompareFlagOverviewHandler(IFeatureFlagService service, EnvironmentPermissionGuard access)
+public class GetCompareFlagOverviewHandler(IFeatureFlagService service, EnvironmentPermissionGuard envGuard)
     : IRequestHandler<GetCompareFlagOverview, PagedResult<CompareFlagOverview>>
 {
     public async Task<PagedResult<CompareFlagOverview>> Handle(GetCompareFlagOverview request, CancellationToken cancellationToken)
     {
-        await access.EnsureAccessAsync(request.OrgId, request.SourceEnvId, request.Permissions);
+        await envGuard.EnsureAccessAsync(request.OrgId, request.SourceEnvId, request.Permissions);
         foreach (var targetEnvId in request.TargetEnvIds.Distinct())
         {
-            await access.EnsureAccessAsync(request.OrgId, targetEnvId, request.Permissions);
+            await envGuard.EnsureAccessAsync(request.OrgId, targetEnvId, request.Permissions);
         }
 
         var pagedFlags = await service.GetListAsync(request.SourceEnvId, request.Filter);
