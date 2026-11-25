@@ -12,16 +12,13 @@ namespace Api.UnitTests;
 public class RefreshTokenCookieTests
 {
     [Theory]
-    [InlineData(null, "", "/api/v1/identity")]
-    [InlineData("", "/featbit", "/featbit/api/v1/identity")]
-    [InlineData(null, "/featbit/", "/featbit/api/v1/identity")]
-    [InlineData("/deployment-prefix/manage/api/v1/identity", "", "/deployment-prefix/manage/api/v1/identity")]
-    [InlineData("/external/api/v1/identity", "/internal", "/external/api/v1/identity")]
-    public void IssueRotateAndDelete_UseTheSamePublicPath(string? configuredPath, string pathBase, string expectedPath)
+    [InlineData(null, "/api/v1/identity")]
+    [InlineData("", "/api/v1/identity")]
+    [InlineData("/deployment-prefix/manage/api/v1/identity", "/deployment-prefix/manage/api/v1/identity")]
+    public void IssueRotateAndDelete_UseTheSamePublicPath(string? configuredPath, string expectedPath)
     {
         using var host = CreateHost(configuredPath);
         var context = new DefaultHttpContext { RequestServices = host.Services };
-        context.Request.PathBase = pathBase;
 
         context.Response.SetRefreshTokenCookie("initial-token");
         var initial = ReadCookie(context);
@@ -45,19 +42,6 @@ public class RefreshTokenCookieTests
         Assert.Equal(string.Empty, deleted.Value.Value);
         Assert.True(deleted.Expires < DateTimeOffset.UtcNow);
         Assert.Null(deleted.MaxAge);
-    }
-
-    [Fact]
-    public void DifferentRequests_DoNotShareCookiePaths()
-    {
-        using var host = CreateHost(null);
-        foreach (var prefix in new[] { "/first", "/second", "" })
-        {
-            var context = new DefaultHttpContext { RequestServices = host.Services };
-            context.Request.PathBase = prefix;
-            context.Response.SetRefreshTokenCookie("token");
-            Assert.Equal(prefix + "/api/v1/identity", ReadCookie(context).Path.Value);
-        }
     }
 
     [Theory]

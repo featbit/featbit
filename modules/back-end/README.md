@@ -59,9 +59,8 @@ Configuration uses the standard .NET environment-variable format: use `__` for n
 |------|-------------|---------------|
 | `Authentication__RefreshTokenCookiePath` | Full public path used when issuing, rotating and deleting the refresh token cookie. Set this when a reverse proxy strips the API's deployment prefix. A non-empty value must start with `/`. | `"/api/v1/identity"` |
 
-When this variable is unset or empty, the API uses `Request.PathBase + /api/v1/identity`.
-If `PathBase` is also empty, the cookie path remains `/api/v1/identity`; no configuration is
-required for deployments without a path prefix. This setting does not configure routing or set `PathBase`.
+When this variable is unset or empty, the API uses `/api/v1/identity`. This setting only
+controls the cookie's `Path` attribute.
 
 For example, if the browser sends refresh requests to
 `/deployment-prefix/manage/api/v1/identity/refresh-token`, configure the API service with:

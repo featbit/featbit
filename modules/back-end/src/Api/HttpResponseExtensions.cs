@@ -24,7 +24,7 @@ public static class HttpResponseExtensions
             SameSite = SameSiteMode.Lax,
 
             Path = string.IsNullOrEmpty(configuredPath)
-                ? response.HttpContext.Request.PathBase.Add(new PathString(ApiConstants.RefreshTokenCookiePath)).Value
+                ? ApiConstants.RefreshTokenCookiePath
                 : configuredPath
         };
     }
