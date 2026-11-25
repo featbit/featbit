@@ -122,7 +122,7 @@ public class PatchSegmentHandlerTests
     }
 
     [Fact]
-    public async Task Handle_InvalidSemVerPatch_DoesNotPersist()
+    public async Task Handle_InvalidSemVerPatch_ReturnsFailureWithoutPersistingOrPublishing()
     {
         var segment = NewSegment();
         var service = new Mock<ISegmentService>();
@@ -134,7 +134,13 @@ public class PatchSegmentHandlerTests
         {
             new() { Id = "rule", Conditions = [new Condition { Id = "condition", Property = "version", Op = "SemVerBiggerThan", Value = "bad" }] }
         });
-        await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => sut.Handle(new PatchSegment { Patch = patch }, CancellationToken.None));
+        var result = await sut.Handle(new PatchSegment { Patch = patch }, CancellationToken.None);
+
+        Assert.False(result.Success);
+        Assert.StartsWith("rules[0].conditions[0].value: Invalid semantic version.", result.Message);
         service.Verify(x => x.UpdateAsync(It.IsAny<Segment>()), Times.Never);
+        publisher.Verify(
+            x => x.Publish(It.IsAny<OnSegmentChange>(), It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 }

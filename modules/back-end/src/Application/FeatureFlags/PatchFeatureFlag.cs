@@ -43,7 +43,13 @@ public class PatchFeatureFlagHandler(
             return PatchResult.Fail(error);
         }
 
-        SemVerConditionValidator.EnsureValid(flag.Rules?.Select(rule => rule?.Conditions));
+        var failure = SemVerConditionValidator
+            .Validate(flag.Rules?.Select(rule => rule?.Conditions))
+            .FirstOrDefault();
+        if (failure != null)
+        {
+            return PatchResult.Fail($"{failure.PropertyName}: {failure.ErrorMessage}");
+        }
 
         flag.MarkAsUpdated(currentUser.Id);
         dataChange.To(flag);

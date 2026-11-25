@@ -105,7 +105,7 @@ public class PatchFeatureFlagHandlerTests
     }
 
     [Fact]
-    public async Task Handle_InvalidSemVerPatch_DoesNotPersist()
+    public async Task Handle_InvalidSemVerPatch_ReturnsFailureWithoutPersistingOrPublishing()
     {
         var flag = NewFlag();
         var service = new Mock<IFeatureFlagService>();
@@ -117,7 +117,13 @@ public class PatchFeatureFlagHandlerTests
         {
             new() { Id = "rule", Conditions = [new Condition { Id = "condition", Property = "version", Op = "SemVerBiggerThan", Value = "bad" }] }
         });
-        await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => sut.Handle(new PatchFeatureFlag { Patch = patch }, CancellationToken.None));
+        var result = await sut.Handle(new PatchFeatureFlag { Patch = patch }, CancellationToken.None);
+
+        Assert.False(result.Success);
+        Assert.StartsWith("rules[0].conditions[0].value: Invalid semantic version.", result.Message);
         service.Verify(x => x.UpdateAsync(It.IsAny<FeatureFlag>()), Times.Never);
+        publisher.Verify(
+            x => x.Publish(It.IsAny<OnFeatureFlagChanged>(), It.IsAny<CancellationToken>()),
+            Times.Never);
     }
 }

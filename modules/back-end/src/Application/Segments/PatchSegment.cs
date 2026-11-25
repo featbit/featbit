@@ -46,7 +46,13 @@ public class PatchSegmentHandler(
             return PatchResult.Fail(error);
         }
 
-        SemVerConditionValidator.EnsureValid(segment.Rules?.Select(rule => rule?.Conditions));
+        var failure = SemVerConditionValidator
+            .Validate(segment.Rules?.Select(rule => rule?.Conditions))
+            .FirstOrDefault();
+        if (failure != null)
+        {
+            return PatchResult.Fail($"{failure.PropertyName}: {failure.ErrorMessage}");
+        }
 
         segment.MarkAsUpdated(currentUser.Id);
         dataChange.To(segment);
