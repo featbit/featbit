@@ -3,7 +3,15 @@ using System.Text.RegularExpressions;
 
 namespace Domain.Targeting;
 
-/// <summary>SemVer 2.0 precedence, with omitted minor and patch components defaulting to zero, including versions with suffixes.</summary>
+/// <summary>
+/// Parses and compares versions using SemVer 2.0 rules.
+/// As an extension to the standard, missing minor and patch numbers default to zero,
+/// including versions with suffixes: "4-beta.1" is treated as "4.0.0-beta.1".
+/// </summary>
+/// <remarks>
+/// See <see href="https://semver.org/">the SemVer 2.0 specification</see>,
+/// especially section 11 for version comparison rules.
+/// </remarks>
 public sealed class SemanticVersion
 {
     private static readonly Regex Pattern = new(
