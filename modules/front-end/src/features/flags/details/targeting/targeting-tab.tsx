@@ -609,6 +609,7 @@ export function TargetingTab({
               }}
             >
               <RuleEditor
+                showValidationErrors={errors.has(rule.id)}
                 envId={envId}
                 rule={rule as SegmentRule}
                 properties={properties}

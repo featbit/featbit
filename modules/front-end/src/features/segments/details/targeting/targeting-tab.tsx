@@ -49,6 +49,7 @@ export function TargetingTab({
   const [draft, setDraft] = useState(() => cloneSegment(segment))
   const [resolvedUsers, setResolvedUsers] = useState(users)
   const [reviewOpen, setReviewOpen] = useState(false)
+  const [showValidationErrors, setShowValidationErrors] = useState(false)
   const [dragRuleId, setDragRuleId] = useState<string | null>(null)
   const { startPreview, movePreview, removePreview } = useRuleDragPreview()
 
@@ -138,6 +139,7 @@ export function TargetingTab({
                 disabled={saveMutation.isPending}
                 onClick={() => {
                   setDraft(cloneSegment(segment))
+                  setShowValidationErrors(false)
                   setDragRuleId(null)
                 }}
               >
@@ -159,6 +161,7 @@ export function TargetingTab({
                     )
                   )
                 ) {
+                  setShowValidationErrors(true)
                   toast.error(t("targeting.rules.semVerInvalid"))
                   return
                 }
@@ -243,6 +246,7 @@ export function TargetingTab({
               }}
             >
               <RuleEditor
+                showValidationErrors={showValidationErrors}
                 envId={envId}
                 rule={rule}
                 properties={properties}

@@ -68,6 +68,7 @@ export function RuleEditor({
   onChange,
   onRemove,
   footer,
+  showValidationErrors = false,
 }: {
   envId: string
   rule: SegmentRule
@@ -83,9 +84,11 @@ export function RuleEditor({
   onMoveDown: () => void
   onChange: (rule: SegmentRule) => void
   onRemove: () => void
+  showValidationErrors?: boolean
   footer?: ReactNode
 }) {
   const { t } = useTranslation()
+  const [touched, setTouched] = useState<Record<string, boolean>>({})
   const [pendingOperator, setPendingOperator] = useState<{
     id: string
     op: string
@@ -150,6 +153,19 @@ export function RuleEditor({
             (candidate) => candidate.name === condition.property
           )
           const multiValue = isMultiValueOperator(condition.op)
+          const validationKey = `${condition.id}:${condition.property}:${condition.op}`
+          const showError =
+            !isValidSemVerCondition(condition) &&
+            (showValidationErrors || Boolean(touched[validationKey]))
+          const errorKey = multiValue
+            ? values.length
+              ? "semVerListInvalid"
+              : "semVerListRequired"
+            : condition.value
+              ? "semVerSingleInvalid"
+              : "semVerRequired"
+          const markTouched = () =>
+            setTouched((current) => ({ ...current, [validationKey]: true }))
           const valueDisabled =
             condition.op === "IsTrue" || condition.op === "IsFalse"
           return (
@@ -271,11 +287,13 @@ export function RuleEditor({
                         <MultiValuePicker
                           key={`${condition.property}-${isSemVerOperator(condition.op)}`}
                           semanticVersion={isSemVerOperator(condition.op)}
+                          invalid={showError}
                           values={values}
                           presetValues={property?.presetValues ?? []}
                           presetOnly={property?.usePresetValuesOnly ?? false}
                           disabled={disabled}
-                          onChange={(nextValues) =>
+                          onChange={(nextValues) => {
+                            markTouched()
                             onChange({
                               ...rule,
                               conditions: rule.conditions.map((item) =>
@@ -284,7 +302,7 @@ export function RuleEditor({
                                   : item
                               ),
                             })
-                          }
+                          }}
                         />
                       ) : (
                         <Input
@@ -292,10 +310,11 @@ export function RuleEditor({
                           disabled={disabled || valueDisabled}
                           placeholder={
                             isSemVerOperator(condition.op)
-                              ? "2.3.0"
+                              ? t("targeting.rules.semVerPlaceholder")
                               : t("targeting.rules.value")
                           }
-                          aria-invalid={!isValidSemVerCondition(condition)}
+                          aria-invalid={showError}
+                          onBlur={markTouched}
                           onChange={(event) =>
                             onChange({
                               ...rule,
@@ -313,15 +332,15 @@ export function RuleEditor({
                       {isSemVerOperator(condition.op) && (
                         <p
                           className={
-                            isValidSemVerCondition(condition)
-                              ? "text-xs text-muted-foreground"
-                              : "text-xs text-destructive"
+                            showError
+                              ? "text-xs text-destructive"
+                              : "text-xs text-muted-foreground"
                           }
                         >
                           {t(
-                            isValidSemVerCondition(condition)
-                              ? "targeting.rules.semVerHelp"
-                              : "targeting.rules.semVerInvalid"
+                            showError
+                              ? `targeting.rules.${errorKey}`
+                              : "targeting.rules.semVerHelp"
                           )}
                         </p>
                       )}

@@ -26,7 +26,9 @@ export function MultiValuePicker({
   disabled,
   onChange,
   semanticVersion = false,
+  invalid = false,
 }: {
+  invalid?: boolean
   semanticVersion?: boolean
   values: string[]
   presetValues: PresetValue[]
@@ -86,7 +88,10 @@ export function MultiValuePicker({
   }
 
   return (
-    <div className="flex min-h-8 min-w-0 flex-wrap items-center gap-1 rounded-md border border-input px-2 py-0.5 focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50">
+    <div
+      data-invalid={invalid || undefined}
+      className="flex min-h-8 min-w-0 flex-wrap items-center gap-1 rounded-md border border-input px-2 py-0.5 focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50 data-[invalid]:border-destructive"
+    >
       {values.map((value) => {
         const label = labels.get(valueKey(value)) ?? value
         return (
@@ -135,6 +140,7 @@ export function MultiValuePicker({
               disabled={disabled}
               aria-label={t("targeting.rules.selectValues")}
               aria-expanded={open}
+              aria-invalid={invalid}
               className="h-6 min-w-28 flex-1 justify-start px-1 font-normal text-muted-foreground"
             />
           }

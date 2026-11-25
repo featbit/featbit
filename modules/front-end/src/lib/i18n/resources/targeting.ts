@@ -42,6 +42,12 @@ export const enTargeting = {
     addValue: 'Add "{{value}}"',
     removeValue: "Remove {{value}}",
     semVerGroup: "Semantic version",
+    semVerPlaceholder: "Enter a version",
+    semVerRequired: "Enter a version.",
+    semVerSingleInvalid: "Enter a valid version, such as 4 or 4.2.0-beta.1.",
+    semVerListRequired: "Add at least one version.",
+    semVerListInvalid:
+      "Each value must be a valid version, such as 4 or 4.2.0-beta.1.",
     semVerHelp:
       "Examples: 4, 4.2, 4-beta.1, 4+build.2. Missing minor and patch versions default to zero; build metadata is ignored.",
     semVerInvalid:
@@ -128,6 +134,11 @@ export const zhTargeting: typeof enTargeting = {
     addValue: "添加“{{value}}”",
     removeValue: "移除 {{value}}",
     semVerGroup: "语义化版本",
+    semVerPlaceholder: "输入版本号",
+    semVerRequired: "请输入版本号。",
+    semVerSingleInvalid: "请输入有效版本，例如 4 或 4.2.0-beta.1。",
+    semVerListRequired: "请至少添加一个版本。",
+    semVerListInvalid: "每个值都必须是有效版本，例如 4 或 4.2.0-beta.1。",
     semVerHelp:
       "支持 4、4.2、4-beta.1、4+build.2。缺失的次版本和补丁版本按零处理，忽略构建元数据。",
     semVerInvalid:
