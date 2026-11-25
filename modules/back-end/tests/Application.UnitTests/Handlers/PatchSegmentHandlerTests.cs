@@ -128,7 +128,8 @@ public class PatchSegmentHandlerTests
         var service = new Mock<ISegmentService>();
         service.Setup(x => x.GetAsync(It.IsAny<Guid>())).ReturnsAsync(segment);
         var publisher = new Mock<IPublisher>();
-        var sut = new PatchSegmentHandler(service.Object, new PermissionGuard(Mock.Of<IResourceService>()), Mock.Of<ICurrentUser>(), publisher.Object);
+        // Invalid conditions must return before permission checking.
+        var sut = new PatchSegmentHandler(service.Object, null!, Mock.Of<ICurrentUser>(), publisher.Object);
         var patch = new JsonPatchDocument<Segment>();
         patch.Replace(x => x.Rules, new List<MatchRule>
         {
