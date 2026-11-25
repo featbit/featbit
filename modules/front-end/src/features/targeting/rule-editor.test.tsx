@@ -221,10 +221,25 @@ describe("SemVer rule editing", () => {
     fireEvent.change(screen.getByPlaceholderText("Search values"), {
       target: { value: "invalid" },
     })
+    fireEvent.click(screen.getByRole("combobox", { name: "Select values" }))
+    expect(screen.getByTestId("condition-value")).toHaveTextContent('"invalid"')
+    expect(screen.getByText(/Each value must be a valid version/)).toBeVisible()
+  })
+
+  it.each(["2", "beta"])("discards pending version %s on Escape", (value) => {
+    renderEditor("SemVerIsOneOf", '["1.2.3"]', "plan")
+    fireEvent.click(screen.getByRole("combobox", { name: "Select values" }))
+    fireEvent.change(screen.getByPlaceholderText("Search values"), {
+      target: { value },
+    })
     fireEvent.keyDown(screen.getByPlaceholderText("Search values"), {
       key: "Escape",
     })
-    expect(screen.getByTestId("condition-value")).toHaveTextContent('"invalid"')
-    expect(screen.getByText(/Each value must be a valid version/)).toBeVisible()
+    expect(screen.getByTestId("condition-value")).toHaveTextContent('["1.2.3"]')
+    expect(
+      screen.queryByText(/Each value must be a valid version/)
+    ).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole("combobox", { name: "Select values" }))
+    expect(screen.getByPlaceholderText("Search values")).toHaveValue("")
   })
 })

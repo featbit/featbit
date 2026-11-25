@@ -116,12 +116,13 @@ export function MultiValuePicker({
       })}
       <Popover
         open={open}
-        onOpenChange={(nextOpen) => {
+        onOpenChange={(nextOpen, details) => {
           setOpen(nextOpen)
           if (!nextOpen) {
             // Commit typed versions before a save click can discard unconfirmed input.
             if (
               semanticVersion &&
+              details.reason !== "escape-key" &&
               !presetOnly &&
               query &&
               !selectedKeys.has(valueKey(query))
