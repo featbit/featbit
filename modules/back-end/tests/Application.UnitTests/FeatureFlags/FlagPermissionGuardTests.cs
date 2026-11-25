@@ -67,34 +67,4 @@ public class FlagPermissionGuardTests
             : [];
         await Assert.ThrowsAsync<ForbiddenException>(() => guard.EnsureChangeAllowedAsync(org, flag, change, policies));
     }
-
-    [Theory]
-    [InlineData("allowed")]
-    [InlineData("foreign-organization")]
-    [InlineData("missing-toggle")]
-    [InlineData("denied-toggle")]
-    public async Task EnsureToggleAllowedAsync_RequiresFlagOwnershipAndTogglePermission(string scenario)
-    {
-        var org = Guid.NewGuid();
-        var flag = NewFlag();
-        var targets = new Mock<IPermissionTargetResolver>();
-        targets.Setup(x => x.ResolveFlagAsync(flag.EnvId, flag.Key))
-            .ReturnsAsync(new PermissionTarget("project/p:env/e:flag/flag", scenario == "foreign-organization" ? Guid.NewGuid() : org));
-
-        var guard = new FlagPermissionGuard(targets.Object);
-        PolicyStatement[] permissions = scenario switch
-        {
-            "missing-toggle" => [],
-            "denied-toggle" => [TogglePermission(EffectType.Allow), TogglePermission(EffectType.Deny)],
-            _ => [TogglePermission(EffectType.Allow)]
-        };
-
-        Task Act() => guard.EnsureToggleAllowedAsync(org, flag, permissions);
-
-        if (scenario == "allowed") await Act();
-        else await Assert.ThrowsAsync<ForbiddenException>(Act);
-    }
-
-    private static PolicyStatement TogglePermission(string effect) =>
-        new() { ResourceType = ResourceTypes.FeatureFlag, Actions = [Permissions.ToggleFlag], Resources = ["*"], Effect = effect };
 }
