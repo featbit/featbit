@@ -5,6 +5,7 @@ using Application.Bases.Behaviours;
 using Application.Environments;
 using Application.FeatureFlags;
 using Application.Policies;
+using Application.ReleaseMetricSourceConnections;
 using Application.Segments;
 using Application.Users;
 using Microsoft.Extensions.Configuration;
@@ -38,6 +39,7 @@ public static class ConfigureServices
         services.AddTransient<SegmentPermissionGuard>();
         services.AddTransient<SegmentCreationScopeGuard>();
         services.AddTransient<AuditLogAccessGuard>();
+        services.AddTransient<ReleaseMetricSourceConnectionAccessGuard>();
         services.AddTransient<ISegmentMessageService, SegmentMessageService>();
         if (configuration.UseControlPlane())
         {
