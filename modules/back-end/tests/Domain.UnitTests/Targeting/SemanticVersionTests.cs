@@ -6,15 +6,32 @@ public class SemanticVersionTests
 {
     [Theory]
     [InlineData("1.2", true)]
+    [InlineData("0", true)]
+    [InlineData("4", true)]
+    [InlineData("4-beta.1", true)]
+    [InlineData("4+build.2", true)]
+    [InlineData("4-beta.1+build.2", true)]
+    [InlineData("4.2+build", true)]
+    [InlineData("4.2-beta+build", true)]
+    [InlineData("04", false)]
+    [InlineData("4.", false)]
+    [InlineData("4..0", false)]
+    [InlineData("4.01", false)]
+    [InlineData("4-01", false)]
+    [InlineData("4-", false)]
+    [InlineData("4+", false)]
+    [InlineData("4-beta..1", false)]
+    [InlineData("4+build..1", false)]
+    [InlineData("4\n", false)]
     [InlineData("1.2.3", true)]
     [InlineData("1.2.3-beta.2+build.01", true)]
     [InlineData("1.2.3-01a", true)]
     [InlineData("1.2.3-01", false)]
     [InlineData("01.2.3", false)]
     [InlineData("1.2.3.4", false)]
-    [InlineData("1.2-beta", false)]
+    [InlineData("1.2-beta", true)]
     [InlineData("v1.2.3", false)]
-    [InlineData("1", false)]
+    [InlineData("1", true)]
     [InlineData("1.2.3\n", false)]
     [InlineData(" 1.2.3", false)]
     [InlineData("^1.2.3", false)]
@@ -23,6 +40,13 @@ public class SemanticVersionTests
         Assert.Equal(valid, SemanticVersion.TryParse(value, out _));
 
     [Theory]
+    [InlineData("4", "4.0.0", 0)]
+    [InlineData("4.0", "4", 0)]
+    [InlineData("4-beta.1", "4.0.0-beta.1", 0)]
+    [InlineData("4+build.2", "4.0.0", 0)]
+    [InlineData("4.2-beta+build", "4.2.0-beta", 0)]
+    [InlineData("4-beta.1", "4", -1)]
+    [InlineData("4", "3.99.99", 1)]
     [InlineData("1.10.0", "1.9.0", 1)]
     [InlineData("1.2", "1.2.0+build", 0)]
     [InlineData("1.2.0-beta.2", "1.2.0-beta.10", -1)]
@@ -48,7 +72,9 @@ public class SemanticVersionTests
     {
         var positive = Operator.Get(OperatorTypes.SemVerIsOneOf);
         var negative = Operator.Get(OperatorTypes.SemVerNotOneOf);
-        Assert.False(positive.IsMatch("1.2+invalid", "[\"1.2\"]"));
+        Assert.True(positive.IsMatch("1.2+build", "[\"1.2\"]"));
+        Assert.True(positive.IsMatch("4+build.2", "[\"4\"]"));
+        Assert.False(negative.IsMatch("4.0.0", "[\"4\"]"));
         Assert.True(positive.IsMatch("1.2.0+abc", "[\"1.2\",\"2.0.0\"]"));
         Assert.False(negative.IsMatch("1.2.0", "[\"1.2\"]"));
         Assert.True(negative.IsMatch("2.0.0", "[\"1.2\"]"));
@@ -59,8 +85,8 @@ public class SemanticVersionTests
         }
         foreach (var value in new[] { null, "", "invalid", "1.2.3.4" })
             Assert.False(negative.IsMatch(value, "[\"1.2\"]"));
-        Assert.False(SemanticVersion.TryParse(new string('1', 257) + ".0.0", out _));
-        Assert.False(SemanticVersion.TryParseList(System.Text.Json.JsonSerializer.Serialize(Enumerable.Repeat("1.2", 101)), out _));
+        Assert.True(SemanticVersion.TryParse(new string('1', 257) + ".0.0", out _));
+        Assert.True(SemanticVersion.TryParseList(System.Text.Json.JsonSerializer.Serialize(Enumerable.Repeat("1.2", 101)), out _));
         Assert.True(new Condition { Property = "version", Op = OperatorTypes.SemVerIsOneOf, Value = "[\"1.2\"]" }.IsMultiValue());
     }
 }

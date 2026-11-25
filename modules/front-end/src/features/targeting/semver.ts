@@ -19,10 +19,10 @@ export function isMultiValueOperator(op: string) {
 
 // Keep this contract aligned with Domain/Targeting/SemanticVersion.cs.
 const versionPattern =
-  /^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:\.(0|[1-9][0-9]*)(?:-((?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*))*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?)?$/
+  /^(0|[1-9][0-9]*)(?:\.(0|[1-9][0-9]*)(?:\.(0|[1-9][0-9]*))?)?(?:-((?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*))*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/
 
 export function isSemanticVersion(value: string) {
-  return value.length <= 256 && versionPattern.exec(value)?.[0] === value
+  return versionPattern.exec(value)?.[0] === value
 }
 
 export function isValidSemVerCondition(
@@ -36,7 +36,6 @@ export function isValidSemVerCondition(
     return (
       Array.isArray(values) &&
       values.length > 0 &&
-      values.length <= 100 &&
       values.every(
         (value) => typeof value === "string" && isSemanticVersion(value)
       )

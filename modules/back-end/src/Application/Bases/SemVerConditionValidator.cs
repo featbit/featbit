@@ -18,7 +18,7 @@ public static class SemVerConditionValidator
                     !OpValueValidator.IsValid(condition.Op, condition.Value))
                 {
                     yield return new ValidationFailure($"rules[{ruleIndex}].conditions[{conditionIndex}].value",
-                        "Invalid semantic version. Use versions such as 2.3.0 (up to 256 characters); lists require 1–100 valid versions. Spaces, v prefixes and ranges are not supported.")
+                        "Invalid semantic version. Use versions such as 2.3.0; lists require at least one valid version. Spaces, v prefixes and ranges are not supported.")
                     { ErrorCode = ErrorCodes.Invalid("semanticVersion") };
                 }
                 conditionIndex++;

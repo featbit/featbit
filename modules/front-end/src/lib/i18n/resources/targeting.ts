@@ -43,9 +43,9 @@ export const enTargeting = {
     removeValue: "Remove {{value}}",
     semVerGroup: "Semantic version",
     semVerHelp:
-      "Examples: 2.3, 2.3.0, 2.3.0-beta.1. 2.3 compares as 2.3.0; build metadata is ignored.",
+      "Examples: 4, 4.2, 4-beta.1, 4+build.2. Missing minor and patch versions default to zero; build metadata is ignored.",
     semVerInvalid:
-      "Enter valid versions such as 2.3.0 (up to 256 characters). Lists require 1–100 versions; spaces, v prefixes and ranges are not supported.",
+      "Enter valid versions such as 2.3.0. Lists require at least one version; spaces, v prefixes and ranges are not supported.",
     semVerChoose: "Choose the version to keep for the single-value operator.",
     cancelSwitch: "Cancel switch",
     operators: {
@@ -129,9 +129,9 @@ export const zhTargeting: typeof enTargeting = {
     removeValue: "移除 {{value}}",
     semVerGroup: "语义化版本",
     semVerHelp:
-      "支持 2.3、2.3.0、2.3.0-beta.1。2.3 按 2.3.0 比较，忽略构建元数据。",
+      "支持 4、4.2、4-beta.1、4+build.2。缺失的次版本和补丁版本按零处理，忽略构建元数据。",
     semVerInvalid:
-      "请输入有效版本，例如 2.3.0（最多 256 个字符）。列表需要 1–100 个版本；不支持空格、v 前缀或范围表达式。",
+      "请输入有效版本，例如 2.3.0。列表需要至少一个版本；不支持空格、v 前缀或范围表达式。",
     semVerChoose: "请选择切换为单值操作符后保留的版本。",
     cancelSwitch: "取消切换",
     operators: {
