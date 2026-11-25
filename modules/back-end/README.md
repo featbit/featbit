@@ -46,36 +46,22 @@ Configuration uses the standard .NET environment-variable format: use `__` for n
 | `OLAPProvider`  | Insights query store: **MongoDb**, **Postgres**, or **ClickHouse**. Defaults to the selected `DbProvider` when unset. ClickHouse requires `MqProvider=Kafka`. | Same as `DbProvider` |
 | `SSOEnabled`    | Enable the SSO endpoint. | `false` (unset) |
 
-## Logging
+### Logging
 
 | Name                                               | Description                                      | Default Value                                                                                |
 |----------------------------------------------------|--------------------------------------------------|----------------------------------------------------------------------------------------------|
 | `Logging__MinimumLevel__Default`                   | Default log level                                | `"Information"`                                                                              |
 | `Logging__MinimumLevel__Override__<SourceContext>` | Override log level for a specific source context | Example: `env "Logging__MinimumLevel__Override__Microsoft.EntityFrameworkCore=Information" ` |
 
-### Refresh token cookie
+### Authentication
 
 | Name | Description | Default Value |
 |------|-------------|---------------|
-| `Authentication__RefreshTokenCookiePath` | Full public path used when issuing, rotating and deleting the refresh token cookie. Set this when a reverse proxy strips the API's deployment prefix. A non-empty value must start with `/`. | `"/api/v1/identity"` |
-
-When this variable is unset or empty, the API uses `/api/v1/identity`. This setting only
-controls the cookie's `Path` attribute.
-
-For example, if the browser sends refresh requests to
-`/deployment-prefix/manage/api/v1/identity/refresh-token`, configure the API service with:
-
-```yaml
-environment:
-  Authentication__RefreshTokenCookiePath: "/deployment-prefix/manage/api/v1/identity"
-```
-
-After changing the path, clear the old `refresh-token` cookie and sign in again. If the proxy
-already rewrites cookie paths, ensure it does not add the prefix a second time.
+| `Authentication__RefreshTokenCookiePath` | Cookie path used when issuing, rotating and deleting the refresh token cookie. Set this when a reverse proxy strips the API's deployment prefix. A non-empty value must start with `/`. | `"/api/v1/identity"` |
 
 ### JWT
 
-JWT (JSON Web Token) configuration for authentication and authorization.
+Settings for signing and validating JWT (JSON Web Token) access tokens.
 
 | Name                  | Description                                                                            | Default Value                                           |
 |-----------------------|----------------------------------------------------------------------------------------|---------------------------------------------------------|
@@ -112,7 +98,7 @@ JWT (JSON Web Token) configuration for authentication and authorization.
 | `MongoDb__ConnectionString` | Mongodb connection string | `"mongodb://admin:password@mongodb:27017"` |
 | `MongoDb__Database`         | Mongodb database name     | `"featbit"`                                |
 
-## Postgres
+### Postgres
 
 | Name                         | Description                                                                                      | Default Value                                                                            |
 |------------------------------|--------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------|
