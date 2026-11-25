@@ -64,7 +64,7 @@ public class UpdateTargetingValidator : AbstractValidator<UpdateTargeting>
 
 public class UpdateTargetingHandler(
     IFeatureFlagService flagService,
-    IPermissionGuard permissionGuard,
+    FlagPermissionGuard flagGuard,
     ICurrentUser currentUser,
     IPublisher publisher)
     : IRequestHandler<UpdateTargeting, Guid>
@@ -81,7 +81,7 @@ public class UpdateTargetingHandler(
 
         var dataChange = flag.UpdateTargeting(request.Targeting, currentUser.Id);
 
-        await permissionGuard.EnsureFlagChangeAllowedAsync(request.OrgId, flag, dataChange, request.Permissions);
+        await flagGuard.EnsureFlagChangeAllowedAsync(request.OrgId, flag, dataChange, request.Permissions);
 
         await flagService.UpdateAsync(flag);
 

@@ -24,7 +24,7 @@ public class PatchSegment : IRequest<PatchResult>
 
 public class PatchSegmentHandler(
     ISegmentService segmentService,
-    SegmentPermissionGuard permissionGuard,
+    SegmentPermissionGuard segmentGuard,
     ICurrentUser currentUser,
     IPublisher publisher)
     : IRequestHandler<PatchSegment, PatchResult>
@@ -50,7 +50,7 @@ public class PatchSegmentHandler(
         segment.MarkAsUpdated(currentUser.Id);
         dataChange.To(segment);
 
-        await permissionGuard.EnsureChangeAllowedAsync(request.OrgId, request.EnvId, segment.Id, dataChange, request.Permissions);
+        await segmentGuard.EnsureChangeAllowedAsync(request.OrgId, request.EnvId, segment.Id, dataChange, request.Permissions);
 
         await segmentService.UpdateAsync(segment);
 

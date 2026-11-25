@@ -8,8 +8,8 @@ namespace Application.Segments;
 
 public class SegmentPermissionGuard(IPermissionTargetResolver targetResolver)
 {
-    public Task EnsureAccessibleAsync(Guid organizationId, Guid envId, Guid segmentId) =>
-        PermissionChecks.ResolveAccessibleTargetAsync(organizationId, () => targetResolver.ResolveSegmentAsync(envId, segmentId));
+    public Task EnsureInOrganizationAsync(Guid organizationId, Guid envId, Guid segmentId) =>
+        PermissionGuard.ResolveAccessibleTargetAsync(organizationId, () => targetResolver.ResolveSegmentAsync(envId, segmentId));
 
     public Task EnsureChangeAllowedAsync(
         Guid organizationId,
@@ -17,7 +17,7 @@ public class SegmentPermissionGuard(IPermissionTargetResolver targetResolver)
         Guid segmentId,
         DataChange change,
         PolicyStatement[] permissions) =>
-        PermissionChecks.EnsureAllowedAsync(
+        PermissionGuard.EnsureAllowedAsync(
             organizationId,
             SegmentComparer.Compare(change).Select(instruction => instruction.Permission),
             permissions,

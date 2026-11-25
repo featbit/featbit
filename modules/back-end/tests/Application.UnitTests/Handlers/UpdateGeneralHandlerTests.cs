@@ -1,6 +1,5 @@
 using Application.Bases.Exceptions;
 using Application.FeatureFlags;
-using Application.Policies;
 using Application.Services;
 using Application.Users;
 using Domain.FeatureFlags;
@@ -77,7 +76,7 @@ public class UpdateGeneralHandlerTests
 
         return new UpdateGeneralHandler(
             flagService.Object,
-            new PermissionGuard(targetResolver.Object),
+            new FlagPermissionGuard(targetResolver.Object),
             currentUser.Object,
             publisher.Object);
     }

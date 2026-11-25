@@ -1,53 +1,38 @@
-using Domain.FeatureFlags;
-using Domain.Resources;
+using Domain.Policies;
 
 namespace Application.FeatureFlags;
 
 public class CopyToEnvPrecheck : IRequest<ICollection<CopyToEnvPrecheckResult>>
 {
+    public Guid OrgId { get; set; }
+
+    public Guid SourceEnvId { get; set; }
+
+    public PolicyStatement[] Permissions { get; set; } = [];
+
     public Guid TargetEnvId { get; set; }
 
     public ICollection<Guid> FlagIds { get; set; } = Array.Empty<Guid>();
 }
 
-public class CopyToEnvPrecheckHandler(
-    IFeatureFlagService flagService,
-    IEndUserService endUserService,
-    IResourceServiceV2 resourceService)
+public class CopyToEnvPrecheckHandler(FlagCopyChecks copyChecks)
     : IRequestHandler<CopyToEnvPrecheck, ICollection<CopyToEnvPrecheckResult>>
 {
     public async Task<ICollection<CopyToEnvPrecheckResult>> Handle(
         CopyToEnvPrecheck request,
         CancellationToken cancellationToken)
     {
-        var flags = await flagService.FindManyAsync(x => request.FlagIds.Contains(x.Id));
-        var targetFlagKeys = flags.Select(x => x.Key).ToArray();
+        var context = new CopyToEnvContext(
+            request.OrgId, request.SourceEnvId, request.TargetEnvId, request.FlagIds, request.Permissions
+        );
 
-        var duplicateKeys =
-        (
-            await flagService.FindManyAsync(x => x.EnvId == request.TargetEnvId && targetFlagKeys.Contains(x.Key))
-        ).Select(x => x.Key).ToArray();
-
-        var targetEnvRN = await resourceService.GetRNAsync(request.TargetEnvId, ResourceTypes.Env);
-        var targetEnvProperties = await endUserService.GetPropertiesAsync(request.TargetEnvId);
-
-        var relatedSegments = await flagService.GetRelatedSegmentsAsync(flags);
-
-        var results = new List<CopyToEnvPrecheckResult>();
-        foreach (var flag in flags)
+        var flags = await copyChecks.EnsureCopyAllowedAsync(context);
+        if (flags.Count == 0)
         {
-            var result = new CopyToEnvPrecheckResult
-            {
-                Id = flag.Id,
-                KeyCheck = !duplicateKeys.Contains(flag.Key),
-                TargetUserCheck = flag.TargetUsers.Count == 0,
-                TargetRuleCheck = FlagCopyHelper.IsRulesCopyable(flag.Rules, relatedSegments, targetEnvRN),
-                NewProperties = FlagCopyHelper.GetNewProperties(flag.Rules, targetEnvProperties)
-            };
-
-            results.Add(result);
+            return [];
         }
 
-        return results;
+        var precheckResults = await copyChecks.CheckAsync(flags, request.TargetEnvId);
+        return precheckResults;
     }
 }

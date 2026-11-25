@@ -24,7 +24,7 @@ public class PatchFeatureFlag : IRequest<PatchResult>
 
 public class PatchFeatureFlagHandler(
     IFeatureFlagService flagService,
-    IPermissionGuard permissionGuard,
+    FlagPermissionGuard flagGuard,
     ICurrentUser currentUser,
     IPublisher publisher)
     : IRequestHandler<PatchFeatureFlag, PatchResult>
@@ -45,7 +45,7 @@ public class PatchFeatureFlagHandler(
         flag.MarkAsUpdated(currentUser.Id);
         dataChange.To(flag);
 
-        await permissionGuard.EnsureFlagChangeAllowedAsync(request.OrgId, flag, dataChange, request.Permissions);
+        await flagGuard.EnsureFlagChangeAllowedAsync(request.OrgId, flag, dataChange, request.Permissions);
 
         await flagService.UpdateAsync(flag);
 

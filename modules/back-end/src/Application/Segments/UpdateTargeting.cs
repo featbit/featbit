@@ -71,7 +71,7 @@ public class UpdateTargetingValidator : AbstractValidator<UpdateTargeting>
 
 public class UpdateTargetingHandler(
     ISegmentService service,
-    SegmentPermissionGuard permissionGuard,
+    SegmentPermissionGuard segmentGaurd,
     ICurrentUser currentUser,
     IPublisher publisher
 ) : IRequestHandler<UpdateTargeting, bool>
@@ -81,7 +81,7 @@ public class UpdateTargetingHandler(
         var segment = await service.GetAsync(request.Id);
         var dataChange = segment.UpdateTargeting(request.Included, request.Excluded, request.Rules);
 
-        await permissionGuard.EnsureChangeAllowedAsync(
+        await segmentGaurd.EnsureChangeAllowedAsync(
             request.OrgId,
             request.EnvId,
             request.Id,

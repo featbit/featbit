@@ -1,6 +1,8 @@
 using Application.Users;
+using Application.Environments;
 using Domain.AuditLogs;
 using Domain.FeatureFlags;
+using Domain.Policies;
 
 namespace Application.FeatureFlags;
 
@@ -15,6 +17,8 @@ public class CopyFlagSettings : CopyFlagSettingsPayload, IRequest<bool>
 
     public Guid OrgId { get; set; }
 
+    public PolicyStatement[] Permissions { get; }
+
     public Guid SourceEnvId { get; set; }
 
     public Guid TargetEnvId { get; set; }
@@ -27,6 +31,7 @@ public class CopyFlagSettings : CopyFlagSettingsPayload, IRequest<bool>
         Guid sourceEnvId,
         Guid targetEnvId,
         string key,
+        PolicyStatement[] permissions,
         CopyFlagSettingsPayload payload)
     {
         WorkspaceId = workspaceId;
@@ -34,6 +39,7 @@ public class CopyFlagSettings : CopyFlagSettingsPayload, IRequest<bool>
         SourceEnvId = sourceEnvId;
         TargetEnvId = targetEnvId;
         Key = key;
+        Permissions = permissions;
 
         Options = payload.Options;
     }
@@ -44,17 +50,25 @@ public class CopyFlagSettingsHandler(
     IEndUserService endUserService,
     IEnvironmentService envService,
     ICurrentUser currentUser,
-    IPublisher publisher)
+    IPublisher publisher,
+    EnvironmentPermissionGuard envGuard,
+    FlagPermissionGuard flagGuard)
     : IRequestHandler<CopyFlagSettings, bool>
 {
     public async Task<bool> Handle(CopyFlagSettings request, CancellationToken cancellationToken)
     {
+        await envGuard.EnsureAccessAsync(request.OrgId, request.SourceEnvId, request.Permissions);
+        await envGuard.EnsureAccessAsync(request.OrgId, request.TargetEnvId, request.Permissions);
+
         var source = await flagService.GetAsync(request.SourceEnvId, request.Key);
         var target = await flagService.GetAsync(request.TargetEnvId, request.Key);
         var relatedSegments = await flagService.GetRelatedSegmentsAsync([source, target]);
 
         var context = new FlagCopyContext(source, target, relatedSegments, request.Options);
         var dataChange = target.CopySettingsFrom(context, currentUser.Id);
+
+        await flagGuard.EnsureFlagChangeAllowedAsync(request.OrgId, target, dataChange, request.Permissions);
+
         await flagService.UpdateAsync(target);
 
         await AddNewPropertiesAsync();

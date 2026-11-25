@@ -9,7 +9,6 @@ using Domain.Workspaces;
 using Domain.FeatureFlags;
 using Domain.Policies;
 using Microsoft.AspNetCore.JsonPatch.SystemTextJson;
-using Microsoft.AspNetCore.JsonPatch.SystemTextJson.Operations;
 
 namespace Api.Controllers;
 
@@ -417,11 +416,15 @@ public class FeatureFlagController : ApiControllerBase
 
     [HttpPost("copy-to-env-precheck/{targetEnvId:guid}")]
     public async Task<ApiResponse<ICollection<CopyToEnvPrecheckResult>>> CopyToEnvPrecheckAsync(
+        Guid envId,
         Guid targetEnvId,
         [FromBody] ICollection<Guid> flagIds)
     {
         var request = new CopyToEnvPrecheck
         {
+            OrgId = OrgId,
+            SourceEnvId = envId,
+            Permissions = await GetRequestPermissionsAsync(),
             TargetEnvId = targetEnvId,
             FlagIds = flagIds
         };
@@ -436,7 +439,8 @@ public class FeatureFlagController : ApiControllerBase
         Guid targetEnvId,
         CopyToEnvPayload payload)
     {
-        var request = new CopyToEnv(WorkspaceId, OrgId, envId, targetEnvId, payload);
+        var permissions = await GetRequestPermissionsAsync();
+        var request = new CopyToEnv(WorkspaceId, OrgId, envId, targetEnvId, permissions, payload);
 
         var copyToEnvResult = await Mediator.Send(request);
         return Ok(copyToEnvResult);
@@ -465,7 +469,8 @@ public class FeatureFlagController : ApiControllerBase
         Guid envId,
         GetCompareFlagOverviewPayload payload)
     {
-        var request = new GetCompareFlagOverview(envId, payload);
+        var permissions = await GetRequestPermissionsAsync();
+        var request = new GetCompareFlagOverview(OrgId, envId, permissions, payload);
 
         var overview = await Mediator.Send(request);
         return Ok(overview);
@@ -477,6 +482,8 @@ public class FeatureFlagController : ApiControllerBase
     {
         var request = new CompareFlag
         {
+            OrgId = OrgId,
+            Permissions = await GetRequestPermissionsAsync(),
             Key = key,
             SourceEnvId = envId,
             TargetEnvId = targetEnvId
@@ -494,7 +501,8 @@ public class FeatureFlagController : ApiControllerBase
         Guid targetEnvId,
         CopyFlagSettingsPayload payload)
     {
-        var request = new CopyFlagSettings(WorkspaceId, OrgId, envId, targetEnvId, key, payload);
+        var permissions = await GetRequestPermissionsAsync();
+        var request = new CopyFlagSettings(WorkspaceId, OrgId, envId, targetEnvId, key, permissions, payload);
 
         var success = await Mediator.Send(request);
         return Ok(success);

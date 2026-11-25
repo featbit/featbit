@@ -39,7 +39,7 @@ public class SegmentPermissionGuardTests
         var requestOrg = ownership == "empty-request-org" ? Guid.Empty : org;
         Func<Task> act = () => changed
             ? guard.EnsureChangeAllowedAsync(requestOrg, seg.EnvId, seg.Id, change, permissions)
-            : guard.EnsureAccessibleAsync(requestOrg, seg.EnvId, seg.Id);
+            : guard.EnsureInOrganizationAsync(requestOrg, seg.EnvId, seg.Id);
         if (ownership == "own") await act();
         else await Assert.ThrowsAsync<ForbiddenException>(act);
         if (ownership == "empty-request-org") targetResolver.VerifyNoOtherCalls();

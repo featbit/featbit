@@ -1,10 +1,16 @@
 using Application.Bases;
+using Application.Environments;
+using Domain.Policies;
 using Domain.Resources;
 
 namespace Application.FeatureFlags;
 
 public class CompareFlag : IRequest<CompareFlagDetail>
 {
+    public Guid OrgId { get; set; }
+
+    public PolicyStatement[] Permissions { get; set; } = [];
+
     public string Key { get; set; }
 
     public Guid SourceEnvId { get; set; }
@@ -25,11 +31,17 @@ public class CompareFlagValidator : AbstractValidator<CompareFlag>
     }
 }
 
-public class CompareFlagHandler(IFeatureFlagService flagService, IResourceServiceV2 resourceService)
+public class CompareFlagHandler(
+    IFeatureFlagService flagService, 
+    IResourceServiceV2 resourceService, 
+    EnvironmentPermissionGuard envGuard)
     : IRequestHandler<CompareFlag, CompareFlagDetail>
 {
     public async Task<CompareFlagDetail> Handle(CompareFlag request, CancellationToken cancellationToken)
     {
+        await envGuard.EnsureAccessAsync(request.OrgId, request.SourceEnvId, request.Permissions);
+        await envGuard.EnsureAccessAsync(request.OrgId, request.TargetEnvId, request.Permissions);
+
         var sourceFlag = await flagService.GetAsync(request.SourceEnvId, request.Key);
         var targetFlag = await flagService.FindOneAsync(x => x.EnvId == request.TargetEnvId && x.Key == request.Key);
         if (targetFlag == null)

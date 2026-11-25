@@ -1,6 +1,8 @@
 using Application.Bases;
+using Application.Environments;
 using Application.Bases.Models;
 using Domain.FeatureFlags;
+using Domain.Policies;
 
 namespace Application.FeatureFlags;
 
@@ -13,11 +15,21 @@ public class GetCompareFlagOverviewPayload
 
 public class GetCompareFlagOverview : GetCompareFlagOverviewPayload, IRequest<PagedResult<CompareFlagOverview>>
 {
+    public Guid OrgId { get; set; }
+
+    public PolicyStatement[] Permissions { get; }
+
     public Guid SourceEnvId { get; set; }
 
-    public GetCompareFlagOverview(Guid sourceEnvId, GetCompareFlagOverviewPayload payload)
+    public GetCompareFlagOverview(
+        Guid orgId,
+        Guid sourceEnvId,
+        PolicyStatement[] permissions,
+        GetCompareFlagOverviewPayload payload)
     {
+        OrgId = orgId;
         SourceEnvId = sourceEnvId;
+        Permissions = permissions;
 
         TargetEnvIds = payload.TargetEnvIds;
         Filter = payload.Filter;
@@ -32,14 +44,22 @@ public class GetCompareFlagOverviewValidator : AbstractValidator<GetCompareFlagO
             .NotEmpty().WithErrorCode(ErrorCodes.Invalid("sourceEnvId"));
         RuleFor(x => x.TargetEnvIds)
             .NotEmpty().WithErrorCode(ErrorCodes.Invalid("targetEnvIds"));
+        RuleForEach(x => x.TargetEnvIds)
+            .NotEmpty().WithErrorCode(ErrorCodes.Invalid("targetEnvIds"));
     }
 }
 
-public class GetCompareFlagOverviewHandler(IFeatureFlagService service)
+public class GetCompareFlagOverviewHandler(IFeatureFlagService service, EnvironmentPermissionGuard envGuard)
     : IRequestHandler<GetCompareFlagOverview, PagedResult<CompareFlagOverview>>
 {
     public async Task<PagedResult<CompareFlagOverview>> Handle(GetCompareFlagOverview request, CancellationToken cancellationToken)
     {
+        await envGuard.EnsureAccessAsync(request.OrgId, request.SourceEnvId, request.Permissions);
+        foreach (var targetEnvId in request.TargetEnvIds.Distinct())
+        {
+            await envGuard.EnsureAccessAsync(request.OrgId, targetEnvId, request.Permissions);
+        }
+
         var pagedFlags = await service.GetListAsync(request.SourceEnvId, request.Filter);
 
         var flags = pagedFlags.Items;

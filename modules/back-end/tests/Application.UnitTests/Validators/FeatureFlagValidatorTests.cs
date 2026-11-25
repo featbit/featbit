@@ -182,7 +182,7 @@ public class FeatureFlagValidatorTests
     public void GetCompareFlagOverview_MissingTargets_TargetEnvIdsInvalidError()
     {
         var req = new GetCompareFlagOverview(
-            Guid.NewGuid(), new GetCompareFlagOverviewPayload { TargetEnvIds = [] });
+            Guid.NewGuid(), Guid.NewGuid(), [], new GetCompareFlagOverviewPayload { TargetEnvIds = [] });
 
         var result = new GetCompareFlagOverviewValidator().Validate(req);
 
