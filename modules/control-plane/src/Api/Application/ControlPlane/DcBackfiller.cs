@@ -653,7 +653,10 @@ public sealed class DcBackfiller(
         var flagCandidates = new List<(Guid EnvId, Guid Id)>();
         var segmentEnvs = new Dictionary<Guid, List<Guid>>();
         var segmentsTooNew = new HashSet<Guid>();
-        var segmentIndexUnreadable = false;
+
+        // A missing environment list counts as an index that could not be read: an environment it would have listed may
+        // list a segment too, and removing the segment from the others would leave that index entry behind.
+        var segmentIndexUnreadable = snapshot.EnvironmentListUnreadable;
         foreach (var envId in envIds)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -722,8 +725,8 @@ public sealed class DcBackfiller(
         if (segmentIndexUnreadable && segmentEnvs.Count > 0)
         {
             logger.LogWarning(
-                "DC backfill: a segment index of DC {DcId} could not be read; not removing deleted segments " +
-                "until every index can be read.",
+                "DC backfill: a segment index of DC {DcId}, or the environment list, could not be read; not removing " +
+                "deleted segments until every index can be read.",
                 dcId);
             segmentEnvs.Clear();
         }

@@ -605,16 +605,23 @@ public class DcBackfillerTests
         Assert.True(snapshot.EnvironmentListUnreadable);
     }
 
+    /// <summary>
+    /// Flags are removed from the environments that are known. Segments are not: one may also be listed in an environment
+    /// the missing list would have named, and removing it elsewhere would leave that entry behind with no value to check.
+    /// </summary>
     [Fact]
-    public async Task BackfillDcAsync_EnvironmentListWasUnreadable_PrunesTheKnownEnvironmentsAndLooksAgain()
+    public async Task BackfillDcAsync_EnvironmentListWasUnreadable_PrunesFlagsButNoSegmentAndLooksAgain()
     {
         var f = CreatePruneFixture();
-        var orphan = Guid.NewGuid();
-        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ReturnsAsync(Index((orphan, OldScore)));
+        var orphanFlag = Guid.NewGuid();
+        var orphanSegment = Guid.NewGuid();
+        f.East.Setup(s => s.GetFlagIndexAsync(f.EnvA)).ReturnsAsync(Index((orphanFlag, OldScore)));
+        f.East.Setup(s => s.GetSegmentIndexAsync(f.EnvA)).ReturnsAsync(Index((orphanSegment, OldScore)));
 
         await f.Sut.BackfillDcAsync("east", ConsistencyMode.BestEffort, f.Snapshot with { EnvironmentListUnreadable = true });
 
-        f.East.Verify(s => s.DeleteFlagAsync(f.EnvA, orphan), Times.Once);
+        f.East.Verify(s => s.DeleteFlagAsync(f.EnvA, orphanFlag), Times.Once);
+        f.East.Verify(s => s.DeleteSegmentAsync(It.IsAny<ICollection<Guid>>(), It.IsAny<Guid>()), Times.Never);
         f.Time.Advance(TimeSpan.FromSeconds(61));
         Assert.Equal(["east"], f.Sut.TakeDcsDueForPrune());
     }
