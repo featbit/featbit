@@ -64,6 +64,10 @@ public static class ConfigureServices
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
         services.AddScoped<IIdentityService, Services.IdentityService>();
 
+        // release metric source credentials
+        services.AddSingleton<IReleaseMetricSourceCredentialProtector>(
+            new Services.ReleaseMetricSourceCredentialProtector(configuration["ReleaseHealth:CredentialKeyRing"]));
+
         // http clients
         services.AddHttpClient<IAgentService, Services.AgentService>();
         var webhookAllowedAddresses = Services.WebhookHandlerFactory.GetAllowedAddresses(configuration);

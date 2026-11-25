@@ -35,6 +35,10 @@ public static class ErrorCodes
     // feature flag
     public const string CannotDeleteUnarchivedFeatureFlag = nameof(CannotDeleteUnarchivedFeatureFlag);
 
+    // release metric source credentials
+    public const string CredentialProtectionNotConfigured = nameof(CredentialProtectionNotConfigured);
+    public const string CredentialUnavailable = nameof(CredentialUnavailable);
+
     // triggers
     public const string InvalidTriggerToken = nameof(InvalidTriggerToken);
     public const string TriggerTokenNotMatchOrHasExpired = nameof(TriggerTokenNotMatchOrHasExpired);

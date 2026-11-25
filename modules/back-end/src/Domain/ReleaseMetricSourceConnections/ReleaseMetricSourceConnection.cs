@@ -1,6 +1,7 @@
 #nullable enable
 
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Domain.ReleaseMetricSourceConnections;
 
@@ -12,6 +13,7 @@ public class ReleaseMetricSourceConnection : AuditedEntity
     public string Name { get; set; }
     public string ProviderType { get; set; }
     public ReleaseMetricSourceConnectionSettings ConnectionConfiguration { get; set; }
+    [JsonIgnore]
     public string? ProtectedCredential { get; set; }
     public bool IsDeleted { get; set; }
 
@@ -30,6 +32,9 @@ public class ReleaseMetricSourceConnection : AuditedEntity
         Name = name;
         ProviderType = providerType;
         ConnectionConfiguration = connectionConfiguration;
-        UpdatedAt = DateTime.UtcNow;
+        // MongoDB stores timestamps to the millisecond. Each successful edit must advance the concurrency token.
+        var next = UpdatedAt.AddMilliseconds(1);
+        var now = DateTime.UtcNow;
+        UpdatedAt = now > next ? now : next;
     }
 }

@@ -29,7 +29,7 @@ public class ReleaseMetricSourceConnectionController : ApiControllerBase
 
     /// <summary>Create a release metric source connection in an environment.</summary>
     /// <remarks>
-    /// Requires CanAccessEnv and UpdateEnvSettings. Supply the provider type and its non-sensitive connection settings.
+    /// Requires CanAccessEnv and UpdateEnvSettings. Supply public connection settings and use secretUpdate for write-only credentials.
     /// </remarks>
     [HttpPost]
     [Authorize(Permissions.UpdateEnvSettings)]
@@ -42,7 +42,7 @@ public class ReleaseMetricSourceConnectionController : ApiControllerBase
 
     /// <summary>Update a release metric source connection's name and settings.</summary>
     /// <remarks>
-    /// Requires CanAccessEnv and UpdateEnvSettings. Send the name, provider type and full connection settings.
+    /// Requires CanAccessEnv and UpdateEnvSettings. Omit fields to keep their stored values. Use secretUpdate to replace credentials.
     /// </remarks>
     [HttpPut("{id:guid}")]
     [Authorize(Permissions.UpdateEnvSettings)]
