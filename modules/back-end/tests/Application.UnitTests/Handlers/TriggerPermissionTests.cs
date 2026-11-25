@@ -26,6 +26,8 @@ public class TriggerPermissionTests
     [InlineData("reset", "deny-toggle", false)]
     [InlineData("create", "allowed", true)]
     [InlineData("reset", "allowed", true)]
+    [InlineData("update", "allowed", true)]
+    [InlineData("delete", "allowed", true)]
     public async Task HandlersEnforceAccessBeforeReadingOrWriting(string operation, string scenario, bool allowed)
     {
         var org = Guid.NewGuid();
