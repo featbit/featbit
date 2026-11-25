@@ -95,7 +95,7 @@ public class UpdateGeneralHandler(
             tagsChanged ? requestedTags : currentTags,
             currentUser.Id
         );
-        await flagGuard.EnsureFlagChangeAllowedAsync(request.OrgId, flag, dataChange, request.Permissions);
+        await flagGuard.EnsureChangeAllowedAsync(request.OrgId, flag, dataChange, request.Permissions);
         await service.UpdateAsync(flag);
 
         var notification = new OnFeatureFlagChanged(

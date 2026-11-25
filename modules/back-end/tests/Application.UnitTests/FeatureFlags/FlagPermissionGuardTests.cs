@@ -39,7 +39,7 @@ public class FlagPermissionGuardTests
             : [];
         var requestOrg = ownership == "empty-request-org" ? Guid.Empty : org;
         Func<Task> act = () => changed
-            ? guard.EnsureFlagChangeAllowedAsync(requestOrg, flag, change, permissions)
+            ? guard.EnsureChangeAllowedAsync(requestOrg, flag, change, permissions)
             : guard.EnsureInOrganizationAsync(requestOrg, flag);
         if (ownership == "own") await act();
         else await Assert.ThrowsAsync<ForbiddenException>(act);
@@ -65,6 +65,6 @@ public class FlagPermissionGuardTests
                 new() { ResourceType = ResourceTypes.FeatureFlag,
                     Effect = EffectType.Deny, Actions = [Permissions.UpdateFlagName], Resources = ["*"] }]
             : [];
-        await Assert.ThrowsAsync<ForbiddenException>(() => guard.EnsureFlagChangeAllowedAsync(org, flag, change, policies));
+        await Assert.ThrowsAsync<ForbiddenException>(() => guard.EnsureChangeAllowedAsync(org, flag, change, policies));
     }
 }

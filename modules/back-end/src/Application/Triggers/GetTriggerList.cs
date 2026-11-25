@@ -1,21 +1,39 @@
+using Application.Environments;
 using Domain.Triggers;
+using Domain.Policies;
 
 namespace Application.Triggers;
 
 public class GetTriggerList : IRequest<IEnumerable<Trigger>>
 {
+    public GetTriggerList(Guid targetId, Guid orgId, PolicyStatement[] permissions)
+    {
+        TargetId = targetId;
+        OrgId = orgId;
+        Permissions = permissions;
+    }
+
+    public Guid OrgId { get; set; }
+
+    public PolicyStatement[] Permissions { get; set; } = [];
+
     public Guid TargetId { get; set; }
 }
 
-public class GetTriggerListHandler(ITriggerService service) : IRequestHandler<GetTriggerList, IEnumerable<Trigger>>
+public class GetTriggerListHandler(
+    ITriggerService triggerService,
+    IFeatureFlagService flagService,
+    EnvironmentPermissionGuard envGuard) : IRequestHandler<GetTriggerList, IEnumerable<Trigger>>
 {
     public async Task<IEnumerable<Trigger>> Handle(GetTriggerList request, CancellationToken cancellationToken)
     {
-        var triggers = await service.FindManyAsync(x => x.TargetId == request.TargetId);
+        var flag = await flagService.GetAsync(request.TargetId);
+        await envGuard.EnsureAccessAsync(request.OrgId, flag.EnvId, request.Permissions);
 
-        // obscure token
+        var triggers = await triggerService.FindManyAsync(x => x.TargetId == request.TargetId);
         foreach (var trigger in triggers)
         {
+            // obscure token
             trigger.Token = trigger.Token[..5] + "************************";
         }
 

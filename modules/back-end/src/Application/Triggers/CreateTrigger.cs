@@ -1,9 +1,12 @@
 using Application.Bases;
+using Application.Environments;
+using Application.FeatureFlags;
 using Domain.Triggers;
+using Domain.Policies;
 
 namespace Application.Triggers;
 
-public class CreateTrigger : IRequest<Trigger>
+public class CreateTriggerPayload
 {
     public Guid TargetId { get; set; }
 
@@ -12,6 +15,23 @@ public class CreateTrigger : IRequest<Trigger>
     public string Action { get; set; }
 
     public string Description { get; set; }
+}
+
+public class CreateTrigger : CreateTriggerPayload, IRequest<Trigger>
+{
+    public CreateTrigger(CreateTriggerPayload payload, Guid orgId, PolicyStatement[] permissions)
+    {
+        TargetId = payload.TargetId;
+        Type = payload.Type;
+        Action = payload.Action;
+        Description = payload.Description;
+        OrgId = orgId;
+        Permissions = permissions;
+    }
+
+    public Guid OrgId { get; set; }
+
+    public PolicyStatement[] Permissions { get; set; } = [];
 }
 
 public class CreateTriggerValidator : AbstractValidator<CreateTrigger>
@@ -26,17 +46,19 @@ public class CreateTriggerValidator : AbstractValidator<CreateTrigger>
     }
 }
 
-public class CreateTriggerHandler : IRequestHandler<CreateTrigger, Trigger>
+public class CreateTriggerHandler(
+    ITriggerService triggerService,
+    IFeatureFlagService flagService,
+    EnvironmentPermissionGuard envGuard,
+    FlagPermissionGuard flagGuard)
+    : IRequestHandler<CreateTrigger, Trigger>
 {
-    private readonly ITriggerService _service;
-
-    public CreateTriggerHandler(ITriggerService service)
-    {
-        _service = service;
-    }
-
     public async Task<Trigger> Handle(CreateTrigger request, CancellationToken cancellationToken)
     {
+        var flag = await flagService.GetAsync(request.TargetId);
+        await envGuard.EnsureAccessAsync(request.OrgId, flag.EnvId, request.Permissions);
+        await flagGuard.EnsureToggleAllowedAsync(request.OrgId, flag, request.Permissions);
+
         var trigger = new Trigger(
             Guid.NewGuid(),
             request.TargetId,
@@ -45,7 +67,7 @@ public class CreateTriggerHandler : IRequestHandler<CreateTrigger, Trigger>
             request.Description
         );
 
-        await _service.AddOneAsync(trigger);
+        await triggerService.AddOneAsync(trigger);
 
         return trigger;
     }
