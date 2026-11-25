@@ -28,14 +28,12 @@ public class GetTriggerListHandler(
     public async Task<IEnumerable<Trigger>> Handle(GetTriggerList request, CancellationToken cancellationToken)
     {
         var flag = await flagService.GetAsync(request.TargetId);
-
         await envGuard.EnsureAccessAsync(request.OrgId, flag.EnvId, request.Permissions);
 
         var triggers = await triggerService.FindManyAsync(x => x.TargetId == request.TargetId);
-
-        // obscure token
         foreach (var trigger in triggers)
         {
+            // obscure token
             trigger.Token = trigger.Token[..5] + "************************";
         }
 
