@@ -72,6 +72,7 @@ public static class ServicesRegister
         builder.Services.AddApplicationServices(builder.Configuration);
 
         // authentication
+        builder.Services.AddRefreshTokenCookies(builder.Configuration);
         var jwtOptions = JwtOptionsBuilder.Build(builder.Configuration);
         builder.Services.AddSingleton(jwtOptions);
         builder.Services.AddScoped<DefaultJwtBearerEvents>();
