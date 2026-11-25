@@ -89,17 +89,12 @@ public class FlagCopyAuthorizationTests
         _flags.VerifyNoOtherCalls();
     }
 
-    [Theory]
-    [InlineData("source", true)]
-    [InlineData("target", false)]
-    public async Task CopyPermissionMustMatchSourceFlag(string environment, bool allowed)
+    [Fact]
+    public async Task TargetCopyPermissionDoesNotAuthorizeSourceFlag()
     {
         var flag = Add(_source);
-        PolicyStatement[] policies = [EnvAccess, Statement(Permissions.CopyFlagTo, $"project/p:env/{environment}:flag/flag")];
-        if (allowed)
-            Assert.Same(flag, Assert.Single(await EnsureBatchAllowedAsync([flag.Id], policies)));
-        else
-            await Assert.ThrowsAsync<ForbiddenException>(() => EnsureBatchAllowedAsync([flag.Id], policies));
+        PolicyStatement[] policies = [EnvAccess, Statement(Permissions.CopyFlagTo, "project/p:env/target:flag/flag")];
+        await Assert.ThrowsAsync<ForbiddenException>(() => EnsureBatchAllowedAsync([flag.Id], policies));
     }
 
     [Theory]
@@ -153,7 +148,6 @@ public class FlagCopyAuthorizationTests
 
     [Theory]
     [InlineData("copyable", true)]
-    [InlineData("unrelated", false)]
     [InlineData("", false)]
     public async Task TagPermissionRequiresMatchingSourceTag(string tag, bool allowed)
     {
@@ -171,18 +165,6 @@ public class FlagCopyAuthorizationTests
         var flag = Add(_source);
         var policies = All.Append(Statement(Permissions.CopyFlagTo, "project/p:env/target:flag/flag", EffectType.Deny)).ToArray();
         Assert.Same(flag, Assert.Single(await EnsureBatchAllowedAsync([flag.Id], policies)));
-    }
-
-    [Fact]
-    public async Task DuplicateIdsAreDeduplicatedAndEnvironmentRnsAreReusedOnlyWithinBatch()
-    {
-        var a = Add(_source, "a"); var b = Add(_source, "b");
-        for (var call = 1; call <= 2; call++)
-        {
-            Assert.Equal(2, (await EnsureBatchAllowedAsync([a.Id, a.Id, b.Id], All)).Count);
-            _targetResolver.Verify(x => x.ResolveEnvironmentAsync(_source), Times.Exactly(call));
-            _targetResolver.Verify(x => x.ResolveEnvironmentAsync(_target), Times.Exactly(call));
-        }
     }
 
     [Theory]

@@ -1,8 +1,8 @@
 using System.Linq.Expressions;
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using Api.Authorization;
-using Application.FeatureFlags;
 using Application.Services;
 using Domain.EndUsers;
 using Domain.FeatureFlags;
@@ -48,7 +48,10 @@ public class FlagCopyTests
         var client = await app.CreateAuthenticatedClientAsync();
         var response = await client.PostAsJsonAsync($"/api/v1/envs/{app.Source}/feature-flags/copy-to-env-precheck/{app.Target}", new[] { app.Flag.Id });
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        app.Flags.Verify(x => x.FindManyAsync(It.IsAny<Expression<Func<FeatureFlag, bool>>>()), Times.Exactly(2));
+        using var payload = await response.Content.ReadFromJsonAsync<JsonDocument>();
+        var result = Assert.Single(payload!.RootElement.GetProperty("data").EnumerateArray());
+        Assert.Equal(app.Flag.Id, result.GetProperty("id").GetGuid());
+        Assert.True(result.GetProperty("keyCheck").GetBoolean());
     }
 }
 

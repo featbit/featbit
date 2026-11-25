@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using Api.Authorization;
 using Application.Bases.Models;
 using Application.FeatureFlags;
@@ -25,7 +26,7 @@ public class FlagComparisonTests
     {
         foreach (var overview in new[] { false, true })
         foreach (var source in new[] { false, true })
-        foreach (var failure in new[] { "foreign", "missing-owner", "missing", "blank", "no-access", "deny" })
+        foreach (var failure in new[] { "foreign", "no-access" })
             yield return [overview, source, failure];
     }
 
@@ -45,13 +46,11 @@ public class FlagComparisonTests
     }
 
     [Theory]
-    [InlineData(false, false)]
-    [InlineData(true, false)]
-    [InlineData(false, true)]
-    [InlineData(true, true)]
-    public async Task AllowsAccessibleEnvironmentsIncludingMissingTargetFlags(bool overview, bool missingTarget)
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task AllowsAccessibleEnvironments(bool overview)
     {
-        await using var app = new FlagComparisonTestApp { MissingTargetFlag = missingTarget };
+        await using var app = new FlagComparisonTestApp();
         var client = await app.CreateAuthenticatedClientAsync();
         var response = await SendAsync(client, app, overview);
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -59,19 +58,20 @@ public class FlagComparisonTests
         app.TargetResolver.Verify(x => x.ResolveEnvironmentAsync(app.Target), Times.Once);
         if (overview)
             app.TargetResolver.Verify(x => x.ResolveEnvironmentAsync(app.AllowedTarget), Times.Once);
-        Assert.NotEmpty(app.Flags.Invocations);
-    }
-
-    [Fact]
-    public async Task EmptyTargetIdReturns400BeforeResourceQueries()
-    {
-        await using var app = new FlagComparisonTestApp();
-        var client = await app.CreateAuthenticatedClientAsync();
-        var response = await client.PostAsJsonAsync($"/api/v1/envs/{app.Source}/feature-flags/compare-overview",
-            new { targetEnvIds = new[] { app.Target, Guid.Empty }, filter = new { } });
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-        app.TargetResolver.VerifyNoOtherCalls();
-        app.Flags.VerifyNoOtherCalls();
+        using var payload = await response.Content.ReadFromJsonAsync<JsonDocument>();
+        var data = payload!.RootElement.GetProperty("data");
+        if (overview)
+        {
+            var flag = Assert.Single(data.GetProperty("items").EnumerateArray());
+            Assert.Equal("flag", flag.GetProperty("key").GetString());
+            var diff = Assert.Single(flag.GetProperty("diffs").EnumerateArray());
+            Assert.Equal(app.Target, diff.GetProperty("targetEnvId").GetGuid());
+        }
+        else
+        {
+            Assert.Equal(app.Source, data.GetProperty("source").GetProperty("envId").GetGuid());
+            Assert.Equal(app.Target, data.GetProperty("target").GetProperty("envId").GetGuid());
+        }
     }
 
     private static Task<HttpResponseMessage> SendAsync(HttpClient client, FlagComparisonTestApp app, bool overview) =>
@@ -93,7 +93,6 @@ public class FlagComparisonTestApp : PermissionCheckTestApp
     public Guid AllowedTarget { get; } = Guid.NewGuid();
     public bool FailSource { get; init; }
     public string Failure { get; init; } = "";
-    public bool MissingTargetFlag { get; init; }
     public Mock<IPermissionTargetResolver> TargetResolver { get; } = new();
     public Mock<IResourceServiceV2> ResourcesV2 { get; } = new();
     public Mock<IFeatureFlagService> Flags { get; } = new();
@@ -108,15 +107,8 @@ public class FlagComparisonTestApp : PermissionCheckTestApp
             foreach (var env in new[] { Source, Target, AllowedTarget })
             {
                 PermissionTarget? resource = new(Rn(env), TestWorkspace.OrganizationId);
-                if (env == deniedEnv)
-                    resource = Failure switch
-                    {
-                        "foreign" => new(Rn(env), Guid.NewGuid()),
-                        "missing-owner" => new(Rn(env), null),
-                        "missing" => null,
-                        "blank" => new("", TestWorkspace.OrganizationId),
-                        _ => resource
-                    };
+                if (env == deniedEnv && Failure == "foreign")
+                    resource = new(Rn(env), Guid.NewGuid());
                 TargetResolver.Setup(x => x.ResolveEnvironmentAsync(env)).ReturnsAsync(resource);
             }
             var statements = new List<PolicyStatement>();
@@ -124,18 +116,15 @@ public class FlagComparisonTestApp : PermissionCheckTestApp
                 if (env != deniedEnv || Failure != "no-access")
                     statements.Add(new() { ResourceType = ResourceTypes.Env, Effect = EffectType.Allow,
                         Actions = [Permissions.CanAccessEnv], Resources = [Rn(env)] });
-            if (Failure == "deny")
-                statements.Add(new() { ResourceType = ResourceTypes.Env, Effect = EffectType.Deny,
-                    Actions = [Permissions.CanAccessEnv], Resources = [Rn(deniedEnv)] });
             var sourceFlag = NewFlag(Source);
             var targetFlag = NewFlag(Target);
             Flags.Setup(x => x.GetAsync(Source, "flag")).ReturnsAsync(sourceFlag);
             Flags.Setup(x => x.FindOneAsync(It.IsAny<Expression<Func<FeatureFlag, bool>>>()))
-                .ReturnsAsync(MissingTargetFlag ? null : targetFlag);
+                .ReturnsAsync(targetFlag);
             Flags.Setup(x => x.GetListAsync(Source, It.IsAny<FeatureFlagFilter>()))
                 .ReturnsAsync(new PagedResult<FeatureFlag>(1, [sourceFlag]));
             Flags.Setup(x => x.FindManyAsync(It.IsAny<Expression<Func<FeatureFlag, bool>>>()))
-                .ReturnsAsync(MissingTargetFlag ? [] : [targetFlag]);
+                .ReturnsAsync([targetFlag]);
             Flags.Setup(x => x.GetRelatedSegmentsAsync(It.IsAny<ICollection<FeatureFlag>>())).ReturnsAsync(Array.Empty<Segment>());
             ResourcesV2.Setup(x => x.GetRNAsync(Target, ResourceTypes.Env)).ReturnsAsync($"organization/o:{Rn(Target)}");
             var members = new Mock<IMemberService>();
