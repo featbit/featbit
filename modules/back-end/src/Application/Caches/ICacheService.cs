@@ -1,3 +1,4 @@
+using Application.ControlPlane;
 using Domain.Environments;
 using Domain.Segments;
 using Domain.FeatureFlags;
@@ -100,6 +101,31 @@ public interface ICacheService
     Task<bool> HasStagedSegmentAsync(Guid id, long ts);
 
     Task DeleteSegmentAsync(ICollection<Guid> envIds, Guid segmentId);
+
+    /// <summary>
+    /// Reads THIS cache's flag index for an environment: the id and index score (the committed unix-ms
+    /// version) of every flag it lists. Used to find entries kept for flags that no longer exist.
+    /// </summary>
+    Task<IReadOnlyDictionary<Guid, long>> GetFlagIndexAsync(Guid envId);
+
+    /// <summary>
+    /// Segment counterpart of <see cref="GetFlagIndexAsync"/>: the id and index score of every segment
+    /// THIS cache lists for an environment.
+    /// </summary>
+    Task<IReadOnlyDictionary<Guid, long>> GetSegmentIndexAsync(Guid envId);
+
+    /// <summary>
+    /// Whether THIS cache holds a value for the flag and that value is archived. <c>false</c> when the
+    /// value is missing or cannot be read, so "not archived" is the answer whenever it is uncertain.
+    /// <paramref name="mode"/> picks the value that is current: under <c>GatedCommit</c> the versioned value
+    /// the committed pointer refers to (or the plain value when there is no pointer), under
+    /// <c>BestEffort</c> only the plain value, because a pointer left behind by an earlier <c>GatedCommit</c>
+    /// is no longer kept up to date.
+    /// </summary>
+    Task<bool> IsFlagArchivedAsync(Guid id, ConsistencyMode mode);
+
+    /// <summary>Segment counterpart of <see cref="IsFlagArchivedAsync"/>.</summary>
+    Task<bool> IsSegmentArchivedAsync(Guid id, ConsistencyMode mode);
 
     Task UpsertLicenseAsync(Workspace workspace);
 

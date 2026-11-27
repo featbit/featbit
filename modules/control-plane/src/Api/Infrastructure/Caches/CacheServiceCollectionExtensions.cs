@@ -110,6 +110,12 @@ public static class CacheServiceCollectionExtensions
                 .ToList();
             services.AddSingleton<IReadOnlyList<DcRedisConnection>>(dcConnections);
 
+            // Keeps a backfill and a prune of the same DC apart across control-plane replicas, with a lock in that DC's
+            // own Redis (see DcBackfiller).
+            services.AddSingleton<Api.Application.ControlPlane.IDcMutationLock>(sp =>
+                new Api.Application.ControlPlane.RedisDcMutationLock(
+                    dcConnections, sp.GetRequiredService<ILogger<Api.Application.ControlPlane.RedisDcMutationLock>>()));
+
             // Pair each cache service with its instance's DcId so broadcast results
             // can be keyed by DC. The first instance remains the local DC by convention.
             var dcCacheServices = clients

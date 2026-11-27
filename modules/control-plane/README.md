@@ -28,7 +28,22 @@ The control plane supports two cross-DC consistency modes, selected by
   (normally sub-second), by documented design.
 
 Regardless of mode, a **cache self-heal** (`CacheReconciler`) rebuilds any DC's Redis (flags,
-segments, and secrets) from the source of truth when that DC's link becomes reachable.
+segments, and secrets) from the source of truth when that DC's link becomes reachable. The same
+backfill also removes the flags and segments that DC still lists although they were deleted, for
+example because the DC was unreachable when the delete was relayed. An entry is removed only if it
+is absent from the snapshot, older than `MinAgeSeconds`, archived in that DC, and still absent from
+the database when asked again; more than `MaxRemovalsPerRun` such entries at once means none are
+removed. An entry that is still too recent, or that sits in an index which could not be read, is
+looked at again later by the reconciler, so it does not wait for the next reconnect. Nothing is
+pruned while the source of truth holds no flags and no segments at all, because an empty read
+cannot be told apart from a database where everything was deleted; the entries of the last
+deleted flag or segment are therefore removed only once another flag or segment exists. By default
+(`ControlPlane:CacheReconcile:PruneDeleted:Mode` is `DryRun`) it only logs what it would remove.
+Set the mode to `On` to remove the entries, or to `Off` to disable the step. With several
+control-plane replicas, a backfill and a prune of the same DC never run at once: each holds a lock
+in that DC's Redis (`featbit:control-plane:dc-mutation-lock:{dcId}`), and what a prune removed is
+recorded there (`featbit:control-plane:pruned:{dcId}`) so that no replica writes it back from an
+older snapshot.
 
 The consistency background workers — commit coordinator, recovery worker, DcId consistency
 checker — run on every instance by default; their operations are idempotent and version-guarded,

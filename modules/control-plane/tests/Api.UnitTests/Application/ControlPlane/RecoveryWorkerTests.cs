@@ -212,6 +212,27 @@ public class RecoveryWorkerTests
         Assert.Equal(1, second);
     }
 
+    /// <summary>
+    /// A backfill postponed because the DC's lock or pruned record could not be used is tried again on the next tick, and
+    /// does not stop the other returned DCs of the tick.
+    /// </summary>
+    [Fact]
+    public async Task BackfillPostponedForTheDcLock_RetriesOnNextTick_AndStillBackfillsTheOthers()
+    {
+        _backfiller
+            .SetupSequence(b => b.BackfillDcAsync("east", It.IsAny<ConsistencyMode>(), It.IsAny<CommittedSnapshot>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new DcLockUnavailableException("locked"))
+            .ReturnsAsync(1);
+        _backfiller
+            .Setup(b => b.BackfillDcAsync("west", It.IsAny<ConsistencyMode>(), It.IsAny<CommittedSnapshot>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(1);
+        SetLiveSet("east", "west");
+        var sut = CreateSut();
+
+        Assert.Equal(1, await sut.RunOnceAsync()); // west backfilled, east postponed
+        Assert.Equal(1, await sut.RunOnceAsync()); // east re-detected as returned and backfilled
+    }
+
     // ----- #71b leader gating still short-circuits before the guard/metrics logic -----
 
     [Fact]

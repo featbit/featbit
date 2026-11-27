@@ -221,7 +221,21 @@ public sealed class RecoveryWorker : BackgroundService
             // value + committed pointer + index) followed by a targeted PushFullSync — delegated to
             // the shared backfiller, which CacheReconciler also uses (with the mode-appropriate
             // write path).
-            var result = await _backfiller.BackfillDcAsync(dcId, ConsistencyMode.GatedCommit, snapshot, cancellationToken);
+            int result;
+            try
+            {
+                result = await _backfiller.BackfillDcAsync(dcId, ConsistencyMode.GatedCommit, snapshot, cancellationToken);
+            }
+            catch (DcLockUnavailableException ex)
+            {
+                // The DC's lock or its pruned record could not be used, so nothing that a prune on another replica removed
+                // could be ruled out; the backfill wrote no flag or segment. Forget the DC so it is detected as returned,
+                // and backfilled, again next tick.
+                _logger.LogWarning(ex, "Recovery worker: backfill for returned DC {DcId} postponed; will retry.", dcId);
+                _previousLiveSet.Remove(dcId);
+                continue;
+            }
+
             if (result == IDcBackfiller.Skipped)
             {
                 _logger.LogDebug(
