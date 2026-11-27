@@ -76,7 +76,7 @@ public class PatchFeatureFlagHandlerTests
     }
 
     [Fact]
-    public async Task Handle_InvalidPatchPath_ReturnsFailureWithoutPersisting()
+    public async Task Handle_MissingArrayItem_ReturnsFailureWithoutPersisting()
     {
         var flag = NewFlag();
         var service = new Mock<IFeatureFlagService>();
@@ -85,12 +85,12 @@ public class PatchFeatureFlagHandlerTests
         var targetResolver = Mock.Of<IPermissionTargetResolver>();
         var sut = new PatchFeatureFlagHandler(service.Object, new FlagPermissionGuard(targetResolver), Mock.Of<ICurrentUser>(), publisher.Object);
 
-        // op against a non-existent path produces a JsonPatchError when applied
+        // An allowed path with a missing array item still fails when the patch is applied.
         var patch = new JsonPatchDocument<FeatureFlag>();
         patch.Operations.Add(new Operation<FeatureFlag>
         {
             op = "remove",
-            path = "/nonexistent"
+            path = "/rules/0"
         });
         var request = new PatchFeatureFlag { OrgId = OrganizationId, EnvId = Guid.NewGuid(), Key = "flag", Patch = patch };
 

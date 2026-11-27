@@ -95,7 +95,7 @@ public class PatchSegmentHandlerTests
     }
 
     [Fact]
-    public async Task Handle_InvalidPatch_ReturnsFailureWithoutPersisting()
+    public async Task Handle_MissingArrayItem_ReturnsFailureWithoutPersisting()
     {
         var segment = NewSegment();
         var service = new Mock<ISegmentService>();
@@ -107,7 +107,7 @@ public class PatchSegmentHandlerTests
         patch.Operations.Add(new Operation<Segment>
         {
             op = "remove",
-            path = "/nonexistent"
+            path = "/rules/0"
         });
         var request = new PatchSegment { OrgId = OrganizationId, EnvId = segment.EnvId, Id = segment.Id, Patch = patch };
 
