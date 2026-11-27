@@ -1,3 +1,4 @@
+import { isMultiValueOperator } from "./semver"
 import type { SegmentCondition } from "@/features/segments/segments-types"
 import {
   isSegmentConditionProperty,
@@ -12,7 +13,7 @@ export function conditionValues(condition: SegmentCondition) {
   if (isSegmentConditionProperty(condition.property)) {
     return segmentConditionValues(condition)
   }
-  if (condition.op !== "IsOneOf" && condition.op !== "NotOneOf") {
+  if (!isMultiValueOperator(condition.op)) {
     return [condition.value]
   }
   try {
@@ -29,9 +30,8 @@ export function withConditionValues(
 ) {
   return {
     ...condition,
-    value:
-      condition.op === "IsOneOf" || condition.op === "NotOneOf"
-        ? JSON.stringify(values)
-        : (values[0] ?? ""),
+    value: isMultiValueOperator(condition.op)
+      ? JSON.stringify(values)
+      : (values[0] ?? ""),
   }
 }

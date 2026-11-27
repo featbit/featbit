@@ -10,6 +10,10 @@ public static class OpValueValidator
     {
         return op switch
         {
+            OperatorTypes.SemVerIsOneOf or OperatorTypes.SemVerNotOneOf => SemanticVersion.TryParseList(value, out _),
+            OperatorTypes.SemVerLessThan or OperatorTypes.SemVerLessEqualThan or
+                OperatorTypes.SemVerBiggerThan or OperatorTypes.SemVerBiggerEqualThan => SemanticVersion.TryParse(value, out _),
+
             // Equality operators, value must be non-null
             OperatorTypes.Equal or OperatorTypes.NotEqual => value != null,
 

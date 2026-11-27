@@ -1,3 +1,4 @@
+using Domain.Targeting;
 using Application.FeatureFlags;
 using Application.Services;
 using Application.Users;
@@ -98,6 +99,30 @@ public class PatchFeatureFlagHandlerTests
 
         Assert.False(result.Success);
         Assert.False(string.IsNullOrWhiteSpace(result.Message));
+        service.Verify(x => x.UpdateAsync(It.IsAny<FeatureFlag>()), Times.Never);
+        publisher.Verify(
+            x => x.Publish(It.IsAny<OnFeatureFlagChanged>(), It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
+
+    [Fact]
+    public async Task Handle_InvalidSemVerPatch_ReturnsFailureWithoutPersistingOrPublishing()
+    {
+        var flag = NewFlag();
+        var service = new Mock<IFeatureFlagService>();
+        service.Setup(x => x.GetAsync(It.IsAny<Guid>(), It.IsAny<string>())).ReturnsAsync(flag);
+        var publisher = new Mock<IPublisher>();
+        // Invalid SemVer must return before the permission guard is used.
+        var sut = new PatchFeatureFlagHandler(service.Object, null!, Mock.Of<ICurrentUser>(), publisher.Object);
+        var patch = new JsonPatchDocument<FeatureFlag>();
+        patch.Replace(x => x.Rules, new List<TargetRule>
+        {
+            new() { Id = "rule", Conditions = [new Condition { Id = "condition", Property = "version", Op = "SemVerBiggerThan", Value = "bad" }] }
+        });
+        var result = await sut.Handle(new PatchFeatureFlag { Patch = patch }, CancellationToken.None);
+
+        Assert.False(result.Success);
+        Assert.StartsWith("rules[0].conditions[0].value: Invalid semantic version.", result.Message);
         service.Verify(x => x.UpdateAsync(It.IsAny<FeatureFlag>()), Times.Never);
         publisher.Verify(
             x => x.Publish(It.IsAny<OnFeatureFlagChanged>(), It.IsAny<CancellationToken>()),

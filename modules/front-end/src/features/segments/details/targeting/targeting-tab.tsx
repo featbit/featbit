@@ -1,3 +1,4 @@
+import { isValidSemVerCondition } from "@/features/targeting/semver"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Plus } from "lucide-react"
 import { useMemo, useState } from "react"
@@ -48,6 +49,7 @@ export function TargetingTab({
   const [draft, setDraft] = useState(() => cloneSegment(segment))
   const [resolvedUsers, setResolvedUsers] = useState(users)
   const [reviewOpen, setReviewOpen] = useState(false)
+  const [showValidationErrors, setShowValidationErrors] = useState(false)
   const [dragRuleId, setDragRuleId] = useState<string | null>(null)
   const { startPreview, movePreview, removePreview } = useRuleDragPreview()
 
@@ -137,6 +139,7 @@ export function TargetingTab({
                 disabled={saveMutation.isPending}
                 onClick={() => {
                   setDraft(cloneSegment(segment))
+                  setShowValidationErrors(false)
                   setDragRuleId(null)
                 }}
               >
@@ -149,6 +152,17 @@ export function TargetingTab({
               onClick={() => {
                 if (!canUpdateRules && !canUpdateUsers) {
                   toast.error(t("segments.permissionDenied"))
+                  return
+                }
+                if (
+                  draft.rules.some((rule) =>
+                    rule.conditions.some(
+                      (condition) => !isValidSemVerCondition(condition)
+                    )
+                  )
+                ) {
+                  setShowValidationErrors(true)
+                  toast.error(t("targeting.rules.semVerInvalid"))
                   return
                 }
                 setReviewOpen(true)
@@ -232,6 +246,7 @@ export function TargetingTab({
               }}
             >
               <RuleEditor
+                showValidationErrors={showValidationErrors}
                 envId={envId}
                 rule={rule}
                 properties={properties}

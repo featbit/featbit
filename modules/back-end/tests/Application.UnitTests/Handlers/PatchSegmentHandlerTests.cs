@@ -120,4 +120,28 @@ public class PatchSegmentHandlerTests
             x => x.Publish(It.IsAny<OnSegmentChange>(), It.IsAny<CancellationToken>()),
             Times.Never);
     }
+
+    [Fact]
+    public async Task Handle_InvalidSemVerPatch_ReturnsFailureWithoutPersistingOrPublishing()
+    {
+        var segment = NewSegment();
+        var service = new Mock<ISegmentService>();
+        service.Setup(x => x.GetAsync(It.IsAny<Guid>())).ReturnsAsync(segment);
+        var publisher = new Mock<IPublisher>();
+        // Invalid conditions must return before permission checking.
+        var sut = new PatchSegmentHandler(service.Object, null!, Mock.Of<ICurrentUser>(), publisher.Object);
+        var patch = new JsonPatchDocument<Segment>();
+        patch.Replace(x => x.Rules, new List<MatchRule>
+        {
+            new() { Id = "rule", Conditions = [new Condition { Id = "condition", Property = "version", Op = "SemVerBiggerThan", Value = "bad" }] }
+        });
+        var result = await sut.Handle(new PatchSegment { Patch = patch }, CancellationToken.None);
+
+        Assert.False(result.Success);
+        Assert.StartsWith("rules[0].conditions[0].value: Invalid semantic version.", result.Message);
+        service.Verify(x => x.UpdateAsync(It.IsAny<Segment>()), Times.Never);
+        publisher.Verify(
+            x => x.Publish(It.IsAny<OnSegmentChange>(), It.IsAny<CancellationToken>()),
+            Times.Never);
+    }
 }

@@ -16,6 +16,7 @@ public static class FlagTargetingValidator
 
     public static void EnsureValid(FlagTargeting targeting, ICollection<Variation> flagVariations)
     {
+        SemVerConditionValidator.EnsureValid(targeting?.Rules?.Select(rule => rule?.Conditions));
         if (targeting?.IsValid(flagVariations) == true)
         {
             return;

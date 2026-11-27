@@ -19,23 +19,30 @@ import type { SegmentUserProperty } from "@/features/segments/segments-types"
 
 type PresetValue = SegmentUserProperty["presetValues"][number]
 
-function valueKey(value: string) {
-  return value.toLocaleLowerCase()
-}
-
 export function MultiValuePicker({
   values,
   presetValues,
   presetOnly,
   disabled,
   onChange,
+  semanticVersion = false,
+  invalid = false,
 }: {
+  invalid?: boolean
+  semanticVersion?: boolean
   values: string[]
   presetValues: PresetValue[]
   presetOnly: boolean
   disabled: boolean
   onChange: (values: string[]) => void
 }) {
+  const valueKey = useMemo(
+    () =>
+      semanticVersion
+        ? (value: string) => value
+        : (value: string) => value.toLocaleLowerCase(),
+    [semanticVersion]
+  )
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState("")
@@ -52,12 +59,12 @@ export function MultiValuePicker({
       }
     })
     return [...presets.values()]
-  }, [initialValues, presetValues])
+  }, [initialValues, presetValues, valueKey])
   const labels = new Map(
     catalog.map((preset) => [valueKey(preset.value), preset.description])
   )
   const selectedKeys = new Set(values.map(valueKey))
-  const query = search.trim()
+  const query = semanticVersion ? search : search.trim()
   const normalizedQuery = valueKey(query)
   const availableValues = catalog.filter(
     (preset) =>
@@ -81,7 +88,10 @@ export function MultiValuePicker({
   }
 
   return (
-    <div className="flex min-h-8 min-w-0 flex-wrap items-center gap-1 rounded-md border border-input px-2 py-0.5 focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50">
+    <div
+      data-invalid={invalid || undefined}
+      className="flex min-h-8 min-w-0 flex-wrap items-center gap-1 rounded-md border border-input px-2 py-0.5 focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50 data-[invalid]:border-destructive"
+    >
       {values.map((value) => {
         const label = labels.get(valueKey(value)) ?? value
         return (
@@ -106,9 +116,20 @@ export function MultiValuePicker({
       })}
       <Popover
         open={open}
-        onOpenChange={(nextOpen) => {
+        onOpenChange={(nextOpen, details) => {
           setOpen(nextOpen)
-          if (!nextOpen) setSearch("")
+          if (!nextOpen) {
+            // Commit typed versions before a save click can discard unconfirmed input.
+            if (
+              semanticVersion &&
+              details.reason !== "escape-key" &&
+              !presetOnly &&
+              query &&
+              !selectedKeys.has(valueKey(query))
+            )
+              onChange([...values, query])
+            setSearch("")
+          }
         }}
       >
         <PopoverTrigger
@@ -120,6 +141,7 @@ export function MultiValuePicker({
               disabled={disabled}
               aria-label={t("targeting.rules.selectValues")}
               aria-expanded={open}
+              aria-invalid={invalid}
               className="h-6 min-w-28 flex-1 justify-start px-1 font-normal text-muted-foreground"
             />
           }

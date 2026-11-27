@@ -162,8 +162,49 @@ public class Operator
         IsTrue, IsFalse
     };
 
+    /// <summary>
+    /// Checks whether the user's version matches a SemVer rule condition.
+    /// </summary>
+    /// <param name="op">The SemVer operator.</param>
+    /// <param name="userValue">The version from the user's attribute.</param>
+    /// <param name="ruleValue">
+    /// A JSON array of version strings for IsOneOf/NotOneOf, or a single version for comparisons.
+    /// </param>
+    /// <returns>
+    /// True when the condition matches; false for invalid versions, invalid or empty lists,
+    /// or unsupported operators.
+    /// </returns>
+    private static bool MatchSemanticVersion(string op, string userValue, string ruleValue)
+    {
+        if (!SemanticVersion.TryParse(userValue, out var user)) return false;
+        if (OperatorTypes.IsMultiValue(op))
+        {
+            // Invalid or empty lists never match, even for NotOneOf.
+            if (!SemanticVersion.TryParseList(ruleValue, out var versions)) return false;
+            // Compare versions rather than raw strings: "4", "4.0.0", and "4.0.0+build.1"
+            // are equal because missing components default to zero and build metadata is ignored.
+            var matches = versions.Any(version => user.CompareTo(version) == 0);
+            return op == OperatorTypes.SemVerIsOneOf ? matches : !matches;
+        }
+        // <, <=, >, and >= compare against a single version.
+        if (!SemanticVersion.TryParse(ruleValue, out var rule)) return false;
+        // CompareTo handles numeric components and pre-release identifiers. A negative result
+        // means the user's version is smaller, zero means equal, and a positive result means greater.
+        var comparison = user.CompareTo(rule);
+        return op switch
+        {
+            OperatorTypes.SemVerLessThan => comparison < 0,
+            OperatorTypes.SemVerLessEqualThan => comparison <= 0,
+            OperatorTypes.SemVerBiggerThan => comparison > 0,
+            OperatorTypes.SemVerBiggerEqualThan => comparison >= 0,
+            _ => false
+        };
+    }
+
     public static Operator Get(string operation)
     {
+        if (OperatorTypes.IsSemVer(operation))
+            return new Operator(operation, (user, rule) => MatchSemanticVersion(operation, user, rule));
         var theOperator = All.FirstOrDefault(x => x.Operation == operation);
 
         // unrecognized operators are treated as non-matches, not errors

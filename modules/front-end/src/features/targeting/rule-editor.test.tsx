@@ -35,7 +35,12 @@ const properties: SegmentUserProperty[] = [
   },
 ]
 
-function renderEditor() {
+function renderEditor(
+  op = "IsOneOf",
+  value = JSON.stringify(["legacy"]),
+  property = "country",
+  showValidationErrors = false
+) {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { retry: false },
@@ -50,15 +55,16 @@ function renderEditor() {
       conditions: [
         {
           id: "condition-1",
-          property: "country",
-          op: "IsOneOf",
-          value: JSON.stringify(["legacy"]),
+          property,
+          op,
+          value,
         },
       ],
     })
     return (
       <>
         <RuleEditor
+          showValidationErrors={showValidationErrors}
           envId="env-1"
           rule={rule}
           properties={properties}
@@ -138,5 +144,102 @@ describe("RuleEditor multi-value behavior", () => {
     selectOperator("is true")
 
     expect(screen.getByTestId("condition-value")).toHaveTextContent("IsTrue")
+  })
+})
+
+describe("SemVer rule editing", () => {
+  it("does not show errors immediately after selecting a SemVer operator", () => {
+    renderEditor("Equal", "", "plan")
+    selectOperator("SemVer >")
+    expect(screen.getByPlaceholderText("Enter a version")).toHaveAttribute(
+      "aria-invalid",
+      "false"
+    )
+    expect(screen.getByText(/Examples: 4/)).toHaveClass("text-muted-foreground")
+    expect(screen.queryByText("Enter a version.")).not.toBeInTheDocument()
+  })
+
+  it("shows required errors after a save attempt and clears them as soon as corrected", () => {
+    renderEditor("SemVerBiggerThan", "", "plan", true)
+    const input = screen.getByPlaceholderText("Enter a version")
+    expect(input).toHaveAttribute("aria-invalid", "true")
+    expect(screen.getByText("Enter a version.")).toBeVisible()
+    fireEvent.change(input, { target: { value: "4" } })
+    expect(input).toHaveAttribute("aria-invalid", "false")
+    expect(screen.queryByText("Enter a version.")).not.toBeInTheDocument()
+  })
+
+  it("uses a list-specific required message on save", () => {
+    renderEditor("SemVerIsOneOf", "[]", "plan", true)
+    expect(
+      screen.getByRole("combobox", { name: "Select values" })
+    ).toHaveAttribute("aria-invalid", "true")
+    expect(screen.getByText("Add at least one version.")).toBeVisible()
+  })
+
+  it("preserves values between comparisons and flags invalid versions", () => {
+    renderEditor("SemVerLessThan", "1.2", "plan")
+    selectOperator("SemVer >=")
+    expect(screen.getByTestId("condition-value")).toHaveTextContent("1.2")
+    fireEvent.change(screen.getByPlaceholderText("Enter a version"), {
+      target: { value: "1.2.3.4" },
+    })
+    expect(screen.getByPlaceholderText("Enter a version")).toHaveAttribute(
+      "aria-invalid",
+      "false"
+    )
+    fireEvent.blur(screen.getByPlaceholderText("Enter a version"))
+    expect(screen.getByPlaceholderText("Enter a version")).toHaveAttribute(
+      "aria-invalid",
+      "true"
+    )
+    expect(screen.getByText(/Enter a valid version/)).toBeVisible()
+  })
+
+  it("requires an explicit choice before reducing a list to one value", () => {
+    renderEditor("SemVerIsOneOf", '["1.2","2.0.0"]', "plan")
+    selectOperator("SemVer >=")
+    expect(screen.getByTestId("condition-value")).toHaveTextContent(
+      '["1.2","2.0.0"]'
+    )
+    fireEvent.click(screen.getByRole("button", { name: "2.0.0" }))
+    expect(screen.getByTestId("condition-value")).toHaveTextContent("2.0.0")
+    expect(screen.getByPlaceholderText("Enter a version")).toHaveValue("2.0.0")
+  })
+
+  it("preserves case-sensitive versions and commits pending input on close", () => {
+    renderEditor("SemVerIsOneOf", '["1.2.0-BETA"]', "plan")
+    fireEvent.click(screen.getByRole("combobox", { name: "Select values" }))
+    fireEvent.change(screen.getByPlaceholderText("Search values"), {
+      target: { value: "1.2.0-beta" },
+    })
+    fireEvent.click(screen.getByRole("option", { name: 'Add "1.2.0-beta"' }))
+    expect(screen.getByTestId("condition-value")).toHaveTextContent(
+      '["1.2.0-BETA","1.2.0-beta"]'
+    )
+    fireEvent.click(screen.getByRole("combobox", { name: "Select values" }))
+    fireEvent.change(screen.getByPlaceholderText("Search values"), {
+      target: { value: "invalid" },
+    })
+    fireEvent.click(screen.getByRole("combobox", { name: "Select values" }))
+    expect(screen.getByTestId("condition-value")).toHaveTextContent('"invalid"')
+    expect(screen.getByText(/Each value must be a valid version/)).toBeVisible()
+  })
+
+  it.each(["2", "beta"])("discards pending version %s on Escape", (value) => {
+    renderEditor("SemVerIsOneOf", '["1.2.3"]', "plan")
+    fireEvent.click(screen.getByRole("combobox", { name: "Select values" }))
+    fireEvent.change(screen.getByPlaceholderText("Search values"), {
+      target: { value },
+    })
+    fireEvent.keyDown(screen.getByPlaceholderText("Search values"), {
+      key: "Escape",
+    })
+    expect(screen.getByTestId("condition-value")).toHaveTextContent('["1.2.3"]')
+    expect(
+      screen.queryByText(/Each value must be a valid version/)
+    ).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole("combobox", { name: "Select values" }))
+    expect(screen.getByPlaceholderText("Search values")).toHaveValue("")
   })
 })

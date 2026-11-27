@@ -41,7 +41,27 @@ export const enTargeting = {
     noValues: "No preset values found",
     addValue: 'Add "{{value}}"',
     removeValue: "Remove {{value}}",
+    semVerGroup: "Semantic version",
+    semVerPlaceholder: "Enter a version",
+    semVerRequired: "Enter a version.",
+    semVerSingleInvalid: "Enter a valid version, such as 4 or 4.2.0-beta.1.",
+    semVerListRequired: "Add at least one version.",
+    semVerListInvalid:
+      "Each value must be a valid version, such as 4 or 4.2.0-beta.1.",
+    semVerHelp:
+      "Examples: 4, 4.2, 4-beta.1, 4+build.2. Missing minor and patch versions default to zero; build metadata is ignored.",
+    semVerInvalid:
+      "Enter valid versions such as 2.3.0. Lists require at least one version; spaces, v prefixes and ranges are not supported.",
+    semVerChoose: "Choose the version to keep for the single-value operator.",
+    cancelSwitch: "Cancel switch",
     operators: {
+      SemVerIsOneOf: "SemVer is one of",
+      SemVerNotOneOf: "SemVer is not one of",
+      SemVerLessThan: "SemVer <",
+      SemVerLessEqualThan: "SemVer <=",
+      SemVerBiggerThan: "SemVer >",
+      SemVerBiggerEqualThan: "SemVer >=",
+
       Equal: "equals",
       NotEqual: "does not equal",
       LessThan: "is less than",
@@ -113,7 +133,26 @@ export const zhTargeting: typeof enTargeting = {
     noValues: "未找到预设值",
     addValue: "添加“{{value}}”",
     removeValue: "移除 {{value}}",
+    semVerGroup: "语义化版本",
+    semVerPlaceholder: "输入版本号",
+    semVerRequired: "请输入版本号。",
+    semVerSingleInvalid: "请输入有效版本，例如 4 或 4.2.0-beta.1。",
+    semVerListRequired: "请至少添加一个版本。",
+    semVerListInvalid: "每个值都必须是有效版本，例如 4 或 4.2.0-beta.1。",
+    semVerHelp:
+      "支持 4、4.2、4-beta.1、4+build.2。缺失的次版本和补丁版本按零处理，忽略构建元数据。",
+    semVerInvalid:
+      "请输入有效版本，例如 2.3.0。列表需要至少一个版本；不支持空格、v 前缀或范围表达式。",
+    semVerChoose: "请选择切换为单值操作符后保留的版本。",
+    cancelSwitch: "取消切换",
     operators: {
+      SemVerIsOneOf: "版本属于",
+      SemVerNotOneOf: "版本不属于",
+      SemVerLessThan: "版本小于",
+      SemVerLessEqualThan: "版本小于等于",
+      SemVerBiggerThan: "版本大于",
+      SemVerBiggerEqualThan: "版本大于等于",
+
       Equal: "等于",
       NotEqual: "不等于",
       LessThan: "小于",

@@ -1,4 +1,5 @@
 using Domain.AuditLogs;
+using Application.Bases;
 using Application.Users;
 using Application.Bases.Models;
 using Domain.Policies;
@@ -45,6 +46,14 @@ public class PatchSegmentHandler(
         if (!string.IsNullOrWhiteSpace(error))
         {
             return PatchResult.Fail(error);
+        }
+
+        var failure = SemVerConditionValidator
+            .Validate(segment.Rules?.Select(rule => rule?.Conditions))
+            .FirstOrDefault();
+        if (failure != null)
+        {
+            return PatchResult.Fail($"{failure.PropertyName}: {failure.ErrorMessage}");
         }
 
         segment.MarkAsUpdated(currentUser.Id);

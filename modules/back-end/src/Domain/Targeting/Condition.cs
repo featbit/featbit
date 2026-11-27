@@ -47,8 +47,7 @@ public class Condition
             return true;
         }
 
-        string[] multiOps = [OperatorTypes.IsOneOf, OperatorTypes.NotOneOf];
-        return multiOps.Contains(Op);
+        return OperatorTypes.IsMultiValue(Op);
     }
 
     public void Assign(Condition source)
