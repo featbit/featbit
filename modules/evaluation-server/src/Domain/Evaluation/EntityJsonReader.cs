@@ -154,7 +154,7 @@ public sealed class EntityJsonReader(EvaluationEntityType entityType, string? en
                 );
             }
 
-            return values;
+            return values.Select(value => Guid.Parse(value).ToString("D")).ToArray();
         }
         catch (JsonException ex)
         {
