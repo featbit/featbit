@@ -13,8 +13,6 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.Extensions.Diagnostics.Testing" />
         <PackageReference Include="Moq" />
-        <PackageReference Include="xunit" />
-        <PackageReference Include="Verify.Xunit" />
     </ItemGroup>
 
     <ItemGroup>

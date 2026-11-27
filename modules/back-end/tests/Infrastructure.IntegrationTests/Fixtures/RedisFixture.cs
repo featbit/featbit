@@ -11,7 +11,7 @@ public sealed class RedisFixture : IAsyncLifetime
 
     public string ConnectionString => _container.GetConnectionString();
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         if (!DockerAvailability.IsAvailable)
         {
@@ -21,7 +21,7 @@ public sealed class RedisFixture : IAsyncLifetime
         await _container.StartAsync();
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         if (!DockerAvailability.IsAvailable)
         {

@@ -7,14 +7,16 @@ on:
     paths:
       - 'modules/back-end/**'
       - 'modules/Directory.Packages.props'
-      - '.github/build-and-test-api.yml'
+      - '.github/workflows/build-and-test-api.yml'
+      - 'global.json'
   pull_request:
     branches:
       - main
     paths:
       - 'modules/back-end/**'
       - 'modules/Directory.Packages.props'
-      - '.github/build-and-test-api.yml'
+      - '.github/workflows/build-and-test-api.yml'
+      - 'global.json'
 
 jobs:
   validate:
@@ -41,12 +43,14 @@ jobs:
       - name: Run Tests
         # Category=Integration tests require external Docker infrastructure (Mongo, Kafka,
         # Postgres, Redis) that CI does not provision; they are local-only.
-        run: dotnet test -c Release --no-build --verbosity normal --filter "Category!=Integration" --collect:"XPlat Code Coverage" --results-directory TestResults
+        # A test project with only Integration tests then runs zero tests, which Microsoft.Testing.Platform
+        # reports as exit code 8; --ignore-exit-code 8 treats that as success.
+        run: dotnet test -c Release --no-build --verbosity normal --filter "Category!=Integration" --coverlet --coverlet-output-format cobertura --results-directory TestResults --ignore-exit-code 8
 
       - name: Upload Coverage Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: coverage-back-end
-          path: modules/back-end/TestResults/**/coverage.cobertura.xml
+          path: modules/back-end/TestResults/**/coverage.cobertura*.xml
           if-no-files-found: warn

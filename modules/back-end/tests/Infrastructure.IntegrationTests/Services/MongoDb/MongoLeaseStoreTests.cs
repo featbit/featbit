@@ -28,11 +28,11 @@ public class MongoLeaseStoreTests : IntegrationTestBase, IAsyncLifetime
     private MongoClient _client = null!;
     private MongoLeaseStore _sut = null!;
 
-    public Task InitializeAsync()
+    public ValueTask InitializeAsync()
     {
         if (!DockerAvailability.IsAvailable)
         {
-            return Task.CompletedTask;
+            return ValueTask.CompletedTask;
         }
 
         _client = new MongoClient(_fixture.ConnectionString);
@@ -46,10 +46,10 @@ public class MongoLeaseStoreTests : IntegrationTestBase, IAsyncLifetime
         var mongoDb = new MongoDbClient(options);
         _sut = new MongoLeaseStore(mongoDb);
 
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await _client.DropDatabaseAsync(_databaseName);
     }

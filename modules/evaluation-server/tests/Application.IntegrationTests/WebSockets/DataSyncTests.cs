@@ -35,7 +35,7 @@ public class DataSyncTests(TestApp app)
         var r2 = await DoDataSyncAsync(ConnectionType.Server, request, false);
 
         Assert.Equal(r1, r2);
-        await VerifyJson(r1).UseParameters(type);
+        await Snapshot.MatchJson(r1, suffix: $"type={type}");
     }
 
     [Theory]
@@ -81,7 +81,7 @@ public class DataSyncTests(TestApp app)
         var r2 = await DoDataSyncAsync(ConnectionType.Client, request, false);
 
         Assert.Equal(r1, r2);
-        await VerifyJson(r1).UseParameters(type);
+        await Snapshot.MatchJson(r1, suffix: $"type={type}");
     }
 
     [Theory]
@@ -112,7 +112,7 @@ public class DataSyncTests(TestApp app)
         var r2 = await DoDataSyncAsync(ConnectionType.RelayProxy, request, false);
 
         Assert.Equal(r1, r2);
-        await VerifyJson(r1).UseParameters(type);
+        await Snapshot.MatchJson(r1, suffix: $"type={type}");
     }
 
     private async Task<string> DoDataSyncAsync(string type, object request, bool multiFragment)

@@ -1,0 +1,25 @@
+{
+  "Content": {
+    "Headers": {
+      "Content-Type": "application/json; charset=utf-8",
+      "Expires": "-1"
+    },
+    "Value": {
+      "data": null,
+      "errors": [
+        "flagKey_is_required",
+        "metricEvent_is_required",
+        "endDate_is_invalid",
+        "metricType_is_invalid",
+        "metricAgg_is_invalid"
+      ],
+      "success": false
+    }
+  },
+  "Headers": {
+    "api-supported-versions": "1.0",
+    "Cache-Control": "no-store, no-cache",
+    "Pragma": "no-cache"
+  },
+  "Status": "400 Bad Request"
+}

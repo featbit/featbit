@@ -32,7 +32,7 @@ public class CompositeRedisGetStagedSegmentDcsTests : IntegrationTestBase, IAsyn
         _fixture = fixture;
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         if (!DockerAvailability.IsAvailable)
         {
@@ -46,10 +46,10 @@ public class CompositeRedisGetStagedSegmentDcsTests : IntegrationTestBase, IAsyn
         await _mux.GetDatabase(1).ExecuteAsync("FLUSHDB");
     }
 
-    public Task DisposeAsync()
+    public ValueTask DisposeAsync()
     {
         _mux?.Dispose();
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 
     [DockerFact]

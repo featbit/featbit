@@ -29,7 +29,7 @@ public class RedisAppliedWatermarkReaderTests : IntegrationTestBase, IAsyncLifet
         _fixture = fixture;
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         if (!DockerAvailability.IsAvailable)
         {
@@ -294,9 +294,9 @@ public class RedisAppliedWatermarkReaderTests : IntegrationTestBase, IAsyncLifet
         public void Advance(TimeSpan by) => _now += by;
     }
 
-    public Task DisposeAsync()
+    public ValueTask DisposeAsync()
     {
         _connection?.Dispose();
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 }

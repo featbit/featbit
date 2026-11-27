@@ -35,7 +35,7 @@ public class ExperimentStatsControllerTests
             metricAgg = "median"
         });
 
-        await Verify(response);
+        await Snapshot.Match(response);
     }
 
     [Fact]
@@ -76,7 +76,7 @@ public class ExperimentStatsControllerTests
             metricAgg = "once"
         });
 
-        await Verify(response);
+        await Snapshot.Match(response);
     }
 
     private Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactory<Program> CreateFactory(

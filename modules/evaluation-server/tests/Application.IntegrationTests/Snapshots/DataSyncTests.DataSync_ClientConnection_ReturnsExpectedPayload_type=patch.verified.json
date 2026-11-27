@@ -1,0 +1,29 @@
+{
+  "data": {
+    "eventType": "patch",
+    "featureFlags": [
+      {
+        "id": "custom-rule-with-segment",
+        "insightsEnabled": false,
+        "matchReason": "default",
+        "sendToExperiment": true,
+        "timestamp": 1674885485421,
+        "variation": "true",
+        "variationId": "Guid_1",
+        "variationOptions": [
+          {
+            "id": "Guid_1",
+            "value": "true"
+          },
+          {
+            "id": "Guid_2",
+            "value": "false"
+          }
+        ],
+        "variationType": "boolean"
+      }
+    ],
+    "userKeyId": "Guid_3"
+  },
+  "messageType": "data-sync"
+}

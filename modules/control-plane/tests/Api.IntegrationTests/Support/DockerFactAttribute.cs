@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 namespace Api.IntegrationTests.Support;
 
 /// <summary>
@@ -6,7 +8,9 @@ namespace Api.IntegrationTests.Support;
 /// </summary>
 public sealed class DockerFactAttribute : FactAttribute
 {
-    public DockerFactAttribute()
+    // The caller's file and line let test runners link results to the test (xUnit3003).
+    public DockerFactAttribute([CallerFilePath] string? sourceFilePath = null, [CallerLineNumber] int sourceLineNumber = -1)
+        : base(sourceFilePath, sourceLineNumber)
     {
         if (!DockerAvailability.IsAvailable)
         {
@@ -20,7 +24,9 @@ public sealed class DockerFactAttribute : FactAttribute
 /// </summary>
 public sealed class DockerTheoryAttribute : TheoryAttribute
 {
-    public DockerTheoryAttribute()
+    // The caller's file and line let test runners link results to the test (xUnit3003).
+    public DockerTheoryAttribute([CallerFilePath] string? sourceFilePath = null, [CallerLineNumber] int sourceLineNumber = -1)
+        : base(sourceFilePath, sourceLineNumber)
     {
         if (!DockerAvailability.IsAvailable)
         {

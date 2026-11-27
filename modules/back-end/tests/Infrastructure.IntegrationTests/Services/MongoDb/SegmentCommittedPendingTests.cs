@@ -34,7 +34,7 @@ public sealed class SegmentCommittedPendingTests : IntegrationTestBase, IAsyncLi
     private readonly Guid _workspaceId = Guid.NewGuid();
     private readonly Guid _envId = Guid.NewGuid();
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         if (!DockerAvailability.IsAvailable)
         {
@@ -57,7 +57,7 @@ public sealed class SegmentCommittedPendingTests : IntegrationTestBase, IAsyncLi
         _sut = new SegmentService(_mongoDb, NullLogger<SegmentService>.Instance);
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await _mongoDb.Database.Client.DropDatabaseAsync(_dbName);
     }

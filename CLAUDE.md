@@ -63,6 +63,8 @@ dotnet test -c Release --no-build --verbosity normal
 # Run a single test
 dotnet test --filter "FullyQualifiedName~TestClassName"
 
+# Tests use xunit.v3 on Microsoft.Testing.Platform (opted in by the repo-root global.json)
+
 # Build Docker image (from modules/; all .NET images share modules/Directory.Packages.props)
 docker build --progress plain -f ./back-end/deploy/Dockerfile -t featbit/api:local .
 ```

@@ -22,7 +22,7 @@ public class MongoDbStoreTests : IntegrationTestBase, IAsyncLifetime
         _fixture = fixture;
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         if (!DockerAvailability.IsAvailable)
         {
@@ -44,7 +44,7 @@ public class MongoDbStoreTests : IntegrationTestBase, IAsyncLifetime
         await Task.CompletedTask;
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         if (!DockerAvailability.IsAvailable || string.IsNullOrEmpty(_dbName))
         {

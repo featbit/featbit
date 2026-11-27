@@ -33,7 +33,7 @@ public class PostgresLeaseStoreTests : IntegrationTestBase, IAsyncLifetime
     private AppDbContext _dbContext = null!;
     private PostgresLeaseStore _sut = null!;
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         if (!DockerAvailability.IsAvailable)
         {
@@ -65,7 +65,7 @@ public class PostgresLeaseStoreTests : IntegrationTestBase, IAsyncLifetime
         _sut = new PostgresLeaseStore(_dbContext);
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await _dbContext.DisposeAsync();
         await _dataSource.DisposeAsync();
