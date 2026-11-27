@@ -4,7 +4,6 @@ using Api.ControlPlane;
 using Api.Cors;
 using Api.RateLimiting;
 using Api.Services;
-using Domain.EndUsers;
 using Domain.Workspaces;
 using Infrastructure;
 using Infrastructure.Services;
@@ -63,9 +62,6 @@ public static class ServicesRegister
         services.AddAuthorizationBuilder()
             .SetFallbackPolicy(requireAuthPolicy)
             .AddSecretPolicies();
-
-        // domain services
-        services.AddSingleton<EndUserDeduplicator>();
 
         // streaming services
         services

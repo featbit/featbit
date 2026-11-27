@@ -1,4 +1,5 @@
 using Domain;
+using Domain.EndUsers;
 using Domain.Secrets;
 using Domain.Messages;
 using Infrastructure;
@@ -39,6 +40,8 @@ public static class StreamingServiceCollectionExtensions
         // services
         services
             .AddEvaluator()
+            .AddSingleton<EndUserDeduplicator>()
+            .AddTransient<IReportEndUserService, ReportEndUserService>()
             .AddTransient<IDataSyncService, DataSyncService>()
             .AddTransient<IAdminService, AdminService>();
 

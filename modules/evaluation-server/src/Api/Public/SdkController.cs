@@ -10,7 +10,7 @@ namespace Api.Public;
 
 [Route("api/public/sdk")]
 [EnableRateLimiting(RateLimitingPolicies.Sdk)]
-public class SdkController(IDataSyncService dataSyncService) : ApiControllerBase
+public class SdkController(IDataSyncService dataSyncService, IReportEndUserService reportEndUserService) : ApiControllerBase
 {
     [HttpGet("server/latest-all")]
     [Authorize(SecretPolicies.ServerOnly)]
@@ -41,6 +41,9 @@ public class SdkController(IDataSyncService dataSyncService) : ApiControllerBase
         }
 
         var payload = await dataSyncService.GetClientSdkPayloadAsync(EnvId, endUser, timestamp);
+
+        await reportEndUserService.ReportEndUserAndMauAsync(EnvId, endUser);
+
         if (payload.IsEmpty())
         {
             return Ok();

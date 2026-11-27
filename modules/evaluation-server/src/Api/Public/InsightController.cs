@@ -35,7 +35,6 @@ public class InsightController(IMessageProducer producer, EndUserDeduplicator en
             if (endUserDeduplicator.TryMarkAsReported(EnvId, insight!.User!.KeyId))
             {
                 endUserMessages.Add(insight.EndUserMessage(EnvId));
-                usage.AddUser(insight.User!.KeyId);
             }
 
             insight.AppendInsightMessages(envIdString, insightMessages);

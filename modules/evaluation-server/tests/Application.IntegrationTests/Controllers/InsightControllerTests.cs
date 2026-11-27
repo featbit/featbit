@@ -66,14 +66,17 @@ public class InsightControllerTests(TestApp app)
     public async Task TrackAsync_WithValidInsight_ReturnsOkAndPublishesAllExpectedMessages()
     {
         var producer = new Mock<IMessageProducer>();
-        var insights = new[] { UserVariationInsight() };
+        var insight = UserVariationInsight();
+        insight.Metrics = [new MetricInsight { Type = "Custom", EventName = "purchase", NumericValue = 1 }];
+        var insights = new[] { insight };
 
         var result = await TrackAsync(producer.Object, insights);
 
         Assert.Equal(HttpStatusCode.OK, result.StatusCode);
         producer.Verify(p => p.PublishBatchAsync(Topics.EndUser, It.Is<IReadOnlyCollection<EndUserMessage>>(x => x.Count == 1)), Times.Once);
-        producer.Verify(p => p.PublishBatchAsync(Topics.Insights, It.Is<IReadOnlyCollection<InsightMessage>>(x => x.Count == 1)), Times.Once);
-        producer.Verify(p => p.PublishAsync(Topics.Usage, It.IsAny<InsightUsage>()), Times.Once);
+        producer.Verify(p => p.PublishBatchAsync(Topics.Insights, It.Is<IReadOnlyCollection<InsightMessage>>(x => x.Count == 2)), Times.Once);
+        producer.Verify(p => p.PublishAsync(Topics.Usage, It.Is<InsightUsage>(u =>
+            u.EndUsers.Count == 0 && u.FlagEvaluations == 1 && u.CustomMetrics == 1)), Times.Once);
     }
 
     [Fact]
