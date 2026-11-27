@@ -17,7 +17,7 @@ public class ImportGlobalUser : IRequest<bool>
 
 public class ImportGlobalUserHandler(IEndUserService endUserService) : IRequestHandler<ImportGlobalUser, bool>
 {
-    public async Task<bool> Handle(ImportGlobalUser request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(ImportGlobalUser request, CancellationToken cancellationToken)
     {
         await endUserService.UpsertAsync(request.WorkspaceId, envId: null, request.Users);
 

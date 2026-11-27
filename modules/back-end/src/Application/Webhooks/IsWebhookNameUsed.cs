@@ -16,7 +16,7 @@ public class IsWebhookNameUsedHandler : IRequestHandler<IsWebhookNameUsed, bool>
         _service = service;
     }
 
-    public async Task<bool> Handle(IsWebhookNameUsed request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(IsWebhookNameUsed request, CancellationToken cancellationToken)
     {
         return await _service.IsNameUsedAsync(request.OrgId, request.Name);
     }

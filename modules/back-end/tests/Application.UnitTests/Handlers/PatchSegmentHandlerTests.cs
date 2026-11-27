@@ -6,7 +6,7 @@ using Domain.Policies;
 using Domain.Resources;
 using Domain.Segments;
 using Domain.Targeting;
-using MediatR;
+using Mediator;
 using Microsoft.AspNetCore.JsonPatch.SystemTextJson;
 using Microsoft.AspNetCore.JsonPatch.SystemTextJson.Operations;
 

@@ -10,7 +10,7 @@ using Domain.FeatureFlags;
 using Domain.Policies;
 using Domain.Resources;
 using Domain.Segments;
-using MediatR;
+using Mediator;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;

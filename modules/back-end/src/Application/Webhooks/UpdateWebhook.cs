@@ -19,16 +19,14 @@ public class UpdateWebhookHandler : IRequestHandler<UpdateWebhook, WebhookVm>
 {
     private readonly IWebhookService _service;
     private readonly ICurrentUser _currentUser;
-    private readonly IMapper _mapper;
 
-    public UpdateWebhookHandler(IWebhookService service, ICurrentUser currentUser, IMapper mapper)
+    public UpdateWebhookHandler(IWebhookService service, ICurrentUser currentUser)
     {
         _service = service;
         _currentUser = currentUser;
-        _mapper = mapper;
     }
 
-    public async Task<WebhookVm> Handle(UpdateWebhook request, CancellationToken cancellationToken)
+    public async ValueTask<WebhookVm> Handle(UpdateWebhook request, CancellationToken cancellationToken)
     {
         var webhook = await _service.GetAsync(request.Id);
         webhook.Update(
@@ -47,7 +45,7 @@ public class UpdateWebhookHandler : IRequestHandler<UpdateWebhook, WebhookVm>
 
         await _service.UpdateAsync(webhook);
 
-        var vm = _mapper.Map<WebhookVm>(webhook);
+        var vm = WebhookMapper.ToVm(webhook);
         return vm;
     }
 }

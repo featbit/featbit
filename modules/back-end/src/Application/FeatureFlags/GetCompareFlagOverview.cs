@@ -52,7 +52,7 @@ public class GetCompareFlagOverviewValidator : AbstractValidator<GetCompareFlagO
 public class GetCompareFlagOverviewHandler(IFeatureFlagService service, EnvironmentPermissionGuard envGuard)
     : IRequestHandler<GetCompareFlagOverview, PagedResult<CompareFlagOverview>>
 {
-    public async Task<PagedResult<CompareFlagOverview>> Handle(GetCompareFlagOverview request, CancellationToken cancellationToken)
+    public async ValueTask<PagedResult<CompareFlagOverview>> Handle(GetCompareFlagOverview request, CancellationToken cancellationToken)
     {
         await envGuard.EnsureAccessAsync(request.OrgId, request.SourceEnvId, request.Permissions);
         foreach (var targetEnvId in request.TargetEnvIds.Distinct())

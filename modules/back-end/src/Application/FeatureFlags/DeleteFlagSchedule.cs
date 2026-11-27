@@ -14,7 +14,7 @@ public class DeleteFlagScheduleHandler : IRequestHandler<DeleteFlagSchedule, boo
         _service = service;
     }
 
-    public async Task<bool> Handle(DeleteFlagSchedule request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(DeleteFlagSchedule request, CancellationToken cancellationToken)
     {
         await _service.DeleteAsync(request.Id);
 

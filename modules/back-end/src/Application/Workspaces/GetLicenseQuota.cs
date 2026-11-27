@@ -10,7 +10,7 @@ public class GetLicenseQuota : IRequest<object>
 
 public class GetLicenseQuotaHandler(IWorkspaceService service) : IRequestHandler<GetLicenseQuota, object>
 {
-    public async Task<object> Handle(GetLicenseQuota request, CancellationToken cancellationToken)
+    public async ValueTask<object> Handle(GetLicenseQuota request, CancellationToken cancellationToken)
     {
         var workspace = await service.GetAsync(request.WorkspaceId);
         var isLicenseValid = LicenseVerifier.TryParse(request.WorkspaceId, workspace.License, out var license);

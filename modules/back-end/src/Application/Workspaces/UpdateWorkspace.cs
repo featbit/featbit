@@ -36,15 +36,13 @@ public class UpdateWorkspaceValidator : AbstractValidator<UpdateWorkspace>
 public class UpdateWorkspaceHandler : IRequestHandler<UpdateWorkspace, WorkspaceVm>
 {
     private readonly IWorkspaceService _service;
-    private readonly IMapper _mapper;
 
-    public UpdateWorkspaceHandler(IWorkspaceService service, IMapper mapper)
+    public UpdateWorkspaceHandler(IWorkspaceService service)
     {
         _service = service;
-        _mapper = mapper;
     }
 
-    public async Task<WorkspaceVm> Handle(UpdateWorkspace request, CancellationToken cancellationToken)
+    public async ValueTask<WorkspaceVm> Handle(UpdateWorkspace request, CancellationToken cancellationToken)
     {
         var workspace = await _service.GetAsync(request.Id);
 
@@ -57,6 +55,6 @@ public class UpdateWorkspaceHandler : IRequestHandler<UpdateWorkspace, Workspace
         workspace.Update(request.Name, request.Key);
         await _service.UpdateAsync(workspace);
 
-        return _mapper.Map<WorkspaceVm>(workspace);
+        return WorkspaceMapper.ToVm(workspace);
     }
 }

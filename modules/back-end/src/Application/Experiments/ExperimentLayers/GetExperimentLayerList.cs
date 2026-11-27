@@ -13,11 +13,10 @@ public class GetExperimentLayerList : IRequest<PagedResult<ExperimentLayerVm>>
 
 public class GetExperimentLayersHandler(
     IExperimentLayerService layerService,
-    IExperimentService experimentService,
-    IMapper mapper)
+    IExperimentService experimentService)
     : IRequestHandler<GetExperimentLayerList, PagedResult<ExperimentLayerVm>>
 {
-    public async Task<PagedResult<ExperimentLayerVm>> Handle(
+    public async ValueTask<PagedResult<ExperimentLayerVm>> Handle(
         GetExperimentLayerList request,
         CancellationToken cancellationToken)
     {
@@ -25,7 +24,7 @@ public class GetExperimentLayersHandler(
         IReadOnlyCollection<ExperimentRunForLayer> runs = layers.Items.Count == 0
             ? []
             : await experimentService.GetExperimentRunsByLayersAsync(request.EnvId, layers.Items);
-        var result = mapper.Map<PagedResult<ExperimentLayerVm>>(layers);
+        var result = ExperimentLayerMapper.ToVm(layers);
 
         foreach (var layer in layers.Items)
         {

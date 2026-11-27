@@ -14,7 +14,7 @@ public class DeleteWebhookHandler : IRequestHandler<DeleteWebhook, bool>
         _service = service;
     }
 
-    public async Task<bool> Handle(DeleteWebhook request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(DeleteWebhook request, CancellationToken cancellationToken)
     {
         await _service.DeleteAsync(request.Id);
         return true;

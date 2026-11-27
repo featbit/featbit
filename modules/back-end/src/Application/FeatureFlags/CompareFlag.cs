@@ -37,7 +37,7 @@ public class CompareFlagHandler(
     EnvironmentPermissionGuard envGuard)
     : IRequestHandler<CompareFlag, CompareFlagDetail>
 {
-    public async Task<CompareFlagDetail> Handle(CompareFlag request, CancellationToken cancellationToken)
+    public async ValueTask<CompareFlagDetail> Handle(CompareFlag request, CancellationToken cancellationToken)
     {
         await envGuard.EnsureAccessAsync(request.OrgId, request.SourceEnvId, request.Permissions);
         await envGuard.EnsureAccessAsync(request.OrgId, request.TargetEnvId, request.Permissions);

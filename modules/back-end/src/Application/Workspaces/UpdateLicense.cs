@@ -33,12 +33,11 @@ public class UpdateLicenseValidator : AbstractValidator<UpdateLicense>
 public class UpdateLicenseHandler(
     IWorkspaceService service,
     ICacheService cacheService,
-    IMapper mapper,
     IConfiguration configuration,
     IMessageProducer messageProducer)
     : IRequestHandler<UpdateLicense, WorkspaceVm>
 {
-    public async Task<WorkspaceVm> Handle(UpdateLicense request, CancellationToken cancellationToken)
+    public async ValueTask<WorkspaceVm> Handle(UpdateLicense request, CancellationToken cancellationToken)
     {
         if (configuration.IsSaasHosting())
         {
@@ -59,6 +58,6 @@ public class UpdateLicenseHandler(
             await messageProducer.PublishAsync(ControlPlaneTopics.ControlPlaneLicenseChange, workspace);
         }
 
-        return mapper.Map<WorkspaceVm>(workspace);
+        return WorkspaceMapper.ToVm(workspace);
     }
 }

@@ -51,7 +51,7 @@ public class UpdateExperimentHandler(
     IExperimentService service)
     : IRequestHandler<UpdateExperiment, ExperimentDetailVm>
 {
-    public async Task<ExperimentDetailVm> Handle(
+    public async ValueTask<ExperimentDetailVm> Handle(
         UpdateExperiment request,
         CancellationToken cancellationToken)
     {
@@ -72,7 +72,7 @@ public class UpdateExperimentStageHandler(
     IExperimentService service)
     : IRequestHandler<UpdateExperimentStage, ExperimentDetailVm>
 {
-    public async Task<ExperimentDetailVm> Handle(
+    public async ValueTask<ExperimentDetailVm> Handle(
         UpdateExperimentStage request,
         CancellationToken cancellationToken)
     {

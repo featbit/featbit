@@ -12,7 +12,7 @@ public class RevokeRefreshToken : IRequest<bool>
 public class RevokeRefreshTokenHandler(IRefreshTokenService refreshTokenService)
     : IRequestHandler<RevokeRefreshToken, bool>
 {
-    public async Task<bool> Handle(RevokeRefreshToken request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(RevokeRefreshToken request, CancellationToken cancellationToken)
     {
         var hashedToken = RefreshToken.HashToken(request.Token);
 

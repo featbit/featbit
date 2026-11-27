@@ -21,7 +21,7 @@ public class GetProject : IRequest<ProjectWithEnvs>
 public class GetProjectHandler(IProjectService projectService)
     : IRequestHandler<GetProject, ProjectWithEnvs>
 {
-    public async Task<ProjectWithEnvs> Handle(GetProject request, CancellationToken cancellationToken)
+    public async ValueTask<ProjectWithEnvs> Handle(GetProject request, CancellationToken cancellationToken)
     {
         var project = await projectService.GetWithEnvsAsync(request.Id);
         var permissions = request.Permissions;

@@ -14,7 +14,7 @@ public class GetEndUserByKeyIds : IRequest<IEnumerable<EndUser>>
 public class GetEndUserByKeyIdsHandler(IEndUserService service)
     : IRequestHandler<GetEndUserByKeyIds, IEnumerable<EndUser>>
 {
-    public async Task<IEnumerable<EndUser>> Handle(GetEndUserByKeyIds request, CancellationToken cancellationToken)
+    public async ValueTask<IEnumerable<EndUser>> Handle(GetEndUserByKeyIds request, CancellationToken cancellationToken)
     {
         var users = await service.FindManyAsync(x =>
             (x.EnvId == request.EnvId || (x.EnvId == null && x.WorkspaceId == request.WorkspaceId)) &&

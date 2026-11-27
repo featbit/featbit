@@ -42,7 +42,7 @@ public class DeleteFeatureFlagHandler : IRequestHandler<DeleteFeatureFlag, bool>
         _currentUser = currentUser;
     }
 
-    public async Task<bool> Handle(DeleteFeatureFlag request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(DeleteFeatureFlag request, CancellationToken cancellationToken)
     {
         var flag = await _service.GetAsync(request.EnvId, request.Key);
         if (!flag.IsArchived)

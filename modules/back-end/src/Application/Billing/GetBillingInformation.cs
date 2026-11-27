@@ -8,7 +8,7 @@ public class GetBillingInformation : IRequest<string>
 public class GetBillingInformationHandler(IBillingService billingService)
     : IRequestHandler<GetBillingInformation, string>
 {
-    public async Task<string> Handle(GetBillingInformation request, CancellationToken cancellationToken)
+    public async ValueTask<string> Handle(GetBillingInformation request, CancellationToken cancellationToken)
     {
         var billingInformation = await billingService.GetBillingInformationAsync(request.WorkspaceId);
 

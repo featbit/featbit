@@ -174,7 +174,7 @@ public class QueryExperimentsHandler(
     IExperimentService service)
     : IRequestHandler<QueryExperiments, PagedResult<ExperimentVm>>
 {
-    public async Task<PagedResult<ExperimentVm>> Handle(
+    public async ValueTask<PagedResult<ExperimentVm>> Handle(
         QueryExperiments request,
         CancellationToken cancellationToken)
     {
@@ -186,7 +186,7 @@ public class GetExperimentHandler(
     IExperimentService service)
     : IRequestHandler<GetExperiment, ExperimentDetailVm>
 {
-    public async Task<ExperimentDetailVm> Handle(
+    public async ValueTask<ExperimentDetailVm> Handle(
         GetExperiment request,
         CancellationToken cancellationToken)
     {
@@ -198,7 +198,7 @@ public class DeleteExperimentHandler(
     IExperimentService service)
     : IRequestHandler<DeleteExperiment, bool>
 {
-    public async Task<bool> Handle(
+    public async ValueTask<bool> Handle(
         DeleteExperiment request,
         CancellationToken cancellationToken)
     {

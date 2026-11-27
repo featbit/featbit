@@ -76,7 +76,7 @@ public class UpdateTargetingHandler(
     IPublisher publisher
 ) : IRequestHandler<UpdateTargeting, bool>
 {
-    public async Task<bool> Handle(UpdateTargeting request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(UpdateTargeting request, CancellationToken cancellationToken)
     {
         var segment = await service.GetAsync(request.Id);
         var dataChange = segment.UpdateTargeting(request.Included, request.Excluded, request.Rules);

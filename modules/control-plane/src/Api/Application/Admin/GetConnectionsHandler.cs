@@ -1,5 +1,5 @@
 using Infrastructure.Caches.Redis;
-using MediatR;
+using Mediator;
 using StackExchange.Redis;
 
 namespace Api.Application.Admin;
@@ -11,7 +11,7 @@ public record ConnectionDto(string Id, string EnvId, string Secret);
 public class GetConnectionsHandler(IRedisClient redisClient, ILogger<GetConnectionsHandler> logger)
     : IRequestHandler<GetConnections, IReadOnlyList<ConnectionDto>>
 {
-    public async Task<IReadOnlyList<ConnectionDto>> Handle(GetConnections request, CancellationToken cancellationToken)
+    public async ValueTask<IReadOnlyList<ConnectionDto>> Handle(GetConnections request, CancellationToken cancellationToken)
     {
         try
         {

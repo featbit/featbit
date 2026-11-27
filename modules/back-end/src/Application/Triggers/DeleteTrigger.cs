@@ -26,7 +26,7 @@ public class DeleteTriggerHandler(
     EnvironmentPermissionGuard envGuard,
     FlagPermissionGuard flagGuard) : IRequestHandler<DeleteTrigger, bool>
 {
-    public async Task<bool> Handle(DeleteTrigger request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(DeleteTrigger request, CancellationToken cancellationToken)
     {
         var trigger = await service.GetAsync(request.Id);
 

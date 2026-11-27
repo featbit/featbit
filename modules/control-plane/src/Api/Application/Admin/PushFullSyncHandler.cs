@@ -1,5 +1,5 @@
 using Domain.Messages;
-using MediatR;
+using Mediator;
 using Action = Domain.Messages.Action;
 
 namespace Api.Application.Admin;
@@ -10,7 +10,7 @@ public class PushFullSyncHandler(IMessageProducer messageProducer, ILogger<PushF
 {
     private static readonly object EmptyMessage = new { };
 
-    public async Task<bool> Handle(PushFullSync request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(PushFullSync request, CancellationToken cancellationToken)
     {
         try
         {

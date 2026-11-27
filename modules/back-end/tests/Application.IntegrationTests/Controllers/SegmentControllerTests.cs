@@ -3,7 +3,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Api.Controllers;
 using Application.Segments;
-using MediatR;
+using Mediator;
 using Moq;
 
 namespace Application.IntegrationTests.Controllers;

@@ -12,7 +12,7 @@ public class ArchiveExperimentMetric : IRequest<bool>
 public class ArchiveExperimentMetricHandler(IExperimentMetricService service)
     : IRequestHandler<ArchiveExperimentMetric, bool>
 {
-    public async Task<bool> Handle(ArchiveExperimentMetric request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(ArchiveExperimentMetric request, CancellationToken cancellationToken)
     {
         await service.ArchiveAsync(request.EnvId, request.Id);
         return true;

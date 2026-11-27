@@ -7,14 +7,14 @@ public class CreateExperimentLayer : IRequest<ExperimentLayerVm>
     public CreateExperimentLayerRequest Request { get; set; }
 }
 
-public class CreateExperimentLayerHandler(IExperimentLayerService service, IMapper mapper)
+public class CreateExperimentLayerHandler(IExperimentLayerService service)
     : IRequestHandler<CreateExperimentLayer, ExperimentLayerVm>
 {
-    public async Task<ExperimentLayerVm> Handle(
+    public async ValueTask<ExperimentLayerVm> Handle(
         CreateExperimentLayer request,
         CancellationToken cancellationToken)
     {
         var layer = await service.CreateAsync(request.EnvId, request.Request);
-        return mapper.Map<ExperimentLayerVm>(layer);
+        return ExperimentLayerMapper.ToVm(layer);
     }
 }

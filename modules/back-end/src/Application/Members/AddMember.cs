@@ -53,7 +53,7 @@ public class AddMemberHandler(
     ICurrentUser currentUser, IMemberService memberService, IPublisher publisher)
     : IRequestHandler<AddMember, bool>
 {
-    public async Task<bool> Handle(AddMember request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(AddMember request, CancellationToken cancellationToken)
     {
         var email = request.Email;
 

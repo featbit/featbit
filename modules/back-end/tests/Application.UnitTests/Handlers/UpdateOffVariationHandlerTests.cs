@@ -3,7 +3,7 @@ using Application.FeatureFlags;
 using Application.Services;
 using Application.Users;
 using Domain.FeatureFlags;
-using MediatR;
+using Mediator;
 
 namespace Application.UnitTests.Handlers;
 
@@ -40,7 +40,7 @@ public class UpdateOffVariationHandlerTests
             Guid.Empty, Guid.Empty, flag.EnvId, flag.Key,
             new UpdateOffVariationPayload { Revision = Guid.NewGuid(), OffVariationId = "v-on" });
 
-        await Assert.ThrowsAsync<ConflictException>(() => sut.Handle(request, CancellationToken.None));
+        await Assert.ThrowsAsync<ConflictException>(async () => await sut.Handle(request, CancellationToken.None));
 
         service.Verify(x => x.UpdateAsync(It.IsAny<FeatureFlag>()), Times.Never);
     }

@@ -44,17 +44,15 @@ public class UpdatePolicySettingHandler : IRequestHandler<UpdatePolicySetting, P
     private readonly ICurrentUser _auditActor;
 
     private readonly IPolicyService _service;
-    private readonly IMapper _mapper;
 
-    public UpdatePolicySettingHandler(IPolicyService service, IMapper mapper, IPublisher auditPublisher, ICurrentUser auditActor)
+    public UpdatePolicySettingHandler(IPolicyService service, IPublisher auditPublisher, ICurrentUser auditActor)
     {
         _auditPublisher = auditPublisher;
         _auditActor = auditActor;
         _service = service;
-        _mapper = mapper;
     }
 
-    public async Task<PolicyVm> Handle(UpdatePolicySetting request, CancellationToken cancellationToken)
+    public async ValueTask<PolicyVm> Handle(UpdatePolicySetting request, CancellationToken cancellationToken)
     {
         var previous = await _service.GetAuditSnapshotAsync(request.PolicyId);
         var change = new DataChange(previous);
@@ -73,6 +71,6 @@ public class UpdatePolicySettingHandler : IRequestHandler<UpdatePolicySetting, P
         await _auditPublisher.Publish(new OnIamResourceChanged(request.WorkspaceId, request.OrganizationId,
             AuditLogRefTypes.Policy, Operations.UpdatePolicySetting, current ?? previous, change.To(current), _auditActor.Id), cancellationToken);
 
-        return _mapper.Map<PolicyVm>(policy);
+        return PolicyMapper.ToVm(policy);
     }
 }

@@ -4,6 +4,7 @@ using Api.Authentication.OpenIdConnect;
 using Api.Authorization;
 using Api.Mcp;
 using Api.Setup.OpenApi;
+using Application.Bases.Behaviours;
 using Application.Services;
 using Domain.Workspaces;
 using Domain.Policies;
@@ -70,6 +71,16 @@ public static class ServicesRegister
         // add infrastructure & application services
         builder.Services.AddInfrastructureServices(builder.Configuration);
         builder.Services.AddApplicationServices(builder.Configuration);
+
+        // mediator: handlers live in Application; Mediator.SourceGenerator generates the mediator here.
+        // Handlers depend on scoped services, so they are transient, as they were with MediatR.
+        builder.Services.AddMediator(options =>
+        {
+            options.Assemblies = [typeof(Application.ApplicationConsts)];
+            options.ServiceLifetime = ServiceLifetime.Transient;
+            options.NotificationPublisherType = typeof(SequentialNotificationPublisher);
+            options.PipelineBehaviors = [typeof(ValidationBehaviour<,>)];
+        });
 
         // authentication
         builder.Services.AddRefreshTokenCookies(builder.Configuration);

@@ -52,7 +52,7 @@ public class OnFeatureFlagDeletedHandlerTests
         var sut = CreateSut(webhookHandler: webhookHandler, publisher: publisher);
         var notification = new OnFeatureFlagDeleted(flag, Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() => sut.Handle(notification, CancellationToken.None));
+        await Assert.ThrowsAsync<InvalidOperationException>(async () => await sut.Handle(notification, CancellationToken.None));
 
         webhookHandler.Verify(
             x => x.HandleAsync(flag, notification.DataChange, notification.OperatorId), Times.Once);

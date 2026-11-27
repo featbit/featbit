@@ -15,7 +15,7 @@ public class GetProfileHandler : IRequestHandler<GetProfile, Profile>
         _currentUser = currentUser;
     }
 
-    public async Task<Profile> Handle(GetProfile request, CancellationToken cancellationToken)
+    public async ValueTask<Profile> Handle(GetProfile request, CancellationToken cancellationToken)
     {
         var user = await _userService.GetAsync(_currentUser.Id);
 

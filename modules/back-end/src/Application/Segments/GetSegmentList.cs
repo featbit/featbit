@@ -14,18 +14,16 @@ public class GetSegmentList : IRequest<PagedResult<SegmentVm>>
 public class GetSegmentListHandler : IRequestHandler<GetSegmentList, PagedResult<SegmentVm>>
 {
     private readonly IEnvironmentAppService _envAppService;
-    private readonly IMapper _mapper;
 
-    public GetSegmentListHandler(IEnvironmentAppService envAppService, IMapper mapper)
+    public GetSegmentListHandler(IEnvironmentAppService envAppService)
     {
         _envAppService = envAppService;
-        _mapper = mapper;
     }
 
-    public async Task<PagedResult<SegmentVm>> Handle(GetSegmentList request, CancellationToken cancellationToken)
+    public async ValueTask<PagedResult<SegmentVm>> Handle(GetSegmentList request, CancellationToken cancellationToken)
     {
         var segments = await _envAppService.GetPagedSegmentsAsync(request);
 
-        return _mapper.Map<PagedResult<SegmentVm>>(segments);
+        return SegmentMapper.ToVm(segments);
     }
 }

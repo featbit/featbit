@@ -17,14 +17,14 @@ public class CreateExperimentMetricValidator : AbstractValidator<CreateExperimen
     }
 }
 
-public class CreateExperimentMetricHandler(IExperimentMetricService service, IMapper mapper)
+public class CreateExperimentMetricHandler(IExperimentMetricService service)
     : IRequestHandler<CreateExperimentMetric, ExperimentMetricVm>
 {
-    public async Task<ExperimentMetricVm> Handle(
+    public async ValueTask<ExperimentMetricVm> Handle(
         CreateExperimentMetric request,
         CancellationToken cancellationToken)
     {
         var metric = await service.CreateAsync(request.EnvId, request.Request);
-        return mapper.Map<ExperimentMetricVm>(metric);
+        return ExperimentMetricMapper.ToVm(metric);
     }
 }

@@ -29,6 +29,6 @@ public class GetFeatureFlagByIdTests
         if (sameEnvironment && sameId)
             Assert.Same(flag, await handler.Handle(request, CancellationToken.None));
         else
-            await Assert.ThrowsAsync<EntityNotFoundException>(() => handler.Handle(request, CancellationToken.None));
+            await Assert.ThrowsAsync<EntityNotFoundException>(async () => await handler.Handle(request, CancellationToken.None));
     }
 }

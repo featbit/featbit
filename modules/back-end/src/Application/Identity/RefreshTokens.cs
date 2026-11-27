@@ -16,7 +16,7 @@ public class RefreshTokensHandler(
     IIdentityService identityService)
     : IRequestHandler<RefreshTokens, RefreshTokensResult>
 {
-    public async Task<RefreshTokensResult> Handle(RefreshTokens request, CancellationToken cancellationToken)
+    public async ValueTask<RefreshTokensResult> Handle(RefreshTokens request, CancellationToken cancellationToken)
     {
         var hashedToken = RefreshToken.HashToken(request.Token);
 

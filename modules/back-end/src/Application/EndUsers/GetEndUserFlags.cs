@@ -18,7 +18,7 @@ public class GetEndUserFlagsHandler(
     IEvaluator evaluator)
     : IRequestHandler<GetEndUserFlags, PagedResult<EndUserFlagVm>>
 {
-    public async Task<PagedResult<EndUserFlagVm>> Handle(GetEndUserFlags request, CancellationToken cancellationToken)
+    public async ValueTask<PagedResult<EndUserFlagVm>> Handle(GetEndUserFlags request, CancellationToken cancellationToken)
     {
         var endUser = await endUserService.GetAsync(request.Id);
         var flags = await flagService.GetListAsync(request.EnvId, request.Filter);

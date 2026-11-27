@@ -16,7 +16,7 @@ public class DeleteEnvironmentHandler : IRequestHandler<DeleteEnvironment, bool>
         _publisher = publisher;
     }
 
-    public async Task<bool> Handle(DeleteEnvironment request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(DeleteEnvironment request, CancellationToken cancellationToken)
     {
         var env = await _service.FindOneAsync(x => x.Id == request.Id);
         if (env == null)

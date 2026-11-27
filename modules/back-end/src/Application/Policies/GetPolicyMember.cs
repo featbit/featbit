@@ -20,7 +20,7 @@ public class GetPolicyMemberHandler : IRequestHandler<GetPolicyMember, PagedResu
         _service = service;
     }
     
-    public async Task<PagedResult<PolicyMember>> Handle(GetPolicyMember request, CancellationToken cancellationToken)
+    public async ValueTask<PagedResult<PolicyMember>> Handle(GetPolicyMember request, CancellationToken cancellationToken)
     {
         var members = await _service.GetMembersAsync(request.OrganizationId, request.PolicyId, request.Filter);
         return members;

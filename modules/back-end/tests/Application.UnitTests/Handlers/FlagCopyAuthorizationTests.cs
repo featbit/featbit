@@ -9,7 +9,7 @@ using Domain.FeatureFlags;
 using Domain.Policies;
 using Domain.Resources;
 using Domain.Segments;
-using MediatR;
+using Mediator;
 
 namespace Application.UnitTests.Handlers;
 
@@ -130,9 +130,9 @@ public class FlagCopyAuthorizationTests
         var copyChecks = new FlagCopyChecks(_environmentAccess, _flags.Object, users.Object, resources.Object);
         Guid[] ids = [first.Id, Guid.NewGuid(), second.Id];
         if (preview)
-            await Assert.ThrowsAsync<ForbiddenException>(() => new CopyToEnvPrecheckHandler(copyChecks).Handle(new CopyToEnvPrecheck { OrgId = _org, SourceEnvId = _source, TargetEnvId = _target, FlagIds = ids, Permissions = permissions }, default));
+            await Assert.ThrowsAsync<ForbiddenException>(async () => await new CopyToEnvPrecheckHandler(copyChecks).Handle(new CopyToEnvPrecheck { OrgId = _org, SourceEnvId = _source, TargetEnvId = _target, FlagIds = ids, Permissions = permissions }, default));
         else
-            await Assert.ThrowsAsync<ForbiddenException>(() => new CopyToEnvHandler(_flags.Object, users.Object, envs.Object,
+            await Assert.ThrowsAsync<ForbiddenException>(async () => await new CopyToEnvHandler(_flags.Object, users.Object, envs.Object,
                 Mock.Of<ICurrentUser>(), publisher.Object, copyChecks).Handle(
                 new CopyToEnv(Guid.Empty, _org, _source, _target, permissions, new()
                 {
@@ -204,7 +204,7 @@ public class FlagCopyAuthorizationTests
         var publisher = new Mock<IPublisher>(MockBehavior.Strict);
         var handler = new CopyFlagSettingsHandler(_flags.Object, users.Object, Mock.Of<IEnvironmentService>(), Mock.Of<ICurrentUser>(),
             publisher.Object, _environmentAccess, _flagGuard);
-        await Assert.ThrowsAsync<ForbiddenException>(() => handler.Handle(
+        await Assert.ThrowsAsync<ForbiddenException>(async () => await handler.Handle(
             new CopyFlagSettings(Guid.Empty, _org, _source, _target, "flag", [EnvAccess], new()
             {
                 Options = new(false, new(false, CopyModes.Overwrite), new(false, CopyModes.Overwrite), false, false)

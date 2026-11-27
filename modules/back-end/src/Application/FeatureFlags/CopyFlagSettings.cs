@@ -55,7 +55,7 @@ public class CopyFlagSettingsHandler(
     FlagPermissionGuard flagGuard)
     : IRequestHandler<CopyFlagSettings, bool>
 {
-    public async Task<bool> Handle(CopyFlagSettings request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(CopyFlagSettings request, CancellationToken cancellationToken)
     {
         await envGuard.EnsureAccessAsync(request.OrgId, request.SourceEnvId, request.Permissions);
         await envGuard.EnsureAccessAsync(request.OrgId, request.TargetEnvId, request.Permissions);

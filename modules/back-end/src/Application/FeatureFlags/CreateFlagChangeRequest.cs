@@ -40,7 +40,7 @@ public class CreateFlagChangeRequestHandler(
     ICurrentUser currentUser)
     : IRequestHandler<CreateFlagChangeRequest, bool>
 {
-    public async Task<bool> Handle(CreateFlagChangeRequest request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(CreateFlagChangeRequest request, CancellationToken cancellationToken)
     {
         var flag = await flagService.GetAsync(request.EnvId, request.Key);
         if (!flag.Revision.Equals(request.Revision))

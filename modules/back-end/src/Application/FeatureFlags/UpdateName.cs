@@ -51,7 +51,7 @@ public class UpdateNameHandler(
     IPublisher publisher)
     : IRequestHandler<UpdateName, Guid>
 {
-    public async Task<Guid> Handle(UpdateName request, CancellationToken cancellationToken)
+    public async ValueTask<Guid> Handle(UpdateName request, CancellationToken cancellationToken)
     {
         var flag = await service.GetAsync(request.EnvId, request.Key);
         if (flag.Name == request.Name)

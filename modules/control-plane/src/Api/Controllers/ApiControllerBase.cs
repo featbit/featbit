@@ -1,5 +1,5 @@
 using System.Net.Mime;
-using MediatR;
+using Mediator;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;

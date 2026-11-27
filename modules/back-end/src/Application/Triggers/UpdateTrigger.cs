@@ -32,7 +32,7 @@ public class UpdateTriggerHandler(
     EnvironmentPermissionGuard envGuard,
     FlagPermissionGuard flagGuard) : IRequestHandler<UpdateTrigger, bool>
 {
-    public async Task<bool> Handle(UpdateTrigger request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(UpdateTrigger request, CancellationToken cancellationToken)
     {
         var trigger = await triggerService.GetAsync(request.Id);
 

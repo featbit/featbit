@@ -40,7 +40,7 @@ public class UpsertEndUserHandler : IRequestHandler<UpsertEndUser, EndUser>
         _service = service;
     }
 
-    public async Task<EndUser> Handle(UpsertEndUser request, CancellationToken cancellationToken)
+    public async ValueTask<EndUser> Handle(UpsertEndUser request, CancellationToken cancellationToken)
     {
         return await _service.UpsertAsync(request.AsEndUser());
     }

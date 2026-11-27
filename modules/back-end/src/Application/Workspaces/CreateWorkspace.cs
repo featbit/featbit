@@ -22,7 +22,7 @@ public class CreateWorkspaceHandler(
     ISender mediator)
     : IRequestHandler<CreateWorkspace, RegisterResult>
 {
-    public async Task<RegisterResult> Handle(CreateWorkspace request, CancellationToken cancellationToken)
+    public async ValueTask<RegisterResult> Handle(CreateWorkspace request, CancellationToken cancellationToken)
     {
         var user = await userService.FindOneAsync(x => x.Email == request.Email);
 

@@ -63,7 +63,7 @@ public class CreateProjectHandler : IRequestHandler<CreateProject, ProjectWithEn
         _publisher = publisher;
     }
 
-    public async Task<ProjectWithEnvs> Handle(CreateProject request, CancellationToken cancellationToken)
+    public async ValueTask<ProjectWithEnvs> Handle(CreateProject request, CancellationToken cancellationToken)
     {
         var keyHasBeenUsed = await _service.HasKeyBeenUsedAsync(request.OrganizationId, request.Key);
         if (keyHasBeenUsed)

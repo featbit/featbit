@@ -111,7 +111,7 @@ public class CreateSegmentHandler(
     SegmentCreationScopeGuard scopeGuard)
     : IRequestHandler<CreateSegment, Segment>
 {
-    public async Task<Segment> Handle(CreateSegment request, CancellationToken cancellationToken)
+    public async ValueTask<Segment> Handle(CreateSegment request, CancellationToken cancellationToken)
     {
         if (request.Type == SegmentType.Shared)
         {

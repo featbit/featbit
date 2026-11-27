@@ -50,7 +50,7 @@ public class ToggleFeatureFlagHandler : IRequestHandler<ToggleFeatureFlag, Guid>
         _publisher = publisher;
     }
 
-    public async Task<Guid> Handle(ToggleFeatureFlag request, CancellationToken cancellationToken)
+    public async ValueTask<Guid> Handle(ToggleFeatureFlag request, CancellationToken cancellationToken)
     {
         var flag = await _service.GetAsync(request.EnvId, request.Key);
         if (flag.IsEnabled == request.Status)

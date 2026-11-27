@@ -26,7 +26,7 @@ public class DeletePolicyHandler : IRequestHandler<DeletePolicy, bool>
         _service = service;
     }
 
-    public async Task<bool> Handle(DeletePolicy request, CancellationToken cancellationToken)
+    public async ValueTask<bool> Handle(DeletePolicy request, CancellationToken cancellationToken)
     {
         var previous = await _service.GetAuditSnapshotAsync(request.PolicyId);
         var change = new DataChange(previous);

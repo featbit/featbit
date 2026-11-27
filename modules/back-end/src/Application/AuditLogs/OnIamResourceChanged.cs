@@ -37,7 +37,7 @@ public record OnIamResourceChanged(
 
 public class OnIamResourceChangedHandler(IAuditLogService logs) : INotificationHandler<OnIamResourceChanged>
 {
-    public async Task Handle(OnIamResourceChanged notification, CancellationToken cancellationToken)
+    public async ValueTask Handle(OnIamResourceChanged notification, CancellationToken cancellationToken)
     {
         var log = notification.GetAuditLog();
         if (log != null)

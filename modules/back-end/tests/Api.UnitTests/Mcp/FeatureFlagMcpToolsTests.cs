@@ -9,7 +9,7 @@ using Application.Services;
 using Domain.FeatureFlags;
 using Domain.Policies;
 using Domain.Workspaces;
-using MediatR;
+using Mediator;
 using Microsoft.AspNetCore.Http;
 using Moq;
 

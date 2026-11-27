@@ -16,7 +16,7 @@ public class GetEndUserHandler : IRequestHandler<GetEndUser, EndUser>
         _service = service;
     }
 
-    public async Task<EndUser> Handle(GetEndUser request, CancellationToken cancellationToken)
+    public async ValueTask<EndUser> Handle(GetEndUser request, CancellationToken cancellationToken)
     {
         return await _service.GetAsync(request.Id);
     }

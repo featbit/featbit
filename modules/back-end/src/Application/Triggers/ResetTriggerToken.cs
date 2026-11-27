@@ -26,7 +26,7 @@ public class ResetTriggerTokenHandler(
     EnvironmentPermissionGuard envGuard,
     FlagPermissionGuard flagGuard) : IRequestHandler<ResetTriggerToken, string>
 {
-    public async Task<string> Handle(ResetTriggerToken request, CancellationToken cancellationToken)
+    public async ValueTask<string> Handle(ResetTriggerToken request, CancellationToken cancellationToken)
     {
         var trigger = await triggerService.GetAsync(request.Id);
 
