@@ -1,9 +1,7 @@
 using Api.Authentication;
 using Api.Authorization;
 using Api.Controllers;
-using Api.Mcp;
 using Application.Bases;
-using Microsoft.AspNetCore.Mvc.Controllers;
 
 namespace Api.Middlewares;
 
@@ -47,36 +45,6 @@ public class TenantAccessValidationMiddleware(RequestDelegate next)
             return false;
         }
 
-        // MCP requests are exempt from tenant context validation.
-        if (IsMcpRequest())
-        {
-            return false;
-        }
-
         return true;
-
-        bool IsMcpRequest()
-        {
-            // MCP protocol endpoints under /mcp are not MVC controller actions.
-            if (context.Request.Path.StartsWithSegments("/mcp"))
-            {
-                return true;
-            }
-
-            // Identify MCP access tokens by their token-type claim.
-            if (context.User.FindFirst(McpClaimTypes.TokenType)?.Value == McpClaimTypes.McpTokenType)
-            {
-                return true;
-            }
-
-            // MCP OAuth endpoints also bypass tenant validation when using an ordinary user JWT.
-            var action = endpoint.Metadata.GetMetadata<ControllerActionDescriptor>();
-            if (action?.ControllerTypeInfo.AsType() == typeof(McpOAuthController))
-            {
-                return true;
-            }
-
-            return false;
-        }
     }
 }

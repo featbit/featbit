@@ -26,8 +26,8 @@ public class TenantAccessValidator(IUserService userService, IOrganizationServic
         }
 
         // A valid workspace ID is required
-        var workspaceHeader = context.Request.Headers[ApiConstants.WorkspaceHeaderKey];
-        if (!Guid.TryParse(workspaceHeader.ToString(), out var workspaceId) || workspaceId == Guid.Empty)
+        var workspaceId = context.Request.WorkspaceId();
+        if (workspaceId == Guid.Empty)
         {
             return false;
         }
@@ -40,8 +40,8 @@ public class TenantAccessValidator(IUserService userService, IOrganizationServic
         }
 
         // Validate workspace and organization
-        var organizationHeader = context.Request.Headers[ApiConstants.OrgIdHeaderKey];
-        if (!Guid.TryParse(organizationHeader.ToString(), out var organizationId) || organizationId == Guid.Empty)
+        var organizationId = context.Request.OrganizationId();
+        if (organizationId == Guid.Empty)
         {
             return false;
         }
