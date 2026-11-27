@@ -54,7 +54,7 @@ public class UpdateEnvironmentValidator : AbstractValidator<UpdateEnvironment>
     }
 }
 
-public class UpdateEnvironmentHandler(IEnvironmentService service, IMapper mapper, IResourceService resources)
+public class UpdateEnvironmentHandler(IEnvironmentService service, IResourceService resources)
     : IRequestHandler<UpdateEnvironment, EnvironmentVm>
 {
     public async Task<EnvironmentVm> Handle(UpdateEnvironment request, CancellationToken cancellationToken)
@@ -66,6 +66,6 @@ public class UpdateEnvironmentHandler(IEnvironmentService service, IMapper mappe
         var rn = await resources.GetEnvRnAsync(env.Id);
         env.Sanitize(rn, request.Permissions);
 
-        return mapper.Map<EnvironmentVm>(env);
+        return EnvironmentMapper.ToVm(env);
     }
 }

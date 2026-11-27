@@ -36,7 +36,7 @@ public class UpdateOrganizationValidator : AbstractValidator<UpdateOrganization>
     }
 }
 
-public class UpdateOrganizationHandler(IOrganizationService service, IMapper mapper)
+public class UpdateOrganizationHandler(IOrganizationService service)
     : IRequestHandler<UpdateOrganization, OrganizationVm>
 {
     public async Task<OrganizationVm> Handle(UpdateOrganization request, CancellationToken cancellationToken)
@@ -78,12 +78,12 @@ public class UpdateOrganizationHandler(IOrganizationService service, IMapper map
 
         if (!nameChanged && !sortingChanged && !defaultPermissionsChanged)
         {
-            return mapper.Map<OrganizationVm>(organization);
+            return OrganizationMapper.ToVm(organization);
         }
 
         organization.Update(request.Name, request.Settings, request.DefaultPermissions);
         await service.UpdateAsync(organization);
 
-        return mapper.Map<OrganizationVm>(organization);
+        return OrganizationMapper.ToVm(organization);
     }
 }

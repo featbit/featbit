@@ -31,12 +31,10 @@ public class CreateOrganizationValidator : AbstractValidator<CreateOrganization>
 public class CreateOrganizationHandler : IRequestHandler<CreateOrganization, OrganizationVm>
 {
     private readonly IOrganizationService _service;
-    private readonly IMapper _mapper;
 
-    public CreateOrganizationHandler(IOrganizationService service, IMapper mapper)
+    public CreateOrganizationHandler(IOrganizationService service)
     {
         _service = service;
-        _mapper = mapper;
     }
 
     public async Task<OrganizationVm> Handle(CreateOrganization request, CancellationToken cancellationToken)
@@ -56,6 +54,6 @@ public class CreateOrganizationHandler : IRequestHandler<CreateOrganization, Org
         var policies = new[] { BuiltInPolicy.Owner };
         await _service.AddUserAsync(organizationUser, policies: policies);
 
-        return _mapper.Map<OrganizationVm>(organization);
+        return OrganizationMapper.ToVm(organization);
     }
 }

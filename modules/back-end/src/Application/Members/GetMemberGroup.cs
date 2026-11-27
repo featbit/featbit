@@ -14,12 +14,10 @@ public class GetMemberGroup : IRequest<PagedResult<MemberGroupVm>>
 public class GetMemberGroupHandler : IRequestHandler<GetMemberGroup, PagedResult<MemberGroupVm>>
 {
     private readonly IMemberService _service;
-    private readonly IMapper _mapper;
 
-    public GetMemberGroupHandler(IMemberService service, IMapper mapper)
+    public GetMemberGroupHandler(IMemberService service)
     {
         _service = service;
-        _mapper = mapper;
     }
     
     public async Task<PagedResult<MemberGroupVm>> Handle(GetMemberGroup request, CancellationToken cancellationToken)
@@ -27,6 +25,6 @@ public class GetMemberGroupHandler : IRequestHandler<GetMemberGroup, PagedResult
         var groups = 
             await _service.GetGroupsAsync(request.OrganizationId, request.MemberId, request.Filter);
 
-        return _mapper.Map<PagedResult<MemberGroupVm>>(groups);
+        return MemberMapper.ToVm(groups);
     }
 }

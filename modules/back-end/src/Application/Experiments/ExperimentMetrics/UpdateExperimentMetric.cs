@@ -19,7 +19,7 @@ public class UpdateExperimentMetricValidator : AbstractValidator<UpdateExperimen
     }
 }
 
-public class UpdateExperimentMetricHandler(IExperimentMetricService service, IMapper mapper)
+public class UpdateExperimentMetricHandler(IExperimentMetricService service)
     : IRequestHandler<UpdateExperimentMetric, ExperimentMetricVm>
 {
     public async Task<ExperimentMetricVm> Handle(
@@ -27,6 +27,6 @@ public class UpdateExperimentMetricHandler(IExperimentMetricService service, IMa
         CancellationToken cancellationToken)
     {
         var metric = await service.UpdateAsync(request.EnvId, request.Id, request.Request);
-        return mapper.Map<ExperimentMetricVm>(metric);
+        return ExperimentMetricMapper.ToVm(metric);
     }
 }
