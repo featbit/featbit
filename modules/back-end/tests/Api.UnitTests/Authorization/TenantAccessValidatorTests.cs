@@ -191,4 +191,34 @@ public class TenantAccessValidatorTests
         _organizations.VerifyNoOtherCalls();
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task McpRequest_RechecksMembershipAfterRemoval(bool mcpToken)
+    {
+        var context = Context();
+        context.Request.Path = "/mcp";
+        if (mcpToken)
+        {
+            context.Request.Headers.Clear();
+            var identity = (ClaimsIdentity)context.User.Identity!;
+            identity.AddClaim(new Claim(Api.Mcp.McpClaimTypes.TokenType, Api.Mcp.McpClaimTypes.McpTokenType));
+            identity.AddClaim(new Claim(Api.Mcp.McpClaimTypes.OrgId, _organizationId.ToString()));
+            identity.AddClaim(new Claim(Api.Mcp.McpClaimTypes.WorkspaceId, _workspaceId.ToString()));
+        }
+        var validator = new TenantAccessValidator(_users.Object, _organizations.Object);
+        Assert.True(await validator.ValidateAsync(context));
+        _organizations.Setup(x => x.ContainsUserAsync(_organizationId, _userId)).ReturnsAsync(false);
+        Assert.False(await validator.ValidateAsync(context));
+        _organizations.Verify(x => x.ContainsUserAsync(_organizationId, _userId), Times.Exactly(2));
+    }
+
+    [Fact]
+    public Task McpToken_MissingClaimsCannotUseValidHeaders()
+    {
+        var context = Context();
+        ((ClaimsIdentity)context.User.Identity!).AddClaim(
+            new Claim(Api.Mcp.McpClaimTypes.TokenType, Api.Mcp.McpClaimTypes.McpTokenType));
+        return AssertResult(context, false);
+    }
 }

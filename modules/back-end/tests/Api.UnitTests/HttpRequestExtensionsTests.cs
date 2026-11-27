@@ -7,45 +7,34 @@ namespace Api.UnitTests;
 
 public class HttpRequestExtensionsTests
 {
-    [Fact]
-    public void OrganizationId_HeaderAndClaim_UsesHeader()
+    [Theory]
+    [InlineData(false, "valid")]
+    [InlineData(false, null)]
+    [InlineData(false, "invalid")]
+    [InlineData(true, "valid")]
+    [InlineData(true, null)]
+    [InlineData(true, "invalid")]
+    public void TenantIds_UseOnlyTheSelectedSource(bool mcpToken, string? value)
     {
-        var headerOrgId = Guid.NewGuid();
-        var claimOrgId = Guid.NewGuid();
+        var expected = value == "valid" ? Guid.NewGuid() : Guid.Empty;
+        var selected = value == "valid" ? expected.ToString() : value;
+        var other = Guid.NewGuid().ToString();
+        var header = mcpToken ? other : selected;
+        var claim = mcpToken ? selected : other;
         var context = new DefaultHttpContext();
-        context.Request.Headers[ApiConstants.OrgIdHeaderKey] = headerOrgId.ToString();
-        context.User = new ClaimsPrincipal(new ClaimsIdentity(
-        [
-            new Claim(McpClaimTypes.OrgId, claimOrgId.ToString())
-        ]));
+        context.Request.Headers[ApiConstants.OrgIdHeaderKey] = header;
+        context.Request.Headers[ApiConstants.WorkspaceHeaderKey] = header;
+        var identity = new ClaimsIdentity();
+        if (mcpToken)
+            identity.AddClaim(new Claim(McpClaimTypes.TokenType, McpClaimTypes.McpTokenType));
+        if (claim != null)
+        {
+            identity.AddClaim(new Claim(McpClaimTypes.OrgId, claim));
+            identity.AddClaim(new Claim(McpClaimTypes.WorkspaceId, claim));
+        }
+        context.User = new ClaimsPrincipal(identity);
 
-        Assert.Equal(headerOrgId, context.Request.OrganizationId());
-    }
-
-    [Fact]
-    public void WorkspaceId_MissingHeader_UsesMcpClaim()
-    {
-        var workspaceId = Guid.NewGuid();
-        var context = new DefaultHttpContext();
-        context.User = new ClaimsPrincipal(new ClaimsIdentity(
-        [
-            new Claim(McpClaimTypes.WorkspaceId, workspaceId.ToString())
-        ]));
-
-        Assert.Equal(workspaceId, context.Request.WorkspaceId());
-    }
-
-    [Fact]
-    public void OrganizationId_MissingOrMalformedContext_ReturnsEmptyGuid()
-    {
-        var context = new DefaultHttpContext();
-        context.Request.Headers[ApiConstants.OrgIdHeaderKey] = "not-a-guid";
-        context.User = new ClaimsPrincipal(new ClaimsIdentity(
-        [
-            new Claim(McpClaimTypes.WorkspaceId, "not-a-guid")
-        ]));
-
-        Assert.Equal(Guid.Empty, context.Request.OrganizationId());
-        Assert.Equal(Guid.Empty, context.Request.WorkspaceId());
+        Assert.Equal(expected, context.Request.OrganizationId());
+        Assert.Equal(expected, context.Request.WorkspaceId());
     }
 }

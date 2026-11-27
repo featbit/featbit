@@ -103,23 +103,23 @@ public class TenantAccessValidationMiddlewareTests
     }
 
     [Fact]
-    public Task McpProtocolEndpoint_SkipsValidator()
+    public Task McpProtocolEndpoint_RequiresValidator()
     {
         var context = Context();
         context.Request.Path = "/mcp";
-        return AssertBypassed(context);
+        return AssertMcpValidated(context);
     }
 
     [Fact]
-    public Task McpAccessToken_SkipsValidator()
+    public Task McpAccessToken_RequiresValidator()
     {
         var context = Context();
         ((ClaimsIdentity)context.User.Identity!).AddClaim(new Claim(McpClaimTypes.TokenType, McpClaimTypes.McpTokenType));
-        return AssertBypassed(context);
+        return AssertMcpValidated(context);
     }
 
     [Fact]
-    public Task McpOAuthEndpoint_SkipsValidator()
+    public Task McpOAuthEndpoint_RequiresValidator()
     {
         var context = Context();
         var action = new ControllerActionDescriptor
@@ -127,6 +127,21 @@ public class TenantAccessValidationMiddlewareTests
             ControllerTypeInfo = typeof(McpOAuthController).GetTypeInfo()
         };
         context.SetEndpoint(new Endpoint(null, new EndpointMetadataCollection(action), "mcp-oauth"));
-        return AssertBypassed(context);
+        return AssertMcpValidated(context);
+    }
+    private static async Task AssertMcpValidated(HttpContext context)
+    {
+        var validator = new Mock<ITenantAccessValidator>(MockBehavior.Strict);
+        validator.Setup(x => x.ValidateAsync(context)).ReturnsAsync(false);
+        var nextCalled = false;
+        var middleware = new TenantAccessValidationMiddleware(_ =>
+        {
+            nextCalled = true;
+            return Task.CompletedTask;
+        });
+        await middleware.InvokeAsync(context, validator.Object);
+        Assert.False(nextCalled);
+        Assert.Equal(StatusCodes.Status403Forbidden, context.Response.StatusCode);
+        validator.Verify(x => x.ValidateAsync(context), Times.Once);
     }
 }

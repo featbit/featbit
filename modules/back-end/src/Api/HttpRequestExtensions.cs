@@ -6,30 +6,30 @@ public static class HttpRequestExtensions
 {
     public static Guid OrganizationId(this HttpRequest request)
     {
-        var orgIdHeaderValue = request.Headers[ApiConstants.OrgIdHeaderKey];
-
-        if (Guid.TryParse(orgIdHeaderValue, out var orgId))
+        // MCP tokens are bound to their signed tenant context, never caller-supplied headers.
+        if (request.HttpContext.User.FindFirst(McpClaimTypes.TokenType)?.Value == McpClaimTypes.McpTokenType)
         {
-            return orgId;
+            return Guid.TryParse(request.HttpContext.User.FindFirst(McpClaimTypes.OrgId)?.Value, out var scopedId)
+                ? scopedId
+                : Guid.Empty;
         }
 
-        var orgIdClaim = request.HttpContext.User.Claims.FirstOrDefault(x => x.Type == McpClaimTypes.OrgId)?.Value;
-        return Guid.TryParse(orgIdClaim, out orgId)
+        return Guid.TryParse(request.Headers[ApiConstants.OrgIdHeaderKey], out var orgId)
             ? orgId
             : Guid.Empty;
     }
 
     public static Guid WorkspaceId(this HttpRequest request)
     {
-        var workspaceIdHeaderValue = request.Headers[ApiConstants.WorkspaceHeaderKey];
-
-        if (Guid.TryParse(workspaceIdHeaderValue, out var workspaceId))
+        // MCP tokens are bound to their signed tenant context, never caller-supplied headers.
+        if (request.HttpContext.User.FindFirst(McpClaimTypes.TokenType)?.Value == McpClaimTypes.McpTokenType)
         {
-            return workspaceId;
+            return Guid.TryParse(request.HttpContext.User.FindFirst(McpClaimTypes.WorkspaceId)?.Value, out var scopedId)
+                ? scopedId
+                : Guid.Empty;
         }
 
-        var workspaceIdClaim = request.HttpContext.User.Claims.FirstOrDefault(x => x.Type == McpClaimTypes.WorkspaceId)?.Value;
-        return Guid.TryParse(workspaceIdClaim, out workspaceId)
+        return Guid.TryParse(request.Headers[ApiConstants.WorkspaceHeaderKey], out var workspaceId)
             ? workspaceId
             : Guid.Empty;
     }

@@ -7,7 +7,6 @@ using Application.Services;
 using Api.Controllers;
 using Domain.Environments;
 using Domain.Mcp;
-using Domain.Organizations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -110,7 +109,7 @@ public class McpOAuthControllerTests
     }
 
     [Fact]
-    public async Task CreateScopedToken_UsesEnvironmentScopeWhenWorkspaceHeadersAreMissing()
+    public async Task CreateScopedToken_MissingTenantHeaders_ReturnsForbidden()
     {
         using var factory = CreateFactory(new InMemoryMcpAuthorizationStore());
         using var client = await _app.CreateAuthenticatedClientAsync(factory);
@@ -123,7 +122,7 @@ public class McpOAuthControllerTests
                 experiment_id = ExperimentId
             });
 
-        await Verify(await NormalizeTokenResponseAsync(response));
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     [Fact]
@@ -266,14 +265,7 @@ public class McpOAuthControllerTests
                 Project = new IdNameKeyProps(),
                 Environment = new IdNameKeyProps { Id = envId }
             });
-        var organizationService = new Mock<IOrganizationService>();
-        organizationService
-            .Setup(x => x.GetAsync(TestWorkspace.OrganizationId))
-            .ReturnsAsync(new Organization(TestWorkspace.Id, "Test organization", "test-org")
-            {
-                Id = TestWorkspace.OrganizationId,
-                Initialized = true
-            });
+        var organizationService = TestTenantContext.CreateOrganizationService();
 
         return _app.WithServices(services =>
         {
